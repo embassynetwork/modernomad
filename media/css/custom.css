@@ -1,0 +1,68 @@
+body {
+	padding-top: 60px;
+	padding-bottom: 40px;
+	font-family: 'Vollkorn', serif;
+	font-size: 16px;
+}
+
+p {
+	font-family: 'Vollkorn', serif;
+	font-size: 16px;
+}
+
+.hero-unit h1 {
+	font-size: 45px;
+	color: #80A64E;
+}
+
+.hero-unit {
+	background-color: white;
+	padding: 0px;
+}
+
+.hero-unit p {
+	margin-top: 20px;
+}
+
+.license {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.btn-xlarge {
+	border-radius: 5px 5px 5px 5px;
+	font-size: 35px;
+	line-height: normal;
+	padding: 9px 14px;
+}
+
+.hero-engage {
+	text-align: center;
+	margin-top: 60px;
+}
+
+.hero-engage > .btn-xlarge {
+	margin-left: 25px;
+	margin-right: 25px;
+}
+
+.box-link {
+	color: inherit;
+}
+
+.footer {
+	margin-top: 150px;
+}
+
+textarea {
+	width: 410px;
+}
+
+.helptext {
+	display:block;
+	color: #999;
+}
+
+.navbar {
+	margin-bottom: 40px;
+}

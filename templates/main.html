@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+<!-- base.html is THE primary base. main.html is the main template used for
+non-index or non-special pages. it has navigation, among other things. -->
+
+{% block body %}
+
+<!-- nav bits -->
+<div class="navbar">
+	<div class="navbar-inner">
+		<div class="container">
+			<ul class="nav">
+				<li><a href="/">Home</a>
+				<li><a href="/about">About</a>
+				<li><a href="/members/locations">Locations</a>
+				<li><a href="/membership">Membership</a>
+			</ul>
+		</div>
+	</div>
+</div>
+
+{% block main %}
+
+{% endblock %}
+
+{% endblock %}

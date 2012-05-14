@@ -1,0 +1,7 @@
+media/data
+*.*~
+*.swp
+*.swo
+*.swn
+modernomad.db
+*.pyc
