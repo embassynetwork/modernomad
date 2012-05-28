@@ -39,17 +39,15 @@ class UserProfile(models.Model):
 
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
-	first = models.CharField("First Name", max_length=200)
-	last = models.CharField("Last Name", max_length=200)
-	email = models.EmailField()
 	# XXX upload_to will need to be a better solution eventually (s3? mongo?) 
 	image = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, help_text="Leave blank to use <a href="">Gravatar</a>")
 	bio = models.TextField("A bit about yourself")
 	links = models.TextField(blank=True, help_text="Comma-separated, please")
 	upto = models.TextField("What are you Up To?", help_text="What are some projects you're working on? What are you up to, bigger picture?")
+
+	# TODO (JMC): Replace with use of Django Groups
 	status = models.CharField(max_length=1, choices = status_choices)
 	invited_by = models.ForeignKey('self', blank=True, null=True, help_text="Your chosen reference will be asked to confirm your relationship.")
-	# in the future: membership level
 
 	def __unicode__(self):
 		return (self.first + " " + self.last)
