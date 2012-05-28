@@ -6,5 +6,8 @@ def index(request):
 def about(request):
 	return render_to_response("about.html")
 
+def community(request):
+	return render_to_response("community.html")
+
 def membership(request):
 	return render_to_response("membership.html")

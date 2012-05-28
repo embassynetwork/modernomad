@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'modernomad.views.index'),
 	url(r'^about/$', 'modernomad.views.about'),
+	url(r'^community/$', 'modernomad.views.community'),
 	url(r'^membership/$', 'modernomad.views.membership'),
     url(r'^members?/', include('wc_profiles.urls')),
 
