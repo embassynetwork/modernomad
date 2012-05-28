@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 
 
@@ -32,8 +33,9 @@ class Resource(models.Model):
 		return (self.name)
 
 
-class User(models.Model):
+class UserProfile(models.Model):
 	status_choices = ((0, 'New'), (1, 'Introduced'), (2, 'Accepted'))
+	user = models.OneToOneField(User)
 
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
@@ -61,6 +63,8 @@ class User(models.Model):
 			else:
 				self.status = 1
 		super(User,self).save(*args, **kwargs)
+
+User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 		
 class Endorsement(models.Model):
 	# endorsements from a person or house

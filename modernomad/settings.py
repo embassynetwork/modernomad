@@ -160,3 +160,4 @@ LOGGING = {
         },
     }
 }
+AUTH_PROFILE_MODULE = 'wc_profile.UserProfile'
