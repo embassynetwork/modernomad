@@ -14,8 +14,9 @@ urlpatterns = patterns('',
     url(r'^community/$', 'modernomad.views.community'),
     url(r'^membership/$', 'modernomad.views.membership'),
 
-    # User profiles.  TODO(mdh): Find a better way to factor the code
-    # for the two sets of URLs.
+    # User profiles and other things that don't belong there.
+    # TODO(mdh): Find a better way to factor the code for the two sets
+    # of URLs.
     url(r'^members/', include('wc_profiles.urls')),
     url(r'^api/members/', include('wc_profiles.api_urls')),
 
