@@ -34,7 +34,7 @@ class Resource(models.Model):
 
 
 class UserProfile(models.Model):
-	status_choices = ((0, 'New'), (1, 'Introduced'), (2, 'Accepted'))
+	status_choices = ((u'0', 'New'), (u'1', 'Introduced'), (u'2', 'Accepted'))
 	user = models.OneToOneField(User)
 
 	created = models.DateTimeField(auto_now_add=True)
@@ -50,23 +50,23 @@ class UserProfile(models.Model):
 	invited_by = models.ForeignKey('self', blank=True, null=True, help_text="Your chosen reference will be asked to confirm your relationship.")
 
 	def __unicode__(self):
-		return (self.first + " " + self.last)
+		return (self.user.__unicode__())
 
 	def save(self, *args, **kwargs):
 		# for new users, set the status depending on whether they were
 		# invited by someone or not
 		if not self.id:
 			if self.invited_by is None:
-				self.status = 0
+				self.status = u'0'
 			else:
-				self.status = 1
-		super(User,self).save(*args, **kwargs)
+				self.status = u'1'
+		super(UserProfile, self).save(*args, **kwargs)
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 		
 class Endorsement(models.Model):
 	# endorsements from a person or house
-	endorsee = models.ForeignKey(User)
+	endorsee = models.ForeignKey(UserProfile)
 	endorser = models.ForeignKey(House)
 	comment = models.TextField()
 
