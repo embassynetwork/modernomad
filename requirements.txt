@@ -1,3 +1,4 @@
+Django==1.4
 django-tastypie
 South
 -e git://github.com/joshuamckenty/django-mailman.git#egg=django-mailman
