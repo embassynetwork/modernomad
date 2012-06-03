@@ -8,37 +8,67 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'House'
+        db.create_table('core_house', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
+            ('summary', self.gf('django.db.models.fields.CharField')(max_length=200)),
+            ('created_date', self.gf('django.db.models.fields.DateTimeField')()),
+            ('address', self.gf('django.db.models.fields.CharField')(max_length=400)),
+            ('amenities', self.gf('django.db.models.fields.TextField')()),
+            ('house_rules', self.gf('django.db.models.fields.TextField')()),
+            ('long_term_rooms', self.gf('django.db.models.fields.IntegerField')()),
+            ('short_term_rooms', self.gf('django.db.models.fields.IntegerField')()),
+        ))
+        db.send_create_signal('core', ['House'])
 
-        # Changing field 'Endorsement.endorsee'
-        db.alter_column('wc_profiles_endorsement', 'endorsee_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['wc_profiles.UserProfile']))
-        # Deleting field 'UserProfile.last'
-        db.delete_column('wc_profiles_userprofile', 'last')
+        # Adding model 'Resource'
+        db.create_table('core_resource', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('house', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.House'])),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
+            ('blurb', self.gf('django.db.models.fields.CharField')(max_length=200)),
+            ('resource_type', self.gf('django.db.models.fields.CharField')(max_length=200)),
+        ))
+        db.send_create_signal('core', ['Resource'])
 
-        # Deleting field 'UserProfile.email'
-        db.delete_column('wc_profiles_userprofile', 'email')
+        # Adding model 'UserProfile'
+        db.create_table('core_userprofile', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
+            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100, blank=True)),
+            ('bio', self.gf('django.db.models.fields.TextField')()),
+            ('links', self.gf('django.db.models.fields.TextField')(blank=True)),
+            ('upto', self.gf('django.db.models.fields.TextField')()),
+            ('status', self.gf('django.db.models.fields.CharField')(max_length=1)),
+            ('invited_by', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.UserProfile'], null=True, blank=True)),
+        ))
+        db.send_create_signal('core', ['UserProfile'])
 
-        # Deleting field 'UserProfile.first'
-        db.delete_column('wc_profiles_userprofile', 'first')
+        # Adding model 'Endorsement'
+        db.create_table('core_endorsement', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('endorsee', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.UserProfile'])),
+            ('endorser', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.House'])),
+            ('comment', self.gf('django.db.models.fields.TextField')()),
+        ))
+        db.send_create_signal('core', ['Endorsement'])
 
 
     def backwards(self, orm):
+        # Deleting model 'House'
+        db.delete_table('core_house')
 
-        # Changing field 'Endorsement.endorsee'
-        db.alter_column('wc_profiles_endorsement', 'endorsee_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User']))
-        # Adding field 'UserProfile.last'
-        db.add_column('wc_profiles_userprofile', 'last',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=200),
-                      keep_default=False)
+        # Deleting model 'Resource'
+        db.delete_table('core_resource')
 
-        # Adding field 'UserProfile.email'
-        db.add_column('wc_profiles_userprofile', 'email',
-                      self.gf('django.db.models.fields.EmailField')(default='', max_length=75),
-                      keep_default=False)
+        # Deleting model 'UserProfile'
+        db.delete_table('core_userprofile')
 
-        # Adding field 'UserProfile.first'
-        db.add_column('wc_profiles_userprofile', 'first',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=200),
-                      keep_default=False)
+        # Deleting model 'Endorsement'
+        db.delete_table('core_endorsement')
 
 
     models = {
@@ -78,14 +108,14 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'wc_profiles.endorsement': {
+        'core.endorsement': {
             'Meta': {'object_name': 'Endorsement'},
             'comment': ('django.db.models.fields.TextField', [], {}),
-            'endorsee': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wc_profiles.UserProfile']"}),
-            'endorser': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wc_profiles.House']"}),
+            'endorsee': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.UserProfile']"}),
+            'endorser': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.House']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
-        'wc_profiles.house': {
+        'core.house': {
             'Meta': {'object_name': 'House'},
             'address': ('django.db.models.fields.CharField', [], {'max_length': '400'}),
             'amenities': ('django.db.models.fields.TextField', [], {}),
@@ -97,21 +127,21 @@ class Migration(SchemaMigration):
             'short_term_rooms': ('django.db.models.fields.IntegerField', [], {}),
             'summary': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
-        'wc_profiles.resource': {
+        'core.resource': {
             'Meta': {'object_name': 'Resource'},
             'blurb': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'house': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wc_profiles.House']"}),
+            'house': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.House']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'resource_type': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         },
-        'wc_profiles.userprofile': {
+        'core.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
             'bio': ('django.db.models.fields.TextField', [], {}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'blank': 'True'}),
-            'invited_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['wc_profiles.UserProfile']", 'null': 'True', 'blank': 'True'}),
+            'invited_by': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['core.UserProfile']", 'null': 'True', 'blank': 'True'}),
             'links': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
@@ -120,4 +150,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['wc_profiles']
+    complete_apps = ['core']
