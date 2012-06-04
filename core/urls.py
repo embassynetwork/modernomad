@@ -6,12 +6,22 @@
 from django.conf.urls import patterns, include, url
 import registration.backends.default.urls
 
+import core.forms
+
 user_patterns = patterns('core.views',
     url(r'^$', 'ListUsers'),
-    url(r'^join/$', 'SignupUser'),
     url(r'^(?P<user_id>\d+)/$', 'GetUser'),
 )
 
+# Add the user registration and account management patters from the
+# django-registration package, overriding the initial registration
+# view to collect our additional user profile information.
+user_patterns += patterns('',
+    url(r'^register/$', 'registration.views.register',
+        {'backend': 'core.views.RegistrationBackend',
+         'form_class': core.forms.CombinedUserForm},
+        name='registration_register'),
+)
 user_patterns += registration.backends.default.urls.urlpatterns
 
 location_patterns = patterns('core.views',
