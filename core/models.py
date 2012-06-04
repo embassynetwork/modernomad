@@ -27,7 +27,7 @@ RESOURCE_TYPES = (
 class Resource(models.Model):
 	house = models.ForeignKey(House)
 	name = models.CharField(max_length=200)
-	blurb = models.CharField(max_length=200)
+	blurb = models.TextField()
 	resource_type = models.CharField(max_length=200, choices=RESOURCE_TYPES)
 	def __unicode__(self):
 		return (self.name)
@@ -66,8 +66,10 @@ User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 		
 class Endorsement(models.Model):
 	# endorsements from a person or house
-	endorsee = models.ForeignKey(UserProfile)
+	# NOTE(mdh): Currently this only supports endorsements by a house.
+	endorsee = models.ForeignKey(User)
 	endorser = models.ForeignKey(House)
 	comment = models.TextField()
 
-
+	def __unicode__(self):
+		return '%s endorsed %s' % (self.endorser, self.endorsee)
