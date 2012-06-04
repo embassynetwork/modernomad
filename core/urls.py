@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 
-urlpatterns = patterns('wc_profiles.views',
+urlpatterns = patterns('core.views',
 	url(r'^$', 'index'),
 	url(r'^join/$', 'signup'),
 	url(r'^locations/$', 'locations'),

@@ -1,9 +1,9 @@
-from django.http import HttpResponse
-from wc_profiles.models import User
-from wc_profiles.forms import SignupForm
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.http import HttpResponseRedirect
+
+from core.forms import SignupForm
+from core.models import User
 
 def index(request):
 	return HttpResponse("Show all users")
