@@ -16,7 +16,7 @@ urlpatterns = patterns('',
 
     # The core views, broken out into a couple of top-level paths.
     url(r'^members/', include(core.urls.user_patterns)),
-    url(r'^locations/', include(core.urls.location_patterns)),
+    url(r'^locations/', include(core.urls.house_patterns)),
 
     # The modernomad API.
     url(r'^api/', include('api.urls')),

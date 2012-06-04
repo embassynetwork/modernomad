@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'registration',
     'south',
     'django_mailman',
     'core',
@@ -162,4 +163,15 @@ LOGGING = {
         },
     }
 }
+
 AUTH_PROFILE_MODULE = 'core.UserProfile'
+ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
+
+# If we add a page for the currently-logged-in user to view and edit
+# their profile, we might want to use that here instead.
+LOGIN_REDIRECT_URL = '/'
+
+LOGIN_URL = '/members/login/'
+LOGOUT_URL = '/members/logout/'
+
+DEFAULT_FROM_EMAIL = 'noreply@modernomad'
