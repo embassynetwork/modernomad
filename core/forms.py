@@ -5,21 +5,21 @@ from core.models import User
 
 
 class SignupForm(ModelForm):
-	class Meta:
-		model = User
-		exclude = ('status')
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password']
 
-	def clean_links(self):
-		data = self.cleaned_data['links']
-		# do stuff
-		return data
+    def clean_links(self):
+        data = self.cleaned_data['links']
+        # do stuff
+        return data
 
-	def clean_image(self):
-		img_path = self.cleaned_data['image']
-		if img_path is not None:
-			# img_path is relative to media_root
-			pass
-		return img_path
+    def clean_image(self):
+        img_path = self.cleaned_data['image']
+        if img_path is not None:
+            # img_path is relative to media_root
+            pass
+        return img_path
 
 
 
