@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
 from tastypie.api import Api
-from wc_profiles.api import HouseResource, ResourceResource, UserResource, EndorsementResource
+
+from api.resources import HouseResource, ResourceResource, UserResource, EndorsementResource
+
 
 v1_api = Api(api_name='v1')
 v1_api.register(HouseResource())
