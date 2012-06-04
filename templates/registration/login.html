@@ -2,8 +2,8 @@
 
 {% block main %}
 
-<form action="/members/join/" enctype="multipart/form-data" method="post">{% csrf_token %}
-	{{ f.as_table }}
+<form enctype="multipart/form-data" method="post">{% csrf_token %}
+	{{ form.as_table }}
 	<input type="submit" value="Submit" />
 </form>
 
