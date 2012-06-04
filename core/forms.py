@@ -1,6 +1,8 @@
 from django.forms import ModelForm
-from wc_profiles.models import User
 from PIL import Image
+
+from core.models import User
+
 
 class SignupForm(ModelForm):
 	class Meta:
