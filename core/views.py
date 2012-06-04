@@ -8,19 +8,25 @@ from registration import signals
 import registration.backends.default
 from registration.models import RegistrationProfile
 
-from core.models import UserProfile
+from core.models import House, UserProfile
 
 
 def ListUsers(request):
-    return HttpResponse("Show all users")
-
-def ListLocations(request):
-    return render_to_response("locations.html")
+    users = User.objects.filter(is_active=True)
+    return render_to_response("user_list.html", {"users": users})
 
 def GetUser(request, user_id):
-   return HttpResponse("This is a specific user page")
+    user = User.objects.get(id=user_id)
+    return render_to_response("user_details.html", {"user": user})
 
+def ListHouses(request):
+    houses = House.objects.all()
+    return render_to_response("house_list.html", {"houses": houses})
 
+def GetHouse(request, house_id):
+    house = House.objects.get(id=house_id)
+    return render_to_response("house_details.html", {"house": house})
+    
 class RegistrationBackend(registration.backends.default.DefaultBackend):
     '''A registration backend that supports capturing user profile
     information during registration.'''

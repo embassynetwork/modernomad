@@ -1,0 +1,17 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+<div>
+<ul>
+{% for user in users %}
+  <li><a href="{% url user_details user.id %}">
+    {{ user.first_name }} {{ user.last_name }}
+    (<font style="font-family:monospace">{{ user.username }}</font>)
+  </a></li>
+{% endfor %}
+</ul>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,14 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+<div>
+<ul>
+{% for house in houses %}
+  <li><a href="{% url house_details house.id %}">{{ house.name }}</a></li>
+{% endfor %}
+</ul>
+</div>
+
+{% endblock %}
+
