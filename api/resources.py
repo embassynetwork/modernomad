@@ -1,6 +1,8 @@
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
-from wc_profiles.models import House, Resource, UserProfile, Endorsement
+
+
+from core.models import House, Resource, UserProfile, Endorsement
 
 
 class HouseResource(ModelResource):

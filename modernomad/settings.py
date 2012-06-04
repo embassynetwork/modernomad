@@ -124,13 +124,14 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'wc_profiles',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'south',
     'django_mailman',
+    'core',
+    'api',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -161,4 +162,4 @@ LOGGING = {
         },
     }
 }
-AUTH_PROFILE_MODULE = 'wc_profile.UserProfile'
+AUTH_PROFILE_MODULE = 'core.UserProfile'
