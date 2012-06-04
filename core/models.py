@@ -27,7 +27,7 @@ RESOURCE_TYPES = (
 class Resource(models.Model):
 	house = models.ForeignKey(House)
 	name = models.CharField(max_length=200)
-	blurb = models.CharField(max_length=200)
+	blurb = models.TextField()
 	resource_type = models.CharField(max_length=200, choices=RESOURCE_TYPES)
 	def __unicode__(self):
 		return (self.name)
