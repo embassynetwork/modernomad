@@ -5,16 +5,23 @@ from django.contrib.auth.models import User
 from core.models import Endorsement, House, Resource, UserProfile
 
 
+class ResourceInline(admin.TabularInline):
+    model = Resource
+
+class HouseAdmin(admin.ModelAdmin):
+    inlines = [ResourceInline]
+
+class EndorsementInline(admin.TabularInline):
+    model = Endorsement
+
 class UserProfileInline(admin.StackedInline):
-	model = UserProfile
+    model = UserProfile
  
 class UserProfileAdmin(UserAdmin):
-	inlines = [UserProfileInline]
- 
+    inlines = [UserProfileInline, EndorsementInline]
 
-admin.site.register(House)
-admin.site.register(Resource)
-admin.site.register(Endorsement)
+
+admin.site.register(House, HouseAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)

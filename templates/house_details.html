@@ -1,0 +1,29 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+<h1>{{ house.name }}</h1>
+<p>{{ house.address }}</p>
+
+<h3>Summary</h3>
+<p>{{ house.summary }}</p>
+
+<h3>Amenities</h3>
+<p>{{ house.amenities }}</p>
+
+<p>
+Long-Term Rooms: {{ house.long_term_rooms }}<br/>
+Short-Term Rooms: {{ house.short_term_rooms }}
+</p>
+
+{% for resource in house.resource_set.all %}
+<h4>{{ resource.name }} ({{ resource.resource_type }})</h4>
+<p>{{ resource.blurb }}</p>
+{% endfor %}
+
+<h3>House Rules</h3>
+<p>{{ house.house_rules }}</p>
+
+
+
+{% endblock %}

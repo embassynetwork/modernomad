@@ -1,0 +1,16 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+<h1>{{ user.first_name }} {{ user.last_name }} (<font style="font-family:monospace">{{ user.username }}</font>)</h1>
+
+<h3>Bio:</h3>
+<p>{{ user.profile.bio }}</p>
+
+<h3>Links:</h3>
+<p>{{ user.profile.links }}</p>
+
+<h3>Up to:</h3>
+<p>{{ user.profile.upto }}</p>
+
+{% endblock %}
