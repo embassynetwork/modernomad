@@ -101,6 +101,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+	'modernomad.middleware.crossdomainxhr.CORSMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -175,3 +176,10 @@ LOGIN_URL = '/members/login/'
 LOGOUT_URL = '/members/logout/'
 
 DEFAULT_FROM_EMAIL = 'noreply@modernomad'
+
+# import any local settings
+try:
+	from local_settings import *
+except ImportError:
+	pass
+
