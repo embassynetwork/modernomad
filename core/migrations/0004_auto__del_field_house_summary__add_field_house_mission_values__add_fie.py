@@ -8,83 +8,63 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'House'
-        db.create_table('core_house', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('address', self.gf('django.db.models.fields.CharField')(unique=True, max_length=400)),
-            ('rooms', self.gf('django.db.models.fields.IntegerField')()),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
-            ('summary', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
-            ('website', self.gf('django.db.models.fields.URLField')(unique=True, max_length=200, blank=True)),
-            ('guests', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('events', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('amenities', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('house_rules', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('long_term_rooms', self.gf('django.db.models.fields.IntegerField')(blank=True)),
-            ('short_term_rooms', self.gf('django.db.models.fields.IntegerField')(blank=True)),
-        ))
-        db.send_create_signal('core', ['House'])
+        # Deleting field 'House.summary'
+        db.delete_column('core_house', 'summary')
 
-        # Adding M2M table for field admins on 'House'
-        db.create_table('core_house_admins', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('house', models.ForeignKey(orm['core.house'], null=False)),
-            ('user', models.ForeignKey(orm['auth.user'], null=False))
-        ))
-        db.create_unique('core_house_admins', ['house_id', 'user_id'])
+        # Adding field 'House.mission_values'
+        db.add_column('core_house', 'mission_values',
+                      self.gf('django.db.models.fields.CharField')(max_length=2000, null=True, blank=True),
+                      keep_default=False)
 
-        # Adding model 'Resource'
-        db.create_table('core_resource', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('house', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.House'])),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('blurb', self.gf('django.db.models.fields.TextField')()),
-            ('resource_type', self.gf('django.db.models.fields.CharField')(max_length=200)),
-        ))
-        db.send_create_signal('core', ['Resource'])
+        # Adding field 'House.description'
+        db.add_column('core_house', 'description',
+                      self.gf('django.db.models.fields.CharField')(max_length=2000, null=True, blank=True),
+                      keep_default=False)
 
-        # Adding model 'UserProfile'
-        db.create_table('core_userprofile', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100, blank=True)),
-            ('bio', self.gf('django.db.models.fields.TextField')()),
-            ('links', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('upto', self.gf('django.db.models.fields.TextField')()),
-            ('status', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('invited_by', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.UserProfile'], null=True, blank=True)),
-        ))
-        db.send_create_signal('core', ['UserProfile'])
+        # Adding field 'House.picture'
+        db.add_column('core_house', 'picture',
+                      self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True),
+                      keep_default=False)
 
-        # Adding model 'Endorsement'
-        db.create_table('core_endorsement', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('endorsee', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('endorser', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.House'])),
-            ('comment', self.gf('django.db.models.fields.TextField')()),
-        ))
-        db.send_create_signal('core', ['Endorsement'])
+        # Adding field 'House.space_share'
+        db.add_column('core_house', 'space_share',
+                      self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'House.slug'
+        db.add_column('core_house', 'slug',
+                      self.gf('django.db.models.fields.CharField')(max_length=100, unique=True, null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'House.get_in_touch'
+        db.add_column('core_house', 'get_in_touch',
+                      self.gf('django.db.models.fields.CharField')(max_length=100, unique=True, null=True, blank=True),
+                      keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting model 'House'
-        db.delete_table('core_house')
+        # Adding field 'House.summary'
+        db.add_column('core_house', 'summary',
+                      self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True),
+                      keep_default=False)
 
-        # Removing M2M table for field admins on 'House'
-        db.delete_table('core_house_admins')
+        # Deleting field 'House.mission_values'
+        db.delete_column('core_house', 'mission_values')
 
-        # Deleting model 'Resource'
-        db.delete_table('core_resource')
+        # Deleting field 'House.description'
+        db.delete_column('core_house', 'description')
 
-        # Deleting model 'UserProfile'
-        db.delete_table('core_userprofile')
+        # Deleting field 'House.picture'
+        db.delete_column('core_house', 'picture')
 
-        # Deleting model 'Endorsement'
-        db.delete_table('core_endorsement')
+        # Deleting field 'House.space_share'
+        db.delete_column('core_house', 'space_share')
+
+        # Deleting field 'House.slug'
+        db.delete_column('core_house', 'slug')
+
+        # Deleting field 'House.get_in_touch'
+        db.delete_column('core_house', 'get_in_touch')
 
 
     models = {
@@ -134,20 +114,26 @@ class Migration(SchemaMigration):
         'core.house': {
             'Meta': {'object_name': 'House'},
             'address': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '400'}),
-            'admins': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'symmetrical': 'False', 'blank': 'True'}),
-            'amenities': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'admins': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'}),
+            'amenities': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'events': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'guests': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'house_rules': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'description': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
+            'events': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
+            'get_in_touch': ('django.db.models.fields.CharField', [], {'max_length': '100', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'guests': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
+            'house_rules': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'long_term_rooms': ('django.db.models.fields.IntegerField', [], {'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'latLong': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'}),
+            'long_term_rooms': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'mission_values': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'picture': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'rooms': ('django.db.models.fields.IntegerField', [], {}),
-            'short_term_rooms': ('django.db.models.fields.IntegerField', [], {'blank': 'True'}),
-            'summary': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'short_term_rooms': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'slug': ('django.db.models.fields.CharField', [], {'max_length': '100', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
+            'space_share': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'website': ('django.db.models.fields.URLField', [], {'unique': 'True', 'max_length': '200', 'blank': 'True'})
+            'website': ('django.db.models.fields.URLField', [], {'max_length': '200', 'unique': 'True', 'null': 'True', 'blank': 'True'})
         },
         'core.resource': {
             'Meta': {'object_name': 'Resource'},

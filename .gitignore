@@ -5,3 +5,4 @@ media/data
 *.swn
 modernomad.db
 *.pyc
+local_settings.py

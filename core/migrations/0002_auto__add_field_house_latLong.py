@@ -8,14 +8,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding field 'House.latLong'
+        db.add_column('core_house', 'latLong',
+                      self.gf('django.db.models.fields.CharField')(default='37.0, -122.0', unique=True, max_length=100),
+                      keep_default=False)
 
-        # Changing field 'Endorsement.endorsee'
-        db.alter_column('core_endorsement', 'endorsee_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User']))
 
     def backwards(self, orm):
+        # Deleting field 'House.latLong'
+        db.delete_column('core_house', 'latLong')
 
-        # Changing field 'Endorsement.endorsee'
-        db.alter_column('core_endorsement', 'endorsee_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.UserProfile']))
 
     models = {
         'auth.group': {
@@ -63,15 +65,22 @@ class Migration(SchemaMigration):
         },
         'core.house': {
             'Meta': {'object_name': 'House'},
-            'address': ('django.db.models.fields.CharField', [], {'max_length': '400'}),
-            'amenities': ('django.db.models.fields.TextField', [], {}),
-            'created_date': ('django.db.models.fields.DateTimeField', [], {}),
-            'house_rules': ('django.db.models.fields.TextField', [], {}),
+            'address': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '400'}),
+            'admins': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']", 'symmetrical': 'False', 'blank': 'True'}),
+            'amenities': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'events': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'guests': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'house_rules': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'long_term_rooms': ('django.db.models.fields.IntegerField', [], {}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'short_term_rooms': ('django.db.models.fields.IntegerField', [], {}),
-            'summary': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+            'latLong': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'}),
+            'long_term_rooms': ('django.db.models.fields.IntegerField', [], {'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'rooms': ('django.db.models.fields.IntegerField', [], {}),
+            'short_term_rooms': ('django.db.models.fields.IntegerField', [], {'blank': 'True'}),
+            'summary': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
+            'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'website': ('django.db.models.fields.URLField', [], {'unique': 'True', 'max_length': '200', 'blank': 'True'})
         },
         'core.resource': {
             'Meta': {'object_name': 'Resource'},
