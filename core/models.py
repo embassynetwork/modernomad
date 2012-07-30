@@ -12,30 +12,39 @@ write new houses via houses resource
 authenticate to edit houses
 '''
 
-def img_path(instance, filename):
-	return "/".join("houses", instance.id)
-
 class House(models.Model):
+	# meta
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
+	admins = models.ManyToManyField(User, blank=True, null=True)
+	# location
 	address = models.CharField(max_length=400, unique=True)
-	rooms = models.IntegerField()
 	latLong = models.CharField(max_length=100, unique=True)
-	name = models.CharField(max_length=200, null=True, blank=True)
-	mission_values = models.CharField(max_length=2000, null=True, blank=True)
-	description = models.CharField(max_length=2000, null=True, blank=True)
-	website = models.URLField(verify_exists = True, null=True, blank=True, unique=True)
+	# community size
+	residents = models.IntegerField() 
+	# descriptive
+	name = models.CharField(max_length=200) # required
+	picture = models.ImageField(upload_to="photos/%Y/%m/%d", blank=True, null=True)
+	description = models.TextField(max_length=2000, null=True, blank=True) # + suggested max length. possible things to incl. are description of mission/values, house rules etc. if desired. 
+	mission_values = models.TextField(max_length=2000, null=True, blank=True) # comma separated list of tags
+	amenities = models.TextField(blank=True, null=True)
 	guests = models.NullBooleanField(blank=True, null=True)
 	events = models.NullBooleanField(blank=True, null=True)
-	amenities = models.TextField(blank=True, null=True)
-	house_rules = models.TextField(blank=True, null=True)
-	long_term_rooms = models.IntegerField(blank=True, null=True)
-	short_term_rooms = models.IntegerField(blank=True, null=True)
-	admins = models.ManyToManyField(User, blank=True, null=True)
-	picture = models.ImageField(upload_to = img_path, blank=True, null=True)
+	events_description = models.TextField(blank=True, null=True)
 	space_share = models.NullBooleanField(blank=True, null=True)
+	space_share_description = models.TextField(blank=True, null=True)
 	slug = models.CharField(max_length=100, unique=True, blank=True, null=True)
-	get_in_touch = models.CharField(max_length=100, unique=True, blank=True, null=True)
+	contact_ok = models.NullBooleanField(blank=True, null=True)
+	contact = models.emailField(blank=True, null=True) # required if contact_ok = True
+	# social
+	website = models.URLField(verify_exists = True, null=True, blank=True, unique=True)
+	twitter_handle = models.CharField(max_length=100, null=True, blank=True)
+	pictures_feed = models.CharField(max_length=400, null=True, blank=True)
+
+	# future - mailing lists?
+	# deprecated: 
+	# get_in_touch = models.CharField(max_length=100, unique=True, blank=True, null=True) --> replace with "ok to contact?" + email addy
+	# house_rules = models.TextField(blank=True, null=True) 
 
 	def __unicode__(self):
 		if self.name:
