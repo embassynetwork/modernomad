@@ -1,0 +1,64 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-info">
+	    <button type="button" class="close" data-dismiss="alert">×</button>
+    	<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+	</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h3>Reservation {{reservation.arrive }} - {{reservation.depart}}</h3>
+
+{% if reservation.status == "pending" %}
+	<div>
+		<span class="btn btn-large btn btn-warning disabled res-status-btn" type="button">Pending</span>
+		<i class="icon-arrow-right"></i>
+		<span class="btn btn-large disabled res-status-btn" type="button">Approved</span>
+		<i class="icon-arrow-right"></i>
+		<span class="btn btn-large disabled res-status-btn" type="button">Confirmed</span>
+	</div>
+
+{% elif reservation.status == "approved" %}
+	<div>
+		<span class="btn btn-large btn-warning disabled res-status-btn" type="button">Approved</span>
+		<i class="icon-arrow-right"></i>
+		<form class="res-confirm" method="post" action="/reservation/{{reservation.id}}/confirm/">{% csrf_token %} <input type="submit" class="btn btn-large btn-success res-status-btn" value="Click to Confirm"></form>
+	</div>
+
+{% elif reservation.status == "confirmed" %}
+	<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
+
+{% elif reservation.status == "declined" %}
+	<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Declined</div>
+
+{% endif %}
+
+<div class="res-detail"><b>Approximate arrival Time</b>: {{ reservation.arrival_time }}</div>
+<div class="res-detail"><b>Accommodation Preference:</b> {{ reservation.accommodation_preference }}</div>
+<div class="res-detail"><b>Tags:</b> {{ reservation.tags }}</div>
+<div class="res-detail"><b>Projects you're currently involved in:</b> {{ reservation.projects }}</div>
+<div class="res-detail"><b>Things you'd be interested in sharing:</b> {{ reservation.sharing }}</div>
+<div class="res-detail"><b>Questions on your Mind:</b> {{ reservation.discussion }}</div>
+<div class="res-detail"><b>What are you in town for?</b> {{ reservation.purpose }}</div>
+<div class="res-detail"><b>How/through whom did you hear about us?</b> {{ reservation.referral }}</div>
+<div class="res-detail"><b>Additional Comments:</b> {{ reservation.comments }}</div>
+
+{% ifequal reservation.user user %}
+	<div class="res-modify-btn">
+	{% if past %}
+		<p class="notice">This reservation is in the past and cannot be modified</p>
+	{% else %}
+		<p><a class="btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a></p> 
+	{% endif %}
+	</div>
+{% endifequal %}
+
+<p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
+
+{% endblock %}

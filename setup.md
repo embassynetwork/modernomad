@@ -41,6 +41,7 @@ within the virtualenv
 - `pip install -r requirements.txt.` 
 
 ## first time and on model updates
+- make sure settings.py and, if applicable, local_settings.py exist and are correct. 
 - `./manage.py syncdb` to create and sync the models of installed apps
 - `./manage.py migrate` to set up the migrations
 

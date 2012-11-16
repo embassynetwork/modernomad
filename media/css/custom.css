@@ -1,68 +1,129 @@
-body {
+#container-main {
 	padding-top: 60px;
 	padding-bottom: 40px;
-	font-family: 'Vollkorn', serif;
-	font-size: 16px;
 }
 
-p {
-	font-family: 'Vollkorn', serif;
-	font-size: 16px;
+p { }
+
+html, body {
+	height: 100%;
+	/* The html and body elements cannot have any padding or margin. */
 }
 
-.hero-unit h1 {
-	font-size: 45px;
-	color: #80A64E;
+/* Wrapper for page content to push down footer */
+#wrap {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	/* Negative indent footer by it's height */
+	margin: 0 auto -60px;
 }
 
-.hero-unit {
-	background-color: white;
-	padding: 0px;
+#wrapbackgroundimg {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	/* Negative indent footer by it's height */
+	margin: 0 auto -60px;
+	background-image: url(/media/img/dining-retouched-small.jpg);
 }
 
-.hero-unit p {
-	margin-top: 20px;
+/* Set the fixed height of the footer here */
+#push, #footer {
+	height: 60px;
 }
 
-.license {
-	padding-left: 5px;
-	padding-right: 5px;
+/* Lastly, apply responsive CSS fixes as necessary */
+@media (max-width: 767px) {
+	#footer {
+	  margin-left: -20px;
+	  margin-right: -20px;
+	  padding-left: 20px;
+	  padding-right: 20px;
+	}
 }
 
-.btn-xlarge {
-	border-radius: 5px 5px 5px 5px;
-	font-size: 35px;
-	line-height: normal;
-	padding: 9px 14px;
+#wrapper-narrow {
+	width: 700px;
 }
 
-.hero-engage {
-	text-align: center;
-	margin-top: 60px;
-}
-
-.hero-engage > .btn-xlarge {
-	margin-left: 25px;
-	margin-right: 25px;
-}
-
-.box-link {
-	color: inherit;
+.button-spacer {
+	padding-top: 30px;
 }
 
 .footer {
-	margin-top: 150px;
+	padding: 30px;
+	background-color: #f5f5f5;
+}
+
+.hero-unit h1 {
+	padding-bottom: 40px;
+}
+
+.hero-unit {
+}
+
+.hero-unit p {
+}
+
+.license {
+}
+
+.btn-xlarge {
+}
+
+.hero-engage {
+}
+
+.hero-engage > .btn-xlarge {
+}
+
+.box-link {
+}
+
+.footer {
 }
 
 textarea {
-	width: 410px;
 }
 
 .helptext {
-	display:block;
-	color: #999;
 }
 
 .navbar {
-	margin-bottom: 40px;
+}
+
+p.notice {
+	color: grey;
+	font-style: italic;
+}
+
+.res-detail {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.res-modify-btn {
+	width: 400px;
+	padding-top:20px;
+	padding-bottom: 20px;
+	margin: auto;
+	text-align: center;
+}
+
+.res-status-btn {
+	cursor: default;
+}
+
+.timeline-tags {
+	font-style: italic;
+	font-size: 120%;
+}
+
+.new-reservation {
+	padding-top: 30px;
+}
+
+form.res-confirm {
+	display: inline;
 }

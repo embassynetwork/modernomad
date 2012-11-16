@@ -2,15 +2,32 @@
 
 {% block main %}
 
-<h1>{{ user.first_name }} {{ user.last_name }} (<font style="font-family:monospace">{{ user.username }}</font>)</h1>
+<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
 
 <h3>Bio:</h3>
-<p>{{ user.profile.bio }}</p>
+<p>{{ u.profile.bio }}</p>
 
 <h3>Links:</h3>
-<p>{{ user.profile.links }}</p>
+<p>{{ u.profile.links }}</p>
 
 <h3>Up to:</h3>
-<p>{{ user.profile.upto }}</p>
+<p>{{ u.profile.upto }}</p>
+
+<h2>Reservations</h2>
+{% for reservation in reservations %}
+	<div>
+		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> - <em>{{reservation.status}}</em>
+	</div>
+{% endfor %}
+
+{% ifequal u user %}
+	<div class="new-reservation">
+		<a href="{% url reservation_submit %}">New Reservation</a>
+	</div>
+
+	<div id="logout">
+		<a href="/members/logout/">Logout</a>
+	</div>
+{% endifequal %}
 
 {% endblock %}

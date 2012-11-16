@@ -27,11 +27,6 @@ DATABASES = {
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
 TIME_ZONE = 'America/Chicago'
 
 # Language code for this installation. All choices can be found here:
@@ -85,9 +80,6 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'd+xvh@)+d_iw%%w65+61&amp;2(w7upu*rt7l%n3d_li#1^pt@133^'
-
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -105,6 +97,17 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+# default template context processors
+# TEMPLATE_CONTEXT_PROCESSORS = (
+#     "django.contrib.auth.context_processors.auth",
+#     "django.core.context_processors.debug",
+#     "django.core.context_processors.i18n",
+#     "django.core.context_processors.media",
+#     "django.core.context_processors.static",
+#     "django.core.context_processors.tz",
+#     "django.contrib.messages.context_processors.messages"
+# )
 
 ROOT_URLCONF = 'modernomad.urls'
 
@@ -131,7 +134,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'registration',
     'south',
-    'django_mailman',
     'core',
     'api',
 )
@@ -175,7 +177,10 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/members/login/'
 LOGOUT_URL = '/members/logout/'
 
-DEFAULT_FROM_EMAIL = 'noreply@modernomad'
+DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
+
+# import the groups script
+import groups
 
 # import any local settings
 try:

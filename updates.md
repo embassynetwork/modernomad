@@ -3,6 +3,8 @@
 create the migration
 $ ./manage.py schemamigration core --auto
 
+to rename a field...?
+
 if you have a fixtures file, add/change field(s) to correspond to any model
 changes you made. 
 

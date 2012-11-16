@@ -1,14 +1,14 @@
 from tastypie.authorization import Authorization
 from tastypie.authentication import Authentication
 from tastypie.resources import ModelResource
+from tastypie import fields
+import datetime
 
 from django.contrib.auth.models import User
-from core.models import House, Resource, UserProfile, Endorsement
+from core.models import House, Resource, UserProfile, Reservation
 
 # XXX TODO 
 # add real authentication. 
-# implement CORS https://gist.github.com/426829
-# - how to set default header in tasty-oie response OR how to integrate middleware?
 
 class UserAuth(Authentication):
 	''' use as authorization for resources where the user must be
@@ -60,10 +60,45 @@ class UserBaseResource(ModelResource):
 		authorization = Authorization()
 		always_return_data = True
 
-# available at /endorsements
-class EndorsementsResource(ModelResource):
+class UpcomingResource(ModelResource):
 	class Meta:
-		queryset = Endorsement.objects.all()
-		authorization = Authorization()
-		always_return_data = True
+		queryset = Reservation.objects.all().order_by('arrive')
+
+	def alter_list_data_to_serialize(self, request, data_dict):
+		if isinstance(data_dict, dict):
+			if 'meta' in data_dict: 
+				# Get rid of the "meta". 
+				del(data_dict['meta'])
+
+			# add in our custom pre-amble
+			today = str(datetime.date.today()).replace("-", ",")
+			data_dict["timeline"] = {
+				"headline":"Embassy SF Upcoming Guests", 
+				"type":"default", 
+				"text":"Read all about it!", 
+				"startDate": today,
+				"date": [] 
+			} 
+
+			# move the individual timeline objects within the timeline pre-amble 
+			data_dict["timeline"]["date"] = data_dict["objects"] 
+			del(data_dict["objects"]) 
+
+		return data_dict
+
+
+	def dehydrate(self, bundle):
+		headline_text = "<h3>%s %s</h3>" % (bundle.obj.user.first_name, bundle.obj.user.last_name)
+		body_text = "<p class='timeline-tags'>%s</p><p><b>Projects: </b>%s</p><p><b>Sharing: </b>%s</p><p><b>Discussion: </b>%s</p><p><b>Purpose: </b>%s</p>" % (
+			bundle.obj.tags, bundle.obj.projects, bundle.obj.sharing, bundle.obj.discussion, bundle.obj.purpose)
+		res_data = {
+	        "startDate":str(bundle.obj.arrive).replace("-", ","),
+			"endDate":str(bundle.obj.depart).replace("-", ","),
+	        "headline":headline_text,
+	        "text": body_text
+	    }
+
+		bundle.data = res_data
+		return bundle
+
 

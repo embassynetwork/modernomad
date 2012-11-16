@@ -3,5 +3,5 @@ django-registration
 django-tastypie
 South
 PIL
--e git://github.com/joshuamckenty/django-mailman.git#egg=django-mailman
+sudo pip install --index-url https://code.stripe.com --upgrade stripe
 

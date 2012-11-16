@@ -1,0 +1,13 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+	<p>Editing your existing reservation for {{arrive}} to {{depart}}.</p>
+	<p>Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</p>
+
+	<form method="post" action="/reservation/{{reservation_id}}/edit/">{% csrf_token %}
+		{{ form.as_p }}
+		<input type="submit" value="Submit">
+	</form>
+
+{% endblock %}

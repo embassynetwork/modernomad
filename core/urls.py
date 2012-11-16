@@ -10,7 +10,7 @@ import core.forms
 
 user_patterns = patterns('core.views',
     url(r'^$', 'ListUsers', name='user_list'),
-    url(r'^(?P<user_id>\d+)/$', 'GetUser', name='user_details'),
+    url(r'^(?P<username>(?!logout)(?!login)\w+)/$', 'GetUser', name='user_details'),
 )
 
 # Add the user registration and account management patters from the
@@ -27,4 +27,12 @@ user_patterns += registration.backends.default.urls.urlpatterns
 house_patterns = patterns('core.views',
     url(r'^$', 'ListHouses', name='house_list'),
     url(r'^(?P<house_id>\d+)/$', 'GetHouse', name='house_details'),
+)
+
+# urls starting in /reservation get sent here. 
+reservation_patterns = patterns('core.views',
+	url(r'^create/$', 'ReservationSubmit', name='reservation_submit'),
+    url(r'^(?P<reservation_id>\d+)/$', 'ReservationDetail', name='reservation_detail'), 
+	url(r'^(?P<reservation_id>\d+)/edit/$', 'ReservationEdit', name='reservation_edit'), 
+    url(r'^(?P<reservation_id>\d+)/confirm/$', 'ReservationConfirm', name='reservation_confirm'), 
 )

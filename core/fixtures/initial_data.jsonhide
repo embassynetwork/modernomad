@@ -1,0 +1,67 @@
+[{
+	"pk": 1, 
+	"model": "core.house", 
+	"fields": {
+		"name": "The Rainbow Mansion", 
+		"address": "21655 Rainbow Drive", 
+		"short_term_rooms": 3, 
+		"description": "A beautiful mansion with rocket scientists", 
+		"amenities": "A beautiful, gigantic kitchen.", 
+		"long_term_rooms": 6, 
+		"rooms": 8,
+		"created": "2012-05-28T21:40:28Z", 
+		"updated": "2012-05-28T21:40:28Z", 
+		"house_rules": "No noise in the yard after 1am.",
+		"latLong" : "37.300079,-122.05498899999998"
+	}
+}, 
+{
+	"pk": 1, 
+	"model": "core.resource", 
+	"fields": {
+		"house": 1, 
+		"resource_type": "bedroom", 
+		"name": "Master Bedroom", 
+		"blurb": "Almost a suite, this corner of the building features a private bathroom, salon, and giant bedroom."
+	}
+}, 
+{
+	"pk": 2, 
+	"model": "core.resource", 
+	"fields": {
+		"house": 1, 
+		"resource_type": "bedroom", 
+		"name": "The Secret Bedroom", 
+		"blurb": "Hidden behind a moving bookcase (truly!), this small and private bedroom has a view over the ponds in the front yard."
+	}
+}, 
+{
+	"pk": 1, 
+	"model": "core.userprofile", 
+	"fields": {
+		"upto": "Stuff and things.", 
+		"bio": "I am the original Django superuser.", 
+		"updated": "2012-05-28T23:33:17.555Z", 
+		"links": "", 
+		"created": "2012-05-28T23:33:17.555Z", 
+		"image": "", 
+		"invited_by": null, 
+		"status": "0", 
+		"user": 1
+	}
+},
+{
+	"pk": 2, 
+	"model": "core.userprofile", 
+	"fields": {
+		"upto": "Nothing at all.", 
+		"bio": "I am your virtual shadow.", 
+		"updated": "2012-05-28T23:33:17.555Z", 
+		"links": "", 
+		"created": "2012-05-28T23:33:17.555Z", 
+		"image": "", 
+		"invited_by": null, 
+		"status": "0", 
+		"user": 2
+	}
+}]

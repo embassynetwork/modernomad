@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+	{% if user.is_authenticated %}
+	<h3>Hello {{user.first_name}}</h3>
+
+	{% else %}
+	<p>If this is your first time making a reservation request, an account will be 
+		created for you. If you already have an account, please <a href="/members/login?next=/reservation/create/">log in</a>.</p> {% endif %}
+
+	<form method="post" action="/reservation/create/">{% csrf_token %}
+
+		{% if user_form %}
+			<fieldset>
+			{{ user_form.as_table }}
+			</fieldset>
+		{% endif %}
+
+		<fieldset>
+		{{ form.as_p }}
+		</fieldset>
+		<input type="submit" value="Submit">
+	</form>
+
+{% endblock %}

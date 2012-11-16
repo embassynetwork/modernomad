@@ -3,42 +3,59 @@ from django.forms import CharField, ModelForm, PasswordInput
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 
-from core.models import UserProfile, House
+from core.models import UserProfile, House, Reservation
 
-class UserForm(ModelForm):
+from django.contrib.auth.forms import UserCreationForm
+
+class ExtendedUserCreationForm(UserCreationForm):
 	class Meta:
 		model = User
-		fields = ['username', 'first_name', 'last_name', 'email', 'password']
-		widgets = {
-				'password': PasswordInput(render_value=False),
-				}
-		password2 = CharField(widget=PasswordInput(render_value=False), 
-				label=_("Password (again)"))
+		fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
-	def clean(self):
-		'''Verify that the values entered into the two password fields match.'''
-		if 'password' in self.cleaned_data and 'password2' in self.cleaned_data:
-			if self.cleaned_data['password'] != self.cleaned_data['password2']:
-				raise forms.ValidationError(_("The two password fields didn't match."))
-		return self.cleaned_data
+	def save(self, commit=True):
+		# by default the UserCreationForm saves username & password info. here we 
+		# override the save method to save the additional data we have gathered. 
+		user = super(ExtendedUserCreationForm, self).save(commit=False)
+		user.first_name = self.cleaned_data['first_name']
+		user.last_name = self.cleaned_data['last_name']
+		user.email = self.cleaned_data["email"]
+		user.save()
+		return user 
+
+# class UserForm(ModelForm):
+# 	class Meta:
+# 		model = User
+# 		widgets = {
+# 				'password': PasswordInput(render_value=False),
+# 				}
+# 		password2 = CharField(widget=PasswordInput(render_value=False), 
+# 				label=_("Password (again)"))
+# 		fields = ['username', 'first_name', 'last_name', 'email', 'password']
+
+# 	def clean(self):
+# 		'''Verify that the values entered into the two password fields match.'''
+# 		if 'password' in self.cleaned_data and 'password2' in self.cleaned_data:
+# 			if self.cleaned_data['password'] != self.cleaned_data['password2']:
+# 				raise forms.ValidationError(_("The two password fields didn't match."))
+# 		return self.cleaned_data
 
 
-class UserProfileForm(ModelForm):
-	class Meta:
-		model = UserProfile
-		exclude = ['user', 'status']
+# class UserProfileForm(ModelForm):
+# 	class Meta:
+# 		model = UserProfile
+# 		exclude = ['user', 'status']
 
-	def clean_links(self):
-		data = self.cleaned_data['links']
-		# do stuff
-		return data
+# 	def clean_links(self):
+# 		data = self.cleaned_data['links']
+# 		# do stuff
+# 		return data
 
-	def clean_image(self):
-		img_path = self.cleaned_data['image']
-		if img_path is not None:
-			# img_path is relative to media_root
-			pass
-		return img_path
+# 	def clean_image(self):
+# 		img_path = self.cleaned_data['image']
+# 		if img_path is not None:
+# 			# img_path is relative to media_root
+# 			pass
+# 		return img_path
 
 
 class CombinedUserForm(object):
@@ -71,5 +88,19 @@ class HouseForm(ModelForm):
 	class Meta:
 		model = House
 		exclude = ['admins', 'created', 'updated']
+
+class ReservationForm(ModelForm):
+	class Meta:
+		model = Reservation
+		exclude = ['created', 'updated', 'status', 'user']
+
+	# XXX TODO
+	# make sure depart is at least one day after arrive. 
+
+
+
+
+
+
 
 

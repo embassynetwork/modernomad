@@ -6,10 +6,14 @@ from django.utils.cache import patch_vary_headers
 from django import http
 
 ''' 
-USAGE:
+EXAMPLE USAGE:
+	Put this file in a directory called, eg, 'middleware,' inside your django
+	project. Make sure to create an __init__.py file in the directory so it can
+	be included as a module. 
 	Set the values for 
 		settings.XS_SHARING_ALLOWED_ORIGINS
 		settings.XS_SHARING_ALLOWED_METHODS 
+		settings.XS_SHARING_ALLOWED_HEADERS
 	in settings.py. Then include 
 		'modernomad.middleware.crossdomainxhr.CORSMiddleware' 
 	in MIDDLEWARE_CLASSES in settings.py.
@@ -30,9 +34,10 @@ class CORSMiddleware(object):
 	"""
 		This middleware allows cross-domain XHR using the html5 postMessage API.
 
+		eg:
 		Access-Control-Allow-Origin: http://foo.example
 		Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE
-
+		Access-Control-Allow-Methods: ["Content-Type"]
 
 	"""
 	def process_request(self, request):
