@@ -10,7 +10,7 @@ import core.forms
 
 user_patterns = patterns('core.views',
     url(r'^$', 'ListUsers', name='user_list'),
-    url(r'^(?P<username>(?!logout)(?!login)\w+)/$', 'GetUser', name='user_details'),
+    url(r'^(?P<username>(?!logout)(?!login)(?!register)\w+)/$', 'GetUser', name='user_details'),
 )
 
 # Add the user registration and account management patters from the
@@ -21,6 +21,7 @@ user_patterns += patterns('',
         {'backend': 'core.views.RegistrationBackend',
          'form_class': core.forms.CombinedUserForm},
         name='registration_register'),
+    url(r'^(?P<username>\w+)/edit/$', 'core.views.UserEdit', name='user_edit'),
 )
 user_patterns += registration.backends.default.urls.urlpatterns
 
@@ -35,4 +36,6 @@ reservation_patterns = patterns('core.views',
     url(r'^(?P<reservation_id>\d+)/$', 'ReservationDetail', name='reservation_detail'), 
 	url(r'^(?P<reservation_id>\d+)/edit/$', 'ReservationEdit', name='reservation_edit'), 
     url(r'^(?P<reservation_id>\d+)/confirm/$', 'ReservationConfirm', name='reservation_confirm'), 
+    url(r'^(?P<reservation_id>\d+)/delete/$', 'ReservationDelete', name='reservation_delete'), 
+
 )

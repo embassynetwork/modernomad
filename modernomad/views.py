@@ -1,7 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from core.models import Reservation
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
+from core.confirmation_email import confirmation_email_details
+from core.models import Reservation
 import json
 
 def index(request):
@@ -82,3 +85,15 @@ def submitpayment(request):
 	)
 
 	return render(request, "stay.html")
+
+def ErrorView(request):
+	return render(request, '404.html')
+
+@login_required
+def GuestInfo(request):
+	# only allow people who have had at least one confirmed reservation access this page
+	confirmed = Reservation.objects.filter(user=request.user).filter(status='confirmed')
+	if len(confirmed) > 0:
+		return render(request, 'guestinfo.html', {'static_info': confirmation_email_details})
+	return HttpResponseRedirect('/')
+

@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+	<h4>{{ user.first_name|title }}, edit your profile</h4>
+
+	<form method="post" action="/people/{{user.username}}/edit/">{% csrf_token %}
+	{% for field in form.user_form %}
+		<div class="field-wrapper">
+			{{ field.errors }}
+			{{ field.label_tag }}
+			<span class="form-help-text">{{ field.help_text}}</span>
+			<div class="form-field-body">
+				{{ field }}
+			</div>
+		</div>
+	{% endfor %}
+
+	{% for field in form.profile_form %}
+		<div class="field-wrapper">
+			{{ field.errors }}
+			{{ field.label_tag }}
+			<span class="form-help-text">{{ field.help_text}}</span>
+			<div class="form-field-body">
+				{{ field }}
+			</div>
+		</div>
+	{% endfor %}
+
+	<input type="submit" value="Submit">
+	</form>
+
+{% endblock %}

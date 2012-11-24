@@ -10,12 +10,11 @@ from django.template import RequestContext
 from registration import signals
 import registration.backends.default
 from registration.models import RegistrationProfile
-from core.forms import ReservationForm, ExtendedUserCreationForm 
+from core.forms import ReservationForm, ExtendedUserCreationForm, CombinedUserForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
 from django.contrib import messages
-
 
 from core.models import House, UserProfile, Reservation
 
@@ -32,8 +31,16 @@ def ListUsers(request):
 @login_required
 def GetUser(request, username):
 	user = User.objects.get(username=username)
-	reservations = Reservation.objects.filter(user=user)
-	return render(request, "user_details.html", {"u": user, "reservations": reservations})
+	reservations = Reservation.objects.filter(user=user).exclude(status='deleted')
+	past_reservations = []
+	upcoming_reservations = []
+	for reservation in reservations:
+		if reservation.arrive >= datetime.date.today():
+			upcoming_reservations.append(reservation)
+		else:
+			past_reservations.append(reservation)
+	return render(request, "user_details.html", {"u": user, 
+		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations})
 
 def ListHouses(request):
 	houses = House.objects.all()
@@ -102,12 +109,39 @@ def ReservationSubmit(request):
 
 @login_required
 def ReservationDetail(request, reservation_id):
-	reservation = Reservation.objects.get(id=reservation_id)
-	if reservation.arrive > datetime.date.today():
-		past = False
+	try:
+		reservation = Reservation.objects.get(id=reservation_id)
+		if reservation.status == 'deleted':
+			raise Reservation.DoesNotExist
+	except Reservation.DoesNotExist:
+		msg = 'The reservation you requested do not exist'
+		messages.add_message(request, messages.ERROR, msg)
+		return HttpResponseRedirect('/404')
 	else:
-		past = True
-	return render(request, "reservation_detail.html", {"reservation": reservation, "past":past})
+		if reservation.arrive > datetime.date.today():
+			past = False
+		else:
+			past = True
+		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past})
+
+
+@login_required
+def UserEdit(request, username):
+	user = UserProfile.objects.get(user__username=username)
+	if request.user.is_authenticated() and request.user.id == user.id:
+		if request.method == "POST":
+			form = CombinedUserForm(request.POST, instance=user)
+			if form.is_valid():
+				form.save()
+				client_msg = "Your profile has been updated."
+				messages.add_message(request, messages.INFO, client_msg)
+				return HttpResponseRedirect("/people/%s" % username)
+		else:
+			form = CombinedUserForm(instance=user)
+		
+		return render(request, 'user_edit.html', {'form': form})
+	return HttpResponseRedirect("/")
+
 
 @login_required
 def ReservationEdit(request, reservation_id):
@@ -177,8 +211,24 @@ def ReservationConfirm(request, reservation_id):
 
 		reservation.status = 'confirmed'
 		reservation.save()
+
 		messages.add_message(request, messages.INFO, 'Thank you! Check your email for further details.')
 		return HttpResponseRedirect("/reservation/%s" % reservation_id)
+
+	else:
+		return HttpResponseRedirect("/")
+
+@login_required
+def ReservationDelete(request, reservation_id):
+	reservation = Reservation.objects.get(id=reservation_id)
+	if (request.user.is_authenticated() and request.user == reservation.user 
+		and request.method == "POST"):
+		reservation.status = 'deleted'
+		reservation.save()
+
+		messages.add_message(request, messages.INFO, 'Your reservation has been canceled.')
+		username = reservation.user.username
+		return HttpResponseRedirect("/people/%s" % username)
 
 	else:
 		return HttpResponseRedirect("/")

@@ -9,7 +9,20 @@ XS_SHARING_ALLOWED_ORIGINS = "http://localhost:8989/"
 XS_SHARING_ALLOWED_METHODS = ['POST','GET', 'PUT', 'OPTIONS', 'DELETE']
 XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 
-# email settings - example only! will send emails to console if left untouched. 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_PORT = "1025"
-EMAIL_HOST = "localhost"
+# what mode are we running in? use this to trigger different settings. 
+DEVELOPMENT = 0
+PRODUCTION = 1
+
+# default mode is dev. change to production as appropriate. 
+MODE = DEVELOPMENT
+
+if MODE == DEVELOPMENT:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'   
+	EMAIL_USE_TLS = True
+	EMAIL_HOST = 'smtp.gmail.com'
+	EMAIL_PORT = 587
+	EMAIL_HOST_USER = 'user@domain.com'
+	EMAIL_HOST_PASSWORD = 'password'
+

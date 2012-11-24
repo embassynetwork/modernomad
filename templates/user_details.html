@@ -2,23 +2,63 @@
 
 {% block main %}
 
-<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-info">
+	    <button type="button" class="close" data-dismiss="alert">×</button>
+    	<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+	</div>
+    {% endfor %}
+</div>
+{% endif %}
 
-<h3>Bio:</h3>
+
+<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
+{% ifequal u user %}
+	<div id="edit-profile">
+		<a href="/people/{{user.username}}/edit/">Edit Profile</a>
+	</div>
+{% endifequal %}
+
+
+<h3>About {{u.first_name|title}}:</h3>
 <p>{{ u.profile.bio }}</p>
+
+<h3>Currently Up to:</h3>
+<p>{{ u.profile.upto }}</p>
 
 <h3>Links:</h3>
 <p>{{ u.profile.links }}</p>
 
-<h3>Up to:</h3>
-<p>{{ u.profile.upto }}</p>
-
 <h2>Reservations</h2>
-{% for reservation in reservations %}
+{% if past_reservations|length > 0 %}
+<h3>Previous</h3>
+{% for reservation in past_reservations %}
 	<div>
-		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> - <em>{{reservation.status}}</em>
+		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+		{% if user == u %}
+		- <em>{{reservation.status}}</em>
+		{% endif %}
 	</div>
 {% endfor %}
+{% endif %}
+
+{% if upcoming_reservations|length > 0 %}
+<h3>Upcoming</h3>
+{% for reservation in upcoming_reservations %}
+	<div>
+		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+		{% if user == u %}
+		- <em>{{reservation.status}}</em>
+		{% endif %}
+	</div>
+{% endfor %}
+{% endif %}
+
+{% if upcoming_reservations|length == 0 and past_reservations|length == 0 %}
+	<p>No reservations</p>
+{% endif %}
 
 {% ifequal u user %}
 	<div class="new-reservation">
@@ -26,7 +66,7 @@
 	</div>
 
 	<div id="logout">
-		<a href="/members/logout/">Logout</a>
+		<a href="/people/logout/">Logout</a>
 	</div>
 {% endifequal %}
 

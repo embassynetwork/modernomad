@@ -14,30 +14,36 @@
 {% endif %}
 
 <h3>Reservation {{reservation.arrive }} - {{reservation.depart}}</h3>
+<h4><em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em></h4>
 
-{% if reservation.status == "pending" %}
-	<div>
-		<span class="btn btn-large btn btn-warning disabled res-status-btn" type="button">Pending</span>
-		<i class="icon-arrow-right"></i>
-		<span class="btn btn-large disabled res-status-btn" type="button">Approved</span>
-		<i class="icon-arrow-right"></i>
-		<span class="btn btn-large disabled res-status-btn" type="button">Confirmed</span>
-	</div>
+{% ifequal reservation.user user %}
+	{% if reservation.status == "pending" %}
+		<div>
+			<span class="btn btn-large btn-success disabled res-status-btn" type="button">Pending</span>
+			<i class="icon-arrow-right"></i>
+			<span class="btn btn-large btn disabled res-status-btn" type="button">Approved</span>
+			<i class="icon-arrow-right"></i>
+			<span class="btn btn-large btn disabled res-status-btn" type="button">Confirmed</span>
+		</div>
 
-{% elif reservation.status == "approved" %}
-	<div>
-		<span class="btn btn-large btn-warning disabled res-status-btn" type="button">Approved</span>
-		<i class="icon-arrow-right"></i>
-		<form class="res-confirm" method="post" action="/reservation/{{reservation.id}}/confirm/">{% csrf_token %} <input type="submit" class="btn btn-large btn-success res-status-btn" value="Click to Confirm"></form>
-	</div>
+	{% elif reservation.status == "approved" %}
+		<div>
+			<span class="btn btn-large btn disabled res-status-btn" type="button">Approved</span>
+			<i class="icon-arrow-right"></i>
+			<form class="btn-inline" method="post" action="/reservation/{{reservation.id}}/confirm/">{% csrf_token %} <input type="submit" class="btn btn-large btn-success res-status-btn" value="Click to Confirm"></form>
+		</div>
 
-{% elif reservation.status == "confirmed" %}
-	<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
+	{% elif reservation.status == "confirmed" %}
+		<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
 
-{% elif reservation.status == "declined" %}
-	<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Declined</div>
+	{% elif reservation.status == "declined" %}
+		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Declined</div>
 
-{% endif %}
+	{% endif %}
+{% else %}
+	<div class="btn btn-large disabled res-status-btn" type="button">{{ reservation.status|title }} </div>	
+{% endifequal %}
+
 
 <div class="res-detail"><b>Approximate arrival Time</b>: {{ reservation.arrival_time }}</div>
 <div class="res-detail"><b>Accommodation Preference:</b> {{ reservation.accommodation_preference }}</div>
@@ -54,11 +60,44 @@
 	{% if past %}
 		<p class="notice">This reservation is in the past and cannot be modified</p>
 	{% else %}
-		<p><a class="btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a></p> 
+		<div>
+			<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>
+			<form id="res-delete" class="btn-inline" method="post" action="/reservation/{{reservation.id}}/delete/">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
+		</div> 
+
+		<div id="dialog-confirm" title="Delete this user?">
+		    <p>
+		        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		        This reservation will be permanently deleted and cannot be recovered. Are you sure?
+		    </p>
+		</div>
+
 	{% endif %}
 	</div>
 {% endifequal %}
 
 <p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
 
+{% endblock %}
+
+{% block extrajs %}
+<script>
+$("#dialog-confirm").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Delete": function () {
+            $("#res-delete").submit();
+         },
+        "Cancel": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-delete").click(function (e) {
+    $("#dialog-confirm").dialog("open");
+    e.preventDefault();
+});
+</script>
 {% endblock %}

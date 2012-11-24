@@ -124,6 +124,35 @@ p.notice {
 	padding-top: 30px;
 }
 
-form.res-confirm {
+.btn-inline {
 	display: inline;
+}
+
+div.ui-datepicker{
+ font-size:10px;
+}
+
+.btn-red {
+	color: red;
+	border: 1px;
+}
+
+.btn-red:hover {
+	text-decoration: none;
+	color: red;
+}
+
+.form-help-text {
+	font-style: italic;
+	font-size: 90%;
+}
+
+.field-wrapper {
+	width: 475px;
+	padding-bottom: 30px;
+}
+
+textarea {
+	width: 475px;
+	height: 120px;
 }

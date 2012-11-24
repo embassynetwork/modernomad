@@ -5,7 +5,8 @@ from django.contrib.auth.models import User
 from core.models import House, Resource, UserProfile, Reservation
 
 class ReservationAdmin(admin.ModelAdmin):
-	pass
+	model = Reservation
+	list_filter = ('status',)
 
 class ResourceInline(admin.TabularInline):
     model = Resource

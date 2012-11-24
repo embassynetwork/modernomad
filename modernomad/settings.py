@@ -174,8 +174,8 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 # their profile, we might want to use that here instead.
 LOGIN_REDIRECT_URL = '/'
 
-LOGIN_URL = '/members/login/'
-LOGOUT_URL = '/members/logout/'
+LOGIN_URL = '/people/login/'
+LOGOUT_URL = '/people/logout/'
 
 DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
 

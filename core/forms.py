@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.forms import CharField, ModelForm, PasswordInput
+from django.forms import CharField, ModelForm, PasswordInput, DateInput, DateField, Form
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 
@@ -22,43 +22,43 @@ class ExtendedUserCreationForm(UserCreationForm):
 		user.save()
 		return user 
 
-# class UserForm(ModelForm):
-# 	class Meta:
-# 		model = User
-# 		widgets = {
-# 				'password': PasswordInput(render_value=False),
-# 				}
-# 		password2 = CharField(widget=PasswordInput(render_value=False), 
-# 				label=_("Password (again)"))
-# 		fields = ['username', 'first_name', 'last_name', 'email', 'password']
+class UserForm(ModelForm):
+	password2 = CharField(widget=PasswordInput(render_value=False), 
+		label=_("Password (again)"))
 
-# 	def clean(self):
-# 		'''Verify that the values entered into the two password fields match.'''
-# 		if 'password' in self.cleaned_data and 'password2' in self.cleaned_data:
-# 			if self.cleaned_data['password'] != self.cleaned_data['password2']:
-# 				raise forms.ValidationError(_("The two password fields didn't match."))
-# 		return self.cleaned_data
+	class Meta:
+		model = User
+		widgets = {
+				'password': PasswordInput(render_value=False),
+				}
+		fields = ['username', 'first_name', 'last_name', 'email', 'password', 'password2']
+
+	def clean(self):
+		'''Verify that the values entered into the two password fields match.'''
+		if 'password' in self.cleaned_data and 'password2' in self.cleaned_data:
+			if self.cleaned_data['password'] != self.cleaned_data['password2']:
+				raise forms.ValidationError(_("The two password fields didn't match."))
+		return self.cleaned_data
+
+class UserProfileForm(ModelForm):
+	class Meta:
+		model = UserProfile
+		exclude = ['user', 'status']
+
+	def clean_links(self):
+		data = self.cleaned_data['links']
+		# do stuff
+		return data
+
+	def clean_image(self):
+		img_path = self.cleaned_data['image']
+		if img_path is not None:
+			# img_path is relative to media_root
+			pass
+		return img_path
 
 
-# class UserProfileForm(ModelForm):
-# 	class Meta:
-# 		model = UserProfile
-# 		exclude = ['user', 'status']
-
-# 	def clean_links(self):
-# 		data = self.cleaned_data['links']
-# 		# do stuff
-# 		return data
-
-# 	def clean_image(self):
-# 		img_path = self.cleaned_data['image']
-# 		if img_path is not None:
-# 			# img_path is relative to media_root
-# 			pass
-# 		return img_path
-
-
-class CombinedUserForm(object):
+class CombinedUserForm(Form):
 	'''A wrapper class that combines a UserForm and a UserProfile
 	form, allowing the django-registration app to collect additional
 	user profile information at registration time.
@@ -78,11 +78,15 @@ class CombinedUserForm(object):
 	def as_table(self):
 		return self.user_form.as_table()#+ self.profile_form.as_p() #table()
 
+	def as_p(self):
+		return self.user_form.as_p() + self.profile_form.as_p()
+
 	@property
 	def cleaned_data(self):
 		data = self.user_form.cleaned_data
 		data.update(self.profile_form.cleaned_data)
 		return data
+
 
 class HouseForm(ModelForm):
 	class Meta:
@@ -93,6 +97,10 @@ class ReservationForm(ModelForm):
 	class Meta:
 		model = Reservation
 		exclude = ['created', 'updated', 'status', 'user']
+		widgets = { 
+			'arrive': DateInput(attrs={'class':'datepicker'}),
+			'depart': DateInput(attrs={'class':'datepicker'})
+		}
 
 	# XXX TODO
 	# make sure depart is at least one day after arrive. 

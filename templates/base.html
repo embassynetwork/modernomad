@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>Embassy Network</title>
+	<meta charset="utf-8">
+	<title>Embassy Network</title>
 	<!-- responsive support -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-    <meta name="author" content="Jessy Kate Schingler">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
+	<meta name="author" content="Jessy Kate Schingler">
 
-    <!-- Le styles -->
-    <link href="/media/css/bootstrap.css" rel="stylesheet">
-    <link href="/media/css/custom.css" rel="stylesheet">
-    <link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
+	<!-- Le styles -->
+	<link href="/media/css/bootstrap.css" rel="stylesheet">
+	<link href="/media/css/custom.css" rel="stylesheet">
+	<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
+	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
 
-    <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
-    	<!-- Le javascript -->
-    <script src="/media/js/jquery.js"></script>
-    <script src="/media/js/bootstrap.js"></script>
+	<!-- Le fav and touch icons -->
+	<link rel="shortcut icon" href="/ico/favicon.ico">
+	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
+	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
+	<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
 
   </head>
 
   <body>
 
-  	<!-- Part 1: Wrap all page content here -->
-  	{% block wrapper %}
-    <div id="wrap">
-    {% endblock %}
+	<!-- Part 1: Wrap all page content here -->
+	{% block wrapper %}
+	<div id="wrap">
+	{% endblock %}
 
 	  <div class="navbar navbar-fixed-top">
 		  <div class="navbar-inner">
@@ -47,9 +44,9 @@
 					  <li><a href="/residents">Residents</a></li>
 					  <li><a href="/stay">Stay</a></li>
 					  {% if user.is_authenticated %}
-					  	<li><a href="/members/{{user.username}}"><i class="icon-user"></i> My Profile</a></li>
+						<li><a href="/people/{{user.username}}"><i class="icon-user"></i> My Profile</a></li>
 					  {% else %}
-					  	<li><a href="/members/login"><i class="icon-user"></i> Login</a></li>
+						<li><a href="/people/login"><i class="icon-user"></i> Login</a></li>
 					  {% endif %}
 				  </ul>
 			  </div>
@@ -57,7 +54,7 @@
 	  </div>
 
 
-    <div class="container" id="container-main">
+	<div class="container" id="container-main">
 	{% block body %}
 	{% endblock %}
 
@@ -65,8 +62,8 @@
 	</div> <!-- /container -->
 	</div> <!-- end #wrap -->
 	
-    <footer class="footer">
-    	<div class="container">
+	<footer class="footer">
+		<div class="container">
 	{% block footer %}
 		<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
 			<img alt="Creative Commons License" style="border-width:0"
@@ -74,6 +71,17 @@
 	{% endblock %}
 	</container>
 	</footer>
+	<!-- Le javascript -->
+	<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
+	<script src="/media/js/jquery-1.8.2.js"></script>
+	<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
+	<script src="/media/js/bootstrap.js"></script>
+	<script>
+		// use the jquery UI datepicker on all pages with the datepicker class:
+		$(".datepicker").datepicker({ minDate: 0});
+	</script>
+	{% block extrajs %}
+	{% endblock %}
   </body>
 </html>
 

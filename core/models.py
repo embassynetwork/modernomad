@@ -10,6 +10,8 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
 
 from django.core.mail import send_mail
+from confirmation_email import confirmation_email_details
+
 
 
 class House(models.Model):
@@ -73,6 +75,8 @@ class Reservation(models.Model):
 	APPROVED = 'approved'
 	CONFIRMED = 'confirmed'
 	DECLINED = 'declined'
+	DELETED = 'deleted'
+
 	PRIVATE = 'private'
 	SHARED = 'shared'
 	PREFER_SHARED = 'prefer_shared'
@@ -82,7 +86,8 @@ class Reservation(models.Model):
 		(PENDING, 'pending'),
 		(APPROVED, 'approved'),
 		(CONFIRMED, 'confirmed'),
-		(DECLINED, 'declined')
+		(DECLINED, 'declined'),
+		(DELETED, 'deleted'),
 	)
 
 	ACCOMMODATION_PREFERENCES = (
@@ -96,17 +101,17 @@ class Reservation(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 	status = models.CharField(max_length=200, choices=RESERVATION_STATUSES, default=PENDING)
 	user = models.ForeignKey(User)
-	arrive = models.DateField()
-	depart = models.DateField()
-	arrival_time = models.CharField(max_length=200)
-	accommodation_preference = models.CharField(max_length=200, choices = ACCOMMODATION_PREFERENCES)
-	tags = models.CharField(max_length =200)
-	projects = models.TextField()
-	sharing = models.TextField()
-	discussion = models.TextField()
-	purpose = models.TextField()
-	referral = models.CharField(max_length=200)
-	comments = models.TextField(blank=True, null=True)
+	arrive = models.DateField(verbose_name='Arrival Date')
+	depart = models.DateField(verbose_name='Departure Date')
+	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
+	accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
+	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
+	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
+	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?")
+	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
+	purpose = models.TextField(verbose_name='What are you in town for?')
+	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
+	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments')
 
 	@models.permalink
 	def get_absolute_url(self):
@@ -150,10 +155,34 @@ def detect_changes(sender, instance, **kwargs):
 		pass
 	else:
 		if obj.status == Reservation.PENDING and instance.status == Reservation.APPROVED:
-			# send email
 			reservation_approved.send(sender=Reservation, url=instance.get_absolute_url, reservation = instance)
-		elif obj.status == Reservation.PENDING and instance.status == Reservation.CONFIRMED:
-			# XXX send confirmation details
+		# if the status was changed from anything else to 'confirmed', generate an email
+		elif obj.status != Reservation.CONFIRMED and instance.status == Reservation.CONFIRMED:
+			subject = "[Embassy SF] Reservation Confirmation, %s - %s" % (str(instance.arrive), 
+			str(instance.depart))
+			sender = "stay@embassynetwork.com"
+			domain = 'http://' + Site.objects.get_current().domain
+			# XXX change this to reservation.house.get_absolute_url()
+			house_info_url = domain + '/guestinfo/'
+			reservation_url = domain + instance.get_absolute_url()
+			recipient = [instance.user.email,]
+			text = '''Dear %s,
+
+This email confirms we will see you from %s - %s. Information on accessing the
+house, house norms, and transportation can be viewed online at %s, and for
+your convenience is also included below. View or edit your reservation at 
+%s. 
+
+Let us know if you have any questions.
+Thanks and see you soon!
+
+-------------------------------------------------------------------------------
+
+''' % (instance.user.first_name.title(), instance.arrive, instance.depart, house_info_url, reservation_url)
+			text += confirmation_email_details
+
+			send_mail(subject, text, sender, recipient) 
+
 			pass
 
 # XXX do we even need a second signal?
@@ -162,7 +191,7 @@ def approval_notify(sender, url, reservation, **kwargs):
 	recipient = [reservation.user.email]
 	subject = "[Embassy SF] Reservation Approval"
 	domain = Site.objects.get_current().domain
-	message = "Your reservation request for %s - %s has been approved. You must confirm this reservation to finalize! View your reservation details and confirm at %s%s" % (
+	message = "Your reservation request for %s - %s has been approved. You must confirm this reservation to finalize!\n\nView your reservation details and confirm at %s%s" % (
 		str(reservation.arrive), str(reservation.depart), domain, reservation.get_absolute_url())
 	sender = "stay@embassynetwork.com"
 	send_mail(subject, message, sender, recipient)
@@ -174,8 +203,8 @@ class UserProfile(models.Model):
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
 	image = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, help_text="Leave blank to use <a href='http://gravatar.com'>Gravatar</a>")
-	bio = models.TextField("Stuff about you", blank=True)
-	links = models.TextField(help_text="Comma-separated, please", blank=True)
+	bio = models.TextField("About you", blank=True)
+	links = models.TextField(help_text="Comma-separated", blank=True)
 
 	def __unicode__(self):
 		return (self.user.__unicode__())

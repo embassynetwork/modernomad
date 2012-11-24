@@ -3,24 +3,36 @@
 {% block main %}
 
 	{% if user.is_authenticated %}
-	<h3>Hello {{user.first_name}}</h3>
+	<h3>Hello {{user.first_name|title}}</h3>
 
 	{% else %}
 	<p>If this is your first time making a reservation request, an account will be 
 		created for you. If you already have an account, please <a href="/members/login?next=/reservation/create/">log in</a>.</p> {% endif %}
 
-	<form method="post" action="/reservation/create/">{% csrf_token %}
+	<div class="form-container">
+		<form method="post" action="/reservation/create/">{% csrf_token %}
 
-		{% if user_form %}
-			<fieldset>
-			{{ user_form.as_table }}
-			</fieldset>
-		{% endif %}
+			{% if user_form %}
+				<fieldset>
+				{{ user_form.as_table }}
+				</fieldset>
+			{% endif %}
 
-		<fieldset>
-		{{ form.as_p }}
-		</fieldset>
-		<input type="submit" value="Submit">
-	</form>
+			{% for field in form %}
+				<div class="field-wrapper">
+					{{ field.errors }}
+					{{ field.label_tag }}
+					<span class="form-help-text">{{ field.help_text}}</span>
+					<div class="form-field-body">
+						{{ field }}
+						{% if field.name == 'arrive' or field.name == 'depart' %}
+						<i class="icon-calendar"></i>
+						{% endif %}
+					</div>
+				</div>
+			{% endfor %}
+			<input type="submit" value="Submit">
 
+		</form>
+	</div>
 {% endblock %}

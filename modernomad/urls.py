@@ -15,12 +15,16 @@ urlpatterns = patterns('',
     url(r'^stay/$', 'modernomad.views.stay'),
     url(r'^upcoming/$', 'modernomad.views.upcoming'),
     url(r'^upcoming-timeline/$', 'modernomad.views.upcomingTimeline'),
+    url(r'^guestinfo/$', 'modernomad.views.GuestInfo'),
+    
     
     url(r'^events/$', 'modernomad.views.events'),
     url(r'^submitpayment/$', 'modernomad.views.submitpayment'),
+    url(r'^404/$', 'modernomad.views.ErrorView'),
+
 
     # The core views, broken out into a couple of top-level paths.
-	url(r'^members/', include(core.urls.user_patterns)),
+	url(r'^people/', include(core.urls.user_patterns)),
 	url(r'^locations/', include(core.urls.house_patterns)),
     url(r'^reservation/', include(core.urls.reservation_patterns)),
 
@@ -34,6 +38,6 @@ urlpatterns = patterns('',
 # media url hackery. TODO does new-django have a better way to do this?
 urlpatterns += patterns('',
     (r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
-     { 'document_root': settings.MEDIA_ROOT }),
+     { 'document_root': settings.MEDIA_ROOT, 'show_indexes':True }),
 )
 
