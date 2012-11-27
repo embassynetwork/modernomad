@@ -4,6 +4,7 @@ each virtualenv contains its own install of pip, but you need pip to be installe
 
 optionally remove old/crusty versions:
 - `sudo apt-get purge python-pip`
+
 then get current version (url from http://www.pip-installer.org/en/latest/installing.html)
 - `cd /tmp`
 - `wget https://raw.github.com/pypa/pip/master/contrib/get-pip.py`
@@ -20,7 +21,7 @@ add to your ~/.bashrc:
 don't forget to source the bashrc file now:
 - `source ~/.bashrc`
 
-PIL is a requirement but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. to install this:
+**if you are on linux:** PIL is a requirement but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. to install this:
 - `sudo apt-get install libjpeg62-dev`
 
 you may need to symlink these libraries for PIL to find them during the install:
