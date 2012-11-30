@@ -4,8 +4,8 @@
 
 	<h4>{{ user.first_name|title }}, edit your profile</h4>
 
-	<form method="post" action="/people/{{user.username}}/edit/">{% csrf_token %}
-	{% for field in form.user_form %}
+	<form method="post" enctype="multipart/form-data" action="/people/{{user.username}}/edit/">{% csrf_token %}
+	{% for field in user_form %}
 		<div class="field-wrapper">
 			{{ field.errors }}
 			{{ field.label_tag }}
@@ -16,7 +16,7 @@
 		</div>
 	{% endfor %}
 
-	{% for field in form.profile_form %}
+	{% for field in profile_form %}
 		<div class="field-wrapper">
 			{{ field.errors }}
 			{{ field.label_tag }}

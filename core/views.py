@@ -10,7 +10,7 @@ from django.template import RequestContext
 from registration import signals
 import registration.backends.default
 from registration.models import RegistrationProfile
-from core.forms import ReservationForm, ExtendedUserCreationForm, CombinedUserForm
+from core.forms import ReservationForm, ExtendedUserCreationForm, UserProfileForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
@@ -127,19 +127,21 @@ def ReservationDetail(request, reservation_id):
 
 @login_required
 def UserEdit(request, username):
-	user = UserProfile.objects.get(user__username=username)
+	profile = UserProfile.objects.get(user__username=username)
+	user = User.objects.get(username=username)
 	if request.user.is_authenticated() and request.user.id == user.id:
 		if request.method == "POST":
-			form = CombinedUserForm(request.POST, instance=user)
-			if form.is_valid():
-				form.save()
+			profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+			if profile_form.is_valid(): 
+				profile_form.save()
 				client_msg = "Your profile has been updated."
 				messages.add_message(request, messages.INFO, client_msg)
 				return HttpResponseRedirect("/people/%s" % username)
+			else:
+				print profile_form.errors
 		else:
-			form = CombinedUserForm(instance=user)
-		
-		return render(request, 'user_edit.html', {'form': form})
+			profile_form = UserProfileForm(instance=profile)		
+		return render(request, 'user_edit.html', {'profile_form': profile_form})
 	return HttpResponseRedirect("/")
 
 

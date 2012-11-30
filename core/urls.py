@@ -8,22 +8,22 @@ import registration.backends.default.urls
 
 import core.forms
 
-user_patterns = patterns('core.views',
-    url(r'^$', 'ListUsers', name='user_list'),
-    url(r'^(?P<username>(?!logout)(?!login)(?!register)\w+)/$', 'GetUser', name='user_details'),
-)
-
 # Add the user registration and account management patters from the
 # django-registration package, overriding the initial registration
 # view to collect our additional user profile information.
-user_patterns += patterns('',
+user_patterns = patterns('',
     url(r'^register/$', 'registration.views.register',
         {'backend': 'core.views.RegistrationBackend',
-         'form_class': core.forms.CombinedUserForm},
+         'form_class': core.forms.UserProfileForm},
         name='registration_register'),
-    url(r'^(?P<username>\w+)/edit/$', 'core.views.UserEdit', name='user_edit'),
 )
 user_patterns += registration.backends.default.urls.urlpatterns
+
+user_patterns += patterns('core.views',
+    url(r'^$', 'ListUsers', name='user_list'),
+    url(r'^(?P<username>(?!logout)(?!login)(?!register)\w+)/$', 'GetUser', name='user_details'),
+    url(r'^(?P<username>\w+)/edit/$', 'UserEdit', name='user_edit'),
+)
 
 house_patterns = patterns('core.views',
     url(r'^$', 'ListHouses', name='house_list'),

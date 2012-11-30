@@ -156,3 +156,12 @@ textarea {
 	width: 475px;
 	height: 120px;
 }
+
+.float-right {
+	float:right;
+}
+
+img.profile-page-img {
+	width: 200px;
+	height: 200px;
+}
