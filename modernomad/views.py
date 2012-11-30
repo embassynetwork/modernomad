@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
 from core.confirmation_email import confirmation_email_details
 from core.models import Reservation
-import json
+import json, datetime
 
 def index(request):
 	return render(request, "index.html")
@@ -26,36 +26,10 @@ def upcoming(request):
 	# method formats the upcoming reservations as JSON appropriate 
 	# for consumption by the timelineJS library. 
 
-	reservations = Reservation.objects.all()
-	response_data = {
-    	"timeline":
-    	{
-	        "headline":"Embassy SF Upcoming Guests",
-	        "type":"default",
-			"text":"Read all about it!",
-			"startDate":"2012,11,7",
-	        "date": []
-	    }
-	}
-
-	for r in reservations:
-		headline_text = "<h3>%s %s</h3>" % (r.user.first_name, r.user.last_name)
-		body_text = "<h3>%s</h3><p>%s - %s</p><p><b>Projects:</b>%s</p><p><b>Sharing:</b>%s</p><p><b>Discussion:</b>%s</p><p><b>Purpose:</b>%s</p>" % (
-			r.tags, r.arrive, r.depart, r.projects, r.sharing, r.discussion, r.purpose)
-		r_data = {
-	        "startDate":str(r.arrive),
-			"endDate":str(r.depart),
-	        "headline":headline_text,
-	        "text": body_text,
-        }
-		response_data['timeline']['date'].append(r_data)
-		fp = open('media/static/upcoming.json', 'w')
-		fp.write(str(response_data))
-		fp.close()
-	#return HttpResponse(json.dumps(response_data), mimetype="application/json")
-	#return HttpResponse(json.dumps(response_data), mimetype="text/html")
-
-	return render(request, "upcoming.html")
+	today = datetime.date.today()
+	upcoming = Reservation.objects.order_by('arrive').exclude(arrive__lt=today)
+	arrived = Reservation.objects.order_by('arrive').exclude(depart__lt=today).exclude(arrive__gte=today)
+	return render(request, "upcoming.html", {'upcoming': upcoming, 'arrived': arrived, 'today': today})
 
 def stay(request):
 	return render(request, "stay.html")

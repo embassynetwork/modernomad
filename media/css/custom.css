@@ -162,6 +162,20 @@ textarea {
 }
 
 img.profile-page-img {
-	width: 200px;
+	width: 300px;
 	height: 200px;
+}
+
+.user-links {
+	padding-top: 30px;
+	padding-bottom: 30px;
+
+}
+
+.user-link {
+	padding-right: 20px;
+}
+
+.icon-spacer {
+	padding-right: 10px;
 }

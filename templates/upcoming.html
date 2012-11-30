@@ -1,11 +1,26 @@
 {% extends "base.html" %}
 {% block body %}
 
-<!-- 
-	There's a namespace conflict between the css for timelineJS and 
-	bootstrap. an evil iframe keeps them isolated. 
--->
-<iframe src="/upcoming-timeline/" width=100% height=100% frameBorder="0">
-</iframe>
+<h3>Current Guests</h3>
+
+{% for r in arrived %}
+	<div class="reservation-list-item">
+		<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a> - 
+		<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a>
+	</div>
+{% endfor %}
+
+
+<h3>Upcoming arrivals</h3>
+
+{% for r in upcoming %}
+	<div class="reservation-list-item">
+		<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a> - 
+		<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a>
+		{% if r.arrive == today %}
+		- <em>today!</em>
+		{% endif %}
+	</div>
+{% endfor %}
 
 {% endblock %}
