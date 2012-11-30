@@ -3,5 +3,5 @@ django-registration
 django-tastypie
 South
 PIL
-sudo pip install --index-url https://code.stripe.com --upgrade stripe
+--index-url https://code.stripe.com --upgrade stripe
 
