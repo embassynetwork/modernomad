@@ -30,18 +30,25 @@
 {% endifequal %}
 
 
-<h3>About {{u.first_name|title}}:</h3>
-<p>{{ u.profile.bio }}</p>
+{% if not u.profile.bio and not u.profile.links %}
 
-<h3>Currently Up to:</h3>
-<p>{{ u.profile.upto }}</p>
+{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
 
-<h3>Links:</h3>
-{% with links=u.profile.links|split:', ' %}
-	{% for link in links %}
-		<a href="{{link}}">{{link}}</a>
-	{% endfor %}
-{% endwith %}
+{% else %}
+	<h3>About {{u.first_name|title}}:</h3>
+	<p>{{ u.profile.bio }}</p>
+
+	{% if u.profile.links %}
+	<div class="user-links">
+	<span class="icon-spacer"><i class="icon-globe"></i></span>
+		{% with links=u.profile.links|split:', ' %}
+			{% for link in links %}
+				<span class="user-link"><a href="{{link}}">{{link}}</a></span>
+			{% endfor %}
+		{% endwith %}
+	</div>
+	{% endif %}
+{% endif %}
 
 <h2>Reservations</h2>
 {% if past_reservations|length > 0 %}
