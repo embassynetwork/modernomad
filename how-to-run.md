@@ -16,6 +16,13 @@ installed in the virtual env.
 within the virtualenv, install the requirements. this is done with the following command, which should iterate through the items in the text file and install them one by one:
 - `pip install -r requirements.txt.` 
 
+note that the stripe library requires custom arguments which the
+requirements.txt file parsing [apparently doesn't
+support](https://github.com/pypa/pip/pull/515) (as of november 2012), so
+install it manually on the command line using:
+`pip install -index-url https://code.stripe.com --upgrade stripe`
+
+
 ## first time
 create your own local_settings.py file from local_settings.example.py:
 - `cp local_settings.example.py local_settings.py`

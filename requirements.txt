@@ -3,5 +3,9 @@ django-registration
 django-tastypie
 South
 PIL
---index-url https://code.stripe.com --upgrade stripe
+
+# the stripe library requires custom arguments which the requirements.txt file
+# parsing apparently doesn't support, so install it manually on the command
+# line using:
+# pip install -index-url https://code.stripe.com --upgrade stripe
 
