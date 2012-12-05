@@ -39,12 +39,22 @@
 				  <a class="brand" href="/">Home</a>
 				  <ul class="nav">
 					  <li><a href="/about">Our House</a></li>
-					  <li><a href="/events">Events</a></li>
 					  <li><a href="/upcoming">Upcoming</a></li>
 					  <li><a href="/residents">Residents</a></li>
 					  <li><a href="/stay">Stay</a></li>
 					  {% if user.is_authenticated %}
-						<li><a href="/people/{{user.username}}"><i class="icon-user"></i> My Profile</a></li>
+						<li class="dropdown">
+							<a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
+								<i class="icon-user"></i> My Profile <b class="caret"></b>
+							</a>
+							<ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop1">
+								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
+								<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
+								<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
+							</ul>
+						</li>
+<!-- 							<a href="/people/{{user.username}}"><i class="icon-user"></i> My Profile</a></li> -->
+
 					  {% else %}
 						<li><a href="/people/login"><i class="icon-user"></i> Login</a></li>
 					  {% endif %}

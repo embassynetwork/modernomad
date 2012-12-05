@@ -16,6 +16,9 @@ PRODUCTION = 1
 # default mode is dev. change to production as appropriate. 
 MODE = DEVELOPMENT
 
+# if using stripe, enter your stripe *secret* key here
+STRIPE_SECRET_KEY = "insert your key here"
+
 if MODE == DEVELOPMENT:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:

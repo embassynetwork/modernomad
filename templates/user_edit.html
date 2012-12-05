@@ -5,17 +5,6 @@
 	<h4>{{ user.first_name|title }}, edit your profile</h4>
 
 	<form method="post" enctype="multipart/form-data" action="/people/{{user.username}}/edit/">{% csrf_token %}
-	{% for field in user_form %}
-		<div class="field-wrapper">
-			{{ field.errors }}
-			{{ field.label_tag }}
-			<span class="form-help-text">{{ field.help_text}}</span>
-			<div class="form-field-body">
-				{{ field }}
-			</div>
-		</div>
-	{% endfor %}
-
 	{% for field in profile_form %}
 		<div class="field-wrapper">
 			{{ field.errors }}

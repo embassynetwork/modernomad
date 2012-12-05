@@ -202,9 +202,9 @@ class UserProfile(models.Model):
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
-	image = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, help_text="Leave blank to use <a href='http://gravatar.com'>Gravatar</a>")
-	bio = models.TextField("About you", blank=True)
-	links = models.TextField(help_text="Comma-separated", blank=True)
+	image = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True)
+	bio = models.TextField("About you", blank=True, null=True)
+	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
 
 	def __unicode__(self):
 		return (self.user.__unicode__())

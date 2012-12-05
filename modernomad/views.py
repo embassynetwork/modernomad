@@ -5,7 +5,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
 from core.confirmation_email import confirmation_email_details
 from core.models import Reservation
-import json, datetime
+import json, datetime, stripe 
+import settings
+from core.forms import PaymentForm
 
 def index(request):
 	return render(request, "index.html")
@@ -34,31 +36,37 @@ def upcoming(request):
 def stay(request):
 	return render(request, "stay.html")
 
-def payment(request):
-	return render(request, "payment.html")
+def contribute(request):
+	if request.method == 'POST':
+		form = PaymentForm(request.POST)
+		if form.is_valid():
+			# account secret key (NOTE: THIS IS A TEST KEY)
+			stripe.api_key = settings.STRIPE_SECRET_KEY
+			
+			# get the payment details from the form
+			token = request.POST.get('stripeToken')
+			charge_amt = int(request.POST.get('amount'))
+			pay_name = request.POST.get('name')
+			pay_email = request.POST.get('email')
+			comment  = request.POST.get('comment')
 
-def submitpayment(request):
-	if request.method != "POST":
-		return render(request, "index.html")
+		    # create the charge on Stripe's servers - this will charge the user's card
+			charge = stripe.Charge.create(
+					amount=charge_amt*100, # convert dollars to cents
+					currency="usd",
+					card=token,
+					description= "from %s: %s" % (pay_email, comment)
+			)
 
-	# account secret key (NOTE: THIS IS A TEST KEY)
-	stripe.api_key = "sk_0DkOebiI0BuKUOxg9KVcRRfMQT8FJ"
-	
-	# get the payment details from the form
-	token = request.POST['stripeToken']
-	charge_amt = request.POST['card-amount']
-	pay_name = request.POST['human-name']
-	pay_email = request.POST['human-email']
+			# TODO error handling if charge does not succeed
+			return HttpResponseRedirect("/thanks")
+	else:
+		form = PaymentForm()		
+	return render(request, "contribute.html", {'form': form})
 
-    # create the charge on Stripe's servers - this will charge the user's card
-	charge = stripe.Charge.create(
-			amount=charge_amt*100, # convert dollars to cents
-			currency="usd",
-			card=token,
-			description=human_email
-	)
-
-	return render(request, "stay.html")
+def thanks(request):
+	# TODO generate receipt
+	return render(request, "thanks.html")
 
 def ErrorView(request):
 	return render(request, '404.html')

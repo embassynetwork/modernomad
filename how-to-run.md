@@ -31,7 +31,7 @@ there's actually nothing you need to change in here at the moment, but note that
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
 - run `./manage.py syncdb` to create and sync the models of installed apps (and create an admin user)
-- run `./manage.py migrate` to set up the migrations
+- run `./manage.py migrate --initial` to set up the migrations
 
 now you should be able to run the software:
 - `./manage.py runserver [port]`

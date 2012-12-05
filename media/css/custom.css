@@ -179,3 +179,28 @@ img.profile-page-img {
 .icon-spacer {
 	padding-right: 10px;
 }
+
+.label-inline {
+	display: inline;
+}
+
+input#id_cvc {
+	width: 35px;
+}
+
+input#id_expiration_month {
+	width: 35px;
+}
+
+input#id_expiration_year {
+	width: 65px;
+}
+
+.page-text {
+	padding-bottom: 40px;
+}
+
+.field-wrapper-tight {
+	width: 475px;
+	padding-bottom: 10px;
+}

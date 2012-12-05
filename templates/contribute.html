@@ -1,0 +1,133 @@
+{% extends 'main.html' %}
+
+{% block main %}
+
+	<div class="page-text">
+		Your contributions are greatly appreciated by our house and the broader community. Thank you! 
+	</div>
+
+	<div id="payment-errors"></div>
+	<form action="/contribute/" method="POST" id="payment-form">{% csrf_token %}
+
+	<div class="field-wrapper-tight">
+		{{ form.name.errors }}
+		{{ form.name.label_tag }}
+		<span class="form-help-text">{{ form.name.help_text}}</span>
+		<div class="form-field-body">
+			{{ form.name }}
+		</div>
+	</div>
+
+	<div class="field-wrapper-tight">
+		{{ form.email.errors }}
+		{{ form.email.label_tag }}
+		<span class="form-help-text">{{ form.email.help_text}}</span>
+		<div class="form-field-body">
+			{{ form.email }}
+		</div>
+	</div>
+
+	<div class="field-wrapper-tight">
+		{{ form.card_number.errors }} {{ form.cvc.errors }}
+		<label class="label-inline">Card Number</label><span class="form-field-body"> {{ form.card_number }} </span>
+		<label class="label-inline">CVC</label> <span class="form-field-body"> {{ form.cvc }} </span>
+	</div>
+
+	<div class="field-wrapper-tight">
+		{{ form.expiration_month.errors }} {{ form.expiration_year.errors }}
+		<label class="label-inline">Card Expiration (MM/YYYY)</label><span class="form-field-body"> {{ form.expiration_month }} </span>
+		<label class="label-inline">/</label> <span class="form-field-body"> {{ form.expiration_year }} </span>
+	</div>
+
+	<div class="field-wrapper-tight">
+		{{ form.amount.errors }}
+		{{ form.amount.label_tag }}
+		<span class="form-help-text">{{ form.amount.help_text}}</span>
+		<div class="form-field-body">
+			{{ form.amount }}
+		</div>
+	</div>
+
+	<div class="field-wrapper-tight">
+		{{ form.comment.errors }}
+		{{ form.comment.label_tag }}
+		<span class="form-help-text">{{ form.comment.help_text}}</span>
+		<div class="form-field-body">
+			{{ form.comment }}
+		</div>
+	</div>
+
+		<button type="submit" class="submit-button">Submit Payment</button>
+	</form>
+
+
+{% endblock %}
+
+
+{% block extrajs %}
+<script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script type="text/javascript">
+
+	// this identifies your website in the createToken call below
+	// NOTE THIS IS A TEST KEY
+	Stripe.setPublishableKey('pk_0DkOTVGlfsLUbMIbF9zRJP6LYoaec');
+
+	$(document).ready(function() {
+		// when the form is submitted, use the CC info to generate a
+		// single-use token. this triggers the stripeResponseHandler,
+		// which submits the token value and any other named elements
+		// (note: form elements witout names are *not* submitted) to
+		// our server for further action. 
+		$("#payment-form").submit(function(event) {
+			// disable the submit button to prevent repeated clicks
+			$('.submit-button').attr("disabled", "disabled");
+
+			var number_val = $('#id_card_number').val();
+			var cvc_val = $('#id_cvc').val();
+			var month_val = $('#id_expiration_month').val();
+			var year_val = $('#id_expiration_year').val();
+
+			//console.log(year_val);
+
+			// validate card number, expiry, CVC etc. via Stripe's servers
+			Stripe.validateCVC(cvc_val);
+			Stripe.validateExpiry(month_val, year_val);
+			Stripe.validateCardNumber(number_val);
+
+			// generate a single=use token for this payment
+			Stripe.createToken({
+				number: number_val,
+				cvc: cvc_val,
+				exp_month: month_val,
+				exp_year: year_val
+			}, stripeResponseHandler);
+
+			// prevent the form from submitting with the default action
+			return false;
+		});
+
+		function stripeResponseHandler(status, response) {
+			if (response.error) {
+				// send the response object to the console (REMOVE)
+				console.log(response);
+				console.log(response.error);
+
+				// show the errors on the form
+				$("#payment-errors").text(response.error.message);
+				// re-enable the submit button so the user can correct
+				// their errors and re-submit.
+				$(".submit-button").removeAttr("disabled");
+			} else {
+				var form$ = $("#payment-form");
+				// token contains id, last4, and card type
+				var token = response['id'];
+				// insert the token into the form so it gets submitted to the server
+				form$.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
+				// and submit
+				form$.get(0).submit();
+			}
+		}
+	});
+</script>
+{% endblock %}

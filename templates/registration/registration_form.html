@@ -2,8 +2,20 @@
 
 {% block main %}
 
+<h3>Register a new account</h3>
+
 <form enctype="multipart/form-data" method="post">{% csrf_token %}
-	{{ form.as_table }}
+	{% for field in form %}
+		<div class="field-wrapper">
+			{{ field.errors }}
+			{{ field.label_tag }}
+			<span class="form-help-text">{{ field.help_text}}</span>
+			<div class="form-field-body">
+				{% if field.field.required %} * {% endif %}
+				{{ field }}
+			</div>
+		</div>
+	{% endfor %}
 	<input type="submit" value="Submit" />
 </form>
 

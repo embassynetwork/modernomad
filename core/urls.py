@@ -14,7 +14,7 @@ import core.forms
 user_patterns = patterns('',
     url(r'^register/$', 'registration.views.register',
         {'backend': 'core.views.RegistrationBackend',
-         'form_class': core.forms.UserProfileForm},
+        'form_class': core.forms.UserProfileForm},
         name='registration_register'),
 )
 user_patterns += registration.backends.default.urls.urlpatterns

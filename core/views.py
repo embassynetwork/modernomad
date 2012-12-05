@@ -133,10 +133,10 @@ def UserEdit(request, username):
 		if request.method == "POST":
 			profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
 			if profile_form.is_valid(): 
-				profile_form.save()
+				updated_user = profile_form.save()
 				client_msg = "Your profile has been updated."
 				messages.add_message(request, messages.INFO, client_msg)
-				return HttpResponseRedirect("/people/%s" % username)
+				return HttpResponseRedirect("/people/%s" % updated_user.username)
 			else:
 				print profile_form.errors
 		else:
@@ -243,13 +243,12 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 	@transaction.commit_on_success
 	def register(self, request, **cleaned_data):
 		'''Register a new user, saving the User and UserProfile data.'''
-		# We can't use RegistrationManager.create_inactive_user()
-		# because it doesn't play nice with saving other information
-		# in the same transaction.
-		user = User(is_active=False)
+		user = User()
 		for field in user._meta.fields:
 			if field.name in cleaned_data:
 				setattr(user, field.name, cleaned_data[field.name])
+		# the password has been validated by the form
+		user.set_password(cleaned_data['password2'])
 		user.save()
 
 		profile = UserProfile(user=user)
@@ -258,7 +257,30 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 				setattr(profile, field.name, cleaned_data[field.name])
 		profile.save()
 
-		registration_profile = RegistrationProfile.objects.create_profile(user)
-		registration_profile.send_activation_email(Site.objects.get_current())
+		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
+		login(request, new_user)
+		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
+		return new_user
 
-		signals.user_registered.send(sender=self.__class__, user=user, request=request)
+	def activate(self, request, user):
+		# we're not using the registration system's activation features ATM.
+		return True
+
+
+	def registration_allowed(self, request):
+		if request.user.is_authenticated():
+			return False
+		else: return True
+
+	def post_registration_redirect(self, request, user):
+		"""
+		Return the name of the URL to redirect to after successful
+		account activation. 
+
+		We're not using the registration system's activation features ATM, so
+		interrupt the registration process here.
+		"""
+		messages.add_message(request, messages.INFO, 'Your account has been created.')
+		return ('user_details', (), {'username': user.username})
+
+
