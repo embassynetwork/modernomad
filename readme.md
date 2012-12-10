@@ -1,9 +1,9 @@
-Manage networks of houses with members and resources. 
+Modernomad is software to manage networks of houses with members and resources. 
 
-## setup
-see setup.md
+## Pre-requisites, system dependencies and environment setup intructions:
+see [setup](/setup.md)
 
-## to run:
-./manage.py runserver [port]
+## First-time Setup
+see [how-to-run](how-to-run.md)
 
 
