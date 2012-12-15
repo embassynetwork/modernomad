@@ -21,8 +21,8 @@ user_patterns += registration.backends.default.urls.urlpatterns
 
 user_patterns += patterns('core.views',
     url(r'^$', 'ListUsers', name='user_list'),
-    url(r'^(?P<username>(?!logout)(?!login)(?!register)\w+)/$', 'GetUser', name='user_details'),
-    url(r'^(?P<username>\w+)/edit/$', 'UserEdit', name='user_edit'),
+    url(r'^(?P<username>(?!logout)(?!login)(?!register)[\w\d\-\.@+_]+)/$', 'GetUser', name='user_details'),
+    url(r'^(?P<username>[\w\d\-\.@+_]+)/edit/$', 'UserEdit', name='user_edit'),
 )
 
 house_patterns = patterns('core.views',

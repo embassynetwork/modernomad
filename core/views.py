@@ -284,3 +284,6 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 		return ('user_details', (), {'username': user.username})
 
 
+#def Dashboard(request):
+
+
