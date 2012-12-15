@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from core.models import Reservation
+from core.models import Reservation, UserProfile
+from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
 from core.confirmation_email import confirmation_email_details
@@ -15,8 +16,10 @@ def index(request):
 def about(request):
 	return render(request, "about.html")
 
-def residents(request):
-	return render(request, "residents.html")
+def community(request):
+	residents = User.objects.filter(groups__name='residents')
+	print len(residents)
+	return render(request, "community.html", {'people': residents})
 
 def events(request):
 	return render(request, "events.html")
@@ -24,6 +27,7 @@ def events(request):
 def upcomingTimeline(request):
 	return render(request, "upcoming-timeline.html")
 
+@login_required
 def upcoming(request):
 	# method formats the upcoming reservations as JSON appropriate 
 	# for consumption by the timelineJS library. 
@@ -50,19 +54,24 @@ def contribute(request):
 			pay_email = request.POST.get('email')
 			comment  = request.POST.get('comment')
 
-		    # create the charge on Stripe's servers - this will charge the user's card
+			# create the charge on Stripe's servers - this will charge the user's card
+			if comment:
+				charge_descr = "from %s: %s" % (pay_email, comment)
+			else:
+				charge_descr = ""
 			charge = stripe.Charge.create(
 					amount=charge_amt*100, # convert dollars to cents
 					currency="usd",
 					card=token,
-					description= "from %s: %s" % (pay_email, comment)
+					description= charge_descr
 			)
 
 			# TODO error handling if charge does not succeed
 			return HttpResponseRedirect("/thanks")
 	else:
 		form = PaymentForm()		
-	return render(request, "contribute.html", {'form': form})
+	return render(request, "contribute.html", {'form': form, 
+		'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY})
 
 def thanks(request):
 	# TODO generate receipt

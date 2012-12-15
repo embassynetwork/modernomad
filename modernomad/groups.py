@@ -18,3 +18,7 @@ reservation_ct = ContentType.objects.get(model='reservation')
 reservation_permissions = Permission.objects.filter(content_type=reservation_ct)
 for perm in reservation_permissions:
 	house_admin.permissions.add(perm)
+
+# also create a group to put all house residents into - this might not
+# necessarily be the exact same set of users as house admins.
+Group.objects.get_or_create(name="residents")

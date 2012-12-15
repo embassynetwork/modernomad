@@ -161,6 +161,10 @@ textarea {
 	float:right;
 }
 
+.float-left {
+	float:left;
+}
+
 img.profile-page-img {
 	width: 300px;
 	height: 200px;
@@ -204,3 +208,29 @@ input#id_expiration_year {
 	width: 475px;
 	padding-bottom: 10px;
 }
+
+img.community-page-img {
+	width: 150px;
+	height: 100px;
+}
+
+.profile-snippet {
+	padding-bottom: 20px;
+}
+.right-img-spacing {
+	margin-right: 30px;
+}
+
+.clear {
+	clear: both;
+}
+
+.bio-container {
+	margin-top: 15px;
+}
+
+.bio-snippet-links {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
