@@ -18,6 +18,7 @@ urlpatterns = patterns('',
 	url(r'^guestinfo/$', 'modernomad.views.GuestInfo'),
 	url(r'^contribute/$', 'modernomad.views.contribute'),
 	url(r'^thanks/$', 'modernomad.views.thanks'),
+	url(r'^dashboard/$', 'core.views.dashboard'),
 	
 	
 	url(r'^events/$', 'modernomad.views.events'),
