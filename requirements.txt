@@ -2,7 +2,7 @@ Django==1.4
 django-registration
 django-tastypie
 South
-PIL
+Pillow
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
