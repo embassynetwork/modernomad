@@ -30,6 +30,9 @@ don't forget to source the bashrc file now:
 PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. to install this on linux:
 - `sudo apt-get install libjpeg62-dev`
 
+you also need the python dev package:
+- `sudo apt-get install python-dev`
+
 on linux, you may need to symlink these libraries for PIL to find them during the install:
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/`
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/`

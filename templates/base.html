@@ -39,13 +39,15 @@
 				  <a class="brand" href="/">Home</a>
 				  <ul class="nav">
 					  <li><a href="/about">Our House</a></li>
+					  {% if user.is_authenticated %}
 					  <li><a href="/upcoming">Upcoming</a></li>
-					  <li><a href="/residents">Residents</a></li>
+					  {% endif %}
+					  <li><a href="/community">Community</a></li>
 					  <li><a href="/stay">Stay</a></li>
 					  {% if user.is_authenticated %}
 						<li class="dropdown">
 							<a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
-								<i class="icon-user"></i> My Profile <b class="caret"></b>
+								<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
 							</a>
 							<ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop1">
 								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>

@@ -1,4 +1,4 @@
-## How to Run
+## How to Run the First Time
 
 Assuming you have all the prerequisites and dependencies outlined in [setup](setup.md), we can proceed with making the virtual environemnt, populating it with required libraries, getting your local configuration working and starting up the app.
 

@@ -11,13 +11,14 @@ media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
 urlpatterns = patterns('',
 	url(r'^$', 'modernomad.views.index'),
 	url(r'^about/$', 'modernomad.views.about'),
-	url(r'^residents/$', 'modernomad.views.residents'),
+	url(r'^community/$', 'modernomad.views.community'),
 	url(r'^stay/$', 'modernomad.views.stay'),
 	url(r'^upcoming/$', 'modernomad.views.upcoming'),
 	url(r'^upcoming-timeline/$', 'modernomad.views.upcomingTimeline'),
 	url(r'^guestinfo/$', 'modernomad.views.GuestInfo'),
 	url(r'^contribute/$', 'modernomad.views.contribute'),
 	url(r'^thanks/$', 'modernomad.views.thanks'),
+#	url(r'^dashboard/$', 'core.views.dashboard'),
 	
 	
 	url(r'^events/$', 'modernomad.views.events'),
