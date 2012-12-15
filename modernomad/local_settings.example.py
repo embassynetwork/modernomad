@@ -18,7 +18,7 @@ MODE = DEVELOPMENT
 
 # if using stripe, enter your stripe *secret* key here
 STRIPE_SECRET_KEY = "insert your key here"
-STRIPE_PUBISHABLE_KEY = "insert your key here"
+STRIPE_PUBLISHABLE_KEY = "insert your key here"
 
 
 if MODE == DEVELOPMENT:
