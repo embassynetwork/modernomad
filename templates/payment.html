@@ -7,7 +7,7 @@
 	</div>
 
 	<div id="payment-errors"></div>
-	<form action="/contribute/" method="POST" id="payment-form">{% csrf_token %}
+	<form action="/payment/" method="POST" id="payment-form">{% csrf_token %}
 
 	<div class="field-wrapper-tight">
 		{{ form.name.errors }}
