@@ -40,7 +40,10 @@ def upcoming(request):
 def stay(request):
 	return render(request, "stay.html")
 
-def contribute(request):
+def participate(request):
+	return render(request, "participate.html")
+
+def payment(request):
 	if request.method == 'POST':
 		form = PaymentForm(request.POST)
 		if form.is_valid():
@@ -70,7 +73,7 @@ def contribute(request):
 			return HttpResponseRedirect("/thanks")
 	else:
 		form = PaymentForm()		
-	return render(request, "contribute.html", {'form': form, 
+	return render(request, "payment.html", {'form': form, 
 		'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY})
 
 def thanks(request):
