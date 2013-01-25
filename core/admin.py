@@ -7,6 +7,7 @@ from core.models import House, Resource, UserProfile, Reservation
 class ReservationAdmin(admin.ModelAdmin):
 	model = Reservation
 	list_filter = ('status',)
+	list_display = ('id', 'user', 'status', 'arrive', 'depart')
 
 class ResourceInline(admin.TabularInline):
     model = Resource
