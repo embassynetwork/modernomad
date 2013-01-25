@@ -29,11 +29,8 @@ def upcomingTimeline(request):
 
 @login_required
 def upcoming(request):
-	# method formats the upcoming reservations as JSON appropriate 
-	# for consumption by the timelineJS library. 
-
 	today = datetime.date.today()
-	upcoming = Reservation.objects.order_by('arrive').exclude(arrive__lt=today)
+	upcoming = Reservation.objects.order_by('arrive').exclude(arrive__lt=today).exclude(status="declined").exclude(status="deleted")
 	arrived = Reservation.objects.order_by('arrive').exclude(depart__lt=today).exclude(arrive__gte=today)
 	return render(request, "upcoming.html", {'upcoming': upcoming, 'arrived': arrived, 'today': today})
 
