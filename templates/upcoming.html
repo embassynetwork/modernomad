@@ -17,7 +17,7 @@
 {% for r in upcoming %}
 	<div class="reservation-list-item">
 		<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a> - 
-		<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a>
+		<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a> 
 		{% if r.arrive == today %}
 		- <em>today!</em>
 		{% endif %}
