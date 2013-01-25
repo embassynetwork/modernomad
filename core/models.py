@@ -91,8 +91,8 @@ class Reservation(models.Model):
 	)
 
 	ACCOMMODATION_PREFERENCES = (
-		(PRIVATE, 'Private'),
-		(SHARED, 'Shared'),
+		(PRIVATE, 'Private (typical rate: $120/night)'),
+		(SHARED, 'Shared (typical rate: $35/night)'),
 		(PREFER_SHARED, 'Prefer shared but will take either'),
 		(PREFER_PRIVATE, 'Prefer private but will take either')
 	)
@@ -120,7 +120,9 @@ class Reservation(models.Model):
 	def __unicode__(self):
 		return "reservation %d" % self.id
 
-# send house_admins notification of new reservation
+# send house_admins notification of new reservation. use the post_save signal
+# so that a) we can be sure the reservation was successfully saved, and b) the
+# unique ID of this reservation only exists post-save.
 @receiver(post_save, sender=Reservation)
 def notify_house_admins(sender, instance, **kwargs):
 	if kwargs['created'] == True:
@@ -137,7 +139,29 @@ def notify_house_admins(sender, instance, **kwargs):
 A new reservation request has been submitted.
 
 You can view, approve or deny this request at %s%s.
-		''' % (domain, admin_path)
+
+--------------------------------------------------- 
+
+%s %s requests %s accommodation from %s to %s. 
+
+How they heard about us: %s. 
+
+Projects: %s.
+
+Sharing interests: %s. 
+
+Discussion interests: %s.
+
+Purpose of trip: %s. 
+
+Additional Comments: %s. 
+
+-------------------------------------
+
+Email this user at %s. 
+		''' % (domain, admin_path, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
+			str(obj.arrive), str(obj.depart), obj.referral, obj.projects, obj.sharing, obj.discussion, 
+			obj.purpose, obj.comments, obj.user.email)
 		# XXX TODO this is terrible. should have an alias and let a mail agent handle this!
 		for admin in house_admins:
 			recipient = [admin.email,]
@@ -152,6 +176,8 @@ def detect_changes(sender, instance, **kwargs):
 	try:
 		obj = Reservation.objects.get(pk=instance.pk)
 	except Reservation.DoesNotExist:
+		# if the reservation does not exist yet, then it's new. in this case
+		# an email is sent using the post_save signal.
 		pass
 	else:
 		if obj.status == Reservation.PENDING and instance.status == Reservation.APPROVED:
