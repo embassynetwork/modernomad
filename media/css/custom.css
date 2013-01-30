@@ -166,7 +166,7 @@ textarea {
 }
 
 img.profile-page-img {
-	width: 300px;
+	width: 200px;
 	height: 200px;
 }
 
@@ -207,11 +207,6 @@ input#id_expiration_year {
 .field-wrapper-tight {
 	width: 475px;
 	padding-bottom: 10px;
-}
-
-img.community-page-img {
-	width: 150px;
-	height: 100px;
 }
 
 .profile-snippet {

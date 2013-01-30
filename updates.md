@@ -20,4 +20,8 @@ if you need to reset all migrations, do:
 
 warning: resetting south will delete all migrations for ALL APPS!
 
+when you pull changes that include new migrations on a remote copy of the repo, run the migrate command again:
+`$ ./manage.py migrate <appname>`
+
+
 

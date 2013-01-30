@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
+import os
 
 from core.models import UserProfile, House, Reservation
 
@@ -99,13 +100,6 @@ class UserProfileForm(forms.ModelForm):
 					raise forms.ValidationError('At least one of the URLs is not correctly formatted.')
 			links = ", ".join(cleaned_links)
 		return links
-
-	def clean_image(self):
-		img_path = self.cleaned_data['image']
-		if img_path is not None:
-			# resize or do other intelligent things. 
-			pass
-		return img_path
 
 	def save(self, commit=True):
 		# save the UserProfile (if editing an existing instance, it will be updated)

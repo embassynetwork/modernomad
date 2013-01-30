@@ -15,9 +15,9 @@
 		<div class="profile-snippet">
 			<h3>{{ u.first_name|title }} {{ u.last_name|title }}</h3>
 			<div class="profile-container">
-				{% if u.profile.image %}
+				{% if u.profile.image_thumb %}
 				<div class="img-polaroid float-left right-img-spacing">
-					<img class="community-page-img" src="{{ MEDIA_URL }}{{ u.profile.image }}" />
+					<img class="community-page-img" src="{{ MEDIA_URL }}{{ u.profile.image_thumb }}" />
 				</div>
 				{% endif %}
 

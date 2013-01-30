@@ -3,7 +3,7 @@
 {% block main %}
 
 	{% if user.is_authenticated %}
-	<h3>Hello {{user.first_name|title}}</h3>
+	<h3>Welcome back, {{user.first_name|title}}</h3>
 
 	{% else %}
 	<p>Tell us about your yourself and your trip. We'll get back to you shortly - usually within a day or two. </p>

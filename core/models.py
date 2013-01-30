@@ -3,6 +3,10 @@ from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
+from PIL import Image
+import os
+from django.conf import settings
+from django.core.files.storage import default_storage
 
 # imports for signals
 import django.dispatch 
@@ -11,6 +15,7 @@ from django.db.models.signals import pre_save, post_save
 
 from django.core.mail import send_mail
 from confirmation_email import confirmation_email_details
+
 
 
 
@@ -138,8 +143,6 @@ def notify_house_admins(sender, instance, **kwargs):
 
 A new reservation request has been submitted.
 
-You can view, approve or deny this request at %s%s.
-
 --------------------------------------------------- 
 
 %s %s requests %s accommodation from %s to %s. 
@@ -158,7 +161,7 @@ Additional Comments: %s.
 
 -------------------------------------
 
-Email this user at %s. 
+You can view, approve or deny this request at %s%s. Or email this user at %s. 
 		''' % (domain, admin_path, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
 			str(obj.arrive), str(obj.depart), obj.referral, obj.projects, obj.sharing, obj.discussion, 
 			obj.purpose, obj.comments, obj.user.email)
@@ -223,18 +226,74 @@ def approval_notify(sender, url, reservation, **kwargs):
 	send_mail(subject, message, sender, recipient)
 
 
+def profile_img_upload_to(instance, filename):
+	upload_path = "data/avatars/%s/" % instance.user.username
+	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+	print upload_path
+	print upload_abs_path
+	print filename
+	print "*****"
+	if not os.path.exists(upload_abs_path):
+		os.makedirs(upload_abs_path)
+	return upload_path
+
 class UserProfile(models.Model):
+	IMG_SIZE = (300,300)
+	IMG_THUMB_SIZE = (150,150)
+
 	# User model fields: username, first_name, last_name, email, 
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
-	image = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
+	image = models.ImageField(upload_to=profile_img_upload_to, blank=True, null=True, help_text="Image should have square dimensions.")
+	image_thumb = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
 
 	def __unicode__(self):
 		return (self.user.__unicode__())
 
-# ??
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+
+@receiver(pre_save, sender=UserProfile)
+def size_images(sender, instance, **kwargs):
+	try:
+		obj = UserProfile.objects.get(pk=instance.pk)
+	except UserProfile.DoesNotExist:
+		# if the reservation does not exist yet, then it's new. 
+		obj = None
+	if instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
+		im = Image.open(instance.image)
+		img_upload_dir_rel = profile_img_upload_to(instance, instance.image.name)
+		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_dir_rel, instance.image.name)
+		# resize returns a copy. resize() forces the dimensions of the image
+		# to match SIZE specified, squeezing the image if necessary along one
+		# dimension.
+		main_img = im.resize(UserProfile.IMG_SIZE, Image.ANTIALIAS)
+		main_img.save(main_img_full_path)
+		main_img_rel_path = os.path.join(img_upload_dir_rel, instance.image.name)
+		instance.image = main_img_rel_path
+		# now use resize this to generate the smaller thumbnail
+		thumb_img = im.resize(UserProfile.IMG_THUMB_SIZE, Image.ANTIALIAS)
+		thumb_full_path = os.path.splitext(main_img_full_path)[0] + ".thumb" + os.path.splitext(main_img_full_path)[1]
+		thumb_img.save(thumb_full_path)
+		# the ImageFileField needs the path info relative to the media
+		# directory
+		# XXX Q: does this save the file twice? once by PIL and another time
+		# reading it in and saving it to the same place when the model saves?
+		thumb_rel_path = os.path.join(img_upload_dir_rel, os.path.basename(thumb_full_path))
+		instance.image_thumb = thumb_rel_path
+		print thumb_rel_path	
+		# now delete the old images
+		default_storage.delete(obj.image.path)
+		default_storage.delete(obj.image_thumb.path)
+
+	if obj and not instance.image:
+		# if the user deleted their profile image, unlink thumbnail and remove the images. 
+		instance.image_thumb = None	
+		print obj.image.path
+		print obj.image_thumb.path
+		default_storage.delete(obj.image.path)
+		default_storage.delete(obj.image_thumb.path)
+		
 
