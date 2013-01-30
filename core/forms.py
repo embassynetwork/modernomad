@@ -82,9 +82,6 @@ class UserProfileForm(forms.ModelForm):
 	def clean_links(self):
 		# validates and formats the urls, returning a string of comma-separated urls
 		links = self.cleaned_data['links']
-		print 'links is type:'
-		print type(links)
-		print len(links)
 		if len(links) > 0:
 			raw_link_list = links.split(',')
 			# the UrlField class has some lovely validation code written already.  
@@ -126,17 +123,49 @@ class HouseForm(forms.ModelForm):
 		model = House
 		exclude = ['admins', 'created', 'updated']
 
+
 class ReservationForm(forms.ModelForm):
+	error_messages = {}
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'status', 'user']
+		exclude = ['created', 'updated', 'user']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker'}),
-			'depart': forms.DateInput(attrs={'class':'datepicker'})
+			'depart': forms.DateInput(attrs={'class':'datepicker'}),
 		}
+		
+
+	def clean_guest_emails(self):
+		# validates guest emails, returning a string of comma-separated urls
+		emails = self.cleaned_data['guest_emails']
+		if len(emails) > 0:
+			raw_emails_list = emails.split(',')
+			# the EmailField class has some lovely validation code written already.  
+			email_field = forms.EmailField()
+			cleaned_emails = []
+			for e in raw_emails_list:
+				try:
+					cleaned = email_field.clean(e.strip(" "))
+					cleaned_emails.append(cleaned)
+				except forms.ValidationError:
+					# customize the error raised by UrlField.
+					raise forms.ValidationError('At least one of the emails is not correctly formatted.')
+			emails = ",".join(cleaned_emails)
+			print emails
+		return emails
+
+	def clean(self):
+		cleaned_data = super(ReservationForm, self).clean()
+		hosted = cleaned_data.get('hosted')
+		guest_name = cleaned_data.get('guest_name')
+		if hosted and not guest_name:
+			raise forms.ValidationError(
+				self.error_messages['Hosted reservations require a guest name.'])
+		return cleaned_data
 
 	# XXX TODO
 	# make sure depart is at least one day after arrive. 
+
 
 class PaymentForm(forms.Form):
 	name = forms.CharField()

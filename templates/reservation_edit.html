@@ -8,16 +8,35 @@
 	</div>
 	
 	<form method="post" action="/reservation/{{reservation_id}}/edit/">{% csrf_token %}
-	{% for field in form %}
-		<div class="field-wrapper">
-			{{ field.errors }}
-			{{ field.label_tag }}
-			<span class="form-help-text">{{ field.help_text}}</span>
-			<div class="form-field-body">
-				{{ field }}
-			</div>
-		</div>
-	{% endfor %}
+		{% for field in form %}
+
+			{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
+				{% if is_house_admin %}
+
+					<div class="field-wrapper">
+						{{ field.errors }}
+						{{ field.label_tag }}
+						<span class="form-help-text">{{ field.help_text}}</span>
+						<div class="form-field-body">
+							{{ field }}
+						</div>
+					</div>
+
+				{% endif %}
+			{% else %} 
+				{% comment %} if it's not one of the fields related to hosting, always show it {% endcomment %} 
+
+				<div class="field-wrapper">
+					{{ field.errors }}
+					{{ field.label_tag }}
+					<span class="form-help-text">{{ field.help_text}}</span>
+					<div class="form-field-body">
+						{{ field }}
+					</div>
+				</div>
+			{% endif %}
+
+		{% endfor %}
 
 		<input type="submit" value="Submit">
 	</form>
