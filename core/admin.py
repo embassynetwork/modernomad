@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from core.models import House, Resource, UserProfile, Reservation
+from core.models import Resource, UserProfile, Reservation
 
 class ReservationAdmin(admin.ModelAdmin):
 	model = Reservation
@@ -12,17 +12,14 @@ class ReservationAdmin(admin.ModelAdmin):
 class ResourceInline(admin.TabularInline):
     model = Resource
 
-class HouseAdmin(admin.ModelAdmin):
-    inlines = [ResourceInline]
-
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
  
 class UserProfileAdmin(UserAdmin):
     inlines = [UserProfileInline]
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
 
 
-admin.site.register(House, HouseAdmin) 
 admin.site.register(Reservation, ReservationAdmin)
 
 admin.site.unregister(User)
