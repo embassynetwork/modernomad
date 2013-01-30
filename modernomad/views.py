@@ -30,7 +30,7 @@ def upcomingTimeline(request):
 @login_required
 def upcoming(request):
 	today = datetime.date.today()
-	upcoming = Reservation.objects
+	upcoming = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(arrive__lt=today)
 	arrived = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(depart__lt=today).exclude(arrive__gte=today)
 	return render(request, "upcoming.html", {'upcoming': upcoming, 'arrived': arrived, 'today': today})
 
