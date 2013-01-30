@@ -285,8 +285,10 @@ def size_images(sender, instance, **kwargs):
 		instance.image_thumb = thumb_rel_path
 		print thumb_rel_path	
 		# now delete the old images
-		default_storage.delete(obj.image.path)
-		default_storage.delete(obj.image_thumb.path)
+		if obj.image:
+			default_storage.delete(obj.image.path)
+		if obj.image_thumb:
+			default_storage.delete(obj.image_thumb.path)
 
 	if obj and not instance.image:
 		# if the user deleted their profile image, unlink thumbnail and remove the images. 
