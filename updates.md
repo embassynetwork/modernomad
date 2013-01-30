@@ -13,6 +13,10 @@ changes you made, if necessary.
 then, as instructed, run
 `$ ./manage.py migrate <appname>`
 
+if you want to sanity check things first, you can start by running the command
+with the db-dry-run flag. don't forget to run it for reals after:
+`$ ./manage.py migrate <appname> --db-dry-run`
+
 if you need to reset all migrations, do:
 `$ rm -r [appname]/migrations/`
 `$ ./manage.py reset south`

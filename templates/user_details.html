@@ -56,6 +56,9 @@
 <h3>Previous</h3>
 {% for reservation in past_reservations %}
 	<div>
+		{% if reservation.hosted %}
+			(hosting {{ reservation.guest_name }})
+		{% endif %}
 		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 		{% if user == u %}
 		- <em>{{reservation.status}}</em>
@@ -68,6 +71,9 @@
 <h3>Upcoming</h3>
 {% for reservation in upcoming_reservations %}
 	<div>
+		{% if reservation.hosted %}
+			(hosting {{ reservation.guest_name }})
+		{% endif %}
 		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 		{% if user == u %}
 		- <em>{{reservation.status}}</em>

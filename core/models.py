@@ -79,20 +79,24 @@ class Reservation(models.Model):
 	PENDING = 'pending'
 	APPROVED = 'approved'
 	CONFIRMED = 'confirmed'
-	DECLINED = 'declined'
+	HOUSE_DECLINED = 'house declined'
 	DELETED = 'deleted'
+	PAID = 'paid'
+	USER_DECLINED = 'user declined'
 
 	PRIVATE = 'private'
 	SHARED = 'shared'
-	PREFER_SHARED = 'prefer_shared'
-	PREFER_PRIVATE = 'prefer_private'
+	PREFER_SHARED = 'prefer shared'
+	PREFER_PRIVATE = 'prefer private'
 
 	RESERVATION_STATUSES = (
-		(PENDING, 'pending'),
-		(APPROVED, 'approved'),
-		(CONFIRMED, 'confirmed'),
-		(DECLINED, 'declined'),
-		(DELETED, 'deleted'),
+		(PENDING, 'Pending'),
+		(APPROVED, 'Approved'),
+		(CONFIRMED, 'Confirmed'),
+		(PAID, 'Paid'),
+		(HOUSE_DECLINED, 'House Declined'),
+		(USER_DECLINED, 'User Declined'),
+		(DELETED, 'Deleted'),
 	)
 
 	ACCOMMODATION_PREFERENCES = (
@@ -102,15 +106,25 @@ class Reservation(models.Model):
 		(PREFER_PRIVATE, 'Prefer private but will take either')
 	)
 
+	# hosted reservations - only exposed to house_admins. form fields are
+	# rendered in the order they are declared in the model, so leave this
+	# order as-is for these fields to appear at the top of the creation and
+	# edit forms.
+	hosted = models.BooleanField(default=False, help_text="Hosting a guest who doesn't have an account.")
+	guest_name = models.CharField(max_length=200, help_text="Guest name if you are hosting.", blank=True, null=True)
+
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
-	status = models.CharField(max_length=200, choices=RESERVATION_STATUSES, default=PENDING)
+	status = models.CharField(max_length=200, choices=RESERVATION_STATUSES, default=PENDING, blank=True)
 	user = models.ForeignKey(User)
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
 	accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
+	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
+		help_text="Comma-separated list of guest emails. A confirmation email will be sent to your guest(s) if you fill this out.")
+
 	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
 	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?")
 	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
@@ -138,14 +152,19 @@ def notify_house_admins(sender, instance, **kwargs):
 			obj.user.last_name, str(obj.arrive), str(obj.depart))
 		sender = "stay@embassynetwork.com"
 		domain = Site.objects.get_current().domain
+		hosting_info = ""
+		if obj.hosted:
+			hosting_info = " for guest %s" % obj.guest_name
 		admin_path = urlresolvers.reverse('admin:core_reservation_change', args=(obj.id,))
 		message = '''Howdy, 
 
-A new reservation request has been submitted.
+A new reservation has been submitted. The current status of this reservation 
+is %s. You can reply-all to discuss this reservation with other house admins. 
 
 --------------------------------------------------- 
 
-%s %s requests %s accommodation from %s to %s. 
+%s %s requests %s accommodation from %s to %s%s. 
+
 
 How they heard about us: %s. 
 
@@ -161,14 +180,18 @@ Additional Comments: %s.
 
 -------------------------------------
 
-You can view, approve or deny this request at %s%s. Or email this user at %s. 
-		''' % (domain, admin_path, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
-			str(obj.arrive), str(obj.depart), obj.referral, obj.projects, obj.sharing, obj.discussion, 
-			obj.purpose, obj.comments, obj.user.email)
-		# XXX TODO this is terrible. should have an alias and let a mail agent handle this!
+You can view, approve or deny this request at %s%s. Or email 
+the requesting user at %s. 
+		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
+			str(obj.arrive), str(obj.depart), hosting_info, obj.referral, obj.projects, obj.sharing, obj.discussion, 
+			obj.purpose, obj.comments, domain, admin_path, obj.user.email)
+		recipients = []
 		for admin in house_admins:
-			recipient = [admin.email,]
-			send_mail(subject, message, sender, recipient)
+			recipients.append(admin.email)
+		# send mail to all house admins at once; this way hose admins can
+		# reply-all and discuss the application if desired. TODO should
+		# probably have a mail agent handle this
+		send_mail(subject, message, sender, recipients)
 
 
 # define a signal for reservation approval
@@ -179,40 +202,42 @@ def detect_changes(sender, instance, **kwargs):
 	try:
 		obj = Reservation.objects.get(pk=instance.pk)
 	except Reservation.DoesNotExist:
-		# if the reservation does not exist yet, then it's new. in this case
-		# an email is sent using the post_save signal.
-		pass
-	else:
-		if obj.status == Reservation.PENDING and instance.status == Reservation.APPROVED:
-			reservation_approved.send(sender=Reservation, url=instance.get_absolute_url, reservation = instance)
-		# if the status was changed from anything else to 'confirmed', generate an email
-		elif obj.status != Reservation.CONFIRMED and instance.status == Reservation.CONFIRMED:
-			subject = "[Embassy SF] Reservation Confirmation, %s - %s" % (str(instance.arrive), 
-			str(instance.depart))
-			sender = "stay@embassynetwork.com"
-			domain = 'http://' + Site.objects.get_current().domain
-			# XXX change this to reservation.house.get_absolute_url()
-			house_info_url = domain + '/guestinfo/'
-			reservation_url = domain + instance.get_absolute_url()
-			recipient = [instance.user.email,]
+		obj = None
+	if not instance.hosted and obj and obj.status == Reservation.PENDING and instance.status == Reservation.APPROVED:
+		reservation_approved.send(sender=Reservation, url=instance.get_absolute_url, reservation = instance)
+	# if the status was changed from anything else to 'confirmed', generate an email
+	elif (obj == None or obj.status != Reservation.CONFIRMED) and instance.status == Reservation.CONFIRMED:
+		subject = "[Embassy SF] Reservation Confirmation, %s - %s" % (str(instance.arrive), 
+		str(instance.depart))
+		sender = "stay@embassynetwork.com"
+		domain = 'http://' + Site.objects.get_current().domain
+		house_info_url = domain + '/guestinfo/'
+		recipients = []
+		# take the contents of the new instance over the old instance, if necessary. 
+		if instance.guest_emails:
+			recipients += instance.guest_emails.split(",") 
+		# don't send confirmation emails to hosts 
+		if not instance.hosted:
+			recipients.append(instance.user.email)
+		print recipients
+		if len(recipients) > 0:
+
 			text = '''Dear %s,
 
 This email confirms we will see you from %s - %s. Information on accessing the
 house, house norms, and transportation can be viewed online at %s, and for
-your convenience is also included below. View or edit your reservation at 
-%s. 
+your convenience is also included below. View or edit your reservation by logging 
+into %s. 
 
 Let us know if you have any questions.
 Thanks and see you soon!
 
 -------------------------------------------------------------------------------
 
-''' % (instance.user.first_name.title(), instance.arrive, instance.depart, house_info_url, reservation_url)
+''' % (instance.user.first_name.title(), instance.arrive, instance.depart, house_info_url, domain)
 			text += confirmation_email_details
+			send_mail(subject, text, sender, recipients) 
 
-			send_mail(subject, text, sender, recipient) 
-
-			pass
 
 # XXX do we even need a second signal?
 @receiver(reservation_approved, sender=Reservation)

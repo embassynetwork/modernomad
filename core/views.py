@@ -86,12 +86,24 @@ def ReservationSubmit(request):
 				print user_form.errors
 
 		form = ReservationForm(POST)
+		print "post"
+		print POST
+		print "form is valid? " + str(form.is_valid())
+		print form.errors
 		if form.is_valid() and request.user.is_authenticated():
 			reservation = form.save(commit=False)
 			reservation.user = request.user
-
+			# this view is used only for submitting new reservations. if the
+			# user is not a house admin, the default status should always be
+			# set to "pending."
+			if not request.user.groups.filter(name='house_admin'):
+				reservation.status = "pending"
 			reservation.save()            
-			messages.add_message(request, messages.INFO, 'Thanks! Your reservation was created. You will receive an email when it has been reviewed. You can still modify your reservation.')
+			if reservation.hosted:
+				messages.add_message(request, messages.INFO, 'Thanks! The reservation has been created. You can modify the reservation below.')
+			else:
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You can still modify your reservation.')
+				
 			return HttpResponseRedirect('/reservation/%d' % reservation.id)
 
 	# GET request
@@ -103,9 +115,14 @@ def ReservationSubmit(request):
 
 	# default - render either the bound form with errors or the unbound form    
 	if request.user.is_authenticated():
-		return render(request, 'reservation.html', {'form': form})
+		if request.user.groups.filter(name='house_admin'):
+			is_house_admin = True
+		else:
+			is_house_admin = False
+		return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin})
 	else:
-		return render(request, 'reservation.html', {'form': form, 'user_form': user_form})
+		is_house_admin = False
+		return render(request, 'reservation.html', {'form': form, 'user_form': user_form, 'is_house_admin': is_house_admin})
 
 @login_required
 def ReservationDetail(request, reservation_id):
@@ -155,14 +172,22 @@ def ReservationEdit(request, reservation_id):
 	original_arrive = reservation.arrive
 	original_depart = reservation.depart
 	if request.user.is_authenticated() and request.user == reservation.user:
+
+		if request.user.groups.filter(name='house_admin'):
+			is_house_admin = True
+		else:
+			is_house_admin = False
+
 		if request.method == "POST":
 			# don't forget to specify the "instance" argument or a new object will get created!
 			form = ReservationForm(request.POST, instance=reservation)
 			if form.is_valid():
 
-				# if the dates have been changed, and the reservation isn't still 
-				# pending to begin with, notify an admin and go back to pending. 
-				if (reservation.status != 'pending' and 
+				# if the dates have been changed, and the reservation isn't
+				# still  pending to begin with, notify an admin and go back to
+				# pending (unless it's hosted, then we don't generate an
+				# email).
+				if not reservation.hosted and (reservation.status != 'pending' and 
 					(reservation.arrive != original_arrive or reservation.depart != original_depart)):
 
 					print "reservation date was changed. updating status."
@@ -185,9 +210,9 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 						recipient = [admin.email,]
 						send_mail(subject, text, sender, recipient) 
 
-					client_msg = 'Your reservation was updated and the new dates will be reviewed for availability.'
+					client_msg = 'The reservation was updated and the new dates will be reviewed for availability.'
 				else:
-					client_msg = 'Your reservation was updated.'
+					client_msg = 'The reservation was updated.'
 				# save the instance *after* the status has been updated as needed.  
 				form.save()
 				messages.add_message(request, messages.INFO, client_msg)
@@ -196,9 +221,8 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 			form = ReservationForm(instance=reservation)
 		
 		return render(request, 'reservation_edit.html', {'form': form, 
-			'reservation_id': reservation_id,
-			'arrive': reservation.arrive,
-			'depart': reservation.depart,
+			'reservation_id': reservation_id, 'arrive': reservation.arrive,
+			'depart': reservation.depart, 'is_house_admin' : is_house_admin,
 			})
 
 	else:
