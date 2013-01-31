@@ -125,7 +125,6 @@ class HouseForm(forms.ModelForm):
 
 
 class ReservationForm(forms.ModelForm):
-	error_messages = {}
 	class Meta:
 		model = Reservation
 		exclude = ['created', 'updated', 'user']
@@ -133,7 +132,7 @@ class ReservationForm(forms.ModelForm):
 			'arrive': forms.DateInput(attrs={'class':'datepicker'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker'}),
 		}
-		
+
 
 	def clean_guest_emails(self):
 		# validates guest emails, returning a string of comma-separated urls
@@ -159,8 +158,7 @@ class ReservationForm(forms.ModelForm):
 		hosted = cleaned_data.get('hosted')
 		guest_name = cleaned_data.get('guest_name')
 		if hosted and not guest_name:
-			raise forms.ValidationError(
-				self.error_messages['Hosted reservations require a guest name.'])
+			self._errors["guest_name"] = self.error_class(['Hosted reservations require a guest name.'])
 		return cleaned_data
 
 	# XXX TODO
