@@ -1,12 +1,44 @@
 {% extends "base.html" %}
-<!-- base.html is THE primary base. main.html is the main template used for
-non-index or non-special pages. it has navigation, among other things. -->
+{% comment %} base.html is the primary base. main.html is the main template used for most page {% endcomment %}
+
 
 {% block body %}
 
-<div class="container" id="wrapper-narrow">
-{% block main %}
+<!-- Header and Nav -->
+  
+  <div class="row">
+    <div class="three columns">
+      <h3><a href="/home">SF Embassy</a></h3>
+    </div>
+    <div class="nine columns">
+      <ul class="nav-bar right">
+		<ul class="button-group radius right">
+		  <li><a href="#" class="button radius secondary">Login</a></li>
+		  <li><a href="#" class="button radius success">Sign Up</a></li>
+		</ul>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- End Header and Nav -->
+
+{% block content %}
 
 {% endblock %}
-</div>
+
+<!-- Footer -->
+  
+  <footer class="row">
+    <div class="twelve columns">
+      <hr />
+      <div class="row">
+        <div class="six columns">
+          <p>&copy; Embassy Network</p>
+        </div>
+      </div>
+    </div> 
+  </footer>
+
+<!-- End Footer -->
+
 {% endblock %}

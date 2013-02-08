@@ -9,7 +9,8 @@ admin.autodiscover()
 media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
 
 urlpatterns = patterns('',
-	url(r'^$', 'modernomad.views.index'),
+	url(r'^$', 'modernomad.views.landing'),
+	url(r'^home$', 'modernomad.views.home'),
 	url(r'^about/$', 'modernomad.views.about'),
 	url(r'^community/$', 'modernomad.views.community'),
 	url(r'^stay/$', 'modernomad.views.stay'),

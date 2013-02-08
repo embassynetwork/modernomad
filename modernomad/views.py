@@ -10,9 +10,12 @@ import json, datetime, stripe
 import settings
 from core.forms import PaymentForm
 
-def index(request):
-	return render(request, "index.html")
+def landing(request):
+	return render(request, "landing.html")
 	
+def home(request):
+	return render(request, "home.html")
+
 def about(request):
 	return render(request, "about.html")
 

@@ -1,113 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-	<meta charset="utf-8">
-	<title>Embassy Network</title>
-	<!-- responsive support -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-	<meta name="author" content="Jessy Kate Schingler">
 
-	<!-- Le styles -->
-	<link href="/media/css/bootstrap.css" rel="stylesheet">
-	<link href="/media/css/custom.css" rel="stylesheet">
-	<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8" />
 
-	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-	<!--[if lt IE 9]>
-	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width" />
 
-	<!-- Le fav and touch icons -->
-	<link rel="shortcut icon" href="/ico/favicon.ico">
-	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
+  <title>Embassy SF</title>
+  
+  <!-- Included CSS Files (Uncompressed) -->
+  <!--
+  <link rel="stylesheet" href="stylesheets/foundation.css">
+  -->
+  
+  <!-- Included CSS Files (Compressed) -->
+  <link rel="stylesheet" href="/media/css/foundation.css">
+  <link rel="stylesheet" href="/media/css/foundation-custom.css">
 
-  </head>
+  <script src="/media/js/modernizr.foundation.js"></script>
+</head>
+<body>
 
-  <body>
+  {% block body %}
+  {% endblock %}
 
-	<!-- Part 1: Wrap all page content here -->
-	{% block wrapper %}
-	<div id="wrap">
-	{% endblock %}
+  <!-- Included JS Files (Compressed) -->
+  <script src="/media/js/jquery.js"></script>
+  <script src="/media/js/foundation.min.js"></script>
+  
+  <!-- Initialize JS Plugins -->
+  <script src="/media/js/app.js"></script>
 
-	  <div class="navbar navbar-fixed-top">
-		  <div class="navbar-inner">
-			  <div class="container">
-				  <a class="brand" href="/">Home</a>
-				  <ul class="nav">
-					  <li><a href="/about">Our House</a></li>
+  {% block extrajs %}
+  {% endblock %}
+  <!-- todo insert google analytics! -->
 
-					  {% if user.is_authenticated %}
-					  <li><a href="/upcoming">Upcoming</a></li>
-					  {% endif %}
-
-<!-- 					  <li><a href="/community">Community</a></li>
- -->					
-						<li class="dropdown">
-							<a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
-								Community <b class="caret"></b>
-							</a>
-							<ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop1">
-								<li><a tabindex="-1" href="/community">People</a></li>
-								<li><a tabindex="-1" href="/participate">Participate</a></li>
-							</ul>
-						</li>
-					  
-
-					  <li><a href="/stay">Stay</a></li>
-
-					  {% if user.is_authenticated %}
-						<li class="dropdown">
-							<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-								<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
-							</a>
-							<ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-								<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
-								<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
-							</ul>
-						</li>
-					  {% else %}
-						<li><a href="/people/login"><i class="icon-user"></i> Login</a></li>
-					  {% endif %}
-
-				  </ul>
-			  </div>
-		  </div>
-	  </div>
-
-
-	<div class="container" id="container-main">
-	{% block body %}
-	{% endblock %}
-
-	<div id="push"></div> <!-- #push goes inside container -->
-	</div> <!-- /container -->
-	</div> <!-- end #wrap -->
-	
-	<footer class="footer">
-		<div class="container">
-	{% block footer %}
-		<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-			<img alt="Creative Commons License" style="border-width:0"
-			src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> </p>
-	{% endblock %}
-	</container>
-	</footer>
-	<!-- Le javascript -->
-	<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
-	<script src="/media/js/jquery-1.8.2.js"></script>
-	<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
-	<script src="/media/js/bootstrap.js"></script>
-	<script>
-		// use the jquery UI datepicker on all pages with the datepicker class:
-		$(".datepicker").datepicker({ minDate: 0});
-	</script>
-	{% block extrajs %}
-	{% endblock %}
-  </body>
+</body>
 </html>
-
