@@ -20,18 +20,18 @@ note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
 support](https://github.com/pypa/pip/pull/515) (as of november 2012), so
 install it manually on the command line using:
-`pip install -index-url https://code.stripe.com --upgrade stripe`
+`pip install --index-url https://code.stripe.com --upgrade stripe`
 
 
 ## first time
-create your own local_settings.py file from local_settings.example.py:
+create your own local_settings.py file from local_settings.example.py. inside the modernomad/modernomad directory, do the following:
 - `cp local_settings.example.py local_settings.py`
 
 there's actually nothing you need to change in here at the moment, but note that if you want to run the software on a production server, there are production-specific settings for email which you must setup if you want email to work. by default, the software is in "development" mode, and emails are sent using django's built-in console backend, meaning they get printed to the console. 
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
 - run `./manage.py syncdb` to create and sync the models of installed apps (and create an admin user)
-- run `./manage.py migrate --initial` to set up the migrations
+- run `./manage.py migrate` to run the existing migrations
 
 now you should be able to run the software:
 - `./manage.py runserver [port]`
