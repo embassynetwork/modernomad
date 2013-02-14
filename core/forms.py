@@ -9,6 +9,10 @@ from core.models import UserProfile, House, Reservation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 class ExtendedUserCreationForm(UserCreationForm):
+	# this is used in the new reservation form if the user does not already
+	# have an account. it does not include all the profile fields, only the
+	# key ones. it takes its verification logic from the base
+	# UserCreationForm.
 	class Meta:
 		model = User
 		fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
@@ -25,6 +29,7 @@ class ExtendedUserCreationForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):     
+	# this is used in the profile edit page. 
 	''' This form manually incorporates the fields corresponding to the base 
 	User model, associated via the UserProfile model via a OneToOne field, so 
 	that both models can be updated via the same form. '''
