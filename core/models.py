@@ -93,7 +93,6 @@ class Reservation(models.Model):
 		(PENDING, 'Pending'),
 		(APPROVED, 'Approved'),
 		(CONFIRMED, 'Confirmed'),
-		(PAID, 'Paid'),
 		(HOUSE_DECLINED, 'House Declined'),
 		(USER_DECLINED, 'User Declined'),
 		(DELETED, 'Deleted'),
