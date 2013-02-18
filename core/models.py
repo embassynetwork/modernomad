@@ -165,6 +165,11 @@ is %s. You can reply-all to discuss this reservation with other house admins.
 
 %s %s requests %s accommodation from %s to %s%s. 
 
+Purpose of trip: %s. 
+
+Additional Comments: %s. 
+
+---- ABOUT THEM -----
 
 How they heard about us: %s. 
 
@@ -174,16 +179,14 @@ Sharing interests: %s.
 
 Discussion interests: %s.
 
-Purpose of trip: %s. 
-
-Additional Comments: %s. 
 
 -------------------------------------
 
 You can view, approve or deny this request at %s%s. Or email 
 the requesting user at %s. 
 		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
-			str(obj.arrive), str(obj.depart), hosting_info, obj.referral, obj.projects, obj.sharing, obj.discussion, 
+			str(obj.arrive), str(obj.depart), hosting_info, obj.user.profile.referral, 
+			obj.user.profile.projects, obj.user.profile.sharing, obj.user.profile.discussion, 
 			obj.purpose, obj.comments, domain, admin_path, obj.user.email)
 		recipients = []
 		for admin in house_admins:
@@ -262,6 +265,10 @@ def profile_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return upload_path
 
+def get_default_profile_img():
+	path = os.path.join(settings.MEDIA_ROOT, "data/avatars/default.jpg")
+	return file(path)
+
 class UserProfile(models.Model):
 	IMG_SIZE = (300,300)
 	IMG_THUMB_SIZE = (150,150)
@@ -270,15 +277,15 @@ class UserProfile(models.Model):
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
-	image = models.ImageField(upload_to=profile_img_upload_to, blank=True, null=True, help_text="Image should have square dimensions.")
+	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.", default="data/avatars/default.jpg")
 	image_thumb = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
 
-	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on', null=True)
-	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?", null=True)
-	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?", null=True, blank=True)
-	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?', null=True)
+	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
+	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing during your stay?")
+	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
+	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
 
 	def __unicode__(self):
 		return (self.user.__unicode__())
@@ -292,7 +299,14 @@ def size_images(sender, instance, **kwargs):
 	except UserProfile.DoesNotExist:
 		# if the reservation does not exist yet, then it's new. 
 		obj = None
-	if instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
+
+	# if this is the default avatar, reuse it for the thumbnail (lazy, but only
+	# for backwards compatibility for those who created accounts before images
+	# were required)
+	if instance.image.name == "data/avatars/default.jpg":
+		instance.image_thumb = os.path.join(settings.MEDIA_ROOT, "data/avatars/default.thumb.jpg")
+
+	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
 		img_upload_dir_rel = profile_img_upload_to(instance, instance.image.name)
 		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_dir_rel, instance.image.name)
@@ -314,16 +328,14 @@ def size_images(sender, instance, **kwargs):
 		thumb_rel_path = os.path.join(img_upload_dir_rel, os.path.basename(thumb_full_path))
 		instance.image_thumb = thumb_rel_path
 		print thumb_rel_path	
-		# now delete the old images
-		if obj.image:
+
+		# now delete any old images
+		if obj and obj.image and obj.image.name != "data/avatars/default.jpg":
 			default_storage.delete(obj.image.path)
-		if obj.image_thumb:
+
+		if obj and obj.image_thumb and obj.image_thumb.name != "data/avatars/default.thumb.jpg":
 			default_storage.delete(obj.image_thumb.path)
 
-	if obj and obj.image and not instance.image:
-		# if the user deleted their profile image, unlink thumbnail and remove the images. 
-		instance.image_thumb = None	
-		default_storage.delete(obj.image.path)
-		default_storage.delete(obj.image_thumb.path)
+
 		
 

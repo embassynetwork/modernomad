@@ -50,47 +50,15 @@ def GetHouse(request, house_id):
 	house = House.objects.get(id=house_id)
 	return render(request, "house_details.html", {"house": house})
 
+@login_required
 def ReservationSubmit(request):
 	if request.method == 'POST':
-		POST = request.POST.copy()
-		if not request.user.is_authenticated():
-			print POST
-			user_data = {
-				'username': POST['username'],
-				'first_name': POST['first_name'],
-				'last_name': POST['last_name'],
-				'password1': POST['password1'],
-				'password2': POST['password2'],
-				'email': POST['email'],
-			}
-			user_form = ExtendedUserCreationForm(user_data)
-		
-			POST.pop('username')
-			POST.pop('first_name')
-			POST.pop('last_name')
-			POST.pop('email')
-			POST.pop('password1') 
-			POST.pop('password2') 
-		
-			if user_form.is_valid():   
-				# create the user and log them in
-				user_form.save()
-				user = authenticate(username=user_data['username'], password=user_data['password1'])
-				if user is not None:
-					login(request, user)
-					print "user %s created and logged in" % user.username
-				else:
-					print "this should not have happened. new user was created but did not authenticate."           
-			else:
-				print "user form was not valid"
-				print user_form.errors
-
-		form = ReservationForm(POST)
+		form = ReservationForm(request.POST)
 		print "post"
-		print POST
+		print request.POST
 		print "form is valid? " + str(form.is_valid())
 		print form.errors
-		if form.is_valid() and request.user.is_authenticated():
+		if form.is_valid():
 			reservation = form.save(commit=False)
 			reservation.user = request.user
 			# this view is used only for submitting new reservations. if the
@@ -102,27 +70,20 @@ def ReservationSubmit(request):
 			if reservation.hosted:
 				messages.add_message(request, messages.INFO, 'Thanks! The reservation has been created. You can modify the reservation below.')
 			else:
-				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You can still modify your reservation.')
-				
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You can still modify your reservation.')			
 			return HttpResponseRedirect('/reservation/%d' % reservation.id)
 
 	# GET request
 	else: 
 		form = ReservationForm()
-		if not request.user.is_authenticated():
-			print "creating new user form"
-			user_form = ExtendedUserCreationForm()
 
 	# default - render either the bound form with errors or the unbound form    
-	if request.user.is_authenticated():
-		if request.user.groups.filter(name='house_admin'):
-			is_house_admin = True
-		else:
-			is_house_admin = False
-		return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin})
+	if request.user.groups.filter(name='house_admin'):
+		is_house_admin = True
 	else:
 		is_house_admin = False
-		return render(request, 'reservation.html', {'form': form, 'user_form': user_form, 'is_house_admin': is_house_admin})
+	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin})
+
 
 @login_required
 def ReservationDetail(request, reservation_id):
@@ -304,8 +265,12 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 		We're not using the registration system's activation features ATM, so
 		interrupt the registration process here.
 		"""
+		url_path = request.get_full_path().split("next=")
 		messages.add_message(request, messages.INFO, 'Your account has been created.')
-		return ('user_details', (), {'username': user.username})
+		if url_path[1] == "/reservation/create/":
+			return (url_path[1], (), {'username' : user.username})
+		else:
+			return ('user_details', (), {'username': user.username})
 
 
 #def Dashboard(request):
