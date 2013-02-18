@@ -123,9 +123,9 @@ class Reservation(models.Model):
 	accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
 	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
-		help_text="Comma-separated list of guest emails. A confirmation email will be sent to your guest(s) if you fill this out. (Optional)")
-	purpose = models.TextField(verbose_name='What are you in town for?')
-	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments')
+		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
+	purpose = models.TextField(verbose_name='What is the purpose of the trip?')
+	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 
 	# projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
 	# sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?")
@@ -277,7 +277,7 @@ class UserProfile(models.Model):
 
 	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on', null=True)
 	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?", null=True)
-	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?", null=True)
+	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?", null=True, blank=True)
 	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?', null=True)
 
 	def __unicode__(self):
