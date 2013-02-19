@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
 	<meta charset="utf-8">
-	<title>Embassy Network</title>
+	<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
 	<!-- responsive support -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
@@ -93,7 +93,8 @@
 	{% block footer %}
 		<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
 			<img alt="Creative Commons License" style="border-width:0"
-			src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> </p>
+			src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> 
+		</p>
 	{% endblock %}
 	</container>
 	</footer>

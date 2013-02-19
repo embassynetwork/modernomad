@@ -5,30 +5,14 @@
 <h3>Current Guests</h3>
 
 {% for r in arrived %}
-	<div class="reservation-list-item">
-		<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a> - 
-		<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a>
-	</div>
+	{% include "upcoming_item.html" %}
 {% endfor %}
 
 
 <h3>Upcoming arrivals</h3>
 
 {% for r in upcoming %}
-	<div class="reservation-list-item">
-		{% if r.hosted %}
-			{{ r.guest_name }} 
-		{% else %}
-			<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
-		{% endif %}
-		- <a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a> 
-		{% if r.arrive == today %}
-		- <em>today!</em>
-		{% endif %}
-		{% if r.hosted %}
-			(hosted by <a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>)
-		{% endif %}
-	</div>
+	{% include "upcoming_item.html" %}
 {% endfor %}
 
 {% endblock %}

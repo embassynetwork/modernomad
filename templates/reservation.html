@@ -13,16 +13,8 @@
 	</div>
 	{% endif %}
 
-	{% if user.is_authenticated %}
 	<h4>New reservation request from {{user.first_name|title}}</h4>
-
-	{% else %}
-	<p>Tell us about your yourself and your trip. We'll get back to you shortly - usually within a day or two. </p>
-
-	<p>If this is your first time making a reservation request, an account will be 
-	created for you. If you already have an account, please <a href="/members/login?next=/reservation/create/">log in</a>.
-	</p> 
-	{% endif %}
+	<p>Give us the downlow on your trip. We'll get back to you shortly - usually within a day or two. </p>
 
 	<div class="form-container">
 		<form method="post" action="/reservation/create/">{% csrf_token %}
