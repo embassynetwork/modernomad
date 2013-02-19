@@ -3,6 +3,7 @@
 {% block main %}
 
 <h3>Occupancy report for {{report_date|date:"F, Y"}}</h3>
+
 {% for item in data %}
 	<div>
 	<p>{{item.reservation.user.username}}, <a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 

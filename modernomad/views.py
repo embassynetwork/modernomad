@@ -9,6 +9,8 @@ from core.models import Reservation
 import json, datetime, stripe 
 import settings
 from core.forms import PaymentForm
+from reservation_calendar import GuestCalendar
+from django.utils.safestring import mark_safe
 
 def index(request):
 	return render(request, "index.html")
@@ -24,12 +26,7 @@ def community(request):
 def events(request):
 	return render(request, "events.html")
 
-def occupancy(request):
-	if not (request.user.is_authenticated and request.user.groups.filter(name='house_admin')):
-		return HttpResponseRedirect(("/404"))
-	today = datetime.date.today()
-	month = request.GET.get("month")
-	year = request.GET.get("year")
+def get_calendar_dates(month, year):
 	if month:
 		month = int(month)
 	else:
@@ -38,9 +35,6 @@ def occupancy(request):
 		year = int(year)
 	else:
 		year = datetime.date.today().year
-
-	# note the day parameter is meaningless
-	report_date = datetime.date(year, month, 1) 
 
 	# start date is first day of the month 
 	start = datetime.date(year,month,1)
@@ -54,7 +48,7 @@ def occupancy(request):
 	end = datetime.date(next_months_year, next_month, 1)
 	next_month = end # for clarity
 
-	# also calculate the previous month for refernece in the template
+	# also calculate the previous month for reference in the template
 	prev_month = (month-1) % 12 
 	if prev_month == 0: prev_month = 12
 	if prev_month > month:
@@ -62,7 +56,22 @@ def occupancy(request):
 	else: prev_months_year = year
 	prev_month = datetime.date(prev_months_year, prev_month, 1)
 
+	# returns datetime objects (start, end, next_month, prev_month) and ints (month, year)
+	return start, end, next_month, prev_month, month, year
+
+def occupancy(request):
+	if not (request.user.is_authenticated and request.user.groups.filter(name='house_admin')):
+		return HttpResponseRedirect(("/404"))
+	today = datetime.date.today()
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+
+	# note the day parameter is meaningless
+	report_date = datetime.date(year, month, 1) 
 	reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+
 	person_nights_data = []
 	total_person_nights = 0
 	total_income = 0
@@ -93,16 +102,28 @@ def occupancy(request):
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 
 		'total_nights':total_person_nights, 'total_income':total_income, 
-		"next_month": next_month, "prev_month": prev_month, "report_date": report_date})
-
-
+		"next_month": next_month, "prev_month": prev_month, 
+		"report_date": report_date})
 
 @login_required
-def upcoming(request):
+def calendar(request):
 	today = datetime.date.today()
-	upcoming = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(arrive__lt=today)
-	arrived = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(depart__lt=today).exclude(arrive__gte=today)
-	return render(request, "upcoming.html", {'upcoming': upcoming, 'arrived': arrived, 'today': today})
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	report_date = datetime.date(year, month, 1) 
+	reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
+
+	#upcoming = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(arrive__lt=today)
+	#arrived = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(depart__lt=today).exclude(arrive__gte=today)
+	
+	# create the calendar object
+	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)
+
+	return render(request, "calendar.html", {'reservations': reservations, 
+		'calendar': mark_safe(guest_calendar), "next_month": next_month, 
+		"prev_month": prev_month, "report_date": report_date })
 
 def stay(request):
 	return render(request, "stay.html")

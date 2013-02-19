@@ -276,3 +276,35 @@ ul.errorlist {
 	width: 300px;
 	text-align: center;
 }
+
+#guest-calendar table {
+	width: 100%;
+	font-size: 85%;
+}
+#guest-calendar li {
+	list-style-type: none;
+}
+
+#guest-calendar ul {
+	margin: 10px 20px 10px 20px;
+}
+
+#guest-calendar td {
+	border: 2px;
+	border-style: solid;
+	border-color: #AAA;
+	padding-left: 5px;
+}
+
+#guest-calendar tr {
+	height: 60px;
+}
+
+#guest-calendar .filled {
+	background-color: #eefce0;
+}
+
+#guest-calendar .today {
+	background-color: lightyellow;
+}
+
