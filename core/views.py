@@ -68,9 +68,9 @@ def ReservationSubmit(request):
 				reservation.status = "pending"
 			reservation.save()            
 			if reservation.hosted:
-				messages.add_message(request, messages.INFO, 'Thanks! The reservation has been created. You can modify the reservation below.')
+				messages.add_message(request, messages.INFO, 'The reservation has been created. You can modify the reservation below.')
 			else:
-				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You can still modify your reservation.')			
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 			return HttpResponseRedirect('/reservation/%d' % reservation.id)
 
 	# GET request
@@ -101,7 +101,6 @@ def ReservationDetail(request, reservation_id):
 		else:
 			past = True
 		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past})
-
 
 @login_required
 def UserEdit(request, username):
