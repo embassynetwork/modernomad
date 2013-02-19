@@ -4,7 +4,7 @@
 
 	<h4>{{ user.first_name|title }}, update your profile</h4>
 
-	<form method="post" enctype="multipart/form-data" action="/people/{{user.username}}/edit/">{% csrf_token %}
+	<form class="well form-inline" method="post" enctype="multipart/form-data" action="/people/{{user.username}}/edit/">{% csrf_token %}
 	{% for field in profile_form %}
 		<div class="field-wrapper">
 			{{ field.errors }}

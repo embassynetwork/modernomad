@@ -114,9 +114,6 @@ def calendar(request):
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	report_date = datetime.date(year, month, 1) 
 	reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
-
-	#upcoming = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(arrive__lt=today)
-	#arrived = Reservation.objects.filter(status="confirmed").order_by('arrive').exclude(depart__lt=today).exclude(arrive__gte=today)
 	
 	# create the calendar object
 	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)

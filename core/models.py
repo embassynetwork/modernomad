@@ -231,6 +231,8 @@ house, house norms, and transportation can be viewed online at %s, and for
 your convenience is also included below. View or edit your reservation by logging 
 into %s. 
 
+In the meantime, why not visit http://embassynetwork.com/calendar to check out who else will be around while you are here? 
+
 Let us know if you have any questions.
 Thanks and see you soon!
 

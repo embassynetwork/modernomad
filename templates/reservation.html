@@ -14,10 +14,10 @@
 	{% endif %}
 
 	<h4>New reservation request from {{user.first_name|title}}</h4>
-	<p>Give us the downlow on your trip. We'll get back to you shortly - usually within a day or two. </p>
+	<p>We'll get back to you shortly - usually within a day or two. </p>
 
 	<div class="form-container">
-		<form method="post" action="/reservation/create/">{% csrf_token %}
+		<form class="well form-inline" method="post" action="/reservation/create/">{% csrf_token %}
 
 			{% if user_form %}
 				<fieldset>

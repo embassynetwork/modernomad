@@ -2,8 +2,17 @@
 
 {% block main %}
 
+<h2>Calendar</h2>
 <div id="guest-calendar">
 	{{calendar}}
+</div>
+
+<div id="by-month-nav">
+	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
+	<a href="/calendar/?month={{prev_month.month}}&year={{prev_month.year}}">Previous Month</a> | 
+	<a href="/calendar/"> Current </a> |
+	<a href="/calendar/?month={{next_month.month}}&year={{next_month.year}}">Next Month</a>
+	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
 </div>
 
 <h3>Reservation Details</h3>
@@ -12,7 +21,7 @@
 	<div class="reservation-list-item">
 	<div class="reservation-title">
 	<a id="reservation{{r.id}}"></a>
-	<h4>
+	<h4 class="inline">
 	{% if r.hosted %}
 		{{ r.guest_name }} 
 	{% else %}

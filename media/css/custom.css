@@ -1,5 +1,4 @@
 #container-main {
-	padding-top: 60px;
 	padding-bottom: 40px;
 }
 
@@ -260,6 +259,7 @@ ul.errorlist {
 
 .reservation-list-item {
 	padding-bottom: 30px;
+	border-top: 2px solid #eee;
 }
 
 .profile-peak {
@@ -268,9 +268,10 @@ ul.errorlist {
 
 .reservation-title {
 	padding-bottom: 10px;
+	padding-top: 25px;
 }
 
-#occupancy-nav {
+#by-month-nav {
 	padding-top: 50px;
 	margin: auto;
 	width: 300px;
@@ -305,6 +306,13 @@ ul.errorlist {
 }
 
 #guest-calendar .today {
-	background-color: lightyellow;
+	background-color: #fcd9ea;
 }
 
+b.dark-red-bold {
+	color: darkred;
+}
+
+.inline {
+	display: inline;
+}

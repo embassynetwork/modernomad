@@ -33,7 +33,7 @@
 	<div id="wrap">
 	{% endblock %}
 
-	  <div class="navbar navbar-fixed-top">
+	  <div class="navbar">
 		  <div class="navbar-inner">
 			  <div class="container">
 				  <a class="brand" href="/">Home</a>
@@ -43,9 +43,6 @@
 					  {% if user.is_authenticated %}
 					  <li><a href="/calendar">Calendar</a></li>
 					  {% endif %}
-
-<!-- 					  <li><a href="/community">Community</a></li>
- -->					
 						<li class="dropdown">
 							<a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
 								Community <b class="caret"></b>

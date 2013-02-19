@@ -19,7 +19,7 @@ class GuestCalendar(HTMLCalendar):
 				cssclass += ' filled'
 				body = ['<ul>']
 				for reservation in self.reservations[day]:
-					body.append('<li>')
+					body.append('<li id="res%d-cal-item">' %reservation.id)
 					body.append('<a href="#reservation%d">' % reservation.id)
 					body.append(esc(reservation.user.first_name.title()))
 					body.append('</a></li>')
