@@ -170,6 +170,11 @@ img.profile-page-img {
 	height: 200px;
 }
 
+img.profile-img-thumb {
+	width: 100px;
+	height: 100px;
+}
+
 .user-links {
 	padding-top: 30px;
 	padding-bottom: 30px;
@@ -183,6 +188,15 @@ img.profile-page-img {
 .icon-spacer {
 	padding-right: 10px;
 }
+
+.icon-spacer-right {
+	padding-right: 10px;
+}
+
+.icon-spacer-left {
+	padding-left: 10px;
+}
+
 
 .label-inline {
 	display: inline;
@@ -244,3 +258,21 @@ ul.errorlist {
 	font-weight: bold;
 }
 
+.reservation-list-item {
+	padding-bottom: 30px;
+}
+
+.profile-peak {
+	padding-left: 120px;
+}
+
+.reservation-title {
+	padding-bottom: 10px;
+}
+
+#occupancy-nav {
+	padding-top: 50px;
+	margin: auto;
+	width: 300px;
+	text-align: center;
+}
