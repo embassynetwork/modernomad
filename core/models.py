@@ -303,7 +303,7 @@ def size_images(sender, instance, **kwargs):
 	# for backwards compatibility for those who created accounts before images
 	# were required)
 	if instance.image.name == "data/avatars/default.jpg":
-		instance.image_thumb = os.path.join(settings.MEDIA_ROOT, "data/avatars/default.thumb.jpg")
+		instance.image_thumb = "data/avatars/default.thumb.jpg"
 
 	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
