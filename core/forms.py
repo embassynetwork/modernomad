@@ -4,28 +4,28 @@ from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 import os
 
-from core.models import UserProfile, House, Reservation
+from core.models import UserProfile, Reservation
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-class ExtendedUserCreationForm(UserCreationForm):
-	# this is used in the new reservation form if the user does not already
-	# have an account. it does not include all the profile fields, only the
-	# key ones. it takes its verification logic from the base
-	# UserCreationForm.
-	class Meta:
-		model = User
-		fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+# class ExtendedUserCreationForm(UserCreationForm):
+# 	# this is used in the new reservation form if the user does not already
+# 	# have an account. it does not include all the profile fields, only the
+# 	# key ones. it takes its verification logic from the base
+# 	# UserCreationForm.
+# 	class Meta:
+# 		model = User
+# 		fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
-	def save(self, commit=True):
-		# by default the UserCreationForm saves username & password info. here we 
-		# override the save method to save the additional data we have gathered. 
-		user = super(ExtendedUserCreationForm, self).save(commit=False)
-		user.first_name = self.cleaned_data['first_name']
-		user.last_name = self.cleaned_data['last_name']
-		user.email = self.cleaned_data["email"]
-		user.save()
-		return user 
+# 	def save(self, commit=True):
+# 		# by default the UserCreationForm saves username & password info. here we 
+# 		# override the save method to save the additional data we have gathered. 
+# 		user = super(ExtendedUserCreationForm, self).save(commit=False)
+# 		user.first_name = self.cleaned_data['first_name']
+# 		user.last_name = self.cleaned_data['last_name']
+# 		user.email = self.cleaned_data["email"]
+# 		user.save()
+# 		return user 
 
 
 class UserProfileForm(forms.ModelForm):     
@@ -121,12 +121,6 @@ class UserProfileForm(forms.ModelForm):
 			user.set_password(self.cleaned_data['password2'])
 		user.save()
 		return user
-
-
-class HouseForm(forms.ModelForm):
-	class Meta:
-		model = House
-		exclude = ['admins', 'created', 'updated']
 
 
 class ReservationForm(forms.ModelForm):

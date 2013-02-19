@@ -10,13 +10,13 @@ from django.template import RequestContext
 from registration import signals
 import registration.backends.default
 from registration.models import RegistrationProfile
-from core.forms import ReservationForm, ExtendedUserCreationForm, UserProfileForm
+from core.forms import ReservationForm, UserProfileForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
 from django.contrib import messages
 
-from core.models import House, UserProfile, Reservation
+from core.models import UserProfile, Reservation
 
 def logout(request):
 	logout(request)

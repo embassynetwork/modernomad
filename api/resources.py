@@ -5,7 +5,7 @@ from tastypie import fields
 import datetime
 
 from django.contrib.auth.models import User
-from core.models import House, Resource, UserProfile, Reservation
+from core.models import UserProfile, Reservation
 
 # XXX TODO 
 # add real authentication. 
@@ -23,29 +23,29 @@ class UserAuth(Authentication):
 # exposes /api/houses, /api/houses/<id>, /api/houses/schema/,
 # /api/houses/set/1;10/. 
 # allows full access to CRUD, exposes all fields. 
-class HousesResource(ModelResource):
-	# TODO (JKS) include resources with house object
-	class Meta:
-		queryset = House.objects.all()
-		authorization = Authorization()
-		always_return_data = True
+# class HousesResource(ModelResource):
+# 	# TODO (JKS) include resources with house object
+# 	class Meta:
+# 		queryset = House.objects.all()
+# 		authorization = Authorization()
+# 		always_return_data = True
 
-# available at /locations
-class LocationsResource(ModelResource):
-	class Meta:
-		queryset = House.objects.all()
-		list_allowed_methods = ['get']
-		detail_allowed_methods = []
-		fields = ['latLong', 'id']
-		authorization = Authorization()
-		always_return_data = True
+# # available at /locations
+# class LocationsResource(ModelResource):
+# 	class Meta:
+# 		queryset = House.objects.all()
+# 		list_allowed_methods = ['get']
+# 		detail_allowed_methods = []
+# 		fields = ['latLong', 'id']
+# 		authorization = Authorization()
+# 		always_return_data = True
 
 # available at /resources
-class ResourcesResource(ModelResource):
-	class Meta:
-		queryset = Resource.objects.all()
-		authorization = Authorization()
-		always_return_data = True
+# class ResourcesResource(ModelResource):
+# 	class Meta:
+# 		queryset = Resource.objects.all()
+# 		authorization = Authorization()
+# 		always_return_data = True
 
 # available at /users
 class UsersResource(ModelResource):
