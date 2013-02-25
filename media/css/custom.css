@@ -234,3 +234,13 @@ input#id_expiration_year {
 	margin-left: 15px;
 }
 
+ul.errorlist {
+	background-color: #ffcccc;
+	list-style-type: none;
+	padding-left: 20px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	font-size: 80%;
+	font-weight: bold;
+}
+

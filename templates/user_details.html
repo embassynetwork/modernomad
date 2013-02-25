@@ -31,13 +31,22 @@
 {% endifequal %}
 
 
-{% if not u.profile.bio and not u.profile.links %}
+{% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
 
-{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
+	{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
 
 {% else %}
-	<h3>About {{u.first_name|title}}:</h3>
+	<h4>About {{u.first_name|title}}:</h4>
 	<p>{{ u.profile.bio }}</p>
+
+	<h4>Current Projects:</h4>
+	<p>{{ u.profile.projects|default:"Empty" }}</p>
+
+	<h4>Learning and Sharing Interests:</h4>
+	<p>{{ u.profile.sharing|default:"Empty" }}</p>
+
+	<h4>Discussion topics:</h4>
+	<p>{{ u.profile.discussion|default:"Empty" }}</p>
 
 	{% if u.profile.links %}
 	<div class="user-links">
@@ -53,7 +62,7 @@
 
 <h2>Reservations</h2>
 {% if past_reservations|length > 0 %}
-<h3>Previous</h3>
+<h4>Previous</h4>
 {% for reservation in past_reservations %}
 	<div>
 		{% if reservation.hosted %}
@@ -68,7 +77,7 @@
 {% endif %}
 
 {% if upcoming_reservations|length > 0 %}
-<h3>Upcoming</h3>
+<h4>Upcoming</h4>
 {% for reservation in upcoming_reservations %}
 	<div>
 		{% if reservation.hosted %}

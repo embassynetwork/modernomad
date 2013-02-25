@@ -9,6 +9,10 @@ from core.models import UserProfile, House, Reservation
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 class ExtendedUserCreationForm(UserCreationForm):
+	# this is used in the new reservation form if the user does not already
+	# have an account. it does not include all the profile fields, only the
+	# key ones. it takes its verification logic from the base
+	# UserCreationForm.
 	class Meta:
 		model = User
 		fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
@@ -25,6 +29,7 @@ class ExtendedUserCreationForm(UserCreationForm):
 
 
 class UserProfileForm(forms.ModelForm):     
+	# this is used in the profile edit page. 
 	''' This form manually incorporates the fields corresponding to the base 
 	User model, associated via the UserProfile model via a OneToOne field, so 
 	that both models can be updated via the same form. '''
@@ -52,8 +57,8 @@ class UserProfileForm(forms.ModelForm):
 
 	class Meta:
 		model = UserProfile
-		exclude = ['user', 'status']
-		fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
+		exclude = ['user', 'status', 'image_thumb', ]
+		# fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
 
 	def __init__(self, *args, **kwargs):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
@@ -125,7 +130,6 @@ class HouseForm(forms.ModelForm):
 
 
 class ReservationForm(forms.ModelForm):
-	error_messages = {}
 	class Meta:
 		model = Reservation
 		exclude = ['created', 'updated', 'user']
@@ -133,7 +137,7 @@ class ReservationForm(forms.ModelForm):
 			'arrive': forms.DateInput(attrs={'class':'datepicker'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker'}),
 		}
-		
+
 
 	def clean_guest_emails(self):
 		# validates guest emails, returning a string of comma-separated urls
@@ -159,8 +163,7 @@ class ReservationForm(forms.ModelForm):
 		hosted = cleaned_data.get('hosted')
 		guest_name = cleaned_data.get('guest_name')
 		if hosted and not guest_name:
-			raise forms.ValidationError(
-				self.error_messages['Hosted reservations require a guest name.'])
+			self._errors["guest_name"] = self.error_class(['Hosted reservations require a guest name.'])
 		return cleaned_data
 
 	# XXX TODO
