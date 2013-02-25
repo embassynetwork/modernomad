@@ -15,10 +15,9 @@
 </div>
 {% endif %}
 
-
 {% if u.profile.image %}
 <div class="img-polaroid float-right">
-	<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image }}" />
+	<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
 </div>
 {% endif %}
 

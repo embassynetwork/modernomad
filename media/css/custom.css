@@ -1,5 +1,4 @@
 #container-main {
-	padding-top: 60px;
 	padding-bottom: 40px;
 }
 
@@ -170,6 +169,11 @@ img.profile-page-img {
 	height: 200px;
 }
 
+img.profile-img-thumb {
+	width: 100px;
+	height: 100px;
+}
+
 .user-links {
 	padding-top: 30px;
 	padding-bottom: 30px;
@@ -183,6 +187,15 @@ img.profile-page-img {
 .icon-spacer {
 	padding-right: 10px;
 }
+
+.icon-spacer-right {
+	padding-right: 10px;
+}
+
+.icon-spacer-left {
+	padding-left: 10px;
+}
+
 
 .label-inline {
 	display: inline;
@@ -244,3 +257,66 @@ ul.errorlist {
 	font-weight: bold;
 }
 
+.reservation-list-item {
+	padding-bottom: 30px;
+	border-top: 2px solid #eee;
+}
+
+.profile-peak {
+	padding-left: 120px;
+}
+
+.reservation-title {
+	padding-bottom: 10px;
+	padding-top: 25px;
+}
+
+#by-month-nav {
+	padding-top: 50px;
+	margin: auto;
+	width: 300px;
+	text-align: center;
+}
+
+#guest-calendar table {
+	width: 100%;
+	font-size: 85%;
+}
+#guest-calendar li {
+	list-style-type: none;
+}
+
+#guest-calendar ul {
+	margin: 10px 20px 10px 20px;
+}
+
+#guest-calendar td {
+	border: 2px;
+	border-style: solid;
+	border-color: #AAA;
+	padding-left: 5px;
+}
+
+#guest-calendar tr {
+	height: 60px;
+}
+
+#guest-calendar .filled {
+	background-color: #eefce0;
+}
+
+#guest-calendar .today {
+	font-weight: bold;
+}
+
+b.dark-red-bold {
+	color: darkred;
+}
+
+.inline {
+	display: inline;
+}
+
+.cal-day-total {
+	color: #AAA;
+}

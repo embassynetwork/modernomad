@@ -16,7 +16,7 @@
 <p>Finally, <b>one of our most important traditions is Sunday night dinner:</b> our weekly community meal with new and familiar faces, boisterous conversation, many helping hands, and most importantly, our way to say Thanks to all the amazing people we know. It’s a time for the “in-between” time, when there’s no set topic or purpose except sharing space with other interesting folks. <b>If it’s at all possible for you to attend, we strongly encourage you to do so</b> (and will make sad faces if you don’t).</p>
  
 <div class="button-spacer">
-<a class="btn btn-large btn-block btn-success" type="button" href="/reservation/create/">Fill out an Application Form</a>
+<a class="btn btn-large btn-block btn-success" type="button" {% if user.is_authenticated %} href="/reservation/create/" {%else %} href="/people/register?next=/reservation/create/"{%endif%}>Fill out an Application Form</a>
 </div>
 {% endblock %}
 

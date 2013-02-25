@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
 from PIL import Image
-import os
+import os, datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
 
@@ -15,95 +15,42 @@ from django.db.models.signals import pre_save, post_save
 
 from django.core.mail import send_mail
 from confirmation_email import confirmation_email_details
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
+from django.template import Context
 
+class Room(models.Model):
 
-
-
-class House(models.Model):
-	# meta
-	created = models.DateTimeField(auto_now_add=True)
-	updated = models.DateTimeField(auto_now=True)
-	admins = models.ManyToManyField(User, blank=True, null=True)
-	# location
-	address = models.CharField(max_length=400, unique=True)
-	latLong = models.CharField(max_length=100, unique=True)
-	# community size
-	residents = models.IntegerField() 
-	rooms = models.IntegerField() 
-	# descriptive
-	name = models.CharField(max_length=200) # required
-	picture = models.ImageField(upload_to="photos/%Y/%m/%d", blank=True, null=True)
-	description = models.TextField(max_length=2000, null=True, blank=True) # + suggested max length. possible things to incl. are description of mission/values, house rules etc. if desired. 
-	mission_values = models.TextField(max_length=2000, null=True, blank=True) # comma separated list of tags
-	amenities = models.TextField(blank=True, null=True)
-	guests = models.NullBooleanField(blank=True, null=True)
-	events = models.NullBooleanField(blank=True, null=True)
-	events_description = models.TextField(blank=True, null=True)
-	space_share = models.NullBooleanField(blank=True, null=True)
-	space_share_description = models.TextField(blank=True, null=True)
-	slug = models.CharField(max_length=100, unique=True, blank=True, null=True)
-	contact_ok = models.NullBooleanField(blank=True, null=True)
-	contact = models.EmailField(blank=True, null=True) # required if contact_ok = True
-	# social
-	website = models.URLField(verify_exists = True, null=True, blank=True, unique=True)
-	twitter_handle = models.CharField(max_length=100, null=True, blank=True)
-	pictures_feed = models.CharField(max_length=400, null=True, blank=True)
-
-	# future - mailing lists?
-	# deprecated: 
-	# get_in_touch = models.CharField(max_length=100, unique=True, blank=True, null=True) --> replace with "ok to contact?" + email addy
-	# house_rules = models.TextField(blank=True, null=True) 
-
-	def __unicode__(self):
-		if self.name:
-			return (self.name)
-		else:
-			return self.address
-
-RESOURCE_TYPES = (
-	('private', 'private'),
-	('hostel', 'hostel'),
-	('conference_room', 'conference room'),
-)
-
-class Resource(models.Model):
-	house = models.ForeignKey(House)
+	GUEST = "guest"
+	PRIVATE = "private"
+	ROOM_USES = (
+		(GUEST, "Guest"),
+		(PRIVATE, "Private"),
+	)
 	name = models.CharField(max_length=200)
-	description = models.TextField()
-	resource_type = models.CharField(max_length=200, choices=RESOURCE_TYPES)
-	def __unicode__(self):
-		return (self.name)
+	default_rate = models.IntegerField()
+	description = models.TextField(blank=True, null=True)
+	primary_use = models.CharField(max_length=200, choices=ROOM_USES, default=PRIVATE, verbose_name='Indicate whether this room should be listed for guests to make reservations.')
 
+	def __unicode__(self):
+		return self.name
 
 class Reservation(models.Model):
 	PENDING = 'pending'
 	APPROVED = 'approved'
 	CONFIRMED = 'confirmed'
 	HOUSE_DECLINED = 'house declined'
-	DELETED = 'deleted'
+	CANCELED = 'canceled'
 	PAID = 'paid'
 	USER_DECLINED = 'user declined'
-
-	PRIVATE = 'private'
-	SHARED = 'shared'
-	PREFER_SHARED = 'prefer shared'
-	PREFER_PRIVATE = 'prefer private'
 
 	RESERVATION_STATUSES = (
 		(PENDING, 'Pending'),
 		(APPROVED, 'Approved'),
 		(CONFIRMED, 'Confirmed'),
-		(PAID, 'Paid'),
 		(HOUSE_DECLINED, 'House Declined'),
 		(USER_DECLINED, 'User Declined'),
-		(DELETED, 'Deleted'),
-	)
-
-	ACCOMMODATION_PREFERENCES = (
-		(PRIVATE, 'Private (typical rate: $120/night)'),
-		(SHARED, 'Shared (typical rate: $35/night)'),
-		(PREFER_SHARED, 'Prefer shared but will take either'),
-		(PREFER_PRIVATE, 'Prefer private but will take either')
+		(CANCELED, 'Canceled'),
 	)
 
 	# hosted reservations - only exposed to house_admins. form fields are
@@ -120,17 +67,13 @@ class Reservation(models.Model):
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-	accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
+	room = models.ForeignKey(Room, null=True)
+	#accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
 	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
 		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
 	purpose = models.TextField(verbose_name='What is the purpose of the trip?')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
-
-	# projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
-	# sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?")
-	# discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
-	# referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
 
 	@models.permalink
 	def get_absolute_url(self):
@@ -138,6 +81,9 @@ class Reservation(models.Model):
 
 	def __unicode__(self):
 		return "reservation %d" % self.id
+
+	def total_nights(self):
+		return (self.depart - self.arrive).days
 
 # send house_admins notification of new reservation. use the post_save signal
 # so that a) we can be sure the reservation was successfully saved, and b) the
@@ -165,6 +111,11 @@ is %s. You can reply-all to discuss this reservation with other house admins.
 
 %s %s requests %s accommodation from %s to %s%s. 
 
+Purpose of trip: %s. 
+
+Additional Comments: %s. 
+
+---- ABOUT THEM -----
 
 How they heard about us: %s. 
 
@@ -174,16 +125,14 @@ Sharing interests: %s.
 
 Discussion interests: %s.
 
-Purpose of trip: %s. 
-
-Additional Comments: %s. 
 
 -------------------------------------
 
 You can view, approve or deny this request at %s%s. Or email 
 the requesting user at %s. 
 		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
-			str(obj.arrive), str(obj.depart), hosting_info, obj.referral, obj.projects, obj.sharing, obj.discussion, 
+			str(obj.arrive), str(obj.depart), hosting_info, obj.user.profile.referral, 
+			obj.user.profile.projects, obj.user.profile.sharing, obj.user.profile.discussion, 
 			obj.purpose, obj.comments, domain, admin_path, obj.user.email)
 		recipients = []
 		for admin in house_admins:
@@ -199,6 +148,16 @@ reservation_approved = django.dispatch.Signal(providing_args=["url", "reservatio
 
 @receiver(pre_save, sender=Reservation)
 def detect_changes(sender, instance, **kwargs):
+	# create new reconciliation object for confirmed reservations
+	if instance.status == Reservation.CONFIRMED:
+		try:
+			Reconcile.objects.get(reservation=instance)
+		except:
+			reconcile = Reconcile()
+			reconcile.reservation = instance
+			reconcile.save()
+
+	# generate notification emails as appropriate
 	try:
 		obj = Reservation.objects.get(pk=instance.pk)
 	except Reservation.DoesNotExist:
@@ -229,6 +188,8 @@ house, house norms, and transportation can be viewed online at %s, and for
 your convenience is also included below. View or edit your reservation by logging 
 into %s. 
 
+In the meantime, why not visit http://embassynetwork.com/calendar to check out who else will be around while you are here? 
+
 Let us know if you have any questions.
 Thanks and see you soon!
 
@@ -250,6 +211,105 @@ def approval_notify(sender, url, reservation, **kwargs):
 	sender = "stay@embassynetwork.com"
 	send_mail(subject, message, sender, recipient)
 
+class Reconcile(models.Model):
+	''' The Reconcile object is automatically created when a reservation is confirmed.'''
+	COMP = "comp"
+	UNPAID = "unpaid"
+	PAID = "paid"
+	INVALID = "invalid"
+	STATUSES = (
+		(COMP, 'Comp'),
+		(UNPAID, 'Unpaid'),
+		(PAID, 'Paid'),
+		(INVALID, "Invalid")
+	)
+
+	SHARED = "shared"
+	SUPERHERO = "superhero"
+	PENROSE = "penrose"
+	BATCAVE = "batcave"
+	PANTRY = "pantry"
+	PRIVATE = "private"
+	OTHER = "other"
+	ROOMS = (
+		(SHARED, 'Ada Lovelace Hostel'),
+		(SUPERHERO, 'Superhero Room'),
+		(PENROSE, 'Penrose Room'), 
+		(BATCAVE, 'Batcave'), 
+		(PANTRY, 'Pantry Room'), 
+		(PRIVATE, 'Private'), 
+		(OTHER, 'Other')
+	)
+	reservation = models.OneToOneField(Reservation)
+	custom_rate = models.IntegerField(null=True, blank=True, help_text="If empty, the default rate for shared or private accommodation will be used.") # default as a function of reservation type
+	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
+	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
+	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
+	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
+	paid_amount = models.IntegerField(null=True, blank=True)
+	transaction_id = models.CharField(max_length=200, null=True, blank=True)
+	payment_date = models.DateField(blank=True, null=True)
+
+	def __unicode__(self):
+		return "reconcile reservation %d" % self.reservation.id
+	def get_rate(self):
+		if not self.custom_rate:
+			return self.default_rate()
+		else:
+			return self.custom_rate
+	get_rate.short_description = 'Rate'
+
+	def default_rate(self):
+		return self.reservation.room.default_rate
+
+	def send_invoice(self):
+		''' trigger a reminder email to the guest about payment.''' 
+		if self.reservation.hosted:
+			# XXX TODO make this a proper error which is viewable in the admin form.
+			print "hosted reservation invoices not supported"
+			return
+		if not self.status == Reconcile.UNPAID:
+			# XXX TODO eventually send an email for COMPs too, but a
+			# different once, with thanks/asking for feedback.
+			return
+
+		total_owed = self.reservation.total_nights()*self.get_rate()
+
+		plaintext = get_template('emails/invoice.txt')
+		htmltext = get_template('emails/invoice.html')
+		c = Context({
+			'first_name': self.reservation.user.first_name, 
+			'res_id': self.reservation.id,
+			'today': datetime.datetime.today(), 
+			'arrive': self.reservation.arrive, 
+			'depart': self.reservation.depart, 
+			'room': self.reservation.room.name, 
+			'num_nights': self.reservation.total_nights(), 
+			'rate': self.get_rate(), 
+			'total': total_owed,
+		}) 
+
+		subject = "[Embassy SF] Thanks for Staying with us!" 
+		sender = "stay@embassynetwork.com"
+		recipients = [self.reservation.user.email,]
+		text_content = plaintext.render(c)
+		html_content = htmltext.render(c)
+		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
+		msg.attach_alternative(html_content, "text/html")
+		msg.send()
+
+	def generate_receipt(self):
+		pass
+
+	def store_payment_details(self, transaction_id, date, method, amount, service=None):
+		self.transaction_id = transaction_id
+		self.payment_date = date
+		self.payment_method = method
+		self.amount = amount
+		if service: self.payment_service = service
+		self.save()
+
+Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
 
 def profile_img_upload_to(instance, filename):
 	upload_path = "data/avatars/%s/" % instance.user.username
@@ -262,6 +322,10 @@ def profile_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return upload_path
 
+def get_default_profile_img():
+	path = os.path.join(settings.MEDIA_ROOT, "data/avatars/default.jpg")
+	return file(path)
+
 class UserProfile(models.Model):
 	IMG_SIZE = (300,300)
 	IMG_THUMB_SIZE = (150,150)
@@ -270,15 +334,15 @@ class UserProfile(models.Model):
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
-	image = models.ImageField(upload_to=profile_img_upload_to, blank=True, null=True, help_text="Image should have square dimensions.")
+	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.", default="data/avatars/default.jpg")
 	image_thumb = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
 
-	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on', null=True)
-	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?", null=True)
-	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?", null=True, blank=True)
-	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?', null=True)
+	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
+	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing during your stay?")
+	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
+	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
 
 	def __unicode__(self):
 		return (self.user.__unicode__())
@@ -292,7 +356,14 @@ def size_images(sender, instance, **kwargs):
 	except UserProfile.DoesNotExist:
 		# if the reservation does not exist yet, then it's new. 
 		obj = None
-	if instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
+
+	# if this is the default avatar, reuse it for the thumbnail (lazy, but only
+	# for backwards compatibility for those who created accounts before images
+	# were required)
+	if instance.image.name == "data/avatars/default.jpg":
+		instance.image_thumb = "data/avatars/default.thumb.jpg"
+
+	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
 		img_upload_dir_rel = profile_img_upload_to(instance, instance.image.name)
 		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_dir_rel, instance.image.name)
@@ -314,16 +385,14 @@ def size_images(sender, instance, **kwargs):
 		thumb_rel_path = os.path.join(img_upload_dir_rel, os.path.basename(thumb_full_path))
 		instance.image_thumb = thumb_rel_path
 		print thumb_rel_path	
-		# now delete the old images
-		if obj.image:
+
+		# now delete any old images
+		if obj and obj.image and obj.image.name != "data/avatars/default.jpg":
 			default_storage.delete(obj.image.path)
-		if obj.image_thumb:
+
+		if obj and obj.image_thumb and obj.image_thumb.name != "data/avatars/default.thumb.jpg":
 			default_storage.delete(obj.image_thumb.path)
 
-	if obj and obj.image and not instance.image:
-		# if the user deleted their profile image, unlink thumbnail and remove the images. 
-		instance.image_thumb = None	
-		default_storage.delete(obj.image.path)
-		default_storage.delete(obj.image_thumb.path)
+
 		
 

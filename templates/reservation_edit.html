@@ -7,7 +7,7 @@
 	<p><em>Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</em></p>
 	</div>
 	
-	<form method="post" action="/reservation/{{reservation_id}}/edit/">{% csrf_token %}
+	<form class="well form-inline" method="post" action="/reservation/{{reservation_id}}/edit/">{% csrf_token %}
 		{% for field in form %}
 
 			{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
@@ -32,6 +32,9 @@
 					<span class="form-help-text">{{ field.help_text}}</span>
 					<div class="form-field-body">
 						{{ field }}
+						{% if field.name == 'arrive' or field.name == 'depart' %}
+							<i class="icon-calendar"></i>
+						{% endif %}
 					</div>
 				</div>
 			{% endif %}

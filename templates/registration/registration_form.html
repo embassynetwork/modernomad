@@ -4,7 +4,14 @@
 
 <h3>Register a new account</h3>
 
-<form enctype="multipart/form-data" method="post">{% csrf_token %}
+<p>If you already have an account, you can <a href="/people/login?next=/reservation/create/">log in</a> instead. </p>
+
+<h4>Tell us a bit about yourself</h4>
+<p>Please put some thought into this - these questions are what help others get some insight into <b class="dark-red-bold">what you are passionate about</b> or <b class="dark-red-bold">possible connections around work, projects or ideas</b>. It might take 5-10 minutes, but it will pay back dividends while you are here, and help you to connect with the other awesome people in the house (who also took the time to tell you about themselves).</p> 
+
+<p>You only create your account once. After, you can log in and create future reservation requests with the same information.</p>
+
+<form class="well form-inline" enctype="multipart/form-data" method="post">{% csrf_token %}
 	{% for field in form %}
 		<div class="field-wrapper">
 			{{ field.errors }}
