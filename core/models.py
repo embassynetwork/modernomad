@@ -15,7 +15,9 @@ from django.db.models.signals import pre_save, post_save
 
 from django.core.mail import send_mail
 from confirmation_email import confirmation_email_details
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
+from django.template import Context
 
 class Room(models.Model):
 
@@ -270,34 +272,31 @@ class Reconcile(models.Model):
 			# XXX TODO eventually send an email for COMPs too, but a
 			# different once, with thanks/asking for feedback.
 			return
+
+		total_owed = self.reservation.total_nights()*self.get_rate()
+
+		plaintext = get_template('emails/invoice.txt')
+		htmltext = get_template('emails/invoice.html')
+		c = Context({
+			'first_name': self.reservation.user.first_name, 
+			'res_id': self.reservation.id,
+			'today': datetime.datetime.today(), 
+			'arrive': self.reservation.arrive, 
+			'depart': self.reservation.depart, 
+			'room': self.reservation.room.name, 
+			'num_nights': self.reservation.total_nights(), 
+			'rate': self.get_rate(), 
+			'total': total_owed,
+		}) 
+
 		subject = "[Embassy SF] Thanks for Staying with us!" 
 		sender = "stay@embassynetwork.com"
 		recipients = [self.reservation.user.email,]
-		total_owed = self.reservation.total_nights()*self.get_rate()
-		text = '''
-Dear %s,
-
-Thanks for staying with us! This email contains your invoice information.  
-
-Invoice Date: %s
-Arrival Date: %s 
-Departure Date: %s
-
-Description ..... Quantity ..... Rate
-%s ..... %d ..... %d
-
-..................... Total: %d		
-
-You can submit payment online at embassynetwork.com/payment, or via cash, check, bank transfer, or Dwolla. 
-
-:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
-:::: California Benefit Corporation, EIN 45-5386726 ::::		
-
-''' % (self.reservation.user.first_name, datetime.datetime.today(), self.reservation.arrive, 
-			self.reservation.depart, self.reservation.room.name, self.reservation.total_nights(), 
-			self.get_rate(), total_owed)
-		send_mail(subject, text, sender, recipients)
-		pass
+		text_content = plaintext.render(c)
+		html_content = htmltext.render(c)
+		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
+		msg.attach_alternative(html_content, "text/html")
+		msg.send()
 
 	def generate_receipt(self):
 		pass
