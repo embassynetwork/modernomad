@@ -252,6 +252,7 @@ class Reconcile(models.Model):
 
 	def __unicode__(self):
 		return "reconcile reservation %d" % self.reservation.id
+		
 	def get_rate(self):
 		if not self.custom_rate:
 			return self.default_rate()

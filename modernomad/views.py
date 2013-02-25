@@ -82,18 +82,14 @@ def occupancy(request):
 			nights_this_month = r.depart - start
 		elif r.depart > end:
 			nights_this_month = end - r.arrive
-		# temporary hack: hard code the rates until the proper reconciliation
-		# object is implemented.
-		accomm = r.accommodation_preference
-		if accomm == "private" or accomm == "prefer private":
-			rate = 120
-		elif accomm == "shared" or accomm == "prefer shared":
-			rate = 35
+		# get_rate grabs the custom rate if it exists, else default rate as
+		# defined in the room definition.
+		rate = r.reconcile.get_rate()
 
 		person_nights_data.append({
 			'reservation': r,
 			'nights_this_month': nights_this_month.days,
-			'type': accomm,
+			'room': r.room.name,
 			'rate': rate,
 			'total': nights_this_month.days*rate
 		})

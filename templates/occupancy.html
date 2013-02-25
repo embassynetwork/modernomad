@@ -7,13 +7,13 @@
 {% for item in data %}
 	<div>
 	<p>{{item.reservation.user.username}}, <a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 
-		{{ item.nights_this_month }} nights @ ${{item.rate}} ({{item.type}}) = ${{item.total}}
+		{{ item.nights_this_month }} nights @ ${{item.rate}} ({{item.room}}) = ${{item.total}}
 	</p>
 	</div>
 {% endfor %}
 
 <h5>Total person nights for {{report_date|date:"F"}}: {{total_nights}}</h5>
-<h5>Total estimated income: ${{total_income}}</h5>
+<h5>Total estimated income (assuming all guests are paying) : ${{total_income}}</h5>
 
 <div id="by-month-nav">
 	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
