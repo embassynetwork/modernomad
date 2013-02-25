@@ -78,6 +78,8 @@ def occupancy(request):
 	for r in reservations:
 		if r.arrive >=start and r.depart <= end:
 			nights_this_month = r.depart - r.arrive
+		elif r.arrive <=start and r.depart >= end:
+			nights_this_month = end - start
 		elif r.arrive < start:
 			nights_this_month = r.depart - start
 		elif r.depart > end:
