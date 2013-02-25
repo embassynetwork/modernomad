@@ -16,7 +16,7 @@ from django.core import urlresolvers
 import datetime
 from django.contrib import messages
 
-from core.models import UserProfile, Reservation
+from core.models import UserProfile, Reservation, Room
 
 def logout(request):
 	logout(request)
@@ -50,14 +50,27 @@ def GetHouse(request, house_id):
 	house = House.objects.get(id=house_id)
 	return render(request, "house_details.html", {"house": house})
 
+def get_reservation_form_for_perms(request, post, instance):
+	if post == True:
+		if instance:
+			form = ReservationForm(request.POST, instance=instance)
+		else:
+			form = ReservationForm(request.POST)
+	else:
+		if instance:
+			form = ReservationForm(instance=instance)
+		else:
+			form = ReservationForm()
+	# ensure we only show official guest rooms unless the user is a house admin. 
+	if not request.user.groups.filter(name='house_admin'):
+		form.fields['room'].queryset = Room.objects.filter(primary_use="guest")
+	return form
+
 @login_required
 def ReservationSubmit(request):
 	if request.method == 'POST':
-		form = ReservationForm(request.POST)
-		print "post"
-		print request.POST
-		print "form is valid? " + str(form.is_valid())
-		print form.errors
+		form = get_reservation_form_for_perms(reqeust, post=True, instance=False)
+
 		if form.is_valid():
 			reservation = form.save(commit=False)
 			reservation.user = request.user
@@ -75,7 +88,7 @@ def ReservationSubmit(request):
 
 	# GET request
 	else: 
-		form = ReservationForm()
+		form = get_reservation_form_for_perms(request, post=False, instance=False)
 
 	# default - render either the bound form with errors or the unbound form    
 	if request.user.groups.filter(name='house_admin'):
@@ -140,7 +153,7 @@ def ReservationEdit(request, reservation_id):
 
 		if request.method == "POST":
 			# don't forget to specify the "instance" argument or a new object will get created!
-			form = ReservationForm(request.POST, instance=reservation)
+			form = get_reservation_form_for_perms(request, post=True, instance=reservation)
 			if form.is_valid():
 
 				# if the dates have been changed, and the reservation isn't
@@ -178,8 +191,8 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 				messages.add_message(request, messages.INFO, client_msg)
 				return HttpResponseRedirect("/reservation/%s" % reservation_id)
 		else:
-			form = ReservationForm(instance=reservation)
-		
+			form = get_reservation_form_for_perms(request, post=False, instance=reservation)
+			
 		return render(request, 'reservation_edit.html', {'form': form, 
 			'reservation_id': reservation_id, 'arrive': reservation.arrive,
 			'depart': reservation.depart, 'is_house_admin' : is_house_admin,

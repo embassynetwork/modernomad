@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
 from PIL import Image
-import os
+import os, datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
 
@@ -17,19 +17,30 @@ from django.core.mail import send_mail
 from confirmation_email import confirmation_email_details
 
 
+class Room(models.Model):
+
+	GUEST = "guest"
+	PRIVATE = "private"
+	ROOM_USES = (
+		(GUEST, "Guest"),
+		(PRIVATE, "Private"),
+	)
+	name = models.CharField(max_length=200)
+	default_rate = models.IntegerField()
+	description = models.TextField(blank=True, null=True)
+	primary_use = models.CharField(max_length=200, choices=ROOM_USES, default=PRIVATE, verbose_name='Indicate whether this room should be listed for guests to make reservations.')
+
+	def __unicode__(self):
+		return self.name
+
 class Reservation(models.Model):
 	PENDING = 'pending'
 	APPROVED = 'approved'
 	CONFIRMED = 'confirmed'
 	HOUSE_DECLINED = 'house declined'
-	DELETED = 'deleted'
+	CANCELED = 'canceled'
 	PAID = 'paid'
 	USER_DECLINED = 'user declined'
-
-	PRIVATE = 'private'
-	SHARED = 'shared'
-	PREFER_SHARED = 'prefer shared'
-	PREFER_PRIVATE = 'prefer private'
 
 	RESERVATION_STATUSES = (
 		(PENDING, 'Pending'),
@@ -37,14 +48,7 @@ class Reservation(models.Model):
 		(CONFIRMED, 'Confirmed'),
 		(HOUSE_DECLINED, 'House Declined'),
 		(USER_DECLINED, 'User Declined'),
-		(DELETED, 'Deleted'),
-	)
-
-	ACCOMMODATION_PREFERENCES = (
-		(PRIVATE, 'Private (typical rate: $120/night)'),
-		(SHARED, 'Shared (typical rate: $35/night)'),
-		(PREFER_SHARED, 'Prefer shared but will take either'),
-		(PREFER_PRIVATE, 'Prefer private but will take either')
+		(CANCELED, 'Canceled'),
 	)
 
 	# hosted reservations - only exposed to house_admins. form fields are
@@ -61,17 +65,13 @@ class Reservation(models.Model):
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-	accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
+	room = models.ForeignKey(Room, null=True)
+	#accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
 	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
 		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
 	purpose = models.TextField(verbose_name='What is the purpose of the trip?')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
-
-	# projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
-	# sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing while you are here?")
-	# discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
-	# referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
 
 	@models.permalink
 	def get_absolute_url(self):
@@ -79,6 +79,9 @@ class Reservation(models.Model):
 
 	def __unicode__(self):
 		return "reservation %d" % self.id
+
+	def total_nights(self):
+		return (self.depart - self.arrive).days
 
 # send house_admins notification of new reservation. use the post_save signal
 # so that a) we can be sure the reservation was successfully saved, and b) the
@@ -143,6 +146,16 @@ reservation_approved = django.dispatch.Signal(providing_args=["url", "reservatio
 
 @receiver(pre_save, sender=Reservation)
 def detect_changes(sender, instance, **kwargs):
+	# create new reconciliation object for confirmed reservations
+	if instance.status == Reservation.CONFIRMED:
+		try:
+			Reconcile.objects.get(reservation=instance)
+		except:
+			reconcile = Reconcile()
+			reconcile.reservation = instance
+			reconcile.save()
+
+	# generate notification emails as appropriate
 	try:
 		obj = Reservation.objects.get(pk=instance.pk)
 	except Reservation.DoesNotExist:
@@ -196,6 +209,108 @@ def approval_notify(sender, url, reservation, **kwargs):
 	sender = "stay@embassynetwork.com"
 	send_mail(subject, message, sender, recipient)
 
+class Reconcile(models.Model):
+	''' The Reconcile object is automatically created when a reservation is confirmed.'''
+	COMP = "comp"
+	UNPAID = "unpaid"
+	PAID = "paid"
+	INVALID = "invalid"
+	STATUSES = (
+		(COMP, 'Comp'),
+		(UNPAID, 'Unpaid'),
+		(PAID, 'Paid'),
+		(INVALID, "Invalid")
+	)
+
+	SHARED = "shared"
+	SUPERHERO = "superhero"
+	PENROSE = "penrose"
+	BATCAVE = "batcave"
+	PANTRY = "pantry"
+	PRIVATE = "private"
+	OTHER = "other"
+	ROOMS = (
+		(SHARED, 'Ada Lovelace Hostel'),
+		(SUPERHERO, 'Superhero Room'),
+		(PENROSE, 'Penrose Room'), 
+		(BATCAVE, 'Batcave'), 
+		(PANTRY, 'Pantry Room'), 
+		(PRIVATE, 'Private'), 
+		(OTHER, 'Other')
+	)
+	reservation = models.OneToOneField(Reservation)
+	custom_rate = models.IntegerField(null=True, blank=True, help_text="If empty, the default rate for shared or private accommodation will be used.") # default as a function of reservation type
+	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
+	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
+	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
+	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
+	paid_amount = models.IntegerField(null=True, blank=True)
+	transaction_id = models.CharField(max_length=200, null=True, blank=True)
+	payment_date = models.DateField(blank=True, null=True)
+
+	def __unicode__(self):
+		return "reconcile reservation %d" % self.reservation.id
+	def get_rate(self):
+		if not self.custom_rate:
+			return self.default_rate()
+		else:
+			return self.custom_rate
+	get_rate.short_description = 'Rate'
+
+	def default_rate(self):
+		return self.reservation.room.default_rate
+
+	def send_invoice(self):
+		''' trigger a reminder email to the guest about payment.''' 
+		if self.reservation.hosted:
+			# XXX TODO make this a proper error which is viewable in the admin form.
+			print "hosted reservation invoices not supported"
+			return
+		if not self.status == Reconcile.UNPAID:
+			# XXX TODO eventually send an email for COMPs too, but a
+			# different once, with thanks/asking for feedback.
+			return
+		subject = "[Embassy SF] Thanks for Staying with us!" 
+		sender = "stay@embassynetwork.com"
+		recipients = [self.reservation.user.email,]
+		total_owed = self.reservation.total_nights()*self.get_rate()
+		text = '''
+Dear %s,
+
+Thanks for staying with us! This email contains your invoice information.  
+
+Invoice Date: %s
+Arrival Date: %s 
+Departure Date: %s
+
+Description ..... Quantity ..... Rate
+%s ..... %d ..... %d
+
+..................... Total: %d		
+
+You can submit payment online at embassynetwork.com/payment, or via cash, check, bank transfer, or Dwolla. 
+
+:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
+:::: California Benefit Corporation, EIN 45-5386726 ::::		
+
+''' % (self.reservation.user.first_name, datetime.datetime.today(), self.reservation.arrive, 
+			self.reservation.depart, self.reservation.room.name, self.reservation.total_nights(), 
+			self.get_rate(), total_owed)
+		send_mail(subject, text, sender, recipients)
+		pass
+
+	def generate_receipt(self):
+		pass
+
+	def store_payment_details(self, transaction_id, date, method, amount, service=None):
+		self.transaction_id = transaction_id
+		self.payment_date = date
+		self.payment_method = method
+		self.amount = amount
+		if service: self.payment_service = service
+		self.save()
+
+Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
 
 def profile_img_upload_to(instance, filename):
 	upload_path = "data/avatars/%s/" % instance.user.username

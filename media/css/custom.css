@@ -306,7 +306,7 @@ ul.errorlist {
 }
 
 #guest-calendar .today {
-	background-color: #fcd9ea;
+	font-weight: bold;
 }
 
 b.dark-red-bold {
@@ -315,4 +315,8 @@ b.dark-red-bold {
 
 .inline {
 	display: inline;
+}
+
+.cal-day-total {
+	color: #AAA;
 }

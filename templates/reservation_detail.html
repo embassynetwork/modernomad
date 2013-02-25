@@ -53,7 +53,7 @@
 
 
 <div class="res-detail"><b>Approximate arrival Time</b>: {{ reservation.arrival_time }}</div>
-<div class="res-detail"><b>Accommodation Type:</b> {{ reservation.accommodation_preference }}</div>
+<div class="res-detail"><b>Room:</b> {{ reservation.room.name|title }}</div>
 <div class="res-detail"><b>In town for?</b> {{ reservation.purpose }}</div>
 <div class="res-detail"><b>Additional Comments:</b> {{ reservation.comments }}</div>
 

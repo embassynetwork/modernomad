@@ -15,15 +15,25 @@ class GuestCalendar(HTMLCalendar):
 			cssclass = self.cssclasses[weekday]
 			if date.today() == date(self.year, self.month, day):
 				cssclass += ' today'
+				today = True
+			else:
+				today = False
 			if day in self.reservations:
 				cssclass += ' filled'
 				body = ['<ul>']
 				for reservation in self.reservations[day]:
+					num_today = len(self.reservations[day])
 					body.append('<li id="res%d-cal-item">' %reservation.id)
 					body.append('<a href="#reservation%d">' % reservation.id)
 					body.append(esc(reservation.user.first_name.title()))
-					body.append('</a></li>')
+					body.append('</a>')
+					if reservation.arrive.day == day:
+						body.append('<em> (Arrive)</em>') 					
+					if reservation.depart.day == day:
+						body.append('<em> (Depart)</em>') 					
+					body.append('</li>')
 				body.append('</ul>')
+				body.append("<span class='cal-day-total'>total %d</span>" % num_today)
 				return self.day_cell(cssclass, '%d %s' % (day, ''.join(body)))
 			return self.day_cell(cssclass, day)
 		return self.day_cell('noday', '&nbsp;')
