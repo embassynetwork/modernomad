@@ -14,12 +14,9 @@ class Migration(DataMigration):
 		# the case.
 		for reservation in orm.Reservation.objects.all():
 			u = reservation.user
-			profile = orm.UserProfile.objects.filter(user=u)[0]
+			print "running migration for reservation %d and user %d" % (reservation.id, u.id)
+			profile = orm.UserProfile.objects.get_or_create(user=u)[0]
 			profile.projects = reservation.projects
-			print reservation
-			print profile
-			print reservation.projects
-			print profile.projects
 			profile.sharing = reservation.sharing
 			profile.discussion = reservation.discussion
 			profile.referral = reservation.referral
@@ -29,7 +26,7 @@ class Migration(DataMigration):
 		"Write your backwards methods here."
 		for reservation in orm.Reservation.objects.all():
 			u = reservation.user
-			profile = orm.UserProfile.objects.filter(user=u)[0]
+			profile = orm.UserProfile.objects.get_or_create(user=u)[0]
 			print reservation
 			print profile
 			reservation.projects = profile.projects
