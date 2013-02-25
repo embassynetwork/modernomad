@@ -204,7 +204,7 @@ Thanks and see you soon!
 @receiver(reservation_approved, sender=Reservation)
 def approval_notify(sender, url, reservation, **kwargs):
 	recipient = [reservation.user.email]
-	subject = "[Embassy SF] Reservation Approval"
+	subject = "[Embassy SF] Request Approved - You must log in to confirm you reservation!"
 	domain = Site.objects.get_current().domain
 	message = "Your reservation request for %s - %s has been approved. You must confirm this reservation to finalize!\n\nView your reservation details and confirm at %s%s" % (
 		str(reservation.arrive), str(reservation.depart), domain, reservation.get_absolute_url())
