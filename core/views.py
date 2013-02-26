@@ -69,7 +69,7 @@ def get_reservation_form_for_perms(request, post, instance):
 @login_required
 def ReservationSubmit(request):
 	if request.method == 'POST':
-		form = get_reservation_form_for_perms(reqeust, post=True, instance=False)
+		form = get_reservation_form_for_perms(request, post=True, instance=False)
 
 		if form.is_valid():
 			reservation = form.save(commit=False)
