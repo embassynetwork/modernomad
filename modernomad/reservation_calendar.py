@@ -25,13 +25,16 @@ class GuestCalendar(HTMLCalendar):
 				num_private = 0
 				num_shared = 0
 				for reservation in self.reservations[day]:
+					room_type = None 
 					if reservation.room.name == "Ada Lovelace Hostel":
 						num_shared += 1
+						room_type = "S"
 					else:
 						num_private += 1
+						room_type = "P"
 					body.append('<li id="res%d-cal-item">' %reservation.id)
 					body.append('<a href="#reservation%d">' % reservation.id)
-					body.append(esc(reservation.user.first_name.title()))
+					body.append(esc("%s (%s)" % (reservation.user.first_name.title(), room_type)))
 					body.append('</a>')
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					
