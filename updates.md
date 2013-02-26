@@ -1,4 +1,6 @@
-## Model Updates (brief cheat sheet based on [South](http://south.readthedocs.org/))
+## Model Updates - brief cheat sheet 
+
+most of these notes are based on [South](http://south.readthedocs.org/)), and some on django's auth documentation. 
 
 if you update a model, create a migration and run south (this assumes
 `./manage.py schemamigration --initial` was run when you set up your project
@@ -38,5 +40,30 @@ for changes in where or what data is stored, use datamigrations:
 7. create a schemamigration to reflect the deleted field (as/if necessary)
 
 
+
+new models and permissions: to get the id for the permissions associated with a model (there are 3 by default - add, change, delete), do the following:
+`>>> from django.contrib.contenttypes.models import ContentType`
+`>>> from django.contrib.auth.models import Permission`
+`>>> [p.id for p in Permission.objects.filter(content_type=ContentType.objects.get(model="modelname"))]`
+which will return a list, eg:
+`[40, 41, 42]`
+
+`modelname` is a string, the lowercase version of the model class name in your app's models.py. then add these to the list in appname/fixtures/initial_data.json, eg.:
+'
+[
+	{
+		"pk": 2, 
+		"model": "auth.group", 
+		"fields": {
+			"name": "my_group", 
+			"permissions": [
+				40,
+				41,
+				42,
+			]
+		}
+	}, 
+	... 
+'
 
 
