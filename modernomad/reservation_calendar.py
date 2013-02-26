@@ -21,8 +21,14 @@ class GuestCalendar(HTMLCalendar):
 			if day in self.reservations:
 				cssclass += ' filled'
 				body = ['<ul>']
+				num_today = len(self.reservations[day])
+				num_private = 0
+				num_shared = 0
 				for reservation in self.reservations[day]:
-					num_today = len(self.reservations[day])
+					if reservation.room.name == "Ada Lovelace Room":
+						num_shared += 1
+					else:
+						num_private += 1
 					body.append('<li id="res%d-cal-item">' %reservation.id)
 					body.append('<a href="#reservation%d">' % reservation.id)
 					body.append(esc(reservation.user.first_name.title()))
@@ -33,7 +39,7 @@ class GuestCalendar(HTMLCalendar):
 						body.append('<em> (Depart)</em>') 					
 					body.append('</li>')
 				body.append('</ul>')
-				body.append("<span class='cal-day-total'>total %d</span>" % num_today)
+				body.append("<span class='cal-day-total'>total %d (P: %d/S: %d)</span>" % (num_today, num_private, num_shared))
 				return self.day_cell(cssclass, '%d %s' % (day, ''.join(body)))
 			return self.day_cell(cssclass, day)
 		return self.day_cell('noday', '&nbsp;')
