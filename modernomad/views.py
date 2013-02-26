@@ -7,7 +7,7 @@ from django.utils.safestring import SafeString
 from core.confirmation_email import confirmation_email_details
 from core.models import Reservation
 import json, datetime, stripe 
-import settings
+from django.conf import settings
 from core.forms import PaymentForm
 from reservation_calendar import GuestCalendar
 from django.utils.safestring import mark_safe

@@ -2,7 +2,8 @@ from django.contrib.auth.models import User
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
-import os
+import os, datetime
+from django.conf import settings
 
 from core.models import UserProfile, Reservation
 
@@ -137,6 +138,10 @@ class ReservationForm(forms.ModelForm):
 		guest_name = cleaned_data.get('guest_name')
 		if hosted and not guest_name:
 			self._errors["guest_name"] = self.error_class(['Hosted reservations require a guest name.'])
+		arrive = cleaned_data.get('arrive')
+		depart = cleaned_data.get('depart')
+		if (depart - arrive).days > settings.MAX_RESERVATION_DAYS:
+			self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
 		return cleaned_data
 
 	# XXX TODO
