@@ -97,9 +97,14 @@ def notify_house_admins(sender, instance, **kwargs):
 			obj.user.last_name, str(obj.arrive), str(obj.depart))
 		sender = "stay@embassynetwork.com"
 		domain = Site.objects.get_current().domain
-		hosting_info = ""
 		if obj.hosted:
 			hosting_info = " for guest %s" % obj.guest_name
+			subject = "[Embassy SF] New Reservation: %s hosting %s from %s - %s" % (obj.user.first_name, 
+				obj.guest_name, str(obj.arrive), str(obj.depart))
+		else:
+			hosting_info = ""
+			subject = "[Embassy SF] Reservation Request, %s %s, %s - %s" % (obj.user.first_name, 
+			obj.user.last_name, str(obj.arrive), str(obj.depart))
 		admin_path = urlresolvers.reverse('admin:core_reservation_change', args=(obj.id,))
 		message = '''Howdy, 
 
@@ -127,12 +132,11 @@ Discussion interests: %s.
 
 -------------------------------------
 
-You can view, approve or deny this request at %s%s. Or email 
-the requesting user at %s. 
+You can view, approve or deny this request at %s%s. Or email the requesting user at %s. 
 		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.room.name, 
-			str(obj.arrive), str(obj.depart), hosting_info, obj.user.profile.referral, 
-			obj.user.profile.projects, obj.user.profile.sharing, obj.user.profile.discussion, 
-			obj.purpose, obj.comments, domain, admin_path, obj.user.email)
+			str(obj.arrive), str(obj.depart), hosting_info, obj.purpose, obj.comments, 
+			obj.user.profile.referral, obj.user.profile.projects, obj.user.profile.sharing, 
+			obj.user.profile.discussion, domain, admin_path, obj.user.email)
 		recipients = []
 		for admin in house_admins:
 			recipients.append(admin.email)
