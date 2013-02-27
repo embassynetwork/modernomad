@@ -215,6 +215,7 @@ class Reconcile(models.Model):
 	STATUSES = (
 		(COMP, 'Comp'),
 		(UNPAID, 'Unpaid'),
+		(INVOICED, 'Invoiced'),
 		(PAID, 'Paid'),
 		(INVALID, "Invalid")
 	)
