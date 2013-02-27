@@ -68,7 +68,6 @@ class Reservation(models.Model):
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
 	room = models.ForeignKey(Room, null=True)
-	#accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
 	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
 		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
@@ -224,22 +223,6 @@ class Reconcile(models.Model):
 		(INVALID, "Invalid")
 	)
 
-	SHARED = "shared"
-	SUPERHERO = "superhero"
-	PENROSE = "penrose"
-	BATCAVE = "batcave"
-	PANTRY = "pantry"
-	PRIVATE = "private"
-	OTHER = "other"
-	ROOMS = (
-		(SHARED, 'Ada Lovelace Hostel'),
-		(SUPERHERO, 'Superhero Room'),
-		(PENROSE, 'Penrose Room'), 
-		(BATCAVE, 'Batcave'), 
-		(PANTRY, 'Pantry Room'), 
-		(PRIVATE, 'Private'), 
-		(OTHER, 'Other')
-	)
 	reservation = models.OneToOneField(Reservation)
 	custom_rate = models.IntegerField(null=True, blank=True, help_text="If empty, the default rate for shared or private accommodation will be used.") # default as a function of reservation type
 	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
@@ -259,6 +242,19 @@ class Reconcile(models.Model):
 		else:
 			return self.custom_rate
 	get_rate.short_description = 'Rate'
+
+	def html_color_status(self):
+		if self.status == Reconcile.PAID:
+			color_code = "#5fbf00"
+		elif self.status == Reconcile.UNPAID:
+			color_code = "#bf0000"
+		elif self.status == Reconcile.COMP:
+			color_code = "#ffc000"
+		else:
+			color_code = "#000000"
+		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
+	html_color_status.allow_tags = True
+
 
 	def default_rate(self):
 		return self.reservation.room.default_rate

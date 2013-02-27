@@ -148,10 +148,9 @@ def payment(request):
 			comment  = request.POST.get('comment')
 
 			# create the charge on Stripe's servers - this will charge the user's card
+			charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
 			if comment:
-				charge_descr = "from %s: %s" % (pay_email, comment)
-			else:
-				charge_descr = ""
+				charge_descr += " comment: %s" % comment
 			charge = stripe.Charge.create(
 					amount=charge_amt*100, # convert dollars to cents
 					currency="usd",
