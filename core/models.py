@@ -68,7 +68,6 @@ class Reservation(models.Model):
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
 	room = models.ForeignKey(Room, null=True)
-	#accommodation_preference = models.CharField(verbose_name='Accommodation Type Preference', max_length=200, choices = ACCOMMODATION_PREFERENCES)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
 	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
 		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
