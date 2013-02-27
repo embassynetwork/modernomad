@@ -224,22 +224,6 @@ class Reconcile(models.Model):
 		(INVALID, "Invalid")
 	)
 
-	SHARED = "shared"
-	SUPERHERO = "superhero"
-	PENROSE = "penrose"
-	BATCAVE = "batcave"
-	PANTRY = "pantry"
-	PRIVATE = "private"
-	OTHER = "other"
-	ROOMS = (
-		(SHARED, 'Ada Lovelace Hostel'),
-		(SUPERHERO, 'Superhero Room'),
-		(PENROSE, 'Penrose Room'), 
-		(BATCAVE, 'Batcave'), 
-		(PANTRY, 'Pantry Room'), 
-		(PRIVATE, 'Private'), 
-		(OTHER, 'Other')
-	)
 	reservation = models.OneToOneField(Reservation)
 	custom_rate = models.IntegerField(null=True, blank=True, help_text="If empty, the default rate for shared or private accommodation will be used.") # default as a function of reservation type
 	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
@@ -258,6 +242,19 @@ class Reconcile(models.Model):
 		else:
 			return self.custom_rate
 	get_rate.short_description = 'Rate'
+
+	def html_color_status(self):
+		if self.status == Reconcile.PAID:
+			color_code = "#5fbf00"
+		elif self.status == Reconcile.UNPAID:
+			color_code = "#bf0000"
+		elif self.status == Reconcile.COMP:
+			color_code = "#ffc000"
+		else:
+			color_code = "#000000"
+		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
+	html_color_status.allow_tags = True
+
 
 	def default_rate(self):
 		return self.reservation.room.default_rate

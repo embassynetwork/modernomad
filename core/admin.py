@@ -21,6 +21,12 @@ def current_rate(obj):
 def automatic_invoice(obj):
 	return obj.reconcile.automatic_invoice
 
+def paid_status(obj):
+	return obj.reconcile.html_color_status()
+# allow_tags tells django not to escape the html returned by the
+# html_color_status function.
+paid_status.allow_tags = True
+
 class ReservationAdmin(admin.ModelAdmin):
 	def send_invoice(self, request, queryset):
 		for item in queryset:
@@ -32,27 +38,57 @@ class ReservationAdmin(admin.ModelAdmin):
 		msg = prefix + " sent"
 		self.message_user(request, msg)
 
+	def reconcile_as_paid(self, request, queryset):
+		for item in queryset:
+			item.reconcile.status = Reconcile.PAID
+		if len(queryset) == 1:
+			prefix = "1 reservation was"
+		else:
+			prefix = "%d reservations were" % len(queryset)
+		msg = prefix + " marked as paid."
+		self.message_user(request, msg)
+
+	def reconcile_as_unpaid(self, request, queryset):
+		for item in queryset:
+			item.reconcile.status = Reconcile.UNPAID
+		if len(queryset) == 1:
+			prefix = "1 reservation was"
+		else:
+			prefix = "%d reservations were" % len(queryset)
+		msg = prefix + " marked as unpaid."
+		self.message_user(request, msg)
+
+	def reconcile_as_comp(self, request, queryset):
+		for item in queryset:
+			print item.reconcile.status
+			item.reconcile.status = Reconcile.COMP
+			print item.reconcile.status
+			item.reconcile.save()
+			print item.reconcile.status
+		if len(queryset) == 1:
+			prefix = "1 reservation was"
+		else:
+			prefix = "%d reservations were" % len(queryset)
+		msg = prefix + " marked as comp."
+		self.message_user(request, msg)
+
+	def reconcile_as_invalid(self, request, queryset):
+		for item in queryset:
+			item.reconcile.status = Reconcile.INVALID
+		if len(queryset) == 1:
+			prefix = "1 reservation was"
+		else:
+			prefix = "%d reservations were" % len(queryset)
+		msg = prefix + " marked as invalid."
+		self.message_user(request, msg)
+
+
 	model = Reservation
 	list_filter = ('status','hosted', 'reconcile__status')
-	list_display = ('__unicode__', 'user', 'status', 'arrive', 'depart', 'room', 'hosted', reconcile_status, current_rate, automatic_invoice)
+	list_display = ('__unicode__', 'user', 'status', 'arrive', 'depart', 'total_nights', 'room', 'hosted', paid_status, current_rate, automatic_invoice)
 	inlines = [ReconcileInline]
-	actions= ['send_invoice']
-
-# class ReconcileAdmin(admin.ModelAdmin):
-# 	def send_invoice(self, request, queryset):
-# 		for item in queryset:
-# 			item.send_invoice()
-# 		if len(queryset) == 1:
-# 			prefix = "1 invoice was"
-# 		else:
-# 			prefix = "%d invoices were" % len(queryset)
-# 		msg = prefix + " sent"
-# 		self.message_user(request, msg)
-
-# 	model = Reconcile
-# 	list_filter = ('status',)
-# 	list_display = ('reservation', guest, 'status', room, 'automatic_invoice', 'get_rate', arrive, depart)
-# 	actions= ['send_invoice']
+	ordering = ['depart',]
+	actions= ['send_invoice',]# 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid']
 	
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
