@@ -147,15 +147,6 @@ reservation_approved = django.dispatch.Signal(providing_args=["url", "reservatio
 
 @receiver(pre_save, sender=Reservation)
 def detect_changes(sender, instance, **kwargs):
-	# create new reconciliation object for confirmed reservations
-	if instance.status == Reservation.CONFIRMED:
-		try:
-			Reconcile.objects.get(reservation=instance)
-		except:
-			reconcile = Reconcile()
-			reconcile.reservation = instance
-			reconcile.save()
-
 	# generate notification emails as appropriate
 	try:
 		obj = Reservation.objects.get(pk=instance.pk)
