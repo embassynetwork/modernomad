@@ -129,7 +129,7 @@ Discussion interests: %s.
 
 You can view, approve or deny this request at %s%s. Or email 
 the requesting user at %s. 
-		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.accommodation_preference, 
+		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.room.name, 
 			str(obj.arrive), str(obj.depart), hosting_info, obj.user.profile.referral, 
 			obj.user.profile.projects, obj.user.profile.sharing, obj.user.profile.discussion, 
 			obj.purpose, obj.comments, domain, admin_path, obj.user.email)
