@@ -209,6 +209,7 @@ class Reconcile(models.Model):
 	''' The Reconcile object is automatically created when a reservation is confirmed.'''
 	COMP = "comp"
 	UNPAID = "unpaid"
+	INVOICED = "invoiced"
 	PAID = "paid"
 	INVALID = "invalid"
 	STATUSES = (
