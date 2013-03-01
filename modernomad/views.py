@@ -89,6 +89,10 @@ def occupancy(request):
 			nights_this_month = (r.depart - start).days
 		elif r.depart > end:
 			nights_this_month = (end - r.arrive).days
+		# if it's the first of the month and the person left on the 1st, then
+		# that's actuallu 0 days this month which we don't need to include.
+		if nights_this_month == 0:
+			continue
 		# get_rate grabs the custom rate if it exists, else default rate as
 		# defined in the room definition.
 		rate = r.reconcile.get_rate()
