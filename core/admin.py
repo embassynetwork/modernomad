@@ -40,7 +40,9 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	def reconcile_as_paid(self, request, queryset):
 		for item in queryset:
-			item.reconcile.status = Reconcile.PAID
+			rec = item.reconcile
+			rec.status = Reconcile.PAID
+			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
 		else:
@@ -50,7 +52,9 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	def reconcile_as_unpaid(self, request, queryset):
 		for item in queryset:
-			item.reconcile.status = Reconcile.UNPAID
+			rec = item.reconcile
+			rec.status = Reconcile.UNPAID
+			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
 		else:
@@ -60,11 +64,9 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	def reconcile_as_comp(self, request, queryset):
 		for item in queryset:
-			print item.reconcile.status
-			item.reconcile.status = Reconcile.COMP
-			print item.reconcile.status
-			item.reconcile.save()
-			print item.reconcile.status
+			rec = item.reconcile
+			rec.status = Reconcile.COMP
+			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
 		else:
@@ -74,7 +76,9 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	def reconcile_as_invalid(self, request, queryset):
 		for item in queryset:
-			item.reconcile.status = Reconcile.INVALID
+			rec = item.reconcile
+			rec.status = Reconcile.INVALID
+			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
 		else:
@@ -82,13 +86,26 @@ class ReservationAdmin(admin.ModelAdmin):
 		msg = prefix + " marked as invalid."
 		self.message_user(request, msg)
 
+	def reconcile_as_invoiced(self, request, queryset):
+		for item in queryset:
+			rec = item.reconcile
+			rec.status = Reconcile.INVOICED
+			rec.save()
+		if len(queryset) == 1:
+			prefix = "1 reservation was"
+		else:
+			prefix = "%d reservations were" % len(queryset)
+		msg = prefix + " marked as invoiced."
+		self.message_user(request, msg)
+
+
 
 	model = Reservation
 	list_filter = ('status','hosted', 'reconcile__status')
 	list_display = ('__unicode__', 'user', 'status', 'arrive', 'depart', 'total_nights', 'room', 'hosted', paid_status, current_rate, automatic_invoice)
 	inlines = [ReconcileInline]
 	ordering = ['depart',]
-	actions= ['send_invoice',]# 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid']
+	actions= ['send_invoice', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
 	
 class UserProfileInline(admin.StackedInline):
     model = UserProfile

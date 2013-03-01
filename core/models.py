@@ -293,6 +293,8 @@ class Reconcile(models.Model):
 		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 		msg.attach_alternative(html_content, "text/html")
 		msg.send()
+		self.status = Reconcile.INVOICED
+		self.save()
 
 	def generate_receipt(self):
 		pass

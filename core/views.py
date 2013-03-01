@@ -79,7 +79,7 @@ def ReservationSubmit(request):
 			# set to "pending."
 			if not request.user.groups.filter(name='house_admin'):
 				reservation.status = "pending"
-			reservation.save()            
+			reservation.save()
 			if reservation.hosted:
 				messages.add_message(request, messages.INFO, 'The reservation has been created. You can modify the reservation below.')
 			else:
