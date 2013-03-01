@@ -234,7 +234,9 @@ class Reconcile(models.Model):
 		return "reconcile reservation %d" % self.reservation.id
 		
 	def get_rate(self):
-		if not self.custom_rate:
+		if self.status == Reconcile.COMP:
+			return 0
+		elif not self.custom_rate:
 			return self.default_rate()
 		else:
 			return self.custom_rate

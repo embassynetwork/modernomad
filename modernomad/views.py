@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
 from core.confirmation_email import confirmation_email_details
-from core.models import Reservation
+from core.models import Reservation, Reconcile
 import json, datetime, stripe 
 from django.conf import settings
 from core.forms import PaymentForm
@@ -77,38 +77,46 @@ def occupancy(request):
 	total_income = 0
 	total_income_shared = 0
 	total_income_private = 0
+	total_comped_nights = 0
+	total_comped_income = 0
 	for r in reservations:
+		comp = False
 		if r.arrive >=start and r.depart <= end:
-			nights_this_month = r.depart - r.arrive
+			nights_this_month = (r.depart - r.arrive).days
 		elif r.arrive <=start and r.depart >= end:
-			nights_this_month = end - start
+			nights_this_month = (end - start).days
 		elif r.arrive < start:
-			nights_this_month = r.depart - start
+			nights_this_month = (r.depart - start).days
 		elif r.depart > end:
-			nights_this_month = end - r.arrive
+			nights_this_month = (end - r.arrive).days
 		# get_rate grabs the custom rate if it exists, else default rate as
 		# defined in the room definition.
 		rate = r.reconcile.get_rate()
+		if r.reconcile.status == Reconcile.COMP:
+			total_comped_nights += nights_this_month
+			total_comped_income += nights_this_month*r.reconcile.default_rate()
+			comp = True
 
 		person_nights_data.append({
 			'reservation': r,
-			'nights_this_month': nights_this_month.days,
+			'nights_this_month': nights_this_month,
 			'room': r.room.name,
 			'rate': rate,
-			'total': nights_this_month.days*rate
+			'total': nights_this_month*rate,
+			'comp': comp
 		})
-		total_person_nights += nights_this_month.days
-		total_income += nights_this_month.days*rate
+		total_person_nights += nights_this_month
+		total_income += nights_this_month*rate
 		if r.room.name == "Ada Lovelace Hostel":
-			total_income_shared += nights_this_month.days*rate
+			total_income_shared += nights_this_month*rate
 		else:
-			total_income_private += nights_this_month.days*rate
+			total_income_private += nights_this_month*rate
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 
 		'total_nights':total_person_nights, 'total_income':total_income, 
-		"next_month": next_month, "prev_month": prev_month, 
-		"total_income_shared": total_income_shared, "total_income_private": total_income_private,
-		"report_date": report_date})
+		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
+		"next_month": next_month, "prev_month": prev_month, "total_income_shared": total_income_shared,
+		"total_income_private": total_income_private, "report_date": report_date})
 
 @login_required
 def calendar(request):
