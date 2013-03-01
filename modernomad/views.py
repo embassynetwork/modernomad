@@ -79,6 +79,9 @@ def occupancy(request):
 	total_income_private = 0
 	total_comped_nights = 0
 	total_comped_income = 0
+	total_shared_nights = 0
+	total_private_nights = 0
+	unpaid_total = 0
 	for r in reservations:
 		comp = False
 		if r.arrive >=start and r.depart <= end:
@@ -100,6 +103,11 @@ def occupancy(request):
 			total_comped_nights += nights_this_month
 			total_comped_income += nights_this_month*r.reconcile.default_rate()
 			comp = True
+		if r.reconcile.status == Reconcile.UNPAID:
+			unpaid = True
+			unpaid_total += nights_this_month*rate
+		else:
+			unpaid = False
 
 		person_nights_data.append({
 			'reservation': r,
@@ -107,17 +115,21 @@ def occupancy(request):
 			'room': r.room.name,
 			'rate': rate,
 			'total': nights_this_month*rate,
-			'comp': comp
+			'comp': comp,
+			'unpaid': unpaid
 		})
 		total_person_nights += nights_this_month
 		total_income += nights_this_month*rate
 		if r.room.name == "Ada Lovelace Hostel":
 			total_income_shared += nights_this_month*rate
+			total_shared_nights += nights_this_month
 		else:
 			total_income_private += nights_this_month*rate
+			total_private_nights += nights_this_month
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 
-		'total_nights':total_person_nights, 'total_income':total_income, 
+		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
+		'total_shared_nights': total_shared_nights, 'total_private_nights': total_private_nights,
 		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
 		"next_month": next_month, "prev_month": prev_month, "total_income_shared": total_income_shared,
 		"total_income_private": total_income_private, "report_date": report_date})

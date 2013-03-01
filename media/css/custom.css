@@ -320,3 +320,7 @@ b.dark-red-bold {
 .cal-day-total {
 	color: #AAA;
 }
+
+.red-text {
+	color: red;
+}

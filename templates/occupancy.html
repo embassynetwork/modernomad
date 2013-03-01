@@ -6,8 +6,17 @@
 
 {% for item in data %}
 	<div>
-	<p>{{item.reservation.user.username}}, <a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 
-		{{ item.nights_this_month }} nights @ ${{item.rate}} ({{item.room}}) = ${{item.total}}
+	<p>
+		{{item.reservation.user.first_name|title}} {{item.reservation.user.last_name|title}}, 
+		<a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 
+		{{ item.nights_this_month }} nights @ ${{item.rate}} ({{item.room}}) = 
+		{% if item.unpaid %}
+			<span class="red-text">
+			${{item.total}}
+			</span>
+		{% else %}
+			${{item.total}}
+		{% endif %}
 		{% if item.comp %}
 		(COMP)
 		{% endif %}
@@ -15,12 +24,19 @@
 	</div>
 {% endfor %}
 
-<h5>Total person nights for {{report_date|date:"F"}}: {{total_nights}}</h5>
-<h5>Total estimated income : ${{total_income}}</h5>
-<h5>Total estimated income from shared : ${{total_income_private}}</h5>
-<h5>Total estimated income from private: ${{total_income_shared}}</h5>
-<h5>Total comped nights: {{total_comped_nights}}</h5>
-<h5>Est. lost income from comps (@ default rates): {{total_comped_income}}</h5>
+<hr>
+
+<p>Total person nights for {{report_date|date:"F"}}: <span class="badge">{{total_nights}}</span></p>
+<p>Total private nights: <span class="badge">{{total_private_nights}}</span></p>
+<p>Total shared nights: <span class="badge">{{total_shared_nights}}</span></p>
+<p>Total estimated income from shared : <span class="badge">${{total_income_private}}</span></p>
+<p>Total estimated income from private: <span class="badge">${{total_income_shared}}</span></p>
+<p>Total comped nights: <span class="badge">{{total_comped_nights}}</span></p>
+<p>Total unpaid: <span class="badge badge-important">{{unpaid_total}}</span></p>
+<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
+
+<h5>Total estimated income : <span class="badge badge-success">${{total_income}}</span></h5>
+
 
 <div id="by-month-nav">
 	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
