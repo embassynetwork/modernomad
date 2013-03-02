@@ -103,7 +103,7 @@ def occupancy(request):
 			total_comped_nights += nights_this_month
 			total_comped_income += nights_this_month*r.reconcile.default_rate()
 			comp = True
-		if r.reconcile.status == Reconcile.UNPAID:
+		if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
 			unpaid = True
 			unpaid_total += nights_this_month*rate
 		else:
