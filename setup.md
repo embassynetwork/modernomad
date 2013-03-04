@@ -27,7 +27,11 @@ don't forget to source the bashrc file now:
 
 ## dependencies
 
-PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. to install this on linux:
+PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. 
+
+on OS X, download and install the tarball linked to on [this](http://apple.stackexchange.com/questions/59718/python-imaging-library-pil-decoder-jpeg-not-available-how-to-fix) stackexchange question. you will need x code installed with the extra "command line tools" component. 
+
+to install on linux:
 - `sudo apt-get install libjpeg62-dev`
 
 you also need the python dev package:
@@ -38,7 +42,6 @@ on linux, you may need to symlink these libraries for PIL to find them during th
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/`
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/`
 
-on OS X, download and install the tarball linked to on [this](http://apple.stackexchange.com/questions/59718/python-imaging-library-pil-decoder-jpeg-not-available-how-to-fix) stackexchange question. 
 
 then either install PIL using `brew`, or from the dmg's available on the PIL website. for example, see the process outlined [here](http://stackoverflow.com/questions/9070074/how-to-install-pil-on-mac-os-x-10-7-2-lion)
 
