@@ -12,8 +12,11 @@ from core.forms import PaymentForm
 from reservation_calendar import GuestCalendar
 from django.utils.safestring import mark_safe
 
-def index(request):
+def new_home(request):
 	return render(request, "landing.html")
+
+def index(request):
+	return render(request, "index.html")
 	
 def about(request):
 	return render(request, "about.html")
