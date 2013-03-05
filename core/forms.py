@@ -45,6 +45,9 @@ class UserProfileForm(forms.ModelForm):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
 		# self.instance will always be an instance of UserProfile. if this
 		# is an existing object, then populate the initial values. 
+		print self.fields['image'].required
+		print self.fields['sharing'].required
+		
 		if self.instance.id is not None:
 			# initialize the form fields with the existing values from the model.  	
 			self.fields['first_name'].initial = self.instance.user.first_name

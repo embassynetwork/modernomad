@@ -332,7 +332,7 @@ class UserProfile(models.Model):
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
-	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.", default="data/avatars/default.jpg")
+	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.")#, default="data/avatars/default.jpg")
 	image_thumb = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
