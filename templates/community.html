@@ -1,7 +1,50 @@
 {% extends "main.html" %}
 
+{% load core_tag_extras %}
+
 {% block main %}
 
-Social Media Content - tweets, pictures, blogs...?
+{% if people|length == 0 %}
+	
+	No community members have been listed yet
+
+{% else %}
+
+	{% for u in people %}
+
+		<div class="profile-snippet">
+			<h3>{{ u.first_name|title }} {{ u.last_name|title }}</h3>
+			<div class="profile-container">
+				{% if u.profile.image_thumb %}
+				<div class="img-polaroid float-left right-img-spacing">
+					<img class="community-page-img" src="{{ MEDIA_URL }}{{ u.profile.image_thumb }}" />
+				</div>
+				{% endif %}
+
+				<div class="bio-container">
+					{% if u.profile.bio %}
+					{{ u.profile.bio}}
+					{% else %}
+					No profile information available
+					{% endif %}
+				</div>
+				<div class="clear"></div>
+
+				{% if u.profile.links %}
+				<div class="bio-snippet-links">
+				<span class="icon-spacer"><i class="icon-globe"></i></span>
+					{% with links=u.profile.links|split:', ' %}
+						{% for link in links %}
+							<span class="user-link"><a href="{{link}}">{{link}}</a></span>
+						{% endfor %}
+					{% endwith %}
+				</div>
+				{% endif %}
+
+			</div>
+		</div>
+	{% endfor %}
+
+{% endif %} 
 
 {% endblock %}

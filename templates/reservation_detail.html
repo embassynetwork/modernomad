@@ -7,14 +7,21 @@
     {% for message in messages %}
     <div class="alert alert-info">
 	    <button type="button" class="close" data-dismiss="alert">×</button>
-    	<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</div>
 	</div>
     {% endfor %}
 </div>
 {% endif %}
 
-<h3>Reservation {{reservation.arrive }} - {{reservation.depart}}</h3>
-<h4><em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em></h4>
+<h3>Reservation for 
+	{% if reservation.hosted %}
+		{{ reservation.guest_name }}, hosted by 
+	{% endif %}
+	<em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+</h3>
+<h4>
+	{{reservation.arrive }} - {{reservation.depart}}.   Tags: {{ reservation.tags }}
+</h4>
 
 {% ifequal reservation.user user %}
 	{% if reservation.status == "pending" %}
@@ -46,14 +53,34 @@
 
 
 <div class="res-detail"><b>Approximate arrival Time</b>: {{ reservation.arrival_time }}</div>
-<div class="res-detail"><b>Accommodation Preference:</b> {{ reservation.accommodation_preference }}</div>
-<div class="res-detail"><b>Tags:</b> {{ reservation.tags }}</div>
-<div class="res-detail"><b>Projects you're currently involved in:</b> {{ reservation.projects }}</div>
-<div class="res-detail"><b>Things you'd be interested in sharing:</b> {{ reservation.sharing }}</div>
-<div class="res-detail"><b>Questions on your Mind:</b> {{ reservation.discussion }}</div>
-<div class="res-detail"><b>What are you in town for?</b> {{ reservation.purpose }}</div>
-<div class="res-detail"><b>How/through whom did you hear about us?</b> {{ reservation.referral }}</div>
+<div class="res-detail"><b>Room:</b> {{ reservation.room.name|title }}</div>
+<div class="res-detail"><b>In town for?</b> {{ reservation.purpose }}</div>
 <div class="res-detail"><b>Additional Comments:</b> {{ reservation.comments }}</div>
+
+{% if reservation.hosted and reservation.guest %}
+{% with guest=reservation.guest%}
+
+	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
+
+	<div class="res-detail"><b>Current Projects:</b> {{ guest.projects }}</div>
+	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.sharing }}</div>
+	<div class="res-detail"><b>Discussion topics:</b> {{ guest.discussion }}</div>
+	<div class="res-detail"><b>Referral: </b> {{ guest.referral }}</div>
+
+{% endwith %}
+{% else %}
+
+{% with guest=reservation.user%}
+
+	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
+
+	<div class="res-detail"><b>Current Projects:</b> {{ guest.profile.projects }}</div>
+	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.profile.sharing }}</div>
+	<div class="res-detail"><b>Discussion topics:</b> {{ guest.profile.discussion }}</div>
+	<div class="res-detail"><b>Referral: </b> {{ guest.profile.referral }}</div>
+
+{% endwith %}
+{% endif %}
 
 {% ifequal reservation.user user %}
 	<div class="res-modify-btn">
@@ -75,6 +102,7 @@
 	{% endif %}
 	</div>
 {% endifequal %}
+
 
 <p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
 

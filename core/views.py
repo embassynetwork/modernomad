@@ -10,13 +10,13 @@ from django.template import RequestContext
 from registration import signals
 import registration.backends.default
 from registration.models import RegistrationProfile
-from core.forms import ReservationForm, ExtendedUserCreationForm, CombinedUserForm
+from core.forms import ReservationForm, UserProfileForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
 from django.contrib import messages
 
-from core.models import House, UserProfile, Reservation
+from core.models import UserProfile, Reservation, Room
 
 def logout(request):
 	logout(request)
@@ -50,62 +50,53 @@ def GetHouse(request, house_id):
 	house = House.objects.get(id=house_id)
 	return render(request, "house_details.html", {"house": house})
 
+def get_reservation_form_for_perms(request, post, instance):
+	if post == True:
+		if instance:
+			form = ReservationForm(request.POST, instance=instance)
+		else:
+			form = ReservationForm(request.POST)
+	else:
+		if instance:
+			form = ReservationForm(instance=instance)
+		else:
+			form = ReservationForm()
+	# ensure we only show official guest rooms unless the user is a house admin. 
+	if not request.user.groups.filter(name='house_admin'):
+		form.fields['room'].queryset = Room.objects.filter(primary_use="guest")
+	return form
+
+@login_required
 def ReservationSubmit(request):
 	if request.method == 'POST':
-		POST = request.POST.copy()
-		if not request.user.is_authenticated():
-			print POST
-			user_data = {
-				'username': POST['username'],
-				'first_name': POST['first_name'],
-				'last_name': POST['last_name'],
-				'password1': POST['password1'],
-				'password2': POST['password2'],
-				'email': POST['email'],
-			}
-			user_form = ExtendedUserCreationForm(user_data)
-		
-			POST.pop('username')
-			POST.pop('first_name')
-			POST.pop('last_name')
-			POST.pop('email')
-			POST.pop('password1') 
-			POST.pop('password2') 
-		
-			if user_form.is_valid():   
-				# create the user and log them in
-				user_form.save()
-				user = authenticate(username=user_data['username'], password=user_data['password1'])
-				if user is not None:
-					login(request, user)
-					print "user %s created and logged in" % user.username
-				else:
-					print "this should not have happened. new user was created but did not authenticate."           
-			else:
-				print "user form was not valid"
-				print user_form.errors
+		form = get_reservation_form_for_perms(request, post=True, instance=False)
 
-		form = ReservationForm(POST)
-		if form.is_valid() and request.user.is_authenticated():
+		if form.is_valid():
 			reservation = form.save(commit=False)
 			reservation.user = request.user
-
-			reservation.save()            
-			messages.add_message(request, messages.INFO, 'Thanks! Your reservation was created. You will receive an email when it has been reviewed. You can still modify your reservation.')
+			# this view is used only for submitting new reservations. if the
+			# user is not a house admin, the default status should always be
+			# set to "pending."
+			if not request.user.groups.filter(name='house_admin'):
+				reservation.status = "pending"
+			reservation.save()
+			if reservation.hosted:
+				messages.add_message(request, messages.INFO, 'The reservation has been created. You can modify the reservation below.')
+			else:
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 			return HttpResponseRedirect('/reservation/%d' % reservation.id)
 
 	# GET request
 	else: 
-		form = ReservationForm()
-		if not request.user.is_authenticated():
-			print "creating new user form"
-			user_form = ExtendedUserCreationForm()
+		form = get_reservation_form_for_perms(request, post=False, instance=False)
 
 	# default - render either the bound form with errors or the unbound form    
-	if request.user.is_authenticated():
-		return render(request, 'reservation.html', {'form': form})
+	if request.user.groups.filter(name='house_admin'):
+		is_house_admin = True
 	else:
-		return render(request, 'reservation.html', {'form': form, 'user_form': user_form})
+		is_house_admin = False
+	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin})
+
 
 @login_required
 def ReservationDetail(request, reservation_id):
@@ -124,22 +115,23 @@ def ReservationDetail(request, reservation_id):
 			past = True
 		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past})
 
-
 @login_required
 def UserEdit(request, username):
-	user = UserProfile.objects.get(user__username=username)
+	profile = UserProfile.objects.get(user__username=username)
+	user = User.objects.get(username=username)
 	if request.user.is_authenticated() and request.user.id == user.id:
 		if request.method == "POST":
-			form = CombinedUserForm(request.POST, instance=user)
-			if form.is_valid():
-				form.save()
+			profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+			if profile_form.is_valid(): 
+				updated_user = profile_form.save()
 				client_msg = "Your profile has been updated."
 				messages.add_message(request, messages.INFO, client_msg)
-				return HttpResponseRedirect("/people/%s" % username)
+				return HttpResponseRedirect("/people/%s" % updated_user.username)
+			else:
+				print profile_form.errors
 		else:
-			form = CombinedUserForm(instance=user)
-		
-		return render(request, 'user_edit.html', {'form': form})
+			profile_form = UserProfileForm(instance=profile)		
+		return render(request, 'user_edit.html', {'profile_form': profile_form})
 	return HttpResponseRedirect("/")
 
 
@@ -153,14 +145,22 @@ def ReservationEdit(request, reservation_id):
 	original_arrive = reservation.arrive
 	original_depart = reservation.depart
 	if request.user.is_authenticated() and request.user == reservation.user:
+
+		if request.user.groups.filter(name='house_admin'):
+			is_house_admin = True
+		else:
+			is_house_admin = False
+
 		if request.method == "POST":
 			# don't forget to specify the "instance" argument or a new object will get created!
-			form = ReservationForm(request.POST, instance=reservation)
+			form = get_reservation_form_for_perms(request, post=True, instance=reservation)
 			if form.is_valid():
 
-				# if the dates have been changed, and the reservation isn't still 
-				# pending to begin with, notify an admin and go back to pending. 
-				if (reservation.status != 'pending' and 
+				# if the dates have been changed, and the reservation isn't
+				# still  pending to begin with, notify an admin and go back to
+				# pending (unless it's hosted, then we don't generate an
+				# email).
+				if not reservation.hosted and (reservation.status != 'pending' and 
 					(reservation.arrive != original_arrive or reservation.depart != original_depart)):
 
 					print "reservation date was changed. updating status."
@@ -183,20 +183,19 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 						recipient = [admin.email,]
 						send_mail(subject, text, sender, recipient) 
 
-					client_msg = 'Your reservation was updated and the new dates will be reviewed for availability.'
+					client_msg = 'The reservation was updated and the new dates will be reviewed for availability.'
 				else:
-					client_msg = 'Your reservation was updated.'
+					client_msg = 'The reservation was updated.'
 				# save the instance *after* the status has been updated as needed.  
 				form.save()
 				messages.add_message(request, messages.INFO, client_msg)
 				return HttpResponseRedirect("/reservation/%s" % reservation_id)
 		else:
-			form = ReservationForm(instance=reservation)
-		
+			form = get_reservation_form_for_perms(request, post=False, instance=reservation)
+			
 		return render(request, 'reservation_edit.html', {'form': form, 
-			'reservation_id': reservation_id,
-			'arrive': reservation.arrive,
-			'depart': reservation.depart,
+			'reservation_id': reservation_id, 'arrive': reservation.arrive,
+			'depart': reservation.depart, 'is_house_admin' : is_house_admin,
 			})
 
 	else:
@@ -241,13 +240,12 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 	@transaction.commit_on_success
 	def register(self, request, **cleaned_data):
 		'''Register a new user, saving the User and UserProfile data.'''
-		# We can't use RegistrationManager.create_inactive_user()
-		# because it doesn't play nice with saving other information
-		# in the same transaction.
-		user = User(is_active=False)
+		user = User()
 		for field in user._meta.fields:
 			if field.name in cleaned_data:
 				setattr(user, field.name, cleaned_data[field.name])
+		# the password has been validated by the form
+		user.set_password(cleaned_data['password2'])
 		user.save()
 
 		profile = UserProfile(user=user)
@@ -256,7 +254,37 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 				setattr(profile, field.name, cleaned_data[field.name])
 		profile.save()
 
-		registration_profile = RegistrationProfile.objects.create_profile(user)
-		registration_profile.send_activation_email(Site.objects.get_current())
+		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
+		login(request, new_user)
+		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
+		return new_user
 
-		signals.user_registered.send(sender=self.__class__, user=user, request=request)
+	def activate(self, request, user):
+		# we're not using the registration system's activation features ATM.
+		return True
+
+
+	def registration_allowed(self, request):
+		if request.user.is_authenticated():
+			return False
+		else: return True
+
+	def post_registration_redirect(self, request, user):
+		"""
+		Return the name of the URL to redirect to after successful
+		account activation. 
+
+		We're not using the registration system's activation features ATM, so
+		interrupt the registration process here.
+		"""
+		url_path = request.get_full_path().split("next=")
+		messages.add_message(request, messages.INFO, 'Your account has been created.')
+		if len(url_path) > 1 and url_path[1] == "/reservation/create/":
+			return (url_path[1], (), {'username' : user.username})
+		else:
+			return ('user_details', (), {'username': user.username})
+
+
+#def Dashboard(request):
+
+

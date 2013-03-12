@@ -1,0 +1,53 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+<div id="guest-calendar">
+	{{calendar}}
+</div>
+
+<div id="by-month-nav">
+	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
+	<a href="/calendar/?month={{prev_month.month}}&year={{prev_month.year}}">Previous Month</a> | 
+	<a href="/calendar/"> Current </a> |
+	<a href="/calendar/?month={{next_month.month}}&year={{next_month.year}}">Next Month</a>
+	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
+</div>
+
+<h3>Reservation Details</h3>
+
+{% for r in reservations %}
+	<div class="reservation-list-item">
+	<div class="reservation-title">
+	<a id="reservation{{r.id}}"></a>
+	<h4 class="inline">
+	{% if r.hosted %}
+		{{ r.guest_name }} 
+	{% else %}
+		<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
+	{% endif %}
+	</h4>
+	<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a> 
+	{% if r.arrive == today %}
+	- <em>today!</em>
+	{% endif %}
+	{% if r.hosted %}
+		(hosted by <a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>)
+	{% endif %}
+	</div>
+
+	<div class="img-polaroid float-left">
+		<img class="profile-img-thumb" src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg' }}" />
+	</div>
+
+	<div class="profile-peak">
+		<p><em>Projects:</em> {{ r.user.profile.projects}}</p>
+		<p><em>Sharing interests:</em> {{ r.user.profile.sharing}}</p>
+		<p><em>Discussion topics:</em> {{ r.user.profile.discussion}}</p>
+	</div>
+
+	<div class="clear"></div>
+	</div>
+{% endfor %}
+
+{% endblock %}

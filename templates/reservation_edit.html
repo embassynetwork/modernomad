@@ -2,11 +2,45 @@
 
 {% block main %}
 
+	<div class="page-text">
 	<p>Editing your existing reservation for {{arrive}} to {{depart}}.</p>
-	<p>Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</p>
+	<p><em>Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</em></p>
+	</div>
+	
+	<form class="well form-inline" method="post" action="/reservation/{{reservation_id}}/edit/">{% csrf_token %}
+		{% for field in form %}
 
-	<form method="post" action="/reservation/{{reservation_id}}/edit/">{% csrf_token %}
-		{{ form.as_p }}
+			{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
+				{% if is_house_admin %}
+
+					<div class="field-wrapper">
+						{{ field.errors }}
+						{{ field.label_tag }}
+						<span class="form-help-text">{{ field.help_text}}</span>
+						<div class="form-field-body">
+							{{ field }}
+						</div>
+					</div>
+
+				{% endif %}
+			{% else %} 
+				{% comment %} if it's not one of the fields related to hosting, always show it {% endcomment %} 
+
+				<div class="field-wrapper">
+					{{ field.errors }}
+					{{ field.label_tag }}
+					<span class="form-help-text">{{ field.help_text}}</span>
+					<div class="form-field-body">
+						{{ field }}
+						{% if field.name == 'arrive' or field.name == 'depart' %}
+							<i class="icon-calendar"></i>
+						{% endif %}
+					</div>
+				</div>
+			{% endif %}
+
+		{% endfor %}
+
 		<input type="submit" value="Submit">
 	</form>
 

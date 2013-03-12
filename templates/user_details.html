@@ -1,5 +1,7 @@
 {% extends "main.html" %}
 
+{% load core_tag_extras %}
+
 {% block main %}
 
 {% if messages %}
@@ -13,6 +15,12 @@
 </div>
 {% endif %}
 
+{% if u.profile.image %}
+<div class="img-polaroid float-right">
+	<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
+</div>
+{% endif %}
+
 
 <h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
 {% ifequal u user %}
@@ -22,20 +30,43 @@
 {% endifequal %}
 
 
-<h3>About {{u.first_name|title}}:</h3>
-<p>{{ u.profile.bio }}</p>
+{% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
 
-<h3>Currently Up to:</h3>
-<p>{{ u.profile.upto }}</p>
+	{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
 
-<h3>Links:</h3>
-<p>{{ u.profile.links }}</p>
+{% else %}
+	<h4>About {{u.first_name|title}}:</h4>
+	<p>{{ u.profile.bio }}</p>
+
+	<h4>Current Projects:</h4>
+	<p>{{ u.profile.projects|default:"Empty" }}</p>
+
+	<h4>Learning and Sharing Interests:</h4>
+	<p>{{ u.profile.sharing|default:"Empty" }}</p>
+
+	<h4>Discussion topics:</h4>
+	<p>{{ u.profile.discussion|default:"Empty" }}</p>
+
+	{% if u.profile.links %}
+	<div class="user-links">
+	<span class="icon-spacer"><i class="icon-globe"></i></span>
+		{% with links=u.profile.links|split:', ' %}
+			{% for link in links %}
+				<span class="user-link"><a href="{{link}}">{{link}}</a></span>
+			{% endfor %}
+		{% endwith %}
+	</div>
+	{% endif %}
+{% endif %}
 
 <h2>Reservations</h2>
 {% if past_reservations|length > 0 %}
-<h3>Previous</h3>
+<h4>Previous</h4>
 {% for reservation in past_reservations %}
 	<div>
+		{% if reservation.hosted %}
+			(hosting {{ reservation.guest_name }})
+		{% endif %}
 		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 		{% if user == u %}
 		- <em>{{reservation.status}}</em>
@@ -45,9 +76,12 @@
 {% endif %}
 
 {% if upcoming_reservations|length > 0 %}
-<h3>Upcoming</h3>
+<h4>Upcoming</h4>
 {% for reservation in upcoming_reservations %}
 	<div>
+		{% if reservation.hosted %}
+			(hosting {{ reservation.guest_name }})
+		{% endif %}
 		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 		{% if user == u %}
 		- <em>{{reservation.status}}</em>

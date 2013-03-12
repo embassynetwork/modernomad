@@ -1,0 +1,20 @@
+Dear {{ first_name }},
+
+Thank you for your payment for your recent stay with us. This is your receipt.  
+
+Receipt Date: {{ today }}
+Arrival Date: {{ arrive }}
+Departure Date: {{ depart }}
+
+Description .............. Quantity ......... Rate
+{{ room }} ..... {{ num_nights }} ..... {{ rate }}
+
+..................... Total Paid: {{ total }}
+
+Receipt ID: {{ receipt_id }}
+Payment Method: {{ payment_method }}
+
+Thank you from the Embassy!
+
+:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
+:::: California Benefit Corporation, EIN 45-5386726 ::::		

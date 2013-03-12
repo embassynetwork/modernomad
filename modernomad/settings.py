@@ -179,9 +179,6 @@ LOGOUT_URL = '/people/logout/'
 
 DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
 
-# import the groups script
-import groups
-
 # import any local settings
 try:
 	from local_settings import *

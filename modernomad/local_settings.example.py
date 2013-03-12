@@ -16,6 +16,13 @@ PRODUCTION = 1
 # default mode is dev. change to production as appropriate. 
 MODE = DEVELOPMENT
 
+# how many days should people be allowed to make a reservation request for?
+MAX_RESERVATION_DAYS = 14
+
+# if using stripe, enter your stripe *secret* key here
+STRIPE_SECRET_KEY = "insert your key here"
+STRIPE_PUBLISHABLE_KEY = "insert your key here"
+
 if MODE == DEVELOPMENT:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
