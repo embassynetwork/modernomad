@@ -279,7 +279,7 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 		"""
 		url_path = request.get_full_path().split("next=")
 		messages.add_message(request, messages.INFO, 'Your account has been created.')
-		if url_path[1] == "/reservation/create/":
+		if len(url_path) > 1 and url_path[1] == "/reservation/create/":
 			return (url_path[1], (), {'username' : user.username})
 		else:
 			return ('user_details', (), {'username': user.username})
