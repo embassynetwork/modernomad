@@ -43,7 +43,7 @@ class GuestCalendar(HTMLCalendar):
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					
 					if reservation.depart == tomorrow:
-						body.append('<em> (Depart)</em>') 					
+						body.append('<em> (Last night)</em>') 					
 					body.append('</li>')
 				body.append('</ul>')
 				body.append("<span class='cal-day-total'>total %d (P: %d/S: %d)</span>" % (num_today, num_private, num_shared))
