@@ -1,5 +1,5 @@
 from calendar import HTMLCalendar
-from datetime import date
+from datetime import date, timedelta
 
 from django.utils.html import conditional_escape as esc
 
@@ -12,6 +12,7 @@ class GuestCalendar(HTMLCalendar):
 
 	def formatday(self, day, weekday):
 		if day != 0:
+			tomorrow = date(self.year, self.month, day) + timedelta(days=1)
 			cssclass = self.cssclasses[weekday]
 			if date.today() == date(self.year, self.month, day):
 				cssclass += ' today'
@@ -41,7 +42,7 @@ class GuestCalendar(HTMLCalendar):
 					body.append('</a>')
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					
-					if reservation.depart.day == day:
+					if reservation.depart == tomorrow:
 						body.append('<em> (Depart)</em>') 					
 					body.append('</li>')
 				body.append('</ul>')
@@ -66,7 +67,9 @@ class GuestCalendar(HTMLCalendar):
 			today_reservations = []
 			the_day = date(self.year, self.month, day)
 			for r in reservations:
-				if r.arrive <= the_day and r.depart >= the_day:
+				# only check that r.depart is strictly greater than the_day,
+				# since people don't need a bed on the day they leave.
+				if r.arrive <= the_day and r.depart > the_day:
 					today_reservations.append(r)
 			if len(today_reservations) > 0:
 				guests_by_day[day] = today_reservations
