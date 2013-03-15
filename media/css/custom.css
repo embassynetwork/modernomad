@@ -324,3 +324,7 @@ b.dark-red-bold {
 .red-text {
 	color: red;
 }
+
+.greyed-out {
+	color: #999999;
+}

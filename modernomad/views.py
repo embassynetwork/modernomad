@@ -11,6 +11,7 @@ from django.conf import settings
 from core.forms import PaymentForm
 from reservation_calendar import GuestCalendar
 from django.utils.safestring import mark_safe
+from django.db.models import Q
 
 def new_home(request):
 	return render(request, "landing.html")
@@ -106,11 +107,13 @@ def occupancy(request):
 			total_comped_nights += nights_this_month
 			total_comped_income += nights_this_month*r.reconcile.default_rate()
 			comp = True
-		if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
-			unpaid = True
-			unpaid_total += nights_this_month*rate
 		else:
-			unpaid = False
+			total_income += nights_this_month*rate
+			if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
+				unpaid = True
+				unpaid_total += nights_this_month*rate
+			else:
+				unpaid = False
 
 		person_nights_data.append({
 			'reservation': r,
@@ -122,13 +125,14 @@ def occupancy(request):
 			'unpaid': unpaid
 		})
 		total_person_nights += nights_this_month
-		total_income += nights_this_month*rate
 		if r.room.name == "Ada Lovelace Hostel":
-			total_income_shared += nights_this_month*rate
 			total_shared_nights += nights_this_month
+			if r.reconcile.status != Reconcile.COMP:
+				total_income_shared += nights_this_month*rate
 		else:
-			total_income_private += nights_this_month*rate
 			total_private_nights += nights_this_month
+			if r.reconcile.status != Reconcile.COMP:
+				total_income_private += nights_this_month*rate
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 
 		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
@@ -145,7 +149,9 @@ def calendar(request):
 
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	report_date = datetime.date(year, month, 1) 
-	reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
+
+	reservations = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
+	#reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
 	
 	# create the calendar object
 	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)

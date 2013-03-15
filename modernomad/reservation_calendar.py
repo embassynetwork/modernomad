@@ -1,5 +1,6 @@
 from calendar import HTMLCalendar
 from datetime import date, timedelta
+from core.models import Reservation
 
 from django.utils.html import conditional_escape as esc
 
@@ -26,15 +27,19 @@ class GuestCalendar(HTMLCalendar):
 				num_private = 0
 				num_shared = 0
 				for reservation in self.reservations[day]:
-					room_type = None 
+					print reservation.status
 					if reservation.room.name == "Ada Lovelace Hostel":
 						num_shared += 1
 						room_type = "S"
 					else:
 						num_private += 1
 						room_type = "P"
+
 					body.append('<li id="res%d-cal-item">' %reservation.id)
-					body.append('<a href="#reservation%d">' % reservation.id)
+					if reservation.status == Reservation.APPROVED:
+						body.append('<a href="#reservation%d" class="greyed-out">' % reservation.id)
+					else:
+						body.append('<a href="#reservation%d">' % reservation.id)				
 					if reservation.hosted:
 						body.append(esc("%s (%s)" % (reservation.guest_name.title(), room_type)))
 					else:
@@ -43,8 +48,9 @@ class GuestCalendar(HTMLCalendar):
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					
 					if reservation.depart == tomorrow:
-						body.append('<em> (Last night)</em>') 					
+						body.append('<em> (Last night)</em>')					
 					body.append('</li>')
+					body.append('</span>')
 				body.append('</ul>')
 				body.append("<span class='cal-day-total'>total %d (P: %d/S: %d)</span>" % (num_today, num_private, num_shared))
 				return self.day_cell(cssclass, '%d %s' % (day, ''.join(body)))

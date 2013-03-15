@@ -34,6 +34,9 @@
 	{% if r.hosted %}
 		(hosted by <a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>)
 	{% endif %}
+	{% if r.status == "approved" %}
+		(pending confirmation from guest)
+		{% endif %}
 	</div>
 
 	<div class="img-polaroid float-left">
