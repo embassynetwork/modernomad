@@ -30,6 +30,9 @@ create your own local_settings.py file from local_settings.example.py. inside th
 there's actually nothing you need to change in here at the moment, but note that if you want to run the software on a production server, there are production-specific settings for email which you must setup if you want email to work. by default, the software is in "development" mode, and emails are sent using django's built-in console backend, meaning they get printed to the console. 
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
+
+go back into the top level repository directory and do the following:
+
 - run `./manage.py syncdb` to create and sync the models of installed apps (and create an admin user)
 - run `./manage.py migrate` to run the existing migrations
 
