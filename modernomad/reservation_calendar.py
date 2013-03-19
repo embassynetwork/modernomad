@@ -1,5 +1,6 @@
 from calendar import HTMLCalendar
-from datetime import date
+from datetime import date, timedelta
+from core.models import Reservation
 
 from django.utils.html import conditional_escape as esc
 
@@ -12,6 +13,7 @@ class GuestCalendar(HTMLCalendar):
 
 	def formatday(self, day, weekday):
 		if day != 0:
+			tomorrow = date(self.year, self.month, day) + timedelta(days=1)
 			cssclass = self.cssclasses[weekday]
 			if date.today() == date(self.year, self.month, day):
 				cssclass += ' today'
@@ -25,15 +27,18 @@ class GuestCalendar(HTMLCalendar):
 				num_private = 0
 				num_shared = 0
 				for reservation in self.reservations[day]:
-					room_type = None 
 					if reservation.room.name == "Ada Lovelace Hostel":
 						num_shared += 1
 						room_type = "S"
 					else:
 						num_private += 1
 						room_type = "P"
+
 					body.append('<li id="res%d-cal-item">' %reservation.id)
-					body.append('<a href="#reservation%d">' % reservation.id)
+					if reservation.status == Reservation.APPROVED:
+						body.append('<a href="#reservation%d" class="greyed-out">' % reservation.id)
+					else:
+						body.append('<a href="#reservation%d">' % reservation.id)				
 					if reservation.hosted:
 						body.append(esc("%s (%s)" % (reservation.guest_name.title(), room_type)))
 					else:
@@ -41,9 +46,10 @@ class GuestCalendar(HTMLCalendar):
 					body.append('</a>')
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					
-					if reservation.depart.day == day:
-						body.append('<em> (Depart)</em>') 					
+					if reservation.depart == tomorrow:
+						body.append('<em> (Last night)</em>')					
 					body.append('</li>')
+					body.append('</span>')
 				body.append('</ul>')
 				body.append("<span class='cal-day-total'>total %d (P: %d/S: %d)</span>" % (num_today, num_private, num_shared))
 				return self.day_cell(cssclass, '%d %s' % (day, ''.join(body)))
@@ -66,7 +72,9 @@ class GuestCalendar(HTMLCalendar):
 			today_reservations = []
 			the_day = date(self.year, self.month, day)
 			for r in reservations:
-				if r.arrive <= the_day and r.depart >= the_day:
+				# only check that r.depart is strictly greater than the_day,
+				# since people don't need a bed on the day they leave.
+				if r.arrive <= the_day and r.depart > the_day:
 					today_reservations.append(r)
 			if len(today_reservations) > 0:
 				guests_by_day[day] = today_reservations

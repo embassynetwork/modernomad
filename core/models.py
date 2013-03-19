@@ -245,7 +245,7 @@ class Reconcile(models.Model):
 	def html_color_status(self):
 		if self.status == Reconcile.PAID:
 			color_code = "#5fbf00"
-		elif self.status == Reconcile.UNPAID:
+		elif self.status == Reconcile.UNPAID or self.status == Reconcile.INVOICED:
 			color_code = "#bf0000"
 		elif self.status == Reconcile.COMP:
 			color_code = "#ffc000"
