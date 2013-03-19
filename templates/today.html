@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% for p in people_today %}
+
+<!-- this forloop.counter business is a hack - it will only work for up to 12
+items. jessy is writing a custom template tag for this. standby... --> 
+
+{% if forloop.counter == 1 or forloop.counter == 7 %} 
+	<div class="row-fluid"> 
+{% endif %}
+
+	<div class="span2">
+		<div class="img-polaroid float-left">
+			<!-- THIS IS BROKEN - clicking the link does not advance the slide to the specific slide position -->
+			<a href="#profileCarousel" data-slide-to="{{ forloop.counter0 }}">
+			<img 
+				class="profile-img-thumb" 
+				src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
+			/> 
+			</a>
+		</div>
+	</div>
+
+{% if forloop.counter == 6 or forloop.counter == 12 or forloop.last %}
+</div>
+{% endif %}
+
+{% endfor %}
+
+<hr>
+
+<!-- carousel of profile deets -->
+
+<div id="profileCarousel" class="carousel slide">
+  <!-- Carousel items -->
+  <div class="carousel-inner">
+  
+    {% for p in people_today %}
+    
+    {% if forloop.first %}
+    <div class="active item">
+    {% else %}
+	<div class="item">
+    {% endif %}
+
+		<div class="img-polaroid float-left">
+			<img class="profile-img-thumb" 
+			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}" 
+			/>
+		</div>
+
+		<div class="profile-peak">
+			<p><em>Projects:</em> {{ p.profile.projects}}</p>
+			<p><em>Sharing interests:</em> {{ p.profile.sharing}}</p>
+			<p><em>Discussion topics:</em> {{ p.profile.discussion}}</p>
+		</div>
+
+	</div><!-- end carousel item div -->   
+  	{% endfor %}
+
+  </div><!-- end carousel-inner -->
+  <!-- Carousel nav -->
+  <a class="carousel-control left" href="#profileCarousel" data-slide="prev">&lsaquo;</a>
+  <a class="carousel-control right" href="#profileCarousel" data-slide="next">&rsaquo;</a>
+</div>
+
+
+{% endblock %}

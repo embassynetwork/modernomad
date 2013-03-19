@@ -27,7 +27,6 @@ class GuestCalendar(HTMLCalendar):
 				num_private = 0
 				num_shared = 0
 				for reservation in self.reservations[day]:
-					print reservation.status
 					if reservation.room.name == "Ada Lovelace Hostel":
 						num_shared += 1
 						room_type = "S"

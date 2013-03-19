@@ -24,7 +24,6 @@ def about(request):
 
 def community(request):
 	residents = User.objects.filter(groups__name='residents')
-	print len(residents)
 	return render(request, "community.html", {'people': residents})
 
 def events(request):
@@ -62,6 +61,19 @@ def get_calendar_dates(month, year):
 
 	# returns datetime objects (start, end, next_month, prev_month) and ints (month, year)
 	return start, end, next_month, prev_month, month, year
+
+def today(request):
+	# get all the reservations that intersect today (including those departing
+	# and arriving today)
+	today = datetime.date.today()
+	reservations_today = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=today).exclude(arrive__gt=today)
+	guests_today = []
+	for r in reservations_today:
+		guests_today.append(r.user)
+	residents = User.objects.filter(groups__name='residents')
+	people_today = guests_today + list(residents)
+	return render(request, "today.html", {'people_today': people_today})
+
 
 def occupancy(request):
 	if not (request.user.is_authenticated and request.user.groups.filter(name='house_admin')):
@@ -152,7 +164,6 @@ def calendar(request):
 	report_date = datetime.date(year, month, 1) 
 
 	reservations = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
-	#reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
 	
 	# create the calendar object
 	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)
