@@ -23,8 +23,6 @@
    text-align:center;
 }
 
-to
-
 .top-nav a {
 	display: block;
 	width: 50px;
@@ -39,12 +37,12 @@ to
 
 
 /* ======================[Home Navigation]================= */
-.navbar {
+.newhome {
 	position: absolute;
 	top: 325px;
 }
 
-.navbar-inner {
+.newhome-inner {
 	padding: 0 0 0 30px;
 	width:669px;
 	margin: auto;
@@ -57,7 +55,33 @@ to
 
 
 /* ==========================================================
-=======================[END NAVIGATION]======================
+============================[TODAY===========================
+========================================================== */
+
+.img-big {
+	width:400px;
+	height: 400px;
+	margin: 0 15px 0 0;
+}
+
+#img-name {
+	color: #c2c2c2;
+	position: absolute;
+}
+
+/* Lower Carousel */
+
+.item {
+	margin: 0 80px 0 80px;
+}
+
+.carousel-control {
+	margin: 0;
+}
+
+
+/* ==========================================================
+============================[TODAY===========================
 ========================================================== */
 
 

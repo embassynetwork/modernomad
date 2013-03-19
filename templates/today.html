@@ -12,7 +12,9 @@ items. jessy is writing a custom template tag for this. standby... -->
 {% endif %}
 
 	<div class="span2">
-		<div class="img-polaroid float-left">
+		<span id="img-name">{{ p.first_name }}</span>
+		
+		<div class="img-polaroid float-left">			
 			<!-- THIS IS BROKEN - clicking the link does not advance the slide to the specific slide position -->
 			<a href="#profileCarousel" data-slide-to="{{ forloop.counter0 }}">
 			<img 
@@ -45,7 +47,7 @@ items. jessy is writing a custom template tag for this. standby... -->
 	<div class="item">
     {% endif %}
 
-		<div class="img-polaroid float-left">
+		<div class="img-polaroid float-left img-big">
 			<img class="profile-img-thumb" 
 			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}" 
 			/>
