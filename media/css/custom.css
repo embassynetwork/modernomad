@@ -1,9 +1,64 @@
 /* ==========================================================
-==========================[ NAVIGATION]======================
+==========================[NAVIGATION]=======================
 ========================================================== */
-.navbar {
-	background: red;
+
+/* ======================[Global Navigation]================= */
+
+.top-nav {
+   float:left;
+   width:100%;
+   background:#fff;
+   overflow:hidden;
+   position:relative;
 }
+
+.top-nav ul {
+   clear:left;
+   float:left;
+   list-style:none;
+   margin:0;
+   padding:0;
+   position:relative;
+   left:50%;
+   text-align:center;
+}
+
+to
+
+.top-nav a {
+	display: block;
+	width: 50px;
+	color: #FFF;
+	text-decoration: none;
+	background: gray;
+	
+}
+.top-nav a:hover {
+	background: green;
+}
+
+
+/* ======================[Home Navigation]================= */
+.navbar {
+	position: absolute;
+	top: 325px;
+}
+
+.navbar-inner {
+	padding: 0 0 0 30px;
+	width:669px;
+	margin: auto;
+}
+
+.affix {
+	position: fixed;
+	top: 0px;
+}
+
+
+/* ==========================================================
+=======================[END NAVIGATION]======================
+========================================================== */
 
 
 
@@ -96,9 +151,6 @@ textarea {
 }
 
 .helptext {
-}
-
-.navbar {
 }
 
 p.notice {

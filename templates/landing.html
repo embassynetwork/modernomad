@@ -14,10 +14,6 @@
 	<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
 
 	<style type="text/css">
-	  body {
-		padding-top: 100px;
-		padding-bottom: 40px;
-	  }
 
 	  /* Custom container */
 	  .container-narrow {
@@ -55,11 +51,6 @@
 		margin-top: 28px;
 	  }
 
-	  .navbar-inner {
-		width:700px;
-		margin: auto;
-		padding: 30px;
-	  }
 	  .centered {
 		text-align: center;
 	  }
@@ -78,7 +69,7 @@
 
   </head>
 
-  <body data-spy="scroll" data-target=".navbar" data-offset="100">
+  <body>
 
 	<!-- Part 1: Wrap all page content here -->
 	<div class="container-narrow">
@@ -86,8 +77,8 @@
 	{% block wrapper %}
 	<div id="wrap">
 	{% endblock %}
-
-	  <div class="navbar navbar-fixed-top">
+	
+	  <div class="navbar" data-spy="affix" data-offset-top="325">
 		  <div class="navbar-inner">
 
 				  <a class="brand" href="/">Home</a>
@@ -105,6 +96,13 @@
 
 
 	<div class="jumbotron" id="mission">
+		<div class="global-nav">
+			<ul class="top-nav">
+				<li><a href="#mission">Mission</a></li>
+				<li><a href="#house">House</a></li>
+			</ul>		
+		</div>
+
 		<h2>Embassy Network Alpha</h2>
 		<p class="lead" style="text-align:right;">Reinventing home as a place of purpose and intention. We seek out those who want to lead examined lives and be around those who will challenge and support them to make a positive impact at scale.</p>
 		<a class="btn btn-large btn-success" href="#participate">Become a Member</a>
