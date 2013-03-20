@@ -296,8 +296,52 @@ class Reconcile(models.Model):
 		self.status = Reconcile.INVOICED
 		self.save()
 
-	def generate_receipt(self):
-		pass
+	def send_receipt(self):
+		if self.reservation.hosted:
+			# XXX TODO make this a proper error which is viewable in the admin form.
+			print "hosted reservation invoices not supported"
+			return False
+		if not self.status == Reconcile.UNPAID and not self.status == Reconcile.PAID:
+			# XXX TODO proper error handling. 
+			print "reservation must be unpaid or paid to generate receipt"
+			return False
+
+		if (not self.paid_amount or not self.payment_method or not self.transaction_id 
+			or not self.payment_date):
+			return False
+
+		total_paid = self.paid_amount
+
+		plaintext = get_template('emails/receipt.txt')
+		htmltext = get_template('emails/receipt.html')
+		c = Context({
+			'first_name': self.reservation.user.first_name, 
+			'last_name': self.reservation.user.last_name, 
+			'res_id': self.reservation.id,
+			'today': datetime.datetime.today(), 
+			'arrive': self.reservation.arrive, 
+			'depart': self.reservation.depart, 
+			'room': self.reservation.room.name, 
+			'num_nights': self.reservation.total_nights(), 
+			'rate': self.get_rate(), 
+			'payment_method': self.payment_method,
+			'transaction_id': self.transaction_id,
+			'payment_date': self.payment_date,
+			'total_paid': total_paid,
+		}) 
+
+		subject = "[Embassy SF] Receipt for your Stay %s - %s" % (str(self.reservation.arrive), str(self.reservation.depart))  
+		sender = "stay@embassynetwork.com"
+		recipients = [self.reservation.user.email,]
+		text_content = plaintext.render(c)
+		html_content = htmltext.render(c)
+		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
+		msg.attach_alternative(html_content, "text/html")
+		msg.send()
+		if self.status != Reconcile.PAID:
+			self.status = Reconcile.PAID
+			self.save()
+		return True
 
 	def store_payment_details(self, transaction_id, date, method, amount, service=None):
 		self.transaction_id = transaction_id

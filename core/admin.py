@@ -38,6 +38,21 @@ class ReservationAdmin(admin.ModelAdmin):
 		msg = prefix + " sent"
 		self.message_user(request, msg)
 
+	def send_receipt(self, request, queryset):
+		success_list = []
+		failure_list = []
+		for item in queryset:
+			if item.reconcile.send_receipt():
+				success_list.append(str(item.id))
+			else:
+				failure_list.append(str(item.id))
+		msg = ""
+		if len(success_list) > 0:
+			msg += "Receipts sent for reservation(s) %s. " % ",".join(success_list)
+		if len(failure_list) > 0:
+			msg += "Receipt sending failed for reservation(s) %s. (Make sure all payment information has been entered in the reservation details and that the status of the reservation is either unpaid or paid.)" % ",".join(failure_list)
+		self.message_user(request, msg)
+
 	def reconcile_as_paid(self, request, queryset):
 		for item in queryset:
 			rec = item.reconcile
@@ -99,13 +114,12 @@ class ReservationAdmin(admin.ModelAdmin):
 		self.message_user(request, msg)
 
 
-
 	model = Reservation
 	list_filter = ('status','hosted', 'reconcile__status')
 	list_display = ('__unicode__', 'user', 'status', 'arrive', 'depart', 'total_nights', 'room', 'hosted', paid_status, current_rate, automatic_invoice)
 	inlines = [ReconcileInline]
 	ordering = ['depart',]
-	actions= ['send_invoice', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
+	actions= ['send_invoice', 'send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
 	
 class UserProfileInline(admin.StackedInline):
     model = UserProfile

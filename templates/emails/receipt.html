@@ -1,14 +1,18 @@
 <body><table  cellspacing="0" cellpadding="0" border="0">
 	<tr><td width="600px">
-		<p margin="0 0 1.6em 0">Dear {{ first_name }},</p>
-		<p margin="0 0 1.6em 0">Thanks for staying with us! This email contains your invoice information. As a reminder, your reservation details are available <a href="http://embassynetwork.com/reservation/{{res_id}}/">online</a>.</p> 
+		<p margin="0 0 1.6em 0"><strong>*-*-*- Receipt for Your Stay -*-*-*</strong></p> 
+		<p margin="0 0 1.6em 0">*-*-*- The Embassy Network -*-*-*</p>
+		<p margin="0 0 1.6em 0">*-*-*- Reimagine Home -*-*-*</p>
 
 		<p margin="0 0 1.6em 0">
-			<strong>Invoice Date:</strong> {{ today }}
+			<strong>{{ first_name }} {{last_name}}</strong>
+			<strong>Paid on: {{ payment_date }}</strong>
 		</p>
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 			<tr><td><strong>Arrival Date:</strong> {{ arrive }}</td></tr>
 			<tr><td><strong>Departure Date:</strong> {{ depart }}</td></tr>
+			<tr><td><strong>Payment Method:</strong> {{ payment_method|title }}</td></tr>
+			<tr><td><strong>Transaction ID:</strong> {{ transaction_id }}</td></tr>
 		</table>
 
 		<table border="0" cellspacing="0" cellpadding="10" border="0">
@@ -19,19 +23,11 @@
 			<td align="left" width="200px">{{ room }}</td><td align="center" width="200px">{{ num_nights }}</td><td align="right" width="200px">${{ rate }}</td>
 		</tr>
 		<tr>
-			<td colspan="3" align="right" width="600px">Total: ${{ total }}</td>
+			<td colspan="3" align="right" width="600px">Total Paid: ${{ total_paid }} - <strong>Thank you!</strong></td>
 		</tr>
 		</table>
 
-		<p margin="0 0 1.6em 0">You can pay via credit card, cash, check, bank transfer, or Dwolla.</p> 
-
-		<table border="0" cellspacing="0" cellpadding="0" border="0">
-		<tr><td>Credit card: <a href="embassynetwork.com/payment">embassynetwork.com/payment</a></td></tr>
-		<tr><td>Dwolla: <a href="https://www.dwolla.com/hub/embassynetwork">https://www.dwolla.com/hub/embassynetwork</a></td></tr>
-		<tr><td>Bank Details: Bank of America, Account 164108426532 // Routing 121000358</td></tr>
-		</table>
-
-		<p margin="0 0 1.6em 0">Thank you from the Embassy!</p>
+		<p margin="0 0 1.6em 0">Cheers to Hacking Home. Have fun on your adventure and thank you from the Embassy!</p>
 
 		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 		<tr><td align="center">:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::</td></tr>

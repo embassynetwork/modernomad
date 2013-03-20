@@ -1,20 +1,22 @@
-Dear {{ first_name }},
+*-*-*- Receipt for Your Stay -*-*-*
+*-*-*- The Embassy Network -*-*-*
+*-*-*- Reimagine Home -*-*-*
 
-Thank you for your payment for your recent stay with us. This is your receipt.  
+{{ first_name }} {{last_name}}
+Paid on: {{ payment_date }}
 
-Receipt Date: {{ today }}
 Arrival Date: {{ arrive }}
 Departure Date: {{ depart }}
+Payment Method: {{ payment_method|title }}
+Transaction ID: {{ transaction_id }}
+
 
 Description .............. Quantity ......... Rate
 {{ room }} ..... {{ num_nights }} ..... {{ rate }}
 
-..................... Total Paid: {{ total }}
+..................... Total Paid: {{ total_paid }} - Thank You!
 
-Receipt ID: {{ receipt_id }}
-Payment Method: {{ payment_method }}
-
-Thank you from the Embassy!
+Cheers to Hacking Home. Have fun on your adventure and thank you from the Embassy!
 
 :::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
 :::: California Benefit Corporation, EIN 45-5386726 ::::		
