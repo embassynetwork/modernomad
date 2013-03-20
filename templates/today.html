@@ -1,34 +1,30 @@
 {% extends "base.html" %}
+{% load core_tag_extras %}
 
 {% block body %}
 
-{% for p in people_today %}
+{% for subset in people_today|subsets_size:6 %}
+<div class="row-fluid"> 
 
-<!-- this forloop.counter business is a hack - it will only work for up to 12
-items. jessy is writing a custom template tag for this. standby... --> 
-
-{% if forloop.counter == 1 or forloop.counter == 7 %} 
-	<div class="row-fluid"> 
-{% endif %}
+{% for person in subset %}
 
 	<div class="span2">
-		<span id="img-name">{{ p.first_name }}</span>
+		<div id="img-name-back"><div id="img-name">{{ person.first_name }}</div></div>
 		
 		<div class="img-polaroid float-left">			
 			<!-- THIS IS BROKEN - clicking the link does not advance the slide to the specific slide position -->
 			<a href="#profileCarousel" data-slide-to="{{ forloop.counter0 }}">
 			<img 
 				class="profile-img-thumb" 
-				src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
-			/> 
+				src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
+			/>
 			</a>
 		</div>
 	</div>
 
-{% if forloop.counter == 6 or forloop.counter == 12 or forloop.last %}
-</div>
-{% endif %}
+{% endfor %}
 
+</div>
 {% endfor %}
 
 <hr>
@@ -47,8 +43,10 @@ items. jessy is writing a custom template tag for this. standby... -->
 	<div class="item">
     {% endif %}
 
-		<div class="img-polaroid float-left img-big">
-			<img class="profile-img-thumb" 
+		<div class="float-left big-img">
+			<div id="big-img-name-back"><div id="big-img-name">{{ p.first_name }}</div></div>
+			
+			<img class="carousel-img" 
 			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}" 
 			/>
 		</div>

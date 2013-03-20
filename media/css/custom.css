@@ -58,18 +58,27 @@
 ============================[TODAY===========================
 ========================================================== */
 
-.img-big {
-	width:400px;
-	height: 400px;
-	margin: 0 15px 0 0;
+#img-name, #big-img-name {
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+	background: #333;	
+}
+
+#img-name-back, #big-img-name-back {
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; 	/* IE 5, 6, 7 */
+	filter: alpha(opacity=80); /* IE 8 & 9 */
+	-moz-opacity:0.8; 	/* Older than Firefox 0.9 */
+	-khtml-opacity: 0.8; 	/* Safari 1.x (pre WebKit!) */
+	opacity: 0.8;
 }
 
 #img-name {
-	color: #c2c2c2;
+	color: #fff;
 	position: absolute;
+	margin: 83px 0 0 7px;
+	padding: 0 5px 0 5px;
 }
 
-/* Lower Carousel */
 
 .item {
 	margin: 0 80px 0 80px;
@@ -79,6 +88,32 @@
 	margin: 0;
 }
 
+.big-img {
+	width:400px;
+	height: 400px;
+	margin: 0 15px 0 0;
+	padding: 4px;
+	background-color: #fff;
+	border: 1px solid #ccc;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#big-img-name {
+	color: #fff;
+	font-size: 50px;
+	position: absolute;
+	margin: 330px 0 0 7px;
+	padding: 5px 10px 13px 10px;
+}
+
+.carousel-img {
+	width: 400px;
+	height: 400px;
+	overflow: hidden;
+}
 
 /* ==========================================================
 ============================[TODAY===========================
