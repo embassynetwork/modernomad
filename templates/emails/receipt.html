@@ -1,13 +1,17 @@
-<body><table  cellspacing="0" cellpadding="0" border="0">
-	<tr><td width="600px">
-		<p margin="0 0 1.6em 0"><strong>*-*-*- Receipt for Your Stay -*-*-*</strong></p> 
-		<p margin="0 0 1.6em 0">*-*-*- The Embassy Network -*-*-*</p>
-		<p margin="0 0 1.6em 0">*-*-*- Reimagine Home -*-*-*</p>
+<body>
+	<table cellspacing="0" cellpadding="0" border="0">
+	
+		<tr><td width="600px">
 
-		<p margin="0 0 1.6em 0">
-			<strong>{{ first_name }} {{last_name}}</strong>
-			<strong>Paid on: {{ payment_date }}</strong>
-		</p>
+		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+			<tr><td align="center"><strong>RECEIPT</strong></td></tr> 
+			<tr><td align="center"><strong>The Embassy Network</strong></td></tr>
+			<tr><td align="center"><strong>Reimagine Home</strong></td></tr>
+		</table>
+
+		<p margin="0 0 1.6em 0"> {{ first_name }} {{last_name}} </p>
+		<p margin="0 0 1.6em 0"> Paid on: {{ payment_date }} </p>
+
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 			<tr><td><strong>Arrival Date:</strong> {{ arrive }}</td></tr>
 			<tr><td><strong>Departure Date:</strong> {{ depart }}</td></tr>
