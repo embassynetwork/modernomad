@@ -59,8 +59,8 @@
 ========================================================== */
 
 #img-name, #big-img-name {
-	-moz-border-radius: 15px;
-	border-radius: 15px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 	background: #333;	
 }
 
@@ -91,7 +91,7 @@
 .big-img {
 	width:400px;
 	height: 400px;
-	margin: 0 15px 0 0;
+	margin: 0 25px 25px 0;
 	padding: 4px;
 	background-color: #fff;
 	border: 1px solid #ccc;
@@ -105,7 +105,7 @@
 	color: #fff;
 	font-size: 50px;
 	position: absolute;
-	margin: 330px 0 0 7px;
+	margin: 320px 0 0 12px;
 	padding: 5px 10px 13px 10px;
 }
 
@@ -447,4 +447,24 @@ b.dark-red-bold {
 
 .greyed-out {
 	color: #999999;
+}
+
+.row-spacer {
+	padding-bottom: 25px;
+}
+
+.reverse-emph {
+	color: white;
+	background-color: #999999;
+	padding: 5px;
+}
+
+.center {
+	text-align: center;
+}
+
+.title-size {
+	font-size: 350%;
+	padding:20px;
+	margin-bottom: 20px;
 }
