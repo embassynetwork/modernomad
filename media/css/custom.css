@@ -58,7 +58,7 @@
 ============================[TODAY===========================
 ========================================================== */
 
-#img-name, #big-img-name {
+#img-name, #big-img-name, .reverse-emph {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	background: #333;	
@@ -75,7 +75,7 @@
 #img-name {
 	color: #fff;
 	position: absolute;
-	margin: 83px 0 0 7px;
+	margin: 113px 0 0 7px;
 	padding: 0 5px 0 5px;
 }
 
@@ -88,9 +88,13 @@
 	margin: 0;
 }
 
+.lead {
+	margin-top: 3px;
+}
+
 .big-img {
-	width:400px;
-	height: 400px;
+	width:360px;
+	height: 360px;
 	margin: 0 25px 25px 0;
 	padding: 4px;
 	background-color: #fff;
@@ -105,18 +109,18 @@
 	color: #fff;
 	font-size: 50px;
 	position: absolute;
-	margin: 320px 0 0 12px;
+	margin: 360px 0 0 7px;
 	padding: 5px 10px 13px 10px;
 }
 
 .carousel-img {
-	width: 400px;
-	height: 400px;
+	width: 360px;
+	height: 360px;
 	overflow: hidden;
 }
 
 /* ==========================================================
-============================[TODAY===========================
+==========================[GENERAL]==========================
 ========================================================== */
 
 
