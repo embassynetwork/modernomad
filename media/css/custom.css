@@ -88,15 +88,14 @@
 	margin: 0;
 }
 
-.lead {
-	margin-top: 3px;
-}
-
 .big-img {
-	width:360px;
-	height: 360px;
+	position: static;
+	display: block;
+	float: left;
+	width:400px;
+	height: 400px;
 	margin: 0 25px 25px 0;
-	padding: 4px;
+	padding: 4px 4px 4px 4px;
 	background-color: #fff;
 	border: 1px solid #ccc;
 	border: 1px solid rgba(0, 0, 0, 0.2);
@@ -105,19 +104,14 @@
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-#big-img-name {
-	color: #fff;
-	font-size: 50px;
-	position: absolute;
-	margin: 360px 0 0 7px;
-	padding: 5px 10px 13px 10px;
+.carousel-img {
+	width: 400px;
+	height: 400px;
+	overflow: hidden;
+	display: block;
 }
 
-.carousel-img {
-	width: 360px;
-	height: 360px;
-	overflow: hidden;
-}
+
 
 /* ==========================================================
 ==========================[GENERAL]==========================

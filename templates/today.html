@@ -19,15 +19,16 @@
 	<div class="item">
     {% endif %}
 
-		<div class="float-left big-img">
-			
+		<div class="big-img">
+			<div>
 			<img class="carousel-img" 
 			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}" 
 			/>
+			</div>
 		</div>
 
 		<div class="profile-peak">
-			<p class="lead"><span class="reverse-emph">Name:</span> {{ p.first_name }} {{ p.last_name}}</p>
+			<p class="lead"><h1>{{ p.first_name }} {{ p.last_name}}</h1></p>
 			<p class="lead"><span class="reverse-emph">Projects:</span> {{ p.profile.projects}}</p>
 			<p class="lead"><span class="reverse-emph">Sharing interests:</span> {{ p.profile.sharing}}</p>
 			<p class="lead"><span class="reverse-emph">Discussion topics:</span> {{ p.profile.discussion}}</p>
