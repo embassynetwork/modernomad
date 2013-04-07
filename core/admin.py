@@ -16,10 +16,19 @@ def reconcile_status(obj):
 	return obj.reconcile.status
 
 def current_rate(obj):
-	return obj.reconcile.get_rate()
+	rate = obj.reconcile.get_rate()
+	return "$%d" % rate
 
 def automatic_invoice(obj):
 	return obj.reconcile.automatic_invoice
+
+def reservation_value(obj):
+	value = obj.reconcile.get_rate()*obj.total_nights()
+	return "$%d" % value
+
+def user_profile(obj):
+	return '''<a href="/people/%s">%s %s (%s)</a>''' % (obj.user.username, obj.user.first_name, obj.user.last_name, obj.user.username)
+user_profile.allow_tags = True
 
 def paid_status(obj):
 	return obj.reconcile.html_color_status()
@@ -116,7 +125,8 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	model = Reservation
 	list_filter = ('status','hosted', 'reconcile__status')
-	list_display = ('__unicode__', 'user', 'status', 'arrive', 'depart', 'total_nights', 'room', 'hosted', paid_status, current_rate, automatic_invoice)
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', current_rate, reservation_value, paid_status )
+	list_editable = ('status',)
 	inlines = [ReconcileInline]
 	ordering = ['depart',]
 	actions= ['send_invoice', 'send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
