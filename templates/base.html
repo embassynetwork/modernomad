@@ -1,3 +1,5 @@
+{% load core_tag_extras %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -38,30 +40,30 @@
 			  <div class="container">
 				  <a class="brand" href="/">Home</a>
 				  <ul data-spy="affix" data-offset-top="300" class="nav">
-					  <li><a href="/about">Our House</a></li>
+						<li><a href="/about">Our House</a></li>
+						<li><a href="/community">Our Community</a></li>
+						<li><a href="/participate">Participate</a></li>
+						<li><a href="/stay">Stay</a></li>
+
 
 					  {% if user.is_authenticated %}
-					  <li><a href="/calendar">Calendar</a></li>
-					  {% endif %}
 						<li class="dropdown">
-							<a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" href="#">
-								Community <b class="caret"></b>
+							<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+								In The House <b class="caret"></b>
 							</a>
-							<ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop1">
-								<li><a tabindex="-1" href="/community">People</a></li>
-								<li><a tabindex="-1" href="/participate">Participate</a></li>
+							<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+								<li><a href="/calendar">Calendar</a></li>
+								<li><a href="/today">Today</a></li>
 							</ul>
 						</li>
+					  {% endif %}
 					  
-
-					  <li><a href="/stay">Stay</a></li>
-
 					  {% if user.is_authenticated %}
 						<li class="dropdown">
 							<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
 								<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
 							</a>
-							<ul id="menu1" class="dropdown-menu" role="menu" aria-labelledby="drop2">
+							<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
 								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
 								<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
 								<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
@@ -71,6 +73,17 @@
 						<li><a href="/people/login"><i class="icon-user"></i> Login</a></li>
 					  {% endif %}
 
+					{% ifusergroup house_admin %}
+						<li class="dropdown">
+							<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
+								Admin <b class="caret"></b>
+							</a>
+							<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
+								<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
+								<li><a tabindex="-1" href="/admin/core/reservation/">Reservations</a></li>
+							</ul>
+						</li>
+					{% endifusergroup %}
 				  </ul>
 			  </div>
 		  </div>
