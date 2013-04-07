@@ -7,12 +7,14 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
+import uuid
 
 # imports for signals
 import django.dispatch 
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
 
+# mail imports
 from django.core.mail import send_mail
 from confirmation_email import confirmation_email_details
 from django.core.mail import EmailMultiAlternatives
@@ -354,6 +356,10 @@ class Reconcile(models.Model):
 Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
 
 def profile_img_upload_to(instance, filename):
+	ext = filename.split('.')[-1]
+	# rename file to random string
+	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+
 	upload_path = "data/avatars/%s/" % instance.user.username
 	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
 	print upload_path
@@ -362,7 +368,7 @@ def profile_img_upload_to(instance, filename):
 	print "*****"
 	if not os.path.exists(upload_abs_path):
 		os.makedirs(upload_abs_path)
-	return upload_path
+	return os.path.join(upload_path, filename)
 
 def get_default_profile_img():
 	path = os.path.join(settings.MEDIA_ROOT, "data/avatars/default.jpg")
@@ -376,7 +382,7 @@ class UserProfile(models.Model):
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
-	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.")#, default="data/avatars/default.jpg")
+	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.")
 	image_thumb = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
@@ -407,16 +413,17 @@ def size_images(sender, instance, **kwargs):
 
 	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
-		img_upload_dir_rel = profile_img_upload_to(instance, instance.image.name)
-		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_dir_rel, instance.image.name)
+		img_upload_path_rel = profile_img_upload_to(instance, instance.image.name)
+		print img_upload_path_rel
+		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_path_rel)
 		# resize returns a copy. resize() forces the dimensions of the image
 		# to match SIZE specified, squeezing the image if necessary along one
 		# dimension.
 		main_img = im.resize(UserProfile.IMG_SIZE, Image.ANTIALIAS)
 		main_img.save(main_img_full_path)
-		main_img_rel_path = os.path.join(img_upload_dir_rel, instance.image.name)
-		instance.image = main_img_rel_path
-		# now use resize this to generate the smaller thumbnail
+        # the image field is a link to the path where the image is stored
+		instance.image = img_upload_path_rel
+		# now resize this to generate the smaller thumbnail
 		thumb_img = im.resize(UserProfile.IMG_THUMB_SIZE, Image.ANTIALIAS)
 		thumb_full_path = os.path.splitext(main_img_full_path)[0] + ".thumb" + os.path.splitext(main_img_full_path)[1]
 		thumb_img.save(thumb_full_path)
@@ -424,7 +431,7 @@ def size_images(sender, instance, **kwargs):
 		# directory
 		# XXX Q: does this save the file twice? once by PIL and another time
 		# reading it in and saving it to the same place when the model saves?
-		thumb_rel_path = os.path.join(img_upload_dir_rel, os.path.basename(thumb_full_path))
+		thumb_rel_path = os.path.join(os.path.split(img_upload_path_rel)[0], os.path.basename(thumb_full_path))
 		instance.image_thumb = thumb_rel_path
 		print thumb_rel_path	
 
