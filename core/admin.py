@@ -15,19 +15,19 @@ class ReconcileInline(admin.TabularInline):
 def reconcile_status(obj):
 	return obj.reconcile.status
 
-def current_rate(obj):
+def rate(obj):
 	rate = obj.reconcile.get_rate()
 	return "$%d" % rate
 
 def automatic_invoice(obj):
 	return obj.reconcile.automatic_invoice
 
-def reservation_value(obj):
+def value(obj):
 	value = obj.reconcile.get_rate()*obj.total_nights()
 	return "$%d" % value
 
 def user_profile(obj):
-	return '''<a href="/people/%s">%s %s (%s)</a>''' % (obj.user.username, obj.user.first_name, obj.user.last_name, obj.user.username)
+	return '''<a href="/people/%s">%s %s</a> (%s)''' % (obj.user.username, obj.user.first_name, obj.user.last_name, obj.user.username)
 user_profile.allow_tags = True
 
 def paid_status(obj):
@@ -125,7 +125,7 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	model = Reservation
 	list_filter = ('status','hosted', 'reconcile__status')
-	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', current_rate, reservation_value, paid_status )
+	list_display = ('__unicode__', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, value, paid_status )
 	list_editable = ('status',)
 	inlines = [ReconcileInline]
 	ordering = ['depart',]
