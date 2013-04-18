@@ -15,6 +15,8 @@ from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
 from django.contrib import messages
+from django.conf import settings
+from django.utils import simplejson
 
 from core.models import UserProfile, Reservation, Room
 
@@ -95,7 +97,15 @@ def ReservationSubmit(request):
 		is_house_admin = True
 	else:
 		is_house_admin = False
-	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin})
+
+	# pass the rate for each room to the template so we can update the cost of
+	# a reservation in real time. 
+	rooms = Room.objects.all()
+	room_list = {}
+	for room in rooms:
+		room_list[room.name] = room.default_rate
+	room_list = simplejson.dumps(room_list)
+	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin, "room_list": room_list})
 
 
 @login_required
@@ -109,11 +119,12 @@ def ReservationDetail(request, reservation_id):
 		messages.add_message(request, messages.ERROR, msg)
 		return HttpResponseRedirect('/404')
 	else:
-		if reservation.arrive > datetime.date.today():
+		if reservation.depart >= datetime.date.today():
 			past = False
 		else:
 			past = True
-		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past})
+		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 
+			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 @login_required
 def UserEdit(request, username):
@@ -202,20 +213,34 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 		return HttpResponseRedirect("/")
 
 
+# @login_required
+# def ReservationPay(request, reservation_id):
+# 	reservation = Reservation.objects.get(id=reservation_id)
+# 	if not (request.user.is_authenticated() and request.user == reservation.user 
+# 		and request.method == "POST" and reservation.status == 'approved'):
+# 		return HttpResponseRedirect('/404')
+# 
+# 	# check if this is a comp
+# 	if reservation.reconcile.status == Reconcile.COMP:
+# 		messages.add_message(request, messages.INFO, "Oops! Looks like your reservation is a comp! Nothing to do here... move along... :)")
+# 
+# 	# get invoice info to populate the payment form
+# 	amount_owed = reservation.reconcile.total_owed()
+
 @login_required
 def ReservationConfirm(request, reservation_id):
 	reservation = Reservation.objects.get(id=reservation_id)
-	if (request.user.is_authenticated() and request.user == reservation.user 
+	if not (request.user.is_authenticated() and request.user == reservation.user 
 		and request.method == "POST" and reservation.status == 'approved'):
-
-		reservation.status = 'confirmed'
-		reservation.save()
-
-		messages.add_message(request, messages.INFO, 'Thank you! Check your email for further details.')
-		return HttpResponseRedirect("/reservation/%s" % reservation_id)
-
-	else:
 		return HttpResponseRedirect("/")
+
+
+	reservation.status = 'confirmed'
+	reservation.save()
+
+	messages.add_message(request, messages.INFO, 'Thank you! Check your email for further details.')
+	return HttpResponseRedirect("/reservation/%s" % reservation_id)
+
 
 @login_required
 def ReservationDelete(request, reservation_id):

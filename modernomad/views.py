@@ -1,20 +1,33 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from core.models import Reservation, UserProfile
+from core.models import Reservation, UserProfile, Reconcile
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
 from core.confirmation_email import confirmation_email_details
-from core.models import Reservation, Reconcile
 import json, datetime, stripe 
 from django.conf import settings
 from core.forms import PaymentForm
 from reservation_calendar import GuestCalendar
 from django.utils.safestring import mark_safe
 from django.db.models import Q
+from django.contrib.sites.models import Site
+from django.contrib import messages
+
 
 def new_home(request):
-	return render(request, "landing.html")
+	today = datetime.date.today()
+	coming_month_res = (
+			Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+			.exclude(depart__lt=today)
+			.exclude( arrive__gt=today+datetime.timedelta(days=30))
+		)
+	coming_month = []
+	for r in coming_month_res:
+		coming_month.append(r.user)
+	residents = User.objects.filter(groups__name='residents')
+	coming_month += list(residents)
+	return render(request, "landing.html", {'coming_month': coming_month})
 
 def index(request):
 	return render(request, "index.html")
@@ -178,11 +191,96 @@ def stay(request):
 def participate(request):
 	return render(request, "participate.html")
 
-def payment(request):
+
+def ReservationPayment(request):
+	print request.POST
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	token = request.POST.get('stripeToken')
+	save_card = request.POST.get('save-card')
+	reservation_id = request.POST.get('res-id')
+	amount_to_pay = request.POST.get('amount-paid')
+
+	reservation = Reservation.objects.get(id=reservation_id)
+	# account secret key 
+	stripe.api_key = settings.STRIPE_SECRET_KEY
+
+	saved_customer = True
+	if not reservation.user.profile.customer_id:
+		if save_card == "yes":
+			customer = stripe.Customer.create(
+					card=token,
+					description=reservation.user.email
+				)
+			profile = reservation.user.profile
+			profile.customer_id = customer.id
+			profile.save()
+		else:
+			saved_customer = False
+	
+	domain = 'http://' + Site.objects.get_current().domain
+	descr = "%s %s from %s - %s. Details: %s." % (reservation.user.first_name, 
+			reservation.user.last_name, str(reservation.arrive), 
+			str(reservation.depart), domain + reservation.get_absolute_url())
+
+	if saved_customer:
+		charge = stripe.Charge.create(
+				amount=amount_to_pay, 
+				currency="usd",
+				customer = reservation.user.profile.customer_id,
+				description=descr
+		)
+	else:
+		# if the user didn't want to save their card, use the token directly to
+		# create a one-time charge. 
+		charge = stripe.Charge.create(
+				amount=amount_to_pay,
+				currency="usd",
+				card=token,
+				description=descr
+		)
+
+	print charge
+
+	# set the status as paid and confirmed, and store the charge details
+	reservation.status = Reservation.CONFIRMED
+	reservation.save()
+	reconcile = reservation.reconcile
+	reconcile.status = Reconcile.PAID
+	reconcile.payment_service = "Stripe"
+	reconcile.payment_method = charge.card.type
+	reconcile.paid_amount = (charge.amount/100)
+	reconcile.transaction_id = charge.id
+	reconcile.payment_date = datetime.datetime.now()
+	reconcile.save()
+
+	reservation.reconcile.send_receipt()
+	variables = {
+		'first_name': reservation.user.first_name, 
+		'last_name': reservation.user.last_name, 
+		'res_id': reservation.id,
+		'today': datetime.datetime.today(), 
+		'arrive': reservation.arrive, 
+		'depart': reservation.depart, 
+		'room': reservation.room.name, 
+		'num_nights': reservation.total_nights(), 
+		'rate': reservation.reconcile.get_rate(), 
+		'payment_method': reservation.reconcile.payment_method,
+		'transaction_id': reservation.reconcile.transaction_id,
+		'payment_date': reservation.reconcile.payment_date,
+		'total_paid': reservation.reconcile.paid_amount
+	}
+
+	messages.add_message(request, messages.INFO, 'Thank you! This receipt has been emailed to you at %s.' % reservation.user.email)
+	return render(request, "showreceipt.html", variables)
+
+
+def GenericPayment(request):
 	if request.method == 'POST':
 		form = PaymentForm(request.POST)
 		if form.is_valid():
-			# account secret key (NOTE: THIS IS A TEST KEY)
+			# account secret key 
 			stripe.api_key = settings.STRIPE_SECRET_KEY
 			
 			# get the payment details from the form

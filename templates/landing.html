@@ -1,3 +1,5 @@
+{% load core_tag_extras %}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -175,140 +177,25 @@
 	
 	<hr>
 
-	<div class="row-fluid" id="community">
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>		
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-	</div>
+	{% for subset in coming_month|subsets_size:6 %}
 
-	<div class="row-fluid">
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>		
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-	</div>
+	{% for person in subset %}
 
-	<div class="row-fluid">
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
+	<div class="span2">
+		<div id="img-name-back">
+			<div id="img-name">{{ person.first_name }}</div>
 		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
-		</div>		
-		<div class="span2">
-		<ul class="thumbnails">
-			<div class="thumbnail">
-				<img src="http://placehold.it/160x160" alt="">
-			</div>
-		</ul>
+		<div class="img-polaroid float-left">			
+			<a href="{{ person.profile.url}}"> 
+			<img class="profile-img-thumb" 
+				src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
+			/>
+			</a>
 		</div>
 	</div>
+	
+	{% endfor %}<!-- end person in subset -->
+	{% endfor %}<!-- end subsets in coming_month -->
 
 
 	<hr>

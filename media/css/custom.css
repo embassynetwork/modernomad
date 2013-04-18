@@ -389,6 +389,21 @@ ul.errorlist {
 	padding-top: 25px;
 }
 
+#reservation-sticky-info {
+	background: #cfedb1;
+    padding: 10px;
+    position:static;
+    right:310px;
+    top:30px;
+    width:250px;
+}
+
+#reassure {
+	padding-top: 10px;
+	font-style: italic;
+	color: #e5ae09;
+}
+
 #by-month-nav {
 	padding-top: 50px;
 	margin: auto;

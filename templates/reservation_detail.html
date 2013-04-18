@@ -35,9 +35,53 @@
 
 	{% elif reservation.status == "approved" %}
 		<div>
-			<span class="btn btn-large btn disabled res-status-btn" type="button">Approved</span>
-			<i class="icon-arrow-right"></i>
-			<form class="btn-inline" method="post" action="/reservation/{{reservation.id}}/confirm/">{% csrf_token %} <input type="submit" class="btn btn-large btn-success res-status-btn" value="Click to Confirm"></form>
+			<form action="/reservationpayment/" method="POST" id="payform">{% csrf_token %}
+				<script src="/media/js/jquery-1.8.2.js"></script>
+				<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+
+				<input type="hidden" value={{ reservation.reconcile.total_owed_in_cents }} name="amount-paid">
+				<input type="hidden" value={{ reservation.id }} name="res-id">
+				<input type="submit" id="pay-button" class="btn btn-large btn-success res-status-btn" value="Click to Confirm and Pay">
+				<div>Save Card for Future Use (default is yes)? 
+					<input type="radio" value="yes" name="save-card" checked="checked"> Yes 
+					<input type="radio" value="no" name="save-card"> No
+					<p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure
+					credit card processing with SSL encryption. Your card card
+					information is never stored on our servers.</small></em></p>
+				</div>
+
+				<script>
+					$(document).ready(function() {
+					$('#pay-button').click(function(event){
+						console.log("here");
+						event.preventDefault();
+
+						// if the user has a saved card, go straight to the
+						// payment processing page. 
+						$customer_id = "{{ reservation.user.profile.customer_id }}";
+						if ($customer_id) {
+							$('#payform').submit();
+						}
+						else {
+							var token = function(res){
+								var $input = $('<input type=hidden name=stripeToken />').val(res.id);
+								$('#payform').append($input).submit();
+							};
+
+							StripeCheckout.open({
+								key: "{{ stripe_publishable_key }}",
+								amount: "{{ reservation.reconcile.total_owed_in_cents }}",
+								name: "The Embassy Network",
+								description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.reconcile.get_rate }}.",
+								image: "/128x128.png",
+								test: '<input name="test1" value="test1">',
+								token: token
+							});
+						}
+					});
+					});
+				</script>
+			</form>
 		</div>
 
 	{% elif reservation.status == "confirmed" %}
@@ -128,4 +172,6 @@ $("#res-delete").click(function (e) {
     e.preventDefault();
 });
 </script>
+
+
 {% endblock %}

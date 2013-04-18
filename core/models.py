@@ -85,6 +85,7 @@ class Reservation(models.Model):
 
 	def total_nights(self):
 		return (self.depart - self.arrive).days
+	total_nights.short_description = "Nights"
 
 # send house_admins notification of new reservation. use the post_save signal
 # so that a) we can be sure the reservation was successfully saved, and b) the
@@ -258,7 +259,17 @@ class Reconcile(models.Model):
 
 
 	def default_rate(self):
+		# default_rate always returns the default rate regardless of comps or
+		# custom rates.
 		return self.reservation.room.default_rate
+
+
+	def total_owed(self):
+		# get_rate checks for comps and custom rates. 
+		return self.reservation.total_nights()*self.get_rate()
+
+	def total_owed_in_cents(self):
+		return self.total_owed()*100
 
 	def send_invoice(self):
 		''' trigger a reminder email to the guest about payment.''' 
@@ -271,8 +282,6 @@ class Reconcile(models.Model):
 			# different once, with thanks/asking for feedback.
 			return
 
-		total_owed = self.reservation.total_nights()*self.get_rate()
-
 		plaintext = get_template('emails/invoice.txt')
 		htmltext = get_template('emails/invoice.html')
 		c = Context({
@@ -284,7 +293,7 @@ class Reconcile(models.Model):
 			'room': self.reservation.room.name, 
 			'num_nights': self.reservation.total_nights(), 
 			'rate': self.get_rate(), 
-			'total': total_owed,
+			'total': self.total_owed,
 		}) 
 
 		subject = "[Embassy SF] Thanks for Staying with us!" 
@@ -391,6 +400,9 @@ class UserProfile(models.Model):
 	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing during your stay?")
 	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
 	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
+	# currently used to store the stripe customer id but could be used for
+	# other payment platforms in the future
+	customer_id = models.CharField(max_length=200, blank=True, null=True)
 
 	def __unicode__(self):
 		return (self.user.__unicode__())

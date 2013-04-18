@@ -162,6 +162,14 @@ class PaymentForm(forms.Form):
 	comment = forms.CharField(widget=forms.Textarea, required=False, help_text="Optional. If you are\
 contributing for someone else, make sure we know who this payment is for.")
 
+class StripeCustomerCreationForm(forms.Form):
+	name = forms.CharField()
+	email = forms.EmailField()
+	card_number = forms.CharField()
+	cvc = forms.IntegerField()
+	expiration_month = forms.IntegerField(label='(MM)')
+	expiration_year = forms.IntegerField(label='(YYYY)')
+
 
 
 

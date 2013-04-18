@@ -13,17 +13,13 @@
 	</div>
 	{% endif %}
 
-	<h4>New reservation request from {{user.first_name|title}}</h4>
+	<h4>New reservation request</h4>
 	<p>We'll get back to you shortly - usually within a day or two. </p>
 
 	<div class="form-container">
 		<form class="well form-inline" method="post" action="/reservation/create/">{% csrf_token %}
 
-			{% if user_form %}
-				<fieldset>
-				{{ user_form.as_table }}
-				</fieldset>
-			{% endif %}
+			<div id="reservation-sticky-info" class="pull-right">Specify your arrival and departure dates and pick a room to see value of this reservation.</div>
 
 			{% for field in form %}
 				{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
@@ -58,8 +54,64 @@
 				{% endif %} 
 
 			{% endfor %}
-			<input type="submit" value="Submit">
+			<input id="submit-reservation" type="submit" value="Submit">
+			<div id="reassure"></div>
 
 		</form>
 	</div>
+{% endblock %}
+
+{% block extrajs %}
+
+<script>
+	$("#id_room, #id_arrive, #id_depart").change(function(event) {
+		console.log("here");
+		var $room_name = $("#id_room option:selected").text();
+		$room_list = {{ room_list|safe }};
+		$rate = $room_list[$room_name];
+
+		// TODO - get arrive and depart dates, update value. 
+		$arrive = $("#id_arrive").val();
+		$depart = $("#id_depart").val();
+
+		$msg = "Specify your arrival and departure dates and pick a room to see value of this reservation.";
+		$value = null;
+		if ($arrive && $depart && $rate) {
+			// date object subtraction returns the difference in milliseconds,
+			// so convert to days. 
+			var $milliseconds_in_a_day = 86400000;
+			var $days = Math.abs((new Date($depart) - new Date($arrive))/$milliseconds_in_a_day)
+			$value = $days*$rate;
+			$msg = $room_name + " for " + $days + " days at $" + $rate + " a night. Reservation value is $" + $value + ".";
+		}
+		
+		$("#reservation-sticky-info").html($msg);
+
+		// update the submit button text to reflect the cost
+		var $customer_id = "{{ user.profile.customer_id }}"
+		console.log($customer_id);
+		console.log($value);
+		if ($customer_id && $value) {
+			$("#submit-reservation").val("Submit and Authorize Payment of $" + $value);
+			$("#reassure").html("<p>You will only be charged if this reservation is approved.</p>");
+		}
+
+	})
+</script>
+
+<script>
+	$(function() {
+		var $stickyTop = $('#reservation-sticky-info').offset().top; //
+		var $offset = 30; // pixels
+		$(window).scroll(function(){ // scroll event
+			var $windowTop = $(window).scrollTop();
+			if ($stickyTop < $windowTop + $offset) {
+				$('#reservation-sticky-info').css({ position: 'fixed', top: $offset });
+			} else {
+				$('#reservation-sticky-info').css('position','static');
+			}
+		})
+	});
+</script>
+
 {% endblock %}
