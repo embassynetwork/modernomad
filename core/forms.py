@@ -38,7 +38,7 @@ class UserProfileForm(forms.ModelForm):
 
 	class Meta:
 		model = UserProfile
-		exclude = ['user', 'status', 'image_thumb', ]
+		exclude = ['user', 'status', 'image_thumb', 'customer_id', ]
 		# fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
 
 	def __init__(self, *args, **kwargs):
@@ -110,7 +110,7 @@ class UserProfileForm(forms.ModelForm):
 class ReservationForm(forms.ModelForm):
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'user']
+		exclude = ['created', 'updated', 'user', 'last_msg']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker'}),

@@ -15,20 +15,40 @@
 </div>
 {% endif %}
 
+<div class="float-right">
 {% if u.profile.image %}
-<div class="img-polaroid float-right">
+<div class="img-polaroid">
 	<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
 </div>
 {% endif %}
 
-
-<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
 {% ifequal u user %}
 	<div id="edit-profile">
-		<a href="/people/{{user.username}}/edit/">Edit Profile</a>
+		<a class="btn btn-inverse btn-small" href="/people/{{user.username}}/edit/">Edit Profile</a>
+		{% if user.profile.customer_id %}
+		<form class="userprofile-card-form" method="post" action="/people/{{user.username}}/deletecard/">{% csrf_token %}
+			<input type="submit" class="btn btn-danger btn-small" value="Delete my saved credit card">
+		</form>
+		{% else %}
+		<div>
+			<form class="userprofile-card-form" action="/people/{{user.username}}/addcard/" method="POST" id="payform">
+				{% csrf_token %}
+				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+					value="Add Credit Card" >
+				<div>
+					<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+						secure credit card processing with SSL encryption. Your card card
+					information is never stored on our servers.</small></em></p>
+				</div>
+			</form>
+		</div>
+		{% endif %}
 	</div>
 {% endifequal %}
+</div>
 
+
+<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
 
 {% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
 
@@ -36,7 +56,7 @@
 
 {% else %}
 	<h4>About {{u.first_name|title}}:</h4>
-	<p>{{ u.profile.bio }}</p>
+	<p>{{ u.profile.bio|default:"Nothing written yet." }}</p>
 
 	<h4>Current Projects:</h4>
 	<p>{{ u.profile.projects|default:"Empty" }}</p>
@@ -47,52 +67,11 @@
 	<h4>Discussion topics:</h4>
 	<p>{{ u.profile.discussion|default:"Empty" }}</p>
 
-	{% if u.profile.links %}
-	<div class="user-links">
-	<span class="icon-spacer"><i class="icon-globe"></i></span>
-		{% with links=u.profile.links|split:', ' %}
-			{% for link in links %}
-				<span class="user-link"><a href="{{link}}">{{link}}</a></span>
-			{% endfor %}
-		{% endwith %}
-	</div>
-	{% endif %}
+	{% include "snippets/profile_links.html" %}
 {% endif %}
 
 <h2>Reservations</h2>
-{% if past_reservations|length > 0 %}
-<h4>Previous</h4>
-{% for reservation in past_reservations %}
-	<div>
-		{% if reservation.hosted %}
-			(hosting {{ reservation.guest_name }})
-		{% endif %}
-		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
-		{% if user == u %}
-		- <em>{{reservation.status}}</em>
-		{% endif %}
-	</div>
-{% endfor %}
-{% endif %}
-
-{% if upcoming_reservations|length > 0 %}
-<h4>Upcoming</h4>
-{% for reservation in upcoming_reservations %}
-	<div>
-		{% if reservation.hosted %}
-			(hosting {{ reservation.guest_name }})
-		{% endif %}
-		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
-		{% if user == u %}
-		- <em>{{reservation.status}}</em>
-		{% endif %}
-	</div>
-{% endfor %}
-{% endif %}
-
-{% if upcoming_reservations|length == 0 and past_reservations|length == 0 %}
-	<p>No reservations</p>
-{% endif %}
+{% include "snippets/user_reservations.html" %}
 
 {% ifequal u user %}
 	<div class="new-reservation">
@@ -105,3 +84,41 @@
 {% endifequal %}
 
 {% endblock %}
+
+{% block extrajs %}
+<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+
+<script>
+	$(document).ready(function() {
+		$customer_id = "{{ reservation.user.profile.customer_id }}";
+		$('#pay-button').click(function(event){
+			event.preventDefault();
+			// if the user has a saved card, go straight to the
+			// payment processing page. (note: this shouldn't happen for new
+			// reservations but might for legacy reservations)
+			$customer_id = "{{ reservation.user.profile.customer_id }}";
+			console.log($customer_id);
+
+			if ($customer_id == "None" || $customer_id == "") {
+				var token = function(res){
+					var $input = $('<input type=hidden name=stripeToken />').val(res.id);
+					$('#payform').append($input).submit();
+				};
+
+				StripeCheckout.open({
+					key: "{{ stripe_publishable_key }}",
+					name: "The Embassy Network",
+					panelLabel:"Save Card",
+					image: "/media/img/embassy-front-1-128x128.jpg",
+					token: token
+				});
+			} else {
+				$('#payform').submit();
+			}
+		});
+	});
+</script>
+
+{% endblock %}
+
+

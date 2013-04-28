@@ -17,8 +17,9 @@ import datetime
 from django.contrib import messages
 from django.conf import settings
 from django.utils import simplejson
-
-from core.models import UserProfile, Reservation, Room
+from core.decorators import group_required
+from core.models import UserProfile, Reservation, Room, Reconcile
+import stripe
 
 def logout(request):
 	logout(request)
@@ -42,7 +43,8 @@ def GetUser(request, username):
 		else:
 			past_reservations.append(reservation)
 	return render(request, "user_details.html", {"u": user, 
-		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations})
+		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 
+		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def ListHouses(request):
 	houses = House.objects.all()
@@ -67,6 +69,7 @@ def get_reservation_form_for_perms(request, post, instance):
 	if not request.user.groups.filter(name='house_admin'):
 		form.fields['room'].queryset = Room.objects.filter(primary_use="guest")
 	return form
+
 
 @login_required
 def ReservationSubmit(request):
@@ -145,6 +148,62 @@ def UserEdit(request, username):
 		return render(request, 'user_edit.html', {'profile_form': profile_form})
 	return HttpResponseRedirect("/")
 
+@login_required
+def UserAddCard(request, username):
+	''' Adds a card from either the reservation page or the user profile page.
+	Displays success or error message and returns user to originating page.'''
+
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	token = request.POST.get('stripeToken')
+	if not token:
+		messages.add_message(request, messages.INFO, "No credit card information was given.")
+		return HttpResponseRedirect("/people/%s" % username)
+
+	reservation_id = request.POST.get('res-id')
+	if reservation_id:
+		reservation = Reservation.objects.get(id=reservation_id)
+	user = User.objects.get(username=username)
+
+	stripe.api_key = settings.STRIPE_SECRET_KEY
+
+	try:
+		customer = stripe.Customer.create(
+			card=token,
+			description=user.email
+		)
+		profile = user.profile
+		profile.customer_id = customer.id
+		profile.save()
+
+		if reservation_id:
+			reservation.status = Reservation.CONFIRMED
+			reservation.save()
+			messages.add_message(request, messages.INFO, 'Thank you! Payment will be processed at the end of your stay.')
+			return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+		else:
+			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
+			return HttpResponseRedirect("/people/%s" % username)
+	except stripe.CardError, e:
+		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
+		if reservation_id:
+			return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+		else:
+			return HttpResponseRedirect("/people/%s" % username)
+
+def UserDeleteCard(request, username):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	profile = UserProfile.objects.get(user__username=username)
+	profile.customer_id = None
+	profile.save()
+	
+	messages.add_message(request, messages.INFO, "Card deleted.")
+	return HttpResponseRedirect("/people/%s" % profile.user.username)
+
+
 
 @login_required
 def ReservationEdit(request, reservation_id):
@@ -212,21 +271,6 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 	else:
 		return HttpResponseRedirect("/")
 
-
-# @login_required
-# def ReservationPay(request, reservation_id):
-# 	reservation = Reservation.objects.get(id=reservation_id)
-# 	if not (request.user.is_authenticated() and request.user == reservation.user 
-# 		and request.method == "POST" and reservation.status == 'approved'):
-# 		return HttpResponseRedirect('/404')
-# 
-# 	# check if this is a comp
-# 	if reservation.reconcile.status == Reconcile.COMP:
-# 		messages.add_message(request, messages.INFO, "Oops! Looks like your reservation is a comp! Nothing to do here... move along... :)")
-# 
-# 	# get invoice info to populate the payment form
-# 	amount_owed = reservation.reconcile.total_owed()
-
 @login_required
 def ReservationConfirm(request, reservation_id):
 	reservation = Reservation.objects.get(id=reservation_id)
@@ -234,12 +278,32 @@ def ReservationConfirm(request, reservation_id):
 		and request.method == "POST" and reservation.status == 'approved'):
 		return HttpResponseRedirect("/")
 
+	if not reservation.user.profile.customer_id:
+		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
+	else:
+		reservation.confirm_and_notify()
+		reservation.save()
+		messages.add_message(request, messages.INFO, 'Thank you! You will receive a confirmation email with further details.')
 
-	reservation.status = 'confirmed'
-	reservation.save()
-
-	messages.add_message(request, messages.INFO, 'Thank you! Check your email for further details.')
 	return HttpResponseRedirect("/reservation/%s" % reservation_id)
+
+
+@login_required
+def ReservationCancel(request, reservation_id):
+	if not request.method == "POST":
+		return HttpResponseRedirect("/404")
+
+	reservation = Reservation.objects.get(id=reservation_id)
+	if (not (request.user.is_authenticated() and request.user == reservation.user) 
+			and not request.user.groups.filter(name='house_admin')):
+		return HttpResponseRedirect("/404")
+
+	redirect = request.POST.get("redirect")
+
+	reservation.cancel()
+	messages.add_message(request, messages.INFO, 'The reservation has been canceled.')
+	username = reservation.user.username
+	return HttpResponseRedirect(redirect)
 
 
 @login_required
@@ -256,6 +320,119 @@ def ReservationDelete(request, reservation_id):
 
 	else:
 		return HttpResponseRedirect("/")
+
+
+# ******************************************************
+#           reservation management views
+# ******************************************************
+
+@group_required('house_admin')
+def ReservationList(request):
+	reservations = Reservation.objects.all()
+	return render(request, 'reservation_list.html', {"reservations": reservations})
+
+
+@group_required('house_admin')
+def ReservationManage(request, reservation_id):
+	reservation = Reservation.objects.get(id=reservation_id)
+	user = User.objects.get(username=reservation.user.username)
+	other_reservations = Reservation.objects.filter(user=user).exclude(status='deleted').exclude(id=reservation_id)
+	past_reservations = []
+	upcoming_reservations = []
+	for res in other_reservations:
+		if res.arrive >= datetime.date.today():
+			upcoming_reservations.append(res)
+		else:
+			past_reservations.append(res)
+	domain = Site.objects.get_current().domain
+	return render(request, 'reservation_manage.html', {
+		"r": reservation, 
+		"past_reservations":past_reservations, 
+		"upcoming_reservations": upcoming_reservations,
+		"domain": domain
+	})
+
+@group_required('house_admin')
+def ReservationManageUpdate(request, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	reservation = Reservation.objects.get(id=reservation_id)
+	reservation_action = request.POST.get('reservation-action')
+	try:
+		if reservation_action == 'tentative-and-prompt':
+			reservation.set_tentative_and_prompt()
+		elif reservation_action == 'tentative-and-notify':
+			reservation.set_tentative_and_notify()
+		elif reservation_action == 'confirm-and-notify':
+			result = reservation.confirm_and_notify()
+		elif reservation_action == 'remind-to-confirm':
+			# asks the user to confirm (without prompting for payment details,
+			# usually because they are not needed or we already have them). 
+			reservation.remind_to_confirm()
+		elif reservation_action == 'remind-payment-info-needed':
+			reservation.remind_payment_info_needed()
+		elif reservation_action == 'comp-tentative-and-notify':
+			reservation.comp_tentative_and_notify()
+		elif reservation_action == 'comp-confirm-and-notify':
+			reservation.comp_confirm_and_notify()
+		else:
+			raise Reservation.ResActionError("Unrecognized action.")
+
+		messages.add_message(request, messages.INFO, 'Your action has been registered!')
+		return render(request, "snippets/res_status_area.html", {"r": reservation})
+
+	except Reservation.ResActionError, e:
+		messages.add_message(request, messages.INFO, "Error: %s" % e)
+		return render(request, "snippets/res_status_area.html", {"r": reservation})
+
+@group_required('house_admin')
+def ReservationChargeCard(request, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	reservation = Reservation.objects.get(id=reservation_id)
+	try:
+		reservation.reconcile.charge_card()
+		return HttpResponse()
+	except stripe.CardError, e:
+		return HttpResponse(status=500)
+
+@group_required('house_admin')
+def ReservationToggleComp(request, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	reservation = Reservation.objects.get(id=reservation_id)
+	reconcile = reservation.reconcile
+	if reconcile.status != Reconcile.COMP:
+		reconcile.status = Reconcile.COMP
+	else:
+		reconcile.status = Reconcile.UNPAID
+	reconcile.save()
+	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
+
+@group_required('house_admin')
+def ReservationSendMail(request, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	print request.POST
+	subject = request.POST.get("email-subject")
+	recipient = [request.POST.get("email-to"),]
+	sender = request.POST.get("email-from")
+	body = request.POST.get("email-body") + "\n\n" + request.POST.get("email-footer")
+	send_mail(subject, body, sender, recipient)
+
+	reservation = Reservation.objects.get(id=reservation_id)
+	reservation.last_msg = datetime.datetime.today()
+	reservation.save()
+
+	messages.add_message(request, messages.INFO, "Your message was sent.")
+	return HttpResponseRedirect('/manage/reservation/%s' % reservation_id)
+
+
+# ******************************************************
+#           registration callbacks and views
+# ******************************************************
 
 
 class RegistrationBackend(registration.backends.default.DefaultBackend):
@@ -309,7 +486,5 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 		else:
 			return ('user_details', (), {'username': user.username})
 
-
-#def Dashboard(request):
 
 

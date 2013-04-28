@@ -8,6 +8,7 @@ import os, datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
 import uuid
+import stripe
 
 # imports for signals
 import django.dispatch 
@@ -33,11 +34,21 @@ class Room(models.Model):
 	default_rate = models.IntegerField()
 	description = models.TextField(blank=True, null=True)
 	primary_use = models.CharField(max_length=200, choices=ROOM_USES, default=PRIVATE, verbose_name='Indicate whether this room should be listed for guests to make reservations.')
+	cancellation_policy = models.CharField(max_length=400, default="24 hours")
+	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
 
 	def __unicode__(self):
 		return self.name
 
 class Reservation(models.Model):
+
+	class ResActionError(Exception):
+		def __init__(self, value):
+			self.value = value
+		def __str__(self):
+			return repr(self.value)
+
+
 	PENDING = 'pending'
 	APPROVED = 'approved'
 	CONFIRMED = 'confirmed'
@@ -75,6 +86,7 @@ class Reservation(models.Model):
 		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
 	purpose = models.TextField(verbose_name='What is the purpose of the trip?')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
+	last_msg = models.DateTimeField(blank=True, null=True)
 
 	@models.permalink
 	def get_absolute_url(self):
@@ -87,6 +99,103 @@ class Reservation(models.Model):
 		return (self.depart - self.arrive).days
 	total_nights.short_description = "Nights"
 
+	def confirm_and_notify (self):
+		if not self.user.profile.customer_id:
+			raise self.ResActionError("Cannot confirm a reservation without payment details.")
+	
+		self.status = Reservation.CONFIRMED
+		self.last_msg = datetime.datetime.now()
+		self.save()
+		subject = "[Embassy SF] Your Reservation has been confirmed"
+		domain = Site.objects.get_current().domain
+		message = "Hello %s! Your reservation for %s - %s has been confirmed. We will use the payment details on file to charge your credit card at the end of your stay.\n\nAs a reminder, the cancellation policy for the %s is %s. You can always view, update, or cancel your reservation online at %s%s.\n\nThanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), self.room.name, self.room.cancellation_policy, domain, self.get_absolute_url())
+		recipient = [self.user.email]
+		sender = "stay@embassynetwork.com"
+		send_mail(subject, message, sender, recipient)
+
+	def set_tentative_and_prompt(self):
+		# approve the reservation and prompt the user to enter payment info.
+		self.status = Reservation.APPROVED
+		self.last_msg = datetime.datetime.today()
+		self.save()
+
+		recipient = [self.user.email]
+		subject = "[Embassy SF] Action Required to Confirm your Reservation"
+		domain = Site.objects.get_current().domain
+		message = "Your reservation request for %s - %s has been approved.\n\nWe request that you a credit card to secure your reservation. Please visit %s%s to add a payment method.\n\nThanks so much, and we look forward to having you!" % (
+			str(self.arrive), str(self.depart), domain, self.get_absolute_url())
+		sender = "stay@embassynetwork.com"
+		send_mail(subject, message, sender, recipient)
+
+	def remind_payment_info_needed(self):
+		# remind the user about the status of their reservation when an action
+		# is required by them. (eg. if approved with payment details or if
+		# confirmed without). mostly useful for legacy reservations but
+		# possible this state would crop up in other situations. 
+		if not ((self.status == Reservation.CONFIRMED or 
+			self.status == Reservation.APPROVED) and not self.user.profile.customer_id):
+			raise self.ResActionError("Reservation must be either approved or confirmed, and payment details must not already exist") 
+
+		if self.status == Reservation.CONFIRMED:
+			self.status = Reservation.APPROVED
+			self.save()
+
+		domain = Site.objects.get_current().domain
+		subject = "[Embassy SF] Reminder: Action Required for your Reservation"
+		message = "Hello %s! This is just a reminder that we request a credit card to secure your reservation from %s - %s. Please visit %s%s to add a payment method, otherwise we may make the room available to other guests.\n\nThank you and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
+		recipient = [self.user.email]
+		sender = "stay@embassynetwork.com"
+		send_mail(subject, message, sender, recipient)
+
+		self.last_msg = datetime.datetime.today()
+		self.save()
+
+	def remind_to_confirm(self):
+		# useful for approved reservation that DO have payment info or COMPS. 
+		# ie, if reservation is approved and we DO have payment info, this can
+		# make it ambiguous if they want the room for sure or not. can
+		# also be used for comp reservations when we don't have the payment
+		# info to hold them accountable. 
+		domain = Site.objects.get_current().domain
+		subject = "[Embassy SF] Reminder: Action Required for your Reservation"
+		message = "Hello %s! This is just a reminder to confirm (or decline) your reservation for %s - %s so that we can make the room available to others if you no longer need it. Please visit %s%s to update your reservation status. Thanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
+		recipient = [self.user.email]
+		sender = "stay@embassynetwork.com"
+		send_mail(subject, message, sender, recipient)
+		self.last_msg = datetime.datetime.today()
+		self.save()
+
+	def comp_confirm_and_notify(self):
+		if self.reconcile.status != Reconcile.COMP:
+			raise ResActionError("Reservation is not marked as complimentary.")
+		self.status = Reservation.CONFIRMED
+		self.last_msg = datetime.datetime.now()
+		self.save()
+		self.comp_notify()
+
+	def comp_notify(self):
+		# send a notification to the user that their reservation has been made
+		# complimentary, and ask them to let us know if anything changes. 
+		if self.reconcile.status != Reconcile.COMP:
+			raise ResActionError("Reservation is not marked as complimentary.")
+
+		subject = "[Embassy SF] You've been offered a Complimentary Stay!"
+		domain = Site.objects.get_current().domain
+		message = "Hello %s! You have been offered a complimentay stay for your reservation %s - %s. We're excited to have you!\n\nIf you no longer need this reservation, please let us know or visit %s%s to update or cancel your reservation, so that we can make the space available to someone else. Thanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
+		recipient = [self.user.email]
+		sender = "stay@embassynetwork.com"
+		send_mail(subject, message, sender, recipient)
+
+	def cancel(self):
+		# cancel this reservation. make sure to update the associated reconcile
+		# info. 
+		self.status = Reservation.CANCELED
+		self.save()
+		reconcile = self.reconcile
+		reconcile.status = Reconcile.INVALID
+		reconcile.save()
+
+
 # send house_admins notification of new reservation. use the post_save signal
 # so that a) we can be sure the reservation was successfully saved, and b) the
 # unique ID of this reservation only exists post-save.
@@ -96,9 +205,6 @@ def notify_house_admins(sender, instance, **kwargs):
 		obj = Reservation.objects.get(pk=instance.pk)
 		house_admins = User.objects.filter(groups__name='house_admin')
 
-		subject = "[Embassy SF] Reservation Request, %s %s, %s - %s" % (obj.user.first_name, 
-			obj.user.last_name, str(obj.arrive), str(obj.depart))
-		sender = "stay@embassynetwork.com"
 		domain = Site.objects.get_current().domain
 		if obj.hosted:
 			hosting_info = " for guest %s" % obj.guest_name
@@ -108,105 +214,41 @@ def notify_house_admins(sender, instance, **kwargs):
 			hosting_info = ""
 			subject = "[Embassy SF] Reservation Request, %s %s, %s - %s" % (obj.user.first_name, 
 			obj.user.last_name, str(obj.arrive), str(obj.depart))
-		admin_path = urlresolvers.reverse('admin:core_reservation_change', args=(obj.id,))
-		message = '''Howdy, 
 
-A new reservation has been submitted. The current status of this reservation 
-is %s. You can reply-all to discuss this reservation with other house admins. 
+		plaintext = get_template('emails/newreservation.txt')
+		htmltext = get_template('emails/newreservation.html')
 
---------------------------------------------------- 
+		c = Context({
+			'status': obj.status, 
+			'user_image' : "https://" + domain+ str(obj.user.profile.image_thumb),
+			'first_name': obj.user.first_name, 
+			'last_name' : obj.user.last_name, 
+			'room_name' : obj.room.name, 
+			'arrive' : str(obj.arrive), 
+		 	'depart' : str(obj.depart), 
+			'hosting': hosting_info, 
+			'purpose': obj.purpose, 
+			'comments' : obj.comments, 
+			'bio' : obj.user.profile.bio,
+			'referral' : obj.user.profile.referral, 
+			'projects' : obj.user.profile.projects, 
+			'sharing': obj.user.profile.sharing, 
+			'discussion' : obj.user.profile.discussion, 
+			"admin_url" : "http://" + domain + urlresolvers.reverse('reservation_manage', args=(obj.id,))
 
-%s %s requests %s accommodation from %s to %s%s. 
+		})
 
-Purpose of trip: %s. 
-
-Additional Comments: %s. 
-
----- ABOUT THEM -----
-
-How they heard about us: %s. 
-
-Projects: %s.
-
-Sharing interests: %s. 
-
-Discussion interests: %s.
-
-
--------------------------------------
-
-You can view, approve or deny this request at %s%s. Or email the requesting user at %s. 
-		''' % (obj.status, obj.user.first_name, obj.user.last_name, obj.room.name, 
-			str(obj.arrive), str(obj.depart), hosting_info, obj.purpose, obj.comments, 
-			obj.user.profile.referral, obj.user.profile.projects, obj.user.profile.sharing, 
-			obj.user.profile.discussion, domain, admin_path, obj.user.email)
+		subject = "[Embassy SF] Reservation Request, %s %s, %s - %s" % (obj.user.first_name, 
+			obj.user.last_name, str(obj.arrive), str(obj.depart))
+		sender = "stay@embassynetwork.com"
 		recipients = []
 		for admin in house_admins:
 			recipients.append(admin.email)
-		# send mail to all house admins at once; this way hose admins can
-		# reply-all and discuss the application if desired. TODO should
-		# probably have a mail agent handle this
-		send_mail(subject, message, sender, recipients)
-
-
-# define a signal for reservation approval
-reservation_approved = django.dispatch.Signal(providing_args=["url", "reservation"])
-
-@receiver(pre_save, sender=Reservation)
-def detect_changes(sender, instance, **kwargs):
-	# generate notification emails as appropriate
-	try:
-		obj = Reservation.objects.get(pk=instance.pk)
-	except Reservation.DoesNotExist:
-		obj = None
-	if not instance.hosted and obj and obj.status == Reservation.PENDING and instance.status == Reservation.APPROVED:
-		reservation_approved.send(sender=Reservation, url=instance.get_absolute_url, reservation = instance)
-	# if the status was changed from anything else to 'confirmed', generate an email
-	elif (obj == None or obj.status != Reservation.CONFIRMED) and instance.status == Reservation.CONFIRMED:
-		subject = "[Embassy SF] Reservation Confirmation, %s - %s" % (str(instance.arrive), 
-		str(instance.depart))
-		sender = "stay@embassynetwork.com"
-		domain = 'http://' + Site.objects.get_current().domain
-		house_info_url = domain + '/guestinfo/'
-		recipients = []
-		# take the contents of the new instance over the old instance, if necessary. 
-		if instance.guest_emails:
-			recipients += instance.guest_emails.split(",") 
-		# don't send confirmation emails to hosts 
-		if not instance.hosted:
-			recipients.append(instance.user.email)
-		print recipients
-		if len(recipients) > 0:
-
-			text = '''Dear %s,
-
-This email confirms we will see you from %s - %s. Information on accessing the
-house, house norms, and transportation can be viewed online at %s, and for
-your convenience is also included below. View or edit your reservation by logging 
-into %s. 
-
-In the meantime, why not visit http://embassynetwork.com/calendar to check out who else will be around while you are here? 
-
-Let us know if you have any questions.
-Thanks and see you soon!
-
--------------------------------------------------------------------------------
-
-''' % (instance.user.first_name.title(), instance.arrive, instance.depart, house_info_url, domain)
-			text += confirmation_email_details
-			send_mail(subject, text, sender, recipients) 
-
-
-# XXX do we even need a second signal?
-@receiver(reservation_approved, sender=Reservation)
-def approval_notify(sender, url, reservation, **kwargs):
-	recipient = [reservation.user.email]
-	subject = "[Embassy SF] Request Approved - You must log in to confirm you reservation!"
-	domain = Site.objects.get_current().domain
-	message = "Your reservation request for %s - %s has been approved. You must confirm this reservation to finalize!\n\nView your reservation details and confirm at %s%s" % (
-		str(reservation.arrive), str(reservation.depart), domain, reservation.get_absolute_url())
-	sender = "stay@embassynetwork.com"
-	send_mail(subject, message, sender, recipient)
+		text_content = plaintext.render(c)
+		html_content = htmltext.render(c)
+		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
+		msg.attach_alternative(html_content, "text/html")
+		msg.send()
 
 class Reconcile(models.Model):
 	''' The Reconcile object is automatically created when a reservation is confirmed.'''
@@ -263,10 +305,18 @@ class Reconcile(models.Model):
 		# custom rates.
 		return self.reservation.room.default_rate
 
-
-	def total_owed(self):
+	def total_value(self):
+		# value of the reservation, regardless of what has been paid
 		# get_rate checks for comps and custom rates. 
 		return self.reservation.total_nights()*self.get_rate()
+
+	def total_owed(self):
+		# in case some amoutn has been paid already
+		if not self.paid_amount:
+			return self.reservation.total_nights()*self.get_rate()
+		else:
+			return self.reservation.total_nights()*self.get_rate() - self.paid_amount
+
 
 	def total_owed_in_cents(self):
 		return self.total_owed()*100
@@ -354,13 +404,34 @@ class Reconcile(models.Model):
 			self.save()
 		return True
 
-	def store_payment_details(self, transaction_id, date, method, amount, service=None):
-		self.transaction_id = transaction_id
-		self.payment_date = date
-		self.payment_method = method
-		self.amount = amount
-		if service: self.payment_service = service
+	def charge_card(self):
+		# stripe will raise a stripe.CardError if the charge fails. this
+		# function purposefully does not handle that error so the calling
+		# function can decide what to do. 
+		domain = 'http://' + Site.objects.get_current().domain
+		descr = "%s %s from %s - %s. Details: %s." % (self.reservation.user.first_name, 
+				self.reservation.user.last_name, str(self.reservation.arrive), 
+				str(self.reservation.depart), domain + self.reservation.get_absolute_url())
+
+		amt_owed = self.total_owed_in_cents()
+		stripe.api_key = settings.STRIPE_SECRET_KEY
+		charge = stripe.Charge.create(
+				amount=amt_owed,
+				currency="usd",
+				customer = self.reservation.user.profile.customer_id,
+				description=descr
+		)
+
+		# store the charge details
+		self.status = Reconcile.PAID
+		self.payment_service = "Stripe"
+		self.payment_method = charge.card.type
+		self.paid_amount = (charge.amount/100)
+		self.transaction_id = charge.id
+		self.payment_date = datetime.datetime.now()
 		self.save()
+		self.send_receipt()
+
 
 Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
 

@@ -1,0 +1,233 @@
+{% extends "main.html" %}
+
+{% block main %}
+
+<div id="spinner">
+    <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
+</div>	
+
+<a href="/manage/reservations/"><i class="icon-arrow-left"></i> Back to reservations</a>
+
+{% if r.status = 'canceled' %}
+<div class="greyed-out">
+{% endif %}
+
+<div class="float-right manage-sidebar">
+{% if r.user.profile.image %}
+<div class="img-polaroid">
+	<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.user.profile.image|default:'data/avatars/default.jpg' }}" />
+</div>
+{% endif %}
+
+<div class="res-actions-secondary"><h2>Manage</h2></div>
+
+	<a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">Email this User</a>
+
+		<!-- Modal -->
+	<div id="emailModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="myModalLabel">Email {{ r.user.first_name }} </h3>
+	</div>
+	<div class="modal-body">
+		<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >
+			{% csrf_token %}
+			<span class="email-form-label">To: </span><input type="text" name="email-to" value="{{r.user.email}}"><br>
+			<span class="email-form-label">From: </span><input type="text" name="email-from" value="stay@embassynetwork.com" readonly><br>
+			<span class="email-form-label">Subject: </span><input id="form-email-subject" type="text" name="email-subject" value="[Embassy SF] A Message about Your Stay">
+			<textarea id="email-body" name="email-body" placeholder="enter email body here..."></textarea>
+			<textarea id="email-footer" name="email-footer" readonly>
+----------------	
+Your reservation is from {{ r.arrive }} to {{r.depart}}.
+Manage your reservation at: http://{{ domain}}{{r.get_absolute_url}}
+			</textarea>
+	</div>
+	<div class="modal-footer">
+		<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+		<button type="submit" class="btn btn-primary">Send</button>
+		</form>
+	</div>
+	</div>
+
+
+	{% if r.status != 'canceled' %}
+
+	{% if r.reconcile.status != 'paid' %}
+		<form id="res-action-toggle-comp" class="res-action" method=POST action="/manage/reservation/{{r.id}}/togglecomp/" >
+			{% csrf_token %}
+			<input type="submit" 
+			{% if r.reconcile.status == "comp" %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
+			class="btn">
+		</form>
+	{% endif %}
+
+		<form id="res-cancel" method="post" action="/reservation/{{r.id}}/cancel/">
+			{% csrf_token %} 
+			<input type="hidden" name="redirect" value="/manage/reservation/{{r.id}}/">
+			<input class="btn" type="submit" value="Cancel This Reservation">
+		</form>
+
+		<div id="dialog-confirm-cancel" title="Cancel this Reservation?">
+			<p>
+				<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+				This reservation will be cancelled. Are you sure?
+			</p>
+		</div>
+
+		<form id="res-action-charge" class="res-action" method="POST" action="/manage/reservation/{{r.id}}/chargecard/">
+			{% if r.reconcile.status == 'paid' %}
+				<input id="res-action-charge-submit" type="submit" value="PAID" class="btn disabled btn-success">
+			{% elif r.reconcile.status == 'comp' %}
+				<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn disabled btn-success">
+			{% else %}
+				<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn btn-success
+				{% if not r.status == 'confirmed' or not r.user.profile.customer_id %} disabled {% endif %}">
+			{% endif %}
+		</form>
+	{% endif %}
+</div>
+
+
+<div class="res-info-main">
+
+	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
+
+	<div id="res-status-area" {% if r.reconcile.status == 'paid' %} class="paid-bg-img" {% endif %} >
+		{% include "snippets/res_status_area.html" %}
+	</div>
+
+	<hr>
+
+	<div class="res-value">${{ r.reconcile.total_value }}</div> 
+	<div class="res-field field">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}</div>
+	<div class="res-field field">Hosted: {{ r.hosted }}</div>
+	<div class="res-field field">Room: {{ r.room }}</div>
+	<div class="res-field field">Tags: {{ r.tags }}</div>
+	<div class="res-field field">Guest emails: {{ r.guest_emails|default:'none' }}</div>
+	<div class="res-field field">Purpose: {{ r.purpose }}</div>
+	<div class="res-field field">Comments: {{ r.comments }}</div>
+
+	<h2>User Details</h2>
+	<div class="user-field field">How they heard about us: {{ r.user.profile.referral }}</div>
+	<div class="user-field field">About them: {{ r.user.profile.bio }}</div>
+	<div class="user-field field">Projects: {{ r.user.profile.projects }}</div>
+	<div class="user-field field">Sharing Interests: {{ r.user.profile.sharing }}</div>
+	<div class="user-field field">Discussion Interests: {{ r.user.profile.discussion }}</div>
+	{% with u=r.user %}
+		{% include "snippets/profile_links.html" %}
+
+		<h3>Other Reservations</h3>
+		{% include "snippets/user_reservations.html" %}
+
+	{% endwith %}
+
+</div> <!-- end res-info-main -->
+
+{% if r.status = 'canceled' %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extrajs %}
+<script language="JavaScript">
+function register_actions() {
+	status = $("#the-reservation-status").html();
+	paid = $("#res-action-charge-submit").val();
+ 
+	// we can use the template for the customer id since that value won't
+	// change by any action taken by a house admin (a change in customer_id
+	// value would require the USER to add a new card.
+	valid_card = "{{ r.user.profile.customer_id }}";
+	// comping a reservation reslts in a page reload so we can use the template
+	// language here too. 
+	reconcile_status = "{{ r.reconcile.status }}"
+	if (status == "confirmed" && valid_card && valid_card != "None" && paid != "PAID" && reconcile_status != 'comp') {
+		$("#res-action-charge-submit").removeClass("disabled");
+	}
+	$('.res-manage-action').click(function() { 
+		submitdata = {
+			'reservation-action': $(this).attr('id'),
+			'csrfmiddlewaretoken': '{{ csrf_token }}'
+		};
+		console.log(submitdata);
+		request = $.ajax({ 
+			data: submitdata, 
+			type: $("#res-action-form").attr('method'), // GET or POST
+			url: $("#res-action-form").attr('action'), // the file to call
+		});
+		request.done(function(msg) { // on success..
+			console.log("Success!");
+			$("#res-status-area").html(msg);
+			// re-register the ajax calls once the new html is injected or we
+			// won't be able to chain calls together without refreshing the
+			// page. 
+			register_actions();
+		});
+		request.fail(function(msg) {
+			console.log("Error in reservation update:");
+			console.log(msg);
+		});
+
+		return false;
+	});
+};
+
+$("#dialog-confirm-cancel").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Cancel": function () {
+            $("#res-cancel").submit();
+         },
+        "Do Not Cancel": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-cancel").click(function (e) {
+    $("#dialog-confirm-cancel").dialog("open");
+    e.preventDefault();
+});
+
+
+$(document).ready(function() {
+	register_actions();
+
+	$('#res-action-charge').submit(function() { 
+		submitdata = {
+			'csrfmiddlewaretoken': '{{ csrf_token }}'
+		};
+		console.log(submitdata);
+		request = $.ajax({ 
+			data: submitdata, 
+			type: $("#res-action-charge").attr('method'), // GET or POST
+			url: $("#res-action-charge").attr('action'), // the file to call
+		});
+		request.done(function(msg) { // on success..
+			console.log("Success!");
+			$("#res-action-charge-submit").val("PAID");
+			$("#res-action-charge-submit").addClass("disabled");
+			$("#res-status-area").addClass("paid-bg-img");
+		});
+		request.fail(function(msg) {
+			console.log("Error in reservation update:");
+			console.log(msg);
+		});
+
+		return false;
+	});
+
+
+	// wire up the ajax-y spinning animated GIF when an ajax call is made. 	
+	$('#spinner').ajaxStart(function () {
+        $(this).fadeIn('fast');
+    }).ajaxStop(function () {
+        $(this).stop().fadeOut('fast');
+    });	
+});
+
+</script>
+
+{% endblock %}

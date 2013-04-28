@@ -1,0 +1,36 @@
+{% load core_tag_extras %}
+
+{% if past_reservations|length > 0 %}
+<h4>Previous</h4>
+{% for reservation in past_reservations %}
+	<div>
+		{% if reservation.hosted %}
+			(hosting {{ reservation.guest_name }})
+		{% endif %}
+		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+		{% if user == u %}
+		- <em>{{reservation.status}}</em>
+		{% endif %}
+	</div>
+{% endfor %}
+{% endif %}
+
+{% if upcoming_reservations|length > 0 %}
+<h4>Upcoming</h4>
+{% for reservation in upcoming_reservations %}
+	<div>
+		{% if reservation.hosted %}
+			(hosting {{ reservation.guest_name }})
+		{% endif %}
+		<a href="/reservation/{{reservation.id}}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+		{% if user == u %}
+		- <em>{{reservation.status}}</em>
+		{% endif %}
+	</div>
+{% endfor %}
+{% endif %}
+
+{% if upcoming_reservations|length == 0 and past_reservations|length == 0 %}
+	<p>No reservations</p>
+{% endif %}
+

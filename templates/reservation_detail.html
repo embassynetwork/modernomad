@@ -2,98 +2,71 @@
 
 {% block main %}
 
-{% if messages %}
-<div class="messages">
-    {% for message in messages %}
-    <div class="alert alert-info">
-	    <button type="button" class="close" data-dismiss="alert">×</button>
-    	<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</div>
-	</div>
-    {% endfor %}
-</div>
-{% endif %}
+{% include "snippets/messages.html" %}
 
 <h3>Reservation for 
 	{% if reservation.hosted %}
 		{{ reservation.guest_name }}, hosted by 
 	{% endif %}
 	<em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+	<span class="res-value text-success">Total: ${{ reservation.reconcile.total_value }}</span>
 </h3>
 <h4>
 	{{reservation.arrive }} - {{reservation.depart}}.   Tags: {{ reservation.tags }}
 </h4>
 
+<div class="res-statusline">
 {% ifequal reservation.user user %}
 	{% if reservation.status == "pending" %}
 		<div>
 			<span class="btn btn-large btn-success disabled res-status-btn" type="button">Pending</span>
-			<i class="icon-arrow-right"></i>
-			<span class="btn btn-large btn disabled res-status-btn" type="button">Approved</span>
-			<i class="icon-arrow-right"></i>
-			<span class="btn btn-large btn disabled res-status-btn" type="button">Confirmed</span>
 		</div>
 
-	{% elif reservation.status == "approved" %}
+	{% elif reservation.status == "approved" and reservation.user.profile.customer_id %}
 		<div>
-			<form action="/reservationpayment/" method="POST" id="payform">{% csrf_token %}
-				<script src="/media/js/jquery-1.8.2.js"></script>
-				<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+			<p><span class="text-error">Action Required! Click below to confirm
+			your reservation and authorize payment. Your card will only be charged at the end of your stay. 
+			Cancellation policy for the {{ reservation.room }} 
+			is {{reservation.room.cancellation_policy}}.</p>
 
-				<input type="hidden" value={{ reservation.reconcile.total_owed_in_cents }} name="amount-paid">
+			<form action="/reservation/{{reservation.id}}/confirm/" method="POST" id="payform">
+				{% csrf_token %}
+				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+					value="Click to confirm and authorize payment." >
+			</form>
+		</div>
+	{% elif reservation.status == "approved" or reservation.status == "confirmed" and not reservation.user.profile.customer_id %}
+		<div>
+			<p><span class="text-error">Action Required! Please enter your payment details to confirm
+			your reservation. Your card will be charged at the end of your stay. 
+			Cancellation policy for the {{ reservation.room }} 
+			is {{reservation.room.cancellation_policy}}.</p>
+
+			<form action="/people/{{reservation.user.username}}/addcard/" method="POST" id="payform">
+				{% csrf_token %}
 				<input type="hidden" value={{ reservation.id }} name="res-id">
-				<input type="submit" id="pay-button" class="btn btn-large btn-success res-status-btn" value="Click to Confirm and Pay">
-				<div>Save Card for Future Use (default is yes)? 
-					<input type="radio" value="yes" name="save-card" checked="checked"> Yes 
-					<input type="radio" value="no" name="save-card"> No
-					<p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure
-					credit card processing with SSL encryption. Your card card
+				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+					value="Click to enter Payment Details" >
+				<div>
+					<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+						secure credit card processing with SSL encryption. Your card card
 					information is never stored on our servers.</small></em></p>
 				</div>
-
-				<script>
-					$(document).ready(function() {
-					$('#pay-button').click(function(event){
-						console.log("here");
-						event.preventDefault();
-
-						// if the user has a saved card, go straight to the
-						// payment processing page. 
-						$customer_id = "{{ reservation.user.profile.customer_id }}";
-						if ($customer_id) {
-							$('#payform').submit();
-						}
-						else {
-							var token = function(res){
-								var $input = $('<input type=hidden name=stripeToken />').val(res.id);
-								$('#payform').append($input).submit();
-							};
-
-							StripeCheckout.open({
-								key: "{{ stripe_publishable_key }}",
-								amount: "{{ reservation.reconcile.total_owed_in_cents }}",
-								name: "The Embassy Network",
-								description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.reconcile.get_rate }}.",
-								image: "/128x128.png",
-								test: '<input name="test1" value="test1">',
-								token: token
-							});
-						}
-					});
-					});
-				</script>
 			</form>
 		</div>
 
-	{% elif reservation.status == "confirmed" %}
+	{% elif reservation.status == "confirmed" and reservation.user.profile.customer_id %}
 		<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
 
-	{% elif reservation.status == "declined" %}
-		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Declined</div>
+	{% elif reservation.status == "canceled" %}
+		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Canceled</div>
 
 	{% endif %}
+
 {% else %}
 	<div class="btn btn-large disabled res-status-btn" type="button">{{ reservation.status|title }} </div>	
 {% endifequal %}
+</div>
 
 
 <div class="res-detail"><b>Approximate arrival Time</b>: {{ reservation.arrival_time }}</div>
@@ -136,7 +109,7 @@
 			<form id="res-delete" class="btn-inline" method="post" action="/reservation/{{reservation.id}}/delete/">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
 		</div> 
 
-		<div id="dialog-confirm" title="Delete this user?">
+		<div id="dialog-confirm" title="Delete this Reservation?">
 		    <p>
 		        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
 		        This reservation will be permanently deleted and cannot be recovered. Are you sure?
@@ -153,6 +126,41 @@
 {% endblock %}
 
 {% block extrajs %}
+<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+
+<script>
+	$(document).ready(function() {
+		$customer_id = "{{ reservation.user.profile.customer_id }}";
+		$('#pay-button').click(function(event){
+			event.preventDefault();
+
+			// if the user has a saved card, go straight to the
+			// payment processing page. (note: this shouldn't happen for new
+			// reservations but might for legacy reservations)
+			$customer_id = "{{ reservation.user.profile.customer_id }}";
+			if ($customer_id && $customer_id != "None") {
+				$('#payform').submit();
+			}
+			else {
+				var token = function(res){
+					var $input = $('<input type=hidden name=stripeToken />').val(res.id);
+					$('#payform').append($input).submit();
+				};
+
+				StripeCheckout.open({
+					key: "{{ stripe_publishable_key }}",
+					amount: "{{ reservation.reconcile.total_owed_in_cents }}",
+					name: "The Embassy Network",
+					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.reconcile.get_rate }}/night.",
+					panelLabel:"Authorize",
+					image: "/media/img/embassy-front-1-128x128.jpg",
+					token: token
+				});
+			}
+		});
+	});
+</script>
+
 <script>
 $("#dialog-confirm").dialog({
     autoOpen: false,

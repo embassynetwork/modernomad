@@ -481,3 +481,100 @@ b.dark-red-bold {
 	padding:20px;
 	margin-bottom: 20px;
 }
+
+.userprofile-card-form {
+	padding-top: 10px;
+}
+
+#edit-profile {
+	padding-top: 20px;
+	text-align: right;
+	width: 200px;
+}
+
+textarea#id_comments, textarea#id_purpose {
+	height: 60px;
+}
+
+#res-status-area {
+	padding-bottom: 15px;
+	padding-top: 15px;
+}
+
+.res-value {
+	float: right;
+	padding-right: 40px;
+}
+
+#res-action-form {
+	margin-bottom: 0px;
+}
+
+.res-info-main {
+	width: 450px;
+}
+
+.res-field, .user-field, .res-action {
+	padding-bottom: 10px;
+}
+
+.manage-sidebar {
+	width: 200px;
+}
+
+form.res-action {
+	padding-bottom: 0px;
+}
+
+.res-value {
+	padding-left: 100px;
+}
+
+.res-manage-btn {
+	width: 450px;
+	white-space: normal;
+}
+
+.greyed-out {
+	font-color: grey;
+}
+
+div#spinner
+{
+    display: none;
+    width:100px;
+    height: 100px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    text-align:center;
+    margin-left: -50px;
+    margin-top: -100px;
+    z-index:2;
+    overflow: auto;
+} 
+
+.paid-bg-img {
+	background: url(/media/img/paid-angle-30-trans.png) 50% 50% no-repeat;
+	background-size: 70%;
+}
+
+#email-user-button {
+	margin-bottom: 20px;
+}
+
+#email-footer {
+	height: 5em;
+}
+
+#form-email-subject {
+	width: 350px;
+}
+
+.email-form-label {
+	width: 100px;
+}
+
+.last-contact {
+	color: #999999;
+}

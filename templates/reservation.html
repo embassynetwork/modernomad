@@ -82,7 +82,8 @@
 			var $milliseconds_in_a_day = 86400000;
 			var $days = Math.abs((new Date($depart) - new Date($arrive))/$milliseconds_in_a_day)
 			$value = $days*$rate;
-			$msg = $room_name + " for " + $days + " days at $" + $rate + " a night. Reservation value is $" + $value + ".";
+			$msg = "<p>" + $room_name + " for " + $days + " days at $" + $rate + " a night. Reservation value is $" + $value + ".</p>";
+			$msg += "<p>Reservations include all food and of course full use of the house and its ammenities during your stay. An alive house is a happy house!</p>"
 		}
 		
 		$("#reservation-sticky-info").html($msg);
@@ -91,9 +92,9 @@
 		var $customer_id = "{{ user.profile.customer_id }}"
 		console.log($customer_id);
 		console.log($value);
-		if ($customer_id && $value) {
+		if ($customer_id != "None" && $value) {
 			$("#submit-reservation").val("Submit and Authorize Payment of $" + $value);
-			$("#reassure").html("<p>You will only be charged if this reservation is approved.</p>");
+			$("#reassure").html("<p>You will only be charged if this reservation is approved. Your card will be charged at the end of your stay.</p>");
 		}
 
 	})

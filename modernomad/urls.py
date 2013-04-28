@@ -19,7 +19,6 @@ urlpatterns = patterns('',
 	url(r'^guestinfo/$', 'modernomad.views.GuestInfo'),
 	url(r'^participate/$', 'modernomad.views.participate'),
 	url(r'^payment/$', 'modernomad.views.GenericPayment'),
-	url(r'^reservationpayment/$', 'modernomad.views.ReservationPayment'),
 	url(r'^thanks/$', 'modernomad.views.thanks'),
 	url(r'^today/$', 'modernomad.views.today'),
 	
@@ -34,6 +33,7 @@ urlpatterns = patterns('',
 	url(r'^people/', include(core.urls.user_patterns)),
 	url(r'^locations/', include(core.urls.house_patterns)),
 	url(r'^reservation/', include(core.urls.reservation_patterns)),
+	url(r'^manage/', include(core.urls.management_patterns)),
 
 	# The modernomad API.
 	url(r'^api/', include('api.urls')),
