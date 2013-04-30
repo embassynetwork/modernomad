@@ -77,11 +77,15 @@ Manage your reservation at: http://{{ domain}}{{r.get_absolute_url}}
 		<form id="res-action-charge" class="res-action" method="POST" action="/manage/reservation/{{r.id}}/chargecard/">
 			{% if r.reconcile.status == 'paid' %}
 				<input id="res-action-charge-submit" type="submit" value="PAID" class="btn disabled btn-success">
-			{% elif r.reconcile.status == 'comp' %}
-				<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn disabled btn-success">
-			{% else %}
-				<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn btn-success
-				{% if not r.status == 'confirmed' or not r.user.profile.customer_id %} disabled {% endif %}">
+			{% else %}	
+				{% if r.reconcile.status == 'comp' %}
+					<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn disabled btn-success">
+				{% elif not r.status == 'confirmed' or not r.user.profile.customer_id %} 
+					<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn disabled btn-success">
+				{% else %}
+					<input id="res-action-charge-submit" type="submit" value="Charge User's Card" class="btn btn-success">
+				{% endif %}
+				<br><small>Unless requested, do not charge this card until the last day of this user's stay ({{r.depart}})</small>
 			{% endif %}
 		</form>
 	{% endif %}

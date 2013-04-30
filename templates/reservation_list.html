@@ -2,42 +2,38 @@
 
 {% block body %}
 
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#pending" data-toggle="tab">Pending</a></li>
+	<li><a href="#approved" data-toggle="tab">Approved</a></li>
+	<li><a href="#confirmed" data-toggle="tab">Confirmed</a></li>
+	<li><a href="#canceled" data-toggle="tab">Canceled</a></li>
+</ul>
 
-<table id="reservation-list">
-	<thead>
-		<tr>
-			<th>Reservation</th>
-			<th>User</ht>
-			<th>Status</ht>
-			<th>Arrival</ht>
-			<th>Departure</ht>
-			<th>Room</ht>
-			<th>Hosted</ht>
-			<th>Nights</ht>
-			<th>Rate</ht>
-			<th>Value</ht>
-			<th>Paid Status</ht>
-		</tr>
-	</thead>
-	<tbody>
-			{% for r in reservations %}
-			<tr>
-				<td><a href="/manage/reservation/{{r.id}}/">Reservation {{r.id}}</a></td>
-				<td><a href="/people/{{r.user.username}}/">{{r.user.first_name}} {{r.user.last_name}}</a> ({{r.user.username}})</td>
-				<td>{{r.status}}</td>
-				<td>{{r.arrive}}</td>
-				<td>{{r.depart}}</td>
-				<td>{{r.room}}</td>
-				<td>{{r.hosted}}</td>
-				<td>{{r.total_nights}}</td>
-				<td>${{r.reconcile.get_rate}}</td>
-				<td>${{r.reconcile.total_value}}</td>
-				<td>{{r.reconcile.html_color_status|safe}}</td>
-			</tr>
-			{% endfor %}
+<div class="tab-content">
+	
+	<div class="tab-pane active" id="pending">
+		{% with reservations=pending %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
 
-	</tbody>
-</table>
+	<div class="tab-pane" id="approved">
+		{% with reservations=approved %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div class="tab-pane" id="confirmed">
+		{% with reservations=confirmed %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div class="tab-pane" id="canceled">
+		{% with reservations=canceled %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
 
 {% endblock %}
 
@@ -62,7 +58,7 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 } );
 
 $(document).ready(function() {
-	$('#reservation-list').dataTable({
+	$('.reservation-list').dataTable({
 	"iDisplayLength": 50,
 	"aLengthMenu": [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "All"]],
 	"aoColumns": [

@@ -17,7 +17,6 @@ from django.db.models.signals import pre_save, post_save
 
 # mail imports
 from django.core.mail import send_mail
-from confirmation_email import confirmation_email_details
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
@@ -122,7 +121,7 @@ class Reservation(models.Model):
 		recipient = [self.user.email]
 		subject = "[Embassy SF] Action Required to Confirm your Reservation"
 		domain = Site.objects.get_current().domain
-		message = "Your reservation request for %s - %s has been approved.\n\nWe request that you a credit card to secure your reservation. Please visit %s%s to add a payment method.\n\nThanks so much, and we look forward to having you!" % (
+		message = '''Thanks for your application! Sounds like you'd be a great addition to our guest quarters and we'd love to have you join us :). Your reservation request for %s - %s has been tentatively approved, but we request that you a credit card to secure your reservation.\n\nPlease visit %s%s to add a payment method and confirm your reservation.\n\nThanks so much, and we look forward to having you!''' % (
 			str(self.arrive), str(self.depart), domain, self.get_absolute_url())
 		sender = "stay@embassynetwork.com"
 		send_mail(subject, message, sender, recipient)
@@ -220,7 +219,7 @@ def notify_house_admins(sender, instance, **kwargs):
 
 		c = Context({
 			'status': obj.status, 
-			'user_image' : "https://" + domain+ str(obj.user.profile.image_thumb),
+			'user_image' : "https://" + domain+"/media/"+ str(obj.user.profile.image_thumb),
 			'first_name': obj.user.first_name, 
 			'last_name' : obj.user.last_name, 
 			'room_name' : obj.room.name, 

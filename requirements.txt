@@ -3,6 +3,15 @@ django-registration
 django-tastypie
 South
 Pillow
+django-celery
+Celery
+
+celery depends on rabbit-mq, which can be installed using brew on OS X or
+apt-get on debian/ubuntu (and other ways on other systems). 
+
+- os x: `brew update; brew install rabbitmq`
+- debian/ubuntu: `sudo apt-get install rabbitmq-server`
+
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command

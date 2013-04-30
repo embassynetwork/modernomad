@@ -329,7 +329,12 @@ def ReservationDelete(request, reservation_id):
 @group_required('house_admin')
 def ReservationList(request):
 	reservations = Reservation.objects.all()
-	return render(request, 'reservation_list.html', {"reservations": reservations})
+	pending = Reservation.objects.filter(status="pending")
+	approved = Reservation.objects.filter(status="approved")
+	confirmed = Reservation.objects.filter(status="confirmed")
+	canceled = Reservation.objects.exclude(status="confirmed").exclude(status="approved").exclude(status="pending")
+	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
+		"confirmed": confirmed, "canceled": canceled})
 
 
 @group_required('house_admin')

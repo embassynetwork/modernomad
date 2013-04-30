@@ -1,0 +1,7 @@
+People arriving today:
+{% for r in reservations %}
+	{{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }}
+	https://{{ domain }}/manage/reservation/{{ r.id }}/
+{% empty %}
+	None!
+{% endfor %}

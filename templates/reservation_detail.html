@@ -9,7 +9,9 @@
 		{{ reservation.guest_name }}, hosted by 
 	{% endif %}
 	<em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
-	<span class="res-value text-success">Total: ${{ reservation.reconcile.total_value }}</span>
+	{% ifequal reservation.user user %}
+		<span class="res-value text-success">Total: ${{ reservation.reconcile.total_value }}</span>
+	{% endifequal %}
 </h3>
 <h4>
 	{{reservation.arrive }} - {{reservation.depart}}.   Tags: {{ reservation.tags }}

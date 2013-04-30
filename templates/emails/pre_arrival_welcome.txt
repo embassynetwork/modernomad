@@ -1,0 +1,24 @@
+Dear {{ first_name }},
+
+We look forward to seeing you at the Embassy on {{ day_of_week }}!
+
+The house is located at 399 Webster Street, San Francisco, CA, 94117. Access
+to the house is via a keypad on the front door. The access code is "0399#" (the
+"#" at the end is important, make sure to enter it as well). 
+
+You can connect to any of the wireless access points named "EmbassySF..." you
+see at the house. The wireless password for all access points is "netpositive."
+
+To browse the profiles of other guests, please visit {{ site_url }}/calendar to
+see who else will overlap with your stay. Check out upcoming events at 
+{{ events_url }}. 
+
+You can always add or edit information associated with your own profile: {{ profile_url }}
+To view your reservation details: {{ reservation_url }}
+
+Thanks and see you soon!
+The Embassy
+
+P.S. More questions? Just reply to this email and we'll do our best to help you
+out!
+

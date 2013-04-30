@@ -39,12 +39,11 @@
 				opportunity to cancel if desired. You can also prompt them to
 				<a href="#" id="remind-to-confirm" class="res-manage-action
 					res-manage-btn">confirm themselves</a> 
-				{% if r.last_msg %} <small>(The last reminder was sent on {{ r.last_msg }}).</small> {% endif %}. 
 			{% else %}
 				This reservation is waiting on the user to confirm; there is no action to take. Optionally, you
 				can <a href="#" id="remind-payment-info-needed"
 					class="res-manage-action res-manage-btn">nudge</a> this
-				user by sending them a reminder to confirm. {% if r.last_msg %} <small>(The last reminder was sent on {{ r.last_msg }}).</small> {% endif %}
+				user by sending them a reminder to confirm. 
 			{% endif %}
 
 		{% elif r.status == "confirmed" %}
