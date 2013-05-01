@@ -105,12 +105,17 @@ class Reservation(models.Model):
 		self.status = Reservation.CONFIRMED
 		self.last_msg = datetime.datetime.now()
 		self.save()
-		subject = "[Embassy SF] Your Reservation has been confirmed"
-		domain = Site.objects.get_current().domain
-		message = "Hello %s! Your reservation for %s - %s has been confirmed. We will use the payment details on file to charge your credit card at the end of your stay.\n\nAs a reminder, the cancellation policy for the %s is %s. You can always view, update, or cancel your reservation online at %s%s.\n\nThanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), self.room.name, self.room.cancellation_policy, domain, self.get_absolute_url())
-		recipient = [self.user.email]
-		sender = "stay@embassynetwork.com"
-		send_mail(subject, message, sender, recipient)
+		try:
+			self.reconcile.charge_card()
+			subject = "[Embassy SF] Your Reservation has been confirmed"
+			domain = Site.objects.get_current().domain
+			message = "Hello %s! Your reservation for %s - %s has been confirmed and your card has been charged.\n\nAs a reminder, the cancellation policy for the %s is %s. You can always view, update, or cancel your reservation online at %s%s.\n\nThanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), self.room.name, self.room.cancellation_policy, domain, self.get_absolute_url())
+			recipient = [self.user.email]
+			sender = "stay@embassynetwork.com"
+			send_mail(subject, message, sender, recipient)
+		except stripe.CardError, e:
+			raise self.ResActionError(e)
+
 
 	def set_tentative_and_prompt(self):
 		# approve the reservation and prompt the user to enter payment info.
@@ -121,7 +126,7 @@ class Reservation(models.Model):
 		recipient = [self.user.email]
 		subject = "[Embassy SF] Action Required to Confirm your Reservation"
 		domain = Site.objects.get_current().domain
-		message = '''Thanks for your application! Sounds like you'd be a great addition to our guest quarters and we'd love to have you join us :). Your reservation request for %s - %s has been tentatively approved, but we request that you a credit card to secure your reservation.\n\nPlease visit %s%s to add a payment method and confirm your reservation.\n\nThanks so much, and we look forward to having you!''' % (
+		message = '''Thanks for your application! Sounds like you'd be a great addition to our guest quarters and we'd love to have you join us :). Your reservation request for %s - %s has been tentatively approved.\n\nPlease visit %s%s to submit payment and confirm your reservation.\n\nThanks so much, and we look forward to having you!''' % (
 			str(self.arrive), str(self.depart), domain, self.get_absolute_url())
 		sender = "stay@embassynetwork.com"
 		send_mail(subject, message, sender, recipient)
@@ -141,7 +146,7 @@ class Reservation(models.Model):
 
 		domain = Site.objects.get_current().domain
 		subject = "[Embassy SF] Reminder: Action Required for your Reservation"
-		message = "Hello %s! This is just a reminder that we request a credit card to secure your reservation from %s - %s. Please visit %s%s to add a payment method, otherwise we may make the room available to other guests.\n\nThank you and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
+		message = "Hello %s! This is just a reminder that we request payment to secure your reservation from %s - %s. Please visit %s%s to pay by credit card, or respond to this email to make alternative arrangements. If we don't hear from you we may make the room available to other guests.\n\nThank you and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
 		recipient = [self.user.email]
 		sender = "stay@embassynetwork.com"
 		send_mail(subject, message, sender, recipient)

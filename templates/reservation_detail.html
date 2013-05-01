@@ -26,23 +26,21 @@
 
 	{% elif reservation.status == "approved" and reservation.user.profile.customer_id %}
 		<div>
-			<p><span class="text-error">Action Required! Click below to confirm
-			your reservation and authorize payment. Your card will only be charged at the end of your stay. 
+			<p><span class="text-error">Action Required! Please pay for your reservation to confirm. 
 			Cancellation policy for the {{ reservation.room }} 
 			is {{reservation.room.cancellation_policy}}.</p>
 
 			<form action="/reservation/{{reservation.id}}/confirm/" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-					value="Click to confirm and authorize payment." >
+					value="Submit payment." >
 			</form>
 		</div>
 	{% elif reservation.status == "approved" or reservation.status == "confirmed" and not reservation.user.profile.customer_id %}
 		<div>
-			<p><span class="text-error">Action Required! Please enter your payment details to confirm
-			your reservation. Your card will be charged at the end of your stay. 
-			Cancellation policy for the {{ reservation.room }} 
-			is {{reservation.room.cancellation_policy}}.</p>
+			<p><span class="text-error">Action Required! Please pay for your
+				reservation to confirm. Cancellation policy for the {{ reservation.room }} is
+				{{reservation.room.cancellation_policy}}.</p>
 
 			<form action="/people/{{reservation.user.username}}/addcard/" method="POST" id="payform">
 				{% csrf_token %}
@@ -154,7 +152,7 @@
 					amount: "{{ reservation.reconcile.total_owed_in_cents }}",
 					name: "The Embassy Network",
 					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.reconcile.get_rate }}/night.",
-					panelLabel:"Authorize",
+					panelLabel:"Pay",
 					image: "/media/img/embassy-front-1-128x128.jpg",
 					token: token
 				});

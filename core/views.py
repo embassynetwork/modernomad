@@ -153,7 +153,8 @@ def UserAddCard(request, username):
 	''' Adds a card from either the reservation page or the user profile page.
 	Displays success or error message and returns user to originating page.'''
 
-	if not request.method == 'POST':
+	user = User.objects.get(username=username)
+	if not request.method == 'POST' or request.user != user:
 		return HttpResponseRedirect('/404')
 
 	token = request.POST.get('stripeToken')
@@ -164,7 +165,6 @@ def UserAddCard(request, username):
 	reservation_id = request.POST.get('res-id')
 	if reservation_id:
 		reservation = Reservation.objects.get(id=reservation_id)
-	user = User.objects.get(username=username)
 
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -177,11 +177,19 @@ def UserAddCard(request, username):
 		profile.customer_id = customer.id
 		profile.save()
 
+		# if the card is being added from the reservation page, then charge the card
 		if reservation_id:
 			reservation.status = Reservation.CONFIRMED
 			reservation.save()
-			messages.add_message(request, messages.INFO, 'Thank you! Payment will be processed at the end of your stay.')
-			return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+			try:
+				# charges card, saves payment details and emails a receipt to
+				# the user
+				reservation.reconcile.charge_card()
+				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s' % user.email)
+				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+			except stripe.CardError, e:
+				raise stripe.CardError(e)
+		# if the card is being added from the user profile page, just save it. 
 		else:
 			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 			return HttpResponseRedirect("/people/%s" % username)
@@ -281,9 +289,13 @@ def ReservationConfirm(request, reservation_id):
 	if not reservation.user.profile.customer_id:
 		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
 	else:
-		reservation.confirm_and_notify()
-		reservation.save()
-		messages.add_message(request, messages.INFO, 'Thank you! You will receive a confirmation email with further details.')
+		try:
+			reservation.reconcile.charge_card()
+			reservation.status = Reservation.CONFIRMED
+			reservation.save()
+			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
+		except stripe.CardError, e:
+			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 
 	return HttpResponseRedirect("/reservation/%s" % reservation_id)
 
@@ -381,6 +393,11 @@ def ReservationManageUpdate(request, reservation_id):
 			reservation.comp_tentative_and_notify()
 		elif reservation_action == 'comp-confirm-and-notify':
 			reservation.comp_confirm_and_notify()
+		elif reservation_action == 'res-charge-card':
+			try:
+				reservation.reconcile.charge_card()
+			except stripe.CardError, e:
+				raise Reservation.ResActionError(e)
 		else:
 			raise Reservation.ResActionError("Unrecognized action.")
 

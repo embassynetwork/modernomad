@@ -1,7 +1,9 @@
+<div id="res-status-area" {% if r.reconcile.status == 'paid' %} class="paid-bg-img" {% endif %} >
 
 	{% include "snippets/messages.html" %}
 
 	The current status of this reservation is <span id="the-reservation-status" type="button" class="btn disabled btn-info">{{ r.status }}</span>
+	<span id="reconcile-status" style="visibility:hidden;">{{r.reconcile.status}}</span>
 	
 	{% if r.reconcile.status == "comp" %}
 		<p><i class="icon-heart"i></i> This reservation is a comp</p>
@@ -22,21 +24,22 @@
 
 		{% if r.status == "pending" %}
 			{% if r.user.profile.customer_id %}
-			<a href="#" id="confirm-and-notify" class="res-manage-action res-manage-btn">
-				Confirm this Reservation and Notify the User
-			</a>
+				Confirm this reservation to 
+				<a href="#" id="confirm-and-notify" class="res-manage-action res-manage-btn">
+				charge the user's card and notify them via email. 
+				</a>
 			{% else %}
 			You may <a href="#" id="tentative-and-prompt" class="res-manage-action res-manage-btn">
-				tentatively confirm this reservation</a> and prompt the user to enter payment details.
+				tentatively confirm this reservation</a> and prompt the user to confirm with payment.
 			{% endif %}
 
 		{% elif r.status == "approved" %}
 			{% if r.user.profile.customer_id %}
 				The reservation is approved and the user has valid payment
-				details. Click here to <a href="#" id="confirm-and-notify"
-					class="res-manage-action res-manage-btn"> confirm this
-					reservation and notify the user</a>. They will have the
-				opportunity to cancel if desired. You can also prompt them to
+				details. Confirm this reservation to 
+				<a href="#" id="confirm-and-notify" class="res-manage-action res-manage-btn">
+				charge the user's card and notify them via email. 
+				</a>. They will have the opportunity to cancel if desired. You can also prompt them to
 				<a href="#" id="remind-to-confirm" class="res-manage-action
 					res-manage-btn">confirm themselves</a> 
 			{% else %}
@@ -48,12 +51,21 @@
 
 		{% elif r.status == "confirmed" %}
 			{% if r.user.profile.customer_id %}
-				<p>This reservation is confirmed and payment has been authorized. No action needed.</p>
+				{% if r.reconcile.status == 'paid' %}
+					<p>This reservation is confirmed and paid. No action needed.</p>
+				{% else %}
+					The reservation is confirmed and the user has valid payment
+					details, but their card has not been charged. 
+					<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
+					Charge the user's card and send a receipt via email. 
+					</a>. 
+				{% endif %}
 			{% else %}
 				This user is confirmed but has not entered payment info. If you
 				would like you can <a href="#" id="remind-payment-info-needed"
-					class="res-manage-action res-manage-btn"> click here to
-					remind them.</a> (This will also change their status back to tentative)
+					class="res-manage-action res-manage-btn"> remind them</a>
+				to do so (this will also change their status back to
+				tentative).
 			{% endif %}
 
 		{% endif %} 
@@ -75,4 +87,4 @@
 	</form>
 
 	<small><em class="last-contact">Last contact about this reservation: {{ r.last_msg|default:"Never" }}</em></small>
-
+</div>
