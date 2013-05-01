@@ -27,7 +27,12 @@ install it manually on the command line using:
 create your own local_settings.py file from local_settings.example.py. inside the modernomad/modernomad directory, do the following:
 - `cp local_settings.example.py local_settings.py`
 
-there's actually nothing you need to change in here at the moment, but note that if you want to run the software on a production server, there are production-specific settings for email which you must setup if you want email to work. by default, the software is in "development" mode, and emails are sent using django's built-in console backend, meaning they get printed to the console. 
+the local_settings.py file contains configuration information for stripe
+(payment handling), and email. if you want to run the software on a production
+server, there are production-specific settings for email which you must setup
+if you want email to work. by default, the software is in "development" mode,
+and emails are sent using django's built-in console backend, meaning they
+get printed to the console. 
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
 

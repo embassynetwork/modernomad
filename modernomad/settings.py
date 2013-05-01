@@ -1,9 +1,6 @@
 # Django settings for modernomad project.
 import os
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 # Make filepaths relative to settings.
 ROOT = os.path.dirname(os.path.abspath(__file__))
 path = lambda *a: os.path.join(ROOT, *a)

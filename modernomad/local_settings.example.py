@@ -25,6 +25,7 @@ STRIPE_PUBLISHABLE_KEY = "insert your key here"
 
 if MODE == DEVELOPMENT:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+	DEBUG=True
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'   
 	EMAIL_USE_TLS = True
@@ -32,4 +33,14 @@ else:
 	EMAIL_PORT = 587
 	EMAIL_HOST_USER = 'user@domain.com'
 	EMAIL_HOST_PASSWORD = 'password'
+	DEBUG=False
 
+TEMPLATE_DEBUG = DEBUG
+
+# celery configuration options
+BROKER_URL = 'amqp://'
+CELERY_RESULT_BACKEND = 'amqp://'
+
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ENABLE_UTC = True
