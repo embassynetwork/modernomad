@@ -42,7 +42,7 @@ def arriving_today():
 	sender = settings.DEFAULT_FROM_EMAIL
 	# XXX this is a temporary hack until we make this a setting on the
 	# house admin accounts. 
-	recipients = ["chelseamangold@gmail.com", "jessy@jessykate.com"]
+	recipients = ["chelseamangold@gmail.com", "jessy@jessykate.com", "derek.dunfield@gmail.com", "kris.tew@gmail.com"]
 	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 	msg.send()
 
