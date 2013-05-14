@@ -10,7 +10,7 @@ from django.template import RequestContext
 from registration import signals
 import registration.backends.default
 from registration.models import RegistrationProfile
-from core.forms import ReservationForm, UserProfileForm
+from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
@@ -18,7 +18,8 @@ from django.contrib import messages
 from django.conf import settings
 from django.utils import simplejson
 from core.decorators import group_required
-from core.models import UserProfile, Reservation, Room, Reconcile
+from django.db.models import Q
+from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate
 import stripe
 
 def logout(request):
@@ -122,12 +123,16 @@ def ReservationDetail(request, reservation_id):
 		messages.add_message(request, messages.ERROR, msg)
 		return HttpResponseRedirect('/404')
 	else:
-		if reservation.depart >= datetime.date.today():
+		if reservation.arrive >= datetime.date.today():
 			past = False
 		else:
 			past = True
+		if reservation.reconcile.status == Reconcile.PAID:
+			paid = True
+		else:
+			paid = False
 		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 
-			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : settings.DEFAULT_FROM_EMAIL})
 
 @login_required
 def UserEdit(request, username):
@@ -222,6 +227,7 @@ def ReservationEdit(request, reservation_id):
 	# yet!)
 	original_arrive = reservation.arrive
 	original_depart = reservation.depart
+	original_room = reservation.room
 	if request.user.is_authenticated() and request.user == reservation.user:
 
 		if request.user.groups.filter(name='house_admin'):
@@ -235,13 +241,13 @@ def ReservationEdit(request, reservation_id):
 			if form.is_valid():
 
 				# if the dates have been changed, and the reservation isn't
-				# still  pending to begin with, notify an admin and go back to
+				# still pending to begin with, notify an admin and go back to
 				# pending (unless it's hosted, then we don't generate an
 				# email).
 				if not reservation.hosted and (reservation.status != 'pending' and 
-					(reservation.arrive != original_arrive or reservation.depart != original_depart)):
+					(reservation.arrive != original_arrive or reservation.depart != original_depart or reservation.room != original_room )):
 
-					print "reservation date was changed. updating status."
+					print "reservation room or date was changed. updating status."
 					reservation.status = "pending"
 					
 					# notify house_admins by email
@@ -250,7 +256,7 @@ def ReservationEdit(request, reservation_id):
 						reservation.user.last_name, str(reservation.arrive), str(reservation.depart))
 					sender = "stay@embassynetwork.com"
 					domain = Site.objects.get_current().domain
-					admin_path = urlresolvers.reverse('admin:core_reservation_change', args=(reservation.id,))
+					admin_path = urlresolvers.reverse('reservation_manage', args=(reservation.id,))
 					text = '''Howdy, 
 
 A reservation has been updated and requires your review. 
@@ -261,7 +267,7 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 						recipient = [admin.email,]
 						send_mail(subject, text, sender, recipient) 
 
-					client_msg = 'The reservation was updated and the new dates will be reviewed for availability.'
+					client_msg = 'The reservation was updated and the new information will be reviewed for availability.'
 				else:
 					client_msg = 'The reservation was updated.'
 				# save the instance *after* the status has been updated as needed.  
@@ -362,12 +368,28 @@ def ReservationManage(request, reservation_id):
 		else:
 			past_reservations.append(res)
 	domain = Site.objects.get_current().domain
+	emails = EmailTemplate.objects.filter(Q(shared=True) | Q(creator=request.user))
+	email_forms = []
+	email_templates_by_name = []
+	for email_template in emails:
+		form = EmailTemplateForm(email_template, reservation)
+		email_forms.append(form)
+		email_templates_by_name.append(email_template.name)
+	print email_templates_by_name
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
 		"upcoming_reservations": upcoming_reservations,
+		"email_forms" : email_forms,
+		"email_templates_by_name" : email_templates_by_name,
 		"domain": domain
 	})
+
+@group_required('house_admin')
+def ReservationSetTentative(request, reservation_id):
+	return HttpResponse()
+
+
 
 @group_required('house_admin')
 def ReservationManageUpdate(request, reservation_id):
@@ -377,32 +399,24 @@ def ReservationManageUpdate(request, reservation_id):
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation_action = request.POST.get('reservation-action')
 	try:
-		if reservation_action == 'tentative-and-prompt':
-			reservation.set_tentative_and_prompt()
-		elif reservation_action == 'tentative-and-notify':
-			reservation.set_tentative_and_notify()
-		elif reservation_action == 'confirm-and-notify':
-			result = reservation.confirm_and_notify()
-		elif reservation_action == 'remind-to-confirm':
-			# asks the user to confirm (without prompting for payment details,
-			# usually because they are not needed or we already have them). 
-			reservation.remind_to_confirm()
-		elif reservation_action == 'remind-payment-info-needed':
-			reservation.remind_payment_info_needed()
-		elif reservation_action == 'comp-tentative-and-notify':
-			reservation.comp_tentative_and_notify()
-		elif reservation_action == 'comp-confirm-and-notify':
-			reservation.comp_confirm_and_notify()
+		if reservation_action == 'set-tentative':
+			reservation.set_tentative()
+		elif reservation_action == 'set-confirm':
+			reservation.set_confirmed()
+		elif reservation_action == 'set-comp':
+			reservation.set_comp()
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.reconcile.charge_card()
+				reservation.set_confirmed()
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)
 		else:
 			raise Reservation.ResActionError("Unrecognized action.")
 
 		messages.add_message(request, messages.INFO, 'Your action has been registered!')
-		return render(request, "snippets/res_status_area.html", {"r": reservation})
+		status_area_html = render(request, "snippets/res_status_area.html", {"r": reservation})
+		return status_area_html
 
 	except Reservation.ResActionError, e:
 		messages.add_message(request, messages.INFO, "Error: %s" % e)
@@ -429,6 +443,10 @@ def ReservationToggleComp(request, reservation_id):
 		reconcile.status = Reconcile.COMP
 	else:
 		reconcile.status = Reconcile.UNPAID
+		# if confirmed set status back to APPROVED 
+		if reservation.status == Reservation.CONFIRMED:
+			reservation.status = Reconcile.APPROVED
+			reservation.save()
 	reconcile.save()
 	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
 
@@ -438,15 +456,14 @@ def ReservationSendMail(request, reservation_id):
 		return HttpResponseRedirect('/404')
 
 	print request.POST
-	subject = request.POST.get("email-subject")
-	recipient = [request.POST.get("email-to"),]
-	sender = request.POST.get("email-from")
-	body = request.POST.get("email-body") + "\n\n" + request.POST.get("email-footer")
+	subject = request.POST.get("subject")
+	recipient = [request.POST.get("recipient"),]
+	sender = request.POST.get("sender")
+	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
 	send_mail(subject, body, sender, recipient)
 
 	reservation = Reservation.objects.get(id=reservation_id)
-	reservation.last_msg = datetime.datetime.today()
-	reservation.save()
+	reservation.mark_last_msg() 
 
 	messages.add_message(request, messages.INFO, "Your message was sent.")
 	return HttpResponseRedirect('/manage/reservation/%s' % reservation_id)

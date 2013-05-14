@@ -24,29 +24,27 @@
 
 		{% if r.status == "pending" %}
 			{% if r.user.profile.customer_id %}
-				Confirm this reservation to 
-				<a href="#" id="confirm-and-notify" class="res-manage-action res-manage-btn">
-				charge the user's card and notify them via email. 
-				</a>
+				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
+				Charge the user's card and notify them via email
+				</a> to confirm this reservation.
 			{% else %}
-			You may <a href="#" id="tentative-and-prompt" class="res-manage-action res-manage-btn">
+			You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
 				tentatively confirm this reservation</a> and prompt the user to confirm with payment.
 			{% endif %}
 
 		{% elif r.status == "approved" %}
 			{% if r.user.profile.customer_id %}
 				The reservation is approved and the user has valid payment
-				details. Confirm this reservation to 
-				<a href="#" id="confirm-and-notify" class="res-manage-action res-manage-btn">
-				charge the user's card and notify them via email. 
-				</a>. They will have the opportunity to cancel if desired. You can also prompt them to
-				<a href="#" id="remind-to-confirm" class="res-manage-action
-					res-manage-btn">confirm themselves</a> 
+				details. 
+				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
+				charge the user's card and notify them via email 
+				</a> to confirm this reservation. They will have the
+				opportunity to cancel if desired. You can also nudge them via
+				email to confirm themselves.
 			{% else %}
-				This reservation is waiting on the user to confirm; there is no action to take. Optionally, you
-				can <a href="#" id="remind-payment-info-needed"
-					class="res-manage-action res-manage-btn">nudge</a> this
-				user by sending them a reminder to confirm. 
+				This reservation is waiting on the user to confirm; there is no
+				action to take. Optionally, you can nudge this user by sending
+				them an email reminder to confirm. 
 			{% endif %}
 
 		{% elif r.status == "confirmed" %}
@@ -61,11 +59,8 @@
 					</a>. 
 				{% endif %}
 			{% else %}
-				This user is confirmed but has not entered payment info. If you
-				would like you can <a href="#" id="remind-payment-info-needed"
-					class="res-manage-action res-manage-btn"> remind them</a>
-				to do so (this will also change their status back to
-				tentative).
+				This user is confirmed but has not entered payment info. You can always remind them 
+				to do so by sending an email. 
 			{% endif %}
 
 		{% endif %} 
@@ -74,8 +69,9 @@
 		{% if r.status == "pending" or r.status == "approved" %}
 		This complimentary reservation is {{r.status}}. <a href="#"
 			class="res-manage-action res-manage-btn"
-			id="comp-confirm-and-notify">Confirm this reservation and notify
-			the guest.</a>
+			id="comp-confirm">Confirm this reservation</a> or <a href="#"
+			class="res-manage-action res-manage-btn"
+			id="request-to-confirm">request the guest to confirm.</a>
 
 		{% elif r.status == "confirmed" %}
 			<p>This reservation is confirmed as a comp. No action required.</p>

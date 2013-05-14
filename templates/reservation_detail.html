@@ -103,6 +103,9 @@
 	<div class="res-modify-btn">
 	{% if past %}
 		<p class="notice">This reservation is in the past and cannot be modified</p>
+	{% elif paid %}
+		<p class="notice">This reservation has already been paid for. Please
+		contact {{ contact }} if you need to make changes. </p>
 	{% else %}
 		<div>
 			<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>

@@ -1,6 +1,11 @@
 # copy this file to local_settings.py. it should be exluded from the repo
 # (ie, ensure local_settings.py is in .gitignore)
 
+ADMINS += (
+	('Jessy Kate Schingler', 'jessy@jessykate.com'),
+)
+
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'd+xvh@)+d_iw%%w65+61&amp;2(w7upu*rt7l%n3d_li#1^pt@133^'
 
@@ -36,6 +41,10 @@ else:
 	DEBUG=False
 
 TEMPLATE_DEBUG = DEBUG
+
+# this will be used as the subject line prefix for all emails sent from this app. 
+EMAIL_SUBJECT_PREFIX = "[Your House Name Here]"
+DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
 
 # celery configuration options
 BROKER_URL = 'amqp://'

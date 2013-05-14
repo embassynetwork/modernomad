@@ -98,97 +98,17 @@ class Reservation(models.Model):
 		return (self.depart - self.arrive).days
 	total_nights.short_description = "Nights"
 
-	def confirm_and_notify (self):
-		if not self.user.profile.customer_id:
-			raise self.ResActionError("Cannot confirm a reservation without payment details.")
-	
-		self.status = Reservation.CONFIRMED
+	def mark_last_msg(self):
 		self.last_msg = datetime.datetime.now()
 		self.save()
-		try:
-			self.reconcile.charge_card()
-			subject = "[Embassy SF] Your Reservation has been confirmed"
-			domain = Site.objects.get_current().domain
-			message = "Hello %s! Your reservation for %s - %s has been confirmed and your card has been charged.\n\nAs a reminder, the cancellation policy for the %s is %s. You can always view, update, or cancel your reservation online at %s%s.\n\nThanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), self.room.name, self.room.cancellation_policy, domain, self.get_absolute_url())
-			recipient = [self.user.email]
-			sender = "stay@embassynetwork.com"
-			send_mail(subject, message, sender, recipient)
-		except stripe.CardError, e:
-			raise self.ResActionError(e)
 
-
-	def set_tentative_and_prompt(self):
-		# approve the reservation and prompt the user to enter payment info.
+	def set_tentative(self):
 		self.status = Reservation.APPROVED
-		self.last_msg = datetime.datetime.today()
 		self.save()
 
-		recipient = [self.user.email]
-		subject = "[Embassy SF] Action Required to Confirm your Reservation"
-		domain = Site.objects.get_current().domain
-		message = '''Thanks for your application! Sounds like you'd be a great addition to our guest quarters and we'd love to have you join us :). Your reservation request for %s - %s has been tentatively approved.\n\nPlease visit %s%s to submit payment and confirm your reservation.\n\nThanks so much, and we look forward to having you!''' % (
-			str(self.arrive), str(self.depart), domain, self.get_absolute_url())
-		sender = "stay@embassynetwork.com"
-		send_mail(subject, message, sender, recipient)
-
-	def remind_payment_info_needed(self):
-		# remind the user about the status of their reservation when an action
-		# is required by them. (eg. if approved with payment details or if
-		# confirmed without). mostly useful for legacy reservations but
-		# possible this state would crop up in other situations. 
-		if not ((self.status == Reservation.CONFIRMED or 
-			self.status == Reservation.APPROVED) and not self.user.profile.customer_id):
-			raise self.ResActionError("Reservation must be either approved or confirmed, and payment details must not already exist") 
-
-		if self.status == Reservation.CONFIRMED:
-			self.status = Reservation.APPROVED
-			self.save()
-
-		domain = Site.objects.get_current().domain
-		subject = "[Embassy SF] Reminder: Action Required for your Reservation"
-		message = "Hello %s! This is just a reminder that we request payment to secure your reservation from %s - %s. Please visit %s%s to pay by credit card, or respond to this email to make alternative arrangements. If we don't hear from you we may make the room available to other guests.\n\nThank you and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
-		recipient = [self.user.email]
-		sender = "stay@embassynetwork.com"
-		send_mail(subject, message, sender, recipient)
-
-		self.last_msg = datetime.datetime.today()
-		self.save()
-
-	def remind_to_confirm(self):
-		# useful for approved reservation that DO have payment info or COMPS. 
-		# ie, if reservation is approved and we DO have payment info, this can
-		# make it ambiguous if they want the room for sure or not. can
-		# also be used for comp reservations when we don't have the payment
-		# info to hold them accountable. 
-		domain = Site.objects.get_current().domain
-		subject = "[Embassy SF] Reminder: Action Required for your Reservation"
-		message = "Hello %s! This is just a reminder to confirm (or decline) your reservation for %s - %s so that we can make the room available to others if you no longer need it. Please visit %s%s to update your reservation status. Thanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
-		recipient = [self.user.email]
-		sender = "stay@embassynetwork.com"
-		send_mail(subject, message, sender, recipient)
-		self.last_msg = datetime.datetime.today()
-		self.save()
-
-	def comp_confirm_and_notify(self):
-		if self.reconcile.status != Reconcile.COMP:
-			raise ResActionError("Reservation is not marked as complimentary.")
+	def set_confirmed(self):
 		self.status = Reservation.CONFIRMED
-		self.last_msg = datetime.datetime.now()
 		self.save()
-		self.comp_notify()
-
-	def comp_notify(self):
-		# send a notification to the user that their reservation has been made
-		# complimentary, and ask them to let us know if anything changes. 
-		if self.reconcile.status != Reconcile.COMP:
-			raise ResActionError("Reservation is not marked as complimentary.")
-
-		subject = "[Embassy SF] You've been offered a Complimentary Stay!"
-		domain = Site.objects.get_current().domain
-		message = "Hello %s! You have been offered a complimentay stay for your reservation %s - %s. We're excited to have you!\n\nIf you no longer need this reservation, please let us know or visit %s%s to update or cancel your reservation, so that we can make the space available to someone else. Thanks, and we look forward to having you!" % (self.user.first_name, str(self.arrive), str(self.depart), domain, self.get_absolute_url())
-		recipient = [self.user.email]
-		sender = "stay@embassynetwork.com"
-		send_mail(subject, message, sender, recipient)
 
 	def cancel(self):
 		# cancel this reservation. make sure to update the associated reconcile
@@ -530,5 +450,24 @@ def size_images(sender, instance, **kwargs):
 			default_storage.delete(obj.image_thumb.path)
 
 
-		
+class EmailTemplate(models.Model):
+	''' Templates for the typical emails sent by the system. The from-address
+	is usually set by DEFAULT_FROM_ADDRESS in settings, and the recipients are
+	determined by the action and reservation in question. ''' 
+
+	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX 
+	FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
+
+	body = models.TextField(verbose_name="The body of the email")
+	subject = models.CharField(max_length=200, verbose_name="Default Subject Line")
+	name = models.CharField(max_length=200, verbose_name="Template Name")
+	creator = models.ForeignKey(User)
+	shared = models.BooleanField(default=False)
+
+	def __unicode__(self):
+		return self.name
+
+	
+
+
 

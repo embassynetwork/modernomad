@@ -23,33 +23,6 @@
 
 		<a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">Email this User</a>
 
-			<!-- Modal -->
-		<div id="emailModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			<h3 id="myModalLabel">Email {{ r.user.first_name }} </h3>
-		</div>
-		<div class="modal-body">
-			<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >
-				{% csrf_token %}
-				<span class="email-form-label">To: </span><input type="text" name="email-to" value="{{r.user.email}}"><br>
-				<span class="email-form-label">From: </span><input type="text" name="email-from" value="stay@embassynetwork.com" readonly><br>
-				<span class="email-form-label">Subject: </span><input id="form-email-subject" type="text" name="email-subject" value="[Embassy SF] A Message about Your Stay">
-				<textarea id="email-body" name="email-body" placeholder="enter email body here..."></textarea>
-				<textarea id="email-footer" name="email-footer" readonly>
-	----------------	
-	Your reservation is from {{ r.arrive }} to {{r.depart}}.
-	Manage your reservation at: http://{{ domain}}{{r.get_absolute_url}}
-				</textarea>
-		</div>
-		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-			<button type="submit" class="btn btn-primary">Send</button>
-			</form>
-		</div>
-		</div>
-
-
 		{% if r.status != 'canceled' %}
 
 			{% if r.reconcile.status != 'paid' %}
@@ -115,36 +88,93 @@
 </div>
 {% endif %}
 
+
+<!-- Email Modal -->
+<div id="emailModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="myModalLabel">Email {{ r.user.first_name }} </h3>
+	</div>
+	<div class="modal-body">
+	
+			<!-- select menu specifies which email to show -->
+			<select name="select-email" id="which-email-select">
+				{% for template_name in email_templates_by_name %}
+				<option id="option{{forloop.counter}}" name="select-email" value="{{ template.name }}">
+						{{template_name}}
+					</option>
+				{% endfor %}
+			</select>
+
+			<!-- the individual emails, initially in hidden divs -->
+			{% for f in email_forms %}
+				<div class="hide" id="form{{forloop.counter}}">
+					<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >
+						{% csrf_token %}
+						{{ f.as_p }}
+						<submit value="Send">
+				
+					<div class="modal-footer">
+						<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+						<button type="submit" class="btn btn-primary">Send Email{{forloop.counter}}</button>
+					</div>
+
+				</div><!-- end hide -->
+			{% endfor %}
+	</div>
+</div>
+
+
 {% endblock %}
 
 {% block extrajs %}
 <script language="JavaScript">
+
+// don't have a default email selected when the modal pops up
+$("#which-email-select").prop("selectedIndex", -1);
+
+$("#which-email-select").change(function() {
+
+	// hide the previously active email, if any
+	active_email = $(".email-active");
+	active_email.removeClass("email-active");
+	active_email.addClass("hide");
+	active_email.hide()
+
+	// un-hide the selected email and add an 'active' class 
+	var email_selection = $("select option:selected").prop("id")
+	var email_id = email_selection.match(/\d+/)
+	form_id = "#form"+ email_id
+	$(form_id).removeClass("hide");
+	$(form_id).addClass("email-active");
+	$(form_id).show();
+});
+
 function register_actions() {
- 
-	// comping a reservation reslts in a page reload so we can use the template
-	// language here too. 
+	// comping a reservation reslts in a page reload so we can rely on the
+	// template language here. 
 	reconcile_status = $("#reconcile-status").html();
 	
 	if (reconcile_status == 'paid') {
 		$("#res-action-toggle-comp").remove();
 	}
 	$('.res-manage-action').click(function() { 
-		submitdata = {
-			'reservation-action': $(this).attr('id'),
-			'csrfmiddlewaretoken': '{{ csrf_token }}'
-		};
-		console.log(submitdata);
 		request = $.ajax({ 
-			data: submitdata, 
+			data: {
+				'reservation-action': $(this).attr('id'),
+				'csrfmiddlewaretoken': '{{ csrf_token }}'
+			}, 
 			type: $("#res-action-form").attr('method'), // GET or POST
-			url: $("#res-action-form").attr('action'), // the file to call
+			url: $("#res-action-form").attr('action') // the url to hit
 		});
 		request.done(function(msg) { // on success..
 			console.log("Success!");
 			$("#res-status-area").html(msg);
-			// re-register the ajax calls once the new html is injected or we
-			// won't be able to chain calls together without refreshing the
-			// page. 
+			$("#emailModal").modal("show");
+
+			// also need to re-register the ajax calls on the new html divs one
+			// it is injected (or we won't be able to chain multiple calls
+			// together without refreshing the page). 
 			register_actions();
 		});
 		request.fail(function(msg) {
@@ -155,25 +185,6 @@ function register_actions() {
 		return false;
 	});
 };
-
-$("#dialog-confirm-cancel").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Cancel": function () {
-            $("#res-cancel").submit();
-         },
-        "Do Not Cancel": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$("#res-cancel").click(function (e) {
-    $("#dialog-confirm-cancel").dialog("open");
-    e.preventDefault();
-});
-
 
 $(document).ready(function() {
 	register_actions();
@@ -209,6 +220,24 @@ $(document).ready(function() {
     }).ajaxStop(function () {
         $(this).stop().fadeOut('fast');
     });	
+});
+
+$("#dialog-confirm-cancel").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Cancel": function () {
+            $("#res-cancel").submit();
+         },
+        "Do Not Cancel": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-cancel").click(function (e) {
+    $("#dialog-confirm-cancel").dialog("open");
+    e.preventDefault();
 });
 
 </script>

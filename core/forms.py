@@ -4,8 +4,9 @@ from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 import os, datetime
 from django.conf import settings
-
-from core.models import UserProfile, Reservation
+from django.template import Template, Context
+from core.models import UserProfile, Reservation, EmailTemplate
+from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
@@ -110,7 +111,7 @@ class UserProfileForm(forms.ModelForm):
 class ReservationForm(forms.ModelForm):
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'user', 'last_msg']
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker'}),
@@ -171,7 +172,54 @@ class StripeCustomerCreationForm(forms.Form):
 	expiration_year = forms.IntegerField(label='(YYYY)')
 
 
+class EmailTemplateForm(forms.Form):
+	''' We don't actually make this a model form because it's a derivative
+	function of a model but not directly constructed from the model fields
+	itself.''' 
+	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly'}))
+	recipient = forms.EmailField() 
+	footer = forms.CharField(widget=forms.Textarea(attrs={'readonly':'readonly'}))
+	subject = forms.CharField()
+	body = forms.CharField(widget=forms.Textarea)
 
+	def __init__(self, tpl, reservation):
+		''' pass in an EmailTemplate instance, and a reservation object '''
+
+		domain = Site.objects.get_current().domain
+		# calling super will initialize the form fields 
+		super(EmailTemplateForm, self).__init__()
+
+		# add in the extra fields
+		self.fields['sender'].initial = EmailTemplate.FROM_ADDRESS
+		self.fields['recipient'].initial = reservation.user.email
+		self.fields['footer'].initial = forms.CharField(
+				widget=forms.Textarea(attrs={'readonly':'readonly'})
+			)
+		self.fields['footer'].initial = '''--------------------------------\nYour reservation is from %s to %s.\nManage your reservation at http://%s%s.''' % (reservation.arrive, reservation.depart, domain, reservation.get_absolute_url())
+
+		# both the subject and body fields expect to have access to all fields
+		# associated with a reservation, so all reservation model fields are
+		# passed to the template renderer, even though we don't know (and so
+		# that we don't have to know) which specific fields a given template
+		# wants to use). 
+		
+		template_variables = {
+			'created': reservation.created,
+			'updated': reservation.updated,
+			'status': reservation.status,
+			'user': reservation.user,
+			'arrive': reservation.arrive, 
+			'depart': reservation.depart, 
+			'arrival_time': reservation.arrival_time,
+			'room': reservation.room, 
+			'num_nights': reservation.total_nights(), 
+			'purpose': reservation.purpose,
+			'comments': reservation.comments,
+			'reservation_url': "https://"+domain+reservation.get_absolute_url()
+		}
+
+		self.fields['subject'].initial = EmailTemplate.SUBJECT_PREFIX + Template(tpl.subject).render(Context(template_variables))
+		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 
 

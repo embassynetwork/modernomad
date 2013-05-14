@@ -175,8 +175,6 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/people/login/'
 LOGOUT_URL = '/people/logout/'
 
-DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
-
 # import any local settings
 try:
 	from local_settings import *

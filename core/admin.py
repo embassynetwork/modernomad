@@ -2,7 +2,14 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from core.models import UserProfile, Reservation, Reconcile, Room
+from core.models import UserProfile, Reservation, Reconcile, Room, EmailTemplate
+
+class EmailTemplateAdmin(admin.ModelAdmin):
+	model = EmailTemplate
+	exclude = ('creator',)
+	def save_model(self, request, obj, form, change): 
+		obj.creator = request.user 
+		obj.save() 
 
 class RoomAdmin(admin.ModelAdmin):
 	model = Room
@@ -142,6 +149,7 @@ class UserProfileAdmin(UserAdmin):
 admin.site.register(Reservation, ReservationAdmin)
 #admin.site.register(Reconcile, ReconcileAdmin)
 admin.site.register(Room, RoomAdmin)
+admin.site.register(EmailTemplate, EmailTemplateAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
