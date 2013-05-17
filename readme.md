@@ -1,12 +1,6 @@
 Modernomad is guest and event management software for coliving houses. 
 
-
-## Pre-requisites, system dependencies and environment setup intructions:
-see [setup](/setup.md)
-
-## First-time Setup
-see [how-to-run](/how-to-run.md)
-
+## About 
 Modernomad is designed to integrate guests, residents and a broader community
 around a colivng house. Although a large portion of the functionality revolves
 around managing guests, the underlying ethos is one in which the reservation is
@@ -37,4 +31,10 @@ Main Features:
 - Occupancy view for admins showing breakdown of income, paid status and guests
   Stats on a month-by-month basis. 
 - House admins can add hosted reservations, for guests without profiles.
+
+### Pre-requisites, system dependencies and environment setup intructions:
+see [setup](/setup.md)
+
+### First-time Setup
+see [how-to-run](/how-to-run.md)
 

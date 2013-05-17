@@ -98,6 +98,9 @@
 	<div class="modal-body">
 	
 			<!-- select menu specifies which email to show -->
+			<div>Select a template from the dropdown list to populate an email
+				with relevant default text. If you would like to add a new
+				template, visit the admin section of the site!</div>
 			<select name="select-email" id="which-email-select">
 				{% for template_name in email_templates_by_name %}
 				<option id="option{{forloop.counter}}" name="select-email" value="{{ template.name }}">
@@ -111,12 +114,17 @@
 				<div class="hide" id="form{{forloop.counter}}">
 					<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >
 						{% csrf_token %}
-						{{ f.as_p }}
+						<span class="email-form-label">To: </span>{{f.recipient }}<br>
+						<span class="email-form-label">From: </span>{{f.sender}}<br>
+						<span class="email-form-label">Subject: </span>{{f.subject}}<br>
+						{{f.body}}
+						{{f.footer}}
+
 						<submit value="Send">
 				
 					<div class="modal-footer">
 						<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-						<button type="submit" class="btn btn-primary">Send Email{{forloop.counter}}</button>
+						<button type="submit" class="btn btn-primary">Send Email</button>
 					</div>
 
 				</div><!-- end hide -->

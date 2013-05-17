@@ -578,3 +578,11 @@ div#spinner
 .last-contact {
 	color: #999999;
 }
+
+#id_footer {
+	height: 5em;
+}
+
+#id_subject {
+	width: 400px;
+}

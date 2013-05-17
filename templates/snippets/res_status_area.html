@@ -39,12 +39,12 @@
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
 				charge the user's card and notify them via email 
 				</a> to confirm this reservation. They will have the
-				opportunity to cancel if desired. You can also nudge them via
-				email to confirm themselves.
+				opportunity to cancel if desired. You can also <a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">nudge them via
+					email</a> to confirm themselves.
 			{% else %}
 				This reservation is waiting on the user to confirm; there is no
-				action to take. Optionally, you can nudge this user by sending
-				them an email reminder to confirm. 
+				action to take. Optionally, you can nudge this user by <a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">sending
+					them an email reminder to confirm</a>. 
 			{% endif %}
 
 		{% elif r.status == "confirmed" %}
@@ -60,7 +60,7 @@
 				{% endif %}
 			{% else %}
 				This user is confirmed but has not entered payment info. You can always remind them 
-				to do so by sending an email. 
+				to do so by <a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">sending an email</a>. 
 			{% endif %}
 
 		{% endif %} 
