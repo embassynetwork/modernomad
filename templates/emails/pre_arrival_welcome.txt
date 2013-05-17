@@ -6,7 +6,10 @@ The house is located at 399 Webster Street, San Francisco, CA, 94117. Access
 to the house is via a keypad on the front door. The access code is "0399#" (the
 "#" at the end is important, make sure to enter it as well). 
 
-You can connect to any of the wireless access points named "EmbassySF..." you
+Our primary, sacred house rule is No Dishes in the Sink. Ever. Wash
+immediately, dry, and put away. Thank you!
+
+You can connect to any of the wireless access points named "Embassy..." you
 see at the house. The wireless password for all access points is "netpositive."
 
 To browse the profiles of other guests, please visit {{ site_url }}/calendar to
