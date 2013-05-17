@@ -30,15 +30,15 @@ STRIPE_PUBLISHABLE_KEY = "insert your key here"
 
 if MODE == DEVELOPMENT:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-	DEBUG=True
+    DEBUG=True
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'   
-	EMAIL_USE_TLS = True
-	EMAIL_HOST = 'smtp.gmail.com'
-	EMAIL_PORT = 587
-	EMAIL_HOST_USER = 'user@domain.com'
-	EMAIL_HOST_PASSWORD = 'password'
-	DEBUG=False
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = 'user@domain.com'
+    EMAIL_HOST_PASSWORD = 'password'
+    DEBUG=False
 
 TEMPLATE_DEBUG = DEBUG
 
