@@ -25,16 +25,17 @@ weekday_number_to_name = {
 #def test():      
 #    print "HELLO WORLD"                    
 
-@periodic_task(run_every=crontab(hour=4, minute=30))
-# @periodic_task(run_every=crontab(minute="*")) # <-- for testing
+#@periodic_task(run_every=crontab(hour=4, minute=30))
+@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def arriving_today():
 	today = datetime.datetime.today() 
 	arriving_today = Reservation.objects.filter(arrive=today).filter(status='confirmed')
-	print "%d arriving today" % len(arriving_today)
+	departing_today = Reservation.objects.filter(depart=today).filter(status='confirmed')
 	domain = Site.objects.get_current().domain
 	plaintext = get_template('emails/arriving_today_notification.txt')
 	c = Context({
-		'reservations' : arriving_today,
+		'arriving' : arriving_today,
+		'departing' : departing_today,
 		'domain': domain,
 	})
 	text_content = plaintext.render(c)
@@ -42,7 +43,8 @@ def arriving_today():
 	sender = settings.DEFAULT_FROM_EMAIL
 	# XXX this is a temporary hack until we make this a setting on the
 	# house admin accounts. 
-	recipients = ["chelseamangold@gmail.com", "jessy@jessykate.com", "derek.dunfield@gmail.com", "kris.tew@gmail.com"]
+	recipients = ["chelseamangold@gmail.com", "jessy@jessykate.com", 
+			"derek.dunfield@gmail.com", "kris.tew@gmail.com", "emi422@gmail.com"]
 	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 	msg.send()
 
