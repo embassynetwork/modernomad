@@ -36,7 +36,7 @@
 			"default_rate": 35,
 			"description": "",
 			"primary_use": "guest",
-			"shared": True,
+			"shared": true
 		}
 	},
 	{
