@@ -109,26 +109,9 @@
 				{% endfor %}
 			</select>
 
-			<!-- the individual emails, initially in hidden divs -->
-			{% for f in email_forms %}
-				<div class="hide" id="form{{forloop.counter}}">
-					<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >
-						{% csrf_token %}
-						<span class="email-form-label">To: </span>{{f.recipient }}<br>
-						<span class="email-form-label">From: </span>{{f.sender}}<br>
-						<span class="email-form-label">Subject: </span>{{f.subject}}<br>
-						{{f.body}}
-						{{f.footer}}
-
-						<submit value="Send">
-				
-					<div class="modal-footer">
-						<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-						<button type="submit" class="btn btn-primary">Send Email</button>
-					</div>
-
-				</div><!-- end hide -->
-			{% endfor %}
+			<!-- the selected email will be inserted here -->
+			<div id="selected-email">
+			</div>
 	</div>
 </div>
 
@@ -143,19 +126,13 @@ $("#which-email-select").prop("selectedIndex", -1);
 
 $("#which-email-select").change(function() {
 
-	// hide the previously active email, if any
-	active_email = $(".email-active");
-	active_email.removeClass("email-active");
-	active_email.addClass("hide");
-	active_email.hide()
+	// remove the previously active email form, if any
+	$("#selected-email").empty();
 
-	// un-hide the selected email and add an 'active' class 
+	// insert form fields with selected email template
 	var email_selection = $("select option:selected").prop("id")
-	var email_id = email_selection.match(/\d+/)
-	form_id = "#form"+ email_id
-	$(form_id).removeClass("hide");
-	$(form_id).addClass("email-active");
-	$(form_id).show();
+	var template_id = email_selection.match(/\d+/)
+	$("#selected-email").html($email_templates[template_id]);
 });
 
 function register_actions() {
@@ -196,6 +173,25 @@ function register_actions() {
 
 $(document).ready(function() {
 	register_actions();
+
+	$email_templates = {};
+	{% for f in email_forms %}
+		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
+			'<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >' +
+			"{% csrf_token %}" +
+			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
+			'<span class="email-form-label">From: </span> {{f.sender}} <br>' +
+			'<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
+			'{{f.body|escapejs}}' +
+			'{{f.footer|escapejs}}' +
+			'<submit value="Send">' +
+			'<div class="modal-footer">' +
+				'<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
+				'<button type="submit" class="btn btn-primary">Send Email</button>' +
+			'</div>' +
+			'</div>'
+	{% endfor %}
+	console.log($email_templates);
 
 	$('#res-action-charge').submit(function() { 
 		submitdata = {
