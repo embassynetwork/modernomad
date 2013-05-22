@@ -8,3 +8,4 @@ modernomad.db
 local_settings.py
 .DS_Store
 celery.db
+celery
