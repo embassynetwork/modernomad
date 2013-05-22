@@ -1,6 +1,14 @@
 People arriving today:
-{% for r in reservations %}
-	{{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }}
+{% for r in arriving %}
+	{{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }}
+	https://{{ domain }}/manage/reservation/{{ r.id }}/
+{% empty %}
+	None!
+{% endfor %}
+
+People departing today:
+{% for r in departing %}
+	{{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }}
 	https://{{ domain }}/manage/reservation/{{ r.id }}/
 {% empty %}
 	None!
