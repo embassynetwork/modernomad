@@ -33,9 +33,10 @@
 		"model": "core.room",
 		"fields" : {
 			"name": "Ada Lovelace Hostel",
-			"default_rate": 45,
+			"default_rate": 35,
 			"description": "",
-			"primary_use": "guest"
+			"primary_use": "guest",
+			"shared": True,
 		}
 	},
 	{
@@ -125,7 +126,7 @@
         "pk": 5,
         "model": "core.emailtemplate",
         "fields": {
-            "body": "Hello {{first_name}}! \r\n\r\nI wanted to send a reminder that we need a payment to secure your reservation from {{arrive}} - {{depart}}. You can visit {{reservation_url}} to pay by credit card, or respond to this email to make alternative arrangements. \r\n\r\nIf we don't hear from you we may make the room available to other guests. If you no longer need the room, that's ok too! Just let us know or cancel your reservation online. \r\n\r\nThanks, look forward to hearing from you!",
+            "body": "Hello {{user.first_name}}! \r\n\r\nI wanted to send a reminder that we need a payment to secure your reservation from {{arrive}} - {{depart}}. You can visit {{reservation_url}} to pay by credit card, or respond to this email to make alternative arrangements. \r\n\r\nIf we don't hear from you we may make the room available to other guests. If you no longer need the room, that's ok too! Just let us know or cancel your reservation online. \r\n\r\nThanks, look forward to hearing from you!",
             "shared": true,
             "creator": 1,
             "name": "Remind Payment Needed",
@@ -136,7 +137,7 @@
         "pk": 6,
         "model": "core.emailtemplate",
         "fields": {
-            "body": "Hello {{first_name}}! \r\n\r\nWe currently have a tentative reservation for you from {{arrive}} - {{depart}}. Do you still need the room? If you could confirm (or decline) your reservation, that would allow us to make the room available to others if you no longer need it. \r\n\r\nYou can visit {{reservation_url}} to update your reservation status, or feel free to just respond to this email and let us know. \r\n\r\nThanks, and we look forward to having you!",
+            "body": "Hello {{user.first_name}}! \r\n\r\nWe currently have a tentative reservation for you from {{arrive}} - {{depart}}. Do you still need the room? If you could confirm (or decline) your reservation, that would allow us to make the room available to others if you no longer need it. \r\n\r\nYou can visit {{reservation_url}} to update your reservation status, or feel free to just respond to this email and let us know. \r\n\r\nThanks, and we look forward to having you!",
             "shared": true,
             "creator": 1,
             "name": "Remind without Payment info",
@@ -147,11 +148,11 @@
         "pk": 7,
         "model": "core.emailtemplate",
         "fields": {
-            "body": "Hello {{first_name}}! \r\n\r\nYou have been offered a complimentay stay for your reservation {{arrive}} - {{depart}}. We're excited to have you!\r\n\r\nLet us know if you have any questions, and if for some reason you no longer need this reservation, please let us know (you can reply to this email) or visit {{reservation_url}} to update or cancel, so that we can make the space available to someone else. \r\n\r\nThanks, and we look forward to having you!",
+            "body": "Hello {{user.first_name}}! \r\n\r\nYou have been offered a complimentay stay for your reservation {{arrive}} - {{depart}}. We're excited to have you!\r\n\r\nLet us know if you have any questions, and if for some reason you no longer need this reservation, please let us know (you can reply to this email) or visit {{reservation_url}} to update or cancel, so that we can make the space available to someone else. \r\n\r\nThanks, and we look forward to having you!",
             "shared": true,
             "creator": 1,
             "name": "Offer Complimentary Stay",
-            "subject": "ou've been offered a Complimentary Stay!"
+            "subject": "You've been offered a Complimentary Stay!"
         }
     }
 ]
