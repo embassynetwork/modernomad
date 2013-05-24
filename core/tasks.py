@@ -48,10 +48,11 @@ def admin_today_notification():
 	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 	msg.send()
 
-@periodic_task(run_every=crontab(hour=2, minute=0))
+#@periodic_task(run_every=crontab(hour=2, minute=0))
+@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def guest_welcome():
-	# get all reservations arriving tomorrow (day = today + 1)
-	tomorrow = datetime.datetime.today() + datetime.timedelta(days=1)
+	# get all reservations arriving day after tomorrow (day = today + 2)
+	tomorrow = datetime.datetime.today() + datetime.timedelta(days=2)
 	upcoming = Reservation.objects.filter(arrive=tomorrow).filter(status='confirmed')
 	domain = Site.objects.get_current().domain
 	plaintext = get_template('emails/pre_arrival_welcome.txt')
@@ -61,12 +62,13 @@ def guest_welcome():
 			'first_name': reservation.user.first_name,
 			'day_of_week' : day_of_week,
 			'site_url': domain,
-			'events_url' : "http://facebook.com/embassynetwork/events",
+			'events_url' : settings.EVENTS_LINK,
+			'facebook_group' : settings.FACEBOOK_GROUP,
 			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.id,)),
 			'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.id,)),
 		})
 		text_content = plaintext.render(c)
-		subject = "[Embassy SF] Your stay from %s - %s" % (reservation.arrive, reservation.depart)
+		subject = "[Embassy SF] See you on %s" % day_of_week
 		sender = settings.DEFAULT_FROM_EMAIL
 		recipients = [reservation.user.email,]
 		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)

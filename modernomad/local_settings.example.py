@@ -46,6 +46,11 @@ TEMPLATE_DEBUG = DEBUG
 EMAIL_SUBJECT_PREFIX = "[Your House Name Here]"
 DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
 
+# social media
+TWITTER = "your twitter handle"
+FACEBOOK_GROUP = "your facebook group"
+EVENTS_LINK = "main events link"
+
 # celery configuration options
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'
