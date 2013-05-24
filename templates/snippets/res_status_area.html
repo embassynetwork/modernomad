@@ -26,7 +26,7 @@
 			{% if r.user.profile.customer_id %}
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
 				Charge the user's card and notify them via email
-				</a> to confirm this reservation.
+				</a> to confirm this reservation. (A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
 			{% else %}
 			You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
 				tentatively confirm this reservation</a> and prompt the user to confirm with payment.
@@ -37,10 +37,8 @@
 				The reservation is approved and the user has valid payment
 				details. 
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-				charge the user's card and notify them via email 
-				</a> to confirm this reservation. They will have the
-				opportunity to cancel if desired. You can also <a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">nudge them via
-					email</a> to confirm themselves.
+				Charge the user's card </a> to confirm this reservation.  (A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away) They will have the
+				opportunity to cancel if desired. 
 			{% else %}
 				This reservation is waiting on the user to confirm; there is no
 				action to take. Optionally, you can nudge this user by <a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">sending
@@ -55,8 +53,8 @@
 					The reservation is confirmed and the user has valid payment
 					details, but their card has not been charged. 
 					<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-					Charge the user's card and send a receipt via email. 
-					</a>. 
+					Charge the user's card.</a>. (A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
+					 
 				{% endif %}
 			{% else %}
 				This user is confirmed but has not entered payment info. You can always remind them 
@@ -69,9 +67,7 @@
 		{% if r.status == "pending" or r.status == "approved" %}
 		This complimentary reservation is {{r.status}}. <a href="#"
 			class="res-manage-action res-manage-btn"
-			id="comp-confirm">Confirm this reservation</a> or <a href="#"
-			class="res-manage-action res-manage-btn"
-			id="request-to-confirm">request the guest to confirm.</a>
+			id="set-confirm">Confirm this reservation</a>. (House information will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
 
 		{% elif r.status == "confirmed" %}
 			<p>This reservation is confirmed as a comp. No action required.</p>

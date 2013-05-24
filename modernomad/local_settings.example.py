@@ -24,6 +24,10 @@ MODE = DEVELOPMENT
 # how many days should people be allowed to make a reservation request for?
 MAX_RESERVATION_DAYS = 14
 
+# how many days ahead to send the welcome email to guests with relevan house
+# info.
+WELCOME_EMAIL_DAYS_AHEAD = 2
+
 # if using stripe, enter your stripe *secret* key here
 STRIPE_SECRET_KEY = "insert your key here"
 STRIPE_PUBLISHABLE_KEY = "insert your key here"

@@ -20,6 +20,7 @@ from django.utils import simplejson
 from core.decorators import group_required
 from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate
+from core.tasks import send_guest_welcome
 import stripe
 
 def logout(request):
@@ -299,6 +300,11 @@ def ReservationConfirm(request, reservation_id):
 			reservation.reconcile.charge_card()
 			reservation.status = Reservation.CONFIRMED
 			reservation.save()
+			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
+			# need to send them house info manually. 
+			days_until_arrival = (reservation.arrive - datetime.date.today()).days
+			if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+				send_guest_welcome([reservation,])
 			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
 		except stripe.CardError, e:
 			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
@@ -382,13 +388,9 @@ def ReservationManage(request, reservation_id):
 		"upcoming_reservations": upcoming_reservations,
 		"email_forms" : email_forms,
 		"email_templates_by_name" : email_templates_by_name,
+		"days_before_welcome_email" : settings.WELCOME_EMAIL_DAYS_AHEAD,
 		"domain": domain
 	})
-
-@group_required('house_admin')
-def ReservationSetTentative(request, reservation_id):
-	return HttpResponse()
-
 
 
 @group_required('house_admin')
@@ -403,12 +405,18 @@ def ReservationManageUpdate(request, reservation_id):
 			reservation.set_tentative()
 		elif reservation_action == 'set-confirm':
 			reservation.set_confirmed()
+			days_until_arrival = (reservation.arrive - datetime.date.today()).days
+			if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+				send_guest_welcome([reservation,])
 		elif reservation_action == 'set-comp':
 			reservation.set_comp()
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.reconcile.charge_card()
 				reservation.set_confirmed()
+				days_until_arrival = (reservation.arrive - datetime.date.today()).days
+				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+					send_guest_welcome([reservation,])
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)
 		else:

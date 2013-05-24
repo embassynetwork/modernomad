@@ -51,9 +51,15 @@ def admin_today_notification():
 @periodic_task(run_every=crontab(hour=2, minute=0))
 #@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def guest_welcome():
-	# get all reservations arriving day after tomorrow (day = today + 2)
-	tomorrow = datetime.datetime.today() + datetime.timedelta(days=2)
-	upcoming = Reservation.objects.filter(arrive=tomorrow).filter(status='confirmed')
+	# get all reservations WELCOME_EMAIL_DAYS_AHEAD from now. 
+	soon = datetime.datetime.today() + datetime.timedelta(days=settings.WELCOME_EMAIL_DAYS_AHEAD)
+	upcoming = Reservation.objects.filter(arrive=soon).filter(status='confirmed')
+	send_guest_welcome(upcoming)
+
+def send_guest_welcome(upcoming):
+	''' does the work of sending a guest welcome email, whether by scheduled
+	task or manually for imminent reservations.'''
+	# 'upcoming' needs to be a queryset
 	domain = Site.objects.get_current().domain
 	plaintext = get_template('emails/pre_arrival_welcome.txt')
 	day_of_week = weekday_number_to_name[datetime.datetime.today().weekday()]
