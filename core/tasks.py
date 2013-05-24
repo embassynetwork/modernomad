@@ -48,8 +48,8 @@ def admin_today_notification():
 	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 	msg.send()
 
-#@periodic_task(run_every=crontab(hour=2, minute=0))
-@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+@periodic_task(run_every=crontab(hour=2, minute=0))
+#@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def guest_welcome():
 	# get all reservations arriving day after tomorrow (day = today + 2)
 	tomorrow = datetime.datetime.today() + datetime.timedelta(days=2)
