@@ -35,6 +35,8 @@ class Room(models.Model):
 	primary_use = models.CharField(max_length=200, choices=ROOM_USES, default=PRIVATE, verbose_name='Indicate whether this room should be listed for guests to make reservations.')
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
+#	beds = models.IntegerField(default=1)
+#	
 
 	def __unicode__(self):
 		return self.name

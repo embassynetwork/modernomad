@@ -1,11 +1,6 @@
 # copy this file to local_settings.py. it should be exluded from the repo
 # (ie, ensure local_settings.py is in .gitignore)
 
-ADMINS += (
-	('Jessy Kate Schingler', 'jessy@jessykate.com'),
-)
-
-
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'd+xvh@)+d_iw%%w65+61&amp;2(w7upu*rt7l%n3d_li#1^pt@133^'
 

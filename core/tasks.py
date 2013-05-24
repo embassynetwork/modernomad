@@ -62,8 +62,8 @@ def send_guest_welcome(upcoming):
 	# 'upcoming' needs to be a queryset
 	domain = Site.objects.get_current().domain
 	plaintext = get_template('emails/pre_arrival_welcome.txt')
-	day_of_week = weekday_number_to_name[datetime.datetime.today().weekday()]
 	for reservation in upcoming:
+		day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
 		c = Context({
 			'first_name': reservation.user.first_name,
 			'day_of_week' : day_of_week,
