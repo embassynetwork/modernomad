@@ -1,4 +1,14 @@
-Modernomad is guest and event management software for coliving houses. 
+Modernomad is guest, event and community management software for coliving
+houses and other experimental living arrangements focused on openness,
+collaboration and participation. 
+
+Modernomad is licensed under the [Affero General Public License](agpl-3.0.txt),
+which is like the GPL but *requires* you provide access to the source code for
+any modified versions that are running publicly (among other things). The
+intent is to make sure that anyone improving the software makes those
+improvements available to others, as we have to them. 
+
+<img src="media/img/agplv3-88x31.png" />
 
 ## About 
 Modernomad is designed to integrate guests, residents and a broader community
@@ -33,8 +43,10 @@ Main Features:
 - House admins can add hosted reservations, for guests without profiles.
 
 ### Pre-requisites, system dependencies and environment setup intructions:
-see [setup](/setup.md)
+see [Environment Setup](docs/environment-setup.md)
 
 ### First-time Setup
-see [how-to-run](/how-to-run.md)
+see [How to Run](docs/how-to-run.md)
 
+### Configuration
+see [Configuration](docs/configuration.md)
