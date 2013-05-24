@@ -185,12 +185,15 @@ def UserAddCard(request, username):
 
 		# if the card is being added from the reservation page, then charge the card
 		if reservation_id:
-			reservation.status = Reservation.CONFIRMED
-			reservation.save()
 			try:
 				# charges card, saves payment details and emails a receipt to
 				# the user
 				reservation.reconcile.charge_card()
+				reservation.status = Reservation.CONFIRMED
+				reservation.save()
+				days_until_arrival = (reservation.arrive - datetime.date.today()).days
+				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+					send_guest_welcome([reservation,])
 				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s' % user.email)
 				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
 			except stripe.CardError, e:
