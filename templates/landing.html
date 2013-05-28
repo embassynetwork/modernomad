@@ -161,28 +161,28 @@
 
 				<hr>
 
-				<div class="row-fluid marketing" id="events">
 				{% for subset in coming_month|subsets_size:6 %}
+					<div class="row-fluid" id="events">
 
-				{% for person in subset %}
+						{% for person in subset %}
 
-				<div class="span2">
-					<div id="img-name-back">
-						<div id="img-name">{{ person.first_name }}</div>
+							<div class="span2">
+								<div id="img-name-back">
+									<div id="img-name">{{ person.first_name }}</div>
+								</div>
+								<div class="float-left" id="img-user{{person.id}}">			
+										<img src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+										<p id="img-descr-user{{person.id}}">{{person.profile.bio|title|truncatewords:60 }}
+										
+										<a href="/people/{{ person.username}}">...{{ person.first_name|title}} {{person.last_name|title}}</a>
+										</p>
+									
+								</div>
+							</div>
+
+						{% endfor %}<!-- end person in subset -->
 					</div>
-					<div class="float-left" id="img-user{{person.id}}">			
-							<img src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
-							<p id="img-descr-user{{person.id}}">{{person.profile.bio|title|truncatewords:60 }}
-							
-							<a href="/people/{{ person.username}}">...{{ person.first_name|title}} {{person.last_name|title}}</a>
-							</p>
-						
-					</div>
-				</div>
-
-				{% endfor %}<!-- end person in subset -->
 				{% endfor %}<!-- end subsets in coming_month -->
-				</div>
 
 				<hr>
 
