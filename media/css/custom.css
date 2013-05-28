@@ -80,30 +80,6 @@ hr.style-two {
 	margin: auto;
 }
 
-/* ==========================================================
-============================[TODAY===========================
-========================================================== */
-
-#img-name, #big-img-name, .reverse-emph {
-	background: #333;	
-}
-
-#img-name-back, #big-img-name-back {
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; 	/* IE 5, 6, 7 */
-	filter: alpha(opacity=80); /* IE 8 & 9 */
-	-moz-opacity:0.8; 	/* Older than Firefox 0.9 */
-	-khtml-opacity: 0.8; 	/* Safari 1.x (pre WebKit!) */
-	opacity: 0.8;
-}
-
-#img-name {
-	color: #fff;
-	position: absolute;
-	margin: 150px 0 0 0px;
-	padding: 0 5px 0 5px;
-	width: 160px;
-}
-
 div[id*=img-user] {
 	position: relative;
 }
@@ -142,11 +118,10 @@ p[id*=img-descr-user] {
 }
 
 .values {
-padding: 10px;
-border-radius: 7px 7px 7px 7px;
--moz-border-radius: 7px 7px 7px 7px;
--webkit-border-radius: 7px 7px 7px 7px;
-transition: background 2s;
+	padding: 10px;
+	border-radius: 7px 7px 7px 7px;
+	-moz-border-radius: 7px 7px 7px 7px;
+	-webkit-border-radius: 7px 7px 7px 7px;
 }
 
 //.values:hover {
@@ -178,6 +153,35 @@ div[id*=img-user]:hover p[id*=img-descr-user] {
 	margin-top: 10px;
 	text-align: center;
 }
+
+.profiles {
+	padding-bottom: 20px;
+}
+
+/* ==========================================================
+============================[TODAY===========================
+========================================================== */
+
+#img-name, #big-img-name, .reverse-emph {
+	background: #333;	
+}
+
+#img-name-back, #big-img-name-back {
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; 	/* IE 5, 6, 7 */
+	filter: alpha(opacity=80); /* IE 8 & 9 */
+	-moz-opacity:0.8; 	/* Older than Firefox 0.9 */
+	-khtml-opacity: 0.8; 	/* Safari 1.x (pre WebKit!) */
+	opacity: 0.8;
+}
+
+#img-name {
+	color: #fff;
+	position: absolute;
+	margin: 150px 0 0 0px;
+	padding: 0 5px 0 5px;
+	width: 160px;
+}
+
 
 .item {
 	margin: 0 80px 0 80px;
