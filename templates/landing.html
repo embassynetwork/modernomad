@@ -2,249 +2,252 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-	<meta charset="utf-8">
-	<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
-	<!-- responsive support -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-	<meta name="author" content="Jessy Kate Schingler">
+	<head>
+		<meta charset="utf-8">
+		<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
+		<!-- responsive support -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
+		<meta name="author" content="Jessy Kate Schingler">
 
-	<!-- Le styles -->
-	<link href="/media/css/bootstrap.css" rel="stylesheet">
-	<link href="/media/css/custom.css" rel="stylesheet">
-	<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
+		<!-- Le styles -->
+		<link href="/media/css/bootstrap.css" rel="stylesheet">
+		<link href="/media/css/custom.css" rel="stylesheet">
+		<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
 
-	<style type="text/css">
+		<style type="text/css">
 
-	  /* Custom container */
-	  .container-narrow {
-		margin: 0 auto;
-		max-width: 700px;
-	  }
-	  .container-narrow > hr {
-		margin: 30px 0;
-	  }
+			/* Custom container */
+			/*
+			.container-narrow {
+				margin: 0 auto;
+				max-width: 90%;
+			}
+			.container-narrow > hr {
+				margin: 30px 0;
+			}
+			*/
 
-	  /* Main marketing message and sign up button */
-	  .jumbotron {
-		margin: 60px 0;
-		text-align: center;
-	  	padding-top: 20px;
-	  	padding-bottom: 20px;
-		background-image: url("/media/img/embassy-front-crop.jpg");	
-		background-size: cover;
-	  }
+			/* Main marketing message and sign up button */
+			.jumbotron {
+				margin: 60px 0;
+				text-align: center;
+			//	background-image: url("/media/img/embassy-collage.png");	
+			//	background-size: cover;
+				height: 235px;
+			}
 
-	  .jumbotron h1 {
-		font-size: 72px;
-		line-height: 1;
-	  }
-	  .jumbotron .btn {
-		font-size: 21px;
-		padding: 14px 24px;
-	  }
+			.jumbotron h1 {
+				font-size: 72px;
+				line-height: 1;
+			}
+			.jumbotron .btn {
+				font-size: 21px;
+				padding: 14px 24px;
+			}
 
-	  /* Supporting marketing content */
-	  .marketing {
-		margin: 60px 0;
-	  }
-	  .marketing p + h4 {
-		margin-top: 28px;
-	  }
+			/* Supporting marketing content */
+			.marketing {
+				margin: 60px 0;
+			}
+			.marketing p + h4 {
+				margin-top: 28px;
+			}
 
-	  .centered {
-		text-align: center;
-	  }
-	</style>
+			.centered {
+				text-align: center;
+			}
+		</style>
 
-	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-	<!--[if lt IE 9]>
-	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+		<!--[if lt IE 9]>
+		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
 
-	<!-- Le fav and touch icons -->
-	<link rel="shortcut icon" href="/ico/favicon.ico">
-	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
+		<!-- Le fav and touch icons -->
+		<link rel="shortcut icon" href="/ico/favicon.ico">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
 
-  </head>
+	</head>
 
-  <body>
-
-	<!-- Part 1: Wrap all page content here -->
-	<div class="container-narrow">
-	
-	{% block wrapper %}
-	<div id="wrap">
-	{% endblock %}
-
-	  <div data-spy="affix" data-offset-top="325" class="navbar newhome">
-		  <div class="navbar-inner newhome-inner">
-
-				  <a class="brand" href="/">Home</a>
-				  <ul class="nav">
-
-					  <li><a href="#mission">Mission</a></li>
-					  <li><a href="#house">House</a></li>
-					  <li><a href="#events">Events</a></li>
-					  <li><a href="#community">Community</a></li>
-					  <li><a href="#participate">Participate</a></li>
-					  <li><a href="#location">Location</a></li>
-				  </ul>
-		  </div>
-	  </div>
+	<body>
 
 
-	<div class="jumbotron" id="mission">
-		<div class="global-nav">
-			<ul class="top-nav">
-				<li><a href="#mission">Mission</a></li>
-				<li><a href="#house">House</a></li>
-			</ul>		
-		</div>
+				<div>
+					<img src="/media/img/embassy-collage-filter.png">
+				</div>
 
-		<h2>Embassy Network Alpha</h2>
-		<p class="lead" style="text-align:right;">Reinventing home as a place of purpose and intention. We seek out those who want to lead examined lives and be around those who will challenge and support them to make a positive impact at scale.</p>
-		<a class="btn btn-large btn-success" href="#participate">Become a Member</a>
-	</div>
-
-	<hr>
-
-	<div class="row-fluid marketing" id="house">
-
-		<h4 class="centered">Day in the Life</h4>
-		We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills. We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-	</div>
-		
-	<div class="row-fluid marketing">
-		<div class="span3">
-			<h4 class="centered">Density Breeds Ideas and Collaboration</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-		<div class="span3">
-			<h4 class="centered">Have a Voice</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-		<div class="span3">
-			<h4 class="centered">Ask Real Questions</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-		<div class="span3">
-			<h4 class="centered">Ask Why?</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-	</div>
-
-	<hr>
-
-	<div class="row-fluid marketing" id="events">
-	<div id="houseCarousel" data-pause="hover" class="carousel slide">
-	  <!-- Carousel items -->
-	  <div class="carousel-inner">
-		<div class="active item">
-			
-			<div class="centered">
-			<h2>Jungian Psychology Workshop</h2>
-			<p>March. 5, 2013, 7pm-9pm</p>
-			</div>
-		</div>
-		<div class="item">
-			<div class="centered">
-			<h2 class>Reading Group: Seeing Like a State</h2>
-			<p>March. 10, 2013, 8pm-10pm</p>
-			</div>
-		</div>
-		<div class="item">
-			<div class="centered">
-			<h2>Sunday Night Dinners</h2>
-			<p>March. 12, 2013, 7:30pm</p>
-			</div>
-		</div>
-		<div class="item">
-			<div class="centered">
-			<h2>HomeBrew Beer 101</h2>
-			<p>March. 11, 2013, 12pm-3pm</p>
-			</div>
-		</div>
-	  </div>
-	  <!-- Carousel nav -->
-	  <a class="carousel-control left" href="#houseCarousel" data-slide="prev">&lsaquo;</a>
-	  <a class="carousel-control right" href="#houseCarousel" data-slide="next">&rsaquo;</a>
-	</div>	
-	</div>
-	
-	<hr>
-
-	{% for subset in coming_month|subsets_size:6 %}
-
-	{% for person in subset %}
-
-	<div class="span2">
-		<div id="img-name-back">
-			<div id="img-name">{{ person.first_name }}</div>
-		</div>
-		<div class="img-polaroid float-left">			
-			<a href="{{ person.profile.url}}"> 
-			<img class="profile-img-thumb" 
-				src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
-			/>
-			</a>
-		</div>
-	</div>
-	
-	{% endfor %}<!-- end person in subset -->
-	{% endfor %}<!-- end subsets in coming_month -->
-
-
-	<hr>
-
-	<div class="row-fluid marketing" id="participate">
-		<div class="span4">
-			<h4 class="centered">Attend</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-		<div class="span4">
-			<h4 class="centered">Stay with Us</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-		<div class="span4">
-			<h4 class="centered">Host</h4>
-			We choose to go to the moon in this decade and do the other things, not because they are easy, but because they are hard, because that goal will serve to organize and measure the best of our energies and skills.
-		</div>
-	</div>
-
-	<div class="row-fluid marketing" id="location">
-		<iframe width="700" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278" style="color:#0000FF;text-align:left">View Larger Map</a></small>
-	</div>
-	  <!-- map -->
-	  <!-- participate -->
-	  <!-- footer info -->
-
-
-
-
-	<footer class="footer">
+		<!-- Part 1: Wrap all page content here -->
 		<div class="container">
-	{% block footer %}
-		<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-			<img alt="Creative Commons License" style="border-width:0"
-			src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> | 
-			Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
-		</p>
-	{% endblock %}
-	</container>
-	</footer>
-	<!-- Le javascript -->
-	<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
-	<script src="/media/js/jquery-1.8.2.js"></script>
-	<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
-	<script src="/media/js/bootstrap.js"></script>
-	<script>
-		$('#houseCarousel').carousel()
-	</script>
-	</div> <!-- end container-narrrow -->
-  </body>
-</html>
+
+			{% block wrapper %}
+			<div id="wrap">
+				{% endblock %}
+
+				<div class="row-fluid marketing" id="house">
+
+					<h1 class="centered large">The Embassy San Francisco</h1>
+					<p class="lead">The Embassy San
+					Francisco is our experiment in creating a home built around
+					purpose and intention. We value curiosity, analysis,
+					questioning, and engagement. This is not a house for
+					by-standers! If you like to jump in and be part of the
+					fray, we think you'll like it here.</p>
+				</div>
+
+				<hr class="style-one">
+
+				<div class="row-fluid marketing">
+					<div class="span3 values">
+						<h4 class="centered lead">Density = Ideas +<br>Collaboration</h4>
+						A community of creatives and professionals sharing space in informal ways.  Opportunities for
+						organic and emergent discussions and collaborations.
+						We're suckers for serendipity.
+					</div>
+					<div class="span3 values">
+						<h4 class="centered lead">Action</h4>
+						We build community through doing stuff together! Think
+						cooking, coworking, hosting but also reading clubs, art
+						projects, skill shares, or sometimes just watching a
+						movie. Events are held 2-3 nights per week.  
+					</div>
+					<div class="span3 values">
+						<h4 class="centered lead">Focus</h4>
+						We often
+						work long hours. Our work may spill into home, but
+						usually on purpose and with joy. We strive to do what
+						we love.  Daytimes at the house are more downbeat, and
+						evenings often involve impromptu meals and wide ranging
+						discussions. 
+					</div>
+					<div class="span3 values">
+						<h4 class="centered lead">Sharing, Openness, Exploration</h4>
+						We live in an age where the values and benefits of
+						sharing and openness are exploding. We share food, space and
+						ideas; we open our doors frequently; we often try new
+						approaches to organizing ourselves. 
+					</div>
+				</div>
+
+				<hr>
+
+				<div class="row-fluid marketing" id="events">
+					<div id="eventsCarousel" data-pause="hover" class="carousel slide">
+					<!-- Carousel items -->
+					<div class="carousel-inner">
+					<div class="carousel-slide-wrapper">
+					{% for event in events %}
+						<div class="item {% if forloop.first %} active {% endif %} ">
+							<img src="{{ event.event.logo }}" class="event-image pull-left"> 
+							<div class="event-description">
+								<h2>{{ event.event.title }}</h2>
+								<p>{{ event.event.start_date }} - {{ event.event.end_date }}</p>
+								<p>{{ event.event.description|safe|truncatewords_html:50 }}</p>
+							</div>
+							<h3 class="centered"><a href="{{ event.event.url }}">Read more and RSVP</a></h3>
+						</div>
+					{% endfor %}
+					</div>
+
+					</div> <!-- end carousel inner -->
+
+				<!-- Carousel nav -->
+				<a class="carousel-control left" href="#eventsCarousel" data-slide="prev">&lsaquo;</a>
+				<a class="carousel-control right" href="#eventsCarousel" data-slide="next">&rsaquo;</a>
+				</div>	
+				</div>
+
+				<hr>
+
+				<div class="row-fluid marketing" id="events">
+				{% for subset in coming_month|subsets_size:6 %}
+
+				{% for person in subset %}
+
+				<div class="span2">
+					<div id="img-name-back">
+						<div id="img-name">{{ person.first_name }}</div>
+					</div>
+					<div class="float-left" id="img-user{{person.id}}">			
+							<img src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+							<p id="img-descr-user{{person.id}}">{{person.profile.bio|title|truncatewords:60 }}
+							
+							<a href="/people/{{ person.username}}">...{{ person.first_name|title}} {{person.last_name|title}}</a>
+							</p>
+						
+					</div>
+				</div>
+
+				{% endfor %}<!-- end person in subset -->
+				{% endfor %}<!-- end subsets in coming_month -->
+				</div>
+
+				<hr>
+
+				<div class="row-fluid marketing" id="participate">
+					<div class="span4">
+						<h3 class="centered super-size">Participate</h3>
+						<p class="lead">We host a salon series on most Thursdays, and a
+						community dinner every Sunday. We've got a Maker Monday
+						series that's currently happening once a month, and
+						various one-off events. Hear about upcoming events on
+						our mailing list!</p> 
+						<form id="form-eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
+							<input name="email" id="list-signup-input" placeholder=" Email..."><br>
+							<input type="submit" id="list-signup-submit" class="btn btn-success btn-large" value="Sign Me Up!" />
+						</form>
+
+					</div>
+					<div class="span4">
+						<h3 class="centered super-size">Stay with Us</h3>
+						<p class="lead">We choose to go to the moon in this
+						decade and do the other things, not because they are
+						easy, but because they are hard, because that goal will
+						serve to organize and measure the best of our energies
+						and skills.</p>
+					</div>
+					<div class="span4">
+						<h3 class="centered super-size">Host</h3>
+						<p class="lead">We choose to go to the moon in this
+						decade and do the other things, not because they are
+						easy, but because they are hard, because that goal will
+						serve to organize and measure the best of our energies
+						and skills.</p>
+					</div>
+				</div>
+
+				<hr>
+
+				<div class="row-fluid marketing" id="location">
+					<iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+				</div>
+				<!-- map -->
+				<!-- participate -->
+				<!-- footer info -->
+
+			</div> <!-- end wrap -->
+				<footer class="footer">
+				<div class="container">
+					{% block footer %}
+					<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
+							<img alt="Creative Commons License" style="border-width:0"
+							src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> | 
+					Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
+					</p>
+					{% endblock %}
+					</container>
+					</footer>
+					<!-- Le javascript -->
+					<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
+					<script src="/media/js/jquery-1.8.2.js"></script>
+					<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
+					<script src="/media/js/bootstrap.js"></script>
+					<script>
+						$('#eventsCarousel').carousel()
+					</script>
+			</div> <!-- end container-narrrow -->
+		</body>
+	</html>
 

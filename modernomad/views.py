@@ -13,6 +13,7 @@ from django.utils.safestring import mark_safe
 from django.db.models import Q
 from django.contrib.sites.models import Site
 from django.contrib import messages
+import eventbrite
 
 
 def new_home(request):
@@ -27,7 +28,16 @@ def new_home(request):
 		coming_month.append(r.user)
 	residents = User.objects.filter(groups__name='residents')
 	coming_month += list(residents)
-	return render(request, "landing.html", {'coming_month': coming_month})
+
+	# get any events
+	eb_auth_tokens = {
+			'app_key':  settings.EVENTBRITE_APP_KEY, 
+			'user_key': settings.EVENTBRITE_USER_KEY
+		}
+	eb_client = eventbrite.EventbriteClient(eb_auth_tokens)
+	response = eb_client.user_list_events()
+	events = response['events']
+	return render(request, "landing.html", {'coming_month': coming_month, 'events': events})
 
 def index(request):
 	return render(request, "index.html")

@@ -36,31 +36,51 @@
 }
 
 
-/* ======================[Home Navigation]================= */
-.newhome {
-	position: absolute;
-	top: 325px;
+/* ====================== Home Page ================= */
+
+.event-image {
+	height: 200px;
+	float: left;
+
 }
 
-.newhome-inner {
-	padding: 0 0 0 30px;
-	width:669px;
+.event-description {
+	max-height: 200px;
+	overflow: hidden;
+	padding-left: 40px;
+	text-align: right;
+}
+
+hr.style-one {
+    border: 0;
+    height: 2px;
+    background: #333;
+    box-shadow: 0 0 20px 2px #AAA;
+    background-image: -webkit-linear-gradient(left, #ccc, #999, #ccc); 
+    background-image:    -moz-linear-gradient(left, #ccc, #999, #ccc); 
+    background-image:     -ms-linear-gradient(left, #ccc, #999, #ccc); 
+    background-image:      -o-linear-gradient(left, #ccc, #999, #ccc); 
+}
+
+hr.style-two {
+    border: 0;
+    height: 1px;
+    background-image: -webkit-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:    -moz-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:     -ms-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:      -o-linear-gradient(left, #ccc, #333, #ccc); 
+}
+
+.carousel-slide-wrapper {
+	width: 860px;
 	margin: auto;
 }
-
-.affix {
-	position: fixed;
-	top: 0px;
-}
-
 
 /* ==========================================================
 ============================[TODAY===========================
 ========================================================== */
 
 #img-name, #big-img-name, .reverse-emph {
-	-moz-border-radius: 5px;
-	border-radius: 5px;
 	background: #333;	
 }
 
@@ -75,10 +95,79 @@
 #img-name {
 	color: #fff;
 	position: absolute;
-	margin: 113px 0 0 7px;
+	margin: 150px 0 0 0px;
 	padding: 0 5px 0 5px;
+	width: 160px;
 }
 
+div[id*=img-user] {
+	position: relative;
+}
+
+p[id*=img-descr-user] {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: rgba(156,83,61, 0.82);
+	color: #fff;
+	overflow: hidden;
+	padding: 5px;
+	height: 160px;
+
+	visibility: hidden;
+	opacity: 0;
+}
+
+.super-size {
+	font-size:35px;
+	font-weight: 200;
+	line-height: 35px;
+	margin-bottom: 30px;
+}
+
+#list-signup-submit {
+	margin-top: 25px;
+	font-size: 20px;
+}
+
+#list-signup-input {
+	line-height: 30px;
+	font-size: 25px;
+}
+
+.values {
+padding: 10px;
+border-radius: 7px 7px 7px 7px;
+-moz-border-radius: 7px 7px 7px 7px;
+-webkit-border-radius: 7px 7px 7px 7px;
+transition: background 2s;
+}
+
+//.values:hover {
+//	background: rgba(219,219,219,1);
+//background: -moz-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
+//background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(219,219,219,1)), color-stop(42%, rgba(246,246,246,1)), color-stop(100%, rgba(255,255,255,1)));
+//background: -webkit-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
+//background: -o-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
+//background: -ms-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
+//background: linear-gradient(to bottom, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
+//filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dbdbdb', endColorstr='#ffffff', GradientType=0 );
+//-webkit-box-shadow: 0px -3px 5px 0px rgba(182,192,192,1);
+//-moz-box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
+//box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
+//}
+
+div[id*=img-user]:hover p[id*=img-descr-user] {
+  visibility: visible;
+  opacity: 1;
+}
+
+#form-eventlist-signup {
+	margin-top: 10px;
+	text-align: center;
+}
 
 .item {
 	margin: 0 80px 0 80px;

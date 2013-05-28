@@ -50,6 +50,10 @@ TWITTER = "your twitter handle"
 FACEBOOK_GROUP = "your facebook group"
 EVENTS_LINK = "main events link"
 
+# eventbrite
+EVENTBRITE_APP_KEY = "your app key here"
+EVENTBRITE_USER_KEY = "your user key here"
+
 # celery configuration options
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'
