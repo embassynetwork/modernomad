@@ -4,6 +4,10 @@
 
 /* ======================[Global Navigation]================= */
 
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'IM Fell French Canon SC', serif;
+}
+
 .top-nav {
    float:left;
    width:100%;
@@ -162,6 +166,12 @@ transition: background 2s;
 div[id*=img-user]:hover p[id*=img-descr-user] {
   visibility: visible;
   opacity: 1;
+}
+
+#house-name-title {
+	font-family: 'IM Fell French Canon SC', serif;
+	font-size: 60px;
+	line-height: 75px;
 }
 
 #form-eventlist-signup {
