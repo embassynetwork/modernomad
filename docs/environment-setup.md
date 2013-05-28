@@ -1,5 +1,21 @@
 
-## prerequisites: pip and virtualenv. 
+## OS X requirements
+
+These are only necessary for OS X devs. You will need Xcode, Xcode command line
+tools, and brew.
+
+For some completely unfathomable reason, OS X does not ship with the GCC
+compiler installed. And for further unfathomable reasons, it is bundled with
+XCode, which is over a GB in size and not installed by default. The upshot is,
+to get [brew](http://mxcl.github.io/homebrew/) to work, you need both Xcode and
+[Xcode command line
+tools](http://stackoverflow.com/questions/9329243/xcode-4-4-command-line-tools)
+installed. Start the Xcode download early, it can take an hour or more
+depending on your connection!
+
+Next, install [brew](http://mxcl.github.io/homebrew/)!
+
+## Pip and Virtualenv. 
 
 each virtualenv contains its own install of pip, but you need pip to be installed globally in order to install virtualenv and virtualenvwrapper (or, at least, this is the easiest way to get those dependencies). 
 
@@ -44,6 +60,14 @@ on linux, you may need to symlink these libraries for PIL to find them during th
 
 
 then either install PIL using `brew`, or from the dmg's available on the PIL website. for example, see the process outlined [here](http://stackoverflow.com/questions/9070074/how-to-install-pil-on-mac-os-x-10-7-2-lion)
+
+# RabbitMQ
+celery depends on rabbit-mq, which can be installed using brew on OS X or
+apt-get on debian/ubuntu (and other ways on other systems). 
+
+- os x: `brew update; brew install rabbitmq`
+- debian/ubuntu: `sudo apt-get install rabbitmq-server`
+
 
 ## Hooray!
 
