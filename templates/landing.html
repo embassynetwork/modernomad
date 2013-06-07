@@ -153,7 +153,7 @@
 
 							<div class="span2">
 								<div class="float-left homepage-user-wrapper">			
-									<img src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+									<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
 									<div class="homepage-user-descr" id="user-{{person.id}}">
 										<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:60 }}</p>
 										... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
