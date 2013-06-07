@@ -80,24 +80,47 @@ hr.style-two {
 	margin: auto;
 }
 
-div[id*=img-user] {
-	position: relative;
-}
 
-p[id*=img-descr-user] {
+.homepage-user-descr {
 	position: absolute;
 	top: 0;
-	bottom: 0;
 	left: 0;
-	right: 0;
-	background: rgba(156,83,61, 0.82);
+	background: rgba(92, 71, 65, 0.82);
 	color: #fff;
 	overflow: hidden;
 	padding: 5px;
 	height: 160px;
-
 	visibility: hidden;
 	opacity: 0;
+}
+
+.homepage-user-descr:hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+.homepage-user-wrapper {
+	position: relative;
+}
+
+.homepage-user-text {
+	height: 140px;
+	width: 160px;
+	overflow: hidden;
+	margin-bottom: 0px;
+}
+
+.homepage-user-link {
+	color: #e71d99;
+}
+
+.homepage-user-wrapper:hover .homepage-user-text {
+	visibility: visible;
+	opacity: 1;
+}
+.homepage-user-wrapper:hover .homepage-user-link {
+	visibility: visible;
+	opacity: 1;
 }
 
 .super-size {
@@ -107,8 +130,11 @@ p[id*=img-descr-user] {
 	margin-bottom: 30px;
 }
 
-#list-signup-submit {
-	margin-top: 25px;
+.list-signup-submit {
+	padding-left: 20px;
+}
+
+.btn-large-text {
 	font-size: 20px;
 }
 
@@ -138,24 +164,42 @@ p[id*=img-descr-user] {
 //box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
 //}
 
-div[id*=img-user]:hover p[id*=img-descr-user] {
-  visibility: visible;
-  opacity: 1;
-}
-
 #house-name-title {
 	font-family: 'IM Fell French Canon SC', serif;
 	font-size: 60px;
 	line-height: 75px;
 }
 
-#form-eventlist-signup {
+#eventlist-signup {
 	margin-top: 10px;
+}
+
+#eventsignup-response-fail {
 	text-align: center;
+	color: #bd362f;
+}
+
+#eventsignup-response-success {
+	text-align: center;
+	color: #51a351;
 }
 
 .profiles {
 	padding-bottom: 20px;
+}
+
+.homepage-header-img {
+	width: 100%;
+}
+
+#homepage-wrap {
+	// fixed width landing page
+	width: 1170px;
+	margin: auto;
+}
+
+.homepage-profile-img {
+	width: 170px;
 }
 
 /* ==========================================================
@@ -183,9 +227,7 @@ div[id*=img-user]:hover p[id*=img-descr-user] {
 }
 
 
-.item {
-	margin: 0 80px 0 80px;
-}
+.item { margin: 0 80px 0 80px; }
 
 .carousel-control {
 	margin: 0;

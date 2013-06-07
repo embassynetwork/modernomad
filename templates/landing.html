@@ -64,16 +64,14 @@
 	<body>
 
 
-				<div>
+				<div class="homepage-header-img">
 					<img src="/media/img/embassy-collage-filter.png">
 				</div>
 
 		<!-- Part 1: Wrap all page content here -->
 		<div class="container">
 
-			{% block wrapper %}
-			<div id="wrap">
-				{% endblock %}
+			<div id="homepage-wrap">
 
 				<div class="row-fluid marketing" id="house">
 
@@ -156,13 +154,12 @@
 						{% for person in subset %}
 
 							<div class="span2">
-								<div class="float-left" id="img-user{{person.id}}">			
-										<img src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
-										<p id="img-descr-user{{person.id}}">{{person.profile.bio|title|truncatewords:60 }}
-										
-										<a href="/people/{{ person.username}}">...{{ person.first_name|title}} {{person.last_name|title}}</a>
-										</p>
-									
+								<div class="float-left homepage-user-wrapper">			
+									<img src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+									<div class="homepage-user-descr" id="user-{{person.id}}">
+										<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:60 }}</p>
+										... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
+									</div>
 								</div>
 							</div>
 
@@ -180,27 +177,32 @@
 						series that's currently happening once a month, and
 						various one-off events. Hear about upcoming events on
 						our mailing list!</p> 
-						<form id="form-eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
-							<input name="email" id="list-signup-input" placeholder=" Email..."><br>
-							<input type="submit" id="list-signup-submit" class="btn btn-success btn-large" value="Sign Me Up!" />
+						<div id="eventlist-signup-wrapper">
+						<form id="eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
+							<input name="email" id="list-signup-input" placeholder=" Email...">
+							<input type="submit" class="btn-large-text btn btn-large" id="list-signup-submit" value="Sign Me Up!" />
 						</form>
+						</div>
 
 					</div>
 					<div class="span4">
 						<h3 class="centered super-size">Stay with Us</h3>
-						<p class="lead">We choose to go to the moon in this
-						decade and do the other things, not because they are
-						easy, but because they are hard, because that goal will
-						serve to organize and measure the best of our energies
-						and skills.</p>
+						<p class="lead">Guests are a cornerstone of our house.
+						Part of our experiment here is seeking out those who
+						are traveling the world for curiosity, passion, and
+						collaboration, and welcoming them into our home. 
+						Would you like to become a member of our global family?</p>
+						<a href="/stay" class="btn btn-large btn-block btn-large-text">Submit a Reservation Request</a>
 					</div>
 					<div class="span4">
 						<h3 class="centered super-size">Host</h3>
-						<p class="lead">We choose to go to the moon in this
-						decade and do the other things, not because they are
-						easy, but because they are hard, because that goal will
-						serve to organize and measure the best of our energies
-						and skills.</p>
+						<p class="lead">We encourage our community to make use
+						of the house for events that advance or suppport
+						curiosity and learning. If you're looking for somewhere
+						to host a salon, hackathon, cooking lesson, art show,
+						research group, or clown training, please get in touch.
+						</p>
+						<a href="mailto:events@embassynetwork.com" class="btn btn-large btn-block btn-large-text">I Have An Idea</a>
 					</div>
 				</div>
 
@@ -234,6 +236,40 @@
 						$('#eventsCarousel').carousel()
 					</script>
 			</div> <!-- end container-narrrow -->
-		</body>
-	</html>
+
+	{% block extrajs %}
+	<script language="JavaScript">
+	$(document).ready(function() {
+
+		$("#eventlist-signup").submit(function() {
+			request = $.ajax({
+				data: $(this).serialize(),
+				type: $(this).attr('method'), // GET or POST
+				url: $(this).attr('action'),
+			});
+			request.done(function(msg) {
+				msg = msg;
+				success_text = "Your subscription request has been received, and will soon be acted upon.";
+				if (msg.match(/success_text/)) {
+
+					$("#eventlist-signup-wrapper").html("<div id='eventsignup-response-success'>Thanks! You should receive a confirmation email.</div>");
+				} else {
+					$("#eventlist-signup-wrapper").prepend("<div id='eventsignup-response-fail'>Hmm, your email appears to be invalid. Please try again.</div>");
+				}
+				
+			});
+			request.fail(function(msg) {
+				$("#eventlist-signup").append("<div id='eventsignup-response-fail'>Hmm, something went wrong. Please try again.</div>");
+			});
+
+			return false;
+		});
+
+	});
+	</script>
+	{% endblock %}
+
+
+	</body>
+</html>
 
