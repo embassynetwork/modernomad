@@ -180,12 +180,10 @@ try:
 	from local_settings import *
 	TMP_TEMPLATE_DIRS = ()
 	for local_tmpl_dir in LOCAL_TEMPLATE_DIRS:
-		print local_tmpl_dir
 		TMP_TEMPLATE_DIRS += (path(local_tmpl_dir),)
 	# make sure any local overrides are found first before the default
 	# templates
 	TEMPLATE_DIRS = TMP_TEMPLATE_DIRS + TEMPLATE_DIRS
-	print TEMPLATE_DIRS
 except ImportError:
 	pass
 

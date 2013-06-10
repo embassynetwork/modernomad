@@ -10,7 +10,6 @@ media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
 
 urlpatterns = patterns('',
 	url(r'^$', 'modernomad.views.index'),
-	url(r'^newhome$', 'modernomad.views.new_home'),	
 	url(r'^about/$', 'modernomad.views.about'),
 	url(r'^community/$', 'modernomad.views.community'),
 	url(r'^stay/$', 'modernomad.views.stay'),
