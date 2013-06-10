@@ -86,17 +86,19 @@
 
 				<div class="row-fluid marketing">
 					<div class="span3 values">
-						<h4 class="centered lead">Density = Ideas +<br>Collaboration</h4>
+						<h4 class="centered lead">Density <i class="icon-arrow-right"></i> Ideas +<br>Collaboration</h4>
 						A community of creatives and professionals sharing space in informal ways.  Opportunities for
 						organic and emergent discussions and collaborations.
 						We're suckers for serendipity.
 					</div>
 					<div class="span3 values">
 						<h4 class="centered lead">Action</h4>
-						We build community through doing stuff together! Think
-						cooking, coworking, hosting but also reading clubs, art
-						projects, skill shares, or sometimes just watching a
-						movie. Events are held 2-3 nights per week.  
+						We build community through doing stuff together! We
+						share food, space and ideas. Think cooking and
+						coworking but also reading clubs, art projects, skill
+						shares, or just watching a movie. We open our doors
+						frequently; we often try new approaches to organizing
+						ourselves.  
 					</div>
 					<div class="span3 values">
 						<h4 class="centered lead">Focus</h4>
@@ -108,15 +110,23 @@
 						discussions. 
 					</div>
 					<div class="span3 values">
-						<h4 class="centered lead">Sharing, Openness, Exploration</h4>
-						We live in an age where the values and benefits of
-						sharing and openness are exploding. We share food, space and
-						ideas; we open our doors frequently; we often try new
-						approaches to organizing ourselves. 
+						<h4 class="centered lead">Part of Something Bigger</h4>
+						The <a href="http://embassynetwork.com">Embassy
+							Network</a> is a new generation of residential
+						spaces around the globe that celebrate trends towards
+						sharing, collaboration, and a modern nomadic
+						disposition. These houses seek those who want to live around
+						those who will inspire and motivate  based on
+						intention, sharing, collaboration, and
+						travel.
 					</div>
 				</div>
 
 				<hr>
+
+				<!-- events section! -->
+
+				{% if events %}
 
 				<div class="row-fluid marketing" id="events">
 					<div id="eventsCarousel" data-pause="hover" class="carousel slide">
@@ -145,6 +155,10 @@
 				</div>
 
 				<hr>
+
+				{% endif %} {% comment %} endif for events section {% endcomment %}
+
+				<!-- People Section! -->
 
 				{% for subset in coming_month|subsets_size:6 %}
 					<div class="row-fluid profiles" id="events">

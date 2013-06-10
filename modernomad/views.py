@@ -16,7 +16,7 @@ from django.contrib import messages
 import eventbrite
 
 
-def new_home(request):
+def index(request):
 	today = datetime.date.today()
 	coming_month_res = (
 			Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
@@ -34,14 +34,15 @@ def new_home(request):
 			'app_key':  settings.EVENTBRITE_APP_KEY, 
 			'user_key': settings.EVENTBRITE_USER_KEY
 		}
-	eb_client = eventbrite.EventbriteClient(eb_auth_tokens)
-	response = eb_client.user_list_events()
-	events = response['events']
+	try:
+		eb_client = eventbrite.EventbriteClient(eb_auth_tokens)
+		response = eb_client.user_list_events()
+		events = response['events']
+	except:
+		events = None
+
 	return render(request, "landing.html", {'coming_month': coming_month, 'events': events})
 
-def index(request):
-	return render(request, "index.html")
-	
 def about(request):
 	return render(request, "about.html")
 
