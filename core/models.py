@@ -140,9 +140,7 @@ class Reservation(models.Model):
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
 	room = models.ForeignKey(Room, null=True)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
-	guest_emails = models.CharField(max_length=400, blank=True, null=True, 
-		help_text="Comma-separated list of guest emails. A confirmation email will be sent to these guests if you fill this out. (Optional)")
-	purpose = models.TextField(verbose_name='What is the purpose of the trip?')
+	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
 
