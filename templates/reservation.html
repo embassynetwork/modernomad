@@ -2,6 +2,11 @@
 
 {% block main %}
 
+{% comment %} shown only when a background request is being made {% endcomment %}
+<div id="spinner">
+    <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
+</div>	
+
 	{% if messages %}
 	<div class="messages">
 	    {% for message in messages %}
@@ -14,47 +19,47 @@
 	{% endif %}
 
 	<h4>New reservation request</h4>
-	<p>We'll get back to you shortly - usually within a day or two. </p>
+	<p>We'll get back to you shortly - usually within a day or two.  </p>
 
 	<div class="form-container">
 		<form class="well form-inline" method="post" action="/reservation/create/">{% csrf_token %}
 
-			<div id="reservation-sticky-info" class="pull-right">Specify your arrival and departure dates and pick a room to see value of this reservation.</div>
-
-			{% for field in form %}
-				{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
-					{% if is_house_admin %}
-
-						<div class="field-wrapper">
-							{{ field.errors }}
-							{{ field.label_tag }}
-							<span class="form-help-text">{{ field.help_text}}</span>
-							<div class="form-field-body">
-								{{ field }}
-							</div>
-						</div>
-
-					{% endif %}
-
-				{% else %} 
-					{% comment %} if it's not one of the fields related to hosting, always show it {% endcomment %} 
-
-					<div class="field-wrapper">
-						{{ field.errors }}
-						{{ field.label_tag }}
-						<span class="form-help-text">{{ field.help_text}}</span>
+			<p>Select arrival and departure dates to show known availability.</p> 
+			<div class="reservation-dates">
+				<span class="reservation-form-dates">Arrive: {{ form.arrive }}</span> 
+				<span class="reservation-form-dates">Depart: {{ form.depart}}</span>
+			</div>
+			<div id="show-room-availability"></div>
+			<div id="reservation-additional-info">
+				<div class="field-wrapper">	
+					<label for="id_purpose">When you're happy with your room selection, 
+					tell us a bit about the purpose of your trip, and hit submit!</label>
+					<span class="form-help-text"></span>
+					<div class="form-field-body">
+						<textarea id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
+					</div>
+				</div>
+				<div id="optional-fields-header">
+					<i id="optional-fields-header-icon" class="icon-plus"></i>Optional fields: arrival time or additional comments... let us know!</div>
+				<div id="optional-fields">
+					<div class="field-wrapper">	
+						<label class="label-optional-field" for="id_arrival_time">Arrival time if known?</label>
 						<div class="form-field-body">
-							{{ field }}
-							{% if field.name == 'arrive' or field.name == 'depart' %}
-							<i class="icon-calendar"></i>
-							{% endif %}
+							<input id="id_arrival_time" type="text" name="arrival_time" maxlength="200" />	
 						</div>
 					</div>
+					<div class="field-wrapper">	
+						<label class="label-optional-field" for="id_comments">Any additional comments. (Optional)</label>
+						<span class="form-help-text"></span>
+						<div class="form-field-body">
+							<textarea id="id_comments" rows="3" cols="40" name="comments"></textarea>							
+						</div>
+					</div>
+				</div>
+			</div>
 
-				{% endif %} 
-
-			{% endfor %}
-			<input id="submit-reservation" type="submit" value="Submit">
+			<br>
+			<input id="submit-reservation" type="submit" class="btn disabled" value="Submit" disabled>
 			<div id="reassure"></div>
 
 		</form>
@@ -64,55 +69,84 @@
 {% block extrajs %}
 
 <script>
-	$("#id_room, #id_arrive, #id_depart").change(function(event) {
-		console.log("here");
-		var $room_name = $("#id_room option:selected").text();
-		$room_list = {{ room_list|safe }};
-		$rate = $room_list[$room_name];
 
-		// TODO - get arrive and depart dates, update value. 
+	$("#id_arrive, #id_depart").datepicker({
+		minDate: 0,
+		onSelect: function( selectedDate ) {
+			if(this.id == 'id_arrive') {
+				startDate = $('#id_arrive').datepicker("getDate");
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+	          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
+	          	console.log(rMax);
+	          	$('#id_depart').datepicker("option","minDate",rMin);
+	          	$('#id_depart').datepicker("option","maxDate",rMax);                    
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	});
+
+	$("#id_arrive, #id_depart").change(function(event) {
+		console.log("here!");
+		// Get arrive and depart dates, update value. 
 		$arrive = $("#id_arrive").val();
 		$depart = $("#id_depart").val();
 
-		$msg = "Specify your arrival and departure dates and pick a room to see value of this reservation.";
-		$value = null;
-		if ($arrive && $depart && $rate) {
-			// date object subtraction returns the difference in milliseconds,
-			// so convert to days. 
-			var $milliseconds_in_a_day = 86400000;
-			var $days = Math.abs((new Date($depart) - new Date($arrive))/$milliseconds_in_a_day)
-			$value = $days*$rate;
-			$msg = "<p>" + $room_name + " for " + $days + " days at $" + $rate + " a night. Reservation value is $" + $value + ".</p>";
-			$msg += "<p>Reservations include all food and of course full use of the house and its ammenities during your stay. An alive house is a happy house!</p>"
-		}
-		
-		$("#reservation-sticky-info").html($msg);
+		// once the dates are selected, poll for a list of available rooms
+		if ($arrive && $depart) {
+			console.log("checking availability...");
+			request = $.ajax({ 
+				data: {
+					'arrive' : $arrive,
+					'depart' : $depart,
+					'csrfmiddlewaretoken': '{{ csrf_token }}'
+				}, 
+				type: "POST",
+				url: '/room/availability/'
+			});
+			
+			request.done(function(msg) { // on success..
+				$("#show-room-availability").html(msg)
+			});
 
-		// update the submit button text to reflect the cost
-		var $customer_id = "{{ user.profile.customer_id }}"
-		console.log($customer_id);
-		console.log($value);
-		if ($customer_id != "None" && $value) {
-			$("#submit-reservation").val("Submit and Authorize Payment of $" + $value);
-			$("#reassure").html("<p>You will be charged if this reservation is approved.</p>");
-		}
+			request.fail(function(msg) {
+				$("#show-room-availability").html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
+			});
 
-	})
-</script>
+		} // end room availability check
 
-<script>
-	$(function() {
-		var $stickyTop = $('#reservation-sticky-info').offset().top; //
-		var $offset = 30; // pixels
-		$(window).scroll(function(){ // scroll event
-			var $windowTop = $(window).scrollTop();
-			if ($stickyTop < $windowTop + $offset) {
-				$('#reservation-sticky-info').css({ position: 'fixed', top: $offset });
-			} else {
-				$('#reservation-sticky-info').css('position','static');
-			}
-		})
+
+		// wire up the ajax-y spinning animated GIF to show when an ajax call
+		// is made. 	
+		$('#spinner').ajaxStart(function () {
+			$(this).fadeIn('fast');
+		}).ajaxStop(function () {
+			$(this).stop().fadeOut('fast');
+		});	
+	
 	});
+
+	// the purpose field is only visible when the other fields have been
+	// filled out, so if the purpose field has content then all required
+	// fields are present and the submit button should be enabled.
+	$("#id_purpose").keyup(function() {
+		if (! !$.trim($("#id_purpose").val())) {
+			console.log("form is ready to submit!")
+			$("#submit-reservation").prop("disabled", false);
+			$("#submit-reservation").removeClass("disabled")
+		} else {
+			$("#submit-reservation").prop("disabled", true);
+			$("#submit-reservation").addClass("disabled")
+		}
+	});
+
+	$("#optional-fields-header").click(function() {
+		$("#optional-fields").slideToggle("slow");
+		$("#optional-fields-header-icon").toggleClass("icon-plus icon-minus")
+	});
+
 </script>
+
 
 {% endblock %}

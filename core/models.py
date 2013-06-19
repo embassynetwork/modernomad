@@ -24,36 +24,62 @@ from django.template import Context
 
 class RoomManager(models.Manager):
 	def availability(self, start, end):
-		# return a map of dates and available rooms between start and end dates
+		# return a map of rooms to dates showing occupied and free beds,
+		# between start and end dates
+
 		availability = {}
 		the_day = start
 		while the_day <= end:
 			# return only rooms available for bookings (currently just guest rooms)
 			# XXX TODO add private rooms that have temporarily been added to the pool). 
 			rooms = list(self.filter(primary_use="guest"))
-			bookings_today = Reservation.objects.on_date(the_day)
+			avail_today = {}
+			for room, beds in [(room, room.beds) for room in rooms]:
+				avail_today[room] = beds
+			bookings_today = Reservation.objects.reserved_on_date(the_day)
 			for booking in bookings_today:
-				rooms.remove(booking.room)
-			availability[the_day] = rooms
+				avail_today[booking.room] = avail_today[booking.room] -1 
+			availability[the_day] = avail_today
 			the_day = the_day + datetime.timedelta(1)
-		return availability
+
+		# but it's actually easier to use the data if organizd by room...
+		by_room = {}
+		all_rooms = list(self.filter(primary_use="guest"))
+		for room in all_rooms:
+			the_day = start
+			by_room[room] = []
+			while the_day <= end:
+				# use tuples to store the dates to ensure the proper ordering
+				# is maintained. each tuple contains (date, num_beds_free)
+				by_room[room].append((the_day, availability[the_day][room]))
+				the_day = the_day + datetime.timedelta(1)
+		return by_room
 
 	
 	def free(self, start, end):
-		# return only rooms that are free between start and end dates
-		# IMPT: make sure to COPY the list of initial rooms - don't delete the
-		# real room objects :-O. 
-		rooms = list(self.filter(primary_use="guest"))
+		# return a list of room objects that are free the entire time between
+		# start and end dates IMPT: make sure to COPY the list of initial
+		# rooms - don't delete the real room objects :-O.
+		room_list = list(self.filter(primary_use="guest"))
+		rooms = {}
+		# make a list of all room and their associated # beds
+		for r in room_list:
+			rooms[r] = r.beds
 		the_day = start
 		while the_day <= end:
-			bookings_today = Reservation.objects.on_date(the_day)
+			rooms_today = dict(rooms)
+			bookings_today = Reservation.objects.reserved_on_date(the_day)
 			for booking in bookings_today:
-				rooms.remove(booking.room)
-			if len(rooms) == 0:
-				break
-			else:
-				the_day = the_day + datetime.timedelta(1)
-		return rooms
+				rooms_today[booking.room] = rooms_today[booking.room] - 1	
+			the_day = the_day + datetime.timedelta(1)
+			# be flexible if beds available is less than 0 in case an admin
+			# wants to overbook a room for some reason, total beds availabile
+			# changes, etc.
+			full_today = [room for room in rooms_today.keys() if rooms_today[room] <=0 ]
+			# can use sets here since the rooms are unique anyway
+			room_list = list(set(room_list) - set(full_today)) 
+		free_rooms = room_list
+		return free_rooms
 
 
 class Room(models.Model):
@@ -70,6 +96,7 @@ class Room(models.Model):
 	primary_use = models.CharField(max_length=200, choices=ROOM_USES, default=PRIVATE, verbose_name='Indicate whether this room should be listed for guests to make reservations.')
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
+	beds = models.IntegerField()
 
 	# manager
 	objects = RoomManager()
@@ -78,19 +105,29 @@ class Room(models.Model):
 		return self.name
 	
 	def available_on(self, this_day):
-		# assumes there will never be more than one reservation for a given
-		# bed/room
-		reservations_on_this_day = Reservation.objects.filter(arrive__lte = this_day).filter(depart__gte = this_day)
+		reservations_on_this_day = Reservation.objects.reserved_on_date(this_day)
+		beds_left = self.beds
 		for r in reservations_on_this_day:
 			if r.room == self:
-				return False
-		return True
+				beds_left -= 1
+		if beds_left > 0:
+			return True
+		else:
+			return False
 
 
 class ReservationManager(models.Manager):
-	def on_date(self, the_day):
-		# return the reservations that intersect this day
-		return super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gte = the_day)
+
+	def on_date(self, the_day, status):
+		# return the reservations that intersect this day, of any status
+		all = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gte = the_day)
+		return all.filter(status=status)
+
+	def reserved_on_date(self, the_day):
+		# return the approved or confirmed reservations that intersect this day
+		approved_reservations = self.on_date(the_day, status= "approved")
+		confirmed_reservations = self.on_date(the_day, status="confirmed")
+		return (list(approved_reservations) + list(confirmed_reservations))
 
 class TodayManager(models.Manager):
 	def get_query_set(self):
@@ -139,7 +176,7 @@ class Reservation(models.Model):
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
 	room = models.ForeignKey(Room, null=True)
-	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?')
+	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)

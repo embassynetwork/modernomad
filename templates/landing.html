@@ -113,12 +113,11 @@
 						<h4 class="centered lead">Part of Something Bigger</h4>
 						The <a href="http://embassynetwork.com">Embassy
 							Network</a> is a new generation of residential
-						spaces around the globe that celebrate trends towards
-						sharing, collaboration, and a modern nomadic
-						disposition. These houses seek those who want to live around
-						those who will inspire and motivate  based on
-						intention, sharing, collaboration, and
-						travel.
+						spaces around the globe, rooted in intention,
+						collaboration, and a modern nomadic disposition.  In
+						the Embassy Network, members find a global family of
+						travelers and seekers, and a place to call home as we
+						travel for work and collaborations. 
 					</div>
 				</div>
 
@@ -229,15 +228,23 @@
 
 			</div> <!-- end wrap -->
 				<footer class="footer">
-				<div class="container">
 					{% block footer %}
-					<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-							<img alt="Creative Commons License" style="border-width:0"
-							src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> | 
-					Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
-					</p>
+					<div class="embassy-footer">
+						<img src="/media/img/en-logo-transparent.png" class="footer-logo">
+						<div class="embassy-footer-text">
+							<p><em>Hacking Home!</em>
+								Embassies of<br>collaboration, creativity and<br>learning.
+							</p>
+							<p>About EN | Other Locations </p>
+							<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
+								<img alt="Creative Commons License" style="border-width:0"
+								src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a></span> 
+								Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
+							</p>
+						</div>
+					</div>
+					<div class="clear"></div>
 					{% endblock %}
-					</container>
 					</footer>
 					<!-- Le javascript -->
 					<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
@@ -262,7 +269,7 @@
 			request.done(function(msg) {
 				msg = msg;
 				success_text = "Your subscription request has been received, and will soon be acted upon.";
-				if (msg.match(/success_text/)) {
+				if (msg.match(success_text)) {
 
 					$("#eventlist-signup-wrapper").html("<div id='eventsignup-response-success'>Thanks! You should receive a confirmation email.</div>");
 				} else {

@@ -207,6 +207,11 @@ hr.style-two {
 	width: 170px;
 }
 
+.footer-logo {
+	float: left;
+	height: 100px;
+}
+
 /* ==========================================================
 ============================[TODAY===========================
 ========================================================== */
@@ -324,6 +329,17 @@ html, body {
 .footer {
 	padding: 30px;
 	background-color: #f5f5f5;
+}
+
+.embassy-footer {
+	float: right;
+	width: 375px;
+	height: 125px;
+	text-align: right;
+}
+
+.embassy-footer-text {
+	float:right;
 }
 
 .hero-unit h1 {
@@ -735,4 +751,73 @@ div#spinner
 
 #id_subject {
 	width: 400px;
+}
+
+.yes-available, .no-available {
+	text-align: center;
+}
+
+.yes-available {
+	background-color: green;
+}
+
+.no-available {
+	background-color: #c7230a;
+}
+
+#rooms-available-calendar th {
+	padding: 0 5px 0 5px;
+	font-size: 90%;
+}
+
+#rooms-available-calendar input[type=radio] {
+    display:none; 
+    margin:10px;
+}
+
+.room-info {
+	display: none;
+}
+
+.reservation-form-dates {
+	padding-right: 15px;
+}
+
+.reservation-form-dates input {
+	width: 150px;
+}
+
+#show-room-availability {
+	padding-top: 50px;
+}
+
+.room-info-area {
+	padding-top: 25px;
+}
+
+#reservation-additional-info {
+	display: none;
+	padding-top: 50px;
+}
+
+#id_arrival_time {
+	width: 150px;
+}
+
+#id_purpose, #id_comments {
+	height: 35px;
+}
+
+.label-optional-field  {
+	color: #999;
+}
+
+#optional-fields {
+	display: none;
+}
+
+#optional-fields-header {
+	font-style: italic;
+	padding-top: 0 0 5px 0;
+	cursor: pointer;
 }
