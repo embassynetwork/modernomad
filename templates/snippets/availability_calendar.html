@@ -36,10 +36,16 @@
 <div class="room-info-area">
 {% for room in free_rooms %}
 <div class="room-info" id="room-info-{{room.id}}">
-	<div>{{ room.description }}</div>
-	<div>Rate: ${{ room.default_rate }} </div>
-	<div>{{ room.photo }}</div>	
-	<div>Value of this reservation: <span id="res-value-{{room.id}}">${{room.value}}</span></div>
+	<h3>{{room.name}}</h3>
+	{% if room.image %} 
+		<div class="pull-right">
+			<img src="/media/{{room.image}}" class="img-polaroid room-info-image" />
+		</div> 
+	{% endif %}
+	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
+	<div><p>{{ room.description }}</p></div>
+	<div><p><strong>Value of this reservation: </strong><span id="res-value-{{room.id}}">${{room.value}}</span></p></div>
+	<div class="clear"></div>
 </div>
 {% endfor %}
 </div>

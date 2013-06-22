@@ -81,6 +81,16 @@ class RoomManager(models.Manager):
 		free_rooms = room_list
 		return free_rooms
 
+def room_img_upload_to(instance, filename):
+	ext = filename.split('.')[-1]
+	# rename file to random string
+	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+
+	upload_path = "data/rooms/%s/" % instance.name 
+	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+	if not os.path.exists(upload_abs_path):
+		os.makedirs(upload_abs_path)
+	return os.path.join(upload_path, filename)
 
 class Room(models.Model):
 
@@ -97,6 +107,7 @@ class Room(models.Model):
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
 	beds = models.IntegerField()
+	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 
 	# manager
 	objects = RoomManager()
@@ -464,10 +475,6 @@ def profile_img_upload_to(instance, filename):
 
 	upload_path = "data/avatars/%s/" % instance.user.username
 	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-	print upload_path
-	print upload_abs_path
-	print filename
-	print "*****"
 	if not os.path.exists(upload_abs_path):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)

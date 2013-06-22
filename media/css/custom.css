@@ -821,3 +821,8 @@ div#spinner
 	padding-top: 0 0 5px 0;
 	cursor: pointer;
 }
+
+.room-info-image {
+	width: 200px;
+	padding-left: 40px;
+}
