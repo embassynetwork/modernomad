@@ -6,7 +6,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 path = lambda *a: os.path.join(ROOT, *a)
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Jessy Kate Schingler', 'jessy@embassynetwork.com'),
 )
 
 MANAGERS = ADMINS
