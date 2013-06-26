@@ -9,3 +9,4 @@ local_settings.py
 .DS_Store
 celery.db
 celery
+local_templates/

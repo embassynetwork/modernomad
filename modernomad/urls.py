@@ -10,7 +10,6 @@ media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
 
 urlpatterns = patterns('',
 	url(r'^$', 'modernomad.views.index'),
-	url(r'^newhome$', 'modernomad.views.new_home'),	
 	url(r'^about/$', 'modernomad.views.about'),
 	url(r'^community/$', 'modernomad.views.community'),
 	url(r'^stay/$', 'modernomad.views.stay'),
@@ -34,12 +33,16 @@ urlpatterns = patterns('',
 	url(r'^locations/', include(core.urls.house_patterns)),
 	url(r'^reservation/', include(core.urls.reservation_patterns)),
 	url(r'^manage/', include(core.urls.management_patterns)),
+	url(r'^room/', include(core.urls.room_patterns)),
 
 	# The modernomad API.
 	url(r'^api/', include('api.urls')),
 
 	# The Django admin interface.
 	url(r'^admin/', include(admin.site.urls)),
+
+	# various other useful things
+	url(r'^ico/favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/img/favicon.ico'}),
 )
 
 # media url hackery. 

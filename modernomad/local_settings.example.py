@@ -41,6 +41,13 @@ else:
 
 TEMPLATE_DEBUG = DEBUG
 
+# fill in any local template directories. any templates with the same name WILL
+# OVERRIDE included templates. don't forget the trailing slash in the path, and
+# a comma at the end of the tuple item if there is only one path. 
+LOCAL_TEMPLATE_DIRS = (
+	# eg, "../local_templates/",
+)
+
 # this will be used as the subject line prefix for all emails sent from this app. 
 EMAIL_SUBJECT_PREFIX = "[Your House Name Here]"
 DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'

@@ -1,6 +1,6 @@
 from calendar import HTMLCalendar
 from datetime import date, timedelta
-from core.models import Reservation
+from core.models import Reservation, Room
 
 from django.utils.html import conditional_escape as esc
 
@@ -21,13 +21,19 @@ class GuestCalendar(HTMLCalendar):
 			else:
 				today = False
 			if day in self.reservations:
-				cssclass += ' filled'
 				body = ['<ul>']
 				num_today = len(self.reservations[day])
 				num_private = 0
 				num_shared = 0
+				this_date = date(self.year, self.month, day)
+				any_availability = Room.objects.free(this_date, tomorrow)
+				print this_date
+				print tomorrow
+				print any_availability
+				if not any_availability:
+					cssclass += ' full-today'
 				for reservation in self.reservations[day]:
-					if reservation.room.name == "Ada Lovelace Hostel":
+					if reservation.room.shared:
 						num_shared += 1
 						room_type = "S"
 					else:

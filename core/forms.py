@@ -117,25 +117,6 @@ class ReservationForm(forms.ModelForm):
 			'depart': forms.DateInput(attrs={'class':'datepicker'}),
 		}
 
-	def clean_guest_emails(self):
-		# validates guest emails, returning a string of comma-separated urls
-		emails = self.cleaned_data['guest_emails']
-		if len(emails) > 0:
-			raw_emails_list = emails.split(',')
-			# the EmailField class has some lovely validation code written already.  
-			email_field = forms.EmailField()
-			cleaned_emails = []
-			for e in raw_emails_list:
-				try:
-					cleaned = email_field.clean(e.strip(" "))
-					cleaned_emails.append(cleaned)
-				except forms.ValidationError:
-					# customize the error raised by UrlField.
-					raise forms.ValidationError('At least one of the emails is not correctly formatted.')
-			emails = ",".join(cleaned_emails)
-			print emails
-		return emails
-
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
 		hosted = cleaned_data.get('hosted')

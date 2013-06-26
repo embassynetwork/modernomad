@@ -72,10 +72,40 @@ def get_reservation_form_for_perms(request, post, instance):
 		form.fields['room'].queryset = Room.objects.filter(primary_use="guest")
 	return form
 
+@login_required
+def CheckRoomAvailability(request):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	arrive_str = request.POST.get('arrive')
+	depart_str = request.POST.get('depart')
+	a_month, a_day, a_year = arrive_str.split("/")
+	d_month, d_day, d_year = depart_str.split("/")
+	arrive = datetime.date(int(a_year), int(a_month), int(a_day))
+	depart = datetime.date(int(d_year), int(d_month), int(d_day))
+	avail_by_room = Room.objects.availability(arrive, depart)
+	print "avail_by_room"
+	print avail_by_room
+	# all rooms should have an associated list of the same length that covers
+	# all days, so just grab the dates from any one of them (they are already
+	# sorted).
+	per_date_avail = avail_by_room[avail_by_room.keys()[0]]
+	dates = [tup[0] for tup in per_date_avail]
+	nights = (depart - arrive).days
+	free_rooms = Room.objects.free(arrive, depart)	
+	print "free rooms"
+	print free_rooms
+	# add some info to free_rooms:
+	for room in free_rooms:
+		room.value = nights*room.default_rate
+	return render(request, "snippets/availability_calendar.html", {"avail": avail_by_room, "dates": dates, 
+		'free_rooms': free_rooms, 'nights': nights, })
+
 
 @login_required
 def ReservationSubmit(request):
 	if request.method == 'POST':
+		print request.POST
 		form = get_reservation_form_for_perms(request, post=True, instance=False)
 
 		if form.is_valid():
@@ -110,7 +140,8 @@ def ReservationSubmit(request):
 	for room in rooms:
 		room_list[room.name] = room.default_rate
 	room_list = simplejson.dumps(room_list)
-	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin, "room_list": room_list})
+	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin, 
+		"room_list": room_list, 'max_days': settings.MAX_RESERVATION_DAYS })
 
 
 @login_required
@@ -384,7 +415,16 @@ def ReservationManage(request, reservation_id):
 		form = EmailTemplateForm(email_template, reservation)
 		email_forms.append(form)
 		email_templates_by_name.append(email_template.name)
-	print email_templates_by_name
+	
+	availability = Room.objects.availability(reservation.arrive, reservation.depart)
+	free = Room.objects.free(reservation.arrive, reservation.depart)
+	per_date_avail = availability[availability.keys()[0]]
+	dates = [tup[0] for tup in per_date_avail]
+	if reservation.room in free:
+		room_has_availability = True
+	else:
+		room_has_availability = False
+
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
@@ -392,6 +432,8 @@ def ReservationManage(request, reservation_id):
 		"email_forms" : email_forms,
 		"email_templates_by_name" : email_templates_by_name,
 		"days_before_welcome_email" : settings.WELCOME_EMAIL_DAYS_AHEAD,
+		"room_has_availability" : room_has_availability,
+		"avail": availability, "dates": dates,
 		"domain": domain
 	})
 

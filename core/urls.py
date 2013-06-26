@@ -43,6 +43,12 @@ reservation_patterns = patterns('core.views',
 
 )
 
+# /room patterns
+room_patterns = patterns('core.views',
+	url(r'availability/$', 'CheckRoomAvailability', name='room_availability'),
+)
+
+
 # custom management (admin) patterns
 management_patterns = patterns('core.views', 
 	url(r'reservations/$', 'ReservationList', name='reservation_list'),

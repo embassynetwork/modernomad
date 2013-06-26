@@ -86,17 +86,19 @@
 
 				<div class="row-fluid marketing">
 					<div class="span3 values">
-						<h4 class="centered lead">Density = Ideas +<br>Collaboration</h4>
+						<h4 class="centered lead">Density <i class="icon-arrow-right"></i> Ideas +<br>Collaboration</h4>
 						A community of creatives and professionals sharing space in informal ways.  Opportunities for
 						organic and emergent discussions and collaborations.
 						We're suckers for serendipity.
 					</div>
 					<div class="span3 values">
 						<h4 class="centered lead">Action</h4>
-						We build community through doing stuff together! Think
-						cooking, coworking, hosting but also reading clubs, art
-						projects, skill shares, or sometimes just watching a
-						movie. Events are held 2-3 nights per week.  
+						We build community through doing stuff together! We
+						share food, space and ideas. Think cooking and
+						coworking but also reading clubs, art projects, skill
+						shares, or just watching a movie. We open our doors
+						frequently; we often try new approaches to organizing
+						ourselves.  
 					</div>
 					<div class="span3 values">
 						<h4 class="centered lead">Focus</h4>
@@ -108,15 +110,22 @@
 						discussions. 
 					</div>
 					<div class="span3 values">
-						<h4 class="centered lead">Sharing, Openness, Exploration</h4>
-						We live in an age where the values and benefits of
-						sharing and openness are exploding. We share food, space and
-						ideas; we open our doors frequently; we often try new
-						approaches to organizing ourselves. 
+						<h4 class="centered lead">Part of Something Bigger</h4>
+						The <a href="http://embassynetwork.com">Embassy
+							Network</a> is a new generation of residential
+						spaces around the globe, rooted in intention,
+						collaboration, and a modern nomadic disposition.  In
+						the Embassy Network, members find a global family of
+						travelers and seekers, and a place to call home as we
+						travel for work and collaborations. 
 					</div>
 				</div>
 
 				<hr>
+
+				<!-- events section! -->
+
+				{% if events %}
 
 				<div class="row-fluid marketing" id="events">
 					<div id="eventsCarousel" data-pause="hover" class="carousel slide">
@@ -145,6 +154,10 @@
 				</div>
 
 				<hr>
+
+				{% endif %} {% comment %} endif for events section {% endcomment %}
+
+				<!-- People Section! -->
 
 				{% for subset in coming_month|subsets_size:6 %}
 					<div class="row-fluid profiles" id="events">
@@ -215,15 +228,23 @@
 
 			</div> <!-- end wrap -->
 				<footer class="footer">
-				<div class="container">
 					{% block footer %}
-					<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-							<img alt="Creative Commons License" style="border-width:0"
-							src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a> Embassy SF</span> | 
-					Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
-					</p>
+					<div class="embassy-footer">
+						<img src="/media/img/en-logo-transparent.png" class="footer-logo">
+						<div class="embassy-footer-text">
+							<p><em>Hacking Home!</em>
+								Embassies of<br>collaboration, creativity and<br>learning.
+							</p>
+							<p>About EN | Other Locations </p>
+							<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
+								<img alt="Creative Commons License" style="border-width:0"
+								src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a></span> 
+								Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
+							</p>
+						</div>
+					</div>
+					<div class="clear"></div>
 					{% endblock %}
-					</container>
 					</footer>
 					<!-- Le javascript -->
 					<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
@@ -248,7 +269,7 @@
 			request.done(function(msg) {
 				msg = msg;
 				success_text = "Your subscription request has been received, and will soon be acted upon.";
-				if (msg.match(/success_text/)) {
+				if (msg.match(success_text)) {
 
 					$("#eventlist-signup-wrapper").html("<div id='eventsignup-response-success'>Thanks! You should receive a confirmation email.</div>");
 				} else {
