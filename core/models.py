@@ -38,7 +38,16 @@ class RoomManager(models.Manager):
 				avail_today[room] = beds
 			bookings_today = Reservation.objects.reserved_on_date(the_day)
 			for booking in bookings_today:
-				avail_today[booking.room] = avail_today[booking.room] -1 
+				# if a room has been changed from a guest room
+				# to some point in the past to a private room
+				# now, then it won't be listed in the available
+				# rooms_today, so we can't remove it. so just
+				# skip over it, since it won't show up in
+				# available rooms anyway. 
+				try:
+					avail_today[booking.room] = avail_today[booking.room] -1 
+				except:
+					pass
 			availability[the_day] = avail_today
 			the_day = the_day + datetime.timedelta(1)
 
@@ -70,7 +79,16 @@ class RoomManager(models.Manager):
 			rooms_today = dict(rooms)
 			bookings_today = Reservation.objects.reserved_on_date(the_day)
 			for booking in bookings_today:
-				rooms_today[booking.room] = rooms_today[booking.room] - 1	
+				# if a room has been changed from a guest room
+				# to some point in the past to a private room
+				# now, then it won't be listed in the available
+				# rooms_today, so we can't remove it. so just
+				# skip over it, since it won't show up in
+				# available rooms anyway. 
+				try:
+					rooms_today[booking.room] = rooms_today[booking.room] - 1	
+				except:
+					pass
 			the_day = the_day + datetime.timedelta(1)
 			# be flexible if beds available is less than 0 in case an admin
 			# wants to overbook a room for some reason, total beds availabile
@@ -131,7 +149,7 @@ class ReservationManager(models.Manager):
 
 	def on_date(self, the_day, status):
 		# return the reservations that intersect this day, of any status
-		all = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gte = the_day)
+		all = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gt = the_day)
 		return all.filter(status=status)
 
 	def reserved_on_date(self, the_day):
@@ -526,7 +544,6 @@ def size_images(sender, instance, **kwargs):
 	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
 		img_upload_path_rel = profile_img_upload_to(instance, instance.image.name)
-		print img_upload_path_rel
 		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_path_rel)
 		# resize returns a copy. resize() forces the dimensions of the image
 		# to match SIZE specified, squeezing the image if necessary along one
@@ -545,7 +562,6 @@ def size_images(sender, instance, **kwargs):
 		# reading it in and saving it to the same place when the model saves?
 		thumb_rel_path = os.path.join(os.path.split(img_upload_path_rel)[0], os.path.basename(thumb_full_path))
 		instance.image_thumb = thumb_rel_path
-		print thumb_rel_path	
 
 		# now delete any old images
 		if obj and obj.image and obj.image.name != "data/avatars/default.jpg":
