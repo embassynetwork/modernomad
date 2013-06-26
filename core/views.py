@@ -415,7 +415,16 @@ def ReservationManage(request, reservation_id):
 		form = EmailTemplateForm(email_template, reservation)
 		email_forms.append(form)
 		email_templates_by_name.append(email_template.name)
-	print email_templates_by_name
+	
+	availability = Room.objects.availability(reservation.arrive, reservation.depart)
+	free = Room.objects.free(reservation.arrive, reservation.depart)
+	per_date_avail = availability[availability.keys()[0]]
+	dates = [tup[0] for tup in per_date_avail]
+	if reservation.room in free:
+		room_has_availability = True
+	else:
+		room_has_availability = False
+
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
@@ -423,6 +432,8 @@ def ReservationManage(request, reservation_id):
 		"email_forms" : email_forms,
 		"email_templates_by_name" : email_templates_by_name,
 		"days_before_welcome_email" : settings.WELCOME_EMAIL_DAYS_AHEAD,
+		"room_has_availability" : room_has_availability,
+		"avail": availability, "dates": dates,
 		"domain": domain
 	})
 

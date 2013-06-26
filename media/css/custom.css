@@ -701,6 +701,14 @@ form.res-action {
 	white-space: normal;
 }
 
+.has-availability {
+	color: green;
+}
+
+.no-availability {
+	color: red;
+}
+
 .greyed-out {
 	font-color: grey;
 }
@@ -824,5 +832,9 @@ div#spinner
 
 .room-info-image {
 	width: 200px;
+}
+
+.room-info-image-wrapper {
 	padding-left: 40px;
 }
+

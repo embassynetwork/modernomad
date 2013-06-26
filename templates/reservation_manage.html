@@ -59,9 +59,49 @@
 
 	<hr>
 
+
+
 	<div class="res-value">${{ r.reconcile.total_value }}</div> 
-	<div class="res-field field">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}</div>
-	<div class="res-field field"><strong>Hosted:</strong> {{ r.hosted }}</div>
+	{% if room_has_availability %}
+		<div class="res-field field has-availability">
+	{% else %}
+		<div class="res-field field no-availability">
+	{% endif %}
+		{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
+		{% if room_has_availability %} (available) {% else %} (conflict) {% endif %}
+	</div>
+
+
+	<!-- availability calendar -->
+	<table id="rooms-available-calendar">
+		<tr>
+		<th>Room</th>
+		{% for date in dates %}
+		<th>{{ date|date:"M d" }}</th>
+		{% endfor %}
+		</tr>
+
+		{% for room_obj, days_list in avail.items %}
+		<tr>
+			<td> 
+				{{room_obj.name}}
+			</td>
+
+			{% for the_day, beds_free in days_list %}
+			<td>
+				{% if beds_free %}
+					<div class="yes-available"><i class="icon-ok"></i> {{beds_free}}</div>
+				{% else %}
+					<div class="no-available"><i class="icon-remove"></i></div>
+				{% endif %}
+			</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+
+	<hr>
+
 	<div class="res-field field"><strong>Room:</strong> {{ r.room }}</div>
 	<div class="res-field field"><strong>Tags:</strong> {{ r.tags }}</div>
 	<div class="res-field field"><strong>Purpose:</strong> {{ r.purpose }}</div>

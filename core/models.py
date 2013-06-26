@@ -29,7 +29,7 @@ class RoomManager(models.Manager):
 
 		availability = {}
 		the_day = start
-		while the_day <= end:
+		while the_day < end:
 			# return only rooms available for bookings (currently just guest rooms)
 			# XXX TODO add private rooms that have temporarily been added to the pool). 
 			rooms = list(self.filter(primary_use="guest"))
@@ -48,7 +48,7 @@ class RoomManager(models.Manager):
 		for room in all_rooms:
 			the_day = start
 			by_room[room] = []
-			while the_day <= end:
+			while the_day < end:
 				# use tuples to store the dates to ensure the proper ordering
 				# is maintained. each tuple contains (date, num_beds_free)
 				by_room[room].append((the_day, availability[the_day][room]))
