@@ -66,7 +66,7 @@ class RoomManager(models.Manager):
 		for r in room_list:
 			rooms[r] = r.beds
 		the_day = start
-		while the_day <= end:
+		while the_day < end:
 			rooms_today = dict(rooms)
 			bookings_today = Reservation.objects.reserved_on_date(the_day)
 			for booking in bookings_today:
