@@ -84,8 +84,6 @@ def CheckRoomAvailability(request):
 	arrive = datetime.date(int(a_year), int(a_month), int(a_day))
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
 	avail_by_room = Room.objects.availability(arrive, depart)
-	print "avail_by_room"
-	print avail_by_room
 	# all rooms should have an associated list of the same length that covers
 	# all days, so just grab the dates from any one of them (they are already
 	# sorted).
@@ -93,8 +91,6 @@ def CheckRoomAvailability(request):
 	dates = [tup[0] for tup in per_date_avail]
 	nights = (depart - arrive).days
 	free_rooms = Room.objects.free(arrive, depart)	
-	print "free rooms"
-	print free_rooms
 	# add some info to free_rooms:
 	for room in free_rooms:
 		room.value = nights*room.default_rate

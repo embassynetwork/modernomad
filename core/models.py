@@ -36,7 +36,7 @@ class RoomManager(models.Manager):
 			avail_today = {}
 			for room, beds in [(room, room.beds) for room in rooms]:
 				avail_today[room] = beds
-			bookings_today = Reservation.objects.reserved_on_date(the_day)
+			bookings_today = Reservation.availability.reserved_on_date(the_day)
 			for booking in bookings_today:
 				# if a room has been changed from a guest room
 				# to some point in the past to a private room
@@ -77,7 +77,7 @@ class RoomManager(models.Manager):
 		the_day = start
 		while the_day < end:
 			rooms_today = dict(rooms)
-			bookings_today = Reservation.objects.reserved_on_date(the_day)
+			bookings_today = Reservation.availability.reserved_on_date(the_day)
 			for booking in bookings_today:
 				# if a room has been changed from a guest room
 				# to some point in the past to a private room
@@ -134,7 +134,7 @@ class Room(models.Model):
 		return self.name
 	
 	def available_on(self, this_day):
-		reservations_on_this_day = Reservation.objects.reserved_on_date(this_day)
+		reservations_on_this_day = Reservation.availability.reserved_on_date(this_day)
 		beds_left = self.beds
 		for r in reservations_on_this_day:
 			if r.room == self:
@@ -149,8 +149,8 @@ class ReservationManager(models.Manager):
 
 	def on_date(self, the_day, status):
 		# return the reservations that intersect this day, of any status
-		all = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gt = the_day)
-		return all.filter(status=status)
+		all_on_date = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gt = the_day)
+		return all_on_date.filter(status=status)
 
 	def reserved_on_date(self, the_day):
 		# return the approved or confirmed reservations that intersect this day
@@ -171,7 +171,6 @@ class Reservation(models.Model):
 			self.value = value
 		def __str__(self):
 			return repr(self.value)
-
 
 	PENDING = 'pending'
 	APPROVED = 'approved'
@@ -211,8 +210,9 @@ class Reservation(models.Model):
 	last_msg = models.DateTimeField(blank=True, null=True)
 
 	# managers
+	objects = models.Manager()
 	today = TodayManager() # approved and confirmed reservations that intersect today
-	objects = ReservationManager()
+	availability = ReservationManager()
 
 	@models.permalink
 	def get_absolute_url(self):
