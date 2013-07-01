@@ -6,7 +6,9 @@ We look forward to seeing you at the Embassy on {{ day_of_week }}!
 
 The house is located at 399 Webster Street, San Francisco, CA, 94117. Access
 to the house is via a keypad on the front door. The access code is "0399#" (the
-"#" at the end is important, make sure to enter it as well). 
+"#" at the end is important, make sure to enter it as well). Checkin is anytime
+after about 1pm. You are free to arrive earlier but your bed may not be ready
+yet.  
 
 Our primary, sacred house rule is No Dishes in the Sink. Ever. Wash
 immediately, dry, and put away. Thank you!
@@ -17,6 +19,10 @@ on a meal in progress, or take lunch with you.
 
 You can connect to any of the wireless access points named "Embassy..." you
 see at the house. The wireless password for all access points is "netpositive."
+
+Checkout is by 11am on your departure day so that we can cycle the sheets and
+prepare for the next guest. Please strip your bed sheets on departure and throw
+them down the laundry chute!
 
 ** Get Connected **
 
