@@ -14,7 +14,7 @@ installed in the virtual env.
 
 ## dependencies:
 within the virtualenv, install the requirements. this is done with the following command, which should iterate through the items in the text file and install them one by one:
-- `pip install -r requirements.txt.` 
+- `pip install -r requirements.txt` 
 
 note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
