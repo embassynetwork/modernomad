@@ -1,5 +1,5 @@
 Django==1.4
-django-registration
+django-registration==1.0
 django-tastypie
 South
 Pillow

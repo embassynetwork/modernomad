@@ -8,8 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from registration import signals
-import registration.backends.default
-from registration.models import RegistrationProfile
+import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
@@ -523,9 +522,10 @@ def ReservationSendMail(request, reservation_id):
 # ******************************************************
 
 
-class RegistrationBackend(registration.backends.default.DefaultBackend):
 	'''A registration backend that supports capturing user profile
 	information during registration.'''
+	
+class Registration(registration.views.RegistrationView):
 	
 	@transaction.commit_on_success
 	def register(self, request, **cleaned_data):
@@ -549,17 +549,12 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
 		return new_user
 
-	def activate(self, request, user):
-		# we're not using the registration system's activation features ATM.
-		return True
-
-
 	def registration_allowed(self, request):
 		if request.user.is_authenticated():
 			return False
 		else: return True
 
-	def post_registration_redirect(self, request, user):
+	def get_success_url(self, request, user):
 		"""
 		Return the name of the URL to redirect to after successful
 		account activation. 
@@ -573,6 +568,12 @@ class RegistrationBackend(registration.backends.default.DefaultBackend):
 			return (url_path[1], (), {'username' : user.username})
 		else:
 			return ('user_details', (), {'username': user.username})
+
+class Activation(registration.views.ActivationView):
+	def activate(self, request, user):
+		# we're not using the registration system's activation features ATM.
+		return True
+
 
 
 

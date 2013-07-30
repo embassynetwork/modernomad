@@ -5,6 +5,7 @@
 
 from django.conf.urls import patterns, include, url
 import registration.backends.default.urls
+from core.views import Registration
 
 import core.forms
 
@@ -12,9 +13,7 @@ import core.forms
 # django-registration package, overriding the initial registration
 # view to collect our additional user profile information.
 user_patterns = patterns('',
-    url(r'^register/$', 'registration.views.register',
-        {'backend': 'core.views.RegistrationBackend',
-        'form_class': core.forms.UserProfileForm},
+    url(r'^register/$', Registration.as_view(form_class = core.forms.UserProfileForm),
         name='registration_register'),
 )
 user_patterns += registration.backends.default.urls.urlpatterns
