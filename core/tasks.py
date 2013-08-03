@@ -43,8 +43,10 @@ def admin_today_notification():
 	sender = settings.DEFAULT_FROM_EMAIL
 	# XXX this is a temporary hack until we make this a setting on the
 	# house admin accounts. 
-	recipients = ["chelseamangold@gmail.com", "jessy@jessykate.com", 
-			"derek.dunfield@gmail.com", "kris.tew@gmail.com", "emi422@gmail.com"]
+	house_admins = User.objects.filter(groups__name='house_admin')
+	recipients = []
+	for admin in house_admins:
+		recipients.append(admin.email)
 	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 	msg.send()
 
