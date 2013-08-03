@@ -9,6 +9,14 @@ any modified versions that are running publicly (among other things). The
 anyone improving the software makes those improvements available to others, as
 we have to them. 
 
+Docs are linked to below, with additional docs also to be found in the `docs` directory. 
+
+Interested in contributing? We use [Pivotal
+Tracker](https://www.pivotaltracker.com/s/projects/883046) for our tickets, and
+[Github issues](https://github.com/jessykate/modernomad/issues?state=open)
+associated with this repository for new problems, bug reports and suggestions.
+[Read more about contributing](docs/contributing.md).
+
 <img src="media/img/agplv3-88x31.png" />
 
 ## About 
