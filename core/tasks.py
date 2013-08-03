@@ -26,7 +26,7 @@ weekday_number_to_name = {
 #    print "HELLO WORLD"                    
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
-#@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def admin_today_notification():
 	today = datetime.datetime.today() 
 	arriving_today = Reservation.objects.filter(arrive=today).filter(status='confirmed')
@@ -39,10 +39,8 @@ def admin_today_notification():
 		'domain': domain,
 	})
 	text_content = plaintext.render(c)
-	subject = "[Embassy SF] Guest Arrivals and Departures for %s" % (str(today))
+	subject = "[" + settings.EMAIL_SUBJECT_PREFIX + "] Guest Arrivals and Departures for %s" % (str(today))
 	sender = settings.DEFAULT_FROM_EMAIL
-	# XXX this is a temporary hack until we make this a setting on the
-	# house admin accounts. 
 	house_admins = User.objects.filter(groups__name='house_admin')
 	recipients = []
 	for admin in house_admins:
