@@ -1,26 +1,27 @@
 ## Tickets and Issues
 
+If you're using the site and see bugs, usability issues, or have suggestions,
+then [the issue
+tracker](https://github.com/jessykate/modernomad/issues?state=open) is the best
+place to submit them. Developers will get a notification, we can discuss the
+issue or idea, and then turn that into an implementation plan. 
+
 We use [Pivotal Tracker](https://www.pivotaltracker.com/s/projects/883046) for
-our tickets, 
-
-If you're using the site and see bugs, useability issues, or have suggestions, then 
-[the issue tracker](https://github.com/jessykate/modernomad/issues?state=open) is the best place to submit them. Developers will get a notification, we can discuss the issue or idea, and then turn that into an implementation plan. 
-
-Pivotal Tracker is specifically for to-do items for the project. There's
-design-, documentation-, and development-related tickets there, so plenty to
+our tickets. Pivotal Tracker is specifically for to-do items for the project. There's
+design- documentation- and development-related tickets there, so plenty to
 help out with if you are inclined. To make it easier to hook into the process,
-there are a few specific labels worth explaining. 
+there are a few specific labels worth explaining: 
 
-* Simple - should be relatively simple to do. Good for new programmers,
+* **Simple**: should be relatively simple to do. Good for new programmers,
   non-programmers, or people just getting farmiliar with the code base. 
-* New Functionality - if you want the satisfaction of implementing something
+* **New Functionality**: if you want the satisfaction of implementing something
   that will expose new functionality to users, look at these. They are usually
   a bit harder, but worth it. 
-* Orientation - these tickets are a good way to get oriented with the codebase,
+* **Orientation**: these tickets are a good way to get oriented with the codebase,
   usually because they involve looking through a lot of code in order to find
   specific lines that touch a specific field or model. They can be simple or
   more advanced. 
-* Standalone - these features can be big or small but are relatively
+* **Standalone**: these features can be big or small but are relatively
   independent of most of the hairy underpinnings and interdependencies of
   different pieces of the code. For example, it might be building a
   visualization, or integrating a new 3rd party service into the
