@@ -15,9 +15,18 @@ depending on your connection!
 
 Next, install [brew](http://mxcl.github.io/homebrew/)!
 
+Install the `wget` tool, which is not installed on OS X by default: 
+
+- `brew install wget`
+
 ## Pip and Virtualenv. 
 
-each virtualenv contains its own install of pip, but you need pip to be installed globally in order to install virtualenv and virtualenvwrapper (or, at least, this is the easiest way to get those dependencies). 
+Pip is Python's package manager, and virtualenv is a tool that lets you create
+self-contained environments for sets of python libraries. 
+
+Each virtualenv contains its own install of pip, but you need pip to be
+installed globally in order to install virtualenv and virtualenvwrapper (or, at
+least, this is the easiest way to get those dependencies). 
 
 optionally remove old/crusty versions:
 - `sudo apt-get purge python-pip`
