@@ -322,6 +322,20 @@ html, body {
 	width: 700px;
 }
 
+.cropping_image_container{
+  max-height: 500px;
+}
+
+.cropping_image {
+  display: inline;
+}
+
+.crop_result {
+  position: relative;
+  float: right;
+  padding-right: 200px;
+}
+
 .button-spacer {
 	padding-top: 30px;
 }
