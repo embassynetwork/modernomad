@@ -21,6 +21,7 @@ from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate
 from core.tasks import send_guest_welcome
 import stripe
+import uuid
 
 def logout(request):
 	logout(request)
@@ -516,14 +517,14 @@ def ReservationSendMail(request, reservation_id):
 	messages.add_message(request, messages.INFO, "Your message was sent.")
 	return HttpResponseRedirect('/manage/reservation/%s' % reservation_id)
 
-
 # ******************************************************
 #           registration callbacks and views
 # ******************************************************
 
 
-	'''A registration backend that supports capturing user profile
-	information during registration.'''
+'''A registration backend that supports capturing user profile
+information during registration.'''
+
 	
 class Registration(registration.views.RegistrationView):
 	

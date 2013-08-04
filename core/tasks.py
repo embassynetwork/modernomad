@@ -25,8 +25,32 @@ weekday_number_to_name = {
 #def test():      
 #    print "HELLO WORLD"                    
 
+#@periodic_task(run_every=crontab(hour=4, minute=0, day=0))
+##@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+#def admin_weekly_preview():
+#	''' weekly preview of upcoming known reservations. '''
+#	soon = datetime.datetime.today() + datetime.timedelta(days=7)
+#	upcoming = Reservation.objects.filter(arrive=soon).filter(status='confirmed')
+#	domain = Site.objects.get_current().domain
+#	plaintext = get_template('emails/admin_weekly_preview.txt')
+#	c = Context({
+#		'upcoming' : upcoming,
+#		'domain': domain,
+#	})
+#	text_content = plaintext.render(c)
+#	today = datetime.datetime.today() 
+#	subject = "[" + settings.EMAIL_SUBJECT_PREFIX + "] Guest Arrivals for Week of %s" % (str(today))
+#	sender = settings.DEFAULT_FROM_EMAIL
+#	house_admins = User.objects.filter(groups__name='house_admin')
+#	recipients = []
+#	for admin in house_admins:
+#		recipients.append(admin.email)
+#	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
+#	msg.send()
+#
+
 @periodic_task(run_every=crontab(hour=4, minute=30))
-@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+#@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def admin_today_notification():
 	today = datetime.datetime.today() 
 	arriving_today = Reservation.objects.filter(arrive=today).filter(status='confirmed')
