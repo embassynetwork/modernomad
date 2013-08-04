@@ -48,21 +48,36 @@ add these to your ~/.bashrc (~/.bash_profile if one OS X) (create this file if i
 - `source /usr/local/bin/virtualenvwrapper.sh` (the path should match the path printed by the pip installer for virtualenvwrapper). 
 
 don't forget to source the bashrc file now:
-- `source ~/.bashrc`
+- `source ~/.bashrc` (or `source ~/.bash_profile` if that's the file you used)
 
-## dependencies
+## Dependencies
 
 PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. 
 
-on OS X, download and install the tarball linked to on [this](http://apple.stackexchange.com/questions/59718/python-imaging-library-pil-decoder-jpeg-not-available-how-to-fix) stackexchange question. you will need x code installed with the extra "command line tools" component. 
+**On OS X**
 
-to install on linux:
+Install the missing libjpeg library. You will need X Code installed with the
+extra "command line tools" component as described above. 
+
+* `cd /tmp`
+* Download the package at [http://www.ijg.org/files/jpegsrc.v8c.tar.gz](http://www.ijg.org/files/jpegsrc.v8c.tar.gz) to the /tmp directory. 
+* Unpack this package (`tar -xzvf jpegsrc.v8c.tar.gz`) and cd into the unpacked folder `cd jpeg-8c`
+* Compile and install it: 
+	* `./configure`
+	* `make`
+	* `sudo make install`
+ 
+
+**On Linux**
+
 - `sudo apt-get install libjpeg62-dev`
 
 you also need the python dev package:
+
 - `sudo apt-get install python-dev`
 
-on linux, you may need to symlink these libraries for PIL to find them during the install:
+you may need to symlink these libraries for PIL to find them during the install:
+
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/`
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/`
 `sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/`
