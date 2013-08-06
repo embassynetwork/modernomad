@@ -322,18 +322,33 @@ html, body {
 	width: 700px;
 }
 
-.cropping_image_container{
-  max-height: 500px;
+#imageLoader {
+	line-height: 0px;
+	font-size: 16px;
 }
 
 .cropping_image {
   display: inline;
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 50px;
+  margin-top: 20px;
 }
 
-.crop_result {
-  position: relative;
-  float: right;
-  padding-right: 200px;
+.crop-result-wrapper {
+  float: left;
+}
+
+#crop-result {
+	display: none;
+}
+
+#crop-button {
+	color: green;
+}
+
+#cropped-header {
+	display: none;
 }
 
 .button-spacer {

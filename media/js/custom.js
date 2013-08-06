@@ -1,20 +1,35 @@
 var imageLoader = document.getElementById('imageLoader');
-    imageLoader.addEventListener('change', handleImage, false);
+imageLoader.addEventListener('change', handleImage, false);
 var canvas = document.getElementById('imageCanvas');
+canvas.width= 200;
+canvas.height= 200;
 var ctx = canvas.getContext('2d');
+// load a default blank avatar image
+var img_placeholder = new Image();
+img_placeholder.src = "/media/data/avatars/default.jpg";
+img_placeholder.onload = function() {
+	ctx.drawImage(img_placeholder, 0,0, 200, 200);
+};
 
+// image scaling factor
+var scale;
 
 function handleImage(e){
     var reader = new FileReader();
     reader.onload = function(event){
         var img = new Image();
         img.onload = function(){
-            canvas.width = img.width;
-            canvas.height = img.height;
+			ctx.canvas.width = 400;
+            scale = canvas.width/img.width;
+			console.log(img.height);
+			console.log(scale);
+            canvas.height = img.height*scale;
+			console.log(canvas.height);
             ctx.drawImage(img,0,0);
         }
         img.src = event.target.result;
         cropThat(img);
+		$("#crop-button").show();
     }
     reader.readAsDataURL(e.target.files[0]);
 }
@@ -51,7 +66,11 @@ function cropThat(image){
 
         // draw part of original image
         if (this.w > 0 && this.h > 0) {
-            ctx.drawImage(image, this.x, this.y, this.w, this.h, this.x, this.y, this.w, this.h);
+			// since we're scaling the image before drawing it, need to scale
+			// the coordinates used to draw the selected portion of the image
+			// inside the selection box back to the correct dimensions for the
+			// original image
+            ctx.drawImage(image, this.x/scale, this.y/scale, this.w/scale, this.h/scale, this.x, this.y, this.w, this.h);
         }
 
         // draw resize cubes
@@ -82,7 +101,7 @@ function cropThat(image){
         ctx = canvas.getContext('2d');
 
         // create initial selection
-        theSelection = new Selection(50, 50, 50, 50);
+        theSelection = new Selection(50, 50, 150, 150);
 
         $('#imageCanvas').mousemove(function(e) { // binding mouse move event
             var canvasOffset = $(canvas).offset();
@@ -219,11 +238,14 @@ function cropThat(image){
         var temp_ctx, temp_canvas;
         temp_canvas = document.createElement('canvas');
         temp_ctx = temp_canvas.getContext('2d');
-        temp_canvas.width = theSelection.w;
-        temp_canvas.height = theSelection.h;
-        temp_ctx.drawImage(image, theSelection.x, theSelection.y, theSelection.w, theSelection.h, 0, 0, theSelection.w, theSelection.h);
+		// scale the cropped selection to a manageable square
+        temp_canvas.width = 200; //theSelection.w;
+        temp_canvas.height = 200; //theSelection.h;
+        temp_ctx.drawImage(image, theSelection.x/scale, theSelection.y/scale, theSelection.w/scale, theSelection.h/scale, 0, 0, 200, 200);//theSelection.w, theSelection.h);
         var vData = temp_canvas.toDataURL();
-        $('#crop_result').attr('src', vData);
+        $('#crop-result').attr('src', vData);
+		$("#cropped-header").show();
+		$("#crop-result").show();
 
         // if using the client side decoding below add these lines back in
         //
