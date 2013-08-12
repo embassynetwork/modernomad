@@ -132,8 +132,7 @@ INSTALLED_APPS = (
     'registration',
     'south',
     'core',
-    'api',
-	'djcelery',
+    'djcelery',
 )
 
 # A sample logging configuration. The only tangible logging
