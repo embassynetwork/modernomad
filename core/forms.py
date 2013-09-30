@@ -44,11 +44,12 @@ class UserProfileForm(forms.ModelForm):
 
 	def __init__(self, *args, **kwargs):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
+
+		# image data is processed in the save method 
+		self.fields['image'].required = False
+
 		# self.instance will always be an instance of UserProfile. if this
 		# is an existing object, then populate the initial values. 
-		print self.fields['image'].required
-		print self.fields['sharing'].required
-		
 		if self.instance.id is not None:
 			# initialize the form fields with the existing values from the model.  	
 			self.fields['first_name'].initial = self.instance.user.first_name
@@ -196,6 +197,7 @@ class EmailTemplateForm(forms.Form):
 			'num_nights': reservation.total_nights(), 
 			'purpose': reservation.purpose,
 			'comments': reservation.comments,
+			'welcome_email_days_ahead': settings.WELCOME_EMAIL_DAYS_AHEAD,
 			'reservation_url': "https://"+domain+reservation.get_absolute_url()
 		}
 

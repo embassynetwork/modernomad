@@ -322,6 +322,35 @@ html, body {
 	width: 700px;
 }
 
+#imageLoader {
+	line-height: 0px;
+	font-size: 16px;
+}
+
+.cropping_image {
+  display: inline;
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 50px;
+  margin-top: 20px;
+}
+
+.crop-result-wrapper {
+  float: left;
+}
+
+#crop-result {
+	display: none;
+}
+
+#crop-button {
+	color: green;
+}
+
+#cropped-header {
+	display: none;
+}
+
 .button-spacer {
 	padding-top: 30px;
 }

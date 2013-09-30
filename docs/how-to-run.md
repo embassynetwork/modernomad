@@ -12,6 +12,12 @@ commands to work with virtualenvwrapper: `workon` to work on a specific virtual
 env, `pip install blah` to install packages, `lssitepackages` to see packaged
 installed in the virtual env. 
 
+## clone the repository
+
+- make sure you have git installed
+- cd into the directory you want to clone the repository into
+- git clone 
+
 ## dependencies:
 within the virtualenv, install the requirements. this is done with the following command, which should iterate through the items in the text file and install them one by one:
 - `pip install -r requirements.txt` 

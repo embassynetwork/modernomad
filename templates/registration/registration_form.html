@@ -7,23 +7,64 @@
 <p>If you already have an account, you can <a href="/people/login?next=/reservation/create/">log in</a> instead. </p>
 
 <h4>Tell us a bit about yourself</h4>
-<p>Please put some thought into this - these questions are what help others get some insight into <b class="dark-red-bold">what you are passionate about</b> or <b class="dark-red-bold">possible connections around work, projects or ideas</b>. It might take 5-10 minutes, but it will pay back dividends while you are here, and help you to connect with the other awesome people in the house (who also took the time to tell you about themselves).</p> 
+<p>These questions are what help others get some insight into <b class="dark-red-bold">what you are passionate about</b> or <b class="dark-red-bold">possible connections around work, projects or ideas</b>. It might take 5-10 minutes, but it will pay back dividends while you are here, and help you to connect with the other awesome people in the house.</p>
 
 <p>You only create your account once. After, you can log in and create future reservation requests with the same information.</p>
 
-<form class="well form-inline" enctype="multipart/form-data" method="post">{% csrf_token %}
-	{% for field in form %}
-		<div class="field-wrapper">
-			{{ field.errors }}
-			{{ field.label_tag }}
-			<span class="form-help-text">{{ field.help_text}}</span>
-			<div class="form-field-body">
-				{% if field.field.required %} * {% endif %}
-				{{ field }}
-			</div>
-		</div>
-	{% endfor %}
-	<input type="submit" value="Submit" />
+
+<div class="well cropping_image_container">
+<p id="img-upload-instruction">Upload an image for your profile (required).</p>
+<p id="img-upload-error"></p>
+<div>
+<input type="file" id="imageLoader" name="imageLoader"/>
+<button id="crop-button" onclick="cropThat.getResults()" hidden>Crop</button>
+</div>
+<div>
+  <canvas class="cropping_image img-polaroid" id="imageCanvas"></canvas>
+  <div class="crop-result-wrapper">
+	  <h3 id="cropped-header">Your image:</h3>
+	<img class="img-polaroid" id="crop-result" />
+  </div>
+  <div class="clear">
+  </div>
+</div>
+</div>
+
+
+<form id="newprofileform" class="well form-inline" enctype="multipart/form-data" method="post">{% csrf_token %}
+  {% for field in form %}
+    {% if field.name != "image" %}
+      <div class="field-wrapper">
+        {{ field.errors }}
+        {{ field.label_tag }}
+        <span class="form-help-text">{{ field.help_text}}</span>
+        <div class="form-field-body">
+          {% if field.field.required %} * {% endif %}
+          {{ field }}
+        </div>
+      </div>
+    {% else %}
+      {{ field.errors }}
+      <input type="hidden" name="image" id="id_image">
+    {% endif %}
+  {% endfor %}
+  <input id="profilesubmit" type="submit" value="Submit" />
 </form>
 
 {% endblock %}
+
+{% block extrajs %}
+	<script src="/media/js/imgcrop.js"></script>
+	<script>
+		$("#newprofileform").submit(function (e) {
+			console.log("inside submit function");
+			if (! $("#id_image").val() ) {
+				$("#img-upload-error").html('<span class="text-error">This field is required.</span>');
+				$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
+				return false;
+			}
+		}) 
+
+	</script>
+{% endblock %}
+

@@ -46,6 +46,9 @@ def index(request):
 def about(request):
 	return render(request, "about.html")
 
+def coworking(request):
+	return render(request, "coworking.html")
+
 def community(request):
 	residents = User.objects.filter(groups__name='residents')
 	return render(request, "community.html", {'people': residents})

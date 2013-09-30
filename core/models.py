@@ -45,7 +45,10 @@ class RoomManager(models.Manager):
 				# skip over it, since it won't show up in
 				# available rooms anyway. 
 				try:
-					avail_today[booking.room] = avail_today[booking.room] -1 
+					if avail_today[booking.room] <= 0:
+						avail_today[booking.room] = 0
+					else:
+						avail_today[booking.room] = avail_today[booking.room] -1 
 				except:
 					pass
 			availability[the_day] = avail_today
@@ -86,7 +89,10 @@ class RoomManager(models.Manager):
 				# skip over it, since it won't show up in
 				# available rooms anyway. 
 				try:
-					rooms_today[booking.room] = rooms_today[booking.room] - 1	
+					if rooms_today[booking.room] <= 0:
+						rooms_today[booking.room] = 0
+					else:
+						rooms_today[booking.room] = rooms_today[booking.room] -1 
 				except:
 					pass
 			the_day = the_day + datetime.timedelta(1)

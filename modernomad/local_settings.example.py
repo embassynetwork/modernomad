@@ -23,6 +23,9 @@ MAX_RESERVATION_DAYS = 14
 # info.
 WELCOME_EMAIL_DAYS_AHEAD = 2
 
+# if your house has a private access code, enter it here. 
+HOUSE_ACCESS_CODE = "1234"
+
 # if using stripe, enter your stripe *secret* key here
 STRIPE_SECRET_KEY = "insert your key here"
 STRIPE_PUBLISHABLE_KEY = "insert your key here"

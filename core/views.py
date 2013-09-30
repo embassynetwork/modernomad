@@ -4,6 +4,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.db import transaction
+from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -21,6 +22,8 @@ from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate
 from core.tasks import send_guest_welcome
 import stripe
+import uuid, base64, os
+from django.core.files import File
 
 def logout(request):
 	logout(request)
@@ -220,7 +223,7 @@ def UserAddCard(request, username):
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
 					send_guest_welcome([reservation,])
-				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s' % user.email)
+				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, settings.WELCOME_EMAIL_DAYS_AHEAD))
 				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
 			except stripe.CardError, e:
 				raise stripe.CardError(e)
@@ -516,14 +519,14 @@ def ReservationSendMail(request, reservation_id):
 	messages.add_message(request, messages.INFO, "Your message was sent.")
 	return HttpResponseRedirect('/manage/reservation/%s' % reservation_id)
 
-
 # ******************************************************
 #           registration callbacks and views
 # ******************************************************
 
 
-	'''A registration backend that supports capturing user profile
-	information during registration.'''
+'''A registration backend that supports capturing user profile
+information during registration.'''
+
 	
 class Registration(registration.views.RegistrationView):
 	
@@ -535,6 +538,7 @@ class Registration(registration.views.RegistrationView):
 			if field.name in cleaned_data:
 				setattr(user, field.name, cleaned_data[field.name])
 		# the password has been validated by the form
+
 		user.set_password(cleaned_data['password2'])
 		user.save()
 
@@ -542,6 +546,30 @@ class Registration(registration.views.RegistrationView):
 		for field in profile._meta.fields:
 			if field.name in cleaned_data:
 				setattr(profile, field.name, cleaned_data[field.name])
+
+		print "request data: image field"
+		img_data = request.POST.get("image")
+		# If none or len 0, means illegal image data
+		if img_data == None or len(img_data) == 0:
+			pass
+
+		# Decode the image data
+		img_data = base64.b64decode(img_data)
+		filename = "%s.png" % uuid.uuid4()
+
+		# XXX make the upload path a fixed setting in models, since it's
+		# reference in two places
+		upload_path = "data/avatars/%s/" % user.username
+		upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+		if not os.path.exists(upload_abs_path):
+			os.makedirs(upload_abs_path)
+		full_file_name = os.path.join(upload_abs_path, filename)
+
+		with open(full_file_name, 'wb') as f:
+			f.write(img_data)
+			f.close()
+
+		profile.image = full_file_name
 		profile.save()
 
 		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
