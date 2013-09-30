@@ -5,7 +5,7 @@ We look forward to seeing you at the Embassy on {{ day_of_week }}!
 ** Key Data **
 
 The house is located at 399 Webster Street, San Francisco, CA, 94117. Access
-to the house is via a keypad on the front door. The access code is "0399#" (the
+to the house is via a keypad on the front door. The access code is "4399#" (the
 "#" at the end is important, make sure to enter it as well). Checkin is anytime
 after about 1pm. You are free to arrive earlier but your bed may not be ready
 yet.  
