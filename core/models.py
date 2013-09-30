@@ -523,7 +523,7 @@ class UserProfile(models.Model):
 	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
 	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing during your stay?")
 	discussion = models.TextField(help_text="We like discussing thorny issues with each other. What's a question that's been on your mind lately that you don't know the answer to?")
-	referral = models.CharField(max_length=200, verbose_name='How did you hear about us?')
+	referral = models.CharField(max_length=200, verbose_name='How did you hear about us? (Give a name if possible!)')
 	# currently used to store the stripe customer id but could be used for
 	# other payment platforms in the future
 	customer_id = models.CharField(max_length=200, blank=True, null=True)

@@ -36,9 +36,6 @@ urlpatterns = patterns('',
 	url(r'^manage/', include(core.urls.management_patterns)),
 	url(r'^room/', include(core.urls.room_patterns)),
 
-	# The modernomad API.
-	url(r'^api/', include('api.urls')),
-
 	# The Django admin interface.
 	url(r'^admin/', include(admin.site.urls)),
 

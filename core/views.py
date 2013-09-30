@@ -591,7 +591,7 @@ class Registration(registration.views.RegistrationView):
 		interrupt the registration process here.
 		"""
 		url_path = request.get_full_path().split("next=")
-		messages.add_message(request, messages.INFO, 'Your account has been created.')
+		messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to make a reservation!')
 		if len(url_path) > 1 and url_path[1] == "/reservation/create/":
 			return (url_path[1], (), {'username' : user.username})
 		else:
