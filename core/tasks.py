@@ -26,7 +26,7 @@ weekday_number_to_name = {
 #    print "HELLO WORLD"                    
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
-@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+#@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def admin_today_notification():
 	today = datetime.datetime.today() 
 	arriving_today = Reservation.objects.filter(arrive=today).filter(status='confirmed')
