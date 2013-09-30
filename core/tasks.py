@@ -92,6 +92,7 @@ def send_guest_welcome(upcoming):
 			'first_name': reservation.user.first_name,
 			'day_of_week' : day_of_week,
 			'site_url': domain,
+			'house_code': settings.HOUSE_ACCESS_CODE,
 			'events_url' : settings.EVENTS_LINK,
 			'facebook_group' : settings.FACEBOOK_GROUP,
 			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.id,)),
