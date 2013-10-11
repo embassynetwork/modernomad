@@ -26,14 +26,21 @@ def index(request):
 			.exclude( arrive__gt=today+datetime.timedelta(days=30))
 		)
 
-	# add the user's associated with those reservations to a list to display on
+	# add users associated with those reservations to a list to display on
 	# the homepage
 	coming_month = []
 	for r in coming_month_res:
+		# check for duplicates, add if not already there.
 		if r.user not in coming_month:
 			coming_month.append(r.user)
 	residents = User.objects.filter(groups__name='residents')
-	coming_month += list(residents)
+	residents = list(residents)
+
+	# add residents to the list of people in the house in the coming month. 
+	for r in residents:
+		# check for duplicates, add if not already there.
+		if r not in coming_month:
+			coming_month.append(r)
 
 	# get any events
 	eb_auth_tokens = {
