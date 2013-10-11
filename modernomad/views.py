@@ -18,14 +18,20 @@ import eventbrite
 
 def index(request):
 	today = datetime.date.today()
+	
+	# pull out all reservations in the coming month
 	coming_month_res = (
 			Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
 			.exclude(depart__lt=today)
 			.exclude( arrive__gt=today+datetime.timedelta(days=30))
 		)
+
+	# add the user's associated with those reservations to a list to display on
+	# the homepage
 	coming_month = []
 	for r in coming_month_res:
-		coming_month.append(r.user)
+		if r.user not in coming_month:
+			coming_month.append(r.user)
 	residents = User.objects.filter(groups__name='residents')
 	coming_month += list(residents)
 
