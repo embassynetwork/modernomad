@@ -36,7 +36,7 @@ def index(request):
 		}
 	try:
 		eb_client = eventbrite.EventbriteClient(eb_auth_tokens)
-		response = eb_client.user_list_events()
+		response = eb_client.user_list_events({'event_statuses':'live,started'})
 		events = response['events']
 	except:
 		events = None
