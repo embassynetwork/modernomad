@@ -122,12 +122,12 @@ def update_mailinglist_members():
 
 	today = datetime.date.today()
 	reservations_today = Reservation.today.get_query_set()
-	current_guests = []
+	guest_emails = []
 	for r in reservations_today:
-		current_guests.append(r.user.email)
+		guest_emails.append(r.user.email)
 	resp= requests.post("https://api.mailgun.net/v2/lists/guests@sf.embassynetwork.com/members.json", 
 			data= {
-				"members":json.dumps(current_guests), 
+				"members":json.dumps(guest_emails), 
 				"subscribed": True
 				}, 
 				auth=('api', mailgun_api_key)
@@ -146,13 +146,13 @@ def update_mailinglist_members():
 
 	residents = User.objects.filter(groups__name='residents')
 	residents = list(residents)
-	current_peeps = current_guests + residents 
-	members = []
-	for person in current_peeps:
-		members.append(person.email)
+	resident_emails = []
+	for person in residents:
+		resident_emails.append(person.email)
+	current_emails = guest_emails + resident_emails 
 	resp = requests.post("https://api.mailgun.net/v2/lists/current@sf.embassynetwork.com/members.json", 
 			data={
-				"members":json.dumps(members), 
+				"members":json.dumps(current_emails), 
 				"subscribed": True
 				},
 				auth=('api', mailgun_api_key)

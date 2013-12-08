@@ -42,13 +42,12 @@ urlpatterns = patterns('',
 	# various other useful things
 	url(r'^ico/favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/img/favicon.ico'}),
 
-	email_patterns = patterns('modernomad.email_views',
-		url(r'^guests$', 'EmailGuests', name='email_guests'),
-		url(r'^current$', 'EmailCurrent', name='email_current'),
-	)
+	#email_patterns = patterns('modernomad.email_views',
+	#	url(r'^guests$', 'EmailGuests', name='email_guests'),
+	#	url(r'^current$', 'EmailCurrent', name='email_current'),
+	#)
 
-	url(r'^email/', include(email_patterns)),
-	
+	#url(r'^email/', include(email_patterns))
 
 )
 
