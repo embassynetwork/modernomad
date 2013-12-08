@@ -782,7 +782,7 @@ div#spinner
 	color: #999999;
 }
 
-#id_footer {
+#res-action-email-user #id_footer {
 	height: 5em;
 }
 
@@ -867,3 +867,15 @@ div#spinner
 	padding-left: 40px;
 }
 
+#message-current-form #id_footer {
+	height: 100px;
+}
+
+.link-light-color {
+	color: #CCC;
+}
+
+#recipient-list {
+	margin-top: 10px;
+	margin-bottom: 20px;
+}

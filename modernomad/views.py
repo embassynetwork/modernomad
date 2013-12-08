@@ -62,9 +62,10 @@ def about(request):
 def coworking(request):
 	return render(request, "coworking.html")
 
-def community(request):
-	residents = User.objects.filter(groups__name='residents')
-	return render(request, "community.html", {'people': residents})
+def projects(request):
+	#residents = User.objects.filter(groups__name='residents')
+	#return render(request, "community.html", {'people': residents})
+	pass
 
 def events(request):
 	return render(request, "events.html")
@@ -214,10 +215,6 @@ def calendar(request):
 
 def stay(request):
 	return render(request, "stay.html")
-
-def participate(request):
-	return render(request, "participate.html")
-
 
 
 def GenericPayment(request):

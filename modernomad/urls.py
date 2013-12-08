@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
-import core.urls #import reservation_patterns
+import core.urls 
 import settings
 
 admin.autodiscover()
@@ -11,13 +11,12 @@ media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
 urlpatterns = patterns('',
 	url(r'^$', 'modernomad.views.index'),
 	url(r'^about/$', 'modernomad.views.about'),
-	url(r'^community/$', 'modernomad.views.community'),
 	url(r'^coworking/$', 'modernomad.views.coworking'),
+	url(r'^broadcast/$', 'core.views.broadcast'),
 	url(r'^stay/$', 'modernomad.views.stay'),
 	url(r'^occupancy/$', 'modernomad.views.occupancy'),
 	url(r'^calendar/$', 'modernomad.views.calendar'),
 	url(r'^guestinfo/$', 'modernomad.views.GuestInfo'),
-	url(r'^participate/$', 'modernomad.views.participate'),
 	url(r'^payment/$', 'modernomad.views.GenericPayment'),
 	url(r'^thanks/$', 'modernomad.views.thanks'),
 	url(r'^today/$', 'modernomad.views.today'),
