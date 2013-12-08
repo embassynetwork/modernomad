@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 import core.urls 
+#import core.email_views
 import settings
 
 admin.autodiscover()
@@ -40,6 +41,15 @@ urlpatterns = patterns('',
 
 	# various other useful things
 	url(r'^ico/favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/img/favicon.ico'}),
+
+	email_patterns = patterns('modernomad.email_views',
+		url(r'^guests$', 'EmailGuests', name='email_guests'),
+		url(r'^current$', 'EmailCurrent', name='email_current'),
+	)
+
+	url(r'^email/', include(email_patterns)),
+	
+
 )
 
 # media url hackery. 

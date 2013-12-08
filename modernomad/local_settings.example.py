@@ -13,6 +13,9 @@ XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 DEVELOPMENT = 0
 PRODUCTION = 1
 
+# What is the name of this house, building, establishment, etc.?
+LOCATION_NAME = "Embassy SF"
+
 # default mode is dev. change to production as appropriate. 
 MODE = DEVELOPMENT
 
@@ -29,6 +32,9 @@ HOUSE_ACCESS_CODE = "1234"
 # if using stripe, enter your stripe *secret* key here
 STRIPE_SECRET_KEY = "insert your key here"
 STRIPE_PUBLISHABLE_KEY = "insert your key here"
+
+MAILGUN_API_KEY = "your private key from mailgun"
+LIST_DOMAIN = "the mail domain used for sending and receiving via mailgun - eg. mail.housename.com"
 
 if MODE == DEVELOPMENT:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
