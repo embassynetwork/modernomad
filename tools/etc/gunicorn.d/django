@@ -1,0 +1,12 @@
+CONFIG = {
+    'mode': 'django',
+    'working_dir': '/vagrant',
+    'user': 'vagrant',
+    'group': 'vagrant',
+
+    'args': (
+        '--bind=0.0.0.0:80',
+        '--workers=4',
+        'settings',
+    ),
+}

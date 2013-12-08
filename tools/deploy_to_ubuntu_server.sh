@@ -1,20 +1,15 @@
-#!/bin/bash
+#!/bin/bash -x
 
+apt-get install python-software-properties -y
 apt-get update -y
 apt-get upgrade -y 
-apt-get install git python-dev libjpeg8 libjpeg8-dev rabbitmq-server wget python-pip nginx -y
+apt-get install git vim python-dev libjpeg8 libjpeg8-dev rabbitmq-server wget python-pip nginx -y
+apt-add-repository ppa:gunicorn/ppa -y
+apt-get install gunicorn -y
 
-mkdir -p /var/django_apps/
-cd /var/django_apps/
+cd /vagrant/
 
-if [ -f /var/django_apps/modernomad/.git ]; then
-    cd modernomad
-    git pull origin
-else
-    git clone "$1"
-    cd modernomad
-fi
-
+pip install pip --upgrade
 pip install -r requirements.txt
 pip install --index-url https://code.stripe.com --upgrade stripe
 
@@ -24,13 +19,10 @@ if [ ! -f modernomad/local_settings.py ]; then
     sed "s/^SECRET_KEY.*$/SECRET_KEY = '$SECRET_KEY'/" modernomad/local_settings.example.py > modernomad/local_settings.py
 fi
 
-chown -R vagrant:vagrant /var/django_apps/
-
 adduser --system --no-create-home --disabled-login --disabled-password --group celery
 mkdir -p /var/run/celery/
 mkdir -p /var/log/celery/
-cp tools/etc/init.d/celeryd /etc/init.d/celeryd
-cp tools/etc/default/celeryd /etc/init.d/celeryd
+rsync -avr tools/etc/ /etc/
 chmod +x /etc/init.d/celeryd
 update-rc.d celeryd defaults
 /etc/init.d/celeryd start
