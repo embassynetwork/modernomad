@@ -10,3 +10,4 @@ local_settings.py
 celery.db
 celery
 local_templates/
+.vagrant
