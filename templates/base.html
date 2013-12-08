@@ -41,7 +41,7 @@
 				  <a class="brand" href="/">Home</a>
 				  <ul data-spy="affix" data-offset-top="300" class="nav">
 						<li><a href="/about">Our House</a></li>
-						<li><a href="/broadcast">Broadcast</a></li>
+						{% if user.is_authenticated %} <li><a href="/broadcast">Broadcast</a></li> {% endif %}
 						<li><a href="/stay">Stay</a></li>
 
 
