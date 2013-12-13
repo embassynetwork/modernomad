@@ -95,7 +95,7 @@ def send_guest_welcome(upcoming):
 			'house_code': settings.HOUSE_ACCESS_CODE,
 			'events_url' : settings.EVENTS_LINK,
 			'facebook_group' : settings.FACEBOOK_GROUP,
-			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.username,)),
+			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.id,)),
 			'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.id,)),
 		})
 		text_content = plaintext.render(c)

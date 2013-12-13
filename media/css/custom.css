@@ -1,73 +1,12 @@
 /* ==========================================================
-==========================[Typography]==========================
-========================================================== */
-@font-face {
-	font-family:'Archer Bold';
-	src:url('/media/fonts/Archer-Semibold-Pro.otf');
-}
-
-@font-face {
-	font-family:'Archer Italic';
-	src:url('/media/fonts/Archer-BoldItal-Pro.otf');
-}
-
-body {
-	font-family:'Arial', sans-serif;
-	-webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4, h5, h6 {
-	font-family: 'Archer Bold', sans-serif;
-	-webkit-font-smoothing: antialiased;
-}
-
-.fancy-header {
-	font-family:'Archer Italic', serif;
-	-webkit-font-smoothing: antialiased;
-}
-
-/* increases line spacing for text that is too tight */
-.easy-reading {
-	line-height:2em;
-}
-
-span.highlight {
-	color:#ea6f56;
-}
-
-
-/* ==========================================================
 ==========================[NAVIGATION]=======================
 ========================================================== */
 
 /* ======================[Global Navigation]================= */
 
-#flyout {
-	width:360px;
-	height:100%;
-	background:#252525;
-	position:fixed;
-	top:0;
-	right:-360px;
-	z-index:999;
-	padding:48px;
-	color:rgba(255,255,255,0.7);
-	box-shadow: -0px 0px 10px rgba(0,0,0,0.8);
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'IM Fell French Canon SC', serif;
 }
-
-.curtain {
-	position: fixed;
-	top: 0;
-	left: 0;
-	background: rgba(255,255,255,0.8);
-	width: 100%;
-	height: 100%;
-	z-index: -1;
-}
-
-/* ======================[Global Navigation]================= */
-
-
 
 .top-nav {
    float:left;
@@ -103,142 +42,8 @@ span.highlight {
 
 /* ====================== Home Page ================= */
 
-#header-wrap {
-	height:120px;
-	padding:20px 0;
-}
-
-#login {
-	padding:32px 0;
-	border-right:1px solid rgba(0,0,0,0.1);
-	font-family:"Archer Bold";
-}
-
-#login a {
-	color:rgba(0,0,0,0.3);
-	font-size:1.3em;
-}
-
-#embassy-logo img {
-	float:right;
-	padding-top:17px;
-}
-
-#homepage-wrap {
-}
-
-#house {
-	background:#2f2f2f;
-	color:#fff;
-	height:223px;
-}
-
-#house-image {
-	background:url('/media/img/house_pic.png') no-repeat;
-	background-size:cover;
-	height:223px;
-	padding:0;
-	
-}
-
-#house-desc {
-	
-}
-
-#house-name-title {
-
-}
-
-#actions {
-	background:#ea6f56;
-	padding:30px 0 30px 0;
-	color:#FFF;
-}
-
-#participate, #reserve {
-	padding:0 70px;
-}
-
-#participate {
-	border-right:1px solid rgba(255,255,255,0.3);
-}
-
-#eventlist-signup-wrapper {
-	background: #fff;
-	border-radius: 4px;
-	margin:0;
-	padding:3px 0 0 3px;
-}
-
-#list-signup-input {
-	background: #ea6f56;
-	padding: 10px 0 10px 8px;
-	border-top-left-radius: 4px;
-	border-bottom-left-radius: 4px;
-	border:none;
-	height: 67px;
-	color:rgba(255,255,255,0.8);
-	font-size:0.6em;
-
-}
-
-#list-signup-input:focus {
-	color:#fff;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
-	
-}
-
-.placeholder {
-	color:rgba(255,255,255,0.3);
-	
-}
-
-.btn {
-	font-family:'Archer Bold';
-	color:#000;
-}
-
-#eventlist-signup-wrapper .btn {
-	background:#fff;
-	padding:0;
-	height:70px;
-	
-}
-
-
-#reserve .btn {
-	background: #fff;
-	padding: 21px 0;
-}
-
-.event {
-	padding: 8px 0;
-	border-bottom: 1px solid rgba(0,0,0,0.1);
-}
-
-.event:hover, .event:hover .date {
-	color:#ea6f56;
-}
-
-.event .date {
-	text-align: center;
-	padding: 0;
-	font-size: 24px;
-	font-family: "Archer Bold";
-	color:rgba(0,0,0,0.3);
-	
-}
-
-.event .date span {
-	font-size: 50px;
-	font-family: "Archer Bold";
-	display: block;
-	line-height: 50px;
-	text-align: center;
-}
-
 .event-image {
-	height: 200px;h
+	height: 200px;
 	float: left;
 
 }
@@ -250,9 +55,29 @@ span.highlight {
 	text-align: right;
 }
 
+hr.style-one {
+    border: 0;
+    height: 2px;
+    background: #333;
+    box-shadow: 0 0 20px 2px #AAA;
+    background-image: -webkit-linear-gradient(left, #ccc, #999, #ccc); 
+    background-image:    -moz-linear-gradient(left, #ccc, #999, #ccc); 
+    background-image:     -ms-linear-gradient(left, #ccc, #999, #ccc); 
+    background-image:      -o-linear-gradient(left, #ccc, #999, #ccc); 
+}
 
-.profiles {
-	padding-left: 16px;
+hr.style-two {
+    border: 0;
+    height: 1px;
+    background-image: -webkit-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:    -moz-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:     -ms-linear-gradient(left, #ccc, #333, #ccc); 
+    background-image:      -o-linear-gradient(left, #ccc, #333, #ccc); 
+}
+
+.carousel-slide-wrapper {
+	width: 860px;
+	margin: auto;
 }
 
 
@@ -264,11 +89,9 @@ span.highlight {
 	color: #fff;
 	overflow: hidden;
 	padding: 5px;
-	height: 210px;
-	width:210px;
+	height: 160px;
 	visibility: hidden;
 	opacity: 0;
-	z-index:1000;
 }
 
 .homepage-user-descr:hover {
@@ -278,24 +101,17 @@ span.highlight {
 
 .homepage-user-wrapper {
 	position: relative;
-	margin-right: 16px;
-	margin-bottom: 16px;
 }
 
 .homepage-user-text {
-	height: 310px;
-	width: 210px;
+	height: 140px;
+	width: 160px;
 	overflow: hidden;
 	margin-bottom: 0px;
 }
 
 .homepage-user-link {
 	color: #e71d99;
-}
-
-img.homepage-user-img {
-	height:110px;
-	width:110px;
 }
 
 .homepage-user-wrapper:hover .homepage-user-text {
@@ -348,6 +164,15 @@ img.homepage-user-img {
 //box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
 //}
 
+#house-name-title {
+	font-family: 'IM Fell French Canon SC', serif;
+	font-size: 60px;
+	line-height: 75px;
+}
+
+#eventlist-signup {
+	margin-top: 10px;
+}
 
 #eventsignup-response-fail {
 	text-align: center;
@@ -372,7 +197,11 @@ img.homepage-user-img {
 	height: 170px;
 }
 
-
+#homepage-wrap {
+	// fixed width landing page
+	width: 1170px;
+	margin: auto;
+}
 
 .homepage-profile-img {
 	width: 170px;
@@ -443,10 +272,6 @@ img.homepage-user-img {
 ==========================[GENERAL]==========================
 ========================================================== */
 
-.container {
-	width:100%;
-	padding:0 15px;
-}
 
 
 #container-main {
@@ -458,14 +283,6 @@ p { }
 html, body {
 	height: 100%;
 	/* The html and body elements cannot have any padding or margin. */
-}
-
-
-/* Class for centering columns. Add to column class eg. class='col-md-1 col-centered' */
-
-.col-centered{
-    float: none;
-    margin: 0 auto;
 }
 
 /* Wrapper for page content to push down footer */
