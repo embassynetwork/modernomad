@@ -3,15 +3,21 @@
 apt-get install python-software-properties -y
 apt-get update -y
 apt-get upgrade -y 
-apt-get install git vim python-dev libjpeg8 libjpeg8-dev rabbitmq-server wget python-pip nginx -y
-apt-add-repository ppa:gunicorn/ppa -y
-apt-get install gunicorn -y
+apt-get install git vim python-dev libjpeg8 libjpeg8-dev rabbitmq-server curl screen -y
+
+if [ -f /etc/init.d/nginx ]; then
+  apt-get remove nginx
+  killall nginx
+fi
+
+cd /tmp
+curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
+sudo python get-pip.py
+pip --version
 
 cd /vagrant/
-
-pip install pip --upgrade
-pip install -r requirements.txt
-pip install --index-url https://code.stripe.com --upgrade stripe
+yes | pip install -r requirements.txt
+yes | pip install --index-url https://code.stripe.com --upgrade stripe
 
 if [ ! -f modernomad/local_settings.py ]; then
     SECURE_RANDOM=$(dd if=/dev/urandom count=1 bs=28 2>/dev/null | od -t x1 -A n)
@@ -29,4 +35,4 @@ update-rc.d celeryd defaults
 
 ./manage.py syncdb --noinput 
 ./manage.py migrate --noinput 
-./manage.py runserver 80
+screen -dmS django ./manage.py runserver 80
