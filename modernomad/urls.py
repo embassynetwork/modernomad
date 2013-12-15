@@ -25,9 +25,9 @@ urlpatterns = patterns('',
 #	url(r'^dashboard/$', 'core.views.dashboard'),
 	
 	
-	url(r'^events/$', 'modernomad.views.events'),
 	url(r'^404/$', 'modernomad.views.ErrorView'),
 
+	url(r'^events/', include('gather.urls')),
 
 	# The core views, broken out into a couple of top-level paths.
 	url(r'^people/', include(core.urls.user_patterns)),

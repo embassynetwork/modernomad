@@ -67,9 +67,6 @@ def projects(request):
 	#return render(request, "community.html", {'people': residents})
 	pass
 
-def events(request):
-	return render(request, "events.html")
-
 def get_calendar_dates(month, year):
 	if month:
 		month = int(month)

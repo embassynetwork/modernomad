@@ -1,8 +1,3 @@
-# NOTE(mdh): This is different from the usual urls.py in that it
-# doesn't define a top-level urlpatterns object.  The individual
-# pattern sets here are intended to be used by a top-level pattern set
-# elsewhere.
-
 from django.conf.urls import patterns, include, url
 import registration.backends.default.urls
 from core.views import Registration
