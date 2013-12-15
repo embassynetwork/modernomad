@@ -2,13 +2,14 @@ from celery.task.schedules import crontab
 from celery.task import periodic_task
 from core.models import Reservation, UserProfile
 from django.contrib.auth.models import User
-import datetime
+import datetime, json
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.loader import get_template
 from django.template import Context
 from django.core import urlresolvers
 from django.core.mail import EmailMultiAlternatives
+import requests
 
 weekday_number_to_name = {
 	0: "Monday",
@@ -104,5 +105,62 @@ def send_guest_welcome(upcoming):
 		recipients = [reservation.user.email,]
 		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 		msg.send()
+
+@periodic_task(run_every=crontab(hour=0, minute=03))
+def update_mailinglist_members():
+
+	mailgun_api_key = settings.MAILGUN_API_KEY
+	list_domain = settings.LIST_DOMAIN
+	guest_list = "guests@" + list_domain
+	current_list = "current@" + list_domain
+
+	# current guests mailing list - delete and recrete to set membership
+	resp = requests.delete("https://api.mailgun.net/v2/lists/%s" % guest_list, auth=('api', mailgun_api_key))
+	print resp.text
+	resp = requests.post("https://api.mailgun.net/v2/lists", auth=('api', mailgun_api_key), data={"address": guest_list, "name": "Current Guests", "access_level": "members"})
+	print resp.text
+
+	today = datetime.date.today()
+	reservations_today = Reservation.today.get_query_set()
+	guest_emails = []
+	for r in reservations_today:
+		guest_emails.append(r.user.email)
+	resp= requests.post("https://api.mailgun.net/v2/lists/guests@sf.embassynetwork.com/members.json", 
+			data= {
+				"members":json.dumps(guest_emails), 
+				"subscribed": True
+				}, 
+				auth=('api', mailgun_api_key)
+			)
+	print "subscribe call responded with:"
+	print resp.text
+	resp = requests.get( "https://api.mailgun.net/v2/lists/guests@sf.embassynetwork.com/members",
+					        auth=('api', mailgun_api_key))
+	print resp.text
+
+	# current guests and residents mailing list- delete and recrete to set membership
+	resp = requests.delete("https://api.mailgun.net/v2/lists/%s" % current_list, auth=('api', mailgun_api_key))
+	print resp.text
+	resp = requests.post("https://api.mailgun.net/v2/lists", data={"address": current_list, "name": "Current Guests and Residents", "access_level": "members"}, auth=('api', mailgun_api_key))
+	print resp.text
+
+	residents = User.objects.filter(groups__name='residents')
+	residents = list(residents)
+	resident_emails = []
+	for person in residents:
+		resident_emails.append(person.email)
+	current_emails = guest_emails + resident_emails 
+	resp = requests.post("https://api.mailgun.net/v2/lists/current@sf.embassynetwork.com/members.json", 
+			data={
+				"members":json.dumps(current_emails), 
+				"subscribed": True
+				},
+				auth=('api', mailgun_api_key)
+			)
+	print resp.text
+	resp = requests.get( "https://api.mailgun.net/v2/lists/current@sf.embassynetwork.com/members",
+					        auth=('api', mailgun_api_key))
+	print resp.text
+
 
 

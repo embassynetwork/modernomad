@@ -205,5 +205,32 @@ class EmailTemplateForm(forms.Form):
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 
+class MessageCurrentPeopleForm(forms.Form):
+	start_date = forms.DateField()
+	end_date = forms.DateField()
+	replyto = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly'}))
+	subject = forms.CharField()
+	body = forms.CharField(widget=forms.Textarea)
+	footer = forms.CharField(widget=forms.Textarea(attrs={'readonly':'readonly'}))
+
+	def __init__(self, *args, **kwargs):
+		domain = Site.objects.get_current().domain
+		if kwargs.has_key('sender'):
+			# pop the ender kwarg out so it doesn't get passed to the parent class
+			sender = kwargs.pop('sender')
+		super(MessageCurrentPeopleForm, self).__init__(*args, **kwargs)
+
+		# add in the extra fields
+		self.fields['replyto'].initial = sender.email
+		self.fields['footer'].initial = forms.CharField(
+				widget=forms.Textarea(attrs={'readonly':'readonly'})
+			)
+		self.fields['footer'].initial = '''--------------------------------\nThis message is a social courtesy service for members of %s. You may reply-all to this email, generate your own network broadcast at http://%s/broadcast, or email the sender directly at %s.''' % (settings.LOCATION_NAME, domain, sender.email,)
+
+		self.fields['subject'].initial = settings.EMAIL_SUBJECT_PREFIX
+		widgets = { 
+			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
+			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
+		}
 
 

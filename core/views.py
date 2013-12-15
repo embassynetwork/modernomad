@@ -10,7 +10,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from registration import signals
 import registration
-from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm
+from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, MessageCurrentPeopleForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
 import datetime
@@ -24,6 +24,8 @@ from core.tasks import send_guest_welcome
 import stripe
 import uuid, base64, os
 from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
+
 
 def logout(request):
 	logout(request)
@@ -377,6 +379,77 @@ def ReservationDelete(request, reservation_id):
 	else:
 		return HttpResponseRedirect("/")
 
+@login_required
+def PeopleDaterangeQuery(request):
+
+	start_str = request.POST.get('start_date')
+	end_str = request.POST.get('end_date')
+	s_month, s_day, s_year = start_str.split("/")
+	e_month, e_day, e_year = end_str.split("/")
+	start_date = datetime.date(int(s_year), int(s_month), int(s_day))
+	end_date = datetime.date(int(e_year), int(e_month), int(e_day))
+	reservations_for_daterange = Reservation.objects.filter(Q(status="confirmed")).exclude(depart__lt=start_date).exclude(arrive__gte=end_date)
+	recipients = []
+	for r in reservations_for_daterange:
+		recipients.append(r.user)
+	residents = User.objects.filter(groups__name='residents')
+	recipients = recipients + list(residents)
+	html = "<div class='btn btn-info disabled' id='recipient-list'>Your message will go to these people: "
+	for person in recipients:
+		info = "<a class='link-light-color' href='/people/" + person.username + "'>" + person.first_name + " " + person.last_name + "</a>, "
+		html += info;
+
+	html = html.strip(", ")
+	html += "</div>"
+	return HttpResponse(html)
+	
+
+@login_required
+def broadcast(request):
+	# the user must be authenticated because we have the @login_required
+	# decorator. 
+	sender = request.user 
+	print 'sender is ' + sender.username
+	if request.method == 'POST':
+		form = MessageCurrentPeopleForm(request.POST, sender=sender)
+		if form.is_valid():
+			# get current people for the specified dates (residents + guests)
+			# this is a waste since we already ueried the DB for the list of
+			# users when the dates were selected. ideally should pass along
+			# this info instead of re-querying. 
+			start_str = request.POST.get('start_date')
+			end_str = request.POST.get('end_date')
+			s_month, s_day, s_year = start_str.split("/")
+			e_month, e_day, e_year = end_str.split("/")
+			start_date = datetime.date(int(s_year), int(s_month), int(s_day))
+			end_date = datetime.date(int(e_year), int(e_month), int(e_day))
+
+			reservations_for_daterange = Reservation.objects.filter(Q(status="confirmed")).exclude(depart__lt=start_date).exclude(arrive__gte=end_date)
+
+			# Send email
+			recipients = []
+			for r in reservations_for_daterange:
+				recipients.append(r.user.email)
+			residents = User.objects.filter(groups__name='residents')
+			residents = list(residents)
+			for r in residents:
+				recipients.append(r.email)
+			text_content = request.POST.get('body') + "\n\n" + request.POST.get('footer')
+			subject = request.POST.get('subject') 
+			sender = sender.email
+			msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
+			msg.send()
+			messages.add_message(request, messages.INFO, 'Your message has been sent!')
+			return HttpResponseRedirect('/broadcast')
+
+		else:
+			print "form not valid"
+			print form.errors
+
+
+	else:
+		form = MessageCurrentPeopleForm(sender=sender)		
+	return render(request, "broadcast.html", {"form": form})
 
 # ******************************************************
 #           reservation management views
