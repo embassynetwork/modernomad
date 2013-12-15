@@ -1,9 +1,9 @@
-#!/bin/bash -x
+#!/bin/bash -ex
 
 apt-get install python-software-properties -y
 apt-get update -y
-apt-get upgrade -y 
-apt-get install git vim python-dev libjpeg8 libjpeg8-dev rabbitmq-server curl screen -y
+#apt-get upgrade -y 
+apt-get install git vim python-dev libjpeg8 libjpeg8-dev rabbitmq-server curl vim screen -y
 
 if [ -f /etc/init.d/nginx ]; then
   apt-get remove nginx
@@ -14,8 +14,8 @@ cd /tmp
 curl -O https://raw.github.com/pypa/pip/master/contrib/get-pip.py
 sudo python get-pip.py
 pip --version
-
 cd /vagrant/
+
 yes | pip install -r requirements.txt
 yes | pip install --index-url https://code.stripe.com --upgrade stripe
 
@@ -33,6 +33,6 @@ chmod +x /etc/init.d/celeryd
 update-rc.d celeryd defaults
 /etc/init.d/celeryd start
 
-./manage.py syncdb --noinput 
-./manage.py migrate --noinput 
-screen -dmS django ./manage.py runserver 80
+su vagrant -c "./manage.py syncdb --noinput"
+su vagrant -c "./manage.py migrate --noinput"
+su vagrant -c "screen -dmS django ./manage.py runserver 0.0.0.0:31337"
