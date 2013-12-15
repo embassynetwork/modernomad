@@ -6,7 +6,7 @@
 * ```cd modernomad```
 * vagrant up
 * wait a minute
-* Open http://localhost:31337
+* open http://localhost:31337
 
 ## OS X requirements
 
