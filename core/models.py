@@ -155,7 +155,7 @@ class ReservationManager(models.Manager):
 
 	def on_date(self, the_day, status):
 		# return the reservations that intersect this day, of any status
-		all_on_date = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gt = the_day)
+		all_on_date = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gt = the_day).filter(status='confirmed')
 		return all_on_date.filter(status=status)
 
 	def reserved_on_date(self, the_day):
@@ -168,7 +168,7 @@ class TodayManager(models.Manager):
 	def get_query_set(self):
 		# return the reservations that intersect today
 		today = datetime.date.today()
-		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today)
+		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today).filter(status='confirmed')
 
 class Reservation(models.Model):
 
