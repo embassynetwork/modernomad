@@ -181,7 +181,7 @@ span.highlight {
 }
 
 #list-signup-input {
-	background: #ea6f56;
+	background: rgba(234, 111, 86, 0.5);
 	padding: 10px 0 10px 8px;
 	border-top-left-radius: 4px;
 	border-bottom-left-radius: 4px;
@@ -196,6 +196,33 @@ span.highlight {
 	color:#fff;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
 	
+}
+
+#map-marker-h1-color, #map-marker-h1-dark {
+	margin: 0px;
+	font-size: 2em;
+}
+
+#map-marker-text {
+	font-size: 1.2em;
+	color: #AAA;
+	margin: 5px;
+}
+
+#map-marker-h1-color {
+	color: #ea6f56;
+}
+
+.leaflet-popup-pane {
+	z-index: 2 !important;
+}
+
+.leaflet-popup-tip {
+	display: none;
+}
+
+.leaflet-popup-content-wrapper {
+	border-radius: 0px !important;
 }
 
 .placeholder {
@@ -215,10 +242,30 @@ span.highlight {
 	
 }
 
+#content-container {
+	padding-bottom: 60px;
+}
+
 
 #reserve .btn {
 	background: #fff;
 	padding: 21px 0;
+}
+
+.btn-rouge {
+	background-color: #ea6f56;
+	border-color: #ea6f56;
+	color: #EEE;
+}
+
+.btn-dark {
+	background-color: #666;
+	border-color: #666;
+	color: #EEE;
+}
+
+.cell-breather {
+	padding-right: 25px;
 }
 
 .event {
@@ -343,21 +390,6 @@ span.highlight {
 	-webkit-border-radius: 7px 7px 7px 7px;
 }
 
-//.values:hover {
-//	background: rgba(219,219,219,1);
-//background: -moz-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(219,219,219,1)), color-stop(42%, rgba(246,246,246,1)), color-stop(100%, rgba(255,255,255,1)));
-//background: -webkit-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: -o-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: -ms-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: linear-gradient(to bottom, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dbdbdb', endColorstr='#ffffff', GradientType=0 );
-//-webkit-box-shadow: 0px -3px 5px 0px rgba(182,192,192,1);
-//-moz-box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
-//box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
-//}
-
-
 #eventsignup-response-fail {
 	text-align: center;
 	color: #bd362f;
@@ -455,11 +487,6 @@ span.highlight {
 .container {
 	width:100%;
 	padding:0 15px;
-}
-
-
-#container-main {
-	padding-bottom: 40px;
 }
 
 p { }
@@ -579,20 +606,10 @@ html, body {
 .btn-xlarge {
 }
 
-.hero-engage {
-}
-
-.hero-engage > .btn-xlarge {
-}
 
 .box-link {
 }
 
-.footer {
-}
-
-textarea {
-}
 
 .helptext {
 }
@@ -654,11 +671,6 @@ div.ui-datepicker{
 .field-wrapper {
 	width: 475px;
 	padding-bottom: 30px;
-}
-
-textarea {
-	width: 475px;
-	height: 120px;
 }
 
 .float-right {
@@ -897,12 +909,13 @@ textarea#id_comments, textarea#id_purpose {
 	margin-bottom: 0px;
 }
 
-.res-info-main {
-	width: 450px;
-}
-
 .res-field, .user-field, .res-action {
 	padding-bottom: 10px;
+}
+
+#reservation-nav {
+	margin-top: 30px;
+	margin-bottom: 30px;
 }
 
 .manage-sidebar {

@@ -2,131 +2,158 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-	<meta charset="utf-8">
-	<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
-	<!-- responsive support -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-	<meta name="author" content="Jessy Kate Schingler">
+	<head>
+		<meta charset="utf-8">
+		<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
+		<!-- responsive support -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
+		<!-- Le styles -->
+		<link href="/media/css/bootstrap.css" rel="stylesheet">
+		<link href="/media/css/custom.css" rel="stylesheet">
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+		<link href='https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC' rel='stylesheet' type='text/css'>
 
-	<!-- Le styles -->
-	<link href="/media/css/bootstrap.css" rel="stylesheet">
-	<link href="/media/css/custom.css" rel="stylesheet">
-	<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-	<!--[if lt IE 9]>
-	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-	<![endif]-->
+		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+		<!--[if lt IE 9]>
+		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
 
-	<!-- Le fav and touch icons -->
-	<link rel="shortcut icon" href="/ico/favicon.ico">
-	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
+		<!-- Le fav and touch icons -->
+		<link rel="shortcut icon" href="/ico/favicon.ico">
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
+		<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
 
-  </head>
+	</head>
 
-  <body>
+	<body>
 
-	<!-- Part 1: Wrap all page content here -->
-	{% block wrapper %}
-	<div id="wrap">
-	{% endblock %}
+		<!-- Part 1: Wrap all page content here -->
+		<div id="flyout">
+			<div id="embassy-logo-menu">
+				<img src="/media/img/embassy_logo.png"/>
+			</div>
+			<p class="easy-reading">Home is one of the few social institutions that remains largely untouched by new modes of interaction rooted in the sharing economy and open source philosophies.</p>
 
-	  <div class="navbar">
-		  <div class="navbar-inner">
-			  <div class="container">
-				  <a class="brand" href="/">Home</a>
-				  <ul data-spy="affix" data-offset-top="300" class="nav">
-						<li><a href="/about">Our House</a></li>
-						{% if user.is_authenticated %} <li><a href="/broadcast">Broadcast</a></li> {% endif %}
-						<li><a href="/stay">Stay</a></li>
-
-
-					  {% if user.is_authenticated %}
-						<li class="dropdown">
-							<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-								In The House <b class="caret"></b>
-							</a>
-							<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-								<li><a href="/calendar">Calendar</a></li>
-								<li><a href="/today">Today</a></li>
+			<p class="easy-reading">We see a nascent model of housing emerging in a new generation of community houses around the globe. It is a model based on intention, creativity, sharing, and travel. A network of houses, connected together by members who flow freely between locations.</p>
+			
+			<ul id="">
+				<li>
+					<h2>Embassy Beta</h2>
+					<span>San Francisco</span>
+				</li>
+				<li>
+					<h2>Basecamp</h2>
+					<span>San Francisco</span>
+				</li>
+			</ul>
+		</div><!-- end flyout -->
+		
+			<div id="header-wrap">
+				<div class="row">
+					<div class="col-md-10 col-centered">
+						<div class="col-md-9" id="house-title">
+							<h1>The Embassy <span class="highlight">San Francisco</span></h1>
+						</div>
+					
+						<div class="col-md-1" id="login">
+							{% if not user.is_authenticated %}
+								<a href="/people/login/">Login</a>
+							{% endif %}
+						</div>					
+					
+						<div class="col-md-2" id="embassy-logo">
+							<img src="/media/img/embassy_logo.png"/>
+						</div>
+					</div>
+				</div>
+				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
+				<div class="row">
+					<div class="col-md-11 col-md-offset-1">
+						<div class="navbar-header">
+							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							</button>
+							<a class="navbar-brand" href="/">Home</a>
+						</div>
+						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+							<ul class="nav navbar-nav">
+								<li><a href="/about">About</a></li>
+								<li><a href="/stay">Stay</a></li>
+								<li><a href="/events">Events</a></li>
+								{% if user.is_authenticated %}
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+											In The House <b class="caret"></b>
+										</a>
+										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+											<li><a href="/calendar">Calendar</a></li>
+											<li><a href="/today">Today</a></li>
+											<li><a href="/broadcast">Message the House</a></li>
+										</ul>
+									</li>
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
+											<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
+										</a>
+										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
+											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
+											<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
+											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
+										</ul>
+									</li>
+								{% endif %}
+								{% ifusergroup house_admin %}
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
+											Admin <b class="caret"></b>
+										</a>
+										<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
+											<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
+											<li><a tabindex="-1" href="/manage/reservations/">Reservations</a></li>
+										</ul>
+									</li>
+								{% endifusergroup %}
 							</ul>
-						</li>
-					  {% endif %}
-					  
-					  {% if user.is_authenticated %}
-						<li class="dropdown">
-							<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-								<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
-							</a>
-							<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-								<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
-								<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
-							</ul>
-						</li>
-					  {% else %}
-						<li><a href="/people/login"><i class="icon-user"></i> Login</a></li>
-					  {% endif %}
-
-					{% ifusergroup house_admin %}
-						<li class="dropdown">
-							<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
-								Admin <b class="caret"></b>
-							</a>
-							<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-								<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
-								<li><a tabindex="-1" href="/manage/reservations/">Reservations</a></li>
-							</ul>
-						</li>
-					{% endifusergroup %}
-				  </ul>
-			  </div>
-		  </div>
-	  </div>
-
+						</div>
+				</div>
+				</div>
+				</nav>
+			</div> <!-- end header wrap -->
 
 	<div class="container" id="container-main">
-	{% block body %}
-	{% endblock %}
+		{% block body %}
+		{% endblock %}
+	<div>
 
-	<div id="push"></div> <!-- #push goes inside container -->
-	</div> <!-- /container -->
-	</div> <!-- end #wrap -->
-	
-	<footer class="footer">
-		<div class="container">
-	{% block footer %}
-		<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-			<img alt="Creative Commons License" style="border-width:0"
-			src="/media/img/cc-by-nc-sa-80x15.png" /> </a> Embassy SF</span> | 
-			Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
-		</p>
-	{% endblock %}
-	</container>
-	</footer>
 	<!-- Le javascript -->
-	<script type="text/javascript">
-
-	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-29650505-1']);
-	  _gaq.push(['_trackPageview']);
-
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
-
-	</script>
-
 	<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
 	<script src="/media/js/jquery-1.8.2.js"></script>
 	<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
 	<script src="/media/js/bootstrap.js"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+
+	<!-- javascript for every page -->
+	<script type="text/javascript">
+
+		$('#embassy-logo').on( "mouseover",function(){
+			$('#flyout').animate({right:0})
+			$('.container').append("<div class='curtain'></div>");
+		});
+		
+		$('#flyout').on("mouseleave", function(){
+			$('#flyout').animate({right:-360});
+		});
+
+	</script>
+
 	{% block extrajs %}
 	{% endblock %}
+
   </body>
 </html>
 

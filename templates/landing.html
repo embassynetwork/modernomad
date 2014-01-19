@@ -1,165 +1,7 @@
-{% load core_tag_extras %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
-		<!-- responsive support -->
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-		<!-- Le styles -->
-		<link href="/media/css/bootstrap.css" rel="stylesheet">
-		<link href="/media/css/custom.css" rel="stylesheet">
-		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-		<link href='https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC' rel='stylesheet' type='text/css'>
+{% block body %}
 
-		<style type="text/css">
-
-			/* Main marketing message and sign up button */
-			.jumbotron {
-				margin: 60px 0;
-				text-align: center;
-				height: 235px;
-			}
-
-			.jumbotron h1 {
-				font-size: 72px;
-				line-height: 1;
-			}
-			.jumbotron .btn {
-				font-size: 21px;
-				padding: 14px 24px;
-			}
-
-			/* Supporting marketing content */
-			.marketing {
-				margin: 60px 0;
-			}
-			.marketing p + h4 {
-				margin-top: 28px;
-			}
-
-			.centered {
-				text-align: center;
-			}
-		</style>
-
-		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-		<!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-		<![endif]-->
-
-		<!-- Le fav and touch icons -->
-		<link rel="shortcut icon" href="/ico/favicon.ico">
-		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
-
-	</head>
-
-	<body>
-
-
-
-		<!-- Part 1: Wrap all page content here -->
-		<div id="flyout">
-			<div id="embassy-logo-menu">
-				<img src="/media/img/embassy_logo.png"/>
-			</div>
-			<p class="easy-reading">Home is one of the few social institutions that remains largely untouched by new modes of interaction rooted in the sharing economy and open source philosophies.</p>
-
-			<p class="easy-reading">We see a nascent model of housing emerging in a new generation of community houses around the globe. It is a model based on intention, creativity, sharing, and travel. A network of houses, connected together by members who flow freely between locations.</p>
-			
-			<ul id="">
-				<li>
-					<h2>Embassy Beta</h2>
-					<span>San Francisco</span>
-				</li>
-				<li>
-					<h2>Basecamp</h2>
-					<span>San Francisco</span>
-				</li>
-			</ul>
-		</div><!-- end flyout -->
-		
-		<div class="container">
-			
-			<div id="header-wrap">
-				<div class="row">
-					<div class="col-md-10 col-centered">
-						<div class="col-md-9" id="house-title">
-							<h1>The Embassy <span class="highlight">San Francisco</span></h1>
-						</div>
-					
-						<div class="col-md-1" id="login">
-							{% if not user.is_authenticated %}
-								<a href="/people/login/">Login</a>
-							{% endif %}
-						</div>					
-					
-						<div class="col-md-2" id="embassy-logo">
-							<img src="/media/img/embassy_logo.png"/>
-						</div>
-					</div>
-				</div>
-				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
-				<div class="row">
-					<div class="col-md-11 col-md-offset-1">
-						<div class="navbar-header">
-							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-							<span class="sr-only">Toggle navigation</span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							</button>
-							<a class="navbar-brand" href="/">Home</a>
-						</div>
-						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-							<ul class="nav navbar-nav">
-								<li><a href="/about">About</a></li>
-								<li><a href="/stay">Stay</a></li>
-								<li><a href="/events">Events</a></li>
-								{% if user.is_authenticated %}
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-											In The House <b class="caret"></b>
-										</a>
-										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-											<li><a href="/calendar">Calendar</a></li>
-											<li><a href="/today">Today</a></li>
-											<li><a href="/broadcast">Message the House</a></li>
-										</ul>
-									</li>
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-											<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
-										</a>
-										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-											<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
-											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
-										</ul>
-									</li>
-								{% endif %}
-								{% ifusergroup house_admin %}
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
-											Admin <b class="caret"></b>
-										</a>
-										<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-											<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
-											<li><a tabindex="-1" href="/manage/reservations/">Reservations</a></li>
-										</ul>
-									</li>
-								{% endifusergroup %}
-							</ul>
-						</div>
-				</div>
-				</div>
-				</nav>
-			</div> <!-- end header wrap -->
-		
 			<div id="homepage-wrap">
 
 				<div class="row" id="house">
@@ -263,19 +105,11 @@
 					<div id="location-map"></div>
 				</div>
 
-			</div> <!-- end wrap -->
+			</div> <!-- end homepage wrap -->
 
-			<!-- Le javascript -->
-			<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
-			<script src="/media/js/jquery-1.8.2.js"></script>
-			<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
-			<script src="/media/js/bootstrap.js"></script>
-			 <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
-			<script>
-				$('#eventsCarousel').carousel()
-			</script>
-			</div> <!-- end container-narrrow -->
+			{% endblock %}
 
+			<!-- ? extra div here? -->
 	{% block extrajs %}
 	<script language="JavaScript">
 	$(document).ready(function() {
@@ -318,9 +152,19 @@
 			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
 			maxZoom: 18
 		}).addTo(map);
-		var marker = L.marker([37.77397341544072, -122.42937415838243]).addTo(map);
-		marker.bindPopup("The Embassy San Francisco<br>399 Webster Street, Lower Haight, SF").openPopup();
-		
+		map.scrollWheelZoom.disable();
+		var RougeIcon = L.Icon.extend({
+			options: {
+				iconUrl: '/media/img/droplet.png',
+				iconSize: [100,170],
+				popupAnchor: [220,60]
+			}
+		});
+		var rougeIcon = new RougeIcon();
+		var marker = L.marker([37.77397341544072, -122.42937415838243], {icon: rougeIcon}).addTo(map);
+		var popup = L.popup({closeButton: false});
+		popup.setContent('<h1 id="map-marker-h1-dark">The Embassy</h1><h1 id="map-marker-h1-color">San Francisco</h1><p id="map-marker-text">399 Webster Street, Lower Haight, SF</p>');
+		marker.bindPopup(popup).openPopup();
 		
 
 	});

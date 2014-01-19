@@ -1,6 +1,6 @@
-{% extends "main.html" %}
+{% extends "content-base.html" %}
 
-{% block main %}
+{% block content %}
 
 {% comment %} shown only when a background request is being made {% endcomment %}
 <div id="spinner">
@@ -21,7 +21,7 @@
 	<h4>New reservation request</h4>
 	<p>We'll get back to you shortly - usually within a day or two.  </p>
 
-	<div class="form-container">
+	<div class="form-container col-md-9">
 		<form class="well form-inline" method="post" action="/reservation/create/">{% csrf_token %}
 
 			<p>Select arrival and departure dates to show known availability.</p> 
@@ -136,9 +136,11 @@
 			console.log("form is ready to submit!")
 			$("#submit-reservation").prop("disabled", false);
 			$("#submit-reservation").removeClass("disabled")
+			$("#submit-reservation").addClass("btn-success")
 		} else {
 			$("#submit-reservation").prop("disabled", true);
 			$("#submit-reservation").addClass("disabled")
+			$("#submit-reservation").removeClass("btn-success")
 		}
 	});
 
