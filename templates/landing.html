@@ -52,29 +52,26 @@
 					
 				<!-- events section! -->
 
-				<div class="row" id="landing-page-more-info">
+				<div class="row" id="landing-page-event-info">
 					<div class="col-md-10 col-centered">
 						<div class="col-md-6" id="events">
-							<h2 class="">What are we doing?</h2>
-							<div class="col-md-12 event">
-								<div class="col-md-1 date"><span class="day">11</span>July</div>
-								<div class="col-md-11"><h3 class="event-title">How to change the world in no easy steps:
-								</br>Embassy Thursday Salon Series #20</h3>
-								<img src="/media/img/event_pic.png"/>
+							<h2 class="">What are we up to?</h2>
+
+							{% for event in events %}
+								<div class="col-md-12 event">
+									<div class="col-md-1 date"><span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}</div>
+									<div class="col-md-11">
+										<a href="/events/{{event.id}}">
+											<h3 class="event-title">{{ event.title}}</h3>
+											{% if forloop.first %}
+												<img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
+											{% endif %}
+										</a>
+									</div>
 								</div>
-							</div>
-							
-							<div class="col-md-12 event">
-								<div class="col-md-1 date"><span class="day">11</span>July</div>
-								<div class="col-md-11"><h3 class="event-title">How to change the world in no easy steps:
-								</br>Embassy Thursday Salon Series #20</h3></div>
-							</div>
-							
-							<div class="col-md-12 event">
-								<div class="col-md-1 date"><span class="day">11</span>July</div>
-								<div class="col-md-11"><h3 class="event-title">How to change the world in no easy steps:
-								</br>Embassy Thursday Salon Series #20</h3></div>
-							</div>
+							{% endfor %}
+
+							<h3 id="more-events-link" class="pull-right"><a href="/events/">See All Upcoming</a></h3>
 						</div>
 						
 				<!-- People Section! -->

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from core.models import Reservation, UserProfile, Reconcile
+from gather.models import Event
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
@@ -42,17 +43,7 @@ def index(request):
 		if r not in coming_month:
 			coming_month.append(r)
 
-	# get any events
-	eb_auth_tokens = {
-			'app_key':  settings.EVENTBRITE_APP_KEY, 
-			'user_key': settings.EVENTBRITE_USER_KEY
-		}
-	try:
-		eb_client = eventbrite.EventbriteClient(eb_auth_tokens)
-		response = eb_client.user_list_events({'event_statuses':'live,started'})
-		events = response['events']
-	except:
-		events = None
+	events = Event.objects.upcoming(upto=5)
 
 	return render(request, "landing.html", {'coming_month': coming_month, 'events': events})
 

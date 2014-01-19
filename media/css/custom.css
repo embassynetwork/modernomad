@@ -65,7 +65,7 @@ span.highlight {
 	z-index: -1;
 }
 
-#landing-page-more-info {
+#landing-page-event-info {
 	padding-top: 50px;
 }
 
@@ -1084,3 +1084,23 @@ div#spinner
 	margin-top: 10px;
 	margin-bottom: 20px;
 }
+
+.event-preview-img-thumb {
+	width: 320px;
+	height: 200px;
+}
+
+.event a, #more-events-link a {
+	color: inherit;
+}
+
+.event a:hover {
+	color:#ea6f56;
+	text-decoration: none;
+}
+
+#more-events-link a:hover {
+	color:#ea6f56;
+	text-decoration: none;
+}
+
