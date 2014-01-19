@@ -1,12 +1,77 @@
 /* ==========================================================
+==========================[Typography]==========================
+========================================================== */
+@font-face {
+	font-family:'Archer Bold';
+	src:url('/media/fonts/Archer-Semibold-Pro.otf');
+}
+
+@font-face {
+	font-family:'Archer Italic';
+	src:url('/media/fonts/Archer-BoldItal-Pro.otf');
+}
+
+body {
+	font-family:'Arial', sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Archer Bold', sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+.fancy-header {
+	//font-family:'Archer Bold', serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* increases line spacing for text that is too tight */
+.easy-reading {
+	line-height:2em;
+}
+
+span.highlight {
+	color:#ea6f56;
+}
+
+
+/* ==========================================================
 ==========================[NAVIGATION]=======================
 ========================================================== */
 
 /* ======================[Global Navigation]================= */
 
-h1, h2, h3, h4, h5, h6 {
-	font-family: 'IM Fell French Canon SC', serif;
+#flyout {
+	width:360px;
+	height:100%;
+	background:#252525;
+	position:fixed;
+	top:0;
+	right:-360px;
+	z-index:999;
+	padding:48px;
+	color:rgba(255,255,255,0.7);
+	box-shadow: -0px 0px 10px rgba(0,0,0,0.8);
 }
+
+.curtain {
+	position: fixed;
+	top: 0;
+	left: 0;
+	background: rgba(255,255,255,0.8);
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+}
+
+#landing-page-more-info {
+	padding-top: 50px;
+}
+
+/* ======================[Global Navigation]================= */
+
+
 
 .top-nav {
    float:left;
@@ -42,8 +107,195 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ====================== Home Page ================= */
 
+#nav-primary {
+	margin-bottom: 0px;
+	margin-top: 20px;
+	background-color: transparent;
+	border-radius: 0px;
+	/* this cancels out the default boostrap border style */
+	border-left: none;
+	border-bottom: none;
+	border-right: none;
+}
+
+#login {
+	padding:32px 0;
+	border-right:1px solid rgba(0,0,0,0.1);
+	font-family:"Archer Bold";
+}
+
+#login a {
+	color:rgba(0,0,0,0.3);
+	font-size:1.3em;
+}
+
+#embassy-logo img {
+	float:right;
+	padding-top:17px;
+}
+
+#homepage-wrap {
+}
+
+#house {
+	background:#2f2f2f;
+	color:#fff;
+	height:223px;
+}
+
+#house-image {
+	background:url('/media/img/house_pic.png') no-repeat;
+	background-size:cover;
+	height:223px;
+	padding:0;
+	
+}
+
+#house-desc {
+	
+}
+
+#house-name-title {
+
+}
+
+#actions {
+	background:#ea6f56;
+	padding:30px 0 30px 0;
+	color:#FFF;
+}
+
+#participate, #reserve {
+	padding:0 70px;
+}
+
+#participate {
+	border-right:1px solid rgba(255,255,255,0.3);
+}
+
+#eventlist-signup-wrapper {
+	background: #fff;
+	border-radius: 4px;
+	margin:0;
+	padding:3px 0 0 3px;
+}
+
+#list-signup-input {
+	background: rgba(234, 111, 86, 0.5);
+	padding: 10px 0 10px 8px;
+	border-top-left-radius: 4px;
+	border-bottom-left-radius: 4px;
+	border:none;
+	height: 67px;
+	color:rgba(255,255,255,0.8);
+	font-size:0.6em;
+
+}
+
+#list-signup-input:focus {
+	color:#fff;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
+	
+}
+
+#map-marker-h1-color, #map-marker-h1-dark {
+	margin: 0px;
+	font-size: 2em;
+}
+
+#map-marker-text {
+	font-size: 1.2em;
+	color: #AAA;
+	margin: 5px;
+}
+
+#map-marker-h1-color {
+	color: #ea6f56;
+}
+
+.leaflet-popup-pane {
+	z-index: 2 !important;
+}
+
+.leaflet-popup-tip {
+	display: none;
+}
+
+.leaflet-popup-content-wrapper {
+	border-radius: 0px !important;
+}
+
+.placeholder {
+	color:rgba(255,255,255,0.3);
+	
+}
+
+.btn {
+	font-family:'Archer Bold';
+	color:#000;
+}
+
+#eventlist-signup-wrapper .btn {
+	background:#fff;
+	padding:0;
+	height:70px;
+	
+}
+
+#content-container {
+	padding-bottom: 60px;
+}
+
+
+#reserve .btn {
+	background: #fff;
+	padding: 21px 0;
+}
+
+.btn-rouge {
+	background-color: #ea6f56;
+	border-color: #ea6f56;
+	color: #EEE;
+}
+
+.btn-dark {
+	background-color: #666;
+	border-color: #666;
+	color: #EEE;
+}
+
+.cell-breather {
+	padding-right: 25px;
+}
+
+.event {
+	padding: 8px 0;
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.event:hover, .event:hover .date {
+	color:#ea6f56;
+}
+
+.event .date {
+	text-align: center;
+	padding: 0;
+	font-size: 24px;
+	font-family: "Archer Bold";
+	color:rgba(0,0,0,0.3);
+	
+}
+
+.event .date span {
+	font-size: 50px;
+	font-family: "Archer Bold";
+	display: block;
+	line-height: 50px;
+	text-align: center;
+}
+
 .event-image {
-	height: 200px;
+	height: 200px;h
 	float: left;
 
 }
@@ -55,29 +307,9 @@ h1, h2, h3, h4, h5, h6 {
 	text-align: right;
 }
 
-hr.style-one {
-    border: 0;
-    height: 2px;
-    background: #333;
-    box-shadow: 0 0 20px 2px #AAA;
-    background-image: -webkit-linear-gradient(left, #ccc, #999, #ccc); 
-    background-image:    -moz-linear-gradient(left, #ccc, #999, #ccc); 
-    background-image:     -ms-linear-gradient(left, #ccc, #999, #ccc); 
-    background-image:      -o-linear-gradient(left, #ccc, #999, #ccc); 
-}
 
-hr.style-two {
-    border: 0;
-    height: 1px;
-    background-image: -webkit-linear-gradient(left, #ccc, #333, #ccc); 
-    background-image:    -moz-linear-gradient(left, #ccc, #333, #ccc); 
-    background-image:     -ms-linear-gradient(left, #ccc, #333, #ccc); 
-    background-image:      -o-linear-gradient(left, #ccc, #333, #ccc); 
-}
-
-.carousel-slide-wrapper {
-	width: 860px;
-	margin: auto;
+.profiles {
+	padding-left: 16px;
 }
 
 
@@ -89,9 +321,10 @@ hr.style-two {
 	color: #fff;
 	overflow: hidden;
 	padding: 5px;
-	height: 160px;
+	height: 170px;
 	visibility: hidden;
 	opacity: 0;
+	z-index:1000;
 }
 
 .homepage-user-descr:hover {
@@ -101,6 +334,8 @@ hr.style-two {
 
 .homepage-user-wrapper {
 	position: relative;
+	margin-right: 16px;
+	margin-bottom: 16px;
 }
 
 .homepage-user-text {
@@ -121,6 +356,11 @@ hr.style-two {
 .homepage-user-wrapper:hover .homepage-user-link {
 	visibility: visible;
 	opacity: 1;
+}
+
+#location-map {
+	height: 250px;
+	margin-top: 50px;
 }
 
 .super-size {
@@ -150,30 +390,6 @@ hr.style-two {
 	-webkit-border-radius: 7px 7px 7px 7px;
 }
 
-//.values:hover {
-//	background: rgba(219,219,219,1);
-//background: -moz-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(219,219,219,1)), color-stop(42%, rgba(246,246,246,1)), color-stop(100%, rgba(255,255,255,1)));
-//background: -webkit-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: -o-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: -ms-linear-gradient(top, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//background: linear-gradient(to bottom, rgba(219,219,219,1) 0%, rgba(246,246,246,1) 42%, rgba(255,255,255,1) 100%);
-//filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dbdbdb', endColorstr='#ffffff', GradientType=0 );
-//-webkit-box-shadow: 0px -3px 5px 0px rgba(182,192,192,1);
-//-moz-box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
-//box-shadow: 0px -3px 5px 0px rgba(192,192,192,1);
-//}
-
-#house-name-title {
-	font-family: 'IM Fell French Canon SC', serif;
-	font-size: 60px;
-	line-height: 75px;
-}
-
-#eventlist-signup {
-	margin-top: 10px;
-}
-
 #eventsignup-response-fail {
 	text-align: center;
 	color: #bd362f;
@@ -197,11 +413,7 @@ hr.style-two {
 	height: 170px;
 }
 
-#homepage-wrap {
-	// fixed width landing page
-	width: 1170px;
-	margin: auto;
-}
+
 
 .homepage-profile-img {
 	width: 170px;
@@ -272,10 +484,9 @@ hr.style-two {
 ==========================[GENERAL]==========================
 ========================================================== */
 
-
-
-#container-main {
-	padding-bottom: 40px;
+.container {
+	width:100%;
+	padding:0 15px;
 }
 
 p { }
@@ -283,6 +494,14 @@ p { }
 html, body {
 	height: 100%;
 	/* The html and body elements cannot have any padding or margin. */
+}
+
+
+/* Class for centering columns. Add to column class eg. class='col-md-1 col-centered' */
+
+.col-centered{
+    float: none;
+    margin: 0 auto;
 }
 
 /* Wrapper for page content to push down footer */
@@ -387,20 +606,10 @@ html, body {
 .btn-xlarge {
 }
 
-.hero-engage {
-}
-
-.hero-engage > .btn-xlarge {
-}
 
 .box-link {
 }
 
-.footer {
-}
-
-textarea {
-}
 
 .helptext {
 }
@@ -462,11 +671,6 @@ div.ui-datepicker{
 .field-wrapper {
 	width: 475px;
 	padding-bottom: 30px;
-}
-
-textarea {
-	width: 475px;
-	height: 120px;
 }
 
 .float-right {
@@ -705,12 +909,13 @@ textarea#id_comments, textarea#id_purpose {
 	margin-bottom: 0px;
 }
 
-.res-info-main {
-	width: 450px;
-}
-
 .res-field, .user-field, .res-action {
 	padding-bottom: 10px;
+}
+
+#reservation-nav {
+	margin-top: 30px;
+	margin-bottom: 30px;
 }
 
 .manage-sidebar {

@@ -1,5 +1,5 @@
-{% extends "main.html" %}
-{% block main %}
+{% extends "content-base.html" %}
+{% block content %}
 
 <h2>Short-Term Accommodations</h2>
 <p>Guests are a cornerstone of our house and we love having new (and familiar) people stay with us. This isn’t your typical B&B – it’s more of an adopted family. We’re working on the hypothesis that <b>density breeds ideas and collaborations</b>, and that’s a big part of what we hope to foster here.</p>
@@ -16,7 +16,9 @@
 <p>Finally, <b>one of our most important traditions is Sunday night dinner:</b> our weekly community meal with new and familiar faces, boisterous conversation, many helping hands, and most importantly, our way to say Thanks to all the amazing people we know. It’s a time for the “in-between” time, when there’s no set topic or purpose except sharing space with other interesting folks. <b>If it’s at all possible for you to attend, we strongly encourage you to do so</b> (and will make sad faces if you don’t).</p>
  
 <div class="button-spacer">
-<a class="btn btn-large btn-block btn-success" type="button" {% if user.is_authenticated %} href="/reservation/create/" {%else %} href="/people/register?next=/reservation/create/"{%endif%}>Fill out an Application Form</a>
+	<div class="col-md-4 col-md-offset-4">
+		<a class="btn btn-lg btn-rouge" type="button" {% if user.is_authenticated %} href="/reservation/create/" {%else %} href="/people/register?next=/reservation/create/"{%endif%}>Fill out an Application Form</a>
+	</div>
 </div>
 {% endblock %}
 

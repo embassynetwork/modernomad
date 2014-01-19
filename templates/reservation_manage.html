@@ -1,18 +1,21 @@
-{% extends "main.html" %}
+{% extends "content-base.html" %}
 
-{% block main %}
+{% block content %}
 
 <div id="spinner">
     <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
 </div>	
 
-<a href="/manage/reservations/"><i class="icon-arrow-left"></i> Back to reservations</a>
+<div class="row" id="reservation-nav">
+	<a href="/manage/reservations/"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
+</div>
 
 {% if r.status = 'canceled' %}
 <div class="greyed-out">
 {% endif %}
 
-<div class="float-right manage-sidebar">
+<div class="row">
+<div class="col-md-3">
 	{% if r.user.profile.image %}
 	<div class="img-polaroid">
 		<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.user.profile.image|default:'data/avatars/default.jpg' }}" />
@@ -51,7 +54,7 @@
 </div>
 
 
-<div class="res-info-main">
+<div class="col-md-7">
 
 	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
 
@@ -122,6 +125,7 @@
 	{% endwith %}
 
 </div> <!-- end res-info-main -->
+</div> 
 
 {% if r.status = 'canceled' %}
 </div>

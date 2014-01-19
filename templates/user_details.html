@@ -1,8 +1,5 @@
-{% extends "main.html" %}
-
-{% load core_tag_extras %}
-
-{% block main %}
+{% extends "content-base.html" %}
+{% block content %}
 
 {% if messages %}
 <div class="messages">
@@ -24,7 +21,7 @@
 
 {% ifequal u user %}
 	<div id="edit-profile">
-		<a class="btn btn-inverse btn-small" href="/people/{{user.username}}/edit/">Edit Profile</a>
+		<a class="btn btn-dark btn-small" href="/people/{{user.username}}/edit/">Edit Profile</a>
 		{% if user.profile.customer_id %}
 		<form class="userprofile-card-form" method="post" action="/people/{{user.username}}/deletecard/">{% csrf_token %}
 			<input type="submit" class="btn btn-danger btn-small" value="Delete my saved credit card">

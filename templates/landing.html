@@ -1,261 +1,115 @@
-{% load core_tag_extras %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
-		<!-- responsive support -->
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-		<meta name="author" content="Jessy Kate Schingler">
-		<!-- Le styles -->
-		<link href="/media/css/bootstrap.css" rel="stylesheet">
-		<link href="/media/css/custom.css" rel="stylesheet">
-		<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
-		<link href='https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC' rel='stylesheet' type='text/css'>
-
-		<style type="text/css">
-
-			/* Main marketing message and sign up button */
-			.jumbotron {
-				margin: 60px 0;
-				text-align: center;
-				height: 235px;
-			}
-
-			.jumbotron h1 {
-				font-size: 72px;
-				line-height: 1;
-			}
-			.jumbotron .btn {
-				font-size: 21px;
-				padding: 14px 24px;
-			}
-
-			/* Supporting marketing content */
-			.marketing {
-				margin: 60px 0;
-			}
-			.marketing p + h4 {
-				margin-top: 28px;
-			}
-
-			.centered {
-				text-align: center;
-			}
-		</style>
-
-		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-		<!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-		<![endif]-->
-
-		<!-- Le fav and touch icons -->
-		<link rel="shortcut icon" href="/ico/favicon.ico">
-		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
-
-	</head>
-
-	<body>
-
-
-				<div class="homepage-header-img">
-					<img class="homepage-header-img" src="/media/img/embassy-collage-filter.png">
-				</div>
-
-		<!-- Part 1: Wrap all page content here -->
-		<div class="container">
+{% block body %}
 
 			<div id="homepage-wrap">
 
-				<div class="row-fluid marketing" id="house">
-
-					<h1 id="house-name-title" class="centered large">The Embassy San Francisco</h1>
-					<p class="lead">The Embassy San
-					Francisco is our experiment in creating a home built around
-					purpose and intention. We value curiosity, analysis,
-					questioning, and engagement. This is not a house for
-					by-standers! If you like to jump in and be part of the
-					fray, we think you'll like it here.</p>
-				</div>
-
-				<hr class="style-one">
-
-				<div class="row-fluid marketing" id="participate">
-					<div class="span4">
-						<h3 class="centered super-size">Participate</h3>
-						<p class="lead">We host a salon series on most Thursdays, and a
-						community dinner every Sunday. We've got a Maker Monday
-						series that's currently happening once a month, and
-						various one-off events. Hear about upcoming events on
-						our mailing list!</p> 
-						<div id="eventlist-signup-wrapper">
-						<form id="eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
-							<input name="email" id="list-signup-input" placeholder=" Email...">
-							<input type="submit" class="btn-large-text btn btn-large" id="list-signup-submit" value="Sign Me Up!" />
-						</form>
-						</div>
-
-					</div>
-					<div class="span4">
-						<h3 class="centered super-size">Stay with Us</h3>
-						<p class="lead">Guests are a cornerstone of our house.
-						Part of our experiment here is seeking out those who
-						are traveling the world for curiosity, passion, and
-						collaboration, and welcoming them into our home. 
-						Would you like to become a member of our global family?</p>
-						<a href="/stay" class="btn btn-large btn-block btn-large-text">Submit a Reservation Request</a>
-					</div>
-					<div class="span4">
-						<h3 class="centered super-size">Host</h3>
-						<p class="lead">We encourage our community to make use
-						of the house for events that advance or suppport
-						curiosity and learning. If you're looking for somewhere
-						to host a salon, hackathon, cooking lesson, art show,
-						research group, or clown training, please get in touch.
-						</p>
-						<a href="mailto:events@embassynetwork.com" class="btn btn-large btn-block btn-large-text">I Have An Idea</a>
-					</div>
-				</div>
-
-				<hr>
-
-				<!-- events section! -->
-
-				{% if events %}
-
-				<div class="row-fluid marketing" id="events">
-					<div id="eventsCarousel" data-pause="hover" class="carousel slide">
-					<!-- Carousel items -->
-					<div class="carousel-inner">
-					<div class="carousel-slide-wrapper">
-					{% for event in events %}
-						<div class="item {% if forloop.first %} active {% endif %} ">
-							<img src="{{ event.event.logo }}" class="event-image pull-left"> 
-							<div class="event-description">
-								<h2>{{ event.event.title }}</h2>
-								<p>{{ event.event.start_date }} - {{ event.event.end_date }}</p>
-								<p>{{ event.event.description|safe|truncatewords_html:50 }}</p>
+				<div class="row" id="house">
+					<div class="col-md-12">
+						<div class="col-md-10 col-centered">
+							<div class="col-md-8" id="house-image">
 							</div>
-							<h3 class="centered"><a href="{{ event.event.url }}">Read more and RSVP</a></h3>
+							<div class="col-md-4" id="house-desc">
+								<h2 id="house-name-title" class="">The House</h2>
+								<p class="easy-reading">The Embassy San Francisco is our experiment 
+									in creating a home built around purpose and intention. We value 
+									curiosity, analysis, questioning, and engagement. This is not a house for by-standers!</p>
+							</div>
 						</div>
-					{% endfor %}
 					</div>
-
-					</div> <!-- end carousel inner -->
-
-				<!-- Carousel nav -->
-				<a class="carousel-control left" href="#eventsCarousel" data-slide="prev">&lsaquo;</a>
-				<a class="carousel-control right" href="#eventsCarousel" data-slide="next">&rsaquo;</a>
-				</div>	
 				</div>
-
-				<hr>
-
-				{% endif %} {% comment %} endif for events section {% endcomment %}
-
-				<!-- People Section! -->
-
-				{% for subset in coming_month|subsets_size:6 %}
-					<div class="row-fluid profiles" id="events">
-
-						{% for person in subset %}
-
-							<div class="span2">
-								<div class="float-left homepage-user-wrapper">			
-									<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
-									<div class="homepage-user-descr" id="user-{{person.id}}">
-										<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:60 }}</p>
-										... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
-									</div>
+				
+				<div class="row" id="actions">
+					<div class="col-md-12">
+						<div class="col-md-10 col-centered">
+							<div class="col-md-6" id="participate">
+								<h2 class="fancy-header">When can I come over?</h3>
+								<p class="easy-reading">We host salons and
+								community dinners with high frequency. We
+								also offers lessons, workshops and various
+								one-off events. Hear about upcoming events on
+								our mailing list!</p> 
+								<div class="col-md-12" id="eventlist-signup-wrapper">
+									<form id="eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
+										<input name="email" class="col-md-7" id="list-signup-input" placeholder="Enter email">
+										<input type="submit" class="btn-large-text btn btn-large col-md-5" id="list-signup-submit" value="Sign Me Up!" />
+									</form>
 								</div>
 							</div>
-
-						{% endfor %}<!-- end person in subset -->
-					</div>
-				{% endfor %}<!-- end subsets in coming_month -->
-
-				<hr>
-
-				<div class="row-fluid marketing">
-					<div class="span3 values">
-						<h4 class="centered lead">Density <i class="icon-arrow-right"></i> Ideas +<br>Collaboration</h4>
-						A community of creatives and professionals sharing space in informal ways.  Opportunities for
-						organic and emergent discussions and collaborations.
-						We're suckers for serendipity.
-					</div>
-					<div class="span3 values">
-						<h4 class="centered lead">Action</h4>
-						We build community through doing stuff together! We
-						share food, space and ideas. Think cooking and
-						coworking but also reading clubs, art projects, skill
-						shares, or just watching a movie. We open our doors
-						frequently; we often try new approaches to organizing
-						ourselves.  
-					</div>
-					<div class="span3 values">
-						<h4 class="centered lead">Focus</h4>
-						We often
-						work long hours. Our work may spill into home, but
-						usually on purpose and with joy. We strive to do what
-						we love.  Daytimes at the house are more downbeat, and
-						evenings often involve impromptu meals and wide ranging
-						discussions. 
-					</div>
-					<div class="span3 values">
-						<h4 class="centered lead">Part of Something Bigger</h4>
-						The <a href="http://embassynetwork.com">Embassy
-							Network</a> is a new generation of residential
-						spaces around the globe, rooted in intention,
-						collaboration, and a modern nomadic disposition.  In
-						the Embassy Network, members find a global family of
-						travelers and seekers, and a place to call home as we
-						travel for work and collaborations. 
-					</div>
-				</div>
-
-				<hr>
-
-
-				<div class="row-fluid marketing" id="location">
-					<iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278" style="color:#0000FF;text-align:left">View Larger Map</a></small>
-				</div>
-				<!-- map -->
-				<!-- participate -->
-				<!-- footer info -->
-
-			</div> <!-- end wrap -->
-				<footer class="footer">
-					{% block footer %}
-					<div class="embassy-footer">
-						<img src="/media/img/en-logo-transparent.png" class="footer-logo">
-						<div class="embassy-footer-text">
-							<p><em>Hacking Home!</em>
-								Embassies of<br>collaboration, creativity and<br>learning.
-							</p>
-							<p>About EN | Other Locations </p>
-							<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-								<img alt="Creative Commons License" style="border-width:0"
-								src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a></span> 
-								Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
-							</p>
+							
+							<div class="col-md-6" id="reserve">
+								<h2 class="fancy-header">I'm Interested in the Residence</h3>
+								<p class="easy-reading">Travel and always be at Home. The Embassy Network
+								offers long- and short-term accommodations for
+								modern nomads and creatives who travel the
+								world for work, projects and collaborations. 
+								</p>
+								<a href="/stay" class="btn btn-large btn-block btn-large-text">Learn More & Make a Reservation</a>
+							</div>
 						</div>
 					</div>
-					<div class="clear"></div>
-					{% endblock %}
-					</footer>
-					<!-- Le javascript -->
-					<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
-					<script src="/media/js/jquery-1.8.2.js"></script>
-					<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
-					<script src="/media/js/bootstrap.js"></script>
-					<script>
-						$('#eventsCarousel').carousel()
-					</script>
-			</div> <!-- end container-narrrow -->
+				</div>
+					
+				<!-- events section! -->
+
+				<div class="row" id="landing-page-more-info">
+					<div class="col-md-10 col-centered">
+						<div class="col-md-6" id="events">
+							<h2 class="">What are we doing?</h2>
+							<div class="col-md-12 event">
+								<div class="col-md-1 date"><span class="day">11</span>July</div>
+								<div class="col-md-11"><h3 class="event-title">How to change the world in no easy steps:
+								</br>Embassy Thursday Salon Series #20</h3>
+								<img src="/media/img/event_pic.png"/>
+								</div>
+							</div>
+							
+							<div class="col-md-12 event">
+								<div class="col-md-1 date"><span class="day">11</span>July</div>
+								<div class="col-md-11"><h3 class="event-title">How to change the world in no easy steps:
+								</br>Embassy Thursday Salon Series #20</h3></div>
+							</div>
+							
+							<div class="col-md-12 event">
+								<div class="col-md-1 date"><span class="day">11</span>July</div>
+								<div class="col-md-11"><h3 class="event-title">How to change the world in no easy steps:
+								</br>Embassy Thursday Salon Series #20</h3></div>
+							</div>
+						</div>
+						
+				<!-- People Section! -->
+						<div class="col-md-6" id="profiles">
+							<h2 class="">Our Community</h2>
+							<div class="row profiles">
+								
+									{% for person in coming_month %}
+										<div class="float-left homepage-user-wrapper">			
+											<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+											<div class="homepage-user-descr" id="user-{{person.id}}">
+												<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
+												... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
+											</div>
+										</div>
+									{% endfor %}
+
+								<!-- end person in subset -->
+								
+							</div>
+						</div>
+					</div>
+				</div>
+
+				</div>
+
+				<div class="row" id="location">
+					<div id="location-map"></div>
+				</div>
+
+			</div> <!-- end homepage wrap -->
+
+			{% endblock %}
+
+			<!-- ? extra div here? -->
 
 	{% block extrajs %}
 	<script language="JavaScript">
@@ -284,8 +138,30 @@
 
 			return false;
 		});
+		
+		var map = L.map('location-map').setView([37.77397341544072, -122.42937415838243], 15);
+		L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+			maxZoom: 18
+		}).addTo(map);
+		map.scrollWheelZoom.disable();
+		var RougeIcon = L.Icon.extend({
+			options: {
+				iconUrl: '/media/img/droplet.png',
+				iconSize: [100,170],
+				popupAnchor: [220,60]
+			}
+		});
+		var rougeIcon = new RougeIcon();
+		var marker = L.marker([37.77397341544072, -122.42937415838243], {icon: rougeIcon}).addTo(map);
+		var popup = L.popup({closeButton: false});
+		popup.setContent('<h1 id="map-marker-h1-dark">The Embassy</h1><h1 id="map-marker-h1-color">San Francisco</h1><p id="map-marker-text">399 Webster Street, Lower Haight, SF</p>');
+		marker.bindPopup(popup).openPopup();
+		
 
 	});
+	
+
 	</script>
 	{% endblock %}
 

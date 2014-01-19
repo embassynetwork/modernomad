@@ -1,4 +1,4 @@
-<p>Select a Room for Details</p>
+<p class="lead">... Now select a room for details</p>
 <table id="rooms-available-calendar">
 	<tr>
 	<th>Room</th>
@@ -9,9 +9,9 @@
 
 	{% for room_obj, days_list in avail.items %}
 	<tr>
-		<td> 
+		<td class="cell-breather"> 
 		{% if room_obj in free_rooms %}
-			<label for="select-room-{{room_obj.id}}" id="label-room-{{room_obj.id}}" class="btn room-select">{{room_obj.name}}</label>
+			<label for="select-room-{{room_obj.id}}" id="label-room-{{room_obj.id}}" class="btn btn-default room-select">{{room_obj.name}}</label>
 			<input type="radio" name="room" id="select-room-{{room_obj.id}}" value="{{room_obj.id}}">
 		{% else %}
 			<div class="btn disabled">
