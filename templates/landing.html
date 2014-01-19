@@ -110,6 +110,7 @@
 			{% endblock %}
 
 			<!-- ? extra div here? -->
+
 	{% block extrajs %}
 	<script language="JavaScript">
 	$(document).ready(function() {
@@ -138,15 +139,6 @@
 			return false;
 		});
 		
-		$('#embassy-logo').on( "mouseover",function(){
-			$('#flyout').animate({right:0})
-			$('.container').append("<div class='curtain'></div>");
-		});
-		
-		$('#flyout').on("mouseleave", function(){
-			$('#flyout').animate({right:-360});
-		});
-
 		var map = L.map('location-map').setView([37.77397341544072, -122.42937415838243], 15);
 		L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
 			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
