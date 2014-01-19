@@ -8,11 +8,10 @@
 		<!-- responsive support -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-		<meta name="author" content="Jessy Kate Schingler">
 		<!-- Le styles -->
 		<link href="/media/css/bootstrap.css" rel="stylesheet">
 		<link href="/media/css/custom.css" rel="stylesheet">
-		<link href="/media/css/bootstrap-responsive.css" rel="stylesheet">
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
 		<link href='https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC' rel='stylesheet' type='text/css'>
 
 		<style type="text/css">
@@ -82,7 +81,7 @@
 					<span>San Francisco</span>
 				</li>
 			</ul>
-		</div>
+		</div><!-- end flyout -->
 		
 		<div class="container">
 			
@@ -94,7 +93,9 @@
 						</div>
 					
 						<div class="col-md-1" id="login">
-							<a href="#">Login</a>
+							{% if not user.is_authenticated %}
+								<a href="/people/login/">Login</a>
+							{% endif %}
 						</div>					
 					
 						<div class="col-md-2" id="embassy-logo">
@@ -102,6 +103,61 @@
 						</div>
 					</div>
 				</div>
+				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
+				<div class="row">
+					<div class="col-md-11 col-md-offset-1">
+						<div class="navbar-header">
+							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							</button>
+							<a class="navbar-brand" href="/">Home</a>
+						</div>
+						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+							<ul class="nav navbar-nav">
+								<li><a href="/about">About</a></li>
+								<li><a href="/stay">Stay</a></li>
+								<li><a href="/events">Events</a></li>
+								{% if user.is_authenticated %}
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+											In The House <b class="caret"></b>
+										</a>
+										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+											<li><a href="/calendar">Calendar</a></li>
+											<li><a href="/today">Today</a></li>
+											<li><a href="/broadcast">Message the House</a></li>
+										</ul>
+									</li>
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
+											<i class="icon-user"></i> {{ user.username|title }} <b class="caret"></b>
+										</a>
+										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
+											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
+											<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
+											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
+										</ul>
+									</li>
+								{% endif %}
+								{% ifusergroup house_admin %}
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
+											Admin <b class="caret"></b>
+										</a>
+										<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
+											<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
+											<li><a tabindex="-1" href="/manage/reservations/">Reservations</a></li>
+										</ul>
+									</li>
+								{% endifusergroup %}
+							</ul>
+						</div>
+				</div>
+				</div>
+				</nav>
 			</div> <!-- end header wrap -->
 		
 			<div id="homepage-wrap">
@@ -126,9 +182,11 @@
 						<div class="col-md-10 col-centered">
 							<div class="col-md-6" id="participate">
 								<h2 class="fancy-header">When can I come over?</h3>
-								<p class="easy-reading">We host a salon series on most Thursdays, and a community dinner 
-									every Sunday. We've got a Maker Monday series that's currently happening once a month, 
-									and various one-off events. Hear about upcoming events on our mailing list!</p> 
+								<p class="easy-reading">We host salons and
+								community dinners with high frequency. We
+								also offers lessons, workshops and various
+								one-off events. Hear about upcoming events on
+								our mailing list!</p> 
 								<div class="col-md-12" id="eventlist-signup-wrapper">
 									<form id="eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
 										<input name="email" class="col-md-7" id="list-signup-input" placeholder="Enter email">
@@ -138,21 +196,21 @@
 							</div>
 							
 							<div class="col-md-6" id="reserve">
-								<h2 class="fancy-header">I want to live here!</h3>
-								<p class="easy-reading">The Embassy San Francisco is our experiment 
-									in creating a home built around purpose and intention. We value curiosity, 
-									analysis, questioning, and engagement. This is not a house for by-standers!</p>
-								<a href="/stay" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>
+								<h2 class="fancy-header">I'm Interested in the Residence</h3>
+								<p class="easy-reading">Travel and always be at Home. The Embassy Network
+								offers long- and short-term accommodations for
+								modern nomads and creatives who travel the
+								world for work, projects and collaborations. 
+								</p>
+								<a href="/stay" class="btn btn-large btn-block btn-large-text">Learn More & Make a Reservation</a>
 							</div>
 						</div>
 					</div>
 				</div>
 					
-				
 				<!-- events section! -->
 
-
-				<div class="row" id="details">
+				<div class="row" id="landing-page-more-info">
 					<div class="col-md-10 col-centered">
 						<div class="col-md-6" id="events">
 							<h2 class="">What are we doing?</h2>
@@ -179,268 +237,43 @@
 						
 				<!-- People Section! -->
 						<div class="col-md-6" id="profiles">
-							<h2 class="">Here we are!</h2>
+							<h2 class="">Our Community</h2>
 							<div class="row profiles">
 								
+									{% for person in coming_month %}
 										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/zarinahagnew/5de0cce5-3194-482d-9b76-a408d402774c.jpg" />
-											<div class="homepage-user-descr" id="user-83">
-												<p class="homepage-user-text">London Born And Bred, I Have Recently Made The Big Move To California To Breathe New Life Into My Life. I Am Neuroscientist, Formerly At Ucl, And Now A Recent Addition To The Dept Of Otolaryngology, Head And Neck Surgery At Ucsf. My Work Focuses On How The Brain Controls Complex Voluntary Movements, Such As Movements Of The Hand (Tool-Use) ...</p>
-												... <a class="homepage-user-link" href="/people/zarinahagnew"> Zarinah Agnew</a>
+											<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+											<div class="homepage-user-descr" id="user-{{person.id}}">
+												<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
+												... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
 											</div>
 										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/spolcz/af32885b-fb3a-405a-8f82-ea51ed6bd9e9.png" />
-											<div class="homepage-user-descr" id="user-222">
-												<p class="homepage-user-text">I&#39;M A Doctoral Student At Stanford Law School. My Legal Research Interests Involve Conducting Original Experimental Research At The Intersection Of Law And Psychology. I Studied Philosophy (Ba ’03) And Law (Jd ’06) At Queen’S University In Canada And Cognitive And Decision Sciences (Msc ’11) At University College London. After Completing Law School I Articled At Baker &amp; Mckenzie Llp ...</p>
-												... <a class="homepage-user-link" href="/people/spolcz"> Sarah Polcz</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/BluInc/1fd0d165-b0e7-4ff5-951d-3e8e2f60211e.png" />
-											<div class="homepage-user-descr" id="user-365">
-												<p class="homepage-user-text">I&#39;M Bowen Lu, Currently Studying Computer Science At Harvard. I Am Passionate About Entrepreneurship And Excited About Startups. I Am Interested In Web And Software Development, And I&#39;M Always Looking To Expand The Breadth Of My Programming Knowledge. I Also Dabble In Politics And Have A Heart For Community Service. I Enjoy Singing, Running, Writing Poetry, Learning New Things, And ...</p>
-												... <a class="homepage-user-link" href="/people/BluInc"> Bowen Lu</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/ZeljkoS/be36d8f6-830b-440b-99d1-396e5bf02d5e.png" />
-											<div class="homepage-user-descr" id="user-367">
-												<p class="homepage-user-text">Tl;Dr: Software Company Owner (Gembox), Startup Owner (Testdome), Cohousing Enthusiast (Perjavica Cohousing), Blogger (Svedic.Org). Long: I Am A Strong Thinker, Always Curious How The World Operates On A Larger Scale. I Tend To Be More Abstract (Interested In Culture, Economy, Philosophy Or Science) Than Concrete (I Am Not So Interested In Customs, Stuff, Cooking Or Sports). I Am An Avid ...</p>
-												... <a class="homepage-user-link" href="/people/ZeljkoS"> Zeljko Svedic</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/Creativesuzie/40b67298-479a-4dbe-9329-bb4a4021dc52.jpg" />
-											<div class="homepage-user-descr" id="user-268">
-												<p class="homepage-user-text">Hi My Name Is Susan, I Am A Toy Designer I Am Passionate About Working With Kids, And Brainstorming And Creating New Ideas. When People Meet Me They Say I Am Very Unique And Different. I Would Describe Myself As The Quite Creator.</p>
-												... <a class="homepage-user-link" href="/people/Creativesuzie"> Susan Nnaji</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/niqueno/bf7d6f36-bf81-455d-a072-5a25fe15321a.png" />
-											<div class="homepage-user-descr" id="user-373">
-												<p class="homepage-user-text">I Am An Environmental Engineer Working As A Graduate Student In An Ocean Acoustics Research Group At Dalhousie University In Halifax. I Live, Work, Weep And Love On The Coast. I Like To Get Lost Outside, In Swamps And Lakes. I Have A Music Practice That I Have Carried Around Since I Was A Child. I Come From Vibrating Reeds, ...</p>
-												... <a class="homepage-user-link" href="/people/niqueno"> Nicholas Dourado</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/kasleymk/60d6d5da-a368-4262-8ff3-3d9137c346cc.png" />
-											<div class="homepage-user-descr" id="user-386">
-												<p class="homepage-user-text">My Name Is Kasley (Pronounced Cass-Lee). I Was Raised In Vancouver, Canada, The Youngest (By 18 Years) Of Four Siblings. When I Was 15, My Mom And I Moved To Montpellier, France (On The Mediterranean), For One Magical Year Of Learning—Learning French, Learning About Genuine Friendship, And Learning To Cultivate Joy And Appreciation. After Graduating High School, I Went To ...</p>
-												... <a class="homepage-user-link" href="/people/kasleymk"> Kasley Killam</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/dariely/08a6c97d-3847-4a57-ab0e-9907c88c8caf.png" />
-											<div class="homepage-user-descr" id="user-394">
-												<p class="homepage-user-text">Irrational Professor At Duke...</p>
-												... <a class="homepage-user-link" href="/people/dariely"> Dan Ariely</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/alvinc/68df9957-160a-4340-b08a-25241db8ff79.png" />
-											<div class="homepage-user-descr" id="user-398">
-												<p class="homepage-user-text">Founding Team Member Of Impactx, An Innovators And Entrepreneurs Member Network. Currently Focused On Building The Member Platform In Tokyo And A 1000m2 Maker&#39;s Live/Work Space In Sendai, The Area Hit By The 2011 Tsunami. From Hong Kong Originally, With The Past 10 Spent In The Sf/Bay Area. My Background Is In Ux Design, And I Hold An Mba In ...</p>
-												... <a class="homepage-user-link" href="/people/alvinc"> Alvin Cheung</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/evanboho/23faa646-d7db-4b65-9add-f3d122b1d7ae.jpg" />
-											<div class="homepage-user-descr" id="user-267">
-												<p class="homepage-user-text">I&#39;M A Musician Turned Developer From Chicago. I Initially Got Into Rails A Little Over A Year Ago Wanting To Build A Rideshare App. At Some Point, The Coding Became More Interesting To Me Than The Product, And I Continued My Development As A Developer Through Other Projects And Jobs, Notably: Dabble.Co And Now Granicus.</p>
-												... <a class="homepage-user-link" href="/people/evanboho"> Evan Kuchar</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/lorettahidalgo/b2095e33-fc28-44bc-8d16-b58c0f34e97d.png" />
-											<div class="homepage-user-descr" id="user-341">
-												<p class="homepage-user-text">Future Virgin Galactic Astronaut, Knew Jessy Before Robbie Did, Have Been To Tahoe With Will Marshall&#39;s Mom, Committed To Living On A Transformed Planet, Co-Creator Of Yuri&#39;s Night, The World Space Party, Zero G Flight Attendant, Mom Of Two Kids Under 4.</p>
-												... <a class="homepage-user-link" href="/people/lorettahidalgo"> Loretta Whitesides</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/Josemiguel/c7eae9be-1a54-4329-9f4d-1617a3cbfe2d.png" />
-											<div class="homepage-user-descr" id="user-331">
-												<p class="homepage-user-text">Rancher By Tradition, Designer By Profession, Sculptor By Vocation. Born And Raised In The Mexican Countryside, I Lived For A While In Sweden And Canada, After Working For Some Time In Mexico City I Quit My Job In The Advertisement Industry To Entirely Follow The Dream. I Considered Creativity The Must Amusing Game Of All, Despite My Location Or Job ...</p>
-												... <a class="homepage-user-link" href="/people/Josemiguel"> Miguel  Loyola</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/Bibi/55ecce30-c428-4794-9281-b3b64d84bee2.png" />
-											<div class="homepage-user-descr" id="user-408">
-												<p class="homepage-user-text">Experimental Quantum Physicist, 30 Years Old, Austrian, Poetry Fan Outdoor And Mountain Enthusiast Curious, Creative, Funny, Efficient, Impatient</p>
-												... <a class="homepage-user-link" href="/people/Bibi"> Birgit Brandstaetter</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/kylesamani/77dc6381-4fea-41a0-9e1a-1efcca27862d.png" />
-											<div class="homepage-user-descr" id="user-409">
-												<p class="homepage-user-text">My Name Is Kyle Samani. I&#39;M Founder And Ceo Of A Startup Based Out Of Austin, Tx, Pristine, That&#39;s Developing Apps For Google Glass For Surgery And Anesthesia. Before That, I Led All Product Management At Versasuite, An Electronic Medical Record (Emr) Vendor. I Also Write For Histalk, An Influential Blog In Health It, Techzulu, And Svbtle.</p>
-												... <a class="homepage-user-link" href="/people/kylesamani"> Kyle Samani</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/molecularbond/8e283395-7594-4c28-b2e9-99d0210ac3bc.png" />
-											<div class="homepage-user-descr" id="user-387">
-												<p class="homepage-user-text">I Am A Medical Speech Pathologist And Returning To School To Pursue A Phd In Behavioral Neuroscience. I Play Piano And Drums, Dj Vinyl From A Large Collection, And Love To Spend Time With Friends/Family. My Mom Had A Stroke Last January And I Sold My House In Los Angeles, Closed My Private Practice, And Moved Back Up To Sf ...</p>
-												... <a class="homepage-user-link" href="/people/molecularbond"> Amber Moncrief</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/jessykate/IMG_0342_sq.jpeg" />
-											<div class="homepage-user-descr" id="user-1">
-												<p class="homepage-user-text">Space Geek Turned Computer Scientist Reinventing Human Settlements On A Planet Called Earth (So Far).</p>
-												... <a class="homepage-user-link" href="/people/jessykate"> Jessy Kate Schingler</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/ProfessorH/250373_10100264594901724_373758_n.jpg" />
-											<div class="homepage-user-descr" id="user-3">
-												<p class="homepage-user-text">I Aspire To: Influence The Way People Interact With Their Environments (Both Physical And Virtual)... Compensate For Poor Vision By Unconsciously Developing Passive Sonar... Empower Individuals Through Collaborating And Sharing Skills/Resources... Redistribute Power And Wealth... Master Everything... Always Be Authentic... Question All Norms.</p>
-												... <a class="homepage-user-link" href="/people/ProfessorH"> Helen Bentley</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/robbie/robbie_profile.jpg" />
-											<div class="homepage-user-descr" id="user-11">
-												<p class="homepage-user-text">I Enjoy Rethinking Societal Structures And The Role That Technology, Tools, And Information Can Recast A More Desirable Future. I Am An Advocate For Coliving, Open Data, And Open Government And Believe There Is No Difference Between Work, Live, And Home.</p>
-												... <a class="homepage-user-link" href="/people/robbie"> Robbie Schingler</a>
-											</div>
-										</div>
-
-
-
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/misha/363b9643-ec2d-424a-a567-05fbb05ae34d.jpg" />
-											<div class="homepage-user-descr" id="user-12">
-												<p class="homepage-user-text">Born In The Ukraine, Grew Up In San Francisco. Working At Planet Labs, Where We&#39;re Building Earth Imaging Satellites To Help Do Good In The World. During My After Work Hours I Take Russian Lessons And Train Capoeira. Currently Striving For Zen Mastery Through Indulging In The Absurd.</p>
-												... <a class="homepage-user-link" href="/people/misha"> Misha Safyan</a>
-											</div>
-										</div>
-
-
-
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="https://sf.embassynetwork.com/media/data/avatars/dunfield/Dunfield_twitter.jpg" />
-											<div class="homepage-user-descr" id="user-33">
-												<p class="homepage-user-text">Neuroscientist / Behavioral Economist In The Marketing Dept. @ Mit. Co-Founder Of The @Embassynetwork. Sideline Writer, Policy Wonk, &amp; Libertarian Paternalist.</p>
-												... <a class="homepage-user-link" href="/people/dunfield"> Derek Dunfield</a>
-											</div>
-										</div>
-
-
+									{% endfor %}
 
 								<!-- end person in subset -->
-								
-								
-								
 								
 							</div>
 						</div>
 					</div>
 				</div>
-	
 
 				</div>
-
-
-
-
-
-
-
-
 
 				<div class="row" id="location">
-					<iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=399+Webster+St,+San+Francisco,+CA&amp;aq=&amp;sll=37.7577,-122.4376&amp;sspn=0.138159,0.268822&amp;t=m&amp;ie=UTF8&amp;hq=&amp;hnear=399+Webster+St,+San+Francisco,+California+94117&amp;z=14&amp;ll=37.774,-122.429278" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+					<div id="location-map"></div>
 				</div>
-				<!-- map -->
-				<!-- participate -->
-				<!-- footer info -->
 
 			</div> <!-- end wrap -->
-				<footer class="footer">
-					{% block footer %}
-					<div class="embassy-footer">
-						<img src="/media/img/en-logo-transparent.png" class="footer-logo">
-						<div class="embassy-footer-text">
-							<p><em>Hacking Home!</em>
-								Embassies of<br>collaboration, creativity and<br>learning.
-							</p>
-							<p>About EN | Other Locations </p>
-							<p><span class="license"><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/">
-								<img alt="Creative Commons License" style="border-width:0"
-								src="http://i.creativecommons.org/l/by-nc-sa/3.0/80x15.png" /> </a></span> 
-								Fork the code on <a href="http://github.com/jessykate/modernomad">Github</a>
-							</p>
-						</div>
-					</div>
-					<div class="clear"></div>
-					{% endblock %}
-					</footer>
-					<!-- Le javascript -->
-					<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
-					<script src="/media/js/jquery-1.8.2.js"></script>
-					<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
-					<script src="/media/js/bootstrap.js"></script>
-					<script>
-						$('#eventsCarousel').carousel()
-					</script>
+
+			<!-- Le javascript -->
+			<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
+			<script src="/media/js/jquery-1.8.2.js"></script>
+			<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
+			<script src="/media/js/bootstrap.js"></script>
+			 <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+			<script>
+				$('#eventsCarousel').carousel()
+			</script>
 			</div> <!-- end container-narrrow -->
 
 	{% block extrajs %}
@@ -471,14 +304,23 @@
 			return false;
 		});
 		
-		$('#embassy-logo img').on( "mouseover",function(){
+		$('#embassy-logo').on( "mouseover",function(){
 			$('#flyout').animate({right:0})
 			$('.container').append("<div class='curtain'></div>");
 		});
 		
-		$('.container').click( function(){
+		$('#flyout').on("mouseleave", function(){
 			$('#flyout').animate({right:-360});
 		});
+
+		var map = L.map('location-map').setView([37.77397341544072, -122.42937415838243], 15);
+		L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+			maxZoom: 18
+		}).addTo(map);
+		var marker = L.marker([37.77397341544072, -122.42937415838243]).addTo(map);
+		marker.bindPopup("The Embassy San Francisco<br>399 Webster Street, Lower Haight, SF").openPopup();
+		
 		
 
 	});

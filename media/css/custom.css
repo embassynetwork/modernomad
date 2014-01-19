@@ -22,7 +22,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .fancy-header {
-	font-family:'Archer Italic', serif;
+	//font-family:'Archer Bold', serif;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -65,6 +65,10 @@ span.highlight {
 	z-index: -1;
 }
 
+#landing-page-more-info {
+	padding-top: 50px;
+}
+
 /* ======================[Global Navigation]================= */
 
 
@@ -103,9 +107,15 @@ span.highlight {
 
 /* ====================== Home Page ================= */
 
-#header-wrap {
-	height:120px;
-	padding:20px 0;
+#nav-primary {
+	margin-bottom: 0px;
+	margin-top: 20px;
+	background-color: transparent;
+	border-radius: 0px;
+	/* this cancels out the default boostrap border style */
+	border-left: none;
+	border-bottom: none;
+	border-right: none;
 }
 
 #login {
@@ -264,8 +274,7 @@ span.highlight {
 	color: #fff;
 	overflow: hidden;
 	padding: 5px;
-	height: 210px;
-	width:210px;
+	height: 170px;
 	visibility: hidden;
 	opacity: 0;
 	z-index:1000;
@@ -283,19 +292,14 @@ span.highlight {
 }
 
 .homepage-user-text {
-	height: 310px;
-	width: 210px;
+	height: 140px;
+	width: 160px;
 	overflow: hidden;
 	margin-bottom: 0px;
 }
 
 .homepage-user-link {
 	color: #e71d99;
-}
-
-img.homepage-user-img {
-	height:110px;
-	width:110px;
 }
 
 .homepage-user-wrapper:hover .homepage-user-text {
@@ -305,6 +309,11 @@ img.homepage-user-img {
 .homepage-user-wrapper:hover .homepage-user-link {
 	visibility: visible;
 	opacity: 1;
+}
+
+#location-map {
+	height: 250px;
+	margin-top: 50px;
 }
 
 .super-size {
