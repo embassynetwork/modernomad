@@ -258,6 +258,15 @@ span.highlight {
 	color: #EEE;
 }
 
+.rouge {
+	color: #ea6f56;
+}
+
+.enlarged-text {
+	font-size: 1.5em;
+}
+
+
 .btn-dark {
 	background-color: #666;
 	border-color: #666;
@@ -269,12 +278,21 @@ span.highlight {
 }
 
 .event {
-	padding: 8px 0;
+	padding: 25px 0;
 	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.event-list-time {
+	margin-bottom: 10px;
+	font-size: 1.2em;
 }
 
 .event:hover, .event:hover .date {
 	color:#ea6f56;
+}
+
+.event-detail-img {
+	width: 600px;
 }
 
 .event .date {
