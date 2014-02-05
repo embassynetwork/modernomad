@@ -1,3 +1,12 @@
+## Development
+* Fork this repo: https://github.com/jessykate/modernomad/fork
+* Download & install the latest version of [VirtualBox](https://www.virtualbox.org/wiki/Downloads) for your platform.
+* Download & install the latest version of [Vagrant](http://downloads.vagrantup.com/) for your platform.
+* Clone your form of the repo ```git clone git@github.com:YOUR_GIT_HUB_USERNAME/modernomad.git```
+* ```cd modernomad```
+* vagrant up
+* wait a minute
+* open http://localhost:31337
 
 ## OS X requirements
 

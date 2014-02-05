@@ -5,7 +5,7 @@
 SECRET_KEY = 'd+xvh@)+d_iw%%w65+61&amp;2(w7upu*rt7l%n3d_li#1^pt@133^'
 
 # use XS_SHARING_ALLOWED_ORIGINS = '*' for all domains
-XS_SHARING_ALLOWED_ORIGINS = "http://localhost:8989/"
+XS_SHARING_ALLOWED_ORIGINS = "http://localhost:31337/"
 XS_SHARING_ALLOWED_METHODS = ['POST','GET', 'PUT', 'OPTIONS', 'DELETE']
 XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 
