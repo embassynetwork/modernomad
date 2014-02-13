@@ -12,73 +12,80 @@
 </div>
 {% endif %}
 
-<div class="float-right">
-{% if u.profile.image %}
-<div class="img-polaroid">
-	<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
-</div>
-{% endif %}
 
-{% ifequal u user %}
-	<div id="edit-profile">
-		<a class="btn btn-dark btn-small" href="/people/{{user.username}}/edit/">Edit Profile</a>
-		{% if user.profile.customer_id %}
-		<form class="userprofile-card-form" method="post" action="/people/{{user.username}}/deletecard/">{% csrf_token %}
-			<input type="submit" class="btn btn-danger btn-small" value="Delete my saved credit card">
-		</form>
-		{% else %}
-		<div>
-			<form class="userprofile-card-form" action="/people/{{user.username}}/addcard/" method="POST" id="payform">
-				{% csrf_token %}
-				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-					value="Add Credit Card" >
-				<div>
-					<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
-						secure credit card processing with SSL encryption. Your card card
-					information is never stored on our servers.</small></em></p>
-				</div>
+<div class="col-md-12" id="user-detail-heading">
+	<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
+</div>
+
+<div class="col-md-3">
+	{% if u.profile.image %}
+	<div class="img-polaroid">
+		<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
+	</div>
+	{% endif %}
+
+	{% ifequal u user %}
+		<div id="edit-profile">
+			<a class="btn btn-dark btn-small" href="/people/{{user.username}}/edit/">Edit Profile</a>
+			{% if user.profile.customer_id %}
+			<form class="userprofile-card-form" method="post" action="/people/{{user.username}}/deletecard/">{% csrf_token %}
+				<input type="submit" class="btn btn-danger btn-small" value="Delete my saved credit card">
+			</form>
+			{% else %}
+			<div>
+				<form class="userprofile-card-form" action="/people/{{user.username}}/addcard/" method="POST" id="payform">
+					{% csrf_token %}
+					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+						value="Add Credit Card" >
+					<div>
+						<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+							secure credit card processing with SSL encryption. Your card card
+						information is never stored on our servers.</small></em></p>
+					</div>
+				</form>
+			</div>
+			{% endif %}
+		</div>
+	{% endifequal %}
+</div>
+
+<div class="col-md-9">
+	{% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
+
+		{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
+
+	{% else %}
+		<h4>About {{u.first_name|title}}:</h4>
+		<p>{{ u.profile.bio|default:"Nothing written yet." }}</p>
+
+		<h4>Current Projects:</h4>
+		<p>{{ u.profile.projects|default:"Empty" }}</p>
+
+		<h4>Learning and Sharing Interests:</h4>
+		<p>{{ u.profile.sharing|default:"Empty" }}</p>
+
+		<h4>Discussion topics:</h4>
+		<p>{{ u.profile.discussion|default:"Empty" }}</p>
+
+		{% include "snippets/profile_links.html" %}
+	{% endif %}
+	
+	{% ifequal u user %} 
+		<h2>Email Notifications</h2>
+		<div class="col-md-12">
+			<form class="" method="post" action="/events/emailpreferences/{{ u.username }}/">{% csrf_token %}
+				<div>Receive automatic reminders of events you are attending: <input class="form-control" type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}></div>
+				<div>Receive weekly emails about upcoming events: <input class="form-control" type="checkbox" name="weekly_updates" id="weekly_updates" {% if u.event_notifications.weekly %} checked {% endif %}></div>
+				<input type="submit" value="Save" class="btn btn-default">
 			</form>
 		</div>
-		{% endif %}
-	</div>
-{% endifequal %}
+	{% endifequal %}
+
+
+	<h2>Reservations</h2>
+	{% include "snippets/user_reservations.html" %}
+
 </div>
-
-
-<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
-
-{% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
-
-	{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
-
-{% else %}
-	<h4>About {{u.first_name|title}}:</h4>
-	<p>{{ u.profile.bio|default:"Nothing written yet." }}</p>
-
-	<h4>Current Projects:</h4>
-	<p>{{ u.profile.projects|default:"Empty" }}</p>
-
-	<h4>Learning and Sharing Interests:</h4>
-	<p>{{ u.profile.sharing|default:"Empty" }}</p>
-
-	<h4>Discussion topics:</h4>
-	<p>{{ u.profile.discussion|default:"Empty" }}</p>
-
-	{% include "snippets/profile_links.html" %}
-{% endif %}
-
-<h2>Reservations</h2>
-{% include "snippets/user_reservations.html" %}
-
-{% ifequal u user %}
-	<div class="new-reservation">
-		<a href="{% url reservation_submit %}">New Reservation</a>
-	</div>
-
-	<div id="logout">
-		<a href="/people/logout/">Logout</a>
-	</div>
-{% endifequal %}
 
 {% endblock %}
 

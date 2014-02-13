@@ -12,7 +12,7 @@
 }
 
 body {
-	font-family:'Arial', sans-serif;
+	font-family:'Open Sans', sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -106,6 +106,16 @@ span.highlight {
 
 
 /* ====================== Home Page ================= */
+
+a {
+	color: #ea6f56;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #ea6f56;
+	text-decoration: none;
+}
 
 #nav-primary {
 	margin-bottom: 0px;
@@ -232,7 +242,14 @@ span.highlight {
 
 .btn {
 	font-family:'Archer Bold';
-	color:#000;
+}
+
+#rsvp-status-yes, #rsvp-status-no {
+	width: 166px;
+}
+
+.modal-dialog-med {
+	width: 400px;
 }
 
 #eventlist-signup-wrapper .btn {
@@ -243,7 +260,7 @@ span.highlight {
 }
 
 #content-container {
-	padding-bottom: 60px;
+	padding: 60px 0px;
 }
 
 
@@ -388,8 +405,21 @@ span.highlight {
 	margin-bottom: 30px;
 }
 
-.list-signup-submit {
+#list-signup-submit {
 	padding-left: 20px;
+	color: #000;
+}
+
+#list-signup-submit:hover {
+	color: #ea6f56;
+}
+
+#stay-button {
+	color: #000;
+}
+
+#stay-button:hover {
+	color: #ea6f56;
 }
 
 .btn-large-text {
@@ -686,11 +716,6 @@ div.ui-datepicker{
 	font-size: 90%;
 }
 
-.field-wrapper {
-	width: 475px;
-	padding-bottom: 30px;
-}
-
 .float-right {
 	float:right;
 }
@@ -783,13 +808,11 @@ input#id_expiration_year {
 }
 
 ul.errorlist {
-	background-color: #ffcccc;
+	background-color: #f2dede;
 	list-style-type: none;
 	padding-left: 20px;
 	padding-top: 5px;
 	padding-bottom: 5px;
-	font-size: 80%;
-	font-weight: bold;
 }
 
 .reservation-list-item {
@@ -849,6 +872,10 @@ ul.errorlist {
 
 #guest-calendar tr {
 	height: 60px;
+}
+
+td {
+	padding: 1px;
 }
 
 #guest-calendar .full-today {
@@ -927,7 +954,7 @@ textarea#id_comments, textarea#id_purpose {
 	margin-bottom: 0px;
 }
 
-.res-field, .user-field, .res-action {
+.res-field, .user-field, {
 	padding-bottom: 10px;
 }
 
@@ -941,7 +968,7 @@ textarea#id_comments, textarea#id_purpose {
 }
 
 form.res-action {
-	padding-bottom: 0px;
+	margin-bottom: 20px;
 }
 
 .res-value {
@@ -1015,14 +1042,9 @@ div#spinner
 
 .yes-available, .no-available {
 	text-align: center;
-}
-
-.yes-available {
-	background-color: green;
-}
-
-.no-available {
-	background-color: #c7230a;
+	height: 30px;
+	color: #666;
+	padding-top: 5px;
 }
 
 #rooms-available-calendar th {
@@ -1043,16 +1065,12 @@ div#spinner
 	padding-right: 15px;
 }
 
-.reservation-form-dates input {
-	width: 150px;
-}
-
-#show-room-availability {
-	padding-top: 50px;
-}
-
 .room-info-area {
 	padding-top: 25px;
+}
+
+#rooms-available-calendar tr {
+	margin-bottom: 10px
 }
 
 #reservation-additional-info {
@@ -1060,8 +1078,16 @@ div#spinner
 	padding-top: 50px;
 }
 
-#id_arrival_time {
-	width: 150px;
+#submit-reservation {
+	margin-top: 30px;
+}
+
+#id_arrival_time, #id_comments {
+	margin-left: 0px;
+}
+
+#optional-fields .form-group
+	margin-left: 0px;
 }
 
 #id_purpose, #id_comments {
@@ -1078,7 +1104,7 @@ div#spinner
 
 #optional-fields-header {
 	font-style: italic;
-	padding-top: 0 0 5px 0;
+	padding-top: 30px;
 	cursor: pointer;
 }
 
@@ -1104,8 +1130,7 @@ div#spinner
 }
 
 .event-preview-img-thumb {
-	width: 320px;
-	height: 200px;
+	width: 200px;
 }
 
 .event a, #more-events-link a {
@@ -1122,3 +1147,159 @@ div#spinner
 	text-decoration: none;
 }
 
+#event-preamble {
+	padding: 30px 0px 30px 0px;
+}
+
+.event-status {
+	padding: 10px;
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+
+.event-create-img-inspire {
+	width: 100%;
+	margin: 0 20px 20px 20px;
+	opacity: 0.7;
+}
+
+.event-form-help-text {
+	color: #666;
+	font-size: 90%;
+}
+
+#our-community-heading {
+	margin-bottom: 70px;
+}
+
+#organizer-notes {
+	color: #888;
+}
+
+.event-guide-title {
+	color:#ea6f56;
+	margin-top: 60px;
+}
+
+.form-group {
+	margin-bottom: 25px !important;
+}
+
+#broadcast-explanation {
+	padding: 20px;
+	margin-bottom: 40px;
+}
+
+.resident-row, .user-event-row {
+	margin-bottom: 40px;
+}
+
+.user-event-row {
+	padding-bottom: 30px;
+}
+
+.user-event-list-img {
+	width: 150px;
+}
+
+h3.no-top-margin {
+	margin-top: 0px;
+	display: inline;
+}
+
+#event-list-tabs {
+	margin-bottom: 30px;
+	font-size: 150%;
+}
+
+.event-list-status {
+	margin-left: 20px;
+}
+
+.title-line {
+	margin-bottom: 10px;
+}
+
+#event-admin-heads-up {
+	margin-bottom: 50px;
+}
+
+.endorsement-area {
+	margin-right: 50px;
+	color:#ea6f56;
+}
+
+#endorsement-area {
+	font-size: 130%;
+	cursor: hand;
+	cursor: pointer;
+}
+
+#endorsers-list-body {
+	cursor: default;
+}
+
+.event-detail-title {
+	display: inline;
+}
+
+.thirtypx-spacer-left {
+	margin-left: 30px;
+}
+
+.event-time {
+	color: #AAA;
+	margin-bottom: 30px;
+	margin-top: 15px;
+}
+
+#event-attendance-status {
+	margin: 20px 0px;
+}
+
+#event-attendance-status button {
+	font-family:'Open Sans', sans-serif;
+	color: #98321C;
+}
+
+.event-date-day {
+	font-size: 25px;
+	line-height: 30px;
+	font-family: "Archer Bold";
+	display: block;
+	text-align: center;
+}
+
+.event-date-month, .event-date-time, .event-location {
+	font-size: 20px;
+	font-family: "Archer Bold";
+	line-height: 30px;
+}
+
+.event-date-month, .event-date-time, .event-date-day {
+	margin-left: 5px;
+}
+
+.event-date-separator {
+	font-family: "Archer Bold";
+	line-height: 30px;
+	font-size: 15px;
+	margin: 0px 10px;
+}
+
+.endorser-name-list-item {
+	margin-left: 15px;
+	margin-bottom: 5px;
+}
+
+#event-edit-link {
+	color: #98321C;
+}
+
+#user-detail-heading {
+	margin-bottom: 30px;
+}
+
+#event-actions {
+	margin-top: 20px;
+}

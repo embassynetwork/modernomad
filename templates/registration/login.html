@@ -2,8 +2,9 @@
 
 {% block main %}
 
+<h2>Log in to your account</h2>
 <form enctype="multipart/form-data" method="post">{% csrf_token %}
-	{{ form.as_table }}
+	{{ form.as_p }}
 	<input type="submit" value="Submit" />
 </form>
 

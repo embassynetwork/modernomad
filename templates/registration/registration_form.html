@@ -1,19 +1,37 @@
-{% extends "main.html" %}
+{% extends "content-base.html" %}
+{% block content %}
 
-{% block main %}
+{% if messages %}
+<div class="messages">
+	{% for message in messages %}
+	<div class="alert alert-info">
+		<button type="button" class="close" data-dismiss="alert">×</button>
+		<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+	</div>
+	{% endfor %}
+</div>
+{% endif %}
 
-<h3>Register a new account</h3>
+{% if not user.is_authenticated %}
+	<h2>Register a new account</h2>
 
-<p>If you already have an account, you can <a href="/people/login?next=/reservation/create/">log in</a> instead. </p>
+	<p>If you already have an account, you can <a href="/people/login?next=/reservation/create/">log in</a> instead. </p>
+{% else %}
+	<h2>Tell us about yourself</h2>
+{% endif %}
 
-<h4>Tell us a bit about yourself</h4>
-<p>These questions are what help others get some insight into <b class="dark-red-bold">what you are passionate about</b> or <b class="dark-red-bold">possible connections around work, projects or ideas</b>. It might take 5-10 minutes, but it will pay back dividends while you are here, and help you to connect with the other awesome people in the house.</p>
+<p class="lead">Your profile tells us and others a little bit about who you are, what you are passionate
+about, and possible connections around work, projects and ideas. It might take
+5-10 minutes, but it will pay back dividends, and help to connect with the other awesome people around the space.</p>
 
-<p>You only create your account once. After, you can log in and create future reservation requests with the same information.</p>
+<hr>
 
-
-<div class="well cropping_image_container">
-<p id="img-upload-instruction">Upload an image for your profile (required).</p>
+<form class="cropping_image_container">
+{% if image_required %}
+	<p id="img-upload-instruction">Upload an image for your profile (required).</p>
+{% else %}
+	<p id="img-upload-instruction">Update your profile image here (optional).</p>
+{% endif %}
 <p id="img-upload-error"></p>
 <div>
 <input type="file" id="imageLoader" name="imageLoader"/>
@@ -28,26 +46,26 @@
   <div class="clear">
   </div>
 </div>
-</div>
+</form>
 
 
-<form id="newprofileform" class="well form-inline" enctype="multipart/form-data" method="post">{% csrf_token %}
-  {% for field in form %}
-    {% if field.name != "image" %}
-      <div class="field-wrapper">
-        {{ field.errors }}
-        {{ field.label_tag }}
-        <span class="form-help-text">{{ field.help_text}}</span>
-        <div class="form-field-body">
-          {% if field.field.required %} * {% endif %}
-          {{ field }}
-        </div>
-      </div>
-    {% else %}
-      {{ field.errors }}
-      <input type="hidden" name="image" id="id_image">
-    {% endif %}
-  {% endfor %}
+<form id="newprofileform" class="" enctype="multipart/form-data" method="post">{% csrf_token %}
+	{% for field in form %}
+		<div class="form-group">
+			{% if field.name != "image" %}
+				{{ field.errors }}
+				{{ field.label_tag }}
+				<span class="form-help-text">{{ field.help_text}}</span>
+				<div class="form-field-body">
+				{% if field.field.required %} * {% endif %}
+				{{ field }}
+				</div>
+			{% else %}
+				{{ field.errors }}
+				<input type="hidden" name="image" id="id_image">
+			{% endif %}
+		</div>
+	{% endfor %}
   <input id="profilesubmit" type="submit" value="Submit" />
 </form>
 
@@ -57,8 +75,7 @@
 	<script src="/media/js/imgcrop.js"></script>
 	<script>
 		$("#newprofileform").submit(function (e) {
-			console.log("inside submit function");
-			if (! $("#id_image").val() ) {
+			if ('{{ image_required }}' == 'True' && ! $("#id_image").val() ) {
 				$("#img-upload-error").html('<span class="text-error">This field is required.</span>');
 				$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
 				return false;

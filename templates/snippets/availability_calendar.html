@@ -23,9 +23,9 @@
 		{% for the_day, beds_free in days_list %}
 		<td>
 			{% if beds_free %}
-				<div class="yes-available"><i class="icon-ok"></i> {{beds_free}}</div>
+				<div class="yes-available bg-success"><i class="glyphicon glyphicon-ok"></i> {{beds_free}}</div>
 			{% else %}
-				<div class="no-available"><i class="icon-remove"></i></div>
+				<div class="no-available bg-danger"><i class="glyphicon glyphicon-remove"></i></div>
 			{% endif %}
 		</td>
 		{% endfor %}
@@ -39,7 +39,7 @@
 	<h3>{{room.name}}</h3>
 	{% if room.image %} 
 		<div class="pull-right room-info-image">
-			<img src="/media/{{room.image}}" class="img-polaroid room-info-image" />
+			<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
 		</div> 
 	{% endif %}
 	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
@@ -59,6 +59,7 @@ $(".room-select").click(function() {
    	room_id = $(this).next().val();
    	room_info_div_id = "#room-info-" + room_id;
 
+	console.log('room select');
    	$(".room-info").hide();
 	$(".room-select").removeClass("btn-success")
    	$(this).addClass("btn-success");

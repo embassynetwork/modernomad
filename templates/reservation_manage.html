@@ -24,7 +24,7 @@
 
 	<div class="res-actions-secondary"><h2>Manage</h2></div>
 
-		<a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">Email this User</a>
+		<a href="#emailModal" id="email-user-button" role="button" class="btn btn-default" data-toggle="modal">Email this User</a>
 
 		{% if r.status != 'canceled' %}
 
@@ -33,14 +33,14 @@
 					{% csrf_token %}
 					<input type="submit" 
 					{% if r.reconcile.status == "comp" %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
-					class="btn" id="toggle-comp-input">
+					class="btn-default btn" id="toggle-comp-input">
 				</form>
 			{% endif %}
 
 			<form id="res-cancel" method="post" action="/reservation/{{r.id}}/cancel/">
 				{% csrf_token %} 
 				<input type="hidden" name="redirect" value="/manage/reservation/{{r.id}}/">
-				<input class="btn" type="submit" value="Cancel This Reservation">
+				<input class="btn btn-default" type="submit" value="Cancel This Reservation">
 			</form>
 
 			<div id="dialog-confirm-cancel" title="Cancel this Reservation?">
@@ -93,9 +93,9 @@
 			{% for the_day, beds_free in days_list %}
 			<td>
 				{% if beds_free %}
-					<div class="yes-available"><i class="icon-ok"></i> {{beds_free}}</div>
+					<div class="yes-available bg-success"><i class="icon-ok"></i> {{beds_free}}</div>
 				{% else %}
-					<div class="no-available"><i class="icon-remove"></i></div>
+					<div class="no-available bg-danger"><i class="icon-remove"></i></div>
 				{% endif %}
 			</td>
 			{% endfor %}

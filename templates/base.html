@@ -11,8 +11,8 @@
 		<!-- Le styles -->
 		<link href="/media/css/bootstrap.css" rel="stylesheet">
 		<link href="/media/css/custom.css" rel="stylesheet">
-		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-		<link href='https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="/media/css/leaflet.css" />
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,600,300,700' rel='stylesheet' type='text/css'>
 
 		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 		<!--[if lt IE 9]>
@@ -57,12 +57,6 @@
 							<h1>The Embassy <span class="highlight">San Francisco</span></h1>
 						</div>
 					
-						<div class="col-md-1" id="login">
-							{% if not user.is_authenticated %}
-								<a href="/people/login/">Login</a>
-							{% endif %}
-						</div>					
-					
 						<div class="col-md-2" id="embassy-logo">
 							<img src="/media/img/embassy_logo.png"/>
 						</div>
@@ -84,16 +78,31 @@
 							<ul class="nav navbar-nav">
 								<li><a href="/about">About</a></li>
 								<li><a href="/stay">Stay</a></li>
-								<li><a href="/events/upcoming/">Events</a></li>
+								
 								{% if user.is_authenticated %}
 									<li class="dropdown">
 										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-											In The House <b class="caret"></b>
+											Events <b class="caret"></b>
 										</a>
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-											<li><a href="/calendar">Calendar</a></li>
-											<li><a href="/today">Today</a></li>
-											<li><a href="/broadcast">Message the House</a></li>
+											<li><a href="/events/upcoming/">Upcoming</a></li>
+											<li><a href="/events/create/">New Event</a></li>
+											<li><a href="/events/past/">Past Events</a></li>
+										</ul>
+									</li>
+								{% else %}
+									<li><a href="/events/upcoming/">Events</a></li>
+								{% endif %}
+
+								{% if user.is_authenticated %}
+									<li class="dropdown">
+										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+											People <b class="caret"></b>
+										</a>
+										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+											<li><a href="/residents">Residents</a></li>
+											<li><a href="/calendar">Guest Calendar</a></li>
+											<li><a href="/broadcast">Say Hello</a></li>
 										</ul>
 									</li>
 									<li class="dropdown">
@@ -102,6 +111,7 @@
 										</a>
 										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
 											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
+											<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
 											<li><a tabindex="-1" href="{% url reservation_submit %}">New Reservation</a></li>
 											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
 										</ul>
@@ -115,9 +125,13 @@
 										<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
 											<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
 											<li><a tabindex="-1" href="/manage/reservations/">Reservations</a></li>
+											<li><a tabindex="-1" href="/events/review/">Pending Events</a></li>
 										</ul>
 									</li>
 								{% endifusergroup %}
+								{% if not user.is_authenticated %}
+									<li><a href="/people/login/">Login</a></li>
+								{% endif %}
 							</ul>
 						</div>
 				</div>
@@ -135,7 +149,7 @@
 	<script src="/media/js/jquery-1.8.2.js"></script>
 	<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
 	<script src="/media/js/bootstrap.js"></script>
-	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+	<script src="/media/js/leaflet.js"></script>
 
 	<!-- javascript for every page -->
 	<script type="text/javascript">

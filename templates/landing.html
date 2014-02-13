@@ -24,9 +24,8 @@
 						<div class="col-md-10 col-centered">
 							<div class="col-md-6" id="participate">
 								<h2 class="fancy-header">When can I come over?</h3>
-								<p class="easy-reading">We host salons and
-								community dinners with high frequency. We
-								also offers lessons, workshops and various
+								<p class="easy-reading">We host salons, 
+								community dinners, skillshares, workshops and various
 								one-off events. Hear about upcoming events on
 								our mailing list!</p> 
 								<div class="col-md-12" id="eventlist-signup-wrapper">
@@ -44,7 +43,7 @@
 								modern nomads and creatives who travel the
 								world for work, projects and collaborations. 
 								</p>
-								<a href="/stay" class="btn btn-large btn-block btn-large-text">Learn More & Make a Reservation</a>
+								<a href="/stay" id="stay-button" class="btn btn-large btn-block btn-large-text">Learn More & Make a Reservation</a>
 							</div>
 						</div>
 					</div>
@@ -61,7 +60,7 @@
 								<div class="col-md-12 event">
 									<div class="col-md-1 date"><span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}</div>
 									<div class="col-md-11">
-										<a href="/events/{{event.id}}">
+										<a href="/events/e/{{event.slug}}">
 											<h3 class="event-title">{{ event.title}}</h3>
 											{% if forloop.first %}
 												<img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
@@ -69,6 +68,8 @@
 										</a>
 									</div>
 								</div>
+							{% empty %}
+							<p class="lead">No upcoming events! Why not <a href="/events/create/">propose one?</a></p>	
 							{% endfor %}
 
 							<h3 id="more-events-link" class="pull-right"><a href="/events/upcoming">See All Upcoming</a></h3>
@@ -76,7 +77,7 @@
 						
 				<!-- People Section! -->
 						<div class="col-md-6" id="profiles">
-							<h2 class="">Our Community</h2>
+							<h2 id="our-community-heading">Our Community</h2>
 							<div class="row profiles">
 								
 									{% for person in coming_month %}

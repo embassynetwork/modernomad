@@ -22,6 +22,9 @@ user_patterns += patterns('core.views',
     url(r'^(?P<username>[\w\d\-\.@+_]+)/deletecard/$', 'UserDeleteCard', name='user_delete_card'),
 )
 
+user_patterns += url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'gather.views.user_events', name='user_events'),
+
+
 house_patterns = patterns('core.views',
     url(r'^$', 'ListHouses', name='house_list'),
     url(r'^(?P<house_id>\d+)/$', 'GetHouse', name='house_details'),

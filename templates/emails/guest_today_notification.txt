@@ -1,13 +1,15 @@
--------------- What's Going Down ----------------
+Good Morning! 
 
-Events happening today:
+Here is what's happening at {{ location_name }} today:
+
+Events:
 {% for event in events_today %}
     * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{ event.slug}} 
 {% empty %}
 	None!
 {% endfor %}
 
-People arriving today:
+People arriving:
 {% for r in arriving %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }} {% if r.reconcile.status != 'paid' %} (unpaid) {% endif %}
 	  https://{{ domain }}/manage/reservation/{{ r.id }}/ 
@@ -15,7 +17,7 @@ People arriving today:
 	None!
 {% endfor %}
 
-People departing today:
+People departing:
 {% for r in departing %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room }} {% if r.reconcile.status != 'paid' %} (unpaid) {% endif %}
 	  https://{{ domain }}/manage/reservation/{{ r.id }}/
@@ -23,19 +25,4 @@ People departing today:
 	None!
 {% endfor %}
 
--------------- Would love your eyeballs ----------------
-
-Events waiting for approval:
-{% for event in events_pending %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{ event.slug}} 
-{% empty %}
-	None!
-{% endfor %}
-
-Events seeking feedback:
-{% for event in events_feedback %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{ event.slug}} 
-{% empty %}
-	None!
-{% endfor %}
 

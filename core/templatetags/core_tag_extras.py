@@ -63,7 +63,7 @@ class GroupCheckNode(template.Node):
     def render(self, context):
         user = resolve_variable('user', context)
         
-        if not user.is_authenticated():
+        if user is None or not user.is_authenticated():
             return self.nodelist_false.render(context)
             
         try:

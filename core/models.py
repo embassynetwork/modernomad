@@ -535,6 +535,8 @@ User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):
+	print 'in size images'
+	print instance.image
 	try:
 		obj = UserProfile.objects.get(pk=instance.pk)
 	except UserProfile.DoesNotExist:
