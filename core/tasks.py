@@ -167,7 +167,7 @@ def update_mailinglist_members():
 	print resp.text
 
 	today = datetime.date.today()
-	reservations_today = Reservation.today.get_query_set()
+	reservations_today = Reservation.today.confirmed()
 	guest_emails = []
 	for r in reservations_today:
 		guest_emails.append(r.user.email)

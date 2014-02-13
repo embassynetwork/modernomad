@@ -164,11 +164,20 @@ class ReservationManager(models.Manager):
 		confirmed_reservations = self.on_date(the_day, status="confirmed")
 		return (list(approved_reservations) + list(confirmed_reservations))
 
+	def confirmed_on_date(self):	
+		confirmed_reservations = self.on_date(the_day, status="confirmed")
+		return (list(approved_reservations) + list(confirmed_reservations))
+
 class TodayManager(models.Manager):
 	def get_query_set(self):
 		# return the reservations that intersect today
 		today = datetime.date.today()
 		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today)
+
+	def confirmed(self):	
+		today = datetime.date.today()
+		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today).filter(status='confirmed')
+		
 
 class Reservation(models.Model):
 
