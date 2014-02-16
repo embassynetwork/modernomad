@@ -28,19 +28,26 @@ class UserProfileForm(forms.ModelForm):
 					  "@/./+/-/_ only."),
 		error_messages = {
 			'invalid': _("This value may contain only letters, numbers and "
-						 "@/./+/-/_ characters.")})
-	first_name = forms.CharField(label=_('First Name'))
-	last_name = forms.CharField(label=_('Last Name'))
+						 "@/./+/-/_ characters.")}, widget=forms.TextInput(attrs={'class':'form-control'}))
+	first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control'}))
+	last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control'}))
 
-	email = forms.EmailField(label=_("E-mail"), max_length=75)
-	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False), label=_("New Password"))
-	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False), 
-		label=_("New Password (again)"))
+	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control'}))
+	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password"))
+	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password (again)"))
 
 	class Meta:
 		model = UserProfile
 		exclude = ['user', 'status', 'image_thumb', 'customer_id', ]
 		# fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
+		widgets = {
+			'bio': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
+			'links': forms.TextInput(attrs={'class':'form-control'}),
+			'projects': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
+			'sharing': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
+			'discussion': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
+			'referral': forms.TextInput(attrs={'class':'form-control'}),
+		}
 
 	def __init__(self, *args, **kwargs):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
@@ -114,8 +121,8 @@ class ReservationForm(forms.ModelForm):
 		model = Reservation
 		exclude = ['created', 'updated', 'user', 'last_msg', 'status']
 		widgets = { 
-			'arrive': forms.DateInput(attrs={'class':'datepicker'}),
-			'depart': forms.DateInput(attrs={'class':'datepicker'}),
+			'arrive': forms.DateInput(attrs={'class':'datepicker form-control'}),
+			'depart': forms.DateInput(attrs={'class':'datepicker form-control'}),
 		}
 
 	def clean(self):
@@ -158,11 +165,11 @@ class EmailTemplateForm(forms.Form):
 	''' We don't actually make this a model form because it's a derivative
 	function of a model but not directly constructed from the model fields
 	itself.''' 
-	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly'}))
-	recipient = forms.EmailField() 
-	footer = forms.CharField(widget=forms.Textarea(attrs={'readonly':'readonly'}))
-	subject = forms.CharField()
-	body = forms.CharField(widget=forms.Textarea)
+	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
+	recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
+	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
 
 	def __init__(self, tpl, reservation):
 		''' pass in an EmailTemplate instance, and a reservation object '''

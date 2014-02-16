@@ -1,8 +1,3 @@
-# NOTE(mdh): This is different from the usual urls.py in that it
-# doesn't define a top-level urlpatterns object.  The individual
-# pattern sets here are intended to be used by a top-level pattern set
-# elsewhere.
-
 from django.conf.urls import patterns, include, url
 import registration.backends.default.urls
 from core.views import Registration
@@ -26,6 +21,9 @@ user_patterns += patterns('core.views',
     url(r'^(?P<username>[\w\d\-\.@+_]+)/addcard/$', 'UserAddCard', name='user_add_card'),
     url(r'^(?P<username>[\w\d\-\.@+_]+)/deletecard/$', 'UserDeleteCard', name='user_delete_card'),
 )
+
+user_patterns += url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'gather.views.user_events', name='user_events'),
+
 
 house_patterns = patterns('core.views',
     url(r'^$', 'ListHouses', name='house_list'),
@@ -56,6 +54,7 @@ management_patterns = patterns('core.views',
     url(r'reservation/(?P<reservation_id>\d+)/action/$', 'ReservationManageUpdate', name='reservation_manage_update'), 
     url(r'reservation/(?P<reservation_id>\d+)/chargecard/$', 'ReservationChargeCard', name='reservation_charge_card'), 
     url(r'reservation/(?P<reservation_id>\d+)/togglecomp/$', 'ReservationToggleComp', name='reservation_toggle_comp'), 
+    url(r'reservation/(?P<reservation_id>\d+)/sendreceipt/$', 'ReservationSendReceipt', name='reservation_send_receipt'), 
     url(r'reservation/(?P<reservation_id>\d+)/sendmail/$', 'ReservationSendMail', name='reservation_send_mail'), 
 )
 

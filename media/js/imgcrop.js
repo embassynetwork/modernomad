@@ -25,7 +25,6 @@ function handleImage(e){
         }
         img.src = event.target.result;
         cropThat(img);
-		$("#crop-button").show();
     }
     reader.readAsDataURL(e.target.files[0]);
 }

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from core.models import Reservation, UserProfile, Reconcile
+from gather.models import Event
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.safestring import SafeString
@@ -26,13 +27,26 @@ def index(request):
 			.exclude( arrive__gt=today+datetime.timedelta(days=30))
 		)
 
-	# add users associated with those reservations to a list to display on
+	coming_month_events = (
+			Event.objects.filter(status="live") 
+			.exclude(end__lt=today)
+			.exclude( start__gte=today+datetime.timedelta(days=30))
+		)
+
+	# add users associated with those reservations and events to a list to display on
 	# the homepage
 	coming_month = []
 	for r in coming_month_res:
 		# check for duplicates, add if not already there.
 		if r.user not in coming_month:
 			coming_month.append(r.user)
+
+	for e in coming_month_events:
+		# check for duplicates, add if not already there.
+		for u in e.organizers.all():
+			if u not in coming_month:
+				coming_month.append(u)
+	
 	residents = User.objects.filter(groups__name='residents')
 	residents = list(residents)
 
@@ -42,17 +56,11 @@ def index(request):
 		if r not in coming_month:
 			coming_month.append(r)
 
-	# get any events
-	eb_auth_tokens = {
-			'app_key':  settings.EVENTBRITE_APP_KEY, 
-			'user_key': settings.EVENTBRITE_USER_KEY
-		}
-	try:
-		eb_client = eventbrite.EventbriteClient(eb_auth_tokens)
-		response = eb_client.user_list_events({'event_statuses':'live,started'})
-		events = response['events']
-	except:
-		events = None
+	if request.user.is_authenticated():
+		current_user = request.user
+	else:
+		current_user = None
+	events = Event.objects.upcoming(upto=5, current_user=current_user)
 
 	return render(request, "landing.html", {'coming_month': coming_month, 'events': events})
 
@@ -62,13 +70,15 @@ def about(request):
 def coworking(request):
 	return render(request, "coworking.html")
 
+def residents(request):
+	residents = User.objects.filter(groups__name='residents')
+	return render(request, "residents.html", {'residents': residents})
+
+
 def projects(request):
 	#residents = User.objects.filter(groups__name='residents')
 	#return render(request, "community.html", {'people': residents})
 	pass
-
-def events(request):
-	return render(request, "events.html")
 
 def get_calendar_dates(month, year):
 	if month:

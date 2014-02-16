@@ -1,5 +1,5 @@
-{% extends "main.html" %}
-{% block main %}
+{% extends "content-base.html" %}
+{% block content %}
 
 <h1>Message Residents and Guests</h1>
 {% if messages %}
@@ -12,17 +12,58 @@
     {% endfor %}
 </div>
 {% endif %}
-<p>Use this form to message all residents and guests who are expected to be around during a given date range.</p>
-<p class="text-warning">Note that sending a message from this page <em>will</em> expose your email address to the recipients.</p>
+
+<p id="broadcast-explanation" class="bg-info">This page lets you send a message to residents and guests
+	who are expected to be around during a given date range in the future. If
+	you want to email people in the house right now, use the email address
+	<a href="mailto:current@sf.emassynetwork.com">current@sf.emassynetwork.com</a>.
+	You (and others) are automatically added and removed from this list as you
+	come and go from the house.</p>
 
 <div id="spinner">
     <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
 </div>	
 <div id="message-current-form-errors"></div>
-<form action="/broadcast/" method="POST" id="message-current-form">{% csrf_token %}
-	{{ form.as_p }}
-	<input text="Submit" type="submit">
-</form>
+
+<div class="col-md-6">
+	<form role="form" class="form-horizonal" action="/broadcast/" method="POST">{% csrf_token %}
+		<div class="form-group">
+			{{ form.start_date.errors }}
+			{{ form.start_date.label_tag }}
+			{{ form.start_date }}
+
+			{{ form.end_date.errors }}
+			{{ form.end_date.label_tag }}
+			{{ form.end_date }}
+		</div>
+		<div class="form-group">
+
+			{{ form.replyto.errors }}
+			{{ form.replyto.label_tag }}
+			{{ form.replyto }}
+		</div>
+		<div class="form-group">
+
+			{{ form.subject.errors }}
+			{{ form.subject.label_tag }}
+			{{ form.subject }}
+		</div>
+		<div class="form-group">
+
+			{{ form.body.errors }}
+			{{ form.body.label_tag }}
+			<textarea id="id_body" class="form-control" rows="6" name="body"></textarea>
+		</div>
+		<div class="form-group">
+
+			{{ form.footer.errors }}
+			{{ form.footer.label_tag }}
+			<textarea id="id_footer" class="form-control" rows="5" name="body" disabled>{{ form.footer.value }} </textarea>
+
+		</div>
+		<input text="Submit" type="submit">
+	</form>
+</div>
 
 
 {% endblock %}

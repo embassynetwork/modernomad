@@ -10,6 +10,7 @@ from django.template import Context
 from django.core import urlresolvers
 from django.core.mail import EmailMultiAlternatives
 import requests
+from gather.tasks import published_events_today_local, events_pending
 
 weekday_number_to_name = {
 	0: "Monday",
@@ -50,6 +51,46 @@ weekday_number_to_name = {
 #	msg.send()
 #
 
+@periodic_task(run_every=crontab(hour=5, minute=30))
+#@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+def guest_today_notification():
+	today = datetime.date.today()
+	reservations_today = Reservation.today.confirmed()
+	guest_emails = []
+	for r in reservations_today:
+		guest_emails.append(r.user.email)
+	
+	arriving_today = Reservation.objects.filter(arrive=today).filter(status='confirmed')
+	departing_today = Reservation.objects.filter(depart=today).filter(status='confirmed')
+	domain = Site.objects.get_current().domain
+	events_today = published_events_today_local()
+
+	plaintext = get_template('emails/guest_today_notification.txt')
+	c = Context({
+		'arriving' : arriving_today,
+		'departing' : departing_today,
+		'domain': domain,
+		'events_today': events_today,
+		'location_name': settings.LOCATION_NAME
+	})
+	text_content = plaintext.render(c)
+	subject = settings.EMAIL_SUBJECT_PREFIX + "Events, Arrivals and Departures for %s" % (str(today))
+	sender = settings.DEFAULT_FROM_EMAIL
+	for guest_email in guest_emails:
+		resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
+			auth=("api", settings.MAILGUN_API_KEY),
+			data={
+				"from": sender,
+				"to": guest_email,
+				"subject": subject,
+				"text": text_content,
+			}
+		)
+
+		print resp.text
+
+
+
 @periodic_task(run_every=crontab(hour=4, minute=30))
 #@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def admin_today_notification():
@@ -57,14 +98,19 @@ def admin_today_notification():
 	arriving_today = Reservation.objects.filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(depart=today).filter(status='confirmed')
 	domain = Site.objects.get_current().domain
+	events_today = published_events_today_local()
+	pending_or_feedback = events_pending()
 	plaintext = get_template('emails/admin_today_notification.txt')
 	c = Context({
 		'arriving' : arriving_today,
 		'departing' : departing_today,
 		'domain': domain,
+		'events_today': events_today,
+		'events_pending': pending_or_feedback['pending'],
+		'events_feedback': pending_or_feedback['feedback'],
 	})
 	text_content = plaintext.render(c)
-	subject = "[" + settings.EMAIL_SUBJECT_PREFIX + "] Guest Arrivals and Departures for %s" % (str(today))
+	subject = settings.EMAIL_SUBJECT_PREFIX + "%s Events and Guests" % (str(today))
 	sender = settings.DEFAULT_FROM_EMAIL
 	house_admins = User.objects.filter(groups__name='house_admin')
 	recipients = []
@@ -94,8 +140,8 @@ def send_guest_welcome(upcoming):
 			'day_of_week' : day_of_week,
 			'site_url': domain,
 			'house_code': settings.HOUSE_ACCESS_CODE,
-			'events_url' : settings.EVENTS_LINK,
-			'facebook_group' : settings.FACEBOOK_GROUP,
+			'events_url' : domain + '/events/upcoming/',
+			'current_email' : 'current@' + settings.LIST_DOMAIN,
 			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.username,)),
 			'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.id,)),
 		})

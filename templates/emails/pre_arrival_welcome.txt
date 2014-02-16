@@ -4,11 +4,10 @@ We look forward to seeing you at the Embassy on {{ day_of_week }}!
 
 ** Key Data **
 
-The house is located at 399 Webster Street, San Francisco, CA, 94117. Access
-to the house is via a keypad on the front door. The access code is "{{ house_code }}" 
-(the "#" at the end is important, make sure to enter it as well). Checkin is anytime
-after about 1pm. You are free to arrive earlier but your bed may not be ready
-yet.  
+The house is located at 399 Webster Street, San Francisco, CA, 94117. Access to
+the house is via a keypad on the front door. The access code is "{{ house_code }}". 
+Checkin is anytime after about 1pm. You are free to arrive earlier but your bed
+may not be ready yet.  
 
 Our primary, sacred house rule is No Dishes in the Sink. Ever. Wash
 immediately, dry, and put away. Thank you!
@@ -26,9 +25,10 @@ them down the laundry chute!
 
 ** Get Connected **
 
-* Browse the profiles of other guests {{ site_url }}/calendar 
-* Upcoming house events {{events_url }}. 
-* Discussion group {{ facebook_group }} (say 
+* You will receive a daily email to keep you informed of goings-on at the house
+* Browse the profiles of other guests at {{ site_url }}/calendar 
+* See upcoming events or propose your own {{events_url }}. 
+* Send a message to guests and residents using the email address {{ current_email }} (say 
 hello, post requests, share a cool event, see who's around for dinner, or 
 who's up for a drink!) 
 

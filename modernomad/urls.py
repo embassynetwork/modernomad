@@ -14,6 +14,7 @@ urlpatterns = patterns('',
 	url(r'^about/$', 'modernomad.views.about'),
 	url(r'^coworking/$', 'modernomad.views.coworking'),
 	url(r'^broadcast/$', 'core.views.broadcast'),
+	url(r'^residents/$', 'modernomad.views.residents'),
 	url(r'^stay/$', 'modernomad.views.stay'),
 	url(r'^occupancy/$', 'modernomad.views.occupancy'),
 	url(r'^calendar/$', 'modernomad.views.calendar'),
@@ -25,9 +26,9 @@ urlpatterns = patterns('',
 #	url(r'^dashboard/$', 'core.views.dashboard'),
 	
 	
-	url(r'^events/$', 'modernomad.views.events'),
 	url(r'^404/$', 'modernomad.views.ErrorView'),
 
+	url(r'^events/', include('gather.urls')),
 
 	# The core views, broken out into a couple of top-level paths.
 	url(r'^people/', include(core.urls.user_patterns)),

@@ -1,6 +1,6 @@
-{% extends "main.html" %}
+{% extends "content-base.html" %}
 
-{% block main %}
+{% block content %}
 
 {% comment %} shown only when a background request is being made {% endcomment %}
 <div id="spinner">
@@ -18,49 +18,55 @@
 	</div>
 	{% endif %}
 
-	<h4>New reservation request</h4>
+	<h2>New reservation request</h2>
 	<p>We'll get back to you shortly - usually within a day or two.  </p>
+	<hr>
 
-	<div class="form-container">
-		<form class="well form-inline" method="post" action="/reservation/create/">{% csrf_token %}
+	<div class="form-container col-md-9">
+		<form method="post" role="form" action="/reservation/create/">{% csrf_token %}
 
 			<p>Select arrival and departure dates to show known availability.</p> 
-			<div class="reservation-dates">
-				<span class="reservation-form-dates">Arrive: {{ form.arrive }}</span> 
-				<span class="reservation-form-dates">Depart: {{ form.depart}}</span>
+
+			<div class="reservation-dates form-group">
+				<div class="col-md-6">Arrive: {{ form.arrive }}</div> 
+				<div class="col-md-6">Depart: {{ form.depart}}</div>
 			</div>
+			
 			<div id="show-room-availability"></div>
+			
 			<div id="reservation-additional-info">
 				<div class="field-wrapper">	
 					<label for="id_purpose">When you're happy with your room selection, 
 					tell us a bit about the purpose of your trip, and hit submit!</label>
 					<span class="form-help-text"></span>
-					<div class="form-field-body">
-						<textarea id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
+					<div class="form-field-body form-group">
+						<textarea class="form-control" id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
 					</div>
 				</div>
+				
 				<div id="optional-fields-header">
-					<i id="optional-fields-header-icon" class="icon-plus"></i>Optional fields: arrival time or additional comments... let us know!
+					<i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i> Optional fields: arrival time or additional comments... let us know!
 				</div>
+				
 				<div id="optional-fields">
 					<div class="field-wrapper">	
 						<label class="label-optional-field" for="id_arrival_time">Arrival time if known?</label>
-						<div class="form-field-body">
-							<input id="id_arrival_time" type="text" name="arrival_time" maxlength="200" />	
+						<div class="form-field-body form-group">
+							<input class="form-control" id="id_arrival_time" type="text" name="arrival_time" maxlength="200" />	
 						</div>
 					</div>
 					<div class="field-wrapper">	
 						<label class="label-optional-field" for="id_comments">Any additional comments. (Optional)</label>
 						<span class="form-help-text"></span>
-						<div class="form-field-body">
-							<textarea id="id_comments" rows="3" cols="40" name="comments"></textarea>							
+						<div class="form-field-body form-group">
+							<textarea class="form-control" id="id_comments" rows="3" cols="40" name="comments"></textarea>							
 						</div>
 					</div>
 				</div>
 			</div>
 
 			<br>
-			<input id="submit-reservation" type="submit" class="btn disabled" value="Submit" disabled>
+			<input id="submit-reservation" type="submit" class="btn btn-default disabled" value="Submit">
 			<div id="reassure"></div>
 
 		</form>
@@ -136,9 +142,11 @@
 			console.log("form is ready to submit!")
 			$("#submit-reservation").prop("disabled", false);
 			$("#submit-reservation").removeClass("disabled")
+			$("#submit-reservation").addClass("btn-success")
 		} else {
 			$("#submit-reservation").prop("disabled", true);
 			$("#submit-reservation").addClass("disabled")
+			$("#submit-reservation").removeClass("btn-success")
 		}
 	});
 

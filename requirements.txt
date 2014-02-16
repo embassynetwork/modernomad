@@ -6,6 +6,8 @@ Pillow
 django-celery
 Celery
 eventbrite
+lxml
+git+https://git@github.com/opendoor/django-gather.git
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
