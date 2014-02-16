@@ -1303,3 +1303,11 @@ h3.no-top-margin {
 #event-actions {
 	margin-top: 20px;
 }
+
+#res-action-email-user #id_body {
+	margin-bottom: 20px;
+}
+
+.manage-button-spacer {
+	margin-bottom: 20px;
+}

@@ -214,7 +214,7 @@ class Reservation(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 	status = models.CharField(max_length=200, choices=RESERVATION_STATUSES, default=PENDING, blank=True)
-	user = models.ForeignKey(User)
+	user = models.ForeignKey(User, related_name='reservations')
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)

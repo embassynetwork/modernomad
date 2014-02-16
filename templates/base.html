@@ -31,23 +31,21 @@
 
 		<!-- Part 1: Wrap all page content here -->
 		<div id="flyout">
-			<div id="embassy-logo-menu">
-				<img src="/media/img/embassy_logo.png"/>
-			</div>
-			<p class="easy-reading">Home is one of the few social institutions that remains largely untouched by new modes of interaction rooted in the sharing economy and open source philosophies.</p>
+			<h2>Embassy Network</h2>
+			<p class="easy-reading">The Embassy Network is a collection of
+			coliving houses prototyping a new approach to Home, one in which
+			members flow freely between locations as they travel the globe for
+			work and collaboration.</p>
 
-			<p class="easy-reading">We see a nascent model of housing emerging in a new generation of community houses around the globe. It is a model based on intention, creativity, sharing, and travel. A network of houses, connected together by members who flow freely between locations.</p>
+			<p class="easy-reading">Embassy locations are united through the
+			values of co-creation, curiosity and class. These embassies and
+			their residents are ambassadors of a modern culture of 
+			openness, collaboration, and connectivity.</p>
+
+			<p class="easy-reading">Visit the global <a
+				href="http://embassynetwork.com" target="blank">Embassy Network</a> website to
+			learn more about other locations in the network, and get involved.</p>
 			
-			<ul id="">
-				<li>
-					<h2>Embassy Beta</h2>
-					<span>San Francisco</span>
-				</li>
-				<li>
-					<h2>Basecamp</h2>
-					<span>San Francisco</span>
-				</li>
-			</ul>
 		</div><!-- end flyout -->
 		
 			<div id="header-wrap">
@@ -101,8 +99,11 @@
 										</a>
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
 											<li><a href="/residents">Residents</a></li>
-											<li><a href="/calendar">Guest Calendar</a></li>
-											<li><a href="/broadcast">Say Hello</a></li>
+											{{ user.reservation_set.count }}
+											{% if user.reservation_set.count > 0 %}
+												<li><a href="/calendar">Guest Calendar</a></li>
+												<li><a href="/broadcast">Say Hello</a></li>
+											{% endif %}
 										</ul>
 									</li>
 									<li class="dropdown">

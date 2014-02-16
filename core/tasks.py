@@ -51,11 +51,11 @@ weekday_number_to_name = {
 #	msg.send()
 #
 
-@periodic_task(run_every=crontab(hour=4, minute=30))
+@periodic_task(run_every=crontab(hour=5, minute=30))
 #@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 def guest_today_notification():
 	today = datetime.date.today()
-	reservations_today = Reservation.today.get_query_set()
+	reservations_today = Reservation.today.confirmed()
 	guest_emails = []
 	for r in reservations_today:
 		guest_emails.append(r.user.email)
@@ -140,8 +140,8 @@ def send_guest_welcome(upcoming):
 			'day_of_week' : day_of_week,
 			'site_url': domain,
 			'house_code': settings.HOUSE_ACCESS_CODE,
-			'events_url' : settings.EVENTS_LINK,
-			'facebook_group' : settings.FACEBOOK_GROUP,
+			'events_url' : domain + '/events/upcoming/',
+			'current_email' : 'current@' + settings.LIST_DOMAIN,
 			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.username,)),
 			'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.id,)),
 		})

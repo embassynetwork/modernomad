@@ -1,10 +1,41 @@
 {% extends "content-base.html" %}
-
 {% block content %}
 
 <div id="spinner">
     <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
 </div>	
+
+<!-- Email Modal -->
+
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3 class="modal-title" id="myModalLabel">Email {{ r.user.first_name }} </h3>
+			</div>
+			<div class="modal-body">
+				<!-- select menu specifies which email to show -->
+				<div>Select a template from the dropdown list to populate an email
+					with relevant default text. If you would like to add a new
+					template, visit the admin section of the site!</div>
+				<select name="select-email" id="which-email-select">
+					{% for template_name in email_templates_by_name %}
+					<option id="option{{forloop.counter}}" name="select-email" value="{{ template.name }}">
+					{{template_name}}
+					</option>
+					{% endfor %}
+				</select>
+
+				<!-- the selected email will be inserted here -->
+				<div id="selected-email">
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+
 
 <div class="row" id="reservation-nav">
 	<a href="/manage/reservations/"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
@@ -24,7 +55,15 @@
 
 	<div class="res-actions-secondary"><h2>Manage</h2></div>
 
-		<a href="#emailModal" id="email-user-button" role="button" class="btn btn-default" data-toggle="modal">Email this User</a>
+		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+
+
+		{% if r.reconcile.status == 'paid' %}
+		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="/manage/reservation/{{r.id}}/sendreceipt/" >
+			{% csrf_token %}
+			<input class="btn-default btn" type="submit" value="Send Receipt">
+		</form>
+		{% endif %}
 
 		{% if r.status != 'canceled' %}
 
@@ -132,33 +171,6 @@
 {% endif %}
 
 
-<!-- Email Modal -->
-<div id="emailModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-		<h3 id="myModalLabel">Email {{ r.user.first_name }} </h3>
-	</div>
-	<div class="modal-body">
-	
-			<!-- select menu specifies which email to show -->
-			<div>Select a template from the dropdown list to populate an email
-				with relevant default text. If you would like to add a new
-				template, visit the admin section of the site!</div>
-			<select name="select-email" id="which-email-select">
-				{% for template_name in email_templates_by_name %}
-				<option id="option{{forloop.counter}}" name="select-email" value="{{ template.name }}">
-						{{template_name}}
-					</option>
-				{% endfor %}
-			</select>
-
-			<!-- the selected email will be inserted here -->
-			<div id="selected-email">
-			</div>
-	</div>
-</div>
-
-
 {% endblock %}
 
 {% block extrajs %}
@@ -222,11 +234,13 @@ $(document).ready(function() {
 		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
 			'<form id="res-action-email-user" method=POST action="/manage/reservation/{{r.id}}/sendmail/" >' +
 			"{% csrf_token %}" +
+			'<div class="form-group">' +
 			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
 			'<span class="email-form-label">From: </span> {{f.sender}} <br>' +
 			'<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
 			'{{f.body|escapejs}}' +
 			'{{f.footer|escapejs}}' +
+			'</div>' + 
 			'<submit value="Send">' +
 			'<div class="modal-footer">' +
 				'<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +

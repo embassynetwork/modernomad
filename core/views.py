@@ -584,6 +584,17 @@ def ReservationChargeCard(request, reservation_id):
 		return HttpResponse(status=500)
 
 @group_required('house_admin')
+def ReservationSendReceipt(request, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	reservation = Reservation.objects.get(id=reservation_id)
+	if reservation.reconcile.status == Reconcile.PAID:
+		reservation.reconcile.send_receipt()
+	messages.add_message(request, messages.INFO, "The receipt was sent.")
+	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
+
+
+@group_required('house_admin')
 def ReservationToggleComp(request, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')

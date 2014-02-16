@@ -165,11 +165,11 @@ class EmailTemplateForm(forms.Form):
 	''' We don't actually make this a model form because it's a derivative
 	function of a model but not directly constructed from the model fields
 	itself.''' 
-	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly'}))
-	recipient = forms.EmailField() 
-	footer = forms.CharField(widget=forms.Textarea(attrs={'readonly':'readonly'}))
-	subject = forms.CharField()
-	body = forms.CharField(widget=forms.Textarea)
+	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
+	recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
+	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
 
 	def __init__(self, tpl, reservation):
 		''' pass in an EmailTemplate instance, and a reservation object '''
