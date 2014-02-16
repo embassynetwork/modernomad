@@ -1145,6 +1145,10 @@ div#spinner
 	text-decoration: none;
 }
 
+#more-events-link {
+	margin-right: 30px;
+}
+
 #more-events-link a:hover {
 	color:#ea6f56;
 	text-decoration: none;
