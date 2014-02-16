@@ -99,11 +99,11 @@
 										</a>
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
 											<li><a href="/residents">Residents</a></li>
-											{{ user.reservation_set.count }}
-											{% if user.reservation_set.count > 0 %}
+
+											{% ifusergroup house_admin %}
 												<li><a href="/calendar">Guest Calendar</a></li>
-												<li><a href="/broadcast">Say Hello</a></li>
-											{% endif %}
+											{% endifusergroup %}
+											<li><a href="/broadcast">Say Hello</a></li>
 										</ul>
 									</li>
 									<li class="dropdown">
