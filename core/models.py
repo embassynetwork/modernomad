@@ -166,7 +166,7 @@ class ReservationManager(models.Manager):
 
 	def confirmed_on_date(self):	
 		confirmed_reservations = self.on_date(the_day, status="confirmed")
-		return (list(approved_reservations) + list(confirmed_reservations))
+		return list(confirmed_reservations)	
 
 class TodayManager(models.Manager):
 	def get_query_set(self):
