@@ -48,51 +48,50 @@
 					</div>
 				</div>
 					
-				<!-- events section! -->
-
 				<div class="row" id="landing-page-event-info">
-					<div class="col-md-10 col-centered">
-						<div class="col-md-6" id="events">
-							<h2 class="">What are we up to?</h2>
 
-							{% for event in events %}
-								<div class="col-md-12 event">
-									<div class="col-md-1 date"><span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}</div>
-									<div class="col-md-11">
-										<a href="/events/e/{{event.slug}}">
-											<h3 class="event-title">{{ event.title}}</h3>
-											{% if forloop.first %}
-												<img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
-											{% endif %}
-										</a>
-									</div>
-								</div>
-							{% empty %}
-							<p class="lead">No upcoming events! Why not <a href="/events/create/">propose one?</a></p>	
-							{% endfor %}
+					<!-- events section! -->
 
-							<h3 id="more-events-link" class="pull-right"><a href="/events/upcoming">See All Upcoming</a></h3>
-						</div>
-						
-				<!-- People Section! -->
-						<div class="col-md-6" id="profiles">
-							<h2 id="our-community-heading">Our Community</h2>
-							<div class="row profiles">
-								
-									{% for person in coming_month %}
-										<div class="float-left homepage-user-wrapper">			
-											<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
-											<div class="homepage-user-descr" id="user-{{person.id}}">
-												<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
-												... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
-											</div>
-										</div>
-									{% endfor %}
+					<div class="col-md-5 col-md-offset-1 col-xs-12" id="events">
+						<h2 class="">What are we up to?</h2>
 
-								<!-- end person in subset -->
-								
+						{% for event in events %}
+						<div class="col-xs-12 event">
+							<div class="col-xs-1 date"><span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}</div>
+							<div class="col-xs-11">
+								<a href="/events/e/{{event.slug}}">
+									<h3 class="event-title">{{ event.title}}</h3>
+									{% if forloop.first %}
+									<img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
+									{% endif %}
+								</a>
 							</div>
 						</div>
+						{% empty %}
+
+						<p class="lead">No upcoming events! Why not <a href="/events/create/">propose one?</a></p>	
+						{% endfor %}
+
+						<h3 id="more-events-link" class="pull-right"><a href="/events/upcoming">See All Upcoming</a></h3>
+					</div>
+
+					<!-- People Section! -->
+
+					<div class="col-md-5 col-xs-12" id="profiles">
+						<h2 id="our-community-heading">Our Community</h2>
+
+						{% for person in coming_month %}
+							<div class="float-left homepage-user-wrapper">			
+								<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+								<div class="homepage-user-descr" id="user-{{person.id}}">
+									<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
+									... <a class="homepage-user-link" href="/people/{{ person.username}}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
+								</div>
+							</div>
+						{% endfor %}
+
+						<!-- end person in subset -->
+
 					</div>
 				</div>
 
