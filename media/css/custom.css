@@ -150,13 +150,12 @@ a:hover {
 #house {
 	background:#2f2f2f;
 	color:#fff;
-	height:223px;
+	//height:223px;
 }
 
 #house-image {
-	background:url('/media/img/house_pic.png') no-repeat;
-	background-size:cover;
 	height:223px;
+	width:100%;
 	padding:0;
 	
 }
@@ -254,7 +253,6 @@ a:hover {
 
 #eventlist-signup-wrapper .btn {
 	background:#fff;
-	padding:0;
 	height:70px;
 	
 }
@@ -410,12 +408,17 @@ a:hover {
 	color: #000;
 }
 
+#list-signup-submit {
+	white-space: normal;
+}
+
 #list-signup-submit:hover {
 	color: #ea6f56;
 }
 
 #stay-button {
 	color: #000;
+	white-space: normal;
 }
 
 #stay-button:hover {
