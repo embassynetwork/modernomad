@@ -1,4 +1,4 @@
--------------- What's Going Down ----------------
+---------- What's Going Down -----------
 
 Events happening today:
 {% for event in events_today %}
@@ -23,18 +23,18 @@ People departing today:
 	None!
 {% endfor %}
 
--------------- Would love your eyeballs ----------------
+---------- Would love your eyeballs ------------
 
 Events waiting for approval:
 {% for event in events_pending %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{ event.slug}} 
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/e/{{ event.slug}} 
 {% empty %}
 	None!
 {% endfor %}
 
 Events seeking feedback:
 {% for event in events_feedback %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{ event.slug}} 
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/e/{{ event.slug}} 
 {% empty %}
 	None!
 {% endfor %}

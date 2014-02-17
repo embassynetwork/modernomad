@@ -74,7 +74,7 @@ Now you can go ahead and start creating content.
 - make sure rabbitmq is running, or start it: `rabbitmq-server`
 - start celery beat (the scheduler for periodic tasks): `celery beat` (or some
   more sophisticated version of the same command, depending on your local or
-  production setup), such as `./manage.py celeryd -v 2 -B -s celery -E -l INFO`
+  production setup), such as `./manage.py celeryd -v 2 -B -s celery -E -l INFO -n some_unique_name`
 - start django `./manage.py runserver domain port`
 
 
