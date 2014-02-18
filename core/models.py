@@ -548,6 +548,7 @@ def size_images(sender, instance, **kwargs):
 	print instance.image
 	try:
 		obj = UserProfile.objects.get(pk=instance.pk)
+		print obj.image
 	except UserProfile.DoesNotExist:
 		# if the reservation does not exist yet, then it's new. 
 		obj = None
@@ -560,6 +561,7 @@ def size_images(sender, instance, **kwargs):
 
 	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
+
 		img_upload_path_rel = profile_img_upload_to(instance, instance.image.name)
 		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_path_rel)
 		# resize returns a copy. resize() forces the dimensions of the image

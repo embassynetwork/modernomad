@@ -175,26 +175,27 @@ def UserEdit(request, username):
 			profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
 			if profile_form.is_valid(): 
 				updated_user = profile_form.save()
+				profile = updated_user.profile
 
 				print "request data: image field"
 				img_data = request.POST.get("image")
-				print img_data
-				img_data = base64.b64decode(img_data)
-				filename = "%s.png" % uuid.uuid4()
-				# XXX make the upload path a fixed setting in models, since it's
-				# referenced in three places
-				upload_path = "data/avatars/%s/" % user.username
-				upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-				if not os.path.exists(upload_abs_path):
-					os.makedirs(upload_abs_path)
-				full_file_name = os.path.join(upload_abs_path, filename)
-				with open(full_file_name, 'wb') as f:
-					f.write(img_data)
-					f.close()
-				profile = updated_user.profile
-				profile.image = full_file_name
-				profile.save()
+				if img_data:
+					print img_data
+					img_data = base64.b64decode(img_data)
+					filename = "%s.png" % uuid.uuid4()
+					# XXX make the upload path a fixed setting in models, since it's
+					# referenced in three places
+					upload_path = "data/avatars/%s/" % user.username
+					upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+					if not os.path.exists(upload_abs_path):
+						os.makedirs(upload_abs_path)
+					full_file_name = os.path.join(upload_abs_path, filename)
+					with open(full_file_name, 'wb') as f:
+						f.write(img_data)
+						f.close()
+					profile.image = full_file_name
 
+				profile.save()
 				client_msg = "Your profile has been updated."
 				messages.add_message(request, messages.INFO, client_msg)
 				return HttpResponseRedirect("/people/%s" % updated_user.username)
