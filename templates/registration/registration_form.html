@@ -75,7 +75,7 @@ about, and possible connections around work, projects and ideas. It should only 
 	<script src="/media/js/imgcrop.js"></script>
 	<script>
 		$("#newprofileform").submit(function (e) {
-			if ('{{ has_image }}' == 'False' && ! $("#id_image").val() ) {
+			if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
 				$("#img-upload-error").html('<span class="text-error">This field is required.</span>');
 				$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
 				return false;
