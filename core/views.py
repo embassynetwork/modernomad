@@ -702,8 +702,11 @@ class Registration(registration.views.RegistrationView):
 		interrupt the registration process here.
 		"""
 		url_path = request.get_full_path().split("next=")
-		messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to make a reservation!')
 		if len(url_path) > 1 and url_path[1] == "/reservation/create/":
+			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to make a reservation!')
+			return (url_path[1], (), {'username' : user.username})
+		elif len(url_path) > 1 and url_path[1] == "/events/create/":
+			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to propose your event!')
 			return (url_path[1], (), {'username' : user.username})
 		else:
 			return ('user_details', (), {'username': user.username})
