@@ -202,14 +202,14 @@ def UserEdit(request, username):
 			else:
 				print profile_form.errors
 		else:
-			if profile.image:
-				image_required = False
-			else:
-				image_required = True
-			print 'profile image required?'
-			print image_required
 			profile_form = UserProfileForm(instance=profile)		
-		return render(request, 'registration/registration_form.html', {'form': profile_form, 'image_required': image_required, 'existing_user': True})
+		if profile.image:
+			has_image = True
+		else:
+			has_image = False
+		print 'profile image already?'
+		print has_image
+		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
 	return HttpResponseRedirect("/")
 
 @login_required

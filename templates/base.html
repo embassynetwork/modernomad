@@ -77,7 +77,6 @@
 								<li><a href="/about">About</a></li>
 								<li><a href="/stay">Stay</a></li>
 								
-								{% if user.is_authenticated %}
 									<li class="dropdown">
 										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
 											Events <b class="caret"></b>
@@ -85,12 +84,12 @@
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
 											<li><a href="/events/upcoming/">Upcoming</a></li>
 											<li><a href="/events/create/">New Event</a></li>
-											<li><a href="/events/past/">Past Events</a></li>
+											{% if user.is_authenticated %}
+												<li><a href="/events/past/">Past Events</a></li>
+											{% else %}
+											{% endif %}
 										</ul>
 									</li>
-								{% else %}
-									<li><a href="/events/upcoming/">Events</a></li>
-								{% endif %}
 
 								{% if user.is_authenticated %}
 									<li class="dropdown">

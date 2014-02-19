@@ -21,16 +21,16 @@
 {% endif %}
 
 <p class="lead">Your profile tells us and others a little bit about who you are, what you are passionate
-about, and possible connections around work, projects and ideas. It might take
-5-10 minutes, but it will pay back dividends, and help to connect with the other awesome people around the space.</p>
+about, and possible connections around work, projects and ideas. It should only take about
+5 minutes, but will help in connecting with the other awesome people around the space.</p>
 
 <hr>
 
 <form class="cropping_image_container">
-{% if image_required %}
-	<p id="img-upload-instruction">Upload an image for your profile (required).</p>
+{% if has_image %}
+	<p id="img-upload-instruction">Update your Profile image here (optional).</p>
 {% else %}
-	<p id="img-upload-instruction">Update your profile image here (optional).</p>
+	<p id="img-upload-instruction">Upload an image for your profile (required).</p>
 {% endif %}
 <p id="img-upload-error"></p>
 <div>
@@ -75,7 +75,7 @@ about, and possible connections around work, projects and ideas. It might take
 	<script src="/media/js/imgcrop.js"></script>
 	<script>
 		$("#newprofileform").submit(function (e) {
-			if ('{{ image_required }}' == 'True' && ! $("#id_image").val() ) {
+			if ('{{ has_image }}' == 'False' && ! $("#id_image").val() ) {
 				$("#img-upload-error").html('<span class="text-error">This field is required.</span>');
 				$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
 				return false;

@@ -9,7 +9,7 @@ import core.forms
 # view to collect our additional user profile information.
 user_patterns = patterns('',
     url(r'^register/$', Registration.as_view(form_class = core.forms.UserProfileForm),
-        name='registration_register'),
+		name='registration_register'),
 )
 user_patterns += registration.backends.default.urls.urlpatterns
 
