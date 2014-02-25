@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.shortcuts import render
 from core.models import Reservation, UserProfile, Reconcile
 from gather.models import Event
@@ -15,6 +16,7 @@ from django.db.models import Q
 from django.contrib.sites.models import Site
 from django.contrib import messages
 import eventbrite
+from gather.tasks import published_events_today_local, events_pending
 
 
 def index(request):
@@ -116,14 +118,16 @@ def get_calendar_dates(month, year):
 def today(request):
 	# get all the reservations that intersect today (including those departing
 	# and arriving today)
-	today = datetime.date.today()
+	today = timezone.now()
 	reservations_today = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=today).exclude(arrive__gt=today)
 	guests_today = []
 	for r in reservations_today:
 		guests_today.append(r.user)
 	residents = User.objects.filter(groups__name='residents')
 	people_today = guests_today + list(residents)
-	return render(request, "today.html", {'people_today': people_today})
+
+	events_today = published_events_today_local()
+	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
 
 
 def occupancy(request):

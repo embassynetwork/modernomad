@@ -2,7 +2,7 @@
 
 Events happening today:
 {% for event in events_today %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{ event.slug}} 
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{event.id}}/{{ event.slug}} 
 {% empty %}
 	None!
 {% endfor %}
@@ -27,14 +27,14 @@ People departing today:
 
 Events waiting for approval:
 {% for event in events_pending %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/e/{{ event.slug}} 
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{event.id}}/{{ event.slug}} 
 {% empty %}
 	None!
 {% endfor %}
 
 Events seeking feedback:
 {% for event in events_feedback %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/e/{{ event.slug}} 
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{event.id}}/{{ event.slug}} 
 {% empty %}
 	None!
 {% endfor %}

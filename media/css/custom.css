@@ -1322,3 +1322,7 @@ h3.no-top-margin {
 #facebook-share-link {
 	text-align: center;
 }
+
+.viewable-area-only {
+	height: 100%;
+}
