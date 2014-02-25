@@ -39,7 +39,12 @@ def ListUsers(request):
 
 @login_required
 def GetUser(request, username):
-	user = User.objects.get(username=username)
+	try:
+		user = User.objects.get(username=username)
+	except:
+		messages.add_message(request, messages.INFO, 'There is no user with that username.')
+		return HttpResponseRedirect('/404')
+
 	reservations = Reservation.objects.filter(user=user).exclude(status='deleted')
 	past_reservations = []
 	upcoming_reservations = []
