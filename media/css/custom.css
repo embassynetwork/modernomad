@@ -2,13 +2,13 @@
 ==========================[Typography]==========================
 ========================================================== */
 @font-face {
-	font-family:'Archer Bold';
-	src:url('/media/fonts/Archer-Semibold-Pro.otf');
-}
-
-@font-face {
-	font-family:'Archer Italic';
-	src:url('/media/fonts/Archer-BoldItal-Pro.otf');
+	font-family:'Museo';
+	src:url('/media/fonts/Museo500.eot');
+	src:url('/media/fonts/Museo500.eot?#iefix') format('embedded-opentype'),
+		url('/media/fonts/Museo500.woff') format('woff'),
+		url('/media/fonts/Museo500.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
 }
 
 body {
@@ -16,13 +16,13 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
-	font-family: 'Archer Bold', sans-serif;
+h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
+	font-family: 'Museo', serif;
+	font-weight: 500;
 	-webkit-font-smoothing: antialiased;
 }
 
 .fancy-header {
-	//font-family:'Archer Bold', serif;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -131,7 +131,6 @@ a:hover {
 #login {
 	padding:32px 0;
 	border-right:1px solid rgba(0,0,0,0.1);
-	font-family:"Archer Bold";
 }
 
 #login a {
@@ -239,10 +238,6 @@ a:hover {
 	
 }
 
-.btn {
-	font-family:'Archer Bold';
-}
-
 #rsvp-status-yes, #rsvp-status-no {
 	width: 166px;
 }
@@ -314,14 +309,12 @@ a:hover {
 	text-align: center;
 	padding: 0;
 	font-size: 24px;
-	font-family: "Archer Bold";
 	color:rgba(0,0,0,0.3);
 	
 }
 
 .event .date span {
 	font-size: 50px;
-	font-family: "Archer Bold";
 	display: block;
 	line-height: 50px;
 	text-align: center;
@@ -1272,14 +1265,12 @@ h3.no-top-margin {
 .event-date-day {
 	font-size: 25px;
 	line-height: 30px;
-	font-family: "Archer Bold";
 	display: block;
 	text-align: center;
 }
 
 .event-date-month, .event-date-time, .event-location {
 	font-size: 20px;
-	font-family: "Archer Bold";
 	line-height: 30px;
 }
 
@@ -1288,7 +1279,6 @@ h3.no-top-margin {
 }
 
 .event-date-separator {
-	font-family: "Archer Bold";
 	line-height: 30px;
 	font-size: 15px;
 	margin: 0px 10px;
