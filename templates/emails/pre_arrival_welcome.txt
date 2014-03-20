@@ -38,7 +38,7 @@ at {{ profile_url }}. To view your reservation details
 {{ reservation_url }}
 
 Thanks and see you soon!
-{{ location name }}
+{{ location_name }}
 
 P.S. More questions? Just reply to this email and we'll do our best to help you
 out!
