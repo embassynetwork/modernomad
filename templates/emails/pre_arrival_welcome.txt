@@ -4,7 +4,7 @@ We look forward to seeing you at the Embassy on {{ day_of_week }}!
 
 ** Key Data **
 
-The house is located at 399 Webster Street, San Francisco, CA, 94117. Access to
+The house is located at {{ address }}. Access to
 the house is via a keypad on the front door. The access code is "{{ house_code }}". 
 Important: please **do not share** the door code with anyone. 
 
@@ -15,8 +15,8 @@ And speaking of food, all food and drink at the house is shared! So please help
 yourself to anything in the fridges or cabinets: cook, eat leftovers, jump in
 on a meal in progress, or take lunch with you. 
 
-You can connect to any of the wireless access points named "Embassy..." you
-see at the house. The wireless password for all access points is "netpositive."
+You can connect to any of the wireless access points named "{{ ssid }}" you
+see at the house. The wireless password for all access points is "{{ ssid_password }}."
 
 You are welcome to bring your bags by at any time during the day when you
 arrive, and use the house throughout your departure day.  Beds are generally
@@ -38,7 +38,7 @@ at {{ profile_url }}. To view your reservation details
 {{ reservation_url }}
 
 Thanks and see you soon!
-The Embassy Stay Bot
+{{ location name }}
 
 P.S. More questions? Just reply to this email and we'll do our best to help you
 out!

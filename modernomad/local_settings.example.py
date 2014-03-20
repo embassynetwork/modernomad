@@ -15,6 +15,11 @@ PRODUCTION = 1
 
 # What is the name of this house, building, establishment, etc.?
 LOCATION_NAME = "Embassy SF"
+LOCATION_ADDRESS = "399 Webster Street, San Francisco, 94117"
+
+# HOUSE INFO
+SSID = "Your wireless network name"
+SSID_PASSWORD = "your wireness network password"
 
 # default mode is dev. change to production as appropriate. 
 MODE = DEVELOPMENT
