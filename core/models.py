@@ -332,7 +332,7 @@ class Reconcile(models.Model):
 	)
 
 	reservation = models.OneToOneField(Reservation)
-	custom_rate = models.IntegerField(null=True, blank=True, help_text="If empty, the default rate for shared or private accommodation will be used.") # default as a function of reservation type
+	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.") 
 	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
 	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
 	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
@@ -347,10 +347,8 @@ class Reconcile(models.Model):
 	def get_rate(self):
 		if self.status == Reconcile.COMP:
 			return 0
-		elif not self.custom_rate:
-			return self.default_rate()
 		else:
-			return self.custom_rate
+			return self.rate
 	get_rate.short_description = 'Rate'
 
 	def html_color_status(self):
@@ -364,7 +362,6 @@ class Reconcile(models.Model):
 			color_code = "#000000"
 		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
 	html_color_status.allow_tags = True
-
 
 	def default_rate(self):
 		# default_rate always returns the default rate regardless of comps or
@@ -500,6 +497,18 @@ class Reconcile(models.Model):
 
 
 Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
+
+@receiver(pre_save, sender=Reconcile)
+def set_rate(sender, instance, **kwargs):
+	try:
+		rec = Reconcile.objects.get(pk=instance.pk)
+	except Reconcile.DoesNotExist:
+		# if the reconcile object does not exist yet, then it's new. set the
+		# rate from the default rate for this room. 
+		instance.rate = instance.reservation.room.default_rate
+	return
+
+
 
 def profile_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
