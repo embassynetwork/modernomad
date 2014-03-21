@@ -274,11 +274,11 @@ def notify_house_admins(sender, instance, **kwargs):
 		domain = Site.objects.get_current().domain
 		if obj.hosted:
 			hosting_info = " for guest %s" % obj.guest_name
-			subject = "[Embassy SF] New Reservation: %s hosting %s from %s - %s" % (obj.user.first_name, 
+			subject = "%s New Reservation: %s hosting %s from %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, obj.user.first_name, 
 				obj.guest_name, str(obj.arrive), str(obj.depart))
 		else:
 			hosting_info = ""
-			subject = "[Embassy SF] Reservation Request, %s %s, %s - %s" % (obj.user.first_name, 
+			subject = "%s Reservation Request, %s %s, %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, obj.user.first_name, 
 			obj.user.last_name, str(obj.arrive), str(obj.depart))
 
 		plaintext = get_template('emails/newreservation.txt')
@@ -304,9 +304,9 @@ def notify_house_admins(sender, instance, **kwargs):
 
 		})
 
-		subject = "[Embassy SF] Reservation Request, %s %s, %s - %s" % (obj.user.first_name, 
+		subject = "%s Reservation Request, %s %s, %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, obj.user.first_name, 
 			obj.user.last_name, str(obj.arrive), str(obj.depart))
-		sender = "stay@embassynetwork.com"
+		sender = settings.DEFAULT_FROM_EMAIL
 		recipients = []
 		for admin in house_admins:
 			recipients.append(admin.email)
@@ -409,8 +409,8 @@ class Reconcile(models.Model):
 			'total': self.total_owed,
 		}) 
 
-		subject = "[Embassy SF] Thanks for Staying with us!" 
-		sender = "stay@embassynetwork.com"
+		subject = "%s Thanks for Staying with us!" % settings.EMAIL_SUBJECT_PREFIX 
+		sender = settings.DEFAULT_FROM_EMAIL
 		recipients = [self.reservation.user.email,]
 		text_content = plaintext.render(c)
 		html_content = htmltext.render(c)
@@ -454,8 +454,8 @@ class Reconcile(models.Model):
 			'total_paid': total_paid,
 		}) 
 
-		subject = "[Embassy SF] Receipt for your Stay %s - %s" % (str(self.reservation.arrive), str(self.reservation.depart))  
-		sender = "stay@embassynetwork.com"
+		subject = "%s Receipt for your Stay %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, str(self.reservation.arrive), str(self.reservation.depart))  
+		sender = settings.DEFAULT_FROM_EMAIL
 		recipients = [self.reservation.user.email,]
 		text_content = plaintext.render(c)
 		html_content = htmltext.render(c)
