@@ -137,6 +137,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	inlines = [ReconcileInline]
 	ordering = ['depart',]
 	actions= ['send_invoice', 'send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
+	save_as = True
 	
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
