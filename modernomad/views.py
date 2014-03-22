@@ -161,8 +161,8 @@ def occupancy(request):
 
 	reconciles_this_month = Reconcile.objects.filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
 	for r in reconciles_this_month:
-		nights_before_this_month = 0
-		nights_after_this_month = 0
+		nights_before_this_month = datetime.timedelta(0)
+		nights_after_this_month = datetime.timedelta(0)
 		if r.reservation.arrive < start and r.reservation.depart < start:
 			# all nights for this reservation were in a previous month
 			nights_before_this_month = (r.reservation.depart - r.reservation.arrive)
