@@ -37,6 +37,14 @@
 <p>Total comped nights: <span class="badge">{{total_comped_nights}}</span></p>
 <p>Total unpaid: <span class="badge badge-important">${{unpaid_total}}</span></p>
 <p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
+<p>Income received for this month: {{ income_for_this_month }}</p>
+<p>Income received for future months: {{ income_for_future_months }}</p>
+<p>Income applied from past months: {{ income_from_past_months }}</p>
+<p>Income received for past months: {{ income_for_past_months }}</p>
+{% for room, amt in room_income.items %}
+	<p>{{ room|title }}: {{ amt }} </p>
+{% endfor %}
+
 
 <h5>Total estimated income : <span class="badge badge-success">${{total_income}}</span></h5>
 

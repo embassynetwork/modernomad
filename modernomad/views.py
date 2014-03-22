@@ -153,6 +153,44 @@ def occupancy(request):
 	total_shared_nights = 0
 	total_private_nights = 0
 	unpaid_total = 0
+	room_income = {}
+	income_for_this_month = 0
+	income_for_future_months = 0
+	income_from_past_months = 0
+	income_for_past_months = 0
+
+	reconciles_this_month = Reconcile.objects.filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
+	for r in reconciles_this_month:
+		nights_before_this_month = 0
+		nights_after_this_month = 0
+		if r.reservation.arrive < start and r.reservation.depart < start:
+			# all nights for this reservation were in a previous month
+			nights_before_this_month = (r.reservation.depart - r.reservation.arrive)
+		
+		elif r.reservation.arrive < start and r.reservation.depart <= end:
+			# only nights this month, don't need to calculate this here because
+			# it's calculated below. 
+			nights_before_this_month = (start - r.reservation.arrive)
+		
+		elif r.reservation.arrive >= start and r.reservation.depart <= end:
+			# only nights this month, don't need to calculate this here because
+			# it's calculated below. 
+			continue
+		
+		elif r.reservation.arrive >= start and r.reservation.depart > end:
+			nights_after_this_month = (r.depart - end)
+		
+		elif r.reservation.arrive > end:  
+			nights_after_this_month = (r.reservation.depart - r.reservation.arrive)
+
+		elif r.reservation.arrive < start and r.reservation.depart > end:  
+			# there are some days paid for this month that belong to the previous month
+			nights_before_this_month = (start - r.reservation.arrive)
+			nights_after_this_month = (r.reservation.depart - end)
+		
+		income_for_future_months = nights_after_this_month*(reconcile.paid_amount/(r.reservation.depart - r.arrive).days)
+		income_for_past_months = nights_before_this_month*(reconcile.paid_amount/(r.reservation.depart - r.arrive).days)
+
 	for r in reservations:
 		comp = False
 		if r.arrive >=start and r.depart <= end:
@@ -177,6 +215,16 @@ def occupancy(request):
 			unpaid = False
 		else:
 			total_income += nights_this_month*rate
+			this_room_income = room_income.get(r.room.name, 0)
+			this_room_income += rate*nights_this_month
+			room_income[r.room.name] = this_room_income
+
+			if r.reconcile.status == Reconcile.PAID:
+				if r.reconcile.payment_date < start:
+					income_from_past_months += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days)
+				else:
+					income_for_this_month += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days) 
+
 			if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
 				unpaid = True
 				unpaid_total += nights_this_month*rate
@@ -202,12 +250,16 @@ def occupancy(request):
 			if r.reconcile.status != Reconcile.COMP:
 				total_income_private += nights_this_month*rate
 
+	print room_income
+
 	return render(request, "occupancy.html", {"data": person_nights_data, 
 		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
 		'total_shared_nights': total_shared_nights, 'total_private_nights': total_private_nights,
 		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
 		"next_month": next_month, "prev_month": prev_month, "total_income_shared": total_income_shared,
-		"total_income_private": total_income_private, "report_date": report_date})
+		"total_income_private": total_income_private, "report_date": report_date, 'room_income':room_income, 
+		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
+		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months })
 
 @login_required
 def calendar(request):
