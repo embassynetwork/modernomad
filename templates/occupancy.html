@@ -29,22 +29,44 @@
 
 <hr>
 
-<p>Total person nights for {{report_date|date:"F"}}: <span class="badge">{{total_nights}}</span></p>
-<p>Total private nights: <span class="badge">{{total_private_nights}}</span></p>
-<p>Total shared nights: <span class="badge">{{total_shared_nights}}</span></p>
-<p>Total estimated income from shared : <span class="badge">${{total_income_shared}}</span></p>
-<p>Total estimated income from private: <span class="badge">${{total_income_private}}</span></p>
-<p>Total comped nights: <span class="badge">{{total_comped_nights}}</span></p>
-<p>Total unpaid: <span class="badge badge-important">${{unpaid_total}}</span></p>
-<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
-<p>Income received for this month: {{ income_for_this_month }}</p>
-<p>Income received for future months: {{ income_for_future_months }}</p>
-<p>Income applied from past months: {{ income_from_past_months }}</p>
-<p>Income received for past months: {{ income_for_past_months }}</p>
-{% for room, amt in room_income.items %}
-	<p>{{ room|title }}: {{ amt }} </p>
-{% endfor %}
+<div class="row">
+	<h4> Breakdown by Person Nights</h4>
+	<p>Total person nights for {{report_date|date:"F"}}: <span class="badge">{{total_nights}}</span></p>
+	<p>Total private nights: <span class="badge">{{total_private_nights}}</span></p>
+	<p>Total shared nights: <span class="badge">{{total_shared_nights}}</span></p>
+</div>
+<div class="row">
+	<h4> Breakdown by Private and Shared</h4>
+	<p>Total estimated income from shared : <span class="badge">${{total_income_shared}}</span></p>
+	<p>Total estimated income from private: <span class="badge">${{total_income_private}}</span></p>
+</div>
 
+<div class="row">
+	<h4>Comped and Unpaid</h4>
+	<p>Total comped nights: <span class="badge">{{total_comped_nights}}</span></p>
+	<p>Total unpaid: <span class="badge badge-important">${{unpaid_total}}</span></p>
+	<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
+</div>
+
+<div class="row">
+	<h4> Breakdown by Income Received Date</h4>
+	<p>Income received for this month: {{ income_for_this_month }}</p>
+	<p>Income applied from past months: {{ income_from_past_months }}</p>
+	<p><strong>Total income this month: {{ total_income_this_month }}</p>
+	<br>
+	<p><em>Income received for past months: {{ income_for_past_months }}</em></p>
+	<p><em>Income received for future months: {{ income_for_future_months }}</em></p>
+</div>
+
+<div class="row">
+	<h4> Breakdown by Room</h4>
+	{% for room, amt in room_income.items %}
+		<p>{{ room|title }}: {{ amt }} </p>
+	{% empty %}
+		None
+	{% endfor %}
+	<p><strong>Total by rooms: {{ total_by_rooms }}</p>
+</div>
 
 <h5>Total estimated income : <span class="badge badge-success">${{total_income}}</span></h5>
 

@@ -250,7 +250,8 @@ def occupancy(request):
 			if r.reconcile.status != Reconcile.COMP:
 				total_income_private += nights_this_month*rate
 
-	print room_income
+	total_income_this_month = income_for_this_month + income_from_past_months
+	total_by_rooms = sum(room_income.itervalues())
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 
 		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
@@ -259,7 +260,8 @@ def occupancy(request):
 		"next_month": next_month, "prev_month": prev_month, "total_income_shared": total_income_shared,
 		"total_income_private": total_income_private, "report_date": report_date, 'room_income':room_income, 
 		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
-		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months })
+		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
+		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms })
 
 @login_required
 def calendar(request):
