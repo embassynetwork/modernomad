@@ -36,23 +36,10 @@
 	<p>Total shared nights: <span class="badge">{{total_shared_nights}}</span></p>
 </div>
 <div class="row">
-	<h4> Breakdown by Private and Shared</h4>
-	<p>Total estimated income from shared : <span class="badge">${{total_income_shared}}</span></p>
-	<p>Total estimated income from private: <span class="badge">${{total_income_private}}</span></p>
-</div>
-
-<div class="row">
-	<h4>Comped and Unpaid</h4>
-	<p>Total comped nights: <span class="badge">{{total_comped_nights}}</span></p>
-	<p>Total unpaid: <span class="badge badge-important">${{unpaid_total}}</span></p>
-	<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
-</div>
-
-<div class="row">
 	<h4> Breakdown by Income Received Date</h4>
 	<p>Income received for this month: {{ income_for_this_month }}</p>
 	<p>Income applied from past months: {{ income_from_past_months }}</p>
-	<p><strong>Total income this month: {{ total_income_this_month }}</p>
+	<p><strong>Total income this month: {{ total_income_this_month }}</strong></p>
 	<br>
 	<p><em>Income received for past months: {{ income_for_past_months }}</em></p>
 	<p><em>Income received for future months: {{ income_for_future_months }}</em></p>
@@ -65,10 +52,23 @@
 	{% empty %}
 		None
 	{% endfor %}
-	<p><strong>Total by rooms: {{ total_by_rooms }}</p>
+	<p><strong>Total by rooms: {{ total_by_rooms }}</strong></p>
+</div>
+<div class="row">
+	<h4> Breakdown by Private and Shared</h4>
+	<p>Total estimated income from shared : <span class="badge">${{total_income_shared}}</span></p>
+	<p>Total estimated income from private: <span class="badge">${{total_income_private}}</span></p>
+	<p><strong>Total estimated income : <span class="badge badge-success">${{total_income}}</span></strong></h5>
 </div>
 
-<h5>Total estimated income : <span class="badge badge-success">${{total_income}}</span></h5>
+<div class="row">
+	<h4>Comped and Unpaid</h4>
+	<p>Total comped nights: <span class="badge">{{total_comped_nights}}</span></p>
+	<p>Total unpaid: <span class="badge badge-important">${{unpaid_total}}</span></p>
+	<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
+</div>
+
+
 
 
 <div id="by-month-nav">
