@@ -8,13 +8,17 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+	# this was manually edited to use rename column instead of deleting and
+	# creating an ew column, to preserve the data in the column.         
+	db.rename_column('core_reconcile', 'custom_rate', 'rate')
+
         # Deleting field 'Reconcile.custom_rate'
-        db.delete_column('core_reconcile', 'custom_rate')
+	#db.delete_column('core_reconcile', 'custom_rate')
 
         # Adding field 'Reconcile.rate'
-        db.add_column('core_reconcile', 'rate',
-                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
-                      keep_default=False)
+        #db.add_column('core_reconcile', 'rate',
+        #              self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
+        #              keep_default=False)
 
 
     def backwards(self, orm):
