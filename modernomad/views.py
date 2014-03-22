@@ -220,10 +220,11 @@ def occupancy(request):
 			this_room_income += rate*nights_this_month
 			room_income[r.room.name] = this_room_income
 
-			paid_rate = (r.reconcile.paid_amount/(r.depart - r.arrive).days)
-			if paid_rate != rate:
-				print "reservation %d has paid rate = $%d and rate set to $%d"
-				paid_rate_discrepancy += paid_rate - rate
+			if r.reconcile.payment_date:
+				paid_rate = (r.reconcile.paid_amount/(r.depart - r.arrive).days)
+				if paid_rate != rate:
+					print "reservation %d has paid rate = $%d and rate set to $%d"
+					paid_rate_discrepancy += nights_this_month*(paid_rate - rate)
 
 			if r.reconcile.status == Reconcile.PAID:
 				if (r.reconcile.payment_date and r.reconcile.payment_date < start):
