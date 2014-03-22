@@ -188,8 +188,8 @@ def occupancy(request):
 			nights_before_this_month = (start - r.reservation.arrive)
 			nights_after_this_month = (r.reservation.depart - end)
 		
-		income_for_future_months += nights_after_this_month*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
-		income_for_past_months += nights_before_this_month*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
+		income_for_future_months += nights_after_this_month.days*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
+		income_for_past_months += nights_before_this_month.days*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
 
 	for r in reservations:
 		comp = False
