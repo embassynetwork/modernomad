@@ -160,6 +160,7 @@ def occupancy(request):
 	income_for_past_months = 0
 	paid_rate_discrepancy = 0
 	payment_discrepancies = []
+	paid_amount_missing = []
 
 	reconciles_this_month = Reconcile.objects.filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
 	for r in reconciles_this_month:
@@ -237,7 +238,10 @@ def occupancy(request):
 					# we have no knowledge of when the payment was issued,
 					# applying it to this month seems like a reasonable guess. 
 					# XXX todo would be nice to highlight these items somehow. 
-					income_for_this_month += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days) 
+					if r.reconcile.paid_amount:
+						income_for_this_month += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days) 
+					else:
+						paid_amount_missing.append(r.id)
 
 			if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
 				unpaid = True
@@ -278,7 +282,7 @@ def occupancy(request):
 		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
 		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms, 
 		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies, 
-		'total_income_during_month': total_income_during_month })
+		'total_income_during_month': total_income_during_month, 'paid_amount_missing':paid_amount_missing })
 
 @login_required
 def calendar(request):

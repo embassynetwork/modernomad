@@ -40,7 +40,8 @@
 <div class="row">
 	<h4>Error Checking</h4>
 	<p>Paid rate discrepancy (paid rate - rate): $ {{ paid_rate_discrepancy }}</p>
-	<p>Payment discrepancies on reservations {{ payment_discrepancies }}</p>
+	<p>Payment discrepancies on reservations: {{ payment_discrepancies|default:"none" }}</p>
+	<p>Paid amount was missing from reservations: {{paid_amount_missing|default:"none"}}</p>
 </div>
 
 <div class="row">
