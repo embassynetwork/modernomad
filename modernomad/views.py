@@ -159,6 +159,7 @@ def occupancy(request):
 	income_from_past_months = 0
 	income_for_past_months = 0
 	paid_rate_discrepancy = 0
+	payment_discrepancies = []
 
 	reconciles_this_month = Reconcile.objects.filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
 	for r in reconciles_this_month:
@@ -225,6 +226,7 @@ def occupancy(request):
 				if paid_rate != rate:
 					print "reservation %d has paid rate = $%d and rate set to $%d"
 					paid_rate_discrepancy += nights_this_month*(paid_rate - rate)
+					payment_discrepancies.append(r.id)
 
 			if r.reconcile.status == Reconcile.PAID:
 				if (r.reconcile.payment_date and r.reconcile.payment_date < start):
@@ -273,7 +275,8 @@ def occupancy(request):
 		"total_income_private": total_income_private, "report_date": report_date, 'room_income':room_income, 
 		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
 		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
-		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms, 'paid_rate_discrepancy': paid_rate_discrepancy })
+		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms, 
+		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies  })
 
 @login_required
 def calendar(request):
