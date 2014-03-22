@@ -265,6 +265,7 @@ def occupancy(request):
 				total_income_private += nights_this_month*rate
 
 	total_income_this_month = income_for_this_month + income_from_past_months
+	total_income_during_month = income_for_this_month + income_for_future_months
 	total_by_rooms = sum(room_income.itervalues())
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 
@@ -276,7 +277,8 @@ def occupancy(request):
 		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
 		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
 		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms, 
-		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies  })
+		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies, 
+		'total_income_during_month': total_income_during_month })
 
 @login_required
 def calendar(request):
