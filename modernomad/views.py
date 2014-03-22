@@ -220,9 +220,14 @@ def occupancy(request):
 			room_income[r.room.name] = this_room_income
 
 			if r.reconcile.status == Reconcile.PAID:
-				if r.reconcile.payment_date < start:
+				if (r.reconcile.payment_date and r.reconcile.payment_date < start):
 					income_from_past_months += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days)
 				else:
+					# if there's no payment date but the reservation is marked
+					# as paid, the payment was probably manually entered. since
+					# we have no knowledge of when the payment was issued,
+					# applying it to this month seems like a reasonable guess. 
+					# XXX todo would be nice to highlight these items somehow. 
 					income_for_this_month += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days) 
 
 			if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
