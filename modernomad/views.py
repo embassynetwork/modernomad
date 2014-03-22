@@ -177,7 +177,7 @@ def occupancy(request):
 			# it's calculated below. 
 			continue
 		
-		elif r.reservation.arrive >= start and r.reservation.depart > end:
+		elif r.reservation.arrive >= start and r.reservation.arrive <= end and r.reservation.depart > end:
 			nights_after_this_month = (r.reservation.depart - end)
 		
 		elif r.reservation.arrive > end:  
