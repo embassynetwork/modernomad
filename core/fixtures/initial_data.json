@@ -29,70 +29,13 @@
 		}
 	},
 	{
-		"pk": 1,
 		"model": "core.room",
 		"fields" : {
-			"name": "Ada Lovelace Hostel",
-			"default_rate": 45,
-			"description": "",
-			"primary_use": "guest",
-			"beds" : 7,
-			"shared": true
-		}
-	},
-	{
-		"pk": 2,
-		"model": "core.room",
-		"fields" : {
-			"name": "Penrose",
-			"default_rate": 90,
-			"description": "",
+			"name": "Test Room",
+			"default_rate": 70,
+			"description": "A lovely room",
 			"beds" : 2,
 			"primary_use": "guest"
-		}
-	},
-	{
-		"pk": 3,
-		"model": "core.room",
-		"fields" : {
-			"name": "Superhero",
-			"default_rate": 120,
-			"description": "",
-			"beds" : 2,
-			"primary_use": "private"
-		}
-	},
-	{
-		"pk": 4,
-		"model": "core.room",
-		"fields" : {
-			"name": "Goldfish",
-			"default_rate": 70,
-			"description": "",
-			"beds" : 1,
-			"primary_use": "private"
-		}
-	},
-	{
-		"pk": 5,
-		"model": "core.room",
-		"fields" : {
-			"name": "Pantry",
-			"default_rate": 70,
-			"description": "",
-			"beds" : 1,
-			"primary_use": "private"
-		}
-	},
-	{
-		"pk": 6,
-		"model": "core.room",
-		"fields" : {
-			"name": "Batcave",
-			"default_rate": 70,
-			"beds" : 1,
-			"description": "",
-			"primary_use": "private"
 		}
 	},
    {
