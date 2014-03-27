@@ -76,8 +76,14 @@ EVENTBRITE_APP_KEY = "your app key here"
 EVENTBRITE_USER_KEY = "your user key here"
 
 # celery configuration options
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'amqp://'
+# note!! you must add the broker and broker user to rabbitmq that corresponds
+# to these credentials. this is done by:
+# sudo rabbitmqctl add_user myusername mypassword
+# sudo rabbitmqctl add_vhost myvhost
+# sudo rabbitmqctl set_permissions -p myvhost myusername ".*" ".*" ".*"
+# and then you MUST restart rabbitmq:
+# sudo rabbitmqctl reset
+BROKER_URL = 'amqp:myusername:mypassword@hostname/vhost'
 
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
