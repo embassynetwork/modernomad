@@ -12,7 +12,7 @@ Events:
 People arriving - welcome!
 {% for r in arriving %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }} {% if r.reconcile.status != 'paid' %} (unpaid) {% endif %}
-	  https://{{ domain }}/manage/reservation/{{ r.id }}/ 
+	  https://{{ domain }}/reservation/{{ r.id }}/ 
 {% empty %}
 	None!
 {% endfor %}
@@ -20,7 +20,7 @@ People arriving - welcome!
 People departing - fare forward and wonderful journeys!
 {% for r in departing %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room }} {% if r.reconcile.status != 'paid' %} (unpaid) {% endif %}
-	  https://{{ domain }}/manage/reservation/{{ r.id }}/
+	  https://{{ domain }}/reservation/{{ r.id }}/
 {% empty %}
 	None!
 {% endfor %}
