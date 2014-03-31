@@ -175,7 +175,7 @@ def update_mailinglist_members():
 	guest_emails = []
 	for r in reservations_today:
 		guest_emails.append(r.user.email)
-	resp= requests.post("https://api.mailgun.net/v2/lists/guests@sf.embassynetwork.com/members.json", 
+	resp= requests.post("https://api.mailgun.net/v2/lists/%s/members.json" % guest_list, 
 			data= {
 				"members":json.dumps(guest_emails), 
 				"subscribed": True
@@ -184,7 +184,7 @@ def update_mailinglist_members():
 			)
 	print "subscribe call responded with:"
 	print resp.text
-	resp = requests.get( "https://api.mailgun.net/v2/lists/guests@sf.embassynetwork.com/members",
+	resp = requests.get( "https://api.mailgun.net/v2/lists/%s/members" % guest_list,
 					        auth=('api', mailgun_api_key))
 	print resp.text
 
@@ -200,7 +200,7 @@ def update_mailinglist_members():
 	for person in residents:
 		resident_emails.append(person.email)
 	current_emails = guest_emails + resident_emails 
-	resp = requests.post("https://api.mailgun.net/v2/lists/current@sf.embassynetwork.com/members.json", 
+	resp = requests.post("https://api.mailgun.net/v2/lists/%s/members.json" % current_list, 
 			data={
 				"members":json.dumps(current_emails), 
 				"subscribed": True
@@ -208,7 +208,7 @@ def update_mailinglist_members():
 				auth=('api', mailgun_api_key)
 			)
 	print resp.text
-	resp = requests.get( "https://api.mailgun.net/v2/lists/current@sf.embassynetwork.com/members",
+	resp = requests.get( "https://api.mailgun.net/v2/lists/%s/members" % current_list,
 					        auth=('api', mailgun_api_key))
 	print resp.text
 
