@@ -4,6 +4,14 @@
 
 			<div id="homepage-wrap">
 
+				{% include 'snippets/email-signup-modal.html' %}
+				
+				<div class="row">
+					<div class="col-sm-10 col-sm-offset-1">
+						{% include "snippets/messages.html" %}
+					</div>
+				</div>
+
 				<div class="row" id="house">
 					<div class="col-sm-12">
 							<div class="col-md-7 col-md-offset-1 col-sm-12">
@@ -22,27 +30,26 @@
 					<div class="col-md-12 col-md-offset-1 col-sm-12">
 
 							<div class="col-md-5" id="participate">
-								<h2 class="fancy-header">When can I come over?</h2>
+								<h2 class="fancy-header">Join in the Fun</h2>
 								<p class="easy-reading">We host salons, 
 								community dinners, skillshares, workshops and various
 								one-off events. Hear about upcoming events on
 								our mailing list, or get a sampling through browsing upcoming events below!</p> 
-								<div class="col-md-12" id="eventlist-signup-wrapper">
-									<form id="eventlist-signup" action="http://lists.coliving.org/subscribe/embassysf-events" method="POST">
-										<input name="email" class="col-md-7" id="list-signup-input" placeholder="Enter email">
-										<input type="submit" class="btn-large-text btn btn-large col-md-5" id="list-signup-submit" value="Sign Me Up!" />
-									</form>
-								</div>
+								{% if user.is_authenticated %}
+									<a href="/people/{{ user.username }}" id="events-button" class="btn btn-large btn-block btn-large-text">View Notification Preferences</a>
+								{% else %}
+									<button id="events-button" class="btn btn-large btn-block btn-large-text">Sign Me Up</button>
+								{% endif %}
 							</div>
 							
 							<div class="col-md-5" id="reserve">
-								<h2 class="fancy-header">I'm Interested in the Residence</h2>
+								<h2 class="fancy-header">Stay with Us</h2>
 								<p class="easy-reading">Travel and always be at Home. The Embassy Network
 								offers long- and short-term accommodations for
 								modern nomads and creatives who travel the
 								world for work, projects and collaborations. 
 								</p>
-								<a href="/stay" id="stay-button" class="btn btn-large btn-block btn-large-text">Learn More & Make a Reservation</a>
+								<a href="/stay" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>
 							</div>
 
 					</div>
@@ -80,7 +87,7 @@
 					<div class="col-md-5 col-xs-12" id="profiles">
 						<h2 id="our-community-heading">Our Community</h2>
 
-						{% for person in coming_month %}
+						{% for person in people_in_coming_month %}
 							<div class="float-left homepage-user-wrapper">			
 								<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
 								<div class="homepage-user-descr" id="user-{{person.id}}">
@@ -111,6 +118,7 @@
 	<script language="JavaScript">
 	$(document).ready(function() {
 
+		/*
 		$("#eventlist-signup").submit(function() {
 			request = $.ajax({
 				data: $(this).serialize(),
@@ -134,7 +142,14 @@
 
 			return false;
 		});
-		
+		*/
+
+
+		$("#events-button").click(function() {
+			$('#email-signup-modal').modal();
+		});
+
+
 		var map = L.map('location-map').setView([37.77397341544072, -122.42937415838243], 15);
 		L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
 			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',

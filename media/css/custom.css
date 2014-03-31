@@ -257,7 +257,7 @@ a:hover {
 }
 
 
-#reserve .btn {
+#reserve .btn, #participate .btn {
 	background: #fff;
 	padding: 21px 0;
 }
@@ -409,12 +409,12 @@ a:hover {
 	color: #ea6f56;
 }
 
-#stay-button {
+#stay-button, #events-button {
 	color: #000;
 	white-space: normal;
 }
 
-#stay-button:hover {
+#stay-button:hover, #events-button:hover {
 	color: #ea6f56;
 }
 

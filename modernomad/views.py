@@ -17,6 +17,7 @@ from django.contrib.sites.models import Site
 from django.contrib import messages
 import eventbrite
 from gather.tasks import published_events_today_local, events_pending
+from gather.forms import NewUserForm
 
 
 def index(request):
@@ -37,17 +38,17 @@ def index(request):
 
 	# add users associated with those reservations and events to a list to display on
 	# the homepage
-	coming_month = []
+	people_in_coming_month = []
 	for r in coming_month_res:
 		# check for duplicates, add if not already there.
-		if r.user not in coming_month:
-			coming_month.append(r.user)
+		if r.user not in people_in_coming_month:
+			people_in_coming_month.append(r.user)
 
 	for e in coming_month_events:
 		# check for duplicates, add if not already there.
 		for u in e.organizers.all():
-			if u not in coming_month:
-				coming_month.append(u)
+			if u not in people_in_coming_month:
+				people_in_coming_month.append(u)
 	
 	residents = User.objects.filter(groups__name='residents')
 	residents = list(residents)
@@ -55,8 +56,8 @@ def index(request):
 	# add residents to the list of people in the house in the coming month. 
 	for r in residents:
 		# check for duplicates, add if not already there.
-		if r not in coming_month:
-			coming_month.append(r)
+		if r not in people_in_coming_month:
+			people_in_coming_month.append(r)
 
 	if request.user.is_authenticated():
 		current_user = request.user
@@ -64,7 +65,12 @@ def index(request):
 		current_user = None
 	events = Event.objects.upcoming(upto=5, current_user=current_user)
 
-	return render(request, "landing.html", {'coming_month': coming_month, 'events': events})
+	if not request.user.is_authenticated():
+		new_user_form = NewUserForm()
+	else:
+		new_user_form = None
+
+	return render(request, "landing.html", {'people_in_coming_month': people_in_coming_month, 'events': events, 'new_user_form': new_user_form})
 
 def about(request):
 	return render(request, "about.html")
