@@ -63,7 +63,7 @@ LOCAL_TEMPLATE_DIRS = (
 )
 
 # this will be used as the subject line prefix for all emails sent from this app. 
-EMAIL_SUBJECT_PREFIX = "[Your House Name Here]"
+EMAIL_SUBJECT_PREFIX = "[Your House Name Here] "
 DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
 
 # social media
