@@ -3,7 +3,7 @@ django-registration==1.0
 django-tastypie
 South
 Pillow
-django-celery
+django-celery>=3.1
 Celery
 eventbrite
 lxml
