@@ -72,12 +72,14 @@
 	
 	{% ifequal u user %} 
 		<h2>Email Notifications</h2>
-		<div class="col-md-12">
-			<form class="" method="post" action="/events/emailpreferences/{{ u.username }}/">{% csrf_token %}
-				<div>Receive automatic reminders of events you are attending: <input class="form-control" type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}></div>
-				<div>Receive weekly emails about upcoming events: <input class="form-control" type="checkbox" name="weekly_updates" id="weekly_updates" {% if u.event_notifications.weekly %} checked {% endif %}></div>
-				<input type="submit" value="Save" class="btn btn-default">
-			</form>
+		<div class="row">
+			<div class="col-md-12">
+				<form class="" method="post" action="/events/emailpreferences/{{ u.username }}/">{% csrf_token %}
+					<div>Receive automatic reminders of events you are attending: <input class="form-control" type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}></div>
+					<div>Receive weekly emails about upcoming events: <input class="form-control" type="checkbox" name="weekly_updates" id="weekly_updates" {% if u.event_notifications.weekly %} checked {% endif %}></div>
+					<input type="submit" value="Save" class="btn btn-default">
+				</form>
+			</div>
 		</div>
 	{% endifequal %}
 
