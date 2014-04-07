@@ -22,6 +22,38 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
+
+# there is a weird db issue it seems with setting a field to null=False after it has been defined as null=True. 
+# see http://od-eon.com/blogs/stefan/adding-not-null-column-south/ and
+# http://south.aeracode.org/ticket/782
+# one suggestion was to try setting default value in the model file, but this hasn't worked either. 
+# currently the field are still set to null=True, though they shouldn't be. 
+
+def default_location():
+	return Location.objects.get(pk=1)
+
+class Location(models.Model):
+	name = models.CharField(max_length=200)
+	slug = models.CharField(max_length=60, unique=True)
+	short_description = models.TextField()
+	about_page = models.TextField()
+	address = models.CharField(max_length=300)
+	stay_page = models.TextField()
+	front_page_stay = models.TextField()
+	front_page_participate = models.TextField()
+	max_reservation_days = models.IntegerField(default=14)
+	welcome_email_days_ahead = models.IntegerField(default=2)
+	house_access_code = models.CharField(max_length=50, blank=True, null=True)
+	stripe_secret_key = models.CharField(max_length=200)
+	stripe_public_key = models.CharField(max_length=200)
+	mailgun_api_key = models.CharField(max_length=200)
+	mailgun_domain = models.CharField(max_length=200)
+	email_subject_prefix = models.CharField(max_length=200)
+	default_from_email = models.CharField(max_length=200)
+	house_admins = models.ManyToManyField(User, related_name='house_admin', blank=True, null=True)
+	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
+
+
 class RoomManager(models.Manager):
 	def availability(self, start, end):
 		# return a map of rooms to dates showing occupied and free beds,
@@ -125,6 +157,7 @@ class Room(models.Model):
 		(PRIVATE, "Private"),
 	)
 	name = models.CharField(max_length=200)
+	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.IntegerField()
 	description = models.TextField(blank=True, null=True)
 	primary_use = models.CharField(max_length=200, choices=ROOM_USES, default=PRIVATE, verbose_name='Indicate whether this room should be listed for guests to make reservations.')
@@ -177,7 +210,7 @@ class TodayManager(models.Manager):
 	def confirmed(self):	
 		today = datetime.date.today()
 		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today).filter(status='confirmed')
-		
+	
 
 class Reservation(models.Model):
 
@@ -211,6 +244,7 @@ class Reservation(models.Model):
 	hosted = models.BooleanField(default=False, help_text="Hosting a guest who doesn't have an account.")
 	guest_name = models.CharField(max_length=200, help_text="Guest name if you are hosting.", blank=True, null=True)
 
+	location = models.ForeignKey(Location, related_name='reservations', null=True)
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 	status = models.CharField(max_length=200, choices=RESERVATION_STATUSES, default=PENDING, blank=True)

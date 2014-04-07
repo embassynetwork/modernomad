@@ -6,26 +6,372 @@ from django.shortcuts import render
 from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
 from django.template import RequestContext
 from registration import signals
 import registration
-from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, MessageCurrentPeopleForm
+from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, MessageCurrentPeopleForm, PaymentForm
 from django.core.mail import send_mail
 from django.core import urlresolvers
-import datetime
 from django.contrib import messages
 from django.conf import settings
 from django.utils import simplejson
 from core.decorators import group_required
 from django.db.models import Q
-from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate
+from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate, Location
 from core.tasks import send_guest_welcome
-import stripe
 import uuid, base64, os
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone
+from gather.models import Event
+from gather.tasks import published_events_today_local, events_pending
+from gather.forms import NewUserForm
+from django.utils.safestring import SafeString
+from django.utils.safestring import mark_safe
+from core.confirmation_email import confirmation_email_details
+import json, datetime, stripe 
+from reservation_calendar import GuestCalendar
 
+
+def location(request, location_slug):
+	try:
+		location = Location.objects.get(slug=location_slug)
+	except:
+		return HttpResponseRedirect(("/404"))
+
+	today = datetime.date.today()
+	
+	# pull out all reservations in the coming month
+	coming_month_res = (
+			Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+			.filter(location=location)
+			.exclude(depart__lt=today)
+			.exclude( arrive__gt=today+datetime.timedelta(days=30))
+		)
+
+	coming_month_events = (
+			Event.objects.filter(status="live") 
+			.filter(location=location)
+			.exclude(end__lt=today)
+			.exclude( start__gte=today+datetime.timedelta(days=30))
+		)
+
+	# add users associated with those reservations and events to a list to display on
+	# the homepage
+	people_in_coming_month = []
+	for r in coming_month_res:
+		# check for duplicates, add if not already there.
+		if r.user not in people_in_coming_month:
+			people_in_coming_month.append(r.user)
+
+	for e in coming_month_events:
+		# check for duplicates, add if not already there.
+		for u in e.organizers.all():
+			if u not in people_in_coming_month:
+				people_in_coming_month.append(u)
+	
+	residents = list(location.residents.all())
+
+	# add residents to the list of people in the house in the coming month. 
+	for r in residents:
+		# check for duplicates, add if not already there.
+		if r not in people_in_coming_month:
+			people_in_coming_month.append(r)
+
+	if request.user.is_authenticated():
+		current_user = request.user
+	else:
+		current_user = None
+	events = Event.objects.upcoming(upto=5, current_user=current_user)
+
+	if not request.user.is_authenticated():
+		new_user_form = NewUserForm()
+	else:
+		new_user_form = None
+
+	return render(request, "landing.html", {'location': location, 'people_in_coming_month': people_in_coming_month, 'events': events, 'new_user_form': new_user_form})
+
+def about(request, location_slug):
+	return render(request, "location_about.html")
+
+def residents(request, location_slug):
+	residents = User.objects.filter(groups__name='residents')
+	return render(request, "location_residents.html", {'residents': residents})
+
+
+def projects(request, location_slug):
+	#residents = User.objects.filter(groups__name='residents')
+	#return render(request, "community.html", {'people': residents})
+	pass
+
+def get_calendar_dates(month, year, location_slug):
+	if month:
+		month = int(month)
+	else:
+		month = datetime.date.today().month
+	if year:
+		year = int(year)
+	else:
+		year = datetime.date.today().year
+
+	# start date is first day of the month 
+	start = datetime.date(year,month,1)
+	# calculate end date by subtracting one day from the start of the next
+	# month (saves us from having to reference how many days that month has)
+	next_month = (month+1) % 12 
+	if next_month == 0: next_month = 12
+	if next_month < month:
+		next_months_year = year + 1
+	else: next_months_year = year
+	end = datetime.date(next_months_year, next_month, 1)
+	next_month = end # for clarity
+
+	# also calculate the previous month for reference in the template
+	prev_month = (month-1) % 12 
+	if prev_month == 0: prev_month = 12
+	if prev_month > month:
+		prev_months_year = year - 1
+	else: prev_months_year = year
+	prev_month = datetime.date(prev_months_year, prev_month, 1)
+
+	# returns datetime objects (start, end, next_month, prev_month) and ints (month, year)
+	return start, end, next_month, prev_month, month, year
+
+def today(request, location_slug):
+	# get all the reservations that intersect today (including those departing
+	# and arriving today)
+	today = timezone.now()
+	reservations_today = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=today).exclude(arrive__gt=today)
+	guests_today = []
+	for r in reservations_today:
+		guests_today.append(r.user)
+	residents = User.objects.filter(groups__name='residents')
+	people_today = guests_today + list(residents)
+
+	events_today = published_events_today_local()
+	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
+
+
+def occupancy(request, location_slug):
+	if not (request.user.is_authenticated and request.user.groups.filter(name='house_admin')):
+		return HttpResponseRedirect(("/404"))
+	today = datetime.date.today()
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+
+	# note the day parameter is meaningless
+	report_date = datetime.date(year, month, 1) 
+	reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+
+	person_nights_data = []
+	total_person_nights = 0
+	total_income = 0
+	total_income_shared = 0
+	total_income_private = 0
+	total_comped_nights = 0
+	total_comped_income = 0
+	total_shared_nights = 0
+	total_private_nights = 0
+	unpaid_total = 0
+	room_income = {}
+	income_for_this_month = 0
+	income_for_future_months = 0
+	income_from_past_months = 0
+	income_for_past_months = 0
+	paid_rate_discrepancy = 0
+	payment_discrepancies = []
+	paid_amount_missing = []
+
+	reconciles_this_month = Reconcile.objects.filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
+	for r in reconciles_this_month:
+		nights_before_this_month = datetime.timedelta(0)
+		nights_after_this_month = datetime.timedelta(0)
+		if r.reservation.arrive < start and r.reservation.depart < start:
+			# all nights for this reservation were in a previous month
+			nights_before_this_month = (r.reservation.depart - r.reservation.arrive)
+		
+		elif r.reservation.arrive < start and r.reservation.depart <= end:
+			# only nights this month, don't need to calculate this here because
+			# it's calculated below. 
+			nights_before_this_month = (start - r.reservation.arrive)
+		
+		elif r.reservation.arrive >= start and r.reservation.depart <= end:
+			# only nights this month, don't need to calculate this here because
+			# it's calculated below. 
+			continue
+		
+		elif r.reservation.arrive >= start and r.reservation.arrive <= end and r.reservation.depart > end:
+			nights_after_this_month = (r.reservation.depart - end)
+		
+		elif r.reservation.arrive > end:  
+			nights_after_this_month = (r.reservation.depart - r.reservation.arrive)
+
+		elif r.reservation.arrive < start and r.reservation.depart > end:  
+			# there are some days paid for this month that belong to the previous month
+			nights_before_this_month = (start - r.reservation.arrive)
+			nights_after_this_month = (r.reservation.depart - end)
+		
+		income_for_future_months += nights_after_this_month.days*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
+		income_for_past_months += nights_before_this_month.days*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
+
+	for r in reservations:
+		comp = False
+		if r.arrive >=start and r.depart <= end:
+			nights_this_month = (r.depart - r.arrive).days
+		elif r.arrive <=start and r.depart >= end:
+			nights_this_month = (end - start).days
+		elif r.arrive < start:
+			nights_this_month = (r.depart - start).days
+		elif r.depart > end:
+			nights_this_month = (end - r.arrive).days
+		# if it's the first of the month and the person left on the 1st, then
+		# that's actuallu 0 days this month which we don't need to include.
+		if nights_this_month == 0:
+			continue
+		# get_rate grabs the custom rate if it exists, else default rate as
+		# defined in the room definition.
+		rate = r.reconcile.get_rate()
+		if r.reconcile.status == Reconcile.COMP:
+			total_comped_nights += nights_this_month
+			total_comped_income += nights_this_month*r.reconcile.default_rate()
+			comp = True
+			unpaid = False
+		else:
+			total_income += nights_this_month*rate
+			this_room_income = room_income.get(r.room.name, 0)
+			this_room_income += rate*nights_this_month
+			room_income[r.room.name] = this_room_income
+
+			if r.reconcile.payment_date:
+				paid_rate = (r.reconcile.paid_amount/(r.depart - r.arrive).days)
+				if paid_rate != rate:
+					print "reservation %d has paid rate = $%d and rate set to $%d"
+					paid_rate_discrepancy += nights_this_month*(paid_rate - rate)
+					payment_discrepancies.append(r.id)
+
+			if r.reconcile.status == Reconcile.PAID:
+				if (r.reconcile.payment_date and r.reconcile.payment_date < start):
+					income_from_past_months += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days)
+				else:
+					# if there's no payment date but the reservation is marked
+					# as paid, the payment was probably manually entered. since
+					# we have no knowledge of when the payment was issued,
+					# applying it to this month seems like a reasonable guess. 
+					# XXX todo would be nice to highlight these items somehow. 
+					if r.reconcile.paid_amount:
+						income_for_this_month += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days) 
+					else:
+						paid_amount_missing.append(r.id)
+
+			if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
+				unpaid = True
+				unpaid_total += nights_this_month*rate
+			else:
+				unpaid = False
+
+		person_nights_data.append({
+			'reservation': r,
+			'nights_this_month': nights_this_month,
+			'room': r.room.name,
+			'rate': rate,
+			'total': nights_this_month*rate,
+			'comp': comp,
+			'unpaid': unpaid
+		})
+		total_person_nights += nights_this_month
+		if r.room.shared:
+			total_shared_nights += nights_this_month
+			if r.reconcile.status != Reconcile.COMP:
+				total_income_shared += nights_this_month*rate
+		else:
+			total_private_nights += nights_this_month
+			if r.reconcile.status != Reconcile.COMP:
+				total_income_private += nights_this_month*rate
+
+	total_income_this_month = income_for_this_month + income_from_past_months
+	total_income_during_month = income_for_this_month + income_for_future_months
+	total_by_rooms = sum(room_income.itervalues())
+
+	return render(request, "occupancy.html", {"data": person_nights_data, 
+		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
+		'total_shared_nights': total_shared_nights, 'total_private_nights': total_private_nights,
+		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
+		"next_month": next_month, "prev_month": prev_month, "total_income_shared": total_income_shared,
+		"total_income_private": total_income_private, "report_date": report_date, 'room_income':room_income, 
+		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
+		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
+		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms, 
+		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies, 
+		'total_income_during_month': total_income_during_month, 'paid_amount_missing':paid_amount_missing })
+
+@login_required
+def calendar(request, location_slug):
+	today = datetime.date.today()
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	report_date = datetime.date(year, month, 1) 
+
+	reservations = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
+	
+	# create the calendar object
+	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)
+
+	return render(request, "calendar.html", {'reservations': reservations, 
+		'calendar': mark_safe(guest_calendar), "next_month": next_month, 
+		"prev_month": prev_month, "report_date": report_date })
+
+def stay(request, location_slug):
+	return render(request, "stay.html")
+
+
+def GenericPayment(request, location_slug):
+	if request.method == 'POST':
+		form = PaymentForm(request.POST)
+		if form.is_valid():
+			# account secret key 
+			stripe.api_key = settings.STRIPE_SECRET_KEY
+			
+			# get the payment details from the form
+			token = request.POST.get('stripeToken')
+			charge_amt = int(request.POST.get('amount'))
+			pay_name = request.POST.get('name')
+			pay_email = request.POST.get('email')
+			comment  = request.POST.get('comment')
+
+			# create the charge on Stripe's servers - this will charge the user's card
+			charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
+			if comment:
+				charge_descr += " comment: %s" % comment
+			charge = stripe.Charge.create(
+					amount=charge_amt*100, # convert dollars to cents
+					currency="usd",
+					card=token,
+					description= charge_descr
+			)
+
+			# TODO error handling if charge does not succeed
+			return HttpResponseRedirect("/thanks")
+	else:
+		form = PaymentForm()		
+	return render(request, "payment.html", {'form': form, 
+		'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY})
+
+
+def thanks(request):
+	# TODO generate receipt
+	return render(request, "thanks.html")
+
+@login_required
+def GuestInfo(request, location_slug):
+	# only allow people who have had at least one confirmed reservation access this page
+	confirmed = Reservation.objects.filter(user=request.user).filter(status='confirmed')
+	if len(confirmed) > 0:
+		return render(request, 'guestinfo.html', {'static_info': confirmation_email_details})
+	return HttpResponseRedirect('/')
 
 def logout(request):
 	logout(request)
@@ -57,13 +403,10 @@ def GetUser(request, username):
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
-def ListHouses(request):
-	houses = House.objects.all()
-	return render(request, "house_list.html", {"houses": houses})
+def location_list(request):
+	locations = Location.objects.all()
+	return render(request, "location_list.html", {"locations": locations})
 
-def GetHouse(request, house_id):
-	house = House.objects.get(id=house_id)
-	return render(request, "house_details.html", {"house": house})
 
 def get_reservation_form_for_perms(request, post, instance):
 	if post == True:
@@ -82,7 +425,7 @@ def get_reservation_form_for_perms(request, post, instance):
 	return form
 
 @login_required
-def CheckRoomAvailability(request):
+def CheckRoomAvailability(request, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -108,7 +451,7 @@ def CheckRoomAvailability(request):
 
 
 @login_required
-def ReservationSubmit(request):
+def ReservationSubmit(request, location_slug):
 	if request.method == 'POST':
 		print request.POST
 		form = get_reservation_form_for_perms(request, post=True, instance=False)
@@ -150,7 +493,7 @@ def ReservationSubmit(request):
 
 
 @login_required
-def ReservationDetail(request, reservation_id):
+def ReservationDetail(request, reservation_id, location_slug):
 	try:
 		reservation = Reservation.objects.get(id=reservation_id)
 		if reservation.status == 'deleted':
@@ -286,7 +629,7 @@ def UserDeleteCard(request, username):
 
 
 @login_required
-def ReservationEdit(request, reservation_id):
+def ReservationEdit(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	# need to pull these dates out before we pass the instance into
 	# the ReservationForm, since it (apparently) updates the instance 
@@ -353,7 +696,7 @@ You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 		return HttpResponseRedirect("/")
 
 @login_required
-def ReservationConfirm(request, reservation_id):
+def ReservationConfirm(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if not (request.user.is_authenticated() and request.user == reservation.user 
 		and request.method == "POST" and reservation.status == 'approved'):
@@ -379,7 +722,7 @@ def ReservationConfirm(request, reservation_id):
 
 
 @login_required
-def ReservationCancel(request, reservation_id):
+def ReservationCancel(request, reservation_id, location_slug):
 	if not request.method == "POST":
 		return HttpResponseRedirect("/404")
 
@@ -397,7 +740,7 @@ def ReservationCancel(request, reservation_id):
 
 
 @login_required
-def ReservationDelete(request, reservation_id):
+def ReservationDelete(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if (request.user.is_authenticated() and request.user == reservation.user 
 		and request.method == "POST"):
@@ -412,7 +755,7 @@ def ReservationDelete(request, reservation_id):
 		return HttpResponseRedirect("/")
 
 @login_required
-def PeopleDaterangeQuery(request):
+def PeopleDaterangeQuery(request, location_slug):
 
 	start_str = request.POST.get('start_date')
 	end_str = request.POST.get('end_date')
@@ -437,7 +780,7 @@ def PeopleDaterangeQuery(request):
 	
 
 @login_required
-def broadcast(request):
+def broadcast(request, location_slug):
 	# the user must be authenticated because we have the @login_required
 	# decorator. 
 	sender = request.user 
@@ -488,7 +831,7 @@ def broadcast(request):
 # ******************************************************
 
 @group_required('house_admin')
-def ReservationList(request):
+def ReservationList(request, location_slug):
 	reservations = Reservation.objects.all()
 	pending = Reservation.objects.filter(status="pending")
 	approved = Reservation.objects.filter(status="approved")
@@ -499,7 +842,7 @@ def ReservationList(request):
 
 
 @group_required('house_admin')
-def ReservationManage(request, reservation_id):
+def ReservationManage(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	user = User.objects.get(username=reservation.user.username)
 	other_reservations = Reservation.objects.filter(user=user).exclude(status='deleted').exclude(id=reservation_id)
@@ -542,7 +885,7 @@ def ReservationManage(request, reservation_id):
 
 
 @group_required('house_admin')
-def ReservationManageUpdate(request, reservation_id):
+def ReservationManageUpdate(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -579,7 +922,7 @@ def ReservationManageUpdate(request, reservation_id):
 		return render(request, "snippets/res_status_area.html", {"r": reservation})
 
 @group_required('house_admin')
-def ReservationChargeCard(request, reservation_id):
+def ReservationChargeCard(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	reservation = Reservation.objects.get(id=reservation_id)
@@ -590,7 +933,7 @@ def ReservationChargeCard(request, reservation_id):
 		return HttpResponse(status=500)
 
 @group_required('house_admin')
-def ReservationSendReceipt(request, reservation_id):
+def ReservationSendReceipt(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	reservation = Reservation.objects.get(id=reservation_id)
@@ -601,7 +944,7 @@ def ReservationSendReceipt(request, reservation_id):
 
 
 @group_required('house_admin')
-def ReservationToggleComp(request, reservation_id):
+def ReservationToggleComp(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	reservation = Reservation.objects.get(id=reservation_id)
@@ -618,7 +961,7 @@ def ReservationToggleComp(request, reservation_id):
 	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
 
 @group_required('house_admin')
-def ReservationSendMail(request, reservation_id):
+def ReservationSendMail(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 

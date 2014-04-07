@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from core.models import UserProfile, Reservation, Reconcile, Room, EmailTemplate
+from core.models import UserProfile, Reservation, Reconcile, Room, EmailTemplate, Location
 
 class EmailTemplateAdmin(admin.ModelAdmin):
 	model = EmailTemplate
@@ -10,6 +10,11 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 	def save_model(self, request, obj, form, change): 
 		obj.creator = request.user 
 		obj.save() 
+
+class LocationAdmin(admin.ModelAdmin):
+	model=Location
+	list_display=('name', 'address')
+	list_filter=('name',)
 
 class RoomAdmin(admin.ModelAdmin):
 	model = Room
@@ -148,8 +153,8 @@ class UserProfileAdmin(UserAdmin):
 
 
 admin.site.register(Reservation, ReservationAdmin)
-#admin.site.register(Reconcile, ReconcileAdmin)
 admin.site.register(Room, RoomAdmin)
+admin.site.register(Location, LocationAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 
 admin.site.unregister(User)

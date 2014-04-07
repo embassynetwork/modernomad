@@ -28,16 +28,6 @@
 			"permissions": []
 		}
 	},
-	{
-		"model": "core.room",
-		"fields" : {
-			"name": "Test Room",
-			"default_rate": 70,
-			"description": "A lovely room",
-			"beds" : 2,
-			"primary_use": "guest"
-		}
-	},
    {
         "pk": 2,
         "model": "core.emailtemplate",
