@@ -1,0 +1,23 @@
+Dear {{ first_name }},
+
+Thanks for staying with us! This email contains your invoice information. As a reminder, your reservation details are available online at http://embassynetwork.com/reservation/{{res_id}}/. 
+
+Invoice Date: {{ today }}
+Arrival Date: {{ arrive }}
+Departure Date: {{ depart }}
+
+Description .............. Quantity ......... Rate
+{{ room }} ..... {{ num_nights }} ..... {{ rate }}
+
+..................... Total: {{ total }}
+
+You can pay via credit card, cash, check, bank transfer, or Dwolla. 
+
+Credit card: embassynetwork.com/payment
+Dwolla: https://www.dwolla.com/hub/embassynetwork
+Bank Details: Account number 164108426532 // Routing number 121000358
+
+Please submit payment at your earliest convenience. Thank you from the Embassy!
+
+:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
+:::: California Benefit Corporation, EIN 45-5386726 ::::		

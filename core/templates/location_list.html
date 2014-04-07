@@ -1,0 +1,14 @@
+{% extends "root.html" %}
+
+{% block body %}
+
+<div>
+	<ul>
+		{% for location in locations %}
+		<li><a href="{% url location_home location.slug %}">{{ location.name }}</a></li>
+		{% endfor %}
+	</ul>
+</div>
+
+{% endblock %}
+
