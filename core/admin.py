@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
 from core.models import UserProfile, Reservation, Reconcile, Room, EmailTemplate, Location
+from gather.models import EventAdminGroup
 
 class EmailTemplateAdmin(admin.ModelAdmin):
 	model = EmailTemplate
@@ -11,10 +12,14 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 		obj.creator = request.user 
 		obj.save() 
 
+class EventAdminGroupInline(admin.TabularInline):
+	model = EventAdminGroup
+
 class LocationAdmin(admin.ModelAdmin):
 	model=Location
 	list_display=('name', 'address')
 	list_filter=('name',)
+	inlines = [EventAdminGroupInline]
 
 class RoomAdmin(admin.ModelAdmin):
 	model = Room

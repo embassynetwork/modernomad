@@ -146,7 +146,7 @@ def send_guest_welcome(upcoming):
 			'ssid_password': settings.SSID_PASSWORD,
 			'events_url' : domain + '/events/upcoming/',
 			'current_email' : 'current@' + settings.LIST_DOMAIN,
-			'profile_url' : "https://" + domain + urlresolvers.reverse('user_details', args=(reservation.user.username,)),
+			'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
 			'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.id,)),
 		})
 		text_content = plaintext.render(c)

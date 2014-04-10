@@ -7,7 +7,7 @@
 			</div>
 			<div class="modal-body">
 				<h4>Create an account to receive weekly event updates. </h4> 	
-				<p><em>Already a member? <a href="/people/login">Login instead</a></em></p>
+				<p><em>Already a member? <a href="{% url django.contrib.auth.views.login">Login instead</a></em></p>
 				<div id="new-user-form-errors"></div>
 				<form id="new-user-form" class="form-horizontal">
 					<div class="form-group">
@@ -79,7 +79,7 @@
 		request = $.ajax({ 
 			data: form_data,	
 			type: "POST",
-			url: '/events/newuser/'
+			url: '{% url gather_new_user_email_signup location.slug %}'
 		});
 
 		request.done(function(msg) {

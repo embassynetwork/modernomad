@@ -32,6 +32,18 @@ from core.confirmation_email import confirmation_email_details
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
 
+class LocationNotUniqueException(Exception):
+	pass
+
+def get_location(location_slug):
+	if location_slug:
+		location = Location.objects.get(slug=location_slug)
+	else:
+		if Location.objects.count() == 1:
+			location = Location.objects.get(id=1)
+		else:
+			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
+	return location
 
 def location(request, location_slug):
 	try:
@@ -82,7 +94,7 @@ def location(request, location_slug):
 		current_user = request.user
 	else:
 		current_user = None
-	events = Event.objects.upcoming(upto=5, current_user=current_user)
+	events = Event.objects.upcoming(upto=5, current_user=current_user, location=location)
 
 	if not request.user.is_authenticated():
 		new_user_form = NewUserForm()
@@ -92,16 +104,16 @@ def location(request, location_slug):
 	return render(request, "landing.html", {'location': location, 'people_in_coming_month': people_in_coming_month, 'events': events, 'new_user_form': new_user_form})
 
 def about(request, location_slug):
-	return render(request, "location_about.html")
+	location = get_location(location_slug)
+	return render(request, "location_about.html", {'location_about_text': location.about_page, 'location': location})
 
 def residents(request, location_slug):
-	residents = User.objects.filter(groups__name='residents')
-	return render(request, "location_residents.html", {'residents': residents})
+	location = get_location(location_slug)
+	residents = location.residents.all()
+	return render(request, "location_residents.html", {'residents': residents, 'location': location})
 
 
 def projects(request, location_slug):
-	#residents = User.objects.filter(groups__name='residents')
-	#return render(request, "community.html", {'people': residents})
 	pass
 
 def get_calendar_dates(month, year, location_slug):
@@ -138,6 +150,7 @@ def get_calendar_dates(month, year, location_slug):
 	return start, end, next_month, prev_month, month, year
 
 def today(request, location_slug):
+	location = get_location(location_slug)
 	# get all the reservations that intersect today (including those departing
 	# and arriving today)
 	today = timezone.now()
@@ -145,7 +158,7 @@ def today(request, location_slug):
 	guests_today = []
 	for r in reservations_today:
 		guests_today.append(r.user)
-	residents = User.objects.filter(groups__name='residents')
+	residents = location.residents.all()
 	people_today = guests_today + list(residents)
 
 	events_today = published_events_today_local()
@@ -325,7 +338,8 @@ def calendar(request, location_slug):
 		"prev_month": prev_month, "report_date": report_date })
 
 def stay(request, location_slug):
-	return render(request, "stay.html")
+	location = get_location(location_slug)
+	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'location': location})
 
 
 def GenericPayment(request, location_slug):
@@ -373,7 +387,7 @@ def GuestInfo(request, location_slug):
 		return render(request, 'guestinfo.html', {'static_info': confirmation_email_details})
 	return HttpResponseRedirect('/')
 
-def logout(request):
+def logout(request, location_slug = None):
 	logout(request)
 	messages.add_message(request, messages.INFO, 'You have been logged out.')
 	return HttpResponseRedirect("/")
@@ -452,6 +466,7 @@ def CheckRoomAvailability(request, location_slug):
 
 @login_required
 def ReservationSubmit(request, location_slug):
+	location=get_location(location_slug)
 	if request.method == 'POST':
 		print request.POST
 		form = get_reservation_form_for_perms(request, post=True, instance=False)
@@ -469,7 +484,7 @@ def ReservationSubmit(request, location_slug):
 				messages.add_message(request, messages.INFO, 'The reservation has been created. You can modify the reservation below.')
 			else:
 				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
-			return HttpResponseRedirect('/reservation/%d' % reservation.id)
+			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 
 	# GET request
 	else: 
@@ -489,7 +504,7 @@ def ReservationSubmit(request, location_slug):
 		room_list[room.name] = room.default_rate
 	room_list = simplejson.dumps(room_list)
 	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin, 
-		"room_list": room_list, 'max_days': settings.MAX_RESERVATION_DAYS })
+		"room_list": room_list, 'max_days': settings.MAX_RESERVATION_DAYS, 'location': location })
 
 
 @login_required
@@ -756,7 +771,7 @@ def ReservationDelete(request, reservation_id, location_slug):
 
 @login_required
 def PeopleDaterangeQuery(request, location_slug):
-
+	location = get_location(location_slug)
 	start_str = request.POST.get('start_date')
 	end_str = request.POST.get('end_date')
 	s_month, s_day, s_year = start_str.split("/")
@@ -767,7 +782,7 @@ def PeopleDaterangeQuery(request, location_slug):
 	recipients = []
 	for r in reservations_for_daterange:
 		recipients.append(r.user)
-	residents = User.objects.filter(groups__name='residents')
+	residents = location.residents.all()
 	recipients = recipients + list(residents)
 	html = "<div class='btn btn-info disabled' id='recipient-list'>Your message will go to these people: "
 	for person in recipients:
@@ -781,6 +796,7 @@ def PeopleDaterangeQuery(request, location_slug):
 
 @login_required
 def broadcast(request, location_slug):
+	location = get_location(location_slug)
 	# the user must be authenticated because we have the @login_required
 	# decorator. 
 	sender = request.user 
@@ -805,7 +821,7 @@ def broadcast(request, location_slug):
 			recipients = []
 			for r in reservations_for_daterange:
 				recipients.append(r.user.email)
-			residents = User.objects.filter(groups__name='residents')
+			residents = location.residents.all()
 			residents = list(residents)
 			for r in residents:
 				recipients.append(r.email)
@@ -1057,7 +1073,7 @@ class Registration(registration.views.RegistrationView):
 			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to propose your event!')
 			return (url_path[1], (), {'username' : user.username})
 		else:
-			return ('user_details', (), {'username': user.username})
+			return ('user_detail', (), {'username': user.username})
 
 class Activation(registration.views.ActivationView):
 	def activate(self, request, user):

@@ -31,21 +31,10 @@
 
 		<!-- Part 1: Wrap all page content here -->
 		<div id="flyout">
-			<h2>Embassy Network</h2>
-			<p class="easy-reading">The Embassy Network is a collection of
-			coliving houses prototyping a new approach to Home, one in which
-			members flow freely between locations as they travel the globe for
-			work and collaboration.</p>
-
-			<p class="easy-reading">Embassy locations are united through the
-			values of co-creation, curiosity and class. These embassies and
-			their residents are ambassadors of a modern culture of 
-			openness, collaboration, and connectivity.</p>
-
-			<p class="easy-reading">Visit the global <a
-				href="http://embassynetwork.com" target="blank">Embassy Network</a> website to
-			learn more about other locations in the network, and get involved.</p>
-			
+			<h2>Check out other network locations</h2>
+			{% for location in network_locations %}
+				<h3><a href="{% url location_home location.slug %}">{{ location.name }}</a></h3>
+			{% endfor %}
 		</div><!-- end flyout -->
 		
 			<div id="header-wrap">
@@ -70,22 +59,22 @@
 							<span class="icon-bar"></span>
 							<span class="icon-bar"></span>
 							</button>
-							<a class="navbar-brand" href="/">Home</a>
+							<a class="navbar-brand" href="{% url location_home location.slug %}">Home</a>
 						</div>
 						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 							<ul class="nav navbar-nav">
-								<li><a href="{% url location_about location.slug %} ">About</a></li>
-								<li><a href="/stay">Stay</a></li>
+								<li><a href="{% url location_about location.slug %}">About</a></li>
+								<li><a href="{% url location_stay location.slug %}">Stay</a></li>
 								
 									<li class="dropdown">
 										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
 											Events <b class="caret"></b>
 										</a>
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-											<li><a href="/events/upcoming/">Upcoming</a></li>
-											<li><a href="/events/create/">New Event</a></li>
+											<li><a href="{% url gather_upcoming_events location.slug %}">Upcoming</a></li>
+											<li><a href="{% url gather_create_event location.slug %}">New Event</a></li>
 											{% if user.is_authenticated %}
-												<li><a href="/events/past/">Past Events</a></li>
+											<li><a href="{% url gather_past_events location.slug %}">Past Events</a></li>
 											{% else %}
 											{% endif %}
 										</ul>
@@ -97,11 +86,11 @@
 											People <b class="caret"></b>
 										</a>
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-											<li><a href="/residents">Residents</a></li>
+											<li><a href="{% url location_residents location.slug %}">Residents</a></li>
 
-											{% ifusergroup house_admin %}
-												<li><a href="/calendar">Guest Calendar</a></li>
-											{% endifusergroup %}
+											{% if user in location.admins.all %}
+												<li><a href="{% url location_calendar location.slug %}">Guest Calendar</a></li>
+											{% endif %}
 											<li><a href="/broadcast">Say Hello</a></li>
 										</ul>
 									</li>
@@ -112,12 +101,12 @@
 										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
 											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
 											<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
-											<li><a tabindex="-1" href="{% url reservation_submit location.slug %}">New Reservation</a></li>
+											<li><a tabindex="-1" href="{% url reservation_create location.slug %}">New Reservation</a></li>
 											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
 										</ul>
 									</li>
 								{% endif %}
-								{% ifusergroup house_admin %}
+								{% if user in location.admins.all %}
 									<li class="dropdown">
 										<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
 											Admin <b class="caret"></b>
@@ -128,7 +117,7 @@
 											<li><a tabindex="-1" href="/events/review/">Pending Events</a></li>
 										</ul>
 									</li>
-								{% endifusergroup %}
+								{% endif %}
 								{% if not user.is_authenticated %}
 									<li><a href="/people/login/">Login</a></li>
 								{% endif %}

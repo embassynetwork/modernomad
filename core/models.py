@@ -53,6 +53,8 @@ class Location(models.Model):
 	house_admins = models.ManyToManyField(User, related_name='house_admin', blank=True, null=True)
 	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
 
+	def __unicode__(self):
+		return self.name
 
 class RoomManager(models.Manager):
 	def availability(self, start, end):

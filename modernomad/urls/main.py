@@ -14,6 +14,8 @@ urlpatterns = patterns('',
 	url(r'^admin/', include(admin.site.urls)),
 	url(r'^people/', include('modernomad.urls.user')),
 	url(r'^locations/', include('core.urls.location')),
+	url(r'^events/$', 'gather.views.upcoming_events_all_locations'),
+
 
 	# various other useful things
 	url(r'^ico/favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/img/favicon.ico'}),

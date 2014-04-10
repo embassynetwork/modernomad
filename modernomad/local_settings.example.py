@@ -34,6 +34,9 @@ WELCOME_EMAIL_DAYS_AHEAD = 2
 # if your house has a private access code, enter it here. 
 HOUSE_ACCESS_CODE = "1234"
 
+# required for django-gather app
+LOCATION_MODEL = 'gather.Location'
+
 # if using stripe, enter your stripe *secret* key here
 STRIPE_SECRET_KEY = "insert your key here"
 STRIPE_PUBLISHABLE_KEY = "insert your key here"
