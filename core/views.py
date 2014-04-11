@@ -31,6 +31,8 @@ from django.utils.safestring import mark_safe
 from core.confirmation_email import confirmation_email_details
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
+from emails import send_receipt, new_reservation_notify, updated_reservation_notify
+from django.core.urlresolvers import reverse
 
 class LocationNotUniqueException(Exception):
 	pass
@@ -116,7 +118,7 @@ def residents(request, location_slug):
 def projects(request, location_slug):
 	pass
 
-def get_calendar_dates(month, year, location_slug):
+def get_calendar_dates(month, year):
 	if month:
 		month = int(month)
 	else:
@@ -166,7 +168,8 @@ def today(request, location_slug):
 
 
 def occupancy(request, location_slug):
-	if not (request.user.is_authenticated and request.user.groups.filter(name='house_admin')):
+	location = get_location(location_slug)
+	if not (request.user.is_authenticated and request.user in location.house_admins.all()):
 		return HttpResponseRedirect(("/404"))
 	today = datetime.date.today()
 	month = request.GET.get("month")
@@ -176,7 +179,7 @@ def occupancy(request, location_slug):
 
 	# note the day parameter is meaningless
 	report_date = datetime.date(year, month, 1) 
-	reservations = Reservation.objects.filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+	reservations = Reservation.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
 	person_nights_data = []
 	total_person_nights = 0
@@ -197,7 +200,7 @@ def occupancy(request, location_slug):
 	payment_discrepancies = []
 	paid_amount_missing = []
 
-	reconciles_this_month = Reconcile.objects.filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
+	reconciles_this_month = Reconcile.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
 	for r in reconciles_this_month:
 		nights_before_this_month = datetime.timedelta(0)
 		nights_after_this_month = datetime.timedelta(0)
@@ -307,7 +310,7 @@ def occupancy(request, location_slug):
 	total_income_during_month = income_for_this_month + income_for_future_months
 	total_by_rooms = sum(room_income.itervalues())
 
-	return render(request, "occupancy.html", {"data": person_nights_data, 
+	return render(request, "occupancy.html", {"data": person_nights_data, 'location': location,
 		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
 		'total_shared_nights': total_shared_nights, 'total_private_nights': total_private_nights,
 		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
@@ -321,6 +324,7 @@ def occupancy(request, location_slug):
 
 @login_required
 def calendar(request, location_slug):
+	location = get_location(location_slug)
 	today = datetime.date.today()
 	month = request.GET.get("month")
 	year = request.GET.get("year")
@@ -328,14 +332,15 @@ def calendar(request, location_slug):
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	report_date = datetime.date(year, month, 1) 
 
-	reservations = Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive')
+	reservations = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+		.filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
 	
 	# create the calendar object
 	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)
 
 	return render(request, "calendar.html", {'reservations': reservations, 
 		'calendar': mark_safe(guest_calendar), "next_month": next_month, 
-		"prev_month": prev_month, "report_date": report_date })
+		"prev_month": prev_month, "report_date": report_date, 'location': location })
 
 def stay(request, location_slug):
 	location = get_location(location_slug)
@@ -474,17 +479,16 @@ def ReservationSubmit(request, location_slug):
 		if form.is_valid():
 			reservation = form.save(commit=False)
 			reservation.user = request.user
-			# this view is used only for submitting new reservations. if the
-			# user is not a house admin, the default status should always be
-			# set to "pending."
-			if not request.user.groups.filter(name='house_admin'):
-				reservation.status = "pending"
+			reservation.location = location
 			reservation.save()
+			new_reservation_notify(reservation)
 			if reservation.hosted:
 				messages.add_message(request, messages.INFO, 'The reservation has been created. You can modify the reservation below.')
 			else:
 				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
+		else:
+			print form.errors
 
 	# GET request
 	else: 
@@ -509,6 +513,7 @@ def ReservationSubmit(request, location_slug):
 
 @login_required
 def ReservationDetail(request, reservation_id, location_slug):
+	location = get_location(location_slug)
 	try:
 		reservation = Reservation.objects.get(id=reservation_id)
 		if reservation.status == 'deleted':
@@ -526,7 +531,7 @@ def ReservationDetail(request, reservation_id, location_slug):
 			paid = True
 		else:
 			paid = False
-		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 
+		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 'location': location,
 			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : settings.DEFAULT_FROM_EMAIL})
 
 @login_required
@@ -645,6 +650,7 @@ def UserDeleteCard(request, username):
 
 @login_required
 def ReservationEdit(request, reservation_id, location_slug):
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	# need to pull these dates out before we pass the instance into
 	# the ReservationForm, since it (apparently) updates the instance 
@@ -655,7 +661,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 	original_room = reservation.room
 	if request.user.is_authenticated() and request.user == reservation.user:
 
-		if request.user.groups.filter(name='house_admin'):
+		if request.user in reservation.location.house_admins.all():
 			is_house_admin = True
 		else:
 			is_house_admin = False
@@ -669,43 +675,26 @@ def ReservationEdit(request, reservation_id, location_slug):
 				# still pending to begin with, notify an admin and go back to
 				# pending (unless it's hosted, then we don't generate an
 				# email).
-				if not reservation.hosted and (reservation.status != 'pending' and 
-					(reservation.arrive != original_arrive or reservation.depart != original_depart or reservation.room != original_room )):
+				if (reservation.status != 'pending' and (reservation.arrive != original_arrive or 
+					reservation.depart != original_depart or reservation.room != original_room )):
 
 					print "reservation room or date was changed. updating status."
 					reservation.status = "pending"
-					
 					# notify house_admins by email
-					house_admins = User.objects.filter(groups__name='house_admin')
-					subject = "[Embassy SF] Reservation Updated, %s %s, %s - %s" % (reservation.user.first_name, 
-						reservation.user.last_name, str(reservation.arrive), str(reservation.depart))
-					sender = "stay@embassynetwork.com"
-					domain = Site.objects.get_current().domain
-					admin_path = urlresolvers.reverse('reservation_manage', args=(reservation.id,))
-					text = '''Howdy, 
-
-A reservation has been updated and requires your review. 
-
-You can view, approve or deny this request at %s%s.''' % (domain, admin_path)
-					# XXX TODO this is terrible. should have an alias and let a mail agent handle this!
-					for admin in house_admins:
-						recipient = [admin.email,]
-						send_mail(subject, text, sender, recipient) 
-
+					updated_reservation_notify(reservation)
 					client_msg = 'The reservation was updated and the new information will be reviewed for availability.'
 				else:
 					client_msg = 'The reservation was updated.'
 				# save the instance *after* the status has been updated as needed.  
 				form.save()
 				messages.add_message(request, messages.INFO, client_msg)
-				return HttpResponseRedirect("/reservation/%s" % reservation_id)
+				return HttpResponseRedirect(reverse("reservation_detail", args=(location.slug, reservation_id)))
 		else:
 			form = get_reservation_form_for_perms(request, post=False, instance=reservation)
 			
-		return render(request, 'reservation_edit.html', {'form': form, 
-			'reservation_id': reservation_id, 'arrive': reservation.arrive,
-			'depart': reservation.depart, 'is_house_admin' : is_house_admin,
-			})
+		return render(request, 'reservation_edit.html', {'form': form, 'reservation_id': reservation_id, 
+			'arrive': reservation.arrive, 'depart': reservation.depart, 'is_house_admin' : is_house_admin,
+			'location': location })
 
 	else:
 		return HttpResponseRedirect("/")
@@ -847,18 +836,19 @@ def broadcast(request, location_slug):
 # ******************************************************
 
 @group_required('house_admin')
-def ReservationList(request, location_slug):
-	reservations = Reservation.objects.all()
-	pending = Reservation.objects.filter(status="pending")
-	approved = Reservation.objects.filter(status="approved")
-	confirmed = Reservation.objects.filter(status="confirmed")
-	canceled = Reservation.objects.exclude(status="confirmed").exclude(status="approved").exclude(status="pending")
+def ReservationManageList(request, location_slug):
+	location = get_location(location_slug)
+	pending = Reservation.objects.filter(location=location).filter(status="pending")
+	approved = Reservation.objects.filter(location=location).filter(status="approved")
+	confirmed = Reservation.objects.filter(location=location).filter(status="confirmed")
+	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending")
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
-		"confirmed": confirmed, "canceled": canceled})
+		"confirmed": confirmed, "canceled": canceled, 'location': location})
 
 
 @group_required('house_admin')
 def ReservationManage(request, reservation_id, location_slug):
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	user = User.objects.get(username=reservation.user.username)
 	other_reservations = Reservation.objects.filter(user=user).exclude(status='deleted').exclude(id=reservation_id)
@@ -896,7 +886,7 @@ def ReservationManage(request, reservation_id, location_slug):
 		"days_before_welcome_email" : settings.WELCOME_EMAIL_DAYS_AHEAD,
 		"room_has_availability" : room_has_availability,
 		"avail": availability, "dates": dates,
-		"domain": domain
+		"domain": domain, 'location': location,
 	})
 
 
@@ -954,7 +944,7 @@ def ReservationSendReceipt(request, reservation_id, location_slug):
 		return HttpResponseRedirect('/404')
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.reconcile.status == Reconcile.PAID:
-		reservation.reconcile.send_receipt()
+		send_receipt(reservation.reconcile)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
 

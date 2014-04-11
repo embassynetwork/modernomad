@@ -88,7 +88,7 @@
 										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
 											<li><a href="{% url location_residents location.slug %}">Residents</a></li>
 
-											{% if user in location.admins.all %}
+											{% if user in location.house_admins.all %}
 												<li><a href="{% url location_calendar location.slug %}">Guest Calendar</a></li>
 											{% endif %}
 											<li><a href="/broadcast">Say Hello</a></li>
@@ -106,15 +106,15 @@
 										</ul>
 									</li>
 								{% endif %}
-								{% if user in location.admins.all %}
+								{% if user in location.house_admins.all %}
 									<li class="dropdown">
 										<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
 											Admin <b class="caret"></b>
 										</a>
 										<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-											<li><a tabindex="-1" href="/occupancy">See Occupancy</a></li>
-											<li><a tabindex="-1" href="/manage/reservations/">Reservations</a></li>
-											<li><a tabindex="-1" href="/events/review/">Pending Events</a></li>
+											<li><a tabindex="-1" href="{% url location_occupancy location.slug %}">See Occupancy</a></li>
+											<li><a tabindex="-1" href="{% url reservation_manage_list location.slug %}">Reservations</a></li>
+											<li><a tabindex="-1" href="{% url gather_needs_review location.slug %}">Pending Events</a></li>
 										</ul>
 									</li>
 								{% endif %}

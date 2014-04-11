@@ -23,7 +23,7 @@
 	<hr>
 
 	<div class="form-container col-md-9">
-		<form method="post" role="form" action="/reservation/create/">{% csrf_token %}
+		<form method="post" role="form" action="{% url reservation_create location.slug %}">{% csrf_token %}
 
 			<p>Select arrival and departure dates to show known availability.</p> 
 
@@ -110,7 +110,7 @@
 					'csrfmiddlewaretoken': '{{ csrf_token }}'
 				}, 
 				type: "POST",
-				url: '/room/availability/'
+				url: '{% url room_availability location.slug %}'
 			});
 			
 			request.done(function(msg) { // on success..

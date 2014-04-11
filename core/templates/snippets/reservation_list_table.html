@@ -17,8 +17,8 @@
 	<tbody>
 			{% for r in reservations %}
 			<tr>
-				<td><a href="/manage/reservation/{{r.id}}/">Reservation {{r.id}}</a></td>
-				<td><a href="/people/{{r.user.username}}/">{{r.user.first_name}} {{r.user.last_name}}</a> ({{r.user.username}})</td>
+				<td><a href="{% url reservation_manage location.slug r.id %}">Reservation {{r.id}}</a></td>
+				<td><a href="{% url user_detail r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a> ({{r.user.username}})</td>
 				<td>{{r.status}}</td>
 				<td>{{r.arrive}}</td>
 				<td>{{r.depart}}</td>

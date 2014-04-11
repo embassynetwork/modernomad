@@ -6,9 +6,9 @@
 
 <div id="by-month-nav">
 	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
-	<a href="/occupancy/?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
-	<a href="/occupancy/"> Current </a> |
-	<a href="/occupancy/?month={{next_month.month}}&year={{next_month.year}}">Next</a>
+	<a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
+	<a href="{% url location_occupancy location.slug %}"> Current </a> |
+	<a href="?month={{next_month.month}}&year={{next_month.year}}">Next</a>
 	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
 </div>
 <div class="row">

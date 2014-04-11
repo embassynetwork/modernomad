@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 import uuid
 import stripe
 from django.db.models import Q
+from emails import send_receipt
 
 # imports for signals
 import django.dispatch 
@@ -267,7 +268,7 @@ class Reservation(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('core.views.ReservationDetail', [str(self.id)])
+		return ('core.views.ReservationDetail', [str(self.location.slug), str(self.id)])
 
 	def __unicode__(self):
 		return "reservation %d" % self.id
@@ -298,59 +299,6 @@ class Reservation(models.Model):
 		reconcile.save()
 
 
-# send house_admins notification of new reservation. use the post_save signal
-# so that a) we can be sure the reservation was successfully saved, and b) the
-# unique ID of this reservation only exists post-save.
-@receiver(post_save, sender=Reservation)
-def notify_house_admins(sender, instance, **kwargs):
-	if kwargs['created'] == True:
-		obj = Reservation.objects.get(pk=instance.pk)
-		house_admins = User.objects.filter(groups__name='house_admin')
-
-		domain = Site.objects.get_current().domain
-		if obj.hosted:
-			hosting_info = " for guest %s" % obj.guest_name
-			subject = "%s New Reservation: %s hosting %s from %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, obj.user.first_name, 
-				obj.guest_name, str(obj.arrive), str(obj.depart))
-		else:
-			hosting_info = ""
-			subject = "%s Reservation Request, %s %s, %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, obj.user.first_name, 
-			obj.user.last_name, str(obj.arrive), str(obj.depart))
-
-		plaintext = get_template('emails/newreservation.txt')
-		htmltext = get_template('emails/newreservation.html')
-
-		c = Context({
-			'status': obj.status, 
-			'user_image' : "https://" + domain+"/media/"+ str(obj.user.profile.image_thumb),
-			'first_name': obj.user.first_name, 
-			'last_name' : obj.user.last_name, 
-			'room_name' : obj.room.name, 
-			'arrive' : str(obj.arrive), 
-		 	'depart' : str(obj.depart), 
-			'hosting': hosting_info, 
-			'purpose': obj.purpose, 
-			'comments' : obj.comments, 
-			'bio' : obj.user.profile.bio,
-			'referral' : obj.user.profile.referral, 
-			'projects' : obj.user.profile.projects, 
-			'sharing': obj.user.profile.sharing, 
-			'discussion' : obj.user.profile.discussion, 
-			"admin_url" : "http://" + domain + urlresolvers.reverse('reservation_manage', args=(obj.id,))
-
-		})
-
-		subject = "%s Reservation Request, %s %s, %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, obj.user.first_name, 
-			obj.user.last_name, str(obj.arrive), str(obj.depart))
-		sender = settings.DEFAULT_FROM_EMAIL
-		recipients = []
-		for admin in house_admins:
-			recipients.append(admin.email)
-		text_content = plaintext.render(c)
-		html_content = htmltext.render(c)
-		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
-		msg.attach_alternative(html_content, "text/html")
-		msg.send()
 
 class Reconcile(models.Model):
 	''' The Reconcile object is automatically created when a reservation is confirmed.'''
@@ -456,53 +404,6 @@ class Reconcile(models.Model):
 		self.status = Reconcile.INVOICED
 		self.save()
 
-	def send_receipt(self):
-		if self.reservation.hosted:
-			# XXX TODO make this a proper error which is viewable in the admin form.
-			print "hosted reservation invoices not supported"
-			return False
-		if not self.status == Reconcile.UNPAID and not self.status == Reconcile.PAID:
-			# XXX TODO proper error handling. 
-			print "reservation must be unpaid or paid to generate receipt"
-			return False
-
-		if (not self.paid_amount or not self.payment_method or not self.transaction_id 
-			or not self.payment_date):
-			return False
-
-		total_paid = self.paid_amount
-
-		plaintext = get_template('emails/receipt.txt')
-		htmltext = get_template('emails/receipt.html')
-		c = Context({
-			'first_name': self.reservation.user.first_name, 
-			'last_name': self.reservation.user.last_name, 
-			'res_id': self.reservation.id,
-			'today': datetime.datetime.today(), 
-			'arrive': self.reservation.arrive, 
-			'depart': self.reservation.depart, 
-			'room': self.reservation.room.name, 
-			'num_nights': self.reservation.total_nights(), 
-			'rate': self.get_rate(), 
-			'payment_method': self.payment_method,
-			'transaction_id': self.transaction_id,
-			'payment_date': self.payment_date,
-			'total_paid': total_paid,
-		}) 
-
-		subject = "%s Receipt for your Stay %s - %s" % (settings.EMAIL_SUBJECT_PREFIX, str(self.reservation.arrive), str(self.reservation.depart))  
-		sender = settings.DEFAULT_FROM_EMAIL
-		recipients = [self.reservation.user.email,]
-		text_content = plaintext.render(c)
-		html_content = htmltext.render(c)
-		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
-		msg.attach_alternative(html_content, "text/html")
-		msg.send()
-		if self.status != Reconcile.PAID:
-			self.status = Reconcile.PAID
-			self.save()
-		return True
-
 	def charge_card(self):
 		# stripe will raise a stripe.CardError if the charge fails. this
 		# function purposefully does not handle that error so the calling
@@ -529,7 +430,7 @@ class Reconcile(models.Model):
 		self.transaction_id = charge.id
 		self.payment_date = datetime.datetime.now()
 		self.save()
-		self.send_receipt()
+		send_receipt()
 
 
 Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
@@ -586,6 +487,8 @@ class UserProfile(models.Model):
 		return (self.user.__unicode__())
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+
+User._meta.ordering = ['username']
 
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):

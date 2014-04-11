@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 # custom management (admin) patterns
 urlpatterns = patterns('core.views', 
-	url(r'reservations/$', 'ReservationList', name='reservation_list'),
+	url(r'reservations/$', 'ReservationManageList', name='reservation_manage_list'),
 	url(r'reservation/(?P<reservation_id>\d+)/$', 'ReservationManage', name='reservation_manage'),
     url(r'reservation/(?P<reservation_id>\d+)/action/$', 'ReservationManageUpdate', name='reservation_manage_update'), 
     url(r'reservation/(?P<reservation_id>\d+)/chargecard/$', 'ReservationChargeCard', name='reservation_charge_card'), 
