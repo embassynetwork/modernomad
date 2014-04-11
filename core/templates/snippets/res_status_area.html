@@ -18,7 +18,7 @@
 	{% endif %}
 
 
-	<form method="POST" action="/manage/reservation/{{r.id}}/action/" id="res-action-form">
+	<form method="POST" action="{% url reservation_manage_update location.slug r.id %}" id="res-action-form">
 		
 	{% if r.reconcile.status != "comp" %}
 

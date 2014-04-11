@@ -430,7 +430,7 @@ class Reconcile(models.Model):
 		self.transaction_id = charge.id
 		self.payment_date = datetime.datetime.now()
 		self.save()
-		send_receipt()
+		send_receipt(self)
 
 
 Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])

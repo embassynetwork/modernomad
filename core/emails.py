@@ -6,6 +6,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.contrib.sites.models import Site
 from django.conf import settings
+import datetime
 
 def send_receipt(reconcile):
 	# make sure we have all the data we need. 
@@ -42,9 +43,6 @@ def send_receipt(reconcile):
 	msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
 	msg.attach_alternative(html_content, "text/html")
 	msg.send()
-	if reconcile.status != Reconcile.PAID:
-		reconcile.status = Reconcile.PAID
-		reconcile.save()
 	return True
 
 # send house_admins notification of new reservation. use the post_save signal

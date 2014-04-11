@@ -730,6 +730,7 @@ def ReservationCancel(request, reservation_id, location_slug):
 	if not request.method == "POST":
 		return HttpResponseRedirect("/404")
 
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if (not (request.user.is_authenticated() and request.user == reservation.user) 
 			and not request.user.groups.filter(name='house_admin')):
@@ -895,6 +896,7 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation_action = request.POST.get('reservation-action')
 	try:
@@ -920,17 +922,18 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 			raise Reservation.ResActionError("Unrecognized action.")
 
 		messages.add_message(request, messages.INFO, 'Your action has been registered!')
-		status_area_html = render(request, "snippets/res_status_area.html", {"r": reservation})
+		status_area_html = render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 		return status_area_html
 
 	except Reservation.ResActionError, e:
 		messages.add_message(request, messages.INFO, "Error: %s" % e)
-		return render(request, "snippets/res_status_area.html", {"r": reservation})
+		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 
 @group_required('house_admin')
 def ReservationChargeCard(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	try:
 		reservation.reconcile.charge_card()
@@ -942,17 +945,19 @@ def ReservationChargeCard(request, reservation_id, location_slug):
 def ReservationSendReceipt(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.reconcile.status == Reconcile.PAID:
 		send_receipt(reservation.reconcile)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
-	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 
 @group_required('house_admin')
 def ReservationToggleComp(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	reconcile = reservation.reconcile
 	if reconcile.status != Reconcile.COMP:
@@ -964,13 +969,14 @@ def ReservationToggleComp(request, reservation_id, location_slug):
 			reservation.status = Reconcile.APPROVED
 			reservation.save()
 	reconcile.save()
-	return HttpResponseRedirect('/manage/reservation/%d' % reservation.id)
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @group_required('house_admin')
 def ReservationSendMail(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
+	location = get_location(location_slug)
 	print request.POST
 	subject = request.POST.get("subject")
 	recipient = [request.POST.get("recipient"),]
@@ -982,7 +988,7 @@ def ReservationSendMail(request, reservation_id, location_slug):
 	reservation.mark_last_msg() 
 
 	messages.add_message(request, messages.INFO, "Your message was sent.")
-	return HttpResponseRedirect('/manage/reservation/%s' % reservation_id)
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 # ******************************************************
 #           registration callbacks and views
