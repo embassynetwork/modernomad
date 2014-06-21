@@ -17,7 +17,7 @@ class Migration(DataMigration):
 		# of the reservation and room objects
 		loc = orm['core.Location'].objects.create(
 				name = "Embassy SF",
-				slug = 'embassysf',
+				slug = 'testlocation',
 				short_description = "The flagship location in the Embassy Network to prototyping a new model of Home",
 				about_page = "about us goes here",
 				address = "399 Webster Street, San Francisco, CA, 94117",
@@ -39,10 +39,12 @@ class Migration(DataMigration):
 		reservations = orm['core.Reservation'].objects.all()
 		for r in reservations:
 			r.location = loc
+			r.save()
 
 		rooms = orm['core.Room'].objects.all()
 		for room in rooms:
 			room.location = loc
+			room.save()
 
 	def backwards(self, orm):
 		"Write your backwards methods here."
@@ -51,12 +53,15 @@ class Migration(DataMigration):
 		reservations = orm['core.Reservation'].objects.all()
 		for r in reservations:
 			r.location = None
+			r.save()
 
 		rooms = orm['core.Room'].objects.all()
 		for room in rooms:
 			room.location = None
+			room.save()
 
-		# not sure if this is necessary?
+		# not sure if this is necessary (the previous migration is what
+		# actually deletes the location object)
 		db.delete_table('core_location')
 		location_content_type = ContentType.objects.filter(model='location')
 		location_content_type.delete()

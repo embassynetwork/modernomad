@@ -10,7 +10,6 @@ from django.core.files.storage import default_storage
 import uuid
 import stripe
 from django.db.models import Q
-from emails import send_receipt
 
 # imports for signals
 import django.dispatch 
@@ -18,7 +17,6 @@ from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
 
 # mail imports
-from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
@@ -35,7 +33,7 @@ def default_location():
 
 class Location(models.Model):
 	name = models.CharField(max_length=200)
-	slug = models.CharField(max_length=60, unique=True)
+	slug = models.CharField(max_length=60, unique=True, help_text="Try to make this short and sweet. It will also be used to form several location-specific email addresses in the form of xxx@<your_slug>.mail.embassynetwork.com")
 	short_description = models.TextField()
 	about_page = models.TextField()
 	address = models.CharField(max_length=300)
@@ -45,33 +43,64 @@ class Location(models.Model):
 	max_reservation_days = models.IntegerField(default=14)
 	welcome_email_days_ahead = models.IntegerField(default=2)
 	house_access_code = models.CharField(max_length=50, blank=True, null=True)
-	stripe_secret_key = models.CharField(max_length=200)
-	stripe_public_key = models.CharField(max_length=200)
-	mailgun_api_key = models.CharField(max_length=200)
-	mailgun_domain = models.CharField(max_length=200)
-	email_subject_prefix = models.CharField(max_length=200)
-	default_from_email = models.CharField(max_length=200)
+	ssid = models.CharField(max_length=200, blank=True, null=True)
+	ssid_password = models.CharField(max_length=200, blank=True, null=True)
+	timezone = models.CharField(max_length=200)
+	#stripe_secret_key = models.CharField(max_length=200)
+	#stripe_public_key = models.CharField(max_length=200)
+	#mailgun_api_key = models.CharField(max_length=200)
+	#mailgun_domain = models.CharField(max_length=200)
+	bank_account_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
+	routing_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
+	bank_name = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
+	name_on_account = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
+	email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
+	#default_from_email = models.CharField(max_length=200)
 	house_admins = models.ManyToManyField(User, related_name='house_admin', blank=True, null=True)
 	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
 
 	def __unicode__(self):
 		return self.name
 
+	def from_email(self):
+		''' return a location-specific email in the standard format we use.'''
+		return "stay@%s.mail.embassynetwork.com" % self.slug
+
+class LocationNotUniqueException(Exception):
+	pass
+
+class LocationDoesNotExistException(Exception):
+	pass
+
+def get_location(location_slug):
+	if location_slug:
+		try:
+			location = Location.objects.get(slug=location_slug)
+		except:
+			raise LocationDoesNotExistException("The requested location does not exist: %s" % location_slug)
+	else:
+		if Location.objects.count() == 1:
+			location = Location.objects.get(id=1)
+		else:
+			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
+	return location
+
 class RoomManager(models.Manager):
-	def availability(self, start, end):
+	def availability(self, start, end, location):
 		# return a map of rooms to dates showing occupied and free beds,
-		# between start and end dates
+		# between start and end dates, per location
 
 		availability = {}
 		the_day = start
 		while the_day < end:
 			# return only rooms available for bookings (currently just guest rooms)
 			# XXX TODO add private rooms that have temporarily been added to the pool). 
-			rooms = list(self.filter(primary_use="guest"))
+
+			rooms_at_location = list(self.filter(primary_use="guest").filter(location=location))
 			avail_today = {}
-			for room, beds in [(room, room.beds) for room in rooms]:
+			for room, beds in [(room, room.beds) for room in rooms_at_location]:
 				avail_today[room] = beds
-			bookings_today = Reservation.availability.reserved_on_date(the_day)
+			bookings_today = Reservation.objects.reserved_on_date(the_day, location)
 			for booking in bookings_today:
 				# if a room has been changed from a guest room
 				# to some point in the past to a private room
@@ -91,8 +120,8 @@ class RoomManager(models.Manager):
 
 		# but it's actually easier to use the data if organizd by room...
 		by_room = {}
-		all_rooms = list(self.filter(primary_use="guest"))
-		for room in all_rooms:
+		all_rooms_at_location = list(self.filter(location=location).filter(primary_use="guest"))
+		for room in all_rooms_at_location:
 			the_day = start
 			by_room[room] = []
 			while the_day < end:
@@ -102,12 +131,12 @@ class RoomManager(models.Manager):
 				the_day = the_day + datetime.timedelta(1)
 		return by_room
 
-	
-	def free(self, start, end):
+
+	def free(self, start, end, location):
 		# return a list of room objects that are free the entire time between
 		# start and end dates IMPT: make sure to COPY the list of initial
 		# rooms - don't delete the real room objects :-O.
-		room_list = list(self.filter(primary_use="guest"))
+		room_list = list(self.filter(location=location).filter(primary_use="guest"))
 		rooms = {}
 		# make a list of all room and their associated # beds
 		for r in room_list:
@@ -115,7 +144,7 @@ class RoomManager(models.Manager):
 		the_day = start
 		while the_day < end:
 			rooms_today = dict(rooms)
-			bookings_today = Reservation.availability.reserved_on_date(the_day)
+			bookings_today = Reservation.objects.reserved_on_date(the_day, location)
 			for booking in bookings_today:
 				# if a room has been changed from a guest room
 				# to some point in the past to a private room
@@ -156,9 +185,9 @@ class Room(models.Model):
 	GUEST = "guest"
 	PRIVATE = "private"
 	ROOM_USES = (
-		(GUEST, "Guest"),
-		(PRIVATE, "Private"),
-	)
+			(GUEST, "Guest"),
+			(PRIVATE, "Private"),
+			)
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.IntegerField()
@@ -174,9 +203,9 @@ class Room(models.Model):
 
 	def __unicode__(self):
 		return self.name
-	
-	def available_on(self, this_day):
-		reservations_on_this_day = Reservation.availability.reserved_on_date(this_day)
+
+	def available_on(self, this_day, location):
+		reservations_on_this_day = Reservation.objects.reserved_on_date(this_day, location=location)
 		beds_left = self.beds
 		for r in reservations_on_this_day:
 			if r.room == self:
@@ -189,31 +218,32 @@ class Room(models.Model):
 
 class ReservationManager(models.Manager):
 
-	def on_date(self, the_day, status):
+	def on_date(self, the_day, status, location):
 		# return the reservations that intersect this day, of any status
-		all_on_date = super(ReservationManager, self).get_query_set().filter(arrive__lte = the_day).filter(depart__gt = the_day)
+		all_on_date = super(ReservationManager, self).get_query_set().filter(location=location).filter(arrive__lte = the_day).filter(depart__gt = the_day)
 		return all_on_date.filter(status=status)
 
-	def reserved_on_date(self, the_day):
+	def reserved_on_date(self, the_day, location):
 		# return the approved or confirmed reservations that intersect this day
-		approved_reservations = self.on_date(the_day, status= "approved")
-		confirmed_reservations = self.on_date(the_day, status="confirmed")
+		approved_reservations = self.on_date(the_day, status= "approved", location=location)
+		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
 		return (list(approved_reservations) + list(confirmed_reservations))
 
-	def confirmed_on_date(self):	
-		confirmed_reservations = self.on_date(the_day, status="confirmed")
+	def confirmed_on_date(self, the_day, location):	
+		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
 		return list(confirmed_reservations)	
 
 class TodayManager(models.Manager):
-	def get_query_set(self):
+	def get_query_set(self, location):
 		# return the reservations that intersect today
 		today = datetime.date.today()
-		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today)
+		return super(TodayManager, self).get_query_set().filter(location=location).filter(arrive__lte = today).filter(depart__gte = today)
 
-	def confirmed(self):	
+	def confirmed(self, location):	
+		# return the reservations that intersect today and are confirmed.
 		today = datetime.date.today()
-		return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today).filter(status='confirmed')
-	
+		return super(TodayManager, self).get_query_set().filter(location=location).filter(arrive__lte = today).filter(depart__gte = today).filter(status='confirmed')
+
 
 class Reservation(models.Model):
 
@@ -232,13 +262,13 @@ class Reservation(models.Model):
 	USER_DECLINED = 'user declined'
 
 	RESERVATION_STATUSES = (
-		(PENDING, 'Pending'),
-		(APPROVED, 'Approved'),
-		(CONFIRMED, 'Confirmed'),
-		(HOUSE_DECLINED, 'House Declined'),
-		(USER_DECLINED, 'User Declined'),
-		(CANCELED, 'Canceled'),
-	)
+			(PENDING, 'Pending'),
+			(APPROVED, 'Approved'),
+			(CONFIRMED, 'Confirmed'),
+			(HOUSE_DECLINED, 'House Declined'),
+			(USER_DECLINED, 'User Declined'),
+			(CANCELED, 'Canceled'),
+			)
 
 	# hosted reservations - only exposed to house_admins. form fields are
 	# rendered in the order they are declared in the model, so leave this
@@ -262,9 +292,9 @@ class Reservation(models.Model):
 	last_msg = models.DateTimeField(blank=True, null=True)
 
 	# managers
-	objects = models.Manager()
+	#objects = models.Manager()
 	today = TodayManager() # approved and confirmed reservations that intersect today
-	availability = ReservationManager()
+	objects = ReservationManager()
 
 	@models.permalink
 	def get_absolute_url(self):
@@ -308,12 +338,12 @@ class Reconcile(models.Model):
 	PAID = "paid"
 	INVALID = "invalid"
 	STATUSES = (
-		(COMP, 'Comp'),
-		(UNPAID, 'Unpaid'),
-		(INVOICED, 'Invoiced'),
-		(PAID, 'Paid'),
-		(INVALID, "Invalid")
-	)
+			(COMP, 'Comp'),
+			(UNPAID, 'Unpaid'),
+			(INVOICED, 'Invoiced'),
+			(PAID, 'Paid'),
+			(INVALID, "Invalid")
+			)
 
 	reservation = models.OneToOneField(Reservation)
 	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.") 
@@ -327,7 +357,7 @@ class Reconcile(models.Model):
 
 	def __unicode__(self):
 		return "reconcile reservation %d" % self.reservation.id
-		
+
 	def get_rate(self):
 		if self.status == Reconcile.COMP:
 			return 0
@@ -391,16 +421,13 @@ class Reconcile(models.Model):
 			'num_nights': self.reservation.total_nights(), 
 			'rate': self.get_rate(), 
 			'total': self.total_owed,
-		}) 
+			}) 
 
-		subject = "%s Thanks for Staying with us!" % settings.EMAIL_SUBJECT_PREFIX 
-		sender = settings.DEFAULT_FROM_EMAIL
-		recipients = [self.reservation.user.email,]
+		subject = "[%s] Thanks for Staying with us!" % self.reservation.location.email_subject_prefix 
+		recipient = [self.reservation.user.email,]
 		text_content = plaintext.render(c)
 		html_content = htmltext.render(c)
-		msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
-		msg.attach_alternative(html_content, "text/html")
-		msg.send()
+		send_from_location_address(subject, text_content, html_context, recipient, self.reservation.location)
 		self.status = Reconcile.INVOICED
 		self.save()
 
@@ -420,7 +447,7 @@ class Reconcile(models.Model):
 				currency="usd",
 				customer = self.reservation.user.profile.customer_id,
 				description=descr
-		)
+				)
 
 		# store the charge details
 		self.status = Reconcile.PAID
@@ -430,7 +457,6 @@ class Reconcile(models.Model):
 		self.transaction_id = charge.id
 		self.payment_date = datetime.datetime.now()
 		self.save()
-		send_receipt(self)
 
 
 Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
@@ -517,7 +543,7 @@ def size_images(sender, instance, **kwargs):
 		# dimension.
 		main_img = im.resize(UserProfile.IMG_SIZE, Image.ANTIALIAS)
 		main_img.save(main_img_full_path)
-        # the image field is a link to the path where the image is stored
+		# the image field is a link to the path where the image is stored
 		instance.image = img_upload_path_rel
 		# now resize this to generate the smaller thumbnail
 		thumb_img = im.resize(UserProfile.IMG_THUMB_SIZE, Image.ANTIALIAS)
@@ -555,7 +581,7 @@ class EmailTemplate(models.Model):
 	def __unicode__(self):
 		return self.name
 
-	
+
 
 
 

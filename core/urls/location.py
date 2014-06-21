@@ -7,10 +7,11 @@ per_location_patterns = [
 	url(r'^stay/$', 'core.views.stay', name='location_stay'),
 	url(r'^occupancy/$', 'core.views.occupancy', name='location_occupancy'),
 	url(r'^calendar/$', 'core.views.calendar', name='location_calendar'),
-	url(r'^guestinfo/$', 'core.views.GuestInfo', name='location_guestinfo'),
 	url(r'^payment/$', 'core.views.GenericPayment', name='location_payment'),
 	url(r'^thanks/$', 'core.views.thanks', name='location_thanks'),
 	url(r'^today/$', 'core.views.today', name='location_today'),
+	url(r'^email/current$', 'core.emails.current', name='location_email_current'),
+	url(r'^email/stay$', 'core.emails.stay', name='location_email_stay'),
 
 	url(r'^events/', include('gather.urls')),
 

@@ -14,17 +14,18 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 class EventAdminGroupInline(admin.TabularInline):
 	model = EventAdminGroup
+	filter_horizontal = ['users',]
+
+class RoomAdminInline(admin.TabularInline):
+	model = Room
+	extra = 0
 
 class LocationAdmin(admin.ModelAdmin):
 	model=Location
 	list_display=('name', 'address')
 	list_filter=('name',)
-	inlines = [EventAdminGroupInline]
-
-class RoomAdmin(admin.ModelAdmin):
-	model = Room
-	list_display = ('name', 'default_rate', 'primary_use')
-	list_filter = ('primary_use',)
+	filter_horizontal = ['residents', 'house_admins']
+	inlines = [RoomAdminInline, EventAdminGroupInline]
 
 class ReconcileInline(admin.TabularInline):
 	model = Reconcile
@@ -146,7 +147,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	list_editable = ('status',)
 	inlines = [ReconcileInline]
 	ordering = ['depart',]
-	actions= ['send_invoice', 'send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
+	actions= ['send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
 	save_as = True
 	
 class UserProfileInline(admin.StackedInline):
@@ -158,7 +159,6 @@ class UserProfileAdmin(UserAdmin):
 
 
 admin.site.register(Reservation, ReservationAdmin)
-admin.site.register(Room, RoomAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 

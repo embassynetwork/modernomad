@@ -9,16 +9,15 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from registration import signals
 import registration
-from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, MessageCurrentPeopleForm, PaymentForm
-from django.core.mail import send_mail
+from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
 from django.utils import simplejson
-from core.decorators import group_required
+from core.decorators import house_admin_required
 from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate, Location
-from core.tasks import send_guest_welcome
+from core.tasks import guest_welcome
 import uuid, base64, os
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
@@ -28,24 +27,11 @@ from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
-from core.confirmation_email import confirmation_email_details
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
-from emails import send_receipt, new_reservation_notify, updated_reservation_notify
+from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
 from django.core.urlresolvers import reverse
-
-class LocationNotUniqueException(Exception):
-	pass
-
-def get_location(location_slug):
-	if location_slug:
-		location = Location.objects.get(slug=location_slug)
-	else:
-		if Location.objects.count() == 1:
-			location = Location.objects.get(id=1)
-		else:
-			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
-	return location
+from core.models import get_location
 
 def location(request, location_slug):
 	try:
@@ -166,11 +152,9 @@ def today(request, location_slug):
 	events_today = published_events_today_local()
 	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
 
-
+@house_admin_required
 def occupancy(request, location_slug):
 	location = get_location(location_slug)
-	if not (request.user.is_authenticated and request.user in location.house_admins.all()):
-		return HttpResponseRedirect(("/404"))
 	today = datetime.date.today()
 	month = request.GET.get("month")
 	year = request.GET.get("year")
@@ -384,14 +368,6 @@ def thanks(request):
 	# TODO generate receipt
 	return render(request, "thanks.html")
 
-@login_required
-def GuestInfo(request, location_slug):
-	# only allow people who have had at least one confirmed reservation access this page
-	confirmed = Reservation.objects.filter(user=request.user).filter(status='confirmed')
-	if len(confirmed) > 0:
-		return render(request, 'guestinfo.html', {'static_info': confirmation_email_details})
-	return HttpResponseRedirect('/')
-
 def logout(request, location_slug = None):
 	logout(request)
 	messages.add_message(request, messages.INFO, 'You have been logged out.')
@@ -426,42 +402,26 @@ def location_list(request):
 	locations = Location.objects.all()
 	return render(request, "location_list.html", {"locations": locations})
 
-
-def get_reservation_form_for_perms(request, post, instance):
-	if post == True:
-		if instance:
-			form = ReservationForm(request.POST, instance=instance)
-		else:
-			form = ReservationForm(request.POST)
-	else:
-		if instance:
-			form = ReservationForm(instance=instance)
-		else:
-			form = ReservationForm()
-	# ensure we only show official guest rooms unless the user is a house admin. 
-	if not request.user.groups.filter(name='house_admin'):
-		form.fields['room'].queryset = Room.objects.filter(primary_use="guest")
-	return form
-
 @login_required
 def CheckRoomAvailability(request, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
+	location=get_location(location_slug)
 	arrive_str = request.POST.get('arrive')
 	depart_str = request.POST.get('depart')
 	a_month, a_day, a_year = arrive_str.split("/")
 	d_month, d_day, d_year = depart_str.split("/")
 	arrive = datetime.date(int(a_year), int(a_month), int(a_day))
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
-	avail_by_room = Room.objects.availability(arrive, depart)
+	avail_by_room = Room.objects.availability(arrive, depart, location)
 	# all rooms should have an associated list of the same length that covers
 	# all days, so just grab the dates from any one of them (they are already
 	# sorted).
 	per_date_avail = avail_by_room[avail_by_room.keys()[0]]
 	dates = [tup[0] for tup in per_date_avail]
 	nights = (depart - arrive).days
-	free_rooms = Room.objects.free(arrive, depart)	
+	free_rooms = Room.objects.free(arrive, depart, location)	
 	# add some info to free_rooms:
 	for room in free_rooms:
 		room.value = nights*room.default_rate
@@ -474,32 +434,22 @@ def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
 	if request.method == 'POST':
 		print request.POST
-		form = get_reservation_form_for_perms(request, post=True, instance=False)
-
+		#form = get_reservation_form_for_perms(request, post=True, instance=False)
+		form = ReservationForm(location, request.POST)
 		if form.is_valid():
 			reservation = form.save(commit=False)
 			reservation.user = request.user
 			reservation.location = location
 			reservation.save()
 			new_reservation_notify(reservation)
-			if reservation.hosted:
-				messages.add_message(request, messages.INFO, 'The reservation has been created. You can modify the reservation below.')
-			else:
-				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
+			messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 		else:
 			print form.errors
-
 	# GET request
 	else: 
-		form = get_reservation_form_for_perms(request, post=False, instance=False)
-
-	# default - render either the bound form with errors or the unbound form    
-	if request.user.groups.filter(name='house_admin'):
-		is_house_admin = True
-	else:
-		is_house_admin = False
-
+		#form = get_reservation_form_for_perms(request, post=False, instance=False)
+		form = ReservationForm(location)
 	# pass the rate for each room to the template so we can update the cost of
 	# a reservation in real time. 
 	rooms = Room.objects.all()
@@ -507,8 +457,8 @@ def ReservationSubmit(request, location_slug):
 	for room in rooms:
 		room_list[room.name] = room.default_rate
 	room_list = simplejson.dumps(room_list)
-	return render(request, 'reservation.html', {'form': form, 'is_house_admin': is_house_admin, 
-		"room_list": room_list, 'max_days': settings.MAX_RESERVATION_DAYS, 'location': location })
+	return render(request, 'reservation.html', {'form': form, "room_list": room_list, 
+		'max_days': settings.MAX_RESERVATION_DAYS, 'location': location })
 
 
 @login_required
@@ -615,11 +565,12 @@ def UserAddCard(request, username):
 				# charges card, saves payment details and emails a receipt to
 				# the user
 				reservation.reconcile.charge_card()
+				send_receipt(reconcile)
 				reservation.status = Reservation.CONFIRMED
 				reservation.save()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
-					send_guest_welcome([reservation,])
+					guest_welcome(reservation)
 				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, settings.WELCOME_EMAIL_DAYS_AHEAD))
 				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
 			except stripe.CardError, e:
@@ -668,7 +619,8 @@ def ReservationEdit(request, reservation_id, location_slug):
 
 		if request.method == "POST":
 			# don't forget to specify the "instance" argument or a new object will get created!
-			form = get_reservation_form_for_perms(request, post=True, instance=reservation)
+			#form = get_reservation_form_for_perms(request, post=True, instance=reservation)
+			form = ReservationForm(location, request.POST, instance=reservation)
 			if form.is_valid():
 
 				# if the dates have been changed, and the reservation isn't
@@ -690,7 +642,8 @@ def ReservationEdit(request, reservation_id, location_slug):
 				messages.add_message(request, messages.INFO, client_msg)
 				return HttpResponseRedirect(reverse("reservation_detail", args=(location.slug, reservation_id)))
 		else:
-			form = get_reservation_form_for_perms(request, post=False, instance=reservation)
+			#form = get_reservation_form_for_perms(request, post=False, instance=reservation)
+			form = ReservationForm(location, instance=reservation)
 			
 		return render(request, 'reservation_edit.html', {'form': form, 'reservation_id': reservation_id, 
 			'arrive': reservation.arrive, 'depart': reservation.depart, 'is_house_admin' : is_house_admin,
@@ -713,11 +666,12 @@ def ReservationConfirm(request, reservation_id, location_slug):
 			reservation.reconcile.charge_card()
 			reservation.status = Reservation.CONFIRMED
 			reservation.save()
+			send_receipt(reconcile)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
 			if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
-				send_guest_welcome([reservation,])
+				guest_welcome(reservation)
 			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
 		except stripe.CardError, e:
 			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
@@ -733,13 +687,13 @@ def ReservationCancel(request, reservation_id, location_slug):
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if (not (request.user.is_authenticated() and request.user == reservation.user) 
-			and not request.user.groups.filter(name='house_admin')):
+			and not request.user in location.house_admins.all()): 
 		return HttpResponseRedirect("/404")
 
 	redirect = request.POST.get("redirect")
 
 	reservation.cancel()
-	messages.add_message(request, messages.INFO, 'The reservation has been canceled.')
+	messages.add_message(request, messages.INFO, 'The reservation has been cancelled.')
 	username = reservation.user.username
 	return HttpResponseRedirect(redirect)
 
@@ -749,10 +703,9 @@ def ReservationDelete(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if (request.user.is_authenticated() and request.user == reservation.user 
 		and request.method == "POST"):
-		reservation.status = 'deleted'
-		reservation.save()
+		reservation.cancel()
 
-		messages.add_message(request, messages.INFO, 'Your reservation has been canceled.')
+		messages.add_message(request, messages.INFO, 'Your reservation has been cancelled.')
 		username = reservation.user.username
 		return HttpResponseRedirect("/people/%s" % username)
 
@@ -784,59 +737,11 @@ def PeopleDaterangeQuery(request, location_slug):
 	return HttpResponse(html)
 	
 
-@login_required
-def broadcast(request, location_slug):
-	location = get_location(location_slug)
-	# the user must be authenticated because we have the @login_required
-	# decorator. 
-	sender = request.user 
-	print 'sender is ' + sender.username
-	if request.method == 'POST':
-		form = MessageCurrentPeopleForm(request.POST, sender=sender)
-		if form.is_valid():
-			# get current people for the specified dates (residents + guests)
-			# this is a waste since we already ueried the DB for the list of
-			# users when the dates were selected. ideally should pass along
-			# this info instead of re-querying. 
-			start_str = request.POST.get('start_date')
-			end_str = request.POST.get('end_date')
-			s_month, s_day, s_year = start_str.split("/")
-			e_month, e_day, e_year = end_str.split("/")
-			start_date = datetime.date(int(s_year), int(s_month), int(s_day))
-			end_date = datetime.date(int(e_year), int(e_month), int(e_day))
-
-			reservations_for_daterange = Reservation.objects.filter(Q(status="confirmed")).exclude(depart__lt=start_date).exclude(arrive__gte=end_date)
-
-			# Send email
-			recipients = []
-			for r in reservations_for_daterange:
-				recipients.append(r.user.email)
-			residents = location.residents.all()
-			residents = list(residents)
-			for r in residents:
-				recipients.append(r.email)
-			text_content = request.POST.get('body') + "\n\n" + request.POST.get('footer')
-			subject = request.POST.get('subject') 
-			sender = sender.email
-			msg = EmailMultiAlternatives(subject, text_content, sender, recipients)
-			msg.send()
-			messages.add_message(request, messages.INFO, 'Your message has been sent!')
-			return HttpResponseRedirect('/broadcast')
-
-		else:
-			print "form not valid"
-			print form.errors
-
-
-	else:
-		form = MessageCurrentPeopleForm(sender=sender)		
-	return render(request, "broadcast.html", {"form": form})
-
 # ******************************************************
 #           reservation management views
 # ******************************************************
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationManageList(request, location_slug):
 	location = get_location(location_slug)
 	pending = Reservation.objects.filter(location=location).filter(status="pending")
@@ -847,7 +752,7 @@ def ReservationManageList(request, location_slug):
 		"confirmed": confirmed, "canceled": canceled, 'location': location})
 
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationManage(request, reservation_id, location_slug):
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
@@ -869,8 +774,8 @@ def ReservationManage(request, reservation_id, location_slug):
 		email_forms.append(form)
 		email_templates_by_name.append(email_template.name)
 	
-	availability = Room.objects.availability(reservation.arrive, reservation.depart)
-	free = Room.objects.free(reservation.arrive, reservation.depart)
+	availability = Room.objects.availability(reservation.arrive, reservation.depart, location)
+	free = Room.objects.free(reservation.arrive, reservation.depart, location)
 	per_date_avail = availability[availability.keys()[0]]
 	dates = [tup[0] for tup in per_date_avail]
 	if reservation.room in free:
@@ -891,7 +796,7 @@ def ReservationManage(request, reservation_id, location_slug):
 	})
 
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationManageUpdate(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -906,16 +811,17 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 			reservation.set_confirmed()
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
 			if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
-				send_guest_welcome([reservation,])
+				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.set_comp()
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.reconcile.charge_card()
 				reservation.set_confirmed()
+				send_receipt(reconcile)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
-					send_guest_welcome([reservation,])
+					guest_welcome(reservation)
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)
 		else:
@@ -929,7 +835,7 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 		messages.add_message(request, messages.INFO, "Error: %s" % e)
 		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationChargeCard(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -937,23 +843,24 @@ def ReservationChargeCard(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	try:
 		reservation.reconcile.charge_card()
+		send_receipt(reconcile)
 		return HttpResponse()
 	except stripe.CardError, e:
 		return HttpResponse(status=500)
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationSendReceipt(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.reconcile.status == Reconcile.PAID:
-		send_receipt(reservation.reconcile)
+		send_receipt(reservation.reconcile, location)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationToggleComp(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -971,7 +878,7 @@ def ReservationToggleComp(request, reservation_id, location_slug):
 	reconcile.save()
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
-@group_required('house_admin')
+@house_admin_required
 def ReservationSendMail(request, reservation_id, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -980,9 +887,8 @@ def ReservationSendMail(request, reservation_id, location_slug):
 	print request.POST
 	subject = request.POST.get("subject")
 	recipient = [request.POST.get("recipient"),]
-	sender = request.POST.get("sender")
 	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
-	send_mail(subject, body, sender, recipient)
+	send_from_location_address(subject, text_content, html_content, recipient, location)
 
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation.mark_last_msg() 

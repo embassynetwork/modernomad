@@ -1,6 +1,6 @@
 Dear {{ first_name|title }},
 
-We look forward to seeing you at the Embassy on {{ day_of_week }}!
+We look forward to seeing you at {{location_name}} on {{ day_of_week }}!
 
 ** Key Data **
 
