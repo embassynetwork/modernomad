@@ -1,11 +1,11 @@
 {% extends "content-base.html" %}
 {% block content %}
 
-{{ location_stay_text }}
+{{ location_stay_text|safe }}
  
 <div class="button-spacer">
 	<div class="col-md-4 col-md-offset-4">
-		<a class="btn btn-lg btn-rouge" type="button" {% if user.is_authenticated %} href="{% url reservation_create location.slug %}" {%else %} href="/people/register?next=/reservation/create/"{%endif%}>Fill out an Application Form</a>
+		<a class="btn btn-lg btn-rouge" type="button" {% if user.is_authenticated %} href="{% url 'reservation_create' location.slug %}" {%else %} href="/people/register?next=/reservation/create/"{%endif%}>Fill out an Application Form</a>
 	</div>
 </div>
 {% endblock %}

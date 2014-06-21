@@ -18,6 +18,7 @@ per_location_patterns = [
 	url(r'^reservation/', include('core.urls.reservations')),
 	url(r'^manage/', include('core.urls.manage')),
 	url(r'^room/', include('core.urls.room')),
+	
 ]
 
 urlpatterns = patterns('core.views',

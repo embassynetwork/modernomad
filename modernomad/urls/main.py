@@ -16,10 +16,8 @@ urlpatterns = patterns('',
 	url(r'^locations/', include('core.urls.location')),
 	url(r'^events/$', 'gather.views.upcoming_events_all_locations'),
 
-
 	# various other useful things
 	url(r'^ico/favicon\.ico$', RedirectView.as_view(url='/media/img/favicon.ico')),
-
 )
 
 # media url hackery. 
