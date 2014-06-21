@@ -234,10 +234,10 @@ class ReservationManager(models.Manager):
 		return list(confirmed_reservations)	
 
 class TodayManager(models.Manager):
-	def get_query_set(self, location):
-		# return the reservations that intersect today
-		today = datetime.date.today()
-		return super(TodayManager, self).get_query_set().filter(location=location).filter(arrive__lte = today).filter(depart__gte = today)
+	#def get_query_set(self):
+	#	# return the reservations that intersect today. NOT location aware!
+	#	today = datetime.date.today()
+	#	return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today)
 
 	def confirmed(self, location):	
 		# return the reservations that intersect today and are confirmed.

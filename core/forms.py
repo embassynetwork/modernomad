@@ -175,7 +175,7 @@ class EmailTemplateForm(forms.Form):
 	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
 	body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
 
-	def __init__(self, tpl, reservation):
+	def __init__(self, tpl, reservation, location):
 		''' pass in an EmailTemplate instance, and a reservation object '''
 
 		domain = Site.objects.get_current().domain
@@ -183,7 +183,7 @@ class EmailTemplateForm(forms.Form):
 		super(EmailTemplateForm, self).__init__()
 
 		# add in the extra fields
-		self.fields['sender'].initial = EmailTemplate.FROM_ADDRESS
+		self.fields['sender'].initial = location.from_email()
 		self.fields['recipient'].initial = reservation.user.email
 		self.fields['footer'].initial = forms.CharField(
 				widget=forms.Textarea(attrs={'readonly':'readonly'})
@@ -208,11 +208,11 @@ class EmailTemplateForm(forms.Form):
 			'num_nights': reservation.total_nights(), 
 			'purpose': reservation.purpose,
 			'comments': reservation.comments,
-			'welcome_email_days_ahead': settings.WELCOME_EMAIL_DAYS_AHEAD,
+			'welcome_email_days_ahead': location.welcome_email_days_ahead,
 			'reservation_url': "https://"+domain+reservation.get_absolute_url()
 		}
 
-		self.fields['subject'].initial = EmailTemplate.SUBJECT_PREFIX + Template(tpl.subject).render(Context(template_variables))
+		self.fields['subject'].initial = location.email_subject_prefix + Template(tpl.subject).render(Context(template_variables))
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 

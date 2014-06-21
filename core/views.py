@@ -458,7 +458,7 @@ def ReservationSubmit(request, location_slug):
 		room_list[room.name] = room.default_rate
 	room_list = simplejson.dumps(room_list)
 	return render(request, 'reservation.html', {'form': form, "room_list": room_list, 
-		'max_days': settings.MAX_RESERVATION_DAYS, 'location': location })
+		'max_days': location.max_reservation_days, 'location': location })
 
 
 @login_required
@@ -482,7 +482,7 @@ def ReservationDetail(request, reservation_id, location_slug):
 		else:
 			paid = False
 		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 'location': location,
-			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : settings.DEFAULT_FROM_EMAIL})
+			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : location.from_email()})
 
 @login_required
 def UserEdit(request, username):
@@ -569,9 +569,9 @@ def UserAddCard(request, username):
 				reservation.status = Reservation.CONFIRMED
 				reservation.save()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
-				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+				if days_until_arrival < reservation.location.welcome_email_days_ahead:
 					guest_welcome(reservation)
-				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, settings.WELCOME_EMAIL_DAYS_AHEAD))
+				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, reservation.location.welcome_email_days_ahead))
 				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
 			except stripe.CardError, e:
 				raise stripe.CardError(e)
@@ -670,7 +670,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
-			if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+			if days_until_arrival < reservation.location.welcome_email_days_ahead:
 				guest_welcome(reservation)
 			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
 		except stripe.CardError, e:
@@ -770,7 +770,7 @@ def ReservationManage(request, reservation_id, location_slug):
 	email_forms = []
 	email_templates_by_name = []
 	for email_template in emails:
-		form = EmailTemplateForm(email_template, reservation)
+		form = EmailTemplateForm(email_template, reservation, location)
 		email_forms.append(form)
 		email_templates_by_name.append(email_template.name)
 	
@@ -789,7 +789,7 @@ def ReservationManage(request, reservation_id, location_slug):
 		"upcoming_reservations": upcoming_reservations,
 		"email_forms" : email_forms,
 		"email_templates_by_name" : email_templates_by_name,
-		"days_before_welcome_email" : settings.WELCOME_EMAIL_DAYS_AHEAD,
+		"days_before_welcome_email" : location.welcome_email_days_ahead,
 		"room_has_availability" : room_has_availability,
 		"avail": availability, "dates": dates,
 		"domain": domain, 'location': location,
@@ -810,7 +810,7 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 		elif reservation_action == 'set-confirm':
 			reservation.set_confirmed()
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
-			if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+			if days_until_arrival < location.welcome_email_days_ahead:
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.set_comp()
@@ -820,7 +820,7 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 				reservation.set_confirmed()
 				send_receipt(reconcile)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
-				if days_until_arrival < settings.WELCOME_EMAIL_DAYS_AHEAD:
+				if days_until_arrival < location.welcome_email_days_ahead:
 					guest_welcome(reservation)
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)

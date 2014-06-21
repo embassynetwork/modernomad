@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from modernomad.urls import user
 from modernomad import settings
-
+from django.views.generic import RedirectView
 
 admin.autodiscover()
 
@@ -18,7 +18,7 @@ urlpatterns = patterns('',
 
 
 	# various other useful things
-	url(r'^ico/favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/img/favicon.ico'}),
+	url(r'^ico/favicon\.ico$', RedirectView.as_view(url='/media/img/favicon.ico')),
 
 )
 

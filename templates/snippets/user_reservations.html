@@ -5,8 +5,8 @@
 {% for reservation in past_reservations %}
 	<div>
 		{% if user == u or reservation.status = 'confirmed' %}
-			<a href="{% url reservation_detail reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
-			at <a href="{% url location_home reservation.location.slug %}">{{reservation.location.name}}</a>
+			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
 		{% endif %}
 		{% if user == u %}
 		- <em>{{reservation.status}}</em>
@@ -20,8 +20,8 @@
 {% for reservation in upcoming_reservations %}
 	<div>
 		{% if user == u or reservation.status = 'confirmed' %}
-			<a href="{% url reservation_detail reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
-			at <a href="{% url location_home reservation.location.slug %}">{{reservation.location.name}}</a>
+			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
 		{% endif %}
 		{% if user == u %}
 		- <em>{{reservation.status}}</em>

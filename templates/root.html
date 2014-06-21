@@ -33,7 +33,7 @@
 		<div id="flyout">
 			<h2>Check out other network locations</h2>
 			{% for location in network_locations %}
-				<h3><a href="{% url location_home location.slug %}">{{ location.name }}</a></h3>
+				<h3><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h3>
 			{% endfor %}
 		</div><!-- end flyout -->
 		
@@ -65,7 +65,7 @@
 							<ul class="nav navbar-nav">
 								<li><a href="/about">About</a></li>
 								<li><a href="/stay">Stay</a></li>
-								<li><a href="{% url location_list %}">Locations</a></li>
+								<li><a href="{% url 'location_list' %}">Locations</a></li>
 								
 								{% if user.is_authenticated %}
 									<li class="dropdown">
