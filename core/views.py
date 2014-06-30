@@ -320,7 +320,7 @@ def calendar(request, location_slug):
 		.filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
 	
 	# create the calendar object
-	guest_calendar = GuestCalendar(reservations, year, month).formatmonth(year, month)
+	guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
 
 	return render(request, "calendar.html", {'reservations': reservations, 
 		'calendar': mark_safe(guest_calendar), "next_month": next_month, 

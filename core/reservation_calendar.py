@@ -5,11 +5,12 @@ from core.models import Reservation, Room
 from django.utils.html import conditional_escape as esc
 
 class GuestCalendar(HTMLCalendar):
-	def __init__(self, reservations, year, month):
+	def __init__(self, reservations, year, month, location):
 		#self.formatmonth(year, month)
 	 	self.year, self.month = year, month
 		super(GuestCalendar, self).__init__()
 		self.reservations = self.group_by_day(reservations)
+		self.location = location
 
 	def formatday(self, day, weekday):
 		if day != 0:
@@ -26,7 +27,7 @@ class GuestCalendar(HTMLCalendar):
 				num_private = 0
 				num_shared = 0
 				this_date = date(self.year, self.month, day)
-				any_availability = Room.objects.free(this_date, tomorrow)
+				any_availability = Room.objects.free(this_date, tomorrow, self.location)
 				print this_date
 				print tomorrow
 				print any_availability

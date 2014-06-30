@@ -83,5 +83,18 @@ about, and possible connections around work, projects and ideas. It should only 
 		}) 
 
 	</script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
+	<script>
+		$("#id_city").keyup(function() {
+			autocomplete = new google.maps.places.Autocomplete(this);
+			google.maps.event.addListener(autocomplete, 'place_changed', function() {
+				var place = autocomplete.getPlace();
+				console.log(place);
+				console.log(place.address_components);
+
+			});
+		});
+	</script>
+
 {% endblock %}
 

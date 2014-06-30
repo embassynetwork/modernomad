@@ -15,7 +15,12 @@
 
 
 <div class="col-md-12" id="user-detail-heading">
-	<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
+	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1> 
+	{% if u.profile.city != "" %}
+	<em> based in {{ u.profile.city }}</em>
+	{% else %}
+	<span class="alert bg-danger">Important! Please <a href="/people/{{user.username}}/edit/">update your home city</a></span>
+	{% endif %}
 </div>
 
 <div class="col-md-3">
@@ -72,18 +77,38 @@
 	{% endif %}
 	
 	{% ifequal u user %} 
+	<div class="row">
 		<h2>Email Notifications</h2>
 		<div class="row">
 			<div class="col-md-12">
 				<form class="" method="post" action="/events/emailpreferences/{{ u.username }}/">{% csrf_token %}
-					<div>Receive automatic reminders of events you are attending: <input class="form-control" type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}></div>
-					<div>Receive weekly emails about upcoming events: <input class="form-control" type="checkbox" name="weekly_updates" id="weekly_updates" {% if u.event_notifications.weekly %} checked {% endif %}></div>
+					<div class="checkbox">
+						<label> Receive automatic reminders of events you are attending
+							<input type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}>
+						</label>
+					</div>
+					<hr>
+					<div>Receive weekly emails about upcoming events: 
+
+						{% for location in network_locations %}
+						<div class="checkbox">
+							<label>
+								<input 
+									type="checkbox" 
+									name="{{ location.slug }}" 
+									id="{{ location.slug }}" 
+									{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
+								> {{ location.name }}
+							</label>
+						</div>
+						{% endfor %}
+					<hr>
 					<input type="submit" value="Save" class="btn btn-default">
 				</form>
 			</div>
 		</div>
+	</div>
 	{% endifequal %}
-
 
 	<h2>Reservations</h2>
 	{% include "snippets/user_reservations.html" %}

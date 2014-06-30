@@ -59,7 +59,7 @@
 							<span class="icon-bar"></span>
 							<span class="icon-bar"></span>
 							</button>
-							<a class="navbar-brand" href="{% url 'location_home' location.slug %}">Home</a>
+							<a class="navbar-brand" href="{% url 'location_home' location.slug %}">{{ location.name }}</a>
 						</div>
 						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 							<ul class="nav navbar-nav">
@@ -100,7 +100,6 @@
 										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
 											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
 											<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
-											<li><a tabindex="-1" href="{% url 'reservation_create' location.slug %}">New Reservation</a></li>
 											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
 										</ul>
 									</li>

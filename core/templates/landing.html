@@ -28,7 +28,7 @@
 					<div class="col-md-12 col-md-offset-1 col-sm-12">
 
 							<div class="col-md-5" id="participate">
-								<h2 class="fancy-header">Join in the Fun</h2>
+								<h2 class="fancy-header">See What's Going On</h2>
 								<p class="easy-reading">{{ location.front_page_participate }}</p> 
 								{% if user.is_authenticated %}
 								<a href="{% url 'user_detail' user.username %}" id="events-button" class="btn btn-large btn-block btn-large-text">View Notification Preferences</a>
@@ -38,7 +38,7 @@
 							</div>
 							
 							<div class="col-md-5" id="reserve">
-								<h2 class="fancy-header">Stay with Us</h2>
+								<h2 class="fancy-header">Stay Here</h2>
 								<p class="easy-reading"> {{ location.front_page_stay }} 
 								</p>
 								<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>

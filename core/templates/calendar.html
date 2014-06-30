@@ -7,9 +7,9 @@
 
 <div id="by-month-nav">
 	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
-	<a href="/calendar/?month={{prev_month.month}}&year={{prev_month.year}}">Previous Month</a> | 
-	<a href="/calendar/"> Current </a> |
-	<a href="/calendar/?month={{next_month.month}}&year={{next_month.year}}">Next Month</a>
+	<a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous Month</a> | 
+	<a href="{% url 'location_calendar' location.slug %}"> Current </a> |
+	<a href="?month={{next_month.month}}&year={{next_month.year}}">Next Month</a>
 	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
 </div>
 
