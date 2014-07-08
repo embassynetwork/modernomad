@@ -38,20 +38,10 @@
 		</div><!-- end flyout -->
 		
 			<div id="header-wrap">
-				<div class="row">
-					<div class="col-md-10 col-centered">
-						<div class="col-md-9" id="house-title">
-							<h1>The Embassy <span class="highlight">Network</span></h1>
-						</div>
-					
-						<div class="col-md-2" id="embassy-logo">
-							<img src="/media/img/embassy_logo.png"/>
-						</div>
-					</div>
 				</div>
 				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
 				<div class="row">
-					<div class="col-md-11 col-md-offset-1">
+					<div class="col-md-10">
 						<div class="navbar-header">
 							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
 							<span class="sr-only">Toggle navigation</span>
@@ -59,12 +49,11 @@
 							<span class="icon-bar"></span>
 							<span class="icon-bar"></span>
 							</button>
-							<a class="navbar-brand" href="/">Home</a>
 						</div>
 						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+							<a class="navbar-brand" href="/"><h1 id="houses-title">The Embassy <span class="highlight">Network</span></a></h1>
 							<ul class="nav navbar-nav">
 								<li><a href="/about">About</a></li>
-								<li><a href="/stay">Stay</a></li>
 								<li><a href="{% url 'location_list' %}">Locations</a></li>
 								
 								{% if user.is_authenticated %}
@@ -84,9 +73,14 @@
 								{% endif %}
 							</ul>
 						</div>
-				</div>
+					</div>
+					<div class="col-md-2" id="embassy-logo">
+						<img src="/media/img/embassy_logo.png"/>
+					</div>
 				</div>
 				</nav>
+				{% block house_nav %}
+				{% endblock %}
 			</div> <!-- end header wrap -->
 
 	<div class="container" id="container-main">

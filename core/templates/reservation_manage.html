@@ -38,7 +38,7 @@
 
 
 <div class="row" id="reservation-nav">
-	<a href="{% url reservation_manage_list location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
+	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
 </div>
 
 {% if r.status = 'canceled' %}
@@ -59,7 +59,7 @@
 
 
 		{% if r.reconcile.status == 'paid' %}
-		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url reservation_send_receipt location.slug r.id %}" >
+		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
 			{% csrf_token %}
 			<input class="btn-default btn" type="submit" value="Send Receipt">
 		</form>
@@ -68,7 +68,7 @@
 		{% if r.status != 'canceled' %}
 
 			{% if r.reconcile.status != 'paid' %}
-				<form id="res-action-toggle-comp" class="res-action" method=POST action="{% url reservation_toggle_comp location.slug r.id %}" >
+				<form id="res-action-toggle-comp" class="res-action" method=POST action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
 					{% csrf_token %}
 					<input type="submit" 
 					{% if r.reconcile.status == "comp" %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
@@ -76,9 +76,9 @@
 				</form>
 			{% endif %}
 
-			<form id="res-cancel" method="post" action="{% url reservation_cancel location.slug r.id %}">
+			<form id="res-cancel" method="post" action="{% url 'reservation_cancel' location.slug r.id %}">
 				{% csrf_token %} 
-				<input type="hidden" name="redirect" value="{% url reservation_manage location.slug r.id %}">
+				<input type="hidden" name="redirect" value="{% url 'reservation_manage' location.slug r.id %}">
 				<input class="btn btn-default" type="submit" value="Cancel This Reservation">
 			</form>
 
@@ -232,7 +232,7 @@ $(document).ready(function() {
 	$email_templates = {};
 	{% for f in email_forms %}
 		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
-			'<form id="res-action-email-user" method=POST action="{% url reservation_send_mail location.slug r.id %}" >' +
+			'<form id="res-action-email-user" method=POST action="{% url 'reservation_send_mail' location.slug r.id %}" >' +
 			"{% csrf_token %}" +
 			'<div class="form-group">' +
 			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +

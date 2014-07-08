@@ -28,6 +28,18 @@ from django.template import Context
 # one suggestion was to try setting default value in the model file, but this hasn't worked either. 
 # currently the field are still set to null=True, though they shouldn't be. 
 
+def location_img_upload_to(instance, filename):
+	ext = filename.split('.')[-1]
+	# rename file to random string
+	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+
+	upload_path = "data/locations/%s/" % instance.name 
+	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+	if not os.path.exists(upload_abs_path):
+		os.makedirs(upload_abs_path)
+	return os.path.join(upload_path, filename)
+
+
 def default_location():
 	return Location.objects.get(pk=1)
 
@@ -37,6 +49,12 @@ class Location(models.Model):
 	short_description = models.TextField()
 	about_page = models.TextField()
 	address = models.CharField(max_length=300)
+	latitude = models.FloatField()
+	longitude = models.FloatField()
+	image = models.ImageField(upload_to=location_img_upload_to)
+	taxes = models.BooleanField(default=False, verbose_name="Are there additional taxes you need to charge for reservations?")
+	tax_rate = models.FloatField(verbose_name="If you are charging additional taxes, what is the tax rate in %", blank=True, null=True)
+
 	stay_page = models.TextField()
 	front_page_stay = models.TextField()
 	front_page_participate = models.TextField()
@@ -46,16 +64,11 @@ class Location(models.Model):
 	ssid = models.CharField(max_length=200, blank=True, null=True)
 	ssid_password = models.CharField(max_length=200, blank=True, null=True)
 	timezone = models.CharField(max_length=200)
-	#stripe_secret_key = models.CharField(max_length=200)
-	#stripe_public_key = models.CharField(max_length=200)
-	#mailgun_api_key = models.CharField(max_length=200)
-	#mailgun_domain = models.CharField(max_length=200)
 	bank_account_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	routing_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	bank_name = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	name_on_account = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
-	#default_from_email = models.CharField(max_length=200)
 	house_admins = models.ManyToManyField(User, related_name='house_admin', blank=True, null=True)
 	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
 

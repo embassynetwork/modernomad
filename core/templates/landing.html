@@ -142,7 +142,7 @@
 		});
 
 
-		var map = L.map('location-map').setView([37.77397341544072, -122.42937415838243], 15);
+		var map = L.map('location-map').setView([{{location.latitude}}, {{location.longitude}}], 15);
 		L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
 			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
 			maxZoom: 18
@@ -156,9 +156,9 @@
 			}
 		});
 		var rougeIcon = new RougeIcon();
-		var marker = L.marker([37.77397341544072, -122.42937415838243], {icon: rougeIcon}).addTo(map);
+		var marker = L.marker([{{location.latitude}}, {{location.longitude}}], {icon: rougeIcon}).addTo(map);
 		var popup = L.popup({closeButton: false});
-		popup.setContent('<h1 id="map-marker-h1-dark">The Embassy</h1><h1 id="map-marker-h1-color">San Francisco</h1><p id="map-marker-text">399 Webster Street, Lower Haight, SF</p>');
+		popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
 		marker.bindPopup(popup).openPopup();
 		
 

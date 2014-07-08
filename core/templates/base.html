@@ -1,54 +1,6 @@
-{% load core_tag_extras %}
+{% extends 'root.html' %}
+{% block house_nav %}
 
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>{% block pagetitle %}Embassy Network{% endblock %}</title>
-		<!-- responsive support -->
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="The Embassy Network is a housing network reinventing home for the creative age.">
-		<!-- Le styles -->
-		<link href="/media/css/bootstrap.css" rel="stylesheet">
-		<link href="/media/css/custom.css" rel="stylesheet">
-		<link rel="stylesheet" href="/media/css/leaflet.css" />
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,600,300,700' rel='stylesheet' type='text/css'>
-
-		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-		<!--[if lt IE 9]>
-		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-		<![endif]-->
-
-		<!-- Le fav and touch icons -->
-		<link rel="shortcut icon" href="/ico/favicon.ico">
-		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
-
-	</head>
-
-	<body>
-
-		<!-- Part 1: Wrap all page content here -->
-		<div id="flyout">
-			<h2>Check out other network locations</h2>
-			{% for location in network_locations %}
-				<h3><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h3>
-			{% endfor %}
-		</div><!-- end flyout -->
-		
-			<div id="header-wrap">
-				<div class="row">
-					<div class="col-md-10 col-centered">
-						<div class="col-md-9" id="house-title">
-							<h1>The Embassy <span class="highlight">San Francisco</span></h1>
-						</div>
-					
-						<div class="col-md-2" id="embassy-logo">
-							<img src="/media/img/embassy_logo.png"/>
-						</div>
-					</div>
-				</div>
 				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
 				<div class="row">
 					<div class="col-md-11 col-md-offset-1">
@@ -93,16 +45,6 @@
 											{% endif %}
 										</ul>
 									</li>
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-											<i class="icon-user"></i> {{ user.username }} <b class="caret"></b>
-										</a>
-										<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-											<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-											<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
-											<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
-										</ul>
-									</li>
 								{% endif %}
 								{% if user in location.house_admins.all %}
 									<li class="dropdown">
@@ -124,10 +66,11 @@
 				</div>
 				</div>
 				</nav>
-			</div> <!-- end header wrap -->
+	{% endblock %}
+	{% block body %}
 
 	<div class="container" id="container-main">
-		{% block body %}
+		{% block content %}
 		{% endblock %}
 	<div>
 
@@ -152,9 +95,9 @@
 
 	</script>
 
+	{% endblock %}
+
 	{% block extrajs %}
 	{% endblock %}
 
-  </body>
-</html>
 

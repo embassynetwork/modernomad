@@ -753,7 +753,7 @@ def ReservationManageList(request, location_slug):
 
 
 @house_admin_required
-def ReservationManage(request, reservation_id, location_slug):
+def ReservationManage(request, location_slug, reservation_id):
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	user = User.objects.get(username=reservation.user.username)
