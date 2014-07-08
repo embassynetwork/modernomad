@@ -6,7 +6,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.contrib.sites.models import Site
 import datetime
-from util import get_location
+from models import get_location
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 import requests
