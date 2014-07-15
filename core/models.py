@@ -270,9 +270,8 @@ class Reservation(models.Model):
 	APPROVED = 'approved'
 	CONFIRMED = 'confirmed'
 	HOUSE_DECLINED = 'house declined'
-	CANCELED = 'canceled'
-	PAID = 'paid'
 	USER_DECLINED = 'user declined'
+	CANCELED = 'canceled'
 
 	RESERVATION_STATUSES = (
 			(PENDING, 'Pending'),
@@ -281,7 +280,7 @@ class Reservation(models.Model):
 			(HOUSE_DECLINED, 'House Declined'),
 			(USER_DECLINED, 'User Declined'),
 			(CANCELED, 'Canceled'),
-			)
+		)
 
 	# hosted reservations - only exposed to house_admins. form fields are
 	# rendered in the order they are declared in the model, so leave this
@@ -303,9 +302,9 @@ class Reservation(models.Model):
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
+	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.") 
 
 	# managers
-	#objects = models.Manager()
 	today = TodayManager() # approved and confirmed reservations that intersect today
 	objects = ReservationManager()
 
@@ -319,105 +318,77 @@ class Reservation(models.Model):
 	def total_nights(self):
 		return (self.depart - self.arrive).days
 	total_nights.short_description = "Nights"
-
-	def mark_last_msg(self):
-		self.last_msg = datetime.datetime.now()
-		self.save()
-
-	def set_tentative(self):
-		self.status = Reservation.APPROVED
-		self.save()
-
-	def set_confirmed(self):
-		self.status = Reservation.CONFIRMED
-		self.save()
-
-	def cancel(self):
-		# cancel this reservation. make sure to update the associated reconcile
-		# info. 
-		self.status = Reservation.CANCELED
-		self.save()
-		reconcile = self.reconcile
-		reconcile.status = Reconcile.INVALID
-		reconcile.save()
-
-
-
-class Reconcile(models.Model):
-	''' The Reconcile object is automatically created when a reservation is confirmed.'''
-	COMP = "comp"
-	UNPAID = "unpaid"
-	INVOICED = "invoiced"
-	PAID = "paid"
-	INVALID = "invalid"
-	STATUSES = (
-			(COMP, 'Comp'),
-			(UNPAID, 'Unpaid'),
-			(INVOICED, 'Invoiced'),
-			(PAID, 'Paid'),
-			(INVALID, "Invalid")
-			)
-
-	reservation = models.OneToOneField(Reservation)
-	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.") 
-	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
-	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
-	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
-	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
-	paid_amount = models.IntegerField(null=True, blank=True)
-	transaction_id = models.CharField(max_length=200, null=True, blank=True)
-	payment_date = models.DateField(blank=True, null=True)
-
-	def __unicode__(self):
-		return "reconcile reservation %d" % self.reservation.id
-
-	def get_rate(self):
-		if self.status == Reconcile.COMP:
-			return 0
-		else:
-			return self.rate
-	get_rate.short_description = 'Rate'
-
-	def html_color_status(self):
-		if self.status == Reconcile.PAID:
-			color_code = "#5fbf00"
-		elif self.status == Reconcile.UNPAID or self.status == Reconcile.INVOICED:
-			color_code = "#bf0000"
-		elif self.status == Reconcile.COMP:
-			color_code = "#ffc000"
-		else:
-			color_code = "#000000"
-		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
-	html_color_status.allow_tags = True
-
+	
 	def default_rate(self):
 		# default_rate always returns the default rate regardless of comps or
 		# custom rates.
-		return self.reservation.room.default_rate
+		return self.room.default_rate
 
 	def total_value(self):
 		# value of the reservation, regardless of what has been paid
 		# get_rate checks for comps and custom rates. 
-		return self.reservation.total_nights()*self.get_rate()
+		return self.total_nights() * self.rate
 
 	def total_owed(self):
-		# in case some amoutn has been paid already
-		if not self.paid_amount:
-			return self.reservation.total_nights()*self.get_rate()
-		else:
-			return self.reservation.total_nights()*self.get_rate() - self.paid_amount
+		# The amount they owe depends on the payments already made
+		payments = Payment.objects.filter(reservation=self)
+		
+		# No payments means they owe the full value + fees
+		if not payments:
+			return self.bill_amount()
+		
+		# Add up all the payments and subtract it from the total value
+		owed = self.bill_amount()
+		for payment in payments:
+			if payment.status == Payment.COMP or payment.status == Payment.PAID:
+				# Presence of a COMP or PAID payment means they owe nothing more
+				return 0
+			owed = owed - payment.paid_amount
+		return owed
 
+	def is_paid(self):
+		return self.total_owed() == 0
+
+	def is_comped(self):
+		for payment in Payment.objects.filter(reservation=self, status=Payment.COMP):
+			return True
+		return False
 
 	def total_owed_in_cents(self):
 		return self.total_owed()*100
 
+	def bill_amount(self):
+		# Room charges + fees not paid by the house
+		return self.total_value() + self.non_house_fees()
+
+	def non_house_fees(self):
+		# Amount of fees not paid by the house
+		room_charge = self.total_value()
+		amount = 0.0
+		for location_fee in LocationFee.objects.filter(location = self.location):
+			if not location_fee.fee.paid_by_house:
+				amount = amount + (room_charge * location_fee.fee.percentage)
+		return amount
+
+	def house_fees(self):
+		# Amount of fees the house owes
+		room_charge = self.total_value()
+		amount = 0.0
+		for location_fee in LocationFee.objects.filter(location = self.location):
+			if location_fee.fee.paid_by_house:
+				amount = amount + (room_charge * location_fee.fee.percentage)
+		return amount
+
+	def to_house(self):
+		return self.total_value() - self.house_fees()
+
 	def send_invoice(self):
 		''' trigger a reminder email to the guest about payment.''' 
-		if self.reservation.hosted:
+		if self.hosted:
 			# XXX TODO make this a proper error which is viewable in the admin form.
 			print "hosted reservation invoices not supported"
 			return
-		if not self.status == Reconcile.UNPAID:
+		if not self.total_owed() <  self.total_value():
 			# XXX TODO eventually send an email for COMPs too, but a
 			# different once, with thanks/asking for feedback.
 			return
@@ -436,12 +407,11 @@ class Reconcile(models.Model):
 			'total': self.total_owed,
 			}) 
 
-		subject = "[%s] Thanks for Staying with us!" % self.reservation.location.email_subject_prefix 
-		recipient = [self.reservation.user.email,]
+		subject = "[%s] Thanks for Staying with us!" % self.location.email_subject_prefix 
+		recipient = [self.user.email,]
 		text_content = plaintext.render(c)
 		html_content = htmltext.render(c)
-		send_from_location_address(subject, text_content, html_context, recipient, self.reservation.location)
-		self.status = Reconcile.INVOICED
+		send_from_location_address(subject, text_content, html_context, recipient, self.location)
 		self.save()
 
 	def charge_card(self):
@@ -449,42 +419,88 @@ class Reconcile(models.Model):
 		# function purposefully does not handle that error so the calling
 		# function can decide what to do. 
 		domain = 'http://' + Site.objects.get_current().domain
-		descr = "%s %s from %s - %s. Details: %s." % (self.reservation.user.first_name, 
-				self.reservation.user.last_name, str(self.reservation.arrive), 
-				str(self.reservation.depart), domain + self.reservation.get_absolute_url())
+		descr = "%s %s from %s - %s. Details: %s." % (self.user.first_name, 
+				self.user.last_name, str(self.arrive), 
+				str(self.depart), domain + self.get_absolute_url())
 
 		amt_owed = self.total_owed_in_cents()
 		stripe.api_key = settings.STRIPE_SECRET_KEY
 		charge = stripe.Charge.create(
 				amount=amt_owed,
 				currency="usd",
-				customer = self.reservation.user.profile.customer_id,
+				customer = self.user.profile.customer_id,
 				description=descr
 				)
 
-		# store the charge details
-		self.status = Reconcile.PAID
-		self.payment_service = "Stripe"
-		self.payment_method = charge.card.type
-		self.paid_amount = (charge.amount/100)
-		self.transaction_id = charge.id
-		self.payment_date = datetime.datetime.now()
+		# Store the charge details in a Payment object
+		Payment.objects.create(reservation=self, 
+			status = Payment.PAID, 
+			payment_service = "Stripe",
+			paid_amount = (charge.amount/100), 
+			transaction_id = charge.id
+		)
+
+	def mark_last_msg(self):
+		self.last_msg = datetime.datetime.now()
 		self.save()
 
+	def set_tentative(self):
+		self.status = Reservation.APPROVED
+		self.save()
 
-Reservation.reconcile = property(lambda r: Reconcile.objects.get_or_create(reservation=r)[0])
+	def set_confirmed(self):
+		self.status = Reservation.CONFIRMED
+		self.save()
 
-@receiver(pre_save, sender=Reconcile)
-def set_rate(sender, instance, **kwargs):
-	try:
-		rec = Reconcile.objects.get(pk=instance.pk)
-	except Reconcile.DoesNotExist:
-		# if the reconcile object does not exist yet, then it's new. set the
-		# rate from the default rate for this room. 
-		instance.rate = instance.reservation.room.default_rate
-	return
+	def cancel(self):
+		# cancel this reservation. 
+		self.status = Reservation.CANCELED
+		self.save()
+	
+	def comp(self):
+		if not self.is_comped():
+			Payment.objects.create(reservation=self, status=Payment.COMP)
 
+	def payments(self):
+		return Payment.objects.filter(reservation=self)
 
+class Payment(models.Model):
+	COMP = "comp"
+	UNPAID = "unpaid"
+	INVOICED = "invoiced"
+	PAID = "paid"
+	INVALID = "invalid"
+	STATUSES = (
+			(COMP, 'Comp'),
+			(UNPAID, 'Unpaid'),
+			(INVOICED, 'Invoiced'),
+			(PAID, 'Paid'),
+			(INVALID, "Invalid")
+			)
+
+	reservation = models.ForeignKey(Reservation)
+	payment_date = models.DateTimeField(auto_now_add=True)
+	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
+	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
+	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
+	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
+	paid_amount = models.IntegerField(null=False, default=0)
+	transaction_id = models.CharField(max_length=200, null=True, blank=True)
+
+	def __unicode__(self):
+		return "payment %d" % self.reservation.id
+
+	def html_color_status(self):
+		if self.status == Payment.PAID:
+			color_code = "#5fbf00"
+		elif self.status == Payment.UNPAID or self.status == Payment.INVOICED:
+			color_code = "#bf0000"
+		elif self.status == Payment.COMP:
+			color_code = "#ffc000"
+		else:
+			color_code = "#000000"
+		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
+	html_color_status.allow_tags = True
 
 def profile_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
@@ -577,7 +593,6 @@ def size_images(sender, instance, **kwargs):
 		if obj and obj.image_thumb and obj.image_thumb.name != "data/avatars/default.thumb.jpg":
 			default_storage.delete(obj.image_thumb.path)
 
-
 class EmailTemplate(models.Model):
 	''' Templates for the typical emails sent by the system. The from-address
 	is usually set by DEFAULT_FROM_ADDRESS in settings, and the recipients are
@@ -594,6 +609,41 @@ class EmailTemplate(models.Model):
 
 	def __unicode__(self):
 		return self.name
+
+class Fee(models.Model):
+	description = models.CharField(max_length=200, verbose_name="Fee Name")
+	percentage = models.PositiveIntegerField(null=False, default=0)
+	paid_by_house = models.BooleanField(default=False)
+
+	def __unicode__(self): 
+		return self.description
+
+class LocationFee(models.Model):
+	location = models.ForeignKey(Location)
+	fee = models.ForeignKey(Fee)
+	
+	def __unicode__(self): 
+		return '%s: %s' % (self.location, self.fee)
+
+class FeeCollection(models.Model):
+	collected_on = models.DateTimeField(auto_now_add=True)
+	fee = models.ForeignKey(Fee)
+	applies_to = models.ForeignKey(Payment)
+	amount = models.SmallIntegerField(null=False, default=0)
+
+	def __unicode__(self): 
+		return '%s: %s - %s' % (self.collected_on, self.fee, self.amount)
+
+class FeeDistribution(models.Model):
+	distributed_on = models.DateTimeField(auto_now_add=True)
+	distributed_by = models.ForeignKey(User)
+	collected_fees = models.ManyToManyField(FeeCollection, blank=False, null=False)
+	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
+	amount = models.SmallIntegerField(null=False, default=0)
+	note = models.CharField(max_length=200)
+
+	def __unicode__(self): 
+		return '%s: %s - %s' % (self.distributed_on, self.payment_method, self.amount)
 
 
 

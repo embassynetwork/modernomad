@@ -9,7 +9,7 @@
 	{% endif %}
 	<em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
 	{% ifequal reservation.user user %}
-		<span class="res-value text-success">Total: ${{ reservation.reconcile.total_value }}</span>
+		<span class="res-value text-success">Total: ${{ reservation.bill_amount|floatformat:2 }}</span>
 	{% endifequal %}
 </h3>
 <h4>
@@ -151,9 +151,9 @@
 
 				StripeCheckout.open({
 					key: "{{ stripe_publishable_key }}",
-					amount: "{{ reservation.reconcile.total_owed_in_cents }}",
+					amount: "{{ reservation.total_owed_in_cents }}",
 					name: "The Embassy Network",
-					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.reconcile.get_rate }}/night.",
+					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.rate }}/night.",
 					panelLabel:"Pay",
 					image: "/media/img/embassy-front-1-128x128.jpg",
 					token: token

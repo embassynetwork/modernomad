@@ -16,7 +16,7 @@ from django.conf import settings
 from django.utils import simplejson
 from core.decorators import house_admin_required
 from django.db.models import Q
-from core.models import UserProfile, Reservation, Room, Reconcile, EmailTemplate, Location
+from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location
 from core.tasks import guest_welcome
 import uuid, base64, os
 from django.core.files import File
@@ -184,8 +184,8 @@ def occupancy(request, location_slug):
 	payment_discrepancies = []
 	paid_amount_missing = []
 
-	reconciles_this_month = Reconcile.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
-	for r in reconciles_this_month:
+	payments_this_month = Payment.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
+	for r in payments_this_month:
 		nights_before_this_month = datetime.timedelta(0)
 		nights_after_this_month = datetime.timedelta(0)
 		if r.reservation.arrive < start and r.reservation.depart < start:
@@ -232,10 +232,10 @@ def occupancy(request, location_slug):
 			continue
 		# get_rate grabs the custom rate if it exists, else default rate as
 		# defined in the room definition.
-		rate = r.reconcile.get_rate()
-		if r.reconcile.status == Reconcile.COMP:
+		rate = r.rate
+		if r.payment.status == Payment.COMP:
 			total_comped_nights += nights_this_month
-			total_comped_income += nights_this_month*r.reconcile.default_rate()
+			total_comped_income += nights_this_month*r.default_rate()
 			comp = True
 			unpaid = False
 		else:
@@ -244,28 +244,29 @@ def occupancy(request, location_slug):
 			this_room_income += rate*nights_this_month
 			room_income[r.room.name] = this_room_income
 
-			if r.reconcile.payment_date:
-				paid_rate = (r.reconcile.paid_amount/(r.depart - r.arrive).days)
+			if r.payment.payment_date:
+				paid_rate = (r.payment.paid_amount/(r.depart - r.arrive).days)
 				if paid_rate != rate:
 					print "reservation %d has paid rate = $%d and rate set to $%d"
 					paid_rate_discrepancy += nights_this_month*(paid_rate - rate)
 					payment_discrepancies.append(r.id)
 
-			if r.reconcile.status == Reconcile.PAID:
-				if (r.reconcile.payment_date and r.reconcile.payment_date < start):
-					income_from_past_months += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days)
+			if r.payment.status == Payment.PAID:
+				if (r.payment.payment_date and r.payment.payment_date < start):
+					income_from_past_months += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days)
 				else:
 					# if there's no payment date but the reservation is marked
 					# as paid, the payment was probably manually entered. since
 					# we have no knowledge of when the payment was issued,
 					# applying it to this month seems like a reasonable guess. 
 					# XXX todo would be nice to highlight these items somehow. 
-					if r.reconcile.paid_amount:
-						income_for_this_month += nights_this_month*(r.reconcile.paid_amount/(r.depart - r.arrive).days) 
+					# TODO This should not happen anymore.  Date defaults to today and amount defaults to 0 --JLS
+					if r.payment.paid_amount:
+						income_for_this_month += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days) 
 					else:
 						paid_amount_missing.append(r.id)
 
-			if r.reconcile.status == Reconcile.UNPAID or r.reconcile.status == Reconcile.INVOICED:
+			if r.payment.status == Payment.UNPAID or r.payment.status == Payment.INVOICED:
 				unpaid = True
 				unpaid_total += nights_this_month*rate
 			else:
@@ -283,11 +284,11 @@ def occupancy(request, location_slug):
 		total_person_nights += nights_this_month
 		if r.room.shared:
 			total_shared_nights += nights_this_month
-			if r.reconcile.status != Reconcile.COMP:
+			if r.payment.status != Payment.COMP:
 				total_income_shared += nights_this_month*rate
 		else:
 			total_private_nights += nights_this_month
-			if r.reconcile.status != Reconcile.COMP:
+			if r.payment.status != Payment.COMP:
 				total_income_private += nights_this_month*rate
 
 	total_income_this_month = income_for_this_month + income_from_past_months
@@ -477,7 +478,7 @@ def ReservationDetail(request, reservation_id, location_slug):
 			past = False
 		else:
 			past = True
-		if reservation.reconcile.status == Reconcile.PAID:
+		if reservation.is_paid():
 			paid = True
 		else:
 			paid = False
@@ -564,8 +565,8 @@ def UserAddCard(request, username):
 			try:
 				# charges card, saves payment details and emails a receipt to
 				# the user
-				reservation.reconcile.charge_card()
-				send_receipt(reconcile)
+				reservation.charge_card()
+				send_receipt(payment)
 				reservation.status = Reservation.CONFIRMED
 				reservation.save()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -663,10 +664,10 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
 	else:
 		try:
-			reservation.reconcile.charge_card()
+			reservation.charge_card()
 			reservation.status = Reservation.CONFIRMED
 			reservation.save()
-			send_receipt(reconcile)
+			send_receipt(payment)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -816,9 +817,9 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 			reservation.set_comp()
 		elif reservation_action == 'res-charge-card':
 			try:
-				reservation.reconcile.charge_card()
+				reservation.charge_card()
 				reservation.set_confirmed()
-				send_receipt(reconcile)
+				send_receipt(payment)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < location.welcome_email_days_ahead:
 					guest_welcome(reservation)
@@ -842,8 +843,8 @@ def ReservationChargeCard(request, reservation_id, location_slug):
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	try:
-		reservation.reconcile.charge_card()
-		send_receipt(reconcile)
+		reservation.charge_card()
+		send_receipt(payment)
 		return HttpResponse()
 	except stripe.CardError, e:
 		return HttpResponse(status=500)
@@ -854,8 +855,8 @@ def ReservationSendReceipt(request, reservation_id, location_slug):
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
-	if reservation.reconcile.status == Reconcile.PAID:
-		send_receipt(reservation.reconcile, location)
+	if reservation.payment.status == Payment.PAID:
+		send_receipt(reservation.payment, location)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
@@ -866,16 +867,16 @@ def ReservationToggleComp(request, reservation_id, location_slug):
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
-	reconcile = reservation.reconcile
-	if reconcile.status != Reconcile.COMP:
-		reconcile.status = Reconcile.COMP
+	payment = reservation.payment
+	if payment.status != Payment.COMP:
+		payment.status = Payment.COMP
 	else:
-		reconcile.status = Reconcile.UNPAID
+		payment.status = Payment.UNPAID
 		# if confirmed set status back to APPROVED 
 		if reservation.status == Reservation.CONFIRMED:
-			reservation.status = Reconcile.APPROVED
+			reservation.status = Payment.APPROVED
 			reservation.save()
-	reconcile.save()
+	payment.save()
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required

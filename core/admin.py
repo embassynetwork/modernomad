@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from core.models import UserProfile, Reservation, Reconcile, Room, EmailTemplate, Location
+from core.models import UserProfile, Reservation, Payment, Room, EmailTemplate, Location, Fee, LocationFee, FeeCollection, FeeDistribution
 from gather.models import EventAdminGroup
 
 class EmailTemplateAdmin(admin.ModelAdmin):
@@ -27,37 +27,36 @@ class LocationAdmin(admin.ModelAdmin):
 	filter_horizontal = ['residents', 'house_admins']
 	inlines = [RoomAdminInline, EventAdminGroupInline]
 
-class ReconcileInline(admin.TabularInline):
-	model = Reconcile
-
-def reconcile_status(obj):
-	return obj.reconcile.status
-
-def rate(obj):
-	rate = obj.reconcile.get_rate()
-	return "$%d" % rate
+class PaymentInline(admin.TabularInline):
+	model = Payment
+	extra = 0
 
 def automatic_invoice(obj):
-	return obj.reconcile.automatic_invoice
+	return obj.payment.automatic_invoice
+
+def rate(obj):
+	return "$%d" % obj.rate
 
 def value(obj):
-	value = obj.reconcile.get_rate()*obj.total_nights()
-	return "$%d" % value
+	return "$%d" % obj.total_value()
+
+def bill(obj):
+	return "$%d" % obj.bill_amount()
+
+def fees(obj):
+	return "$%d" % obj.non_house_fees()
+
+def to_house(obj):
+	return "$%d" % obj.to_house()
 
 def user_profile(obj):
 	return '''<a href="/people/%s">%s %s</a> (%s)''' % (obj.user.username, obj.user.first_name, obj.user.last_name, obj.user.username)
 user_profile.allow_tags = True
 
-def paid_status(obj):
-	return obj.reconcile.html_color_status()
-# allow_tags tells django not to escape the html returned by the
-# html_color_status function.
-paid_status.allow_tags = True
-
 class ReservationAdmin(admin.ModelAdmin):
 	def send_invoice(self, request, queryset):
 		for item in queryset:
-			item.reconcile.send_invoice()
+			item.send_invoice()
 		if len(queryset) == 1:
 			prefix = "1 invoice was"
 		else:
@@ -69,7 +68,7 @@ class ReservationAdmin(admin.ModelAdmin):
 		success_list = []
 		failure_list = []
 		for item in queryset:
-			if item.reconcile.send_receipt():
+			if item.send_receipt():
 				success_list.append(str(item.id))
 			else:
 				failure_list.append(str(item.id))
@@ -83,7 +82,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	def reconcile_as_paid(self, request, queryset):
 		for item in queryset:
 			rec = item.reconcile
-			rec.status = Reconcile.PAID
+			rec.status = Payment.PAID
 			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
@@ -95,7 +94,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	def reconcile_as_unpaid(self, request, queryset):
 		for item in queryset:
 			rec = item.reconcile
-			rec.status = Reconcile.UNPAID
+			rec.status = Payment.UNPAID
 			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
@@ -107,7 +106,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	def reconcile_as_comp(self, request, queryset):
 		for item in queryset:
 			rec = item.reconcile
-			rec.status = Reconcile.COMP
+			rec.status = Payment.COMP
 			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
@@ -119,7 +118,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	def reconcile_as_invalid(self, request, queryset):
 		for item in queryset:
 			rec = item.reconcile
-			rec.status = Reconcile.INVALID
+			rec.status = Payment.INVALID
 			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
@@ -131,7 +130,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	def reconcile_as_invoiced(self, request, queryset):
 		for item in queryset:
 			rec = item.reconcile
-			rec.status = Reconcile.INVOICED
+			rec.status = Payment.INVOICED
 			rec.save()
 		if len(queryset) == 1:
 			prefix = "1 reservation was"
@@ -142,10 +141,10 @@ class ReservationAdmin(admin.ModelAdmin):
 
 
 	model = Reservation
-	list_filter = ('status','hosted', 'reconcile__status')
-	list_display = ('__unicode__', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, value, paid_status )
+	list_filter = ('status', 'hosted', 'payment__status')
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, fees, bill, to_house, 'is_paid' )
 	list_editable = ('status',)
-	inlines = [ReconcileInline]
+	inlines = [PaymentInline]
 	ordering = ['depart',]
 	actions= ['send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
 	save_as = True
@@ -164,3 +163,8 @@ admin.site.register(EmailTemplate, EmailTemplateAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
+
+admin.site.register(Fee)
+admin.site.register(LocationFee)
+admin.site.register(FeeCollection)
+admin.site.register(FeeDistribution)
