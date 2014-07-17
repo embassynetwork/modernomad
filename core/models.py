@@ -287,7 +287,6 @@ class Reservation(models.Model):
 	# edit forms.
 	hosted = models.BooleanField(default=False, help_text="Hosting a guest who doesn't have an account.")
 	guest_name = models.CharField(max_length=200, help_text="Guest name if you are hosting.", blank=True, null=True)
-
 	location = models.ForeignKey(Location, related_name='reservations', null=True)
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
@@ -364,11 +363,7 @@ class Reservation(models.Model):
 	def total_owed_in_cents(self):
 		return self.total_owed()*100
 
-	def bill_amount(self):
-		# Room charges + fees not paid by the house
-		return self.total_value() + self.non_house_fees()
-
-	def non_house_fees(self):
+	def calc_non_house_fees(self):
 		# Amount of fees not paid by the house
 		room_charge = self.total_value()
 		amount = 0.0
@@ -377,13 +372,47 @@ class Reservation(models.Model):
 				amount = amount + (room_charge * location_fee.fee.percentage/100)
 		return amount
 
-	def house_fees(self):
+	def calc_house_fees(self):
 		# Amount of fees the house owes
 		room_charge = self.total_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if location_fee.fee.paid_by_house:
 				amount = amount + (room_charge * location_fee.fee.percentage/100)
+		return amount
+
+	def generate_bill(self, delete_old_items=True):
+		if delete_old_items:
+			BillLineItem.objects.filter(reservation=self).delete()
+
+		room_charge_desc = "%s (%d * $%d)" % (self.room, self.total_nights(), self.rate)
+		room_charge = self.total_value()
+		BillLineItem.objects.create(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+
+		for location_fee in LocationFee.objects.filter(location = self.location):
+			desc = "%s (%s%c)" % (location_fee.fee.description, location_fee.fee.percentage, '%')
+			amount = room_charge * location_fee.fee.percentage/100
+			BillLineItem.objects.create(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+
+	def bill_amount(self):
+		amount = 0 
+		for line_item in BillLineItem.objects.filter(reservation=self):
+			if not line_item.fee or not line_item.paid_by_house:
+				amount = amount + line_item.amount
+		return amount
+
+	def house_fees(self):
+		amount = 0 
+		for line_item in BillLineItem.objects.filter(reservation=self):
+			if line_item.fee and line_item.paid_by_house:
+				amount = amount + line_item.amount
+		return amount
+
+	def non_house_fees(self):
+		amount = 0 
+		for line_item in BillLineItem.objects.filter(reservation=self):
+			if line_item.fee and not line_item.paid_by_house:
+				amount = amount + line_item.amount
 		return amount
 
 	def to_house(self):
@@ -441,6 +470,9 @@ class Reservation(models.Model):
 
 	def payments(self):
 		return Payment.objects.filter(reservation=self)
+
+	def bill_line_items(self):
+		return BillLineItem.objects.filter(reservation=self)
 
 class Payment(models.Model):
 	reservation = models.ForeignKey(Reservation)
@@ -579,10 +611,13 @@ class LocationFee(models.Model):
 
 class BillLineItem(models.Model):
 	reservation = models.ForeignKey(Reservation)
-	fee = models.ForeignKey(Fee)
+	fee = models.ForeignKey(Fee, null=True)
 	description = models.CharField(max_length=200)
 	amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
-	visible_to_user = models.BooleanField(default=True)
+	paid_by_house = models.BooleanField(default=True)
+
+	def __unicode__(self): 
+		return '%s: %s' % (self.reservation.location, self.description)
 
 
 

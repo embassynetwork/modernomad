@@ -62,7 +62,7 @@ class Migration(SchemaMigration):
 		},
 		u'core.fee': {
 			'Meta': {'object_name': 'Fee'},
-			'description': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+			'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
 			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
 			'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
 			'percentage': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
@@ -163,14 +163,15 @@ class Migration(SchemaMigration):
 			'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
 			'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
 			},
-		u'core.billlineitem': {
-			'Meta': {'object_name': 'BillLineItem'},
-			'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
-			'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-			'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"}),
-			'visible_to_user': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
-		}
+			u'core.billlineitem': {
+				'Meta': {'object_name': 'BillLineItem'},
+				'amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '7', 'decimal_places': '2'}),
+				'description': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+				'fee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Fee']", 'null': 'True'}),
+				u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+				'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+				'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"})
+			},
 	}
 
 	complete_apps = ['core']

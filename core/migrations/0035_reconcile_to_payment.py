@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 		# Adding model 'Fee'
 		db.create_table(u'core_fee', (
 			(u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-			('description', self.gf('django.db.models.fields.CharField')(max_length=200)),
+			('description', self.gf('django.db.models.fields.CharField')(max_length=100)),
 			('percentage', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
 			('paid_by_house', self.gf('django.db.models.fields.BooleanField')(default=False)),
 		))
@@ -34,9 +34,10 @@ class Migration(SchemaMigration):
 		db.create_table(u'core_billlineitem', (
 			(u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
 			('reservation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Reservation'])),
-			('description', self.gf('django.db.models.fields.CharField')(max_length=100)),
+			('description', self.gf('django.db.models.fields.CharField')(max_length=200)),
+			('fee', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Fee'], null=True)),
 			('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
-			('visible_to_user', self.gf('django.db.models.fields.BooleanField')(default=True)),
+			('paid_by_house', self.gf('django.db.models.fields.BooleanField')(default=True)),
 		))
 		db.send_create_signal(u'core', ['BillLineItem'])
 
@@ -105,7 +106,7 @@ class Migration(SchemaMigration):
 		},
 		u'core.fee': {
 			'Meta': {'object_name': 'Fee'},
-			'description': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+			'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
 			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
 			'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
 			'percentage': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
@@ -210,12 +211,13 @@ class Migration(SchemaMigration):
 		},
 		u'core.billlineitem': {
 			'Meta': {'object_name': 'BillLineItem'},
-			'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
-			'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+			'amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '7', 'decimal_places': '2'}),
+			'description': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+			'fee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Fee']", 'null': 'True'}),
 			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-			'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"}),
-			'visible_to_user': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
-		}
+			'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+			'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"})
+		},
 	}
 
 	complete_apps = ['core']

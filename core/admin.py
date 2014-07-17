@@ -111,13 +111,23 @@ class ReservationAdmin(admin.ModelAdmin):
 		msg = prefix + " set to default rate."
 		self.message_user(request, msg)
 
+	def generate_bill(self, request, queryset):
+		for res in queryset:
+			res.generate_bill()
+		if len(queryset) == 1:
+			prefix = "1 bill was"
+		else:
+			prefix = "%d bills were" % len(queryset)
+		msg = prefix + " generated."
+		self.message_user(request, msg)
+
 	model = Reservation
 	list_filter = ('status', 'hosted')
 	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, fees, bill, to_house, 'is_paid' )
 	list_editable = ('status',)
 	inlines = [PaymentInline]
 	ordering = ['depart',]
-	actions= ['send_invoice', 'send_receipt', 'mark_as_comp', 'reset_rate']
+	actions= ['send_invoice', 'send_receipt', 'generate_bill', 'mark_as_comp', 'reset_rate']
 	save_as = True
 	
 class UserProfileInline(admin.StackedInline):
@@ -127,14 +137,24 @@ class UserProfileAdmin(UserAdmin):
 	inlines = [UserProfileInline]
 	list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
 
+class BillLineItemAdmin(admin.ModelAdmin):
+	def user(self):
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+	user.allow_tags = True
+	
+	def location(self):
+		return self.reservation.location
+
+	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
+
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(BillLineItem, BillLineItemAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
 
 admin.site.register(Fee)
 admin.site.register(LocationFee)
-admin.site.register(BillLineItem)
