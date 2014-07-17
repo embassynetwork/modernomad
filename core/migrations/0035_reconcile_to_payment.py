@@ -22,36 +22,6 @@ class Migration(SchemaMigration):
 		))
 		db.send_create_signal(u'core', ['Fee'])
 
-		# Adding model 'FeeCollection'
-		db.create_table(u'core_feecollection', (
-			(u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-			('collected_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-			('fee', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Fee'])),
-			('applies_to', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Payment'])),
-			('amount', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-		))
-		db.send_create_signal(u'core', ['FeeCollection'])
-
-		# Adding model 'FeeDistribution'
-		db.create_table(u'core_feedistribution', (
-			(u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-			('distributed_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-			('distributed_by', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-			('payment_method', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
-			('amount', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-			('note', self.gf('django.db.models.fields.CharField')(max_length=200)),
-		))
-		db.send_create_signal(u'core', ['FeeDistribution'])
-
-		# Adding M2M table for field collected_fees on 'FeeDistribution'
-		m2m_table_name = db.shorten_name(u'core_feedistribution_collected_fees')
-		db.create_table(m2m_table_name, (
-			('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-			('feedistribution', models.ForeignKey(orm[u'core.feedistribution'], null=False)),
-			('feecollection', models.ForeignKey(orm[u'core.feecollection'], null=False))
-		))
-		db.create_unique(m2m_table_name, ['feedistribution_id', 'feecollection_id'])
-
 		# Adding model 'LocationFee'
 		db.create_table(u'core_locationfee', (
 			(u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -59,6 +29,19 @@ class Migration(SchemaMigration):
 			('fee', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Fee'])),
 		))
 		db.send_create_signal(u'core', ['LocationFee'])
+
+		# Adding model 'BillLineItem'
+		db.create_table(u'core_billlineitem', (
+			(u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+			('reservation', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Reservation'])),
+			('description', self.gf('django.db.models.fields.CharField')(max_length=100)),
+			('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+			('visible_to_user', self.gf('django.db.models.fields.BooleanField')(default=True)),
+		))
+		db.send_create_signal(u'core', ['BillLineItem'])
+
+		# Convert Payment.paid_amount to Decimal
+		db.alter_column(u'core_payment', 'paid_amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2, default=0))
 
 		# Changing field 'Payment.payment_date'
 		db.alter_column(u'core_payment', 'payment_date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, default=datetime.datetime(2014, 7, 14, 0, 0)))
@@ -127,24 +110,6 @@ class Migration(SchemaMigration):
 			'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
 			'percentage': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
 		},
-		u'core.feecollection': {
-			'Meta': {'object_name': 'FeeCollection'},
-			'amount': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-			'applies_to': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Payment']"}),
-			'collected_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-			'fee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Fee']"}),
-			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-		},
-		u'core.feedistribution': {
-			'Meta': {'object_name': 'FeeDistribution'},
-			'amount': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-			'collected_fees': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['core.FeeCollection']", 'symmetrical': 'False'}),
-			'distributed_by': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
-			'distributed_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-			'note': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-			'payment_method': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
-		},
 		u'core.location': {
 			'Meta': {'object_name': 'Location'},
 			'about_page': ('django.db.models.fields.TextField', [], {}),
@@ -185,7 +150,7 @@ class Migration(SchemaMigration):
 			'Meta': {'object_name': 'Payment'},
 			'automatic_invoice': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
 			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-			'paid_amount': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+			'paid_amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
 			'payment_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
 			'payment_method': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
 			'payment_service': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
@@ -242,6 +207,14 @@ class Migration(SchemaMigration):
 			'sharing': ('django.db.models.fields.TextField', [], {}),
 			'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
 			'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
+		},
+		u'core.billlineitem': {
+			'Meta': {'object_name': 'BillLineItem'},
+			'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
+			'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+			'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"}),
+			'visible_to_user': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
 		}
 	}
 

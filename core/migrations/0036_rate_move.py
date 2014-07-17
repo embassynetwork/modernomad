@@ -20,7 +20,10 @@ class Migration(DataMigration):
 			if not p.paid_amount:
 				p.paid_amount = 0
 			if not p.payment_date:
-				p.payment_date = datetime.datetime(1970, 1, 1, 0, 0)
+				p.payment_date = p.reservation.created
+			if not p.payment_method:
+				# Convert blanks to None
+				p.payment_method = None
 			p.save()
 
 	def backwards(self, orm):
@@ -79,24 +82,6 @@ class Migration(DataMigration):
 			'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
 			'percentage': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'})
 		},
-		u'core.feecollection': {
-			'Meta': {'object_name': 'FeeCollection'},
-			'amount': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-			'applies_to': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Payment']"}),
-			'collected_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-			'fee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Fee']"}),
-			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-		},
-		u'core.feedistribution': {
-			'Meta': {'object_name': 'FeeDistribution'},
-			'amount': ('django.db.models.fields.SmallIntegerField', [], {'default': '0'}),
-			'collected_fees': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['core.FeeCollection']", 'symmetrical': 'False'}),
-			'distributed_by': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
-			'distributed_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-			'note': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-			'payment_method': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
-		},
 		u'core.location': {
 			'Meta': {'object_name': 'Location'},
 			'about_page': ('django.db.models.fields.TextField', [], {}),
@@ -137,7 +122,7 @@ class Migration(DataMigration):
 			'Meta': {'object_name': 'Payment'},
 			'automatic_invoice': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
 			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-			'paid_amount': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+			'paid_amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
 			'payment_date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
 			'payment_method': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
 			'payment_service': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
@@ -194,6 +179,14 @@ class Migration(DataMigration):
 			'sharing': ('django.db.models.fields.TextField', [], {}),
 			'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
 			'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
+			},
+		u'core.billlineitem': {
+			'Meta': {'object_name': 'BillLineItem'},
+			'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
+			'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+			'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"}),
+			'visible_to_user': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
 		}
 	}
 
