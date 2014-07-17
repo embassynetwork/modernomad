@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 import uuid
 import stripe
 from django.db.models import Q
+from decimal import Decimal
 
 # imports for signals
 import django.dispatch 
@@ -194,7 +195,6 @@ def room_img_upload_to(instance, filename):
 	return os.path.join(upload_path, filename)
 
 class Room(models.Model):
-
 	GUEST = "guest"
 	PRIVATE = "private"
 	ROOM_USES = (
@@ -227,7 +227,6 @@ class Room(models.Model):
 			return True
 		else:
 			return False
-
 
 class ReservationManager(models.Manager):
 
@@ -330,6 +329,10 @@ class Reservation(models.Model):
 		return self.total_nights() * self.rate
 
 	def total_owed(self):
+		# Maybe someone was nice and they don't owe anything!
+		if self.is_comped():
+			return 0
+			
 		# The amount they owe depends on the payments already made
 		payments = Payment.objects.filter(reservation=self)
 		
@@ -338,21 +341,25 @@ class Reservation(models.Model):
 			return self.bill_amount()
 		
 		# Add up all the payments and subtract it from the total value
-		owed = self.bill_amount()
+		owed = Decimal(self.bill_amount())
 		for payment in payments:
-			if payment.status == Payment.COMP or payment.status == Payment.PAID:
-				# Presence of a COMP or PAID payment means they owe nothing more
-				return 0
 			owed = owed - payment.paid_amount
 		return owed
+		
+	def total_paid(self):
+		payments = Payment.objects.filter(reservation=self)
+		if not payments:
+			return 0
+		paid = Decimal(0)
+		for payment in payments:
+			paid = paid + payment.paid_amount
+		return paid
 
 	def is_paid(self):
 		return self.total_owed() == 0
 
 	def is_comped(self):
-		for payment in Payment.objects.filter(reservation=self, status=Payment.COMP):
-			return True
-		return False
+		return self.rate == 0
 
 	def total_owed_in_cents(self):
 		return self.total_owed()*100
@@ -367,7 +374,7 @@ class Reservation(models.Model):
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if not location_fee.fee.paid_by_house:
-				amount = amount + (room_charge * location_fee.fee.percentage)
+				amount = amount + (room_charge * location_fee.fee.percentage/100)
 		return amount
 
 	def house_fees(self):
@@ -376,43 +383,11 @@ class Reservation(models.Model):
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if location_fee.fee.paid_by_house:
-				amount = amount + (room_charge * location_fee.fee.percentage)
+				amount = amount + (room_charge * location_fee.fee.percentage/100)
 		return amount
 
 	def to_house(self):
 		return self.total_value() - self.house_fees()
-
-	def send_invoice(self):
-		''' trigger a reminder email to the guest about payment.''' 
-		if self.hosted:
-			# XXX TODO make this a proper error which is viewable in the admin form.
-			print "hosted reservation invoices not supported"
-			return
-		if not self.total_owed() <  self.total_value():
-			# XXX TODO eventually send an email for COMPs too, but a
-			# different once, with thanks/asking for feedback.
-			return
-
-		plaintext = get_template('emails/invoice.txt')
-		htmltext = get_template('emails/invoice.html')
-		c = Context({
-			'first_name': self.reservation.user.first_name, 
-			'res_id': self.reservation.id,
-			'today': datetime.datetime.today(), 
-			'arrive': self.reservation.arrive, 
-			'depart': self.reservation.depart, 
-			'room': self.reservation.room.name, 
-			'num_nights': self.reservation.total_nights(), 
-			'rate': self.get_rate(), 
-			'total': self.total_owed,
-			}) 
-
-		subject = "[%s] Thanks for Staying with us!" % self.location.email_subject_prefix 
-		recipient = [self.user.email,]
-		text_content = plaintext.render(c)
-		html_content = htmltext.render(c)
-		send_from_location_address(subject, text_content, html_context, recipient, self.location)
-		self.save()
 
 	def charge_card(self):
 		# stripe will raise a stripe.CardError if the charge fails. this
@@ -434,7 +409,6 @@ class Reservation(models.Model):
 
 		# Store the charge details in a Payment object
 		Payment.objects.create(reservation=self, 
-			status = Payment.PAID, 
 			payment_service = "Stripe",
 			paid_amount = (charge.amount/100), 
 			transaction_id = charge.id
@@ -458,49 +432,27 @@ class Reservation(models.Model):
 		self.save()
 	
 	def comp(self):
-		if not self.is_comped():
-			Payment.objects.create(reservation=self, status=Payment.COMP)
+		self.rate = 0
+		self.save()
+
+	def reset_rate(self):
+		self.rate = self.room.default_rate
+		self.save()
 
 	def payments(self):
 		return Payment.objects.filter(reservation=self)
 
 class Payment(models.Model):
-	COMP = "comp"
-	UNPAID = "unpaid"
-	INVOICED = "invoiced"
-	PAID = "paid"
-	INVALID = "invalid"
-	STATUSES = (
-			(COMP, 'Comp'),
-			(UNPAID, 'Unpaid'),
-			(INVOICED, 'Invoiced'),
-			(PAID, 'Paid'),
-			(INVALID, "Invalid")
-			)
-
 	reservation = models.ForeignKey(Reservation)
 	payment_date = models.DateTimeField(auto_now_add=True)
-	status = models.CharField(max_length=200, choices=STATUSES, default=UNPAID)
 	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
 	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
 	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
-	paid_amount = models.IntegerField(null=False, default=0)
+	paid_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	transaction_id = models.CharField(max_length=200, null=True, blank=True)
 
 	def __unicode__(self):
-		return "payment %d" % self.reservation.id
-
-	def html_color_status(self):
-		if self.status == Payment.PAID:
-			color_code = "#5fbf00"
-		elif self.status == Payment.UNPAID or self.status == Payment.INVOICED:
-			color_code = "#bf0000"
-		elif self.status == Payment.COMP:
-			color_code = "#ffc000"
-		else:
-			color_code = "#000000"
-		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
-	html_color_status.allow_tags = True
+		return "%s: %s - $%s" % (str(self.payment_date)[:16], self.reservation.user, self.paid_amount)
 
 def profile_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
@@ -611,7 +563,7 @@ class EmailTemplate(models.Model):
 		return self.name
 
 class Fee(models.Model):
-	description = models.CharField(max_length=200, verbose_name="Fee Name")
+	description = models.CharField(max_length=100, verbose_name="Fee Name")
 	percentage = models.PositiveIntegerField(null=False, default=0)
 	paid_by_house = models.BooleanField(default=False)
 
@@ -625,25 +577,12 @@ class LocationFee(models.Model):
 	def __unicode__(self): 
 		return '%s: %s' % (self.location, self.fee)
 
-class FeeCollection(models.Model):
-	collected_on = models.DateTimeField(auto_now_add=True)
+class BillLineItem(models.Model):
+	reservation = models.ForeignKey(Reservation)
 	fee = models.ForeignKey(Fee)
-	applies_to = models.ForeignKey(Payment)
-	amount = models.SmallIntegerField(null=False, default=0)
-
-	def __unicode__(self): 
-		return '%s: %s - %s' % (self.collected_on, self.fee, self.amount)
-
-class FeeDistribution(models.Model):
-	distributed_on = models.DateTimeField(auto_now_add=True)
-	distributed_by = models.ForeignKey(User)
-	collected_fees = models.ManyToManyField(FeeCollection, blank=False, null=False)
-	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
-	amount = models.SmallIntegerField(null=False, default=0)
-	note = models.CharField(max_length=200)
-
-	def __unicode__(self): 
-		return '%s: %s - %s' % (self.distributed_on, self.payment_method, self.amount)
+	description = models.CharField(max_length=200)
+	amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+	visible_to_user = models.BooleanField(default=True)
 
 
 
