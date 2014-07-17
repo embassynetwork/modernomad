@@ -206,38 +206,33 @@ def send_from_location_address(subject, text_content, html_content, recipient, l
 	print resp.text
 	return HttpResponse(status=200)
 
-def send_receipt(reconcile):
-	# make sure we have all the data we need. 
-	if (not reconcile.paid_amount or not reconcile.payment_method or not reconcile.transaction_id 
-			or not reconcile.payment_date or not reconcile.PAID):
-		raise Exception("reservation must be unpaid or paid to generate receipt")
-		return False
-
-	location = reconcile.reservation.location
-	total_paid = reconcile.paid_amount
+# TODO - This method needs work!
+# TODO - Need to send a list of Payments and of BillLineItems -JLS
+def send_receipt(reservation):
+	location = reservation.location
 
 	plaintext = get_template('emails/receipt.txt')
 	htmltext = get_template('emails/receipt.html')
 	c = Context({
-		'first_name': reconcile.reservation.user.first_name, 
-		'last_name': reconcile.reservation.user.last_name, 
-		'res_id': reconcile.reservation.id,
+		'first_name': reservation.user.first_name, 
+		'last_name': reservation.user.last_name, 
+		'res_id': reservation.id,
 		'today': datetime.datetime.today(), 
-		'arrive': reconcile.reservation.arrive, 
-		'depart': reconcile.reservation.depart, 
+		'arrive': reservation.arrive, 
+		'depart': reservation.depart, 
 		'location': location.name,
-		'room': reconcile.reservation.room.name, 
-		'num_nights': reconcile.reservation.total_nights(), 
-		'rate': reconcile.get_rate(), 
-		'payment_method': reconcile.payment_method,
-		'transaction_id': reconcile.transaction_id,
-		'payment_date': reconcile.payment_date,
-		'total_paid': total_paid,
+		'room': reservation.room.name, 
+		'num_nights': reservation.total_nights(), 
+		'rate': reservation.rate, 
+		#'payment_method': reconcile.payment_method,
+		#'transaction_id': reconcile.transaction_id,
+		#'payment_date': reconcile.payment_date,
+		'total_paid': reservation.total_paid(),
 		}) 
 
-	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reconcile.reservation.arrive), str(reconcile.reservation.depart))  
+	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))  
 	sender = location.from_email()
-	recipient = [reconcile.reservation.user.email,]
+	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
 
@@ -252,8 +247,39 @@ def send_receipt(reconcile):
 				}
 			)
 	print resp.text
-	return 
+	return True
 
+def send_invoice(reservation):
+	''' trigger a reminder email to the guest about payment.''' 
+	if reservation.hosted:
+		# XXX TODO make this a proper error which is viewable in the admin form.
+		print "hosted reservation invoices not supported"
+		return
+	if not reservation.total_owed() <  reservation.total_value():
+		# XXX TODO eventually send an email for COMPs too, but a
+		# different once, with thanks/asking for feedback.
+		return
+
+	plaintext = get_template('emails/invoice.txt')
+	htmltext = get_template('emails/invoice.html')
+	c = Context({
+		'first_name': reservation.user.first_name, 
+		'res_id': reservation.id,
+		'today': datetime.datetime.today(), 
+		'arrive': reservation.arrive, 
+		'depart': reservation.depart, 
+		'room': reservation.room.name, 
+		'num_nights': reservation.total_nights(), 
+		'rate': rate, 
+		'total': self.total_owed,
+		}) 
+
+	subject = "[%s] Thanks for Staying with us!" % reservation.location.email_subject_prefix 
+	recipient = [reservation.user.email,]
+	text_content = plaintext.render(c)
+	html_content = htmltext.render(c)
+	send_from_location_address(subject, text_content, html_context, recipient, self.location)
+	self.save()
 
 def new_reservation_notify(reservation):
 	location = reservation.location
