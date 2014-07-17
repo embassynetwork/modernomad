@@ -331,20 +331,9 @@ class Reservation(models.Model):
 		# Maybe someone was nice and they don't owe anything!
 		if self.is_comped():
 			return 0
-			
-		# The amount they owe depends on the payments already made
-		payments = Payment.objects.filter(reservation=self)
-		
-		# No payments means they owe the full value + fees
-		if not payments:
-			return self.bill_amount()
-		
-		# Add up all the payments and subtract it from the total value
-		owed = Decimal(self.bill_amount())
-		for payment in payments:
-			owed = owed - payment.paid_amount
-		return owed
-		
+
+		return self.bill_amount() - self.total_paid()
+
 	def total_paid(self):
 		payments = Payment.objects.filter(reservation=self)
 		if not payments:
@@ -361,10 +350,10 @@ class Reservation(models.Model):
 		return self.rate == 0
 
 	def total_owed_in_cents(self):
-		return self.total_owed()*100
+		return self.total_owed() * 100
 
 	def calc_non_house_fees(self):
-		# Amount of fees not paid by the house
+		# Calculate the amount of fees not paid by the house
 		room_charge = self.total_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
@@ -373,7 +362,7 @@ class Reservation(models.Model):
 		return amount
 
 	def calc_house_fees(self):
-		# Amount of fees the house owes
+		# Calculate the amount of fees the house owes
 		room_charge = self.total_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
@@ -395,6 +384,7 @@ class Reservation(models.Model):
 			BillLineItem.objects.create(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 
 	def bill_amount(self):
+		# Bill amount comes from generated bill line items
 		amount = 0 
 		for line_item in BillLineItem.objects.filter(reservation=self):
 			if not line_item.fee or not line_item.paid_by_house:
@@ -402,6 +392,7 @@ class Reservation(models.Model):
 		return amount
 
 	def house_fees(self):
+		# Pull the house fees from the generated bill line items
 		amount = 0 
 		for line_item in BillLineItem.objects.filter(reservation=self):
 			if line_item.fee and line_item.paid_by_house:
@@ -409,6 +400,7 @@ class Reservation(models.Model):
 		return amount
 
 	def non_house_fees(self):
+		# Pull the non-house fees from the generated bill line items
 		amount = 0 
 		for line_item in BillLineItem.objects.filter(reservation=self):
 			if line_item.fee and not line_item.paid_by_house:
