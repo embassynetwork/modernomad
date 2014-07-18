@@ -55,6 +55,7 @@ class BillLineItemAdmin(admin.ModelAdmin):
 		return self.reservation.location
 
 	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
+	list_filter = ('fee', 'paid_by_house', 'reservation__location')
 
 class BillLineItemInline(admin.TabularInline):
 	model = BillLineItem
