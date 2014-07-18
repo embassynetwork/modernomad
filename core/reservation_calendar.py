@@ -42,7 +42,7 @@ class GuestCalendar(HTMLCalendar):
 						room_type = "P"
 
 					body.append('<li id="res%d-cal-item">' %reservation.id)
-					if reservation.status == Reservation.APPROVED:
+					if reservation.is_apprived():
 						body.append('<a href="#reservation%d" class="greyed-out">' % reservation.id)
 					else:
 						body.append('<a href="#reservation%d">' % reservation.id)				

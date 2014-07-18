@@ -41,7 +41,7 @@
 	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
 </div>
 
-{% if r.status = 'canceled' %}
+{% if r.is_canceled %}
 <div class="greyed-out">
 {% endif %}
 
@@ -58,20 +58,20 @@
 		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 
 
-		{% if r.reconcile.status == 'paid' %}
+		{% if r.is_paid %}
 		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
 			{% csrf_token %}
 			<input class="btn-default btn" type="submit" value="Send Receipt">
 		</form>
 		{% endif %}
 
-		{% if r.status != 'canceled' %}
+		{% if not r.is_canceled %}
 
-			{% if r.reconcile.status != 'paid' %}
+			{% if not r.is_paid %}
 				<form id="res-action-toggle-comp" class="res-action" method=POST action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
 					{% csrf_token %}
 					<input type="submit" 
-					{% if r.reconcile.status == "comp" %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
+					{% if r.is_comped %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
 					class="btn-default btn" id="toggle-comp-input">
 				</form>
 			{% endif %}
@@ -103,7 +103,7 @@
 
 
 
-	<div class="res-value">${{ r.reconcile.total_value }}</div> 
+	<div class="res-value">${{ r.bill_amount }}</div> 
 	{% if room_has_availability %}
 		<div class="res-field field has-availability">
 	{% else %}
@@ -166,7 +166,7 @@
 </div> <!-- end res-info-main -->
 </div> 
 
-{% if r.status = 'canceled' %}
+{% if r.is_canceled %}
 </div>
 {% endif %}
 
@@ -193,9 +193,9 @@ $("#which-email-select").change(function() {
 function register_actions() {
 	// comping a reservation reslts in a page reload so we can rely on the
 	// template language here. 
-	reconcile_status = $("#reconcile-status").html();
+	payment_status = $("#payment-status").html();
 	
-	if (reconcile_status == 'paid') {
+	if (payment_status == 'paid') {
 		$("#res-action-toggle-comp").remove();
 	}
 	$('.res-manage-action').click(function() { 

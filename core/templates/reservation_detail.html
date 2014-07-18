@@ -18,12 +18,12 @@
 
 <div class="res-statusline">
 {% ifequal reservation.user user %}
-	{% if reservation.status == "pending" %}
+	{% if reservation.is_pending %}
 		<div>
 			<span class="btn btn-large btn-success disabled res-status-btn" type="button">Pending</span>
 		</div>
 
-	{% elif reservation.status == "approved" and reservation.user.profile.customer_id %}
+	{% elif reservation.is_approved and reservation.user.profile.customer_id %}
 		<div>
 			<p><span class="text-error">Action Required! Please pay for your reservation to confirm. 
 			Cancellation policy for the {{ reservation.room }} 
@@ -35,7 +35,7 @@
 					value="Submit payment." >
 			</form>
 		</div>
-	{% elif reservation.status == "approved" or reservation.status == "confirmed" and not reservation.user.profile.customer_id %}
+	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.user.profile.customer_id %}
 		<div>
 			<p><span class="text-error">Action Required! Please pay for your
 				reservation to confirm. Cancellation policy for the {{ reservation.room }} is
@@ -54,10 +54,10 @@
 			</form>
 		</div>
 
-	{% elif reservation.status == "confirmed" and reservation.user.profile.customer_id %}
+	{% elif reservation.is_confirmed and reservation.user.profile.customer_id %}
 		<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
 
-	{% elif reservation.status == "canceled" %}
+	{% elif reservation.is_canceled %}
 		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Canceled</div>
 
 	{% endif %}

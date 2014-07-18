@@ -465,7 +465,7 @@ def ReservationDetail(request, reservation_id, location_slug):
 	location = get_location(location_slug)
 	try:
 		reservation = Reservation.objects.get(id=reservation_id)
-		if reservation.status == 'deleted':
+		if not reservation:
 			raise Reservation.DoesNotExist
 	except Reservation.DoesNotExist:
 		msg = 'The reservation you requested do not exist'
@@ -565,8 +565,7 @@ def UserAddCard(request, username):
 				# the user
 				reservation.charge_card()
 				send_receipt(payment)
-				reservation.status = Reservation.CONFIRMED
-				reservation.save()
+				reservation.confirm()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < reservation.location.welcome_email_days_ahead:
 					guest_welcome(reservation)
@@ -626,11 +625,11 @@ def ReservationEdit(request, reservation_id, location_slug):
 				# still pending to begin with, notify an admin and go back to
 				# pending (unless it's hosted, then we don't generate an
 				# email).
-				if (reservation.status != 'pending' and (reservation.arrive != original_arrive or 
+				if (not reservation.is_pending and (reservation.arrive != original_arrive or 
 					reservation.depart != original_depart or reservation.room != original_room )):
 
 					print "reservation room or date was changed. updating status."
-					reservation.status = "pending"
+					reservation.pending
 					# notify house_admins by email
 					updated_reservation_notify(reservation)
 					client_msg = 'The reservation was updated and the new information will be reviewed for availability.'
@@ -655,7 +654,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 def ReservationConfirm(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if not (request.user.is_authenticated() and request.user == reservation.user 
-		and request.method == "POST" and reservation.status == 'approved'):
+		and request.method == "POST" and reservation.is_approved):
 		return HttpResponseRedirect("/")
 
 	if not reservation.user.profile.customer_id:
@@ -663,8 +662,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 	else:
 		try:
 			reservation.charge_card()
-			reservation.status = Reservation.CONFIRMED
-			reservation.save()
+			reservation.confirm()
 			send_receipt(payment)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
@@ -805,9 +803,9 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 	reservation_action = request.POST.get('reservation-action')
 	try:
 		if reservation_action == 'set-tentative':
-			reservation.set_tentative()
+			reservation.approve()
 		elif reservation_action == 'set-confirm':
-			reservation.set_confirmed()
+			reservation.confirm()
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
 			if days_until_arrival < location.welcome_email_days_ahead:
 				guest_welcome(reservation)
@@ -816,7 +814,7 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.charge_card()
-				reservation.set_confirmed()
+				reservation.confirm()
 				send_receipt(payment)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < location.welcome_email_days_ahead:
@@ -872,9 +870,8 @@ def ReservationToggleComp(request, reservation_id, location_slug):
 		# Put the rate back to the default rate
 		reservation.reset_rate()
 		# if confirmed set status back to APPROVED 
-		if reservation.status == Reservation.CONFIRMED:
-			reservation.status = Payment.APPROVED
-			reservation.save()
+		if reservation.is_confirmed():
+			reservation.approve()
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required

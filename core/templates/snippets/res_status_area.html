@@ -1,15 +1,15 @@
-<div id="res-status-area" {% if r.reconcile.status == 'paid' %} class="paid-bg-img" {% endif %} >
+<div id="res-status-area" {% if r.is_paid %} class="paid-bg-img" {% endif %} >
 
 	{% include "snippets/messages.html" %}
 
 	The current status of this reservation is <span id="the-reservation-status" type="button" class="btn disabled btn-info">{{ r.status }}</span>
-	<span id="reconcile-status" style="visibility:hidden;">{{r.reconcile.status}}</span>
+	<span id="payment_status" style="visibility:hidden;">{% if r.is_paid %}paid{% endif %}</span>
 	
-	{% if r.reconcile.status == "comp" %}
+	{% if r.is_comped %}
 		<p><i class="icon-heart"i></i> This reservation is a comp</p>
 	{% endif %}
 
-	{% if r.status != 'canceled' %}
+	{% if not r.is_canceled %}
 		{% if r.user.profile.customer_id %}
 			<p class="text-success"><i class="icon-ok"i></i> This user has valid payment credentials.</p>
 		{% else %}
@@ -20,9 +20,9 @@
 
 	<form method="POST" action="{% url 'reservation_manage_update' location.slug r.id %}" id="res-action-form">
 		
-	{% if r.reconcile.status != "comp" %}
+	{% if not r.is_comped %}
 
-		{% if r.status == "pending" %}
+		{% if r.is_pending %}
 			{% if r.user.profile.customer_id %}
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
 				Charge the user's card and notify them via email
@@ -32,7 +32,7 @@
 				tentatively confirm this reservation</a> and prompt the user to confirm with payment.
 			{% endif %}
 
-		{% elif r.status == "approved" %}
+		{% elif r.is_approved %}
 			{% if r.user.profile.customer_id %}
 				The reservation is approved and the user has valid payment
 				details. 
@@ -45,9 +45,9 @@
 					them an email reminder to confirm</a>. 
 			{% endif %}
 
-		{% elif r.status == "confirmed" %}
+		{% elif r.is_confirmed %}
 			{% if r.user.profile.customer_id %}
-				{% if r.reconcile.status == 'paid' %}
+				{% if r.is_paid %}
 					<p>This reservation is confirmed and paid. No action needed.</p>
 				{% else %}
 					The reservation is confirmed and the user has valid payment
@@ -64,12 +64,12 @@
 		{% endif %} 
 
 	{% else %} <!-- if the reservation IS a comp... -->
-		{% if r.status == "pending" or r.status == "approved" %}
+		{% if r.is_pending or r.is_approved %}
 		This complimentary reservation is {{r.status}}. <a href="#"
 			class="res-manage-action res-manage-btn"
 			id="set-confirm">Confirm this reservation</a>. (House information will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
 
-		{% elif r.status == "confirmed" %}
+		{% elif r.is_confirmed %}
 			<p>This reservation is confirmed as a comp. No action required.</p>
 
 		{% endif %} <!-- end confirmed -->

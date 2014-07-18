@@ -343,12 +343,6 @@ class Reservation(models.Model):
 			paid = paid + payment.paid_amount
 		return paid
 
-	def is_paid(self):
-		return self.total_owed() == 0
-
-	def is_comped(self):
-		return self.rate == 0
-
 	def total_owed_in_cents(self):
 		return self.total_owed() * 100
 
@@ -438,15 +432,27 @@ class Reservation(models.Model):
 			transaction_id = charge.id
 		)
 
+	def set_rate(self, rate):
+		self.rate = rate
+		self.save()
+		self.generate_bill()
+
+	def reset_rate(self):
+		self.set_rate(self.room.default_rate)
+
 	def mark_last_msg(self):
 		self.last_msg = datetime.datetime.now()
 		self.save()
 
-	def set_tentative(self):
+	def pending(self):
+		self.status = Reservation.PENDING
+		self.save()
+
+	def approve(self):
 		self.status = Reservation.APPROVED
 		self.save()
 
-	def set_confirmed(self):
+	def confirm(self):
 		self.status = Reservation.CONFIRMED
 		self.save()
 
@@ -456,22 +462,44 @@ class Reservation(models.Model):
 		self.save()
 		self.delete_bill()
 	
-	def set_rate(self, rate):
-		self.rate = rate
-		self.save()
-		self.generate_bill()
-
-	def reset_rate(self):
-		self.set_rate(self.room.default_rate)
-
 	def comp(self):
 		self.set_rate(0)
+
+	def is_paid(self):
+		return self.total_owed() == 0
+
+	def is_comped(self):
+		return self.rate == 0
+
+	def is_pending(self):
+		return self.status == Reservation.PENDING
+
+	def is_apprived(self):
+		return self.status == Reservation.APPROVED
+
+	def is_confirmed(self):
+		return self.status == Reservation.CONFIRMED
+
+	def is_canceled(self):
+		return self.status == Reservation.CANCELED
 
 	def payments(self):
 		return Payment.objects.filter(reservation=self)
 
 	def bill_line_items(self):
 		return BillLineItem.objects.filter(reservation=self)
+
+	def html_color_status(self):
+		if self.is_paid():
+			color_code = "#5fbf00"
+		elif self.is_comped():
+			color_code = "#ffc000"
+		elif self.is_pending():
+			color_code = "#bf0000"
+		else:
+			color_code = "#000000"
+		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
+	html_color_status.allow_tags = True
 
 class Payment(models.Model):
 	reservation = models.ForeignKey(Reservation)

@@ -25,9 +25,9 @@
 				<td>{{r.room}}</td>
 				<td>{{r.hosted}}</td>
 				<td>{{r.total_nights}}</td>
-				<td>${{r.reconcile.get_rate}}</td>
-				<td>${{r.reconcile.total_value}}</td>
-				<td>{{r.reconcile.html_color_status|safe}}</td>
+				<td>${{r.rate}}</td>
+				<td>${{r.bill_amount}}</td>
+				<td>{{r.html_color_status|safe}}</td>
 			</tr>
 			{% endfor %}
 
