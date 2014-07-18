@@ -1,4 +1,6 @@
 {% extends 'root.html' %}
+{% load ifappexists %}
+
 {% block house_nav %}
 
 				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
@@ -17,7 +19,8 @@
 							<ul class="nav navbar-nav">
 								<li><a href="{% url 'location_about' location.slug %}">About</a></li>
 								<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
-								
+
+								{% ifappexists gather %}
 									<li class="dropdown">
 										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
 											Events <b class="caret"></b>
@@ -31,6 +34,7 @@
 											{% endif %}
 										</ul>
 									</li>
+								{% endifappexists %}
 
 								{% if user.is_authenticated %}
 									<li class="dropdown">
