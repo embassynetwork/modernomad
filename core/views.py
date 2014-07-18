@@ -438,6 +438,8 @@ def ReservationSubmit(request, location_slug):
 			reservation.user = request.user
 			reservation.location = location
 			reservation.save()
+			reservation.reset_rate()
+			reservation.generate_bill()
 			new_reservation_notify(reservation)
 			messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
