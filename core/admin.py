@@ -46,6 +46,22 @@ class PaymentInline(admin.TabularInline):
 	model = Payment
 	extra = 0
 
+class BillLineItemAdmin(admin.ModelAdmin):
+	def user(self):
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+	user.allow_tags = True
+
+	def location(self):
+		return self.reservation.location
+
+	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
+
+class BillLineItemInline(admin.TabularInline):
+	model = BillLineItem
+	fields = ('fee', 'description', 'amount', 'paid_by_house')
+	readonly_fields = ('fee',)
+	extra = 0
+
 class ReservationAdmin(admin.ModelAdmin):
 	def rate(self):
 		return "$%d" % self.rate
@@ -128,7 +144,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	list_filter = ('status', 'hosted')
 	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, fees, bill, to_house, paid )
 	list_editable = ('status',)
-	inlines = [PaymentInline]
+	inlines = [BillLineItemInline, PaymentInline]
 	ordering = ['depart',]
 	actions= ['send_invoice', 'send_receipt', 'generate_bill', 'mark_as_comp', 'reset_rate']
 	save_as = True
@@ -139,16 +155,6 @@ class UserProfileInline(admin.StackedInline):
 class UserProfileAdmin(UserAdmin):
 	inlines = [UserProfileInline]
 	list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
-
-class BillLineItemAdmin(admin.ModelAdmin):
-	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
-	user.allow_tags = True
-	
-	def location(self):
-		return self.reservation.location
-
-	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
 
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Location, LocationAdmin)
