@@ -26,7 +26,9 @@ class LocationAdmin(admin.ModelAdmin):
 	list_display=('name', 'address')
 	list_filter=('name',)
 	filter_horizontal = ['residents', 'house_admins']
-	inlines = [RoomAdminInline, EventAdminGroupInline]
+	inlines = [RoomAdminInline]
+	if 'gather' in settings.INSTALLED_APPS:
+		 inlines.append(EventAdminGroupInline)
 
 class PaymentAdmin(admin.ModelAdmin):
 	def user(self):
