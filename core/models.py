@@ -372,7 +372,7 @@ class Reservation(models.Model):
 
 	def generate_bill(self, delete_old_items=True):
 		if delete_old_items:
-			BillLineItem.objects.filter(reservation=self).delete()
+			self.delete_bill()
 
 		room_charge_desc = "%s (%d * $%d)" % (self.room, self.total_nights(), self.rate)
 		room_charge = self.total_value()
@@ -382,6 +382,9 @@ class Reservation(models.Model):
 			desc = "%s (%s%c)" % (location_fee.fee.description, location_fee.fee.percentage, '%')
 			amount = room_charge * location_fee.fee.percentage/100
 			BillLineItem.objects.create(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+
+	def delete_bill(self):
+		BillLineItem.objects.filter(reservation=self).delete()
 
 	def bill_amount(self):
 		# Bill amount comes from generated bill line items
@@ -451,14 +454,18 @@ class Reservation(models.Model):
 		# cancel this reservation. 
 		self.status = Reservation.CANCELED
 		self.save()
+		self.delete_bill()
 	
-	def comp(self):
-		self.rate = 0
+	def set_rate(self, rate):
+		self.rate = rate
 		self.save()
+		self.generate_bill()
 
 	def reset_rate(self):
-		self.rate = self.room.default_rate
-		self.save()
+		self.set_rate(self.room.default_rate)
+
+	def comp(self):
+		self.set_rate(0)
 
 	def payments(self):
 		return Payment.objects.filter(reservation=self)
