@@ -61,6 +61,9 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	def to_house(self):
 		return "$%d" % self.to_house()
+		
+	def paid(self):
+		return "$%d" % self.total_paid()
 
 	def user_profile(self):
 		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
@@ -123,7 +126,7 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	model = Reservation
 	list_filter = ('status', 'hosted')
-	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, fees, bill, to_house, 'is_paid' )
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, fees, bill, to_house, paid )
 	list_editable = ('status',)
 	inlines = [PaymentInline]
 	ordering = ['depart',]
