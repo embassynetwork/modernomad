@@ -18,7 +18,7 @@
 	<p><em>Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</em></p>
 	</div>
 	
-	<form class="well form-inline" method="post" action="{% url reservation_edit location.slug reservation_id %}">{% csrf_token %}
+	<form class="well form-inline" method="post" action="{% url 'reservation_edit' location.slug reservation_id %}">{% csrf_token %}
 		{% for field in form %}
 
 			{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
