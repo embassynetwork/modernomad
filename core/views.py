@@ -233,7 +233,7 @@ def occupancy(request, location_slug):
 		# get_rate grabs the custom rate if it exists, else default rate as
 		# defined in the room definition.
 		rate = r.rate
-		if r.payment.status == Payment.COMP:
+		if r.is_comped():
 			total_comped_nights += nights_this_month
 			total_comped_income += nights_this_month*r.default_rate()
 			comp = True
@@ -251,7 +251,7 @@ def occupancy(request, location_slug):
 					paid_rate_discrepancy += nights_this_month*(paid_rate - rate)
 					payment_discrepancies.append(r.id)
 
-			if r.payment.status == Payment.PAID:
+			if r.is_paid():
 				if (r.payment.payment_date and r.payment.payment_date < start):
 					income_from_past_months += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days)
 				else:
@@ -266,9 +266,9 @@ def occupancy(request, location_slug):
 					else:
 						paid_amount_missing.append(r.id)
 
-			if r.payment.status == Payment.UNPAID or r.payment.status == Payment.INVOICED:
+			if not r.is_paid():
 				unpaid = True
-				unpaid_total += nights_this_month*rate
+				unpaid_total += r.total_owed()
 			else:
 				unpaid = False
 
@@ -284,11 +284,11 @@ def occupancy(request, location_slug):
 		total_person_nights += nights_this_month
 		if r.room.shared:
 			total_shared_nights += nights_this_month
-			if r.payment.status != Payment.COMP:
+			if not r.is_comped():
 				total_income_shared += nights_this_month*rate
 		else:
 			total_private_nights += nights_this_month
-			if r.payment.status != Payment.COMP:
+			if not r.is_comped():
 				total_income_private += nights_this_month*rate
 
 	total_income_this_month = income_for_this_month + income_from_past_months
@@ -855,8 +855,8 @@ def ReservationSendReceipt(request, reservation_id, location_slug):
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
-	if reservation.payment.status == Payment.PAID:
-		send_receipt(reservation.payment, location)
+	if reservation.is_paid():
+		send_receipt(reservation, location)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
@@ -867,16 +867,16 @@ def ReservationToggleComp(request, reservation_id, location_slug):
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
-	payment = reservation.payment
-	if payment.status != Payment.COMP:
-		payment.status = Payment.COMP
+	if not reservation.is_comped():
+		# Let these nice people stay here for free
+		reservation.comp()
 	else:
-		payment.status = Payment.UNPAID
+		# Put the rate back to the default rate
+		reservation.reset_rate()
 		# if confirmed set status back to APPROVED 
 		if reservation.status == Reservation.CONFIRMED:
 			reservation.status = Payment.APPROVED
 			reservation.save()
-	payment.save()
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required

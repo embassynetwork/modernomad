@@ -255,7 +255,7 @@ def send_invoice(reservation):
 		# XXX TODO make this a proper error which is viewable in the admin form.
 		print "hosted reservation invoices not supported"
 		return
-	if not reservation.total_owed() <  reservation.total_value():
+	if not reservation.is_comped():
 		# XXX TODO eventually send an email for COMPs too, but a
 		# different once, with thanks/asking for feedback.
 		return
