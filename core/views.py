@@ -22,7 +22,6 @@ import uuid, base64, os
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
-from gather.models import Event
 from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.utils.safestring import SafeString
@@ -32,14 +31,17 @@ from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
 from django.core.urlresolvers import reverse
 from core.models import get_location
+from django.shortcuts import get_object_or_404
 
 def location(request, location_slug):
-	try:
-		location = Location.objects.get(slug=location_slug)
-	except:
-		return HttpResponseRedirect(("/404"))
+	location = my_object = get_object_or_404(Location, slug=location_slug)
 
 	today = datetime.date.today()
+
+	if request.user.is_authenticated():
+		current_user = request.user
+	else:
+		current_user = None
 	
 	# pull out all reservations in the coming month
 	coming_month_res = (
@@ -48,41 +50,35 @@ def location(request, location_slug):
 			.exclude(depart__lt=today)
 			.exclude( arrive__gt=today+datetime.timedelta(days=30))
 		)
-
-	coming_month_events = (
-			Event.objects.filter(status="live") 
-			.filter(location=location)
-			.exclude(end__lt=today)
-			.exclude( start__gte=today+datetime.timedelta(days=30))
-		)
-
-	# add users associated with those reservations and events to a list to display on
-	# the homepage
 	people_in_coming_month = []
 	for r in coming_month_res:
 		# check for duplicates, add if not already there.
 		if r.user not in people_in_coming_month:
 			people_in_coming_month.append(r.user)
 
-	for e in coming_month_events:
-		# check for duplicates, add if not already there.
-		for u in e.organizers.all():
-			if u not in people_in_coming_month:
-				people_in_coming_month.append(u)
-	
-	residents = list(location.residents.all())
-
 	# add residents to the list of people in the house in the coming month. 
+	residents = list(location.residents.all())
 	for r in residents:
 		# check for duplicates, add if not already there.
 		if r not in people_in_coming_month:
 			people_in_coming_month.append(r)
 
-	if request.user.is_authenticated():
-		current_user = request.user
-	else:
-		current_user = None
-	events = Event.objects.upcoming(upto=5, current_user=current_user, location=location)
+	# Add all the people from events too if we have gather installed
+	events = None
+	if 'gather' in settings.INSTALLED_APPS:
+		from gather.models import Event
+		events = Event.objects.upcoming(upto=5, current_user=current_user, location=location)
+		coming_month_events = (
+				Event.objects.filter(status="live") 
+				.filter(location=location)
+				.exclude(end__lt=today)
+				.exclude( start__gte=today+datetime.timedelta(days=30))
+			)
+		for e in coming_month_events:
+			# check for duplicates, add if not already there.
+			for u in e.organizers.all():
+				if u not in people_in_coming_month:
+					people_in_coming_month.append(u)
 
 	if not request.user.is_authenticated():
 		new_user_form = NewUserForm()
