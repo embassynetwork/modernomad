@@ -180,7 +180,7 @@ def occupancy(request, location_slug):
 	payment_discrepancies = []
 	paid_amount_missing = []
 
-	payments_this_month = Payment.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end).filter(status="paid")
+	payments_this_month = Payment.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	for r in payments_this_month:
 		nights_before_this_month = datetime.timedelta(0)
 		nights_after_this_month = datetime.timedelta(0)
