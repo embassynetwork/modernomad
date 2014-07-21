@@ -1,0 +1,71 @@
+{% load ifappexists %}
+
+		<div class="row">
+			<div class="col-md-12">
+				<nav class="navbar navbar-default" id="nav-location" role="navigation">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="{% url 'location_home' location.slug %}">{{ location.name }}</a>
+				</div>
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav">
+						<li><a href="{% url 'location_about' location.slug %}">About</a></li>
+						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+
+						{% ifappexists gather %}
+						<li class="dropdown">
+						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+							Events <b class="caret"></b>
+						</a>
+						<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+							<li><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming</a></li>
+							<li><a href="{% url 'gather_create_event' location.slug %}">New Event</a></li>
+							{% if user.is_authenticated %}
+							<li><a href="{% url 'gather_past_events' location.slug %}">Past Events</a></li>
+							{% else %}
+							{% endif %}
+						</ul>
+						</li>
+						{% endifappexists %}
+
+						{% if user.is_authenticated %}
+						<li class="dropdown">
+						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+							People <b class="caret"></b>
+						</a>
+						<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+							<li><a href="{% url 'location_residents' location.slug %}">Residents</a></li>
+
+							{% if user in location.house_admins.all %}
+							<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
+							{% endif %}
+						</ul>
+						</li>
+						{% endif %}
+						{% if user in location.house_admins.all %}
+						<li class="dropdown">
+						<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
+							Admin <b class="caret"></b>
+						</a>
+						<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
+							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">See Occupancy</a></li>
+							<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
+							<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
+						</ul>
+						</li>
+						{% endif %}
+						{% if not user.is_authenticated %}
+						<li><a href="/people/login/">Login</a></li>
+						{% endif %}
+					</ul>
+				</div>
+				</nav>
+			</div> <!-- end col-md-12 -->
+		</div> <!-- end row -->
+
+

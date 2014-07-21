@@ -134,7 +134,7 @@ INSTALLED_APPS = (
     'south',
     'core',
     'djcelery',
-    #'gather',
+    'gather',
 )
 
 # A sample logging configuration. The only tangible logging
