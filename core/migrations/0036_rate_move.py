@@ -13,6 +13,13 @@ class Migration(DataMigration):
 				r.rate = p.rate
 			if not r.rate:
 				r.rate = 0
+			
+			# Now generate a bill for this reservation
+			total_nights = (r.depart - r.arrive).days
+			room_charge_desc = "%s (%d * $%d)" % (r.room, total_nights, r.rate)
+			room_charge = total_nights * r.rate
+			orm['core.BillLineItem'].objects.create(reservation=r, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+
 			r.save()
 
 		# Check for a few non-nullable values and clean them up
@@ -180,15 +187,15 @@ class Migration(DataMigration):
 			'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
 			'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
 			},
-			u'core.billlineitem': {
-				'Meta': {'object_name': 'BillLineItem'},
-				'amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '7', 'decimal_places': '2'}),
-				'description': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-				'fee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Fee']", 'null': 'True'}),
-				u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-				'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-				'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"})
-			},
+		u'core.billlineitem': {
+			'Meta': {'object_name': 'BillLineItem'},
+			'amount': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '7', 'decimal_places': '2'}),
+			'description': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
+			'fee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Fee']", 'null': 'True'}),
+			u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+			'paid_by_house': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+			'reservation': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['core.Reservation']"})
+		},
 	}
 
 	complete_apps = ['core']
