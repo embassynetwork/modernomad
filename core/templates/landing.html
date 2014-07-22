@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load ifappexists %}
 
 {% block content %}
 
@@ -30,7 +31,9 @@
 		<div class="col-md-4" id="participate">
 			<h2 class="fancy-header center"><span class="glyphicon glyphicon-calendar"></span> Events</h2>
 			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
+			{% ifappexists gather %}
 			<a href="{% url 'gather_upcoming_events' location.slug %}"  class="btn btn-large btn-block btn-large-text">See Upcoming</a>
+			{% endifappexists %}
 		</div>
 
 
