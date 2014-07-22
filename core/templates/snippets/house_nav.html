@@ -55,7 +55,9 @@
 						<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
 							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">See Occupancy</a></li>
 							<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
-							<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
+							{% ifappexists gather %}
+								<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
+							{% endifappexists %}
 						</ul>
 						</li>
 						{% endif %}
