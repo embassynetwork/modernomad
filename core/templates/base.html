@@ -1,107 +1,32 @@
 {% extends 'root.html' %}
-{% load ifappexists %}
 
-{% block house_nav %}
+<!-- block body -->
+{% block body %}
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">
+			<div class="row">
+				<img src="{{ MEDIA_URL }}{{ location.image }}" id="house-image">
+			</div>
 
-				<nav class="navbar navbar-default" id="nav-primary" role="navigation">
-				<div class="row">
-					<div class="col-md-11 col-md-offset-1">
-						<div class="navbar-header">
-							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-							<span class="sr-only">Toggle navigation</span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							<span class="icon-bar"></span>
-							</button>
-							<a class="navbar-brand" href="{% url 'location_home' location.slug %}">{{ location.name }}</a>
-						</div>
-						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-							<ul class="nav navbar-nav">
-								<li><a href="{% url 'location_about' location.slug %}">About</a></li>
-								<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+			{% include 'snippets/house_nav.html' %}
 
-								{% ifappexists gather %}
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-											Events <b class="caret"></b>
-										</a>
-										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-											<li><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming</a></li>
-											<li><a href="{% url 'gather_create_event' location.slug %}">New Event</a></li>
-											{% if user.is_authenticated %}
-											<li><a href="{% url 'gather_past_events' location.slug %}">Past Events</a></li>
-											{% else %}
-											{% endif %}
-										</ul>
-									</li>
-								{% endifappexists %}
+			<hr>
 
-								{% if user.is_authenticated %}
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-											People <b class="caret"></b>
-										</a>
-										<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-											<li><a href="{% url 'location_residents' location.slug %}">Residents</a></li>
+			{% block content %}
+			{% endblock %}
+		</div>
+	</div>
+{% endblock %}
 
-											{% if user in location.house_admins.all %}
-												<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
-											{% endif %}
-										</ul>
-									</li>
-								{% endif %}
-								{% if user in location.house_admins.all %}
-									<li class="dropdown">
-										<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
-											Admin <b class="caret"></b>
-										</a>
-										<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-											<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">See Occupancy</a></li>
-											<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
-											<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
-										</ul>
-									</li>
-								{% endif %}
-								{% if not user.is_authenticated %}
-									<li><a href="/people/login/">Login</a></li>
-								{% endif %}
-							</ul>
-						</div>
-				</div>
-				</div>
-				</nav>
-	{% endblock %}
-	{% block body %}
+<!-- Le javascript -->
+<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
+<script src="/media/js/jquery-1.8.2.js"></script>
+<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
+<script src="/media/js/bootstrap.js"></script>
+<script src="/media/js/leaflet.js"></script>
 
-	<div class="container" id="container-main">
-		{% block content %}
-		{% endblock %}
-	<div>
+{% block extrajs %}
+{% endblock %}
 
-	<!-- Le javascript -->
-	<link rel="stylesheet" href="/media/css/flick/jquery-ui-1.9.1.custom.css" />    
-	<script src="/media/js/jquery-1.8.2.js"></script>
-	<script src="/media/js/jquery-ui-1.9.1.custom.js"></script>	
-	<script src="/media/js/bootstrap.js"></script>
-	<script src="/media/js/leaflet.js"></script>
-
-	<!-- javascript for every page -->
-	<script type="text/javascript">
-
-		$('#embassy-logo').on( "mouseover",function(){
-			$('#flyout').animate({right:0})
-			$('.container').append("<div class='curtain'></div>");
-		});
-		
-		$('#flyout').on("mouseleave", function(){
-			$('#flyout').animate({right:-360});
-		});
-
-	</script>
-
-	{% endblock %}
-
-	{% block extrajs %}
-	{% endblock %}
 
 

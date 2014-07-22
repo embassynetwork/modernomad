@@ -13,3 +13,4 @@ local_templates/
 local_templates_hidden/
 build/
 backup/
+gather

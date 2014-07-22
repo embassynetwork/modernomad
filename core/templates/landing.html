@@ -1,174 +1,94 @@
 {% extends 'base.html' %}
 
-{% block body %}
+{% block content %}
 
-			<div id="homepage-wrap">
+{% include 'snippets/email-signup-modal.html' %}
 
-				{% include 'snippets/email-signup-modal.html' %}
-				
-				<div class="row">
-					<div class="col-sm-10 col-sm-offset-1">
-						{% include "snippets/messages.html" %}
-					</div>
-				</div>
+<div class="row">
+	<div class="col-sm-10 col-sm-offset-1"> {% include "snippets/messages.html" %} </div>
+</div>
 
-				<div class="row" id="house">
-					<div class="col-sm-12">
-							<div class="col-md-7 col-md-offset-1 col-sm-12">
-								<img src="/media/img/house_pic.png" id="house-image">
-							</div>
-							<div class="col-md-3" id="house-desc">
-								<h2 id="house-name-title" class="">The House</h2>
-								<p class="easy-reading">{{ location.short_description }}</p>
-							</div>
-					</div>
-				</div>
+<div class="row" id="house-desc">
+	<div class="col-sm-12">
+		{{ location.short_description|safe }}
+	</div>
+</div>
 
-				<div class="row" id="actions">
-					<div class="col-md-12 col-md-offset-1 col-sm-12">
+<div class="row">
 
-							<div class="col-md-5" id="participate">
-								<h2 class="fancy-header">See What's Going On</h2>
-								<p class="easy-reading">{{ location.front_page_participate }}</p> 
-								{% if user.is_authenticated %}
-								<a href="{% url 'user_detail' user.username %}" id="events-button" class="btn btn-large btn-block btn-large-text">View Notification Preferences</a>
-								{% else %}
-									<button id="events-button" class="btn btn-large btn-block btn-large-text">Sign Me Up</button>
-								{% endif %}
-							</div>
-							
-							<div class="col-md-5" id="reserve">
-								<h2 class="fancy-header">Stay Here</h2>
-								<p class="easy-reading"> {{ location.front_page_stay }} 
-								</p>
-								<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>
-							</div>
+		<div class="col-md-4" id="participate">
+			<h2 class="fancy-header center"><span class="glyphicon glyphicon-star"></span> Announcements</h2>
+			<p class="easy-reading">{{ location.announcement|safe }}</p> 
+		</div>
 
-					</div>
-				</div>
-					
-				<div class="row" id="landing-page-event-info">
+		<div class="col-md-4" id="reserve">
+			<h2 class="fancy-header center"><span class="glyphicon glyphicon-globe"></span> Accommodations</h2>
+			<p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
+			<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>
+		</div>
 
-					<!-- events section! -->
+		<div class="col-md-4" id="participate">
+			<h2 class="fancy-header center"><span class="glyphicon glyphicon-calendar"></span> Events</h2>
+			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
+			<a href="{% url 'gather_upcoming_events' location.slug %}"  class="btn btn-large btn-block btn-large-text">See Upcoming</a>
+		</div>
 
-					<div class="col-md-5 col-md-offset-1 col-xs-12" id="events">
-						<h2 class="">What are we up to?</h2>
 
-						{% for event in events %}
-						<div class="col-xs-12 event">
-							<div class="col-xs-1 date"><span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}</div>
-							<div class="col-xs-11">
-								<a href="{% url 'gather_view_event' location.slug event.id event.slug %}">
-									<h3 class="event-title">{{ event.title}}</h3>
-									{% if forloop.first %}
-									<img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
-									{% endif %}
-								</a>
-							</div>
-						</div>
-						{% empty %}
+</div>
 
-						<p class="lead">No upcoming events! Why not <a href="{% url 'gather_create_event' location.slug %}">propose one?</a></p>	
-						{% endfor %}
+<div class="row" id="community-section">
+	<div class="col-md-12" id="profiles">
+		{% for person in people_in_coming_month %}
+		<div class="float-left homepage-user-wrapper">			
+			<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+			<div class="homepage-user-descr" id="user-{{person.id}}">
+				<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
+				... <a class="homepage-user-link" href="{% url 'user_detail' person.username %}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</div>
 
-						<h3 id="more-events-link" class="pull-right"><span class="glyphicon glyphicon-calendar"></span> <a href="{% url 'gather_upcoming_events' location.slug %}">See All Upcoming</a></h3>
-					</div>
+<div class="row" id="location">
+	<div id="location-map"></div>
+</div>
+{% endblock %}
 
-					<!-- People Section! -->
+{% block extrajs %}
 
-					<div class="col-md-5 col-xs-12" id="profiles">
-						<h2 id="our-community-heading">Our Community</h2>
-
-						{% for person in people_in_coming_month %}
-							<div class="float-left homepage-user-wrapper">			
-								<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
-								<div class="homepage-user-descr" id="user-{{person.id}}">
-									<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
-									... <a class="homepage-user-link" href="{% url 'user_detail' person.username %}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
-								</div>
-							</div>
-						{% endfor %}
-
-						<!-- end person in subset -->
-
-					</div>
-				</div>
-
-				</div>
-
-				<div class="row" id="location">
-					<div id="location-map"></div>
-				</div>
-
-			</div> <!-- end homepage wrap -->
-
-			{% endblock %}
-
-			<!-- ? extra div here? -->
-
-	{% block extrajs %}
 	<script language="JavaScript">
-	$(document).ready(function() {
+		$(document).ready(function() {
 
-		/*
-		$("#eventlist-signup").submit(function() {
-			request = $.ajax({
-				data: $(this).serialize(),
-				type: $(this).attr('method'), // GET or POST
-				url: $(this).attr('action'),
+			$("#events-button").click(function() {
+				$('#email-signup-modal').modal();
 			});
-			request.done(function(msg) {
-				msg = msg;
-				success_text = "Your subscription request has been received, and will soon be acted upon.";
-				if (msg.match(success_text)) {
 
-					$("#eventlist-signup-wrapper").html("<div id='eventsignup-response-success'>Thanks! You should receive a confirmation email.</div>");
-				} else {
-					$("#eventlist-signup-wrapper").prepend("<div id='eventsignup-response-fail'>Hmm, your email appears to be invalid. Please try again.</div>");
+			var map = L.map('location-map').setView([{{location.latitude}}, {{location.longitude}}], 15);
+			L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+				maxZoom: 18
+			}).addTo(map);
+			map.scrollWheelZoom.disable();
+			var RougeIcon = L.Icon.extend({
+				options: {
+					iconUrl: '/media/img/droplet.png',
+					iconSize: [100,170],
+					popupAnchor: [220,60]
 				}
-				
 			});
-			request.fail(function(msg) {
-				$("#eventlist-signup").append("<div id='eventsignup-response-fail'>Hmm, something went wrong. Please try again.</div>");
-			});
-
-			return false;
+			var rougeIcon = new RougeIcon();
+			var marker = L.marker([{{location.latitude}}, {{location.longitude}}], {icon: rougeIcon}).addTo(map);
+			var popup = L.popup({closeButton: false});
+			popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
+			marker.bindPopup(popup).openPopup();
 		});
-		*/
-
-
-		$("#events-button").click(function() {
-			$('#email-signup-modal').modal();
-		});
-
-
-		var map = L.map('location-map').setView([{{location.latitude}}, {{location.longitude}}], 15);
-		L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
-			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
-			maxZoom: 18
-		}).addTo(map);
-		map.scrollWheelZoom.disable();
-		var RougeIcon = L.Icon.extend({
-			options: {
-				iconUrl: '/media/img/droplet.png',
-				iconSize: [100,170],
-				popupAnchor: [220,60]
-			}
-		});
-		var rougeIcon = new RougeIcon();
-		var marker = L.marker([{{location.latitude}}, {{location.longitude}}], {icon: rougeIcon}).addTo(map);
-		var popup = L.popup({closeButton: false});
-		popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
-		marker.bindPopup(popup).openPopup();
-		
-
-	});
-	
 
 	</script>
-	{% endblock %}
+
+{% endblock %}
 
 
-	</body>
+</body>
 </html>
 
