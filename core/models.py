@@ -53,9 +53,6 @@ class Location(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	image = models.ImageField(upload_to=location_img_upload_to)
-	taxes = models.BooleanField(default=False, verbose_name="Are there additional taxes you need to charge for reservations?")
-	tax_rate = models.FloatField(verbose_name="If you are charging additional taxes, what is the tax rate in %", blank=True, null=True)
-
 	stay_page = models.TextField()
 	front_page_stay = models.TextField()
 	front_page_participate = models.TextField()
@@ -352,7 +349,7 @@ class Reservation(models.Model):
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if not location_fee.fee.paid_by_house:
-				amount = amount + (room_charge * location_fee.fee.percentage/100)
+				amount = amount + (room_charge * location_fee.fee.percentage)
 		return amount
 
 	def calc_house_fees(self):
@@ -361,7 +358,7 @@ class Reservation(models.Model):
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if location_fee.fee.paid_by_house:
-				amount = amount + (room_charge * location_fee.fee.percentage/100)
+				amount = amount + (room_charge * location_fee.fee.percentage)
 		return amount
 
 	def generate_bill(self, delete_old_items=True):
@@ -374,7 +371,7 @@ class Reservation(models.Model):
 
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			desc = "%s (%s%c)" % (location_fee.fee.description, location_fee.fee.percentage, '%')
-			amount = room_charge * location_fee.fee.percentage/100
+			amount = room_charge * location_fee.fee.percentage
 			BillLineItem.objects.create(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 
 	def delete_bill(self):
@@ -623,7 +620,7 @@ class EmailTemplate(models.Model):
 
 class Fee(models.Model):
 	description = models.CharField(max_length=100, verbose_name="Fee Name")
-	percentage = models.PositiveIntegerField(null=False, default=0)
+	percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
 	paid_by_house = models.BooleanField(default=False)
 
 	def __unicode__(self): 
