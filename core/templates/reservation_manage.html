@@ -68,7 +68,7 @@
 		{% if not r.is_canceled %}
 
 			{% if not r.is_paid %}
-				<form id="res-action-toggle-comp" class="res-action" method=POST action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
+				<form id="res-action-toggle-comp" class="res-action" method="post" action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
 					{% csrf_token %}
 					<input type="submit" 
 					{% if r.is_comped %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
