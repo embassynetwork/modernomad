@@ -31,7 +31,11 @@ class Migration(DataMigration):
 			if not p.payment_method:
 				# Convert blanks to None
 				p.payment_method = None
-			p.save()
+			if not p.paid_amount and not p.payment_method:
+				# We have to have something!
+				p.delete()
+			else:
+				p.save()
 
 	def backwards(self, orm):
 		raise RuntimeError("Cannot reverse this migration.")
