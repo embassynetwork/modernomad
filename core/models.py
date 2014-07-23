@@ -370,7 +370,7 @@ class Reservation(models.Model):
 		BillLineItem.objects.create(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 
 		for location_fee in LocationFee.objects.filter(location = self.location):
-			desc = "%s (%s%c)" % (location_fee.fee.description, location_fee.fee.percentage, '%')
+			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
 			amount = room_charge * location_fee.fee.percentage
 			BillLineItem.objects.create(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 
