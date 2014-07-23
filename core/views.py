@@ -240,33 +240,36 @@ def occupancy(request, location_slug):
 			this_room_income += rate*nights_this_month
 			room_income[r.room.name] = this_room_income
 
-			if r.payment.payment_date:
-				paid_rate = (r.payment.paid_amount/(r.depart - r.arrive).days)
+			# If there are payments, calculate the payment rate
+			if r.payments():
+				paid_rate = r.total_paid() / r.total_nights()
 				if paid_rate != rate:
 					print "reservation %d has paid rate = $%d and rate set to $%d"
-					paid_rate_discrepancy += nights_this_month*(paid_rate - rate)
+					paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
 					payment_discrepancies.append(r.id)
 
+			# XXX I don't understand this part.  I'm going to just put the payment amount on this month
+			# and move on for now.  --JLS
+			#if r.is_paid():
+			#	if (r.payment.payment_date and r.payment.payment_date < start):
+			#		income_from_past_months += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days)
+			#	else:
+			#		# if there's no payment date but the reservation is marked
+			#		# as paid, the payment was probably manually entered. since
+			#		# we have no knowledge of when the payment was issued,
+			#		# applying it to this month seems like a reasonable guess. 
+			#		# XXX todo would be nice to highlight these items somehow. 
+			#		# TODO This should not happen anymore.  Date defaults to today and amount defaults to 0 --JLS
+			#		if r.payment.paid_amount:
+			#			income_for_this_month += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days) 
+			#		else:
+			#			paid_amount_missing.append(r.id)
 			if r.is_paid():
-				if (r.payment.payment_date and r.payment.payment_date < start):
-					income_from_past_months += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days)
-				else:
-					# if there's no payment date but the reservation is marked
-					# as paid, the payment was probably manually entered. since
-					# we have no knowledge of when the payment was issued,
-					# applying it to this month seems like a reasonable guess. 
-					# XXX todo would be nice to highlight these items somehow. 
-					# TODO This should not happen anymore.  Date defaults to today and amount defaults to 0 --JLS
-					if r.payment.paid_amount:
-						income_for_this_month += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days) 
-					else:
-						paid_amount_missing.append(r.id)
-
-			if not r.is_paid():
-				unpaid = True
-				unpaid_total += r.total_owed()
-			else:
+				income_for_this_month += r.total_paid()
 				unpaid = False
+			else:
+				unpaid_total += r.total_owed()
+				unpaid = True
 
 		person_nights_data.append({
 			'reservation': r,
