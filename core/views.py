@@ -564,7 +564,7 @@ def UserAddCard(request, username):
 				# charges card, saves payment details and emails a receipt to
 				# the user
 				reservation.charge_card()
-				send_receipt(payment)
+				send_receipt(reservation)
 				reservation.confirm()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < reservation.location.welcome_email_days_ahead:
@@ -663,7 +663,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		try:
 			reservation.charge_card()
 			reservation.confirm()
-			send_receipt(payment)
+			send_receipt(reservation)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -794,7 +794,7 @@ def ReservationManage(request, location_slug, reservation_id):
 
 
 @house_admin_required
-def ReservationManageUpdate(request, reservation_id, location_slug):
+def ReservationManageUpdate(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -815,7 +815,7 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 			try:
 				reservation.charge_card()
 				reservation.confirm()
-				send_receipt(payment)
+				send_receipt(reservation)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
 				if days_until_arrival < location.welcome_email_days_ahead:
 					guest_welcome(reservation)
@@ -833,36 +833,36 @@ def ReservationManageUpdate(request, reservation_id, location_slug):
 		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 
 @house_admin_required
-def ReservationChargeCard(request, reservation_id, location_slug):
+def ReservationChargeCard(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	#location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	try:
 		reservation.charge_card()
-		send_receipt(payment)
+		send_receipt(reservation)
 		return HttpResponse()
 	except stripe.CardError, e:
 		return HttpResponse(status=500)
 
 @house_admin_required
-def ReservationSendReceipt(request, reservation_id, location_slug):
+def ReservationSendReceipt(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.is_paid():
-		send_receipt(reservation, location)
+		send_receipt(reservation)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 
 @house_admin_required
-def ReservationToggleComp(request, reservation_id, location_slug):
+def ReservationToggleComp(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
-	reservation = Reservation.objects.get(id=reservation_id)
+	reservation = Reservation.objects.get(pk=reservation_id)
 	if not reservation.is_comped():
 		# Let these nice people stay here for free
 		reservation.comp()
@@ -875,7 +875,7 @@ def ReservationToggleComp(request, reservation_id, location_slug):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required
-def ReservationSendMail(request, reservation_id, location_slug):
+def ReservationSendMail(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -884,6 +884,7 @@ def ReservationSendMail(request, reservation_id, location_slug):
 	subject = request.POST.get("subject")
 	recipient = [request.POST.get("recipient"),]
 	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
+	# TODO - This isn't fully implemented yet -JLS
 	send_from_location_address(subject, text_content, html_content, recipient, location)
 
 	reservation = Reservation.objects.get(id=reservation_id)
