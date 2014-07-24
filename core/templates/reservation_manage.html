@@ -147,31 +147,39 @@
 	<hr>
 
 	<h2>Bill Details</h2>
-	<table id="bill-details" style="margin-left:3em; width:80%">
+	<table id="bill-details">
 		{% for item in r.bill_line_items %}
-			<tr {% if item.paid_by_house %} style="color:red;" {% endif %}>
+			{% if item.paid_by_house %}
+				<tr>
+					<td class="paid-by-house">{{ item.description }}</td>
+					<td class="money paid-by-house">{{ item.amount|floatformat:2 }}</td>
+					<td class="money">0.00</td>
+				</tr>
+			{% else %}
+			<tr>
 				<td>{{ item.description }}</td>
-				<td>{% if item.paid_by_house %} (paid by house) {% endif %}</td>
-				<td style="text-align:right;">{{ item.amount|floatformat:2 }}</td>
+				<td></td>
+				<td class="money">{{ item.amount|floatformat:2 }}</td>
 			</tr>
+			{% endif %}
 		{% endfor %}
-		<tr style="border-top:thick double black;">
+		<tr class="total-row">
 			<td></td>
-			<td></td>
-			<td style="text-align:right;">${{ r.bill_amount|floatformat:2 }}</td>
+			<td class="money paid-by-house">${{ r.house_fees|floatformat:2 }}</td>
+			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
 	</table>
 
 	<h2>Payments</h2>
-	<table id="payment-details" style="margin-left:3em; width:80%">
+	<table id="payment-details">
 		{% for p in r.payments %}
 			<tr>
 				<td>{{ p.payment_method }}</td>
-				<td style="text-align:right;">{{ p.amount|floatformat:2 }}</td>
+				<td class="money">{{ p.paid_amount|floatformat:2 }}</td>
 			</tr>
 		{% endfor %}
-		<tr style="border-top:thick double black;">
+		<tr class="total-row">
 			<td></td>
-			<td style="text-align:right;">${{ r.total_paid|floatformat:2 }}</td>
+			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
 	</table>
 	<hr>
 	

@@ -1302,3 +1302,20 @@ h3.no-top-margin {
 #community-section {
 	margin-top: 60px;
 }
+
+#bill-details, #payment-details {
+	margin-left:3em; 
+	width:80%
+}
+
+.paid-by-house {
+	color:red;
+}
+
+.money {
+	text-align:right;
+}
+
+.total-row {
+	border-top:thin double black;
+}
