@@ -2,13 +2,13 @@
 ==========================[Typography]==========================
 ========================================================== */
 @font-face {
-	font-family:'Clarendon';
-	src: url(/media/fonts/Clarendon_LT_Roman.ttf) format("truetype");
-}
-
-@font-face {
-	font-family:'Clarendon Light';
-	src: url(/media/fonts/Clarendon_LT_Light.ttf) format("truetype");
+	font-family:'Museo';
+	src:url('/media/fonts/Museo500.eot');
+	src:url('/media/fonts/Museo500.eot?#iefix') format('embedded-opentype'),
+		url('/media/fonts/Museo500.woff') format('woff'),
+		url('/media/fonts/Museo500.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
 }
 
 body {
@@ -17,7 +17,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
-	font-family: 'Clarendon', serif;
+	font-family: 'Museo', serif;
 	font-weight: 500;
 	-webkit-font-smoothing: antialiased;
 }
@@ -41,6 +41,19 @@ span.highlight {
 ========================================================== */
 
 /* ======================[Global Navigation]================= */
+
+#flyout {
+	width:360px;
+	height:100%;
+	background:#252525;
+	position:fixed;
+	top:0;
+	right:-360px;
+	z-index:999;
+	padding:48px;
+	color:rgba(255,255,255,0.7);
+	box-shadow: -0px 0px 10px rgba(0,0,0,0.8);
+}
 
 .curtain {
 	position: fixed;
@@ -104,6 +117,17 @@ a:hover {
 	text-decoration: none;
 }
 
+#nav-primary {
+	margin-bottom: 0px;
+	margin-top: 20px;
+	background-color: transparent;
+	border-radius: 0px;
+	/* this cancels out the default boostrap border style */
+	border-left: none;
+	border-bottom: none;
+	border-right: none;
+}
+
 #login {
 	padding:32px 0;
 	border-right:1px solid rgba(0,0,0,0.1);
@@ -129,13 +153,14 @@ a:hover {
 }
 
 #house-image {
-	height:300px;
+	height:223px;
 	width:100%;
 	padding:0;
+	
 }
 
 #house-desc {
-	margin-bottom: 50px;	
+	
 }
 
 #house-name-title {
@@ -502,6 +527,13 @@ a:hover {
 /* ==========================================================
 ==========================[GENERAL]==========================
 ========================================================== */
+
+.container {
+	width:100%;
+	padding:0 15px;
+}
+
+p { }
 
 html, body {
 	height: 100%;
@@ -1283,22 +1315,4 @@ h3.no-top-margin {
 
 .viewable-area-only {
 	height: 100%;
-}
-
-#nav-network {
-	padding-right: 20px;
-	margin-bottom: 1px;
-	font-family: 'Clarendon Light', serif;
-}
-
-#nav-location {
-	background-color: transparent;
-	border-color: transparent;
-	margin-bottom: 0px;
-	margin-top: 20px;
-	font-family: 'Clarendon Light', serif;
-}
-
-#community-section {
-	margin-top: 60px;
 }
