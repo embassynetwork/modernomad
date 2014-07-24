@@ -17,7 +17,7 @@ class Migration(DataMigration):
 		# of the reservation and room objects
 		loc = orm['core.Location'].objects.create(
 				name = "Embassy SF",
-				slug = 'testlocation',
+				slug = 'embassysf',
 				short_description = "The flagship location in the Embassy Network to prototyping a new model of Home",
 				about_page = "about us goes here",
 				address = "399 Webster Street, San Francisco, CA, 94117",
