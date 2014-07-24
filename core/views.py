@@ -755,7 +755,7 @@ def ReservationManageList(request, location_slug):
 @house_admin_required
 def ReservationManage(request, location_slug, reservation_id):
 	location = get_location(location_slug)
-	reservation = Reservation.objects.get(id=reservation_id)
+	reservation = get_object_or_404(Reservation, id=reservation_id)
 	user = User.objects.get(username=reservation.user.username)
 	other_reservations = Reservation.objects.filter(user=user).exclude(status='deleted').exclude(id=reservation_id)
 	past_reservations = []
