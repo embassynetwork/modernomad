@@ -1,7 +1,7 @@
 Django==1.6
 django-registration==1.0
 django-tastypie
-South
+South>=1.0
 Pillow
 django-celery>=3.1
 Celery
