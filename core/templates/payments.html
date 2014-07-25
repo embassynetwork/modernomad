@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+{{ location_about_text|safe}}
+
+<div>
+<a href="{% url 'location_payments' location.slug previous_date.year previous_date.month %}">&larr;</a>
+<a href="{% url 'location_payments_today' location.slug %}">{{ this_month|date:"M, Y"}}</a>
+<a href="{% url 'location_payments' location.slug next_date.year next_date.month %}">&rarr;</a>
+</div>
+
+<table id="payment-list">
+<thead>
+	<tr>
+		<th colspan="2"></th>
+		<th colspan="6" id="reservation-header">Reservation</th>
+		<th colspan="2"></th>
+	</tr>
+	<tr>
+		<th>Date</th>
+		<th>User</th>
+		<th>Nights</th>
+		<th class="money">Rate</th>
+		<th class="money">House Fees</th>
+		<th class="money">To House</th>
+		<th class="money">Taxes</th>
+		<th class="money">Bill Amount</th>
+		<th >Method</th>
+		<!--<th>Service</th>-->
+		<!--<th>Transaction</th>-->
+		<th class="money">Paid</th>
+	</tr>
+</thead>
+<tbody>
+{% for p in payments %}
+	<tr class="{% cycle 'row-even' 'row-odd' %}">
+		<td>{{ p.payment_date|date:"m/d/y" }}</td>
+		<td>{{ p.reservation.user }}</td>
+		<td>{{ p.reservation.total_nights }}</td>
+		<td class="money">${{ p.reservation.rate|floatformat:2 }}</td>
+		<td class="money">${{ p.reservation.house_fees|floatformat:2 }}</td>
+		<td class="money">${{ p.reservation.to_house|floatformat:2 }}</td>
+		<td class="money">${{ p.reservation.non_house_fees|floatformat:2 }}</td>
+		<td class="money">${{ p.reservation.bill_amount|floatformat:2 }}</td>
+		<td>{{ p.payment_method }}</td>
+		<!--<td>{{ p.payment_service }}</td>-->
+		<!--<td>{{ p.transaction_id }}</td>-->
+		<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
+	</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

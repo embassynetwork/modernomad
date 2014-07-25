@@ -1299,6 +1299,22 @@ h3.no-top-margin {
 	font-family: 'Clarendon Light', serif;
 }
 
+table tr.row-even td { background: #eee; }
+
+#payment-list {
+	width: 100%;
+}
+#payment-list th {
+	text-align: center;
+}
+#payment-list td {
+	text-align: center;
+}
+#reservation-header {
+	text-align:center;
+	border-bottom: 1px solid black;
+}
+
 #community-section {
 	margin-top: 60px;
 }

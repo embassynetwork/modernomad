@@ -26,6 +26,7 @@ from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
+from datetime import date, datetime, timedelta
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
@@ -895,6 +896,21 @@ def ReservationSendMail(request, location_slug, reservation_id):
 
 	messages.add_message(request, messages.INFO, "Your message was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
+def payments_today(request, location_slug):
+	today = timezone.localtime(timezone.now())
+	return HttpResponseRedirect(reverse('core.views.payments', args=[], kwargs={'location_slug':location_slug, 'year':today.year, 'month':today.month}))
+
+@house_admin_required
+def payments(request, location_slug, year, month):
+	location = get_location(location_slug)
+	this_month = date(year=int(year), month=int(month), day=1)
+	start = this_month - timedelta(days=1)
+	day_next_month = this_month + timedelta(days=35)
+	end = date(year=day_next_month.year, month=day_next_month.month, day=1)
+	payments = Payment.objects.filter(reservation__location=location, payment_date__gt=start, payment_date__lt=end).order_by('payment_date').reverse()
+	return render(request, "payments.html", {'payments': payments, 'location': location, 'this_month':this_month, 'previous_date':start, 'next_date':end })
 
 # ******************************************************
 #           registration callbacks and views
