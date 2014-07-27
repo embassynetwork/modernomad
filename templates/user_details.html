@@ -19,7 +19,9 @@
 	{% if u.profile.city != "" %}
 	<em> based in {{ u.profile.city }}</em>
 	{% else %}
-	<span class="alert bg-danger">Important! Please <a href="/people/{{user.username}}/edit/">update your home city</a></span>
+		{% ifequal u user %}
+			<span class="alert bg-danger">Important! Please <a href="/people/{{user.username}}/edit/">update your home city</a></span>
+		{% endifequal %}
 	{% endif %}
 </div>
 

@@ -17,8 +17,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
-	font-family: 'Clarendon', serif;
-	font-weight: 500;
+	font-family: 'Clarendon Light', serif;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -1334,4 +1333,12 @@ table tr.row-even td { background: #eee; }
 
 .total-row {
 	border-top:thin double black;
+}
+
+#full-page-wrapper {
+	margin-bottom: 50px;
+}
+
+.bottom-pad-thirty {
+	padding-bottom: 30px;
 }
