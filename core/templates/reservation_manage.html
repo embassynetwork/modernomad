@@ -99,15 +99,7 @@
 
 	<hr>
 
-	<div class="res-value">${{ r.total_value }}</div> 
-	{% if room_has_availability %}
-		<div class="res-field field has-availability">
-	{% else %}
-		<div class="res-field field no-availability">
-	{% endif %}
-		{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
-		{% if room_has_availability %} (available) {% else %} (conflict) {% endif %}
-	</div>
+	<h3 class="bottom-pad-thirty">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %} <span class="pull-right">${{ r.total_value }}</span></h3>
 
 	<!-- availability calendar -->
 	<table id="rooms-available-calendar">
@@ -125,11 +117,30 @@
 			</td>
 
 			{% for the_day, beds_free in days_list %}
-			<td>
-				{% if beds_free %}
-					<div class="yes-available bg-success"><i class="icon-ok"></i> {{beds_free}}</div>
+				{% if room_obj == r.room and room_has_availability %}
+					<td class="bg-success">
+				{% elif room_obj == r.room and r.status == 'approved' and beds_free >= 0 %}
+					<td class="bg-success">
+				{% elif room_obj == r.room and r.status == 'confirmed' and beds_free >= 0 %}
+					<td class="bg-success">
+				{% elif room_obj == r.room and not room_has_availability %}
+					<td class="bg-danger">
 				{% else %}
-					<div class="no-available bg-danger"><i class="icon-remove"></i></div>
+					<td>
+				{% endif %}
+
+				{% comment %} {% if r.status == 'pending' or r.status == 'canceled'%} {% endcomment %}
+
+				{% if r.status == 'approved' and r.room == room_obj %}
+					<div class="yes-available"><i class="text-danger glyphicon glyphicon-user"></i> {{beds_free}}</div>
+				{% elif r.status == 'confirmed' and r.room == room_obj %}
+					<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{beds_free}}</div>
+				{% else %}
+					{% if beds_free %}
+						<div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{beds_free}}</div>
+					{% else %}
+						<div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{beds_free}}</div>
+					{% endif %}
 				{% endif %}
 			</td>
 			{% endfor %}
