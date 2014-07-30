@@ -361,18 +361,39 @@ class Reservation(models.Model):
 				amount = amount + (room_charge * location_fee.fee.percentage)
 		return amount
 
-	def generate_bill(self, delete_old_items=True):
+	def calc_bill_amount(self):
+		total = 0
+		for item in self.generate_bill(delete_old_items=False, save=False):
+			total = total + item.amount
+		return total
+
+	def generate_bill(self, delete_old_items=True, save=True):
 		if delete_old_items:
 			self.delete_bill()
 
-		room_charge_desc = "%s (%d * $%d)" % (self.room, self.total_nights(), self.rate)
+		line_items = []
+		
+		# The first line item is for the room charge
+		room_charge_desc = "%s (%d * $%d)" % (self.room.name, self.total_nights(), self.rate)
 		room_charge = self.total_value()
-		BillLineItem.objects.create(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+		line_items.append(room_line_item)
+		print line_items
 
+		# A line item for every fee that applies to this location
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
 			amount = room_charge * location_fee.fee.percentage
-			BillLineItem.objects.create(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+			fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+			line_items.append(fee_line_item)
+			print line_items
+
+		# Optionally save the line items to the database
+		if save:
+			for item in line_items:
+				item.save()
+				
+		return line_items
 
 	def delete_bill(self):
 		BillLineItem.objects.filter(reservation=self).delete()
