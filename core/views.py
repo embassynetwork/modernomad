@@ -16,7 +16,7 @@ from django.conf import settings
 from django.utils import simplejson
 from core.decorators import house_admin_required
 from django.db.models import Q
-from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location
+from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee
 from core.tasks import guest_welcome
 import uuid, base64, os
 from django.core.files import File
@@ -426,8 +426,15 @@ def CheckRoomAvailability(request, location_slug):
 	# add some info to free_rooms:
 	for room in free_rooms:
 		room.value = nights*room.default_rate
+	room_fees = {}
+	for room in free_rooms:
+		room_fees[room.name] = {}
+		for location_fee in LocationFee.objects.filter(location = location):
+			if not location_fee.fee.paid_by_house:
+				room_fees[room.name][location_fee.fee.description] = room.value * location_fee.fee.percentage / 100
+	print room_fees
 	return render(request, "snippets/availability_calendar.html", {"avail": avail_by_room, "dates": dates, 
-		'free_rooms': free_rooms, 'nights': nights, })
+		'free_rooms': free_rooms, 'room_fees': room_fees, 'nights': nights, })
 
 
 @login_required

@@ -1342,3 +1342,8 @@ table tr.row-even td { background: #eee; }
 .bottom-pad-thirty {
 	padding-bottom: 30px;
 }
+
+.affix {
+	top: 520px;
+	right: 85px;
+}

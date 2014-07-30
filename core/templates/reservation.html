@@ -4,24 +4,28 @@
 
 {% comment %} shown only when a background request is being made {% endcomment %}
 <div id="spinner">
-    <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
+	<img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
 </div>	
 
-	{% if messages %}
-	<div class="messages">
-	    {% for message in messages %}
-	    <div class="alert alert-info">
-		    <button type="button" class="close" data-dismiss="alert">×</button>
-	    	<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-		</div>
-	    {% endfor %}
+{% if messages %}
+<div class="messages">
+	{% for message in messages %}
+	<div class="alert alert-info">
+		<button type="button" class="close" data-dismiss="alert">×</button>
+		<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
 	</div>
-	{% endif %}
+	{% endfor %}
+</div>
+{% endif %}
 
-	<h2>New reservation request</h2>
-	<p>We'll get back to you shortly - usually within a day or two.  </p>
-	<hr>
+<h2>New reservation request</h2>
+<p>We'll get back to you shortly - usually within a day or two. Not all
+locations are able to accept last minute or day-of requests so please
+submit your request with a few days' notice. </p>
+<hr>
 
+<div class="row">
+	
 	<div class="form-container col-md-9">
 		<form method="post" role="form" action="{% url 'reservation_create' location.slug %}">{% csrf_token %}
 
@@ -31,23 +35,23 @@
 				<div class="col-md-6">Arrive: {{ form.arrive }}</div> 
 				<div class="col-md-6">Depart: {{ form.depart}}</div>
 			</div>
-			
+
 			<div id="show-room-availability"></div>
-			
+
 			<div id="reservation-additional-info">
 				<div class="field-wrapper">	
 					<label for="id_purpose">When you're happy with your room selection, 
-					tell us a bit about the purpose of your trip, and hit submit!</label>
+						tell us a bit about the purpose of your trip, and hit submit!</label>
 					<span class="form-help-text"></span>
 					<div class="form-field-body form-group">
 						<textarea class="form-control" id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
 					</div>
 				</div>
-				
+
 				<div id="optional-fields-header">
 					<i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i> Optional fields: arrival time or additional comments... let us know!
 				</div>
-				
+
 				<div id="optional-fields">
 					<div class="field-wrapper">	
 						<label class="label-optional-field" for="id_arrival_time">Arrival time if known?</label>
@@ -71,6 +75,14 @@
 
 		</form>
 	</div>
+	<div class="col-md-2 pull-right affix" id="reservation-amount-summary-box" data-spy="affix" data-offset-top="60">
+		<h3>Reservation Total</h3>
+		<div id="room-subtotal"></div>
+		<div id="room-fees"></div>
+		<em id="room-reservation-total">Total: $0</em>
+	</div>
+
+</div>
 {% endblock %}
 
 {% block extrajs %}

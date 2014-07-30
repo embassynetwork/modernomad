@@ -45,6 +45,9 @@
 	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
 	<div><p>{{ room.description }}</p></div>
 	<div><p><strong>Value of this reservation: </strong><span id="res-value-{{room.id}}">${{room.value}}</span></p></div>
+	<div>
+
+	</div>
 	<div class="clear"></div>
 </div>
 {% endfor %}
@@ -68,6 +71,21 @@ $(".room-select").click(function() {
    	room_name = $(this).text();
    	res_value = $("#res-value-" + room_id).text();
    	$("#submit-reservation").val("Submit request for " + room_name + " at " + res_value);
+
+	// inject the fees and subtotal info for this room when selected
+	console.log('grr')
+	{% for this_room_name, this_room_fees in room_fees.items %}
+	console.log('{{this_room_name}}')
+	console.log(room_name)
+	if ('{{this_room_name}}' == room_name) {
+		console.log('found_room');
+		{% for fee_name, fee_value in this_room_fees.items %}
+			console.log('fee name: {{fee_name}}')
+			$("#room-fees").append('<div class="a-room-fee"><em>{{ fee_name}}:</em><span class="pull-right">${{fee_value}}</span></div>')
+		{% endfor %}
+		$("#room-reservation-total").val("blah")
+	}
+	{% endfor %}
 
 });
 </script>
