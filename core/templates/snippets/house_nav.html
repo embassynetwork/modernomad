@@ -16,6 +16,7 @@
 					<ul class="nav navbar-nav">
 						<li><a href="{% url 'location_about' location.slug %}">About</a></li>
 						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+						<li><a href="{% url 'location_rooms' location.slug %}">Rooms</a></li>
 
 						{% ifappexists gather %}
 						<li class="dropdown">

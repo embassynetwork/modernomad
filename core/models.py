@@ -77,6 +77,15 @@ class Location(models.Model):
 		''' return a location-specific email in the standard format we use.'''
 		return "stay@%s.mail.embassynetwork.com" % self.slug
 
+	def guest_rooms(self):
+		return Room.objects.filter(location=self, primary_use=Room.GUEST)
+
+	def private_rooms(self):
+		return Rooms.objects.filter(location=self, primary_use=Room.PRIVATE)
+
+	def get_available(self, arrive, depart):
+		return []
+
 class LocationNotUniqueException(Exception):
 	pass
 

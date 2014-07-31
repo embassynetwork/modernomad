@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load imagetags %}
+
+{% block content %}
+
+<div>
+	<h3>{{room.name}}</h3>
+	{% if room.image %} 
+		<div class="pull-right room-info-image">
+			<img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-info-image" />
+		</div> 
+	{% endif %}
+	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
+	<div><p>{{ room.description }}</p></div>
+</div>
+
+<div>
+	<h3>Availability</h3>
+</div>
+{% endblock %}
+

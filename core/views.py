@@ -92,11 +92,20 @@ def about(request, location_slug):
 	location = get_location(location_slug)
 	return render(request, "location_about.html", {'location_about_text': location.about_page, 'location': location})
 
+def guest_rooms(request, location_slug):
+	location = get_location(location_slug)
+	rooms = location.guest_rooms()
+	return render(request, "location_rooms.html", {'rooms': rooms, 'location': location})
+
+def view_room(request, location_slug, room_id):
+	location = get_location(location_slug)
+	room = get_object_or_404(Room, id=room_id)
+	return render(request, "room.html", {'room': room, 'location': location})
+
 def residents(request, location_slug):
 	location = get_location(location_slug)
 	residents = location.residents.all()
 	return render(request, "location_residents.html", {'residents': residents, 'location': location})
-
 
 def projects(request, location_slug):
 	pass

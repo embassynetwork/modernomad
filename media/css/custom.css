@@ -1161,6 +1161,11 @@ div#spinner
 	margin-bottom: 40px;
 }
 
+.room-row {
+	margin-top: 0px;
+	margin-bottom: 40px;	
+}
+
 .user-event-row {
 	padding-bottom: 30px;
 }
