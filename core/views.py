@@ -425,26 +425,23 @@ def CheckRoomAvailability(request, location_slug):
 	d_month, d_day, d_year = depart_str.split("/")
 	arrive = datetime.date(int(a_year), int(a_month), int(a_day))
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
-	avail_by_room = Room.objects.availability(arrive, depart, location)
+	availability_table = Room.objects.availability(arrive, depart, location)
 	# all rooms should have an associated list of the same length that covers
 	# all days, so just grab the dates from any one of them (they are already
 	# sorted).
-	per_date_avail = avail_by_room[avail_by_room.keys()[0]]
+	per_date_avail = availability_table[availability_table.keys()[0]]
 	dates = [tup[0] for tup in per_date_avail]
-	nights = (depart - arrive).days
-	free_rooms = Room.objects.free(arrive, depart, location)	
-	# add some info to free_rooms:
-	for room in free_rooms:
-		room.value = nights*room.default_rate
-	room_fees = {}
-	for room in free_rooms:
-		room_fees[room.name] = {}
-		for location_fee in LocationFee.objects.filter(location = location):
-			if not location_fee.fee.paid_by_house:
-				room_fees[room.name][location_fee.fee.description] = room.value * location_fee.fee.percentage / 100
-	print room_fees
-	return render(request, "snippets/availability_calendar.html", {"avail": avail_by_room, "dates": dates, 
-		'free_rooms': free_rooms, 'room_fees': room_fees, 'nights': nights, })
+	available_reservations = {}
+	# Create some mock reservations for each available room so we can generate the bill
+	for room in Room.objects.free(arrive, depart, location):
+		reservation = Reservation(id=-1, room=room, arrive=arrive, depart=depart, location=location)
+		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False, non_house_only=True)
+		nights = reservation.total_nights()
+		total = reservation.calc_bill_amount()
+		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
+
+	return render(request, "snippets/availability_calendar.html", {"availability_table": availability_table, "dates": dates, 
+		'available_reservations': available_reservations, })
 
 
 @login_required(login_url='registration_register')

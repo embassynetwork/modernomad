@@ -7,15 +7,15 @@
 	{% endfor %}
 	</tr>
 
-	{% for room_obj, days_list in avail.items %}
+	{% for room, days_list in availability_table.items %}
 	<tr>
 		<td class="cell-breather"> 
-		{% if room_obj in free_rooms %}
-			<label for="select-room-{{room_obj.id}}" id="label-room-{{room_obj.id}}" class="btn btn-default room-select">{{room_obj.name}}</label>
-			<input type="radio" name="room" id="select-room-{{room_obj.id}}" value="{{room_obj.id}}">
+		{% if room in available_reservations %}
+			<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="btn btn-default room-select">{{room.name}}</label>
+			<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
 		{% else %}
 			<div class="btn disabled">
-				{{room_obj.name}}
+				{{room.name}}
 			</div>
 		{% endif %}
 		</td>
@@ -34,7 +34,7 @@
 </table>
 
 <div class="room-info-area">
-{% for room in free_rooms %}
+{% for room, res_dict in available_reservations.items %}
 <div class="room-info" id="room-info-{{room.id}}">
 	<h3>{{room.name}}</h3>
 	{% if room.image %} 
@@ -42,9 +42,9 @@
 			<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
 		</div> 
 	{% endif %}
-	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
+	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p></div>
 	<div><p>{{ room.description }}</p></div>
-	<div><p><strong>Value of this reservation: </strong><span id="res-value-{{room.id}}">${{room.value}}</span></p></div>
+	<div><p><strong>Total (including fees): </strong><span id="res-value-{{room.id}}">${{res_dict.total|floatformat:2}}</span></p></div>
 	<div>
 
 	</div>
@@ -53,39 +53,34 @@
 {% endfor %}
 </div>
 
-
 <script>
 $(".room-select").click(function() {
 	// relies on the fact that the input tag is directly after the label tag
 	// for each room option.
 	$(this).next().prop("checked", true);
-   	room_id = $(this).next().val();
-   	room_info_div_id = "#room-info-" + room_id;
+	room_id = $(this).next().val();
+	room_info_div_id = "#room-info-" + room_id;
 
-	console.log('room select');
-   	$(".room-info").hide();
+	$(".room-info").hide();
 	$(".room-select").removeClass("btn-success")
-   	$(this).addClass("btn-success");
-   	$(room_info_div_id).show();
-   	$("#reservation-additional-info").show();
-   	room_name = $(this).text();
-   	res_value = $("#res-value-" + room_id).text();
-   	$("#submit-reservation").val("Submit request for " + room_name + " at " + res_value);
+	$(this).addClass("btn-success");
+	$(room_info_div_id).show();
+	$("#reservation-additional-info").show();
+	room_name = $(this).text();
+	res_value = $("#res-value-" + room_id).text();
+	$("#submit-reservation").val("Submit request for " + room_name + " at " + res_value);
 
 	// inject the fees and subtotal info for this room when selected
-	console.log('grr')
-	{% for this_room_name, this_room_fees in room_fees.items %}
-	console.log('{{this_room_name}}')
-	console.log(room_name)
-	if ('{{this_room_name}}' == room_name) {
-		console.log('found_room');
-		{% for fee_name, fee_value in this_room_fees.items %}
-			console.log('fee name: {{fee_name}}')
-			$("#room-fees").append('<div class="a-room-fee"><em>{{ fee_name}}:</em><span class="pull-right">${{fee_value}}</span></div>')
+	{% for room, res_dict in available_reservations.items %}
+	if ('{{room.name}}' == room_name) {
+		console.log('selected {{room.name}}')
+		$("#reservation-items").empty()
+		{% for line_item in res_dict.bill_line_items %}
+			console.log('{{ line_item.description }}')
+			$("#reservation-items").append('<div class="a-room-fee"><em>{{ line_item.description }}:</em><span class="pull-right">${{ line_item.amount|floatformat:2 }}</span></div>')
 		{% endfor %}
-		$("#room-reservation-total").val("blah")
+		$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
 	}
 	{% endfor %}
-
 });
 </script>

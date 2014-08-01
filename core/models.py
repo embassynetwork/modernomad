@@ -328,10 +328,15 @@ class Reservation(models.Model):
 		# custom rates.
 		return self.room.default_rate
 
+	def get_rate(self):
+		if self.rate:
+			return self.rate
+		return self.default_rate()
+
 	def total_value(self):
 		# value of the reservation, regardless of what has been paid
 		# get_rate checks for comps and custom rates. 
-		return self.total_nights() * self.rate
+		return self.total_nights() * self.get_rate()
 
 	def total_owed(self):
 		# Maybe someone was nice and they don't owe anything!
@@ -373,29 +378,29 @@ class Reservation(models.Model):
 	def calc_bill_amount(self):
 		total = 0
 		for item in self.generate_bill(delete_old_items=False, save=False):
-			total = total + item.amount
+			if not item.paid_by_house:
+				total = total + item.amount
 		return total
 
-	def generate_bill(self, delete_old_items=True, save=True):
+	def generate_bill(self, delete_old_items=True, save=True, non_house_only=False):
 		if delete_old_items:
 			self.delete_bill()
 
 		line_items = []
 		
 		# The first line item is for the room charge
-		room_charge_desc = "%s (%d * $%d)" % (self.room.name, self.total_nights(), self.rate)
+		room_charge_desc = "%s (%d * $%d)" % (self.room.name, self.total_nights(), self.get_rate())
 		room_charge = self.total_value()
 		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
-		print line_items
 
 		# A line item for every fee that applies to this location
 		for location_fee in LocationFee.objects.filter(location = self.location):
-			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-			amount = room_charge * location_fee.fee.percentage
-			fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
-			line_items.append(fee_line_item)
-			print line_items
+			if non_house_only and not location_fee.fee.paid_by_house:
+				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
+				amount = room_charge * location_fee.fee.percentage
+				fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+				line_items.append(fee_line_item)
 
 		# Optionally save the line items to the database
 		if save:

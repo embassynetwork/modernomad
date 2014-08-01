@@ -75,11 +75,10 @@ submit your request with a few days' notice. </p>
 
 		</form>
 	</div>
-	<div class="col-md-2 pull-right affix" id="reservation-amount-summary-box" data-spy="affix" data-offset-top="60">
-		<h3>Reservation Total</h3>
-		<div id="room-subtotal"></div>
-		<div id="room-fees"></div>
-		<em id="room-reservation-total">Total: $0</em>
+	<div class="col-md-3 pull-right affix" id="reservation-amount-summary-box" data-spy="affix" data-offset-top="60">
+		<h3>Reservation</h3>
+		<div id="reservation-items"></div>
+		<div class="pull-right"><strong>Total: $<em id="reservation-total">0</em></strong></div>
 	</div>
 
 </div>
@@ -107,7 +106,6 @@ submit your request with a few days' notice. </p>
 	});
 
 	$("#id_arrive, #id_depart").change(function(event) {
-		console.log("here!");
 		// Get arrive and depart dates, update value. 
 		$arrive = $("#id_arrive").val();
 		$depart = $("#id_depart").val();
