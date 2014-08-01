@@ -338,7 +338,8 @@ def calendar(request, location_slug):
 
 def stay(request, location_slug):
 	location = get_location(location_slug)
-	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'location': location})
+	rooms = location.guest_rooms()
+	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, 'location': location})
 
 
 def GenericPayment(request, location_slug):
@@ -446,7 +447,7 @@ def CheckRoomAvailability(request, location_slug):
 		'free_rooms': free_rooms, 'room_fees': room_fees, 'nights': nights, })
 
 
-@login_required
+@login_required(login_url='registration_register')
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
 	if request.method == 'POST':

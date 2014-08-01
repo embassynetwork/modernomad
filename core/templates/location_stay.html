@@ -5,8 +5,28 @@
  
 <div class="button-spacer">
 	<div class="col-md-4 col-md-offset-4">
-		<a class="btn btn-lg btn-rouge" type="button" {% if user.is_authenticated %} href="{% url 'reservation_create' location.slug %}" {%else %} href="/people/register?next=/reservation/create/"{%endif%}>Fill out an Application Form</a>
+		<a class="btn btn-lg btn-rouge" type="button" href="{% url 'reservation_create' location.slug %}">Make a Reservation</a>
 	</div>
+</div>
+
+<div class="room-list">
+	<h2>Explore the Rooms</h2>
+	{% for room in rooms %}
+		<div class="row room-row">
+			<div class="col-md-3">
+				<a href="{% url 'view_room' location.slug room.id %}"><img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-info-image" /></a>
+			</div>
+			<div class="col-md-9">
+				<h3>
+					<a href="{% url 'view_room' location.slug room.id %}">{{ room.name|title }}</a>
+					- ${{ room.default_rate }}/night
+				</h3>
+			</div>
+			<div class="col-md-8">
+				<div>{{ room.description }}</div>
+			</div>
+		</div>
+	{% endfor %}
 </div>
 {% endblock %}
 

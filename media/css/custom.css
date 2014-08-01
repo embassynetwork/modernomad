@@ -1024,6 +1024,11 @@ div#spinner
 	display: none;
 }
 
+
+.room-list {
+	margin-top: 60px;
+}
+
 .reservation-form-dates {
 	padding-right: 15px;
 }
