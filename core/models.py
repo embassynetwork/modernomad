@@ -382,7 +382,7 @@ class Reservation(models.Model):
 				total = total + item.amount
 		return total
 
-	def generate_bill(self, delete_old_items=True, save=True, non_house_only=False):
+	def generate_bill(self, delete_old_items=True, save=True):
 		if delete_old_items:
 			self.delete_bill()
 
@@ -396,11 +396,10 @@ class Reservation(models.Model):
 
 		# A line item for every fee that applies to this location
 		for location_fee in LocationFee.objects.filter(location = self.location):
-			if non_house_only and not location_fee.fee.paid_by_house:
-				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-				amount = room_charge * location_fee.fee.percentage
-				fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
-				line_items.append(fee_line_item)
+			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
+			amount = room_charge * location_fee.fee.percentage
+			fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+			line_items.append(fee_line_item)
 
 		# Optionally save the line items to the database
 		if save:

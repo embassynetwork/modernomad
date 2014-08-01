@@ -62,6 +62,7 @@ $(".room-select").click(function() {
 	room_info_div_id = "#room-info-" + room_id;
 
 	$(".room-info").hide();
+	$("#reservation-items").empty()
 	$(".room-select").removeClass("btn-success")
 	$(this).addClass("btn-success");
 	$(room_info_div_id).show();
@@ -73,11 +74,13 @@ $(".room-select").click(function() {
 	// inject the fees and subtotal info for this room when selected
 	{% for room, res_dict in available_reservations.items %}
 	if ('{{room.name}}' == room_name) {
-		console.log('selected {{room.name}}')
-		$("#reservation-items").empty()
 		{% for line_item in res_dict.bill_line_items %}
-			console.log('{{ line_item.description }}')
-			$("#reservation-items").append('<div class="a-room-fee"><em>{{ line_item.description }}:</em><span class="pull-right">${{ line_item.amount|floatformat:2 }}</span></div>')
+			{% if not line_item.paid_by_house %}
+				$("#reservation-items").append('<div class="a-room-fee">')
+				$("#reservation-items").append('<em>{{ line_item.description }}:</em>')
+				$("#reservation-items").append('<span class="pull-right">${{ line_item.amount|floatformat:2 }}</span>')
+				$("#reservation-items").append('</div>')
+			{% endif %}
 		{% endfor %}
 		$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
 	}

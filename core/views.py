@@ -435,9 +435,12 @@ def CheckRoomAvailability(request, location_slug):
 	# Create some mock reservations for each available room so we can generate the bill
 	for room in Room.objects.free(arrive, depart, location):
 		reservation = Reservation(id=-1, room=room, arrive=arrive, depart=depart, location=location)
-		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False, non_house_only=True)
+		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
+		total = 0
+		for item in bill_line_items:
+			if not item.paid_by_house:
+				total = total + item.amount
 		nights = reservation.total_nights()
-		total = reservation.calc_bill_amount()
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability_table, "dates": dates, 

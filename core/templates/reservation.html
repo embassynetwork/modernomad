@@ -130,7 +130,8 @@ submit your request with a few days' notice. </p>
 			request.fail(function(msg) {
 				$("#show-room-availability").html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
 			});
-
+			$("#reservation-items").empty()
+			$("#reservation-total").html("0")
 		} // end room availability check
 
 
