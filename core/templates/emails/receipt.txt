@@ -11,13 +11,11 @@ Departure Date: {{ reservation.depart }}
 Total Nights: {{ reservation.total_nights }}
 
 Charges
-{% for line_item in reservation.bill_line_items %}
-{% if not line_item.paid_by_house %}
+{% for line_item in reservation.bill_line_items %}{% if not line_item.paid_by_house %}
 {{ line_item.description }}:  ${{ line_item.amount|floatformat:2 }}
-{% endif %}
-{% endfor %}
+{% endif %}{% endfor %}
 
-Total Paid: {{ reservation.total_paid }}
+Total Paid: ${{ reservation.total_paid|floatformat:2 }}
 
 Have fun on your onward adventures!
 The Embassy Team
