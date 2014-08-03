@@ -337,11 +337,32 @@ def calendar(request, location_slug):
 		"prev_month": prev_month, "report_date": report_date, 'location': location })
 
 
+def room_cal_request(request, location_slug, room_id):
+	location = get_location(location_slug)
+	room = Room.objects.get(id=room_id)
+	month = int(request.GET.get("month"))
+	year = int(request.GET.get("year"))
+	cal_html = room.availability_calendar_html(month=month, year=year)
+	print 'here is the calendar info for %s' % room.name
+	print cal_html
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	link_html = '''
+		<a class="room-cal-req" href="%s?month=%d&year=%d">Previous</a> | 
+		<a class="room-cal-req" href="%s?month=%d&year=%d">Next</a>
+	''' % (reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
+			reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
+	return HttpResponse(cal_html+link_html)
+
 def stay(request, location_slug):
 	location = get_location(location_slug)
 
 	rooms = location.guest_rooms()
-	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, 'location': location})
+	today = timezone.localtime(timezone.now())
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, "next_month": next_month, 
+		"prev_month": prev_month, 'location': location})
 
 
 def GenericPayment(request, location_slug):

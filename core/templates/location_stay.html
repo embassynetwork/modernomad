@@ -26,6 +26,8 @@
 				<div>{{ room.description }}</div>
 				<div class="availability-cal" id="availability-cal-{{room.id}}">
 					{{ room.availability_calendar_html|safe }}
+					<a class="room-cal-req" href="{% url 'room_cal_request' location.slug room.id %}?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
+					<a class="room-cal-req" href="{% url 'room_cal_request' location.slug room.id %}?month={{next_month.month}}&year={{next_month.year}}">Next</a> 
 				</div>
 			</div>
 		</div>
@@ -37,6 +39,45 @@
 <script>
 
 	// for each room, get the availability calendar and inject it into the appropriate div. 
+	function register() {
+		$(".room-cal-req").click(function(e) {
+			e.preventDefault();
+			//note: relies on the relative position of the clicked div and the
+			//wrapping div which contains the room id in its div id.
+			room_div_id = $(this).closest("div").attr("id")
+			room_id = room_div_id.split("availability-cal-")[1]
+			href = $(this).attr('href');
+			href_parts = href.split('?')
+			url_part = href_parts[0]
+			params = href_parts[1].split('&');
+			location_slug = '{{ location.slug }}';
+			year = params[1].split("=")[1];
+			month = params[0].split("=")[1];
+
+			request = $.ajax({ 
+				data: {
+					'month' : month,
+					'year' : year,
+					'csrfmiddlewaretoken': '{{ csrf_token }}'
+				}, 
+				type: "GET",
+				url: url_part
+			});
+
+			request.done(function(msg) { // on success..
+				div_id = "#availability-cal-" + room_id
+				$(div_id).html(msg)
+				register();
+			});
+
+			request.fail(function(msg) {
+				div_id = "#availability-cal-" + room_id
+				$(div_id).html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
+			});
+		})
+	};
+	register();
+	
 
 
 

@@ -219,7 +219,6 @@ class RoomCalendar(HTMLCalendar):
 		else:
 			the_day = datetime.date(self.year, self.month, day)
 			available = self.room.available_on(the_day, self.location)
-			print '%s: num_available %s' % (the_day, available)
 			if available:
 				return '<td class="%s"><span class="text-success glyphicon glyphicon-ok"></span> %d</td>' % (self.cssclasses[weekday], day)
 			else:
@@ -264,14 +263,10 @@ class Room(models.Model):
 		if not (month and year):
 			today = timezone.localtime(timezone.now())
 			month = today.month
-			print month
 			year = today.year
-			print year
 		location = self.location
 		room_cal = RoomCalendar(self, location, year, month)
 		month_html = room_cal.formatmonth(year, month)
-		print 'month html:'
-		print month_html
 		return month_html
 
 class ReservationManager(models.Manager):
