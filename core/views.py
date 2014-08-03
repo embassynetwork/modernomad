@@ -37,7 +37,7 @@ from django.shortcuts import get_object_or_404
 def location(request, location_slug):
 	location = my_object = get_object_or_404(Location, slug=location_slug)
 
-	today = datetime.date.today()
+	today = timezone.localtime(timezone.now())
 
 	if request.user.is_authenticated():
 		current_user = request.user
@@ -319,7 +319,7 @@ def occupancy(request, location_slug):
 @login_required
 def calendar(request, location_slug):
 	location = get_location(location_slug)
-	today = datetime.date.today()
+	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
 	year = request.GET.get("year")
 
@@ -336,8 +336,10 @@ def calendar(request, location_slug):
 		'calendar': mark_safe(guest_calendar), "next_month": next_month, 
 		"prev_month": prev_month, "report_date": report_date, 'location': location })
 
+
 def stay(request, location_slug):
 	location = get_location(location_slug)
+
 	rooms = location.guest_rooms()
 	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, 'location': location})
 
