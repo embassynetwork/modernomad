@@ -2,21 +2,23 @@
 *-*-*- The Embassy Network -*-*-*
 *-*-*- Reimagine Home -*-*-*
 
-{{ first_name }} {{last_name}}
-Paid on: {{ payment_date }}
+{{ user.first_name }} {{ user.last_name }}
+Paid on: {{ reservation.payment_date }}
 
-Arrival Date: {{ arrive }}
-Departure Date: {{ depart }}
-Payment Method: {{ payment_method|title }}
-Transaction ID: {{ transaction_id }}
+Location: {{ location }}
+Arrival Date: {{ reservation.arrive }}
+Departure Date: {{ reservation.depart }}
+Total Nights: {{ reservation.total_nights }}
 
+Charges
+{% for line_item in reservation.bill_line_items %}
+{% if not line_item.paid_by_house %}
+{{ line_item.description }}:  ${{ line_item.amount|floatformat:2 }}
+{% endif %}
+{% endfor %}
 
-Description .............. Quantity ......... Rate
-{{ room }} ..... {{ num_nights }} ..... {{ rate }}
+Total Paid: {{ reservation.total_paid }}
 
-..................... Total Paid: {{ total_paid }} - Thank You!
-
-Cheers to Hacking Home. Have fun on your adventure and thank you from the Embassy!
-
-:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
-:::: California Benefit Corporation, EIN 45-5386726 ::::		
+Have fun on your onward adventures!
+The Embassy Team
+support@embassynetwork.com
