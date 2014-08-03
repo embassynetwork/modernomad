@@ -100,7 +100,11 @@ def guest_rooms(request, location_slug):
 def view_room(request, location_slug, room_id):
 	location = get_location(location_slug)
 	room = get_object_or_404(Room, id=room_id)
-	return render(request, "room.html", {'room': room, 'location': location})
+	today = timezone.localtime(timezone.now())
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	return render(request, "room.html", {'room': room, 'location': location, "next_month": next_month, "prev_month": prev_month})
 
 def residents(request, location_slug):
 	location = get_location(location_slug)

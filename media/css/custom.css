@@ -1357,3 +1357,7 @@ table tr.row-even td { background: #eee; }
 	top: 520px;
 	right: 85px;
 }
+
+.top-spacer {
+	margin-top: 30px;
+}
