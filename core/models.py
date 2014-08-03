@@ -11,6 +11,9 @@ import uuid
 import stripe
 from django.db.models import Q
 from decimal import Decimal
+from django.utils.safestring import mark_safe
+from calendar import HTMLCalendar
+from django.utils import timezone
 
 # imports for signals
 import django.dispatch 
@@ -200,6 +203,29 @@ def room_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)
 
+class RoomCalendar(HTMLCalendar):
+	def __init__(self, room, location, year, month):
+		super(RoomCalendar, self).__init__()
+		self.year = year
+		self.month = month
+		self.room = room
+		self.location = location
+
+	def formatday(self, day, weekday):
+		# XXX warning: if there are ANY errors this method seems to just punt
+		# and return None. makes it very hard to debug. 
+		if day == 0:
+			return '<td class="noday">&nbsp;</td>' # day outside month
+		else:
+			the_day = datetime.date(self.year, self.month, day)
+			available = self.room.available_on(the_day, self.location)
+			print '%s: num_available %s' % (the_day, available)
+			if available:
+				return '<td class="%s"><span class="text-success glyphicon glyphicon-ok"></span> %d</td>' % (self.cssclasses[weekday], day)
+			else:
+				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (self.cssclasses[weekday], day)
+
+
 class Room(models.Model):
 	GUEST = "guest"
 	PRIVATE = "private"
@@ -233,6 +259,20 @@ class Room(models.Model):
 			return True
 		else:
 			return False
+
+	def availability_calendar_html(self, month=None, year=None):
+		if not (month and year):
+			today = timezone.localtime(timezone.now())
+			month = today.month
+			print month
+			year = today.year
+			print year
+		location = self.location
+		room_cal = RoomCalendar(self, location, year, month)
+		month_html = room_cal.formatmonth(year, month)
+		print 'month html:'
+		print month_html
+		return month_html
 
 class ReservationManager(models.Manager):
 
