@@ -5,11 +5,12 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 from django.contrib.sites.models import Site
-import datetime
 from models import get_location
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
+from django.utils import timezone
 import requests
+import datetime
 
 weekday_number_to_name = {
 	0: "Monday",
@@ -206,28 +207,16 @@ def send_from_location_address(subject, text_content, html_content, recipient, l
 	print resp.text
 	return HttpResponse(status=200)
 
-# TODO - This method needs work!
-# TODO - Need to send a list of Payments and of BillLineItems -JLS
 def send_receipt(reservation):
 	location = reservation.location
 
 	plaintext = get_template('emails/receipt.txt')
 	htmltext = get_template('emails/receipt.html')
 	c = Context({
-		'first_name': reservation.user.first_name, 
-		'last_name': reservation.user.last_name, 
-		'res_id': reservation.id,
-		'today': datetime.datetime.today(), 
-		'arrive': reservation.arrive, 
-		'depart': reservation.depart, 
-		'location': location.name,
-		'room': reservation.room.name, 
-		'num_nights': reservation.total_nights(), 
-		'rate': reservation.rate, 
-		#'payment_method': reconcile.payment_method,
-		#'transaction_id': reconcile.transaction_id,
-		#'payment_date': reconcile.payment_date,
-		'total_paid': reservation.total_paid(),
+		'today': timezone.localtime(timezone.now()), 
+		'user': reservation.user, 
+		'location': reservation.location,
+		'reservation': reservation,
 		}) 
 
 	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))  
@@ -263,15 +252,10 @@ def send_invoice(reservation):
 	plaintext = get_template('emails/invoice.txt')
 	htmltext = get_template('emails/invoice.html')
 	c = Context({
-		'first_name': reservation.user.first_name, 
-		'res_id': reservation.id,
-		'today': datetime.datetime.today(), 
-		'arrive': reservation.arrive, 
-		'depart': reservation.depart, 
-		'room': reservation.room.name, 
-		'num_nights': reservation.total_nights(), 
-		'rate': rate, 
-		'total': self.total_owed,
+		'today': timezone.localtime(timezone.now()), 
+		'user': reservation.user, 
+		'location': reservation.location,
+		'reservation': reservation,
 		}) 
 
 	subject = "[%s] Thanks for Staying with us!" % reservation.location.email_subject_prefix 

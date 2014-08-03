@@ -6,50 +6,61 @@
 		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 			<tr><td width="600px" align="center" style="font-size:140%;"><strong>RECEIPT</strong></td></tr> 
 			<tr><td width="600px" align="center" style="font-size:140%;"><strong>The Embassy Network</strong></td></tr>
-			<tr><td width="600px" align="center" style="font-size:140%;"><strong>Reimagine Home</strong></td></tr>
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>Be at Home Across the Globe</strong></td></tr>
 		</table>
 
-		<p margin="0 0 1.6em 0" style="font-size:120%;"> {{ first_name }} {{last_name}} </p>
-		<p margin="0 0 1.6em 0"> Paid on: {{ payment_date }} </p>
-
+		<p margin="0 0 1.6em 0" style="font-size:120%;"> {{ user.first_name }} {{ user.last_name }} </p>
+		<p margin="0 0 1.6em 0"> Paid on: {{ reservation.payment_date }} </p>
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
-			<tr><td width="150px"><strong>Arrival Date:</strong></td><td width="150px"> {{ arrive }}</td></tr>
-			<tr><td width="150px"><strong>Departure Date:</strong></td><td width="150px"> {{ depart }}</td></tr>
-			<tr><td width="150px"><strong>Payment Method:</strong></td><td width="150px"> {{ payment_method|title }}</td></tr>
-			<tr><td width="150px"><strong>Transaction ID:</strong></td><td width="150px"> {{ transaction_id }}</td></tr>
+			<tr><td width="150px"><strong>Location:</strong></td><td width="150px"> {{ location }}</td></tr>
+			<tr><td width="150px"><strong>Arrival Date:</strong></td><td width="150px"> {{ reservation.arrive }}</td></tr>
+			<tr><td width="150px"><strong>Departure Date:</strong></td><td width="150px"> {{ reservation.depart }}</td></tr>
+			<tr><td width="150px"><strong>Total Nights:</strong></td><td width="150px"> {{ reservation.total_nights }}</td></tr>
 		</table>
 
 		<tr><td width="600px"><p margin="1.6em 0 1.6em 0"><hr></p></td></tr>
 
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 		<tr>
-			<th align="left" width="200px">Description</th><th align="center" width="200px">Quantity</th><th align="right" width="200px">Rate</th>
+			<th align="left" width="200px">Description</th><th align="right" width="200px">Amount</th>
 		</tr>
+		{% for line_item in reservation.bill_line_items %}
+			{% if not line_item.paid_by_house %}
+				<tr>
+					<td align="left" width="200px">{{ line_item.description }}</td>
+					<td align="right" width="200px">${{ line_item.amount|floatformat:2 }}</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
 		<tr>
-			<td align="left" width="200px"><p margin="0 0 1.6em 0">{{ room }}</p></td>
-			<td align="center" width="200px"><p margin="0 0 1.6em 0">{{ num_nights }}</p></td>
-			<td align="right" width="200px"><p margin="0 0 1.6em 0">${{ rate }}</p></td>
-		</tr>
-		<tr>
-			<td colspan="3" align="right" width="600px">Total Paid: ${{ total_paid }}</td>
-		</tr>
-			<td colspan="3" align="right" width="600px"><strong>Thank you!</strong>
-		</tr>
+			<td colspan="3" align="right" width="600px">
+				<p margin="0 0 1.6em 0"><strong>Total Paid:</strong> ${{ reservation.total_paid|floatformat:2 }}</p>
+			</td>
 		</table>
 
+		<!--
+		<p><strong>Payments</strong></p>
+		<table border="0" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<th>Date</th>
+				<th>Method</th>
+				<th>Transaction ID</th>
+				<th>Amount</th>
+			</tr>
+			{% for payment in reservation.payments %}
+			<tr>
+				<td width="150px">{{ payment.payment_date }}</td>
+				<td width="150px">{{ payment.payment_method|title }}</td>
+				<td width="150px">{{ payment.transaction_id }}</td>
+				<td width="150px" align="right">${{ payment.paid_amount|floatformat:2 }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		-->
+		
 		<p margin="0 0 0.6em 0">Have fun on your onward adventures!</p> 
-		<p margin="0 0 0.6em 0">The Embassy Team</p>
-
-		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-		<tr>
-			<td width="600px" align="center">:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::
-			</td>
-		</tr>
-		<tr>
-			<td width="600px" align="center">:::: California Benefit Corporation, EIN 45-5386726 ::::
-			</td>
-		</tr>
-		</table>
+		<p>The Embassy Team</p>
+		<p>support@embassynetwork.com</p>
 
 	</td></tr>
 </body></table>
