@@ -24,22 +24,9 @@
 			</div>
 			<div class="col-md-8">
 				<div>{{ room.description }}</div>
-				<div class="availability-cal" id="availability-cal-{{room.id}}">
-					{{ room.availability_calendar_html|safe }}
-				</div>
 			</div>
 		</div>
 	{% endfor %}
 </div>
-{% endblock %}
-
-{% block extrajs %}
-<script>
-
-	// for each room, get the availability calendar and inject it into the appropriate div. 
-
-
-
-</script>
 {% endblock %}
 
