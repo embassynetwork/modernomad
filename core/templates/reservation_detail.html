@@ -7,7 +7,8 @@
 	{% if reservation.hosted %}
 		{{ reservation.guest_name }}, hosted by 
 	{% endif %}
-	<em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+
 	{% ifequal reservation.user user %}
 		<span class="res-value text-success">Total: ${{ reservation.bill_amount|floatformat:2 }}</span>
 	{% endifequal %}
@@ -29,19 +30,19 @@
 			Cancellation policy for the {{ reservation.room }} 
 			is {{reservation.room.cancellation_policy}}.</p>
 
-			<form action="/reservation/{{reservation.id}}/confirm/" method="POST" id="payform">
+			<form action="{% url 'reservation_confirm' reservation.id %}" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 					value="Submit payment." >
 			</form>
 		</div>
-	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.user.profile.customer_id %}
+	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.is_paid %}
 		<div>
 			<p><span class="text-error">Action Required! Please pay for your
 				reservation to confirm. Cancellation policy for the {{ reservation.room }} is
 				{{reservation.room.cancellation_policy}}.</p>
 
-			<form action="/people/{{reservation.user.username}}/addcard/" method="POST" id="payform">
+			<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="hidden" value={{ reservation.id }} name="res-id">
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
@@ -54,8 +55,9 @@
 			</form>
 		</div>
 
-	{% elif reservation.is_confirmed and reservation.user.profile.customer_id %}
+	{% elif reservation.is_confirmed and reservation.is_paid %}
 		<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
+		<a class="btn btn-lg res-status-btn" type="button" href="{% url 'reservation_receipt' location.slug reservation.id %}">View Receipt</a>
 
 	{% elif reservation.is_canceled %}
 		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Canceled</div>

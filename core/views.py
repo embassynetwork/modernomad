@@ -33,6 +33,8 @@ from emails import send_receipt, new_reservation_notify, updated_reservation_not
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.template import Context
 
 def location(request, location_slug):
 	location = my_object = get_object_or_404(Location, slug=location_slug)
@@ -758,6 +760,27 @@ def ReservationDelete(request, reservation_id, location_slug):
 		return HttpResponseRedirect("/")
 
 @login_required
+def ReservationReceipt(request, location_slug, reservation_id):
+	location = get_location(location_slug)
+	reservation = get_object_or_404(Reservation, id=reservation_id)
+	if request.user != reservation.user or location != reservation.location:
+		if not request.user.is_staff:
+			return HttpResponseRedirect("/404")
+
+	# I want to render the receipt exactly like we do in the email
+	htmltext = get_template('emails/receipt.html')
+	c = Context({
+		'today': timezone.localtime(timezone.now()), 
+		'user': reservation.user, 
+		'location': reservation.location,
+		'reservation': reservation,
+		}) 
+	receipt_html = htmltext.render(c)
+
+	return render(request, 'reservation_receipt.html', {'receipt_html': receipt_html, 'reservation': reservation, 
+		'location': location })
+
+@login_required
 def PeopleDaterangeQuery(request, location_slug):
 	location = get_location(location_slug)
 	start_str = request.POST.get('start_date')
@@ -780,7 +803,6 @@ def PeopleDaterangeQuery(request, location_slug):
 	html = html.strip(", ")
 	html += "</div>"
 	return HttpResponse(html)
-	
 
 # ******************************************************
 #           reservation management views
@@ -903,7 +925,6 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 		send_receipt(reservation)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
-
 
 @house_admin_required
 def ReservationToggleComp(request, location_slug, reservation_id):

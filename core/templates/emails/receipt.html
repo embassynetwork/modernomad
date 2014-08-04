@@ -10,7 +10,14 @@
 		</table>
 
 		<p margin="0 0 1.6em 0" style="font-size:120%;"> {{ user.first_name }} {{ user.last_name }} </p>
-		<p margin="0 0 1.6em 0"> Paid on: {{ reservation.payment_date }} </p>
+		
+		
+		{% if reservation.payment_date %}
+			 <p margin="0 0 1.6em 0">Paid on: {{ reservation.payment_date }}</p>
+		{% else %}
+			<p style="width:100%; text-align:center;"><em>*** UNPAID ***</em></p>
+		{% endif %}
+		
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 			<tr><td width="150px"><strong>Location:</strong></td><td width="150px"> {{ location }}</td></tr>
 			<tr><td width="150px"><strong>Arrival Date:</strong></td><td width="150px"> {{ reservation.arrive }}</td></tr>
@@ -22,7 +29,8 @@
 
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 		<tr>
-			<th align="left" width="200px">Description</th><th align="right" width="200px">Amount</th>
+			<th style="text-align: left; width:200px">Description</th>
+			<th style="text-align: right;">Amount</th>
 		</tr>
 		{% for line_item in reservation.bill_line_items %}
 			{% if not line_item.paid_by_house %}
@@ -33,8 +41,8 @@
 			{% endif %}
 		{% endfor %}
 		<tr>
-			<td colspan="3" align="right" width="600px">
-				<p margin="0 0 1.6em 0"><strong>Total Paid:</strong> ${{ reservation.total_paid|floatformat:2 }}</p>
+			<td colspan="2" align="right" width="600px">
+				<strong>Total Paid:</strong> ${{ reservation.total_paid|floatformat:2 }}
 			</td>
 		</table>
 
@@ -45,7 +53,7 @@
 				<th>Date</th>
 				<th>Method</th>
 				<th>Transaction ID</th>
-				<th>Amount</th>
+				<th align="right">Amount</th>
 			</tr>
 			{% for payment in reservation.payments %}
 			<tr>
@@ -58,9 +66,11 @@
 		</table>
 		-->
 		
-		<p margin="0 0 0.6em 0">Have fun on your onward adventures!</p> 
-		<p>The Embassy Team</p>
-		<p>support@embassynetwork.com</p>
+		<p style="margin: 1em 0 0 0;">
+			Have fun on your onward adventures!<br/>
+			The Embassy Team<br/>
+			support@embassynetwork.com
+		</p>
 
 	</td></tr>
 </body></table>
