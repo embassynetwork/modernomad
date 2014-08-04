@@ -554,9 +554,11 @@ class Reservation(models.Model):
 
 	def payment_date(self):
 		# Date of the last payment
-		payment = Payment.objects.filter(reservation=self).order_by('payment_date').reverse()[0]
-		if payment:
-			return payment.payment_date
+		payments = Payment.objects.filter(reservation=self).order_by('payment_date').reverse()
+		if payments:
+			payment = payments[0]
+			if payment:
+				return payment.payment_date
 
 	def bill_line_items(self):
 		return BillLineItem.objects.filter(reservation=self)
