@@ -59,6 +59,7 @@ class Location(models.Model):
 	stay_page = models.TextField()
 	front_page_stay = models.TextField()
 	front_page_participate = models.TextField()
+	announcement = models.TextField()
 	max_reservation_days = models.IntegerField(default=14)
 	welcome_email_days_ahead = models.IntegerField(default=2)
 	house_access_code = models.CharField(max_length=50, blank=True, null=True)
