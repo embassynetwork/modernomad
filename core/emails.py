@@ -240,11 +240,7 @@ def send_receipt(reservation):
 
 def send_invoice(reservation):
 	''' trigger a reminder email to the guest about payment.''' 
-	if reservation.hosted:
-		# XXX TODO make this a proper error which is viewable in the admin form.
-		print "hosted reservation invoices not supported"
-		return
-	if not reservation.is_comped():
+	if reservation.is_comped():
 		# XXX TODO eventually send an email for COMPs too, but a
 		# different once, with thanks/asking for feedback.
 		return

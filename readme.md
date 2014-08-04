@@ -49,7 +49,6 @@ Main Features:
 - 'Today' view of residents and guests at the house "today"
 - Occupancy view for admins showing breakdown of income, paid status and guests
   Stats on a month-by-month basis. 
-- House admins can add hosted reservations, for guests without profiles.
 
 ### Pre-requisites, system dependencies and environment setup intructions:
 see [Environment Setup](docs/environment-setup.md)

@@ -63,10 +63,7 @@
 {% for item in data %}
 	<div>
 	<p>
-		{% if item.reservation.hosted %}
-			{{item.reservation.guest_name|title}}, hosted by 
-		{% endif %}
-		{{item.reservation.user.first_name|title}} {{item.reservation.user.last_name|title}}, 
+		{{ item.reservation.user.first_name|title }} {{ item.reservation.user.last_name|title }}, 
 		<a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 
 		{{ item.nights_this_month }} nights @ ${{item.rate}} ({{item.room}}) = 
 		{% if item.unpaid %}

@@ -4,9 +4,6 @@
 {% include "snippets/messages.html" %}
 
 <h3>Reservation for 
-	{% if reservation.hosted %}
-		{{ reservation.guest_name }}, hosted by 
-	{% endif %}
 	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
 
 	{% ifequal reservation.user user %}
@@ -75,30 +72,13 @@
 <div class="res-detail"><b>In town for?</b> {{ reservation.purpose }}</div>
 <div class="res-detail"><b>Additional Comments:</b> {{ reservation.comments }}</div>
 
-{% if reservation.hosted and reservation.guest %}
-{% with guest=reservation.guest%}
-
-	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
-
-	<div class="res-detail"><b>Current Projects:</b> {{ guest.projects }}</div>
-	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.sharing }}</div>
-	<div class="res-detail"><b>Discussion topics:</b> {{ guest.discussion }}</div>
-	<div class="res-detail"><b>Referral: </b> {{ guest.referral }}</div>
-
-{% endwith %}
-{% else %}
-
 {% with guest=reservation.user%}
-
 	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
-
 	<div class="res-detail"><b>Current Projects:</b> {{ guest.profile.projects }}</div>
 	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.profile.sharing }}</div>
 	<div class="res-detail"><b>Discussion topics:</b> {{ guest.profile.discussion }}</div>
 	<div class="res-detail"><b>Referral: </b> {{ guest.profile.referral }}</div>
-
 {% endwith %}
-{% endif %}
 
 {% ifequal reservation.user user %}
 	<div class="res-modify-btn">

@@ -18,21 +18,21 @@
 <div class="row">
 
 		<div class="col-md-4" id="participate">
-			<h2 class="fancy-header center"><span class="glyphicon glyphicon-star"></span> Announcements</h2>
+			<h2 class="fancy-header center"><span class="glyphicon glyphicon-star"></span><br/>Announcements</h2>
 			<p class="easy-reading">{{ location.announcement|safe }}</p> 
 		</div>
 
-		<div class="col-md-4" id="reserve">
-			<h2 class="fancy-header center"><span class="glyphicon glyphicon-globe"></span> Accommodations</h2>
+		<div class="col-md-4" id="participate">
+			<h2 class="fancy-header center"><span class="glyphicon glyphicon-globe"></span><br/>Accommodations</h2>
 			<p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
-			<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>
+			<!--<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>-->
 		</div>
 
 		<div class="col-md-4" id="participate">
-			<h2 class="fancy-header center"><span class="glyphicon glyphicon-calendar"></span> Events</h2>
+			<h2 class="fancy-header center"><span class="glyphicon glyphicon-calendar"></span><br/>Events</h2>
 			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
 			{% ifappexists gather %}
-			<a href="{% url 'gather_upcoming_events' location.slug %}"  class="btn btn-large btn-block btn-large-text">See Upcoming</a>
+			<!--<a href="{% url 'gather_upcoming_events' location.slug %}"  class="btn btn-large btn-block btn-large-text">See Upcoming</a>-->
 			{% endifappexists %}
 		</div>
 

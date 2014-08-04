@@ -673,8 +673,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 
 				# if the dates have been changed, and the reservation isn't
 				# still pending to begin with, notify an admin and go back to
-				# pending (unless it's hosted, then we don't generate an
-				# email).
+				# pending.
 				if (not reservation.is_pending and (reservation.arrive != original_arrive or 
 					reservation.depart != original_depart or reservation.room != original_room )):
 

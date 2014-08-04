@@ -21,9 +21,8 @@
 	<form class="well form-inline" method="post" action="{% url 'reservation_edit' location.slug reservation_id %}">{% csrf_token %}
 		{% for field in form %}
 
-			{% if field.name == 'hosted' or field.name = 'guest_name' or field.name == 'status' %}
+			{% if field.name == 'status' %}
 				{% if is_house_admin %}
-
 					<div class="field-wrapper">
 						{{ field.errors }}
 						{{ field.label_tag }}
