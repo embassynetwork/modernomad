@@ -1,0 +1,49 @@
+# Ubuntu 14.04 LTS
+
+# Add users
+adduser jacob
+adduser jacob sudo
+adduser jessykate
+adduser jessykate sudo
+adduser embassynetwork
+
+# SSH
+curl -i https://api.github.com/users/jessykate/keys
+"PasswordAuthentication no" > /etc/ssh/ssh_conf
+
+# Install apps
+apt-get update
+apt-get dist-upgrade
+apt-get install nginx gunicorn supervisor
+apt-get install git python-dev python-virtualenv python-pip
+apt-get install zlib1g-dev libxml2-dev libxslt1-dev python-lxml
+
+# Setup Modernomad
+sudo su - embassynetwork
+mkdir logs
+virtualenv webapp
+cd webapp
+mkdir media
+mkdir static
+source bin/activate
+git clone https://github.com/jessykate/modernomad.git
+cd modernomad
+pip install -r requirements.txt
+pip install --index-url https://code.stripe.com --upgrade stripe
+pip install gunicorn
+
+# Edit local_settings.py
+MEDIA_ROOT = "/home/embassynetwork/webapp/media"
+STATIC_ROOT = "/home/embassynetwork/webapp/static"
+
+# Config Nginx and Gunicorn
+cp gunicorn.conf /etc/supervisor/conf.d/gunicorn.conf
+cp gunicorn_start /home/embassynetwork/bin/gunicorn_start
+cp embassynetwork /etc/nginx/sites-available/embassynetwork
+ln -s /etc/nginx/sites-available/embassynetwork /etc/nginx/sites-enabled/
+
+# Restart everything
+supervisorctl reload 
+service nginx restart
+supervisorctl restart gunicorn
+
