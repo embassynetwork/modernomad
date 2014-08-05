@@ -349,8 +349,8 @@ def room_cal_request(request, location_slug, room_id):
 	month = int(request.GET.get("month"))
 	year = int(request.GET.get("year"))
 	cal_html = room.availability_calendar_html(month=month, year=year)
-	print 'here is the calendar info for %s' % room.name
-	print cal_html
+	#print 'here is the calendar info for %s' % room.name
+	#print cal_html
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	link_html = '''
 		<a class="room-cal-req" href="%s?month=%d&year=%d">Previous</a> | 
@@ -480,7 +480,7 @@ def CheckRoomAvailability(request, location_slug):
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
 	if request.method == 'POST':
-		print request.POST
+		#print request.POST
 		#form = get_reservation_form_for_perms(request, post=True, instance=False)
 		form = ReservationForm(location, request.POST)
 		if form.is_valid():
@@ -547,7 +547,7 @@ def UserEdit(request, username):
 				print "request data: image field"
 				img_data = request.POST.get("image")
 				if img_data:
-					print img_data
+					#print img_data
 					img_data = base64.b64decode(img_data)
 					filename = "%s.png" % uuid.uuid4()
 					# XXX make the upload path a fixed setting in models, since it's
@@ -574,8 +574,8 @@ def UserEdit(request, username):
 			has_image = True
 		else:
 			has_image = False
-		print 'profile image already?'
-		print has_image
+		#print 'profile image already?'
+		#print has_image
 		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
 	return HttpResponseRedirect("/")
 
@@ -948,7 +948,6 @@ def ReservationSendMail(request, location_slug, reservation_id):
 		return HttpResponseRedirect('/404')
 
 	location = get_location(location_slug)
-	print request.POST
 	subject = request.POST.get("subject")
 	recipient = [request.POST.get("recipient"),]
 	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")

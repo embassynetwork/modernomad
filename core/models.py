@@ -628,11 +628,8 @@ User._meta.ordering = ['username']
 
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):
-	print 'in size images'
-	print instance.image
 	try:
 		obj = UserProfile.objects.get(pk=instance.pk)
-		print obj.image
 	except UserProfile.DoesNotExist:
 		# if the reservation does not exist yet, then it's new. 
 		obj = None

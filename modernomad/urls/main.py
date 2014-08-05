@@ -18,7 +18,7 @@ urlpatterns = patterns('',
     url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', 'gather.views.email_preferences', name='gather_email_preferences'),
 
 	# various other useful things
-	url(r'^ico/favicon\.ico$', RedirectView.as_view(url='/media/img/favicon.ico')),
+	url(r'^ico/favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
 )
 
 # media url hackery. 

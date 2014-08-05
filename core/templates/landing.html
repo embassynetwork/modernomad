@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load ifappexists %}
+{% load staticfiles %}
 
 {% block content %}
 
@@ -75,7 +76,7 @@
 			map.scrollWheelZoom.disable();
 			var RougeIcon = L.Icon.extend({
 				options: {
-					iconUrl: '/media/img/droplet.png',
+					iconUrl: '{% static 'img/droplet.png'%}',
 					iconSize: [100,170],
 					popupAnchor: [220,60]
 				}

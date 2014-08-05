@@ -3,12 +3,12 @@
 ========================================================== */
 @font-face {
 	font-family:'Clarendon';
-	src: url(/media/fonts/Clarendon_LT_Roman.ttf) format("truetype");
+	src: url(/static/fonts/Clarendon_LT_Roman.ttf) format("truetype");
 }
 
 @font-face {
 	font-family:'Clarendon Light';
-	src: url(/media/fonts/Clarendon_LT_Light.ttf) format("truetype");
+	src: url(/static/fonts/Clarendon_LT_Light.ttf) format("truetype");
 }
 
 body {

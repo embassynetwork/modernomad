@@ -88,7 +88,7 @@ class UserProfileForm(forms.ModelForm):
 			for l in raw_link_list:
 				try:
 					cleaned = url.clean(l.strip())
-					print cleaned 
+					#print cleaned 
 					cleaned_links.append(cleaned)
 				except forms.ValidationError:
 					# customize the error raised by UrlField.

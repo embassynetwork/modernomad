@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
 {% block content %}
 
 <div id="spinner">
-    <img src="/media/img/ajax-loader-drip.gif" alt="Loading..."/>
+    <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
 </div>	
 
 <!-- Email Modal -->

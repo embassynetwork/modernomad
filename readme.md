@@ -17,7 +17,7 @@ Tracker](https://www.pivotaltracker.com/s/projects/883046) for our tickets, and
 associated with this repository for new problems, bug reports and suggestions.
 [Read more about contributing](docs/contributing.md).
 
-<img src="media/img/agplv3-88x31.png" />
+<img src="static/img/agplv3-88x31.png" />
 
 ## About 
 Modernomad is designed to integrate guests, residents and a broader community
