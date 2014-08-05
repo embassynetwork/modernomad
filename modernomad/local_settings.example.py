@@ -13,14 +13,6 @@ XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 DEVELOPMENT = 0
 PRODUCTION = 1
 
-# What is the name of this house, building, establishment, etc.?
-LOCATION_NAME = "Embassy SF"
-LOCATION_ADDRESS = "399 Webster Street, San Francisco, 94117"
-
-# HOUSE INFO
-SSID = "Your wireless network name"
-SSID_PASSWORD = "your wireness network password"
-
 # default mode is dev. change to production as appropriate. 
 MODE = DEVELOPMENT
 
@@ -30,9 +22,6 @@ MAX_RESERVATION_DAYS = 14
 # how many days ahead to send the welcome email to guests with relevan house
 # info.
 WELCOME_EMAIL_DAYS_AHEAD = 2
-
-# if your house has a private access code, enter it here. 
-HOUSE_ACCESS_CODE = "1234"
 
 # required for django-gather app
 LOCATION_MODEL = 'gather.Location'
