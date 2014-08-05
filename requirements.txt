@@ -7,6 +7,9 @@ django-celery>=3.1
 Celery
 eventbrite
 lxml
+billiard>=3.3.0.18
+kombu>=3.0.21
+lxml>=3.3.5
 git+https://git@github.com/opendoor/django-gather.git
 
 # the stripe library requires custom arguments which the requirements.txt file
