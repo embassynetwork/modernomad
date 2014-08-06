@@ -18,6 +18,14 @@ apt-get install nginx gunicorn supervisor
 apt-get install git python-dev python-virtualenv python-pip
 apt-get install zlib1g-dev libxml2-dev libxslt1-dev python-lxml
 
+# Install Postgres
+sudo apt-get install postgresql postgresql-client-common
+sudo -u postgres psql
+  -> ALTER USER postgres PASSWORD 'newpassword';
+sudo vi /etc/postgresql/9.3/main/pg_hba.conf
+  -> local	all	postgres	md5
+sudo service postgresql restart
+
 # Setup Modernomad
 sudo su - embassynetwork
 mkdir logs
