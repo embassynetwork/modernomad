@@ -952,7 +952,7 @@ def ReservationSendMail(request, location_slug, reservation_id):
 	recipient = [request.POST.get("recipient"),]
 	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
 	# TODO - This isn't fully implemented yet -JLS
-	send_from_location_address(subject, text_content, html_content, recipient, location)
+	send_from_location_address(subject, body, None, recipient, location)
 
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation.mark_last_msg() 
