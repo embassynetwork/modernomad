@@ -6,7 +6,6 @@ Pillow>=2.5.1
 django-celery>=3.1
 Celery>=3.1.13
 eventbrite>=0.45
-lxml>=3.3.5
 billiard>=3.3.0.18
 kombu>=3.0.21
 lxml>=3.3.5
@@ -19,4 +18,3 @@ git+https://git@github.com/opendoor/django-gather.git
 # parsing apparently doesn't support, so install it manually on the command
 # line using:
 # pip install --index-url https://code.stripe.com --upgrade stripe
-
