@@ -18,13 +18,11 @@ apt-get install nginx gunicorn supervisor
 apt-get install git python-dev python-virtualenv python-pip
 apt-get install zlib1g-dev libxml2-dev libxslt1-dev python-lxml
 
-# Install Postgres
-sudo apt-get install postgresql postgresql-client-common
-sudo -u postgres psql
-  -> ALTER USER postgres PASSWORD 'newpassword';
-sudo vi /etc/postgresql/9.3/main/pg_hba.conf
-  -> local	all	postgres	md5
-sudo service postgresql restart
+# PILLOW needs some libs to help with the images
+sudo apt-get install libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
+sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib
+sudo ln -s /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib
+sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib
 
 # Setup Modernomad
 sudo su - embassynetwork
@@ -39,6 +37,7 @@ cd modernomad
 pip install -r requirements.txt
 pip install --index-url https://code.stripe.com --upgrade stripe
 pip install gunicorn
+pip install psycopg2
 
 # Edit local_settings.py
 MEDIA_ROOT = "/home/embassynetwork/webapp/media"
@@ -54,4 +53,53 @@ ln -s /etc/nginx/sites-available/embassynetwork /etc/nginx/sites-enabled/
 supervisorctl reload 
 service nginx restart
 supervisorctl restart gunicorn
+
+#######################################
+# Extra Credit
+#######################################
+
+# Install Postgres
+sudo apt-get install postgresql postgresql-client-common 
+sudo apt-get install python-psycopg2 libpq-dev
+sudo -u postgres psql
+  -> ALTER USER postgres PASSWORD 'newpassword';
+sudo vi /etc/postgresql/9.3/main/pg_hba.conf
+  -> local	all	postgres	md5
+sudo service postgresql restart
+
+# Porting SQLite3 to Postgres
+./manage.py dumpdata > alldata.json
+./manage.py syncdb
+./manage.py migrate
+./manage.py dbshell
+  -> TRUNCATE django_content_type CASCADE;
+./manage.py loaddata alldata.json 
+
+./manage.py dumpdata --exclude=contenttypes --exclude=auth.Permission  > data.json
+vi modernomad.local_settins.py
+DATABASES = {
+    'default': {
+                'ENGINE':'django.db.backends.postgresql_psycopg2',
+                'USER':'postgres',
+                'NAME':'modernomadb',
+                'PASSWORD':'PASSWORD',
+                'HOST': 'localhost',
+                'PORT':'5432'
+    }
+}
+
+# Data Cleanup
+cp media/data/avatars/default.jpg media/data/avatars/Jessicat/Thompson\ small.jpg
+cd media/data/events
+mv Sexual-Energetics-Workshop-Coed\:\ sex\ energy\,\ chakras\,\ and\ creating\ safe\ space./ Sexual-Energetics-Workshop-Coed
+mv private-event-session-one-a-brainstorm-group-for-b/ private-event-session-one-a-brainstorm-group
+mv institute-for-the-future-and-organized-crime-and-c/ institute-for-the-future-and-organized-crime
+mv welcome-gathering-for-indong-cho-head-of-seouls-in/ welcome-gathering-for-indong-cho
+mv daughters-of-the-internet-revolution-welcomes-stac/ daughters-of-the-internet-revolution-welcomes
+mv aia-architecture-in-the-city-exhibition-photo-shoo/ aia-architecture-in-the-city-exhibition-photo
+mv evening-of-live-music-eastern-european-french-mini/ evening-of-live-music-eastern-european-french
+cat data.json | python -m json.tool > expanded.json
+vi expanded.json
+ -> Edit paths from above
+./manage.py loaddata expanded.json
 
