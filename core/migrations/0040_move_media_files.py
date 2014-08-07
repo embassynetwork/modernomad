@@ -3,6 +3,15 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+from django.conf import settings
+import os
+
+def move_file(old, new):
+    # Old is a full path, new is not... keep that in mind when you try to use this genericly
+    try:
+        os.rename(old, os.path.join(settings.MEDIA_ROOT, new))
+    except:
+        print "Can not move %s" % old
 
 class Migration(DataMigration):
 
@@ -17,25 +26,28 @@ class Migration(DataMigration):
             ("avatars", orm['core.UserProfile'], True),
         )
         for (foldername, jobclass, is_thumbed) in jobs:
-            try:
-                os.mkdir(os.path.join(settings.MEDIA_ROOT, foldername), 0755)
-            except:
-                pass
-
             for mediaobj in jobclass.objects.all():
+                if not mediaobj.image:
+                    mediaobj.image = '%s/default.jpg' % foldername
+                    mediaobj.save()
+                    continue
                 oldpath = mediaobj.image.path
-                #print "oldpath: %s" % oldpath
+                print "oldpath: %s" % oldpath
                 filename, extname = os.path.splitext(os.path.split(oldpath)[-1])
                 newpath = "%s/%s%s" % (foldername, filename, extname)
                 print "newpath: %s" % newpath
-                os.rename(oldpath, os.path.join(settings.MEDIA_ROOT, newpath))
                 mediaobj.image = newpath
+                if newpath != "%s/default.jpg" % foldername:
+                    #os.rename(oldpath, os.path.join(settings.MEDIA_ROOT, newpath))
+                    move_file(oldpath, newpath)
                 if is_thumbed:
                     oldthumbpath = mediaobj.image_thumb.path
                     filename, extname = os.path.splitext(os.path.split(oldthumbpath)[-1])
-                    newthumbpath = "%s/%s_thumb%s" % (foldername, filename, extname)
-                    os.rename(oldthumbpath, os.path.join(settings.MEDIA_ROOT, newthumbpath))
+                    newthumbpath = "%s/%s%s" % (foldername, filename, extname)
                     mediaobj.image_thumb = newthumbpath
+                    if mediaobj.image_thumb.path != '%s/default_thumb.jpg' % foldername:
+                        #os.rename(oldthumbpath, os.path.join(settings.MEDIA_ROOT, newthumbpath))
+                        move_file(oldthumbpath, newthumbpath)
                 mediaobj.save()
 
     def backwards(self, orm):
