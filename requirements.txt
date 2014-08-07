@@ -9,7 +9,6 @@ eventbrite>=0.45
 lxml>=3.3.5
 billiard>=3.3.0.18
 kombu>=3.0.21
-lxml>=3.3.5
 pytz>=2014.4
 
 # Django Gather code
