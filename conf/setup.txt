@@ -68,57 +68,23 @@ sudo vi /etc/postgresql/9.3/main/pg_hba.conf
 sudo service postgresql restart
 
 # Porting SQLite3 to Postgres
-./manage.py dumpdata > alldata.json
-./manage.py syncdb
-./manage.py migrate
-./manage.py dbshell
-  -> TRUNCATE django_content_type CASCADE;
-./manage.py loaddata alldata.json 
-
-./manage.py dumpdata --exclude=contenttypes --exclude=auth.Permission  > data.json
-vi modernomad.local_settins.py
-DATABASES = {
-    'default': {
-                'ENGINE':'django.db.backends.postgresql_psycopg2',
-                'USER':'postgres',
-                'NAME':'modernomadb',
-                'PASSWORD':'PASSWORD',
-                'HOST': 'localhost',
-                'PORT':'5432'
-    }
-}
-
-# Data Cleanup
 cp media/data/avatars/default.jpg media/data/avatars/Jessicat/Thompson\ small.jpg
+cd media
+mkdir avatars
+mkdir locations
+mkdir rooms
+mkdir events
+cp data/avatars/default.jpg avatars/
+cp data/avatars/default.jpg locations/
+cp data/avatars/default.jpg rooms/
+cd ..
+rm -rf media/data
 
+./manage.py migrate --delete-ghost-migrations core
 ./manage.py migrate gather --fake 0009
 ./manage.py migrate gather
 
-cd media/data/events
-mv Sexual-Energetics-Workshop-Coed\:\ sex\ energy\,\ chakras\,\ and\ creating\ safe\ space./ Sexual-Energetics-Workshop-Coed
-mv private-event-session-one-a-brainstorm-group-for-b/ private-event-session-one-a-brainstorm-group
-mv institute-for-the-future-and-organized-crime-and-c/ institute-for-the-future-and-organized-crime
-mv welcome-gathering-for-indong-cho-head-of-seouls-in/ welcome-gathering-for-indong-cho
-mv daughters-of-the-internet-revolution-welcomes-stac/ daughters-of-the-internet-revolution-welcomes
-mv aia-architecture-in-the-city-exhibition-photo-shoo/ aia-architecture-in-the-city-exhibition-photo
-mv evening-of-live-music-eastern-european-french-mini/ evening-of-live-music-eastern-european-french
-cat data.json | python -m json.tool > expanded.json
-vi expanded.json
- -> Edit paths from above
-./manage.py loaddata expanded.json
-
-cd media
-mkdir avatars
-(modernomad)Marta-3:media jacob$ mkdir locations
-(modernomad)Marta-3:media jacob$ mkdir rooms
-(modernomad)Marta-3:media jacob$ mkdir events
-(modernomad)Marta-3:media jacob$ cp avatars/d
-(modernomad)Marta-3:media jacob$ cp data/avatars/default.jpg avatars/
-(modernomad)Marta-3:media jacob$ cp data/avatars/default.jpg locations/
-(modernomad)Marta-3:media jacob$ cp data/avatars/default.jpg rooms/
-
-
-./manage.py loaddata eventadmingroup.json 
+# Edit eventadmingroup.json:
 [
     {
         "fields": {
@@ -131,3 +97,27 @@ mkdir avatars
         "pk": 1
     }
 ]
+./manage.py loaddata eventadmingroup.json
+
+./manage.py dumpdata > data.json
+
+# Switch to Postgres
+vi modernomad.local_settins.py
+DATABASES = {
+    'default': {
+                'ENGINE':'django.db.backends.postgresql_psycopg2',
+                'USER':'postgres',
+                'NAME':'modernomadb',
+                'PASSWORD':'PASSWORD',
+                'HOST': 'localhost',
+                'PORT':'5432'
+    }
+}
+
+# Load Postgres
+./manage.py syncdb (no superuser)
+./manage.py migrate
+./manage.py dbshell
+  -> TRUNCATE django_content_type CASCADE;
+./manage.py loaddata data.json 
+
