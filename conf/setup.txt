@@ -90,6 +90,10 @@ DATABASES = {
 
 # Data Cleanup
 cp media/data/avatars/default.jpg media/data/avatars/Jessicat/Thompson\ small.jpg
+
+./manage.py migrate gather --fake 0009
+./manage.py migrate gather
+
 cd media/data/events
 mv Sexual-Energetics-Workshop-Coed\:\ sex\ energy\,\ chakras\,\ and\ creating\ safe\ space./ Sexual-Energetics-Workshop-Coed
 mv private-event-session-one-a-brainstorm-group-for-b/ private-event-session-one-a-brainstorm-group
@@ -103,3 +107,27 @@ vi expanded.json
  -> Edit paths from above
 ./manage.py loaddata expanded.json
 
+cd media
+mkdir avatars
+(modernomad)Marta-3:media jacob$ mkdir locations
+(modernomad)Marta-3:media jacob$ mkdir rooms
+(modernomad)Marta-3:media jacob$ mkdir events
+(modernomad)Marta-3:media jacob$ cp avatars/d
+(modernomad)Marta-3:media jacob$ cp data/avatars/default.jpg avatars/
+(modernomad)Marta-3:media jacob$ cp data/avatars/default.jpg locations/
+(modernomad)Marta-3:media jacob$ cp data/avatars/default.jpg rooms/
+
+
+./manage.py loaddata eventadmingroup.json 
+[
+    {
+        "fields": {
+            "location": 1,
+            "users": [
+                1
+            ]
+        },
+        "model": "gather.eventadmingroup",
+        "pk": 1
+    }
+]

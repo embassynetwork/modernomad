@@ -16,7 +16,7 @@ from calendar import HTMLCalendar
 from django.utils import timezone
 
 # imports for signals
-import django.dispatch
+import django.dispatch 
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
 
@@ -26,18 +26,18 @@ from django.template.loader import get_template
 from django.template import Context
 
 
-# there is a weird db issue it seems with setting a field to null=False after it has been defined as null=True.
+# there is a weird db issue it seems with setting a field to null=False after it has been defined as null=True. 
 # see http://od-eon.com/blogs/stefan/adding-not-null-column-south/ and
 # http://south.aeracode.org/ticket/782
-# one suggestion was to try setting default value in the model file, but this hasn't worked either.
-# currently the field are still set to null=True, though they shouldn't be.
+# one suggestion was to try setting default value in the model file, but this hasn't worked either. 
+# currently the field are still set to null=True, though they shouldn't be. 
 
 def location_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
 	# rename file to random string
 	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
 
-	upload_path = "locations/"
+	upload_path = "data/locations/%s/" % instance.name 
 	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
 	if not os.path.exists(upload_abs_path):
 		os.makedirs(upload_abs_path)
@@ -118,7 +118,7 @@ class RoomManager(models.Manager):
 		the_day = start
 		while the_day < end:
 			# return only rooms available for bookings (currently just guest rooms)
-			# XXX TODO add private rooms that have temporarily been added to the pool).
+			# XXX TODO add private rooms that have temporarily been added to the pool). 
 
 			rooms_at_location = list(self.filter(primary_use="guest").filter(location=location))
 			avail_today = {}
@@ -131,12 +131,12 @@ class RoomManager(models.Manager):
 				# now, then it won't be listed in the available
 				# rooms_today, so we can't remove it. so just
 				# skip over it, since it won't show up in
-				# available rooms anyway.
+				# available rooms anyway. 
 				try:
 					if avail_today[booking.room] <= 0:
 						avail_today[booking.room] = 0
 					else:
-						avail_today[booking.room] = avail_today[booking.room] -1
+						avail_today[booking.room] = avail_today[booking.room] -1 
 				except:
 					pass
 			availability[the_day] = avail_today
@@ -175,12 +175,12 @@ class RoomManager(models.Manager):
 				# now, then it won't be listed in the available
 				# rooms_today, so we can't remove it. so just
 				# skip over it, since it won't show up in
-				# available rooms anyway.
+				# available rooms anyway. 
 				try:
 					if rooms_today[booking.room] <= 0:
 						rooms_today[booking.room] = 0
 					else:
-						rooms_today[booking.room] = rooms_today[booking.room] -1
+						rooms_today[booking.room] = rooms_today[booking.room] -1 
 				except:
 					pass
 			the_day = the_day + datetime.timedelta(1)
@@ -189,7 +189,7 @@ class RoomManager(models.Manager):
 			# changes, etc.
 			full_today = [room for room in rooms_today.keys() if rooms_today[room] <=0 ]
 			# can use sets here since the rooms are unique anyway
-			room_list = list(set(room_list) - set(full_today))
+			room_list = list(set(room_list) - set(full_today)) 
 		free_rooms = room_list
 		return free_rooms
 
@@ -198,7 +198,7 @@ def room_img_upload_to(instance, filename):
 	# rename file to random string
 	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
 
-	upload_path = "rooms/"
+	upload_path = "data/rooms/%s/" % instance.name 
 	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
 	if not os.path.exists(upload_abs_path):
 		os.makedirs(upload_abs_path)
@@ -214,7 +214,7 @@ class RoomCalendar(HTMLCalendar):
 
 	def formatday(self, day, weekday):
 		# XXX warning: if there are ANY errors this method seems to just punt
-		# and return None. makes it very hard to debug.
+		# and return None. makes it very hard to debug. 
 		if day == 0:
 			return '<td class="noday">&nbsp;</td>' # day outside month
 		else:
@@ -283,9 +283,9 @@ class ReservationManager(models.Manager):
 		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
 		return (list(approved_reservations) + list(confirmed_reservations))
 
-	def confirmed_on_date(self, the_day, location):
+	def confirmed_on_date(self, the_day, location):	
 		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
-		return list(confirmed_reservations)
+		return list(confirmed_reservations)	
 
 class TodayManager(models.Manager):
 	#def get_query_set(self):
@@ -293,7 +293,7 @@ class TodayManager(models.Manager):
 	#	today = datetime.date.today()
 	#	return super(TodayManager, self).get_query_set().filter(arrive__lte = today).filter(depart__gte = today)
 
-	def confirmed(self, location):
+	def confirmed(self, location):	
 		# return the reservations that intersect today and are confirmed.
 		today = datetime.date.today()
 		return super(TodayManager, self).get_query_set().filter(location=location).filter(arrive__lte = today).filter(depart__gte = today).filter(status='confirmed')
@@ -336,7 +336,7 @@ class Reservation(models.Model):
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
-	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
+	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.") 
 
 	# managers
 	today = TodayManager() # approved and confirmed reservations that intersect today
@@ -352,7 +352,7 @@ class Reservation(models.Model):
 	def total_nights(self):
 		return (self.depart - self.arrive).days
 	total_nights.short_description = "Nights"
-
+	
 	def default_rate(self):
 		# default_rate always returns the default rate regardless of comps or
 		# custom rates.
@@ -365,7 +365,7 @@ class Reservation(models.Model):
 
 	def total_value(self):
 		# value of the reservation, regardless of what has been paid
-		# get_rate checks for comps and custom rates.
+		# get_rate checks for comps and custom rates. 
 		return self.total_nights() * self.get_rate()
 
 	def total_owed(self):
@@ -417,7 +417,7 @@ class Reservation(models.Model):
 			self.delete_bill()
 
 		line_items = []
-
+		
 		# The first line item is for the room charge
 		room_charge_desc = "%s (%d * $%d)" % (self.room.name, self.total_nights(), self.get_rate())
 		room_charge = self.total_value()
@@ -435,7 +435,7 @@ class Reservation(models.Model):
 		if save:
 			for item in line_items:
 				item.save()
-
+				
 		return line_items
 
 	def delete_bill(self):
@@ -443,7 +443,7 @@ class Reservation(models.Model):
 
 	def bill_amount(self):
 		# Bill amount comes from generated bill line items
-		amount = 0
+		amount = 0 
 		for line_item in BillLineItem.objects.filter(reservation=self):
 			if not line_item.fee or not line_item.paid_by_house:
 				amount = amount + line_item.amount
@@ -451,7 +451,7 @@ class Reservation(models.Model):
 
 	def house_fees(self):
 		# Pull the house fees from the generated bill line items
-		amount = 0
+		amount = 0 
 		for line_item in BillLineItem.objects.filter(reservation=self):
 			if line_item.fee and line_item.paid_by_house:
 				amount = amount + line_item.amount
@@ -459,7 +459,7 @@ class Reservation(models.Model):
 
 	def non_house_fees(self):
 		# Pull the non-house fees from the generated bill line items
-		amount = 0
+		amount = 0 
 		for line_item in BillLineItem.objects.filter(reservation=self):
 			if line_item.fee and not line_item.paid_by_house:
 				amount = amount + line_item.amount
@@ -471,10 +471,10 @@ class Reservation(models.Model):
 	def charge_card(self):
 		# stripe will raise a stripe.CardError if the charge fails. this
 		# function purposefully does not handle that error so the calling
-		# function can decide what to do.
+		# function can decide what to do. 
 		domain = 'http://' + Site.objects.get_current().domain
-		descr = "%s %s from %s - %s. Details: %s." % (self.user.first_name,
-				self.user.last_name, str(self.arrive),
+		descr = "%s %s from %s - %s. Details: %s." % (self.user.first_name, 
+				self.user.last_name, str(self.arrive), 
 				str(self.depart), domain + self.get_absolute_url())
 
 		amt_owed = self.total_owed_in_cents()
@@ -487,9 +487,9 @@ class Reservation(models.Model):
 				)
 
 		# Store the charge details in a Payment object
-		Payment.objects.create(reservation=self,
+		Payment.objects.create(reservation=self, 
 			payment_service = "Stripe",
-			paid_amount = (charge.amount/100),
+			paid_amount = (charge.amount/100), 
 			transaction_id = charge.id
 		)
 
@@ -518,11 +518,11 @@ class Reservation(models.Model):
 		self.save()
 
 	def cancel(self):
-		# cancel this reservation.
+		# cancel this reservation. 
 		self.status = Reservation.CANCELED
 		self.save()
 		self.delete_bill()
-
+	
 	def comp(self):
 		self.set_rate(0)
 
@@ -587,26 +587,26 @@ def profile_img_upload_to(instance, filename):
 	# rename file to random string
 	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
 
-	upload_path = "avatars/%s/" % instance.user.username
+	upload_path = "data/avatars/%s/" % instance.user.username
 	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
 	if not os.path.exists(upload_abs_path):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)
 
 def get_default_profile_img():
-	path = os.path.join(settings.MEDIA_ROOT, "avatars/default.jpg")
+	path = os.path.join(settings.MEDIA_ROOT, "data/avatars/default.jpg")
 	return file(path)
 
 class UserProfile(models.Model):
 	IMG_SIZE = (300,300)
 	IMG_THUMB_SIZE = (150,150)
 
-	# User model fields: username, first_name, last_name, email,
+	# User model fields: username, first_name, last_name, email, 
 	# password, is_staff, is_active, is_superuser, last_login, date_joined,
 	user = models.OneToOneField(User)
 	updated = models.DateTimeField(auto_now=True)
 	image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.")
-	image_thumb = models.ImageField(upload_to="avatars/%Y/%m/%d/", blank=True, null=True)
+	image_thumb = models.ImageField(upload_to="data/avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
 
@@ -631,14 +631,14 @@ def size_images(sender, instance, **kwargs):
 	try:
 		obj = UserProfile.objects.get(pk=instance.pk)
 	except UserProfile.DoesNotExist:
-		# if the reservation does not exist yet, then it's new.
+		# if the reservation does not exist yet, then it's new. 
 		obj = None
 
 	# if this is the default avatar, reuse it for the thumbnail (lazy, but only
 	# for backwards compatibility for those who created accounts before images
 	# were required)
-	if instance.image.name == "avatars/default.jpg":
-		instance.image_thumb = "avatars/default.thumb.jpg"
+	if instance.image.name == "data/avatars/default.jpg":
+		instance.image_thumb = "data/avatars/default.thumb.jpg"
 
 	elif instance.image and (obj == None or obj.image != instance.image or obj.image_thumb == None):
 		im = Image.open(instance.image)
@@ -664,18 +664,18 @@ def size_images(sender, instance, **kwargs):
 		instance.image_thumb = thumb_rel_path
 
 		# now delete any old images
-		if obj and obj.image and obj.image.name != "avatars/default.jpg":
+		if obj and obj.image and obj.image.name != "data/avatars/default.jpg":
 			default_storage.delete(obj.image.path)
 
-		if obj and obj.image_thumb and obj.image_thumb.name != "avatars/default.thumb.jpg":
+		if obj and obj.image_thumb and obj.image_thumb.name != "data/avatars/default.thumb.jpg":
 			default_storage.delete(obj.image_thumb.path)
 
 class EmailTemplate(models.Model):
 	''' Templates for the typical emails sent by the system. The from-address
 	is usually set by DEFAULT_FROM_ADDRESS in settings, and the recipients are
-	determined by the action and reservation in question. '''
+	determined by the action and reservation in question. ''' 
 
-	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
+	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX 
 	FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
 
 	body = models.TextField(verbose_name="The body of the email")
@@ -692,14 +692,14 @@ class Fee(models.Model):
 	percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
 	paid_by_house = models.BooleanField(default=False)
 
-	def __unicode__(self):
+	def __unicode__(self): 
 		return self.description
 
 class LocationFee(models.Model):
 	location = models.ForeignKey(Location)
 	fee = models.ForeignKey(Fee)
-
-	def __unicode__(self):
+	
+	def __unicode__(self): 
 		return '%s: %s' % (self.location, self.fee)
 
 class BillLineItem(models.Model):
@@ -709,5 +709,10 @@ class BillLineItem(models.Model):
 	amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	paid_by_house = models.BooleanField(default=True)
 
-	def __unicode__(self):
+	def __unicode__(self): 
 		return '%s: %s' % (self.reservation.location, self.description)
+
+
+
+
+
