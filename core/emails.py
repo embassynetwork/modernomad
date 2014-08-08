@@ -38,8 +38,6 @@ def current(request, location_slug):
 	message_headers = json.loads(message_headers)
 	message_header_keys = [item[0] for item in message_headers]
 	print message_header_keys
-	print '\n\nrequest.POST'
-	print request.POST
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
 	# A List-Id header will only be present if it has been added manually in
@@ -80,9 +78,9 @@ def current(request, location_slug):
 	# Now loop through all the emails and build the bcc list we will use.
 	# This makes sure there are no duplicate emails.
 	bcc_list = []
-	for person in current_emails:
-		if person.email not in bcc_list:
-			bcc_list.append(person.email)
+	for email in current_emails:
+		if email not in bcc_list:
+			bcc_list.append(email)
 	print bcc_list
 
 	# prefix subject, but only if the prefix string isn't already in the
