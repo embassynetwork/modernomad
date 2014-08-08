@@ -51,18 +51,21 @@ def current(request, location_slug):
 	body_plain = request.POST.get('body-plain')
 	body_html = request.POST.get('body-html')
 
-	# find who is currently at this location and add them to a bcc list 
-	reservations_here_today = Reservation.today.confirmed(location)
-	guest_emails = []
-	for r in reservations_here_today:
-		guest_emails.append(r.user.email)
+	# Add any current reservations
+	current_emails = [] 
+	for r in Reservation.today.confirmed(location):
+		current_emails.append(r.user.email)
 
-	residents = location.residents.all()
-	resident_emails = []
-	for person in residents:
-		resident_emails.append(person.email)
-	current_emails = guest_emails + resident_emails 
+	# Add all the residents at this location
+	for r in location.residents.all():
+		current_emails.append(r.email)
+		
+	# Add the house admins
+	for a in location.house_admins.all():
+		current_emails.append(a.email)
 
+	# Now loop through all the emails and build the bcc list we will use.
+	# This makes sure there are no duplicate emails.
 	bcc_list = []
 	for person in current_emails:
 		if person.email not in bcc_list:
