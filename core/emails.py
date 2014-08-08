@@ -9,6 +9,7 @@ from models import get_location
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.utils import timezone
+import json
 import requests
 import datetime
 
@@ -30,13 +31,20 @@ def current(request, location_slug):
 		# XXX TODO reject and bounce back to sender?
 		return HttpResponse(status=200)
 
+	message_headers = json.loads(request.POST.get('message-headers'))
+	print 'message headers'
+	print message_headers
+	print '\n\nrequest.POST'
+	print request.POST
+
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
 	# A List-Id header will only be present if it has been added manually in
 	# this function, ie, if we have already processed this message. 
-	if request.POST.get('List-Id'):
+	if request.POST.get('List-Id') or message_headers.get('List-Id'):
 		# mailgun requires a code 200 or it will continue to retry delivery
 		return HttpResponse(status=200)
-	if message['Auto-Submitted'] and message['Auto-Submitted'] != 'no':
+
+	if message_headers['Auto-Submitted'] and message_headers['Auto-Submitted'] != 'no':
 		return HttpResponse(status=200)
 
 	# TODO? make sure the sender is on the list?
@@ -84,7 +92,7 @@ def current(request, location_slug):
 	# send the message 
 	mailgun_api_key = settings.MAILGUN_API_KEY
 	list_domain = settings.LIST_DOMAIN
-	list_address = "current@%s.mail.embassynetwork.com" % location.slug
+	list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
 	resp = requests.post(
 	    "https://api.mailgun.net/v2/%s/messages" % list_domain,
 	    auth=("api", mailgun_api_key),
