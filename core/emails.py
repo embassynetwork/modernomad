@@ -35,6 +35,7 @@ def current(request, location_slug):
 
 	# we think that message_headers is a list of strings
 	message_headers = request.POST.get('message-headers')
+	message_headers = json.loads(message_headers)
 	message_header_keys = [item[0] for item in message_headers]
 	print message_header_keys
 	print '\n\nrequest.POST'
