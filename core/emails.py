@@ -422,7 +422,6 @@ def admin_daily_update(location):
 		print resp.text
 		return HttpResponse(status=200)
 
-
 def guest_welcome(reservation):
 	''' Send guest a welcome email'''
 	# this is split out by location because each location has a timezone that affects the value of 'today'
@@ -432,7 +431,7 @@ def guest_welcome(reservation):
 	c = Context({
 		'first_name': reservation.user.first_name,
 		'day_of_week' : day_of_week,
-		'site_url': urlresolvers.reverse('location_home'),
+		'site_url': urlresolvers.reverse('location_home', args=(reservation.location.slug)),
 		'house_code': location.house_access_code,
 		'location_name': location.name,
 		'address': location.address,
