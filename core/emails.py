@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from models import get_location
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import json
 import requests
@@ -23,6 +24,7 @@ weekday_number_to_name = {
 	6: "Sunday"
 }
 
+@csrf_exempt
 def current(request, location_slug):
 	# fail gracefully if location does not exist
 	try:
