@@ -13,7 +13,6 @@ from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, Paym
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
-from django.utils import simplejson
 from core.decorators import house_admin_required
 from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee
@@ -505,7 +504,7 @@ def ReservationSubmit(request, location_slug):
 	room_list = {}
 	for room in rooms:
 		room_list[room.name] = room.default_rate
-	room_list = simplejson.dumps(room_list)
+	room_list = json.dumps(room_list)
 	return render(request, 'reservation.html', {'form': form, "room_list": room_list, 
 		'max_days': location.max_reservation_days, 'location': location })
 
