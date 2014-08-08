@@ -164,13 +164,9 @@ LOGGING = {
 			'level': 'INFO',
 			'propagate': True,
 		},
-		'staff': {
+		'core': {
 			'handlers': ['file'],
-			'level': 'INFO',
-		},
-		'arpwatch': {
-			'handlers': ['file'],
-			'level': 'INFO',
+			'level': 'DEBUG',
 		},
 	},
 }
