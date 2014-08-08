@@ -1,13 +1,13 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
 {% block content %}
 
 {% include "snippets/messages.html" %}
 
 <h3>Reservation for 
-	{% if reservation.hosted %}
-		{{ reservation.guest_name }}, hosted by 
-	{% endif %}
-	<em><a href="/people/{{reservation.user.username}}/">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+
 	{% ifequal reservation.user user %}
 		<span class="res-value text-success">Total: ${{ reservation.bill_amount|floatformat:2 }}</span>
 	{% endifequal %}
@@ -29,19 +29,19 @@
 			Cancellation policy for the {{ reservation.room }} 
 			is {{reservation.room.cancellation_policy}}.</p>
 
-			<form action="/reservation/{{reservation.id}}/confirm/" method="POST" id="payform">
+			<form action="{% url 'reservation_confirm' reservation.id %}" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 					value="Submit payment." >
 			</form>
 		</div>
-	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.user.profile.customer_id %}
+	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.is_paid %}
 		<div>
 			<p><span class="text-error">Action Required! Please pay for your
 				reservation to confirm. Cancellation policy for the {{ reservation.room }} is
 				{{reservation.room.cancellation_policy}}.</p>
 
-			<form action="/people/{{reservation.user.username}}/addcard/" method="POST" id="payform">
+			<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="hidden" value={{ reservation.id }} name="res-id">
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
@@ -54,8 +54,9 @@
 			</form>
 		</div>
 
-	{% elif reservation.is_confirmed and reservation.user.profile.customer_id %}
+	{% elif reservation.is_confirmed and reservation.is_paid %}
 		<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
+		<a class="btn btn-lg res-status-btn" type="button" href="{% url 'reservation_receipt' location.slug reservation.id %}">View Receipt</a>
 
 	{% elif reservation.is_canceled %}
 		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Canceled</div>
@@ -73,30 +74,13 @@
 <div class="res-detail"><b>In town for?</b> {{ reservation.purpose }}</div>
 <div class="res-detail"><b>Additional Comments:</b> {{ reservation.comments }}</div>
 
-{% if reservation.hosted and reservation.guest %}
-{% with guest=reservation.guest%}
-
-	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
-
-	<div class="res-detail"><b>Current Projects:</b> {{ guest.projects }}</div>
-	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.sharing }}</div>
-	<div class="res-detail"><b>Discussion topics:</b> {{ guest.discussion }}</div>
-	<div class="res-detail"><b>Referral: </b> {{ guest.referral }}</div>
-
-{% endwith %}
-{% else %}
-
 {% with guest=reservation.user%}
-
 	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
-
 	<div class="res-detail"><b>Current Projects:</b> {{ guest.profile.projects }}</div>
 	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.profile.sharing }}</div>
 	<div class="res-detail"><b>Discussion topics:</b> {{ guest.profile.discussion }}</div>
 	<div class="res-detail"><b>Referral: </b> {{ guest.profile.referral }}</div>
-
 {% endwith %}
-{% endif %}
 
 {% ifequal reservation.user user %}
 	<div class="res-modify-btn">
@@ -155,7 +139,7 @@
 					name: "The Embassy Network",
 					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.rate }}/night.",
 					panelLabel:"Pay",
-					image: "/media/img/embassy-front-1-128x128.jpg",
+					image: "{% static '/img/embassy-front-1-128x128.jpg' %}",
 					token: token
 				});
 			}

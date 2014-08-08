@@ -20,22 +20,15 @@
 	<div class="reservation-title">
 	<a id="reservation{{r.id}}"></a>
 	<h4 class="inline">
-	{% if r.hosted %}
-		{{ r.guest_name }} 
-	{% else %}
-		<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
-	{% endif %}
+	<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
 	</h4>
 	<a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a> 
 	{% if r.arrive == today %}
 	- <em>today!</em>
 	{% endif %}
-	{% if r.hosted %}
-		(hosted by <a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>)
-	{% endif %}
 	{% if r.is_approved %}
 		(pending confirmation from guest)
-		{% endif %}
+	{% endif %}
 	</div>
 
 	<div class="img-polaroid float-left">

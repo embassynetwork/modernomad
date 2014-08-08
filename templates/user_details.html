@@ -1,4 +1,5 @@
 {% extends "root.html" %}
+{% load staticfiles %}
 
 {% block body %}
 
@@ -143,7 +144,7 @@
 					key: "{{ stripe_publishable_key }}",
 					name: "The Embassy Network",
 					panelLabel:"Save Card",
-					image: "/media/img/embassy-front-1-128x128.jpg",
+					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
 					token: token
 				});
 			} else {

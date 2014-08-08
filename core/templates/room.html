@@ -1,18 +1,23 @@
 {% extends "base.html" %}
-{% comment %}
-{% load imagetags %}
-{% endcomment %}
 
 {% block content %}
 
 <div class="row">
 	<div class="col-md-12"><a href="{% url 'location_stay' location.slug %}"><span class="glyphicon glyphicon-chevron-left"></span> back to all rooms</a></div>
+
+	<div class="button-spacer">
+		<div class="col-md-4 col-md-offset-4">
+			<a class="btn btn-lg btn-rouge" type="button" href="{% url 'reservation_create' location.slug %}">Make a Reservation</a>
+		</div>
+	</div>
+
 	<div class="col-md-12">
 		<h2>{{room.name}}</h2>
 		{% if room.shared %}
 			<div class="text-primary"> <span class="glyphicon glyphicon-bullhorn"></span> This is a shared room</div>
 		{% endif %}
 	</div>
+	
 	<div class="col-md-9 top-spacer">
 		<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
 		<div><p>{{ room.description }}</p></div>
@@ -23,14 +28,13 @@
 			<a class="room-cal-req" href="{% url 'room_cal_request' location.slug room.id %}?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
 			<a class="room-cal-req" href="{% url 'room_cal_request' location.slug room.id %}?month={{next_month.month}}&year={{next_month.year}}">Next</a> 
 		</div>
-
 	</div>
+	
 	{% if room.image %} 
 		<div class="col-md-3 room-info-image">
 			<img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-info-image" />
 		</div> 
 	{% endif %}
-
 
 </div>
 {% endblock %}

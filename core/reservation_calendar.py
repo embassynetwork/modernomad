@@ -45,11 +45,8 @@ class GuestCalendar(HTMLCalendar):
 					if reservation.is_apprived():
 						body.append('<a href="#reservation%d" class="greyed-out">' % reservation.id)
 					else:
-						body.append('<a href="#reservation%d">' % reservation.id)				
-					if reservation.hosted:
-						body.append(esc("%s (%s)" % (reservation.guest_name.title(), room_type)))
-					else:
-						body.append(esc("%s (%s)" % (reservation.user.first_name.title(), room_type)))
+						body.append('<a href="#reservation%d">' % reservation.id)
+					body.append(esc("%s (%s)" % (reservation.user.first_name.title(), room_type)))
 					body.append('</a>')
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					

@@ -3,17 +3,19 @@
 ========================================================== */
 @font-face {
 	font-family:'Clarendon';
-	src: url(/media/fonts/Clarendon_LT_Roman.ttf) format("truetype");
+	src: url(/static/fonts/Clarendon_LT_Roman.ttf) format("truetype");
 }
 
 @font-face {
 	font-family:'Clarendon Light';
-	src: url(/media/fonts/Clarendon_LT_Light.ttf) format("truetype");
+	src: url(/static/fonts/Clarendon_LT_Light.ttf) format("truetype");
 }
 
 body {
 	font-family:'Open Sans', sans-serif;
 	-webkit-font-smoothing: antialiased;
+	margin-left: 1em;
+	margin-right: 1em;
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
@@ -124,7 +126,7 @@ a:hover {
 #house {
 	background:#2f2f2f;
 	color:#fff;
-	//height:223px;
+	height:223px;
 }
 
 #house-image {

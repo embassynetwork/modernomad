@@ -88,7 +88,7 @@ class UserProfileForm(forms.ModelForm):
 			for l in raw_link_list:
 				try:
 					cleaned = url.clean(l.strip())
-					print cleaned 
+					#print cleaned 
 					cleaned_links.append(cleaned)
 				except forms.ValidationError:
 					# customize the error raised by UrlField.
@@ -131,10 +131,6 @@ class ReservationForm(forms.ModelForm):
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
-		hosted = cleaned_data.get('hosted')
-		guest_name = cleaned_data.get('guest_name')
-		if hosted and not guest_name:
-			self._errors["guest_name"] = self.error_class(['Hosted reservations require a guest name.'])
 		arrive = cleaned_data.get('arrive')
 		depart = cleaned_data.get('depart')
 		if (depart - arrive).days > settings.MAX_RESERVATION_DAYS:

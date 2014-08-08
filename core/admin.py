@@ -144,8 +144,8 @@ class ReservationAdmin(admin.ModelAdmin):
 		self.message_user(request, msg)
 
 	model = Reservation
-	list_filter = ('status', 'hosted')
-	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, fees, bill, to_house, paid )
+	list_filter = ('status',)
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
 	list_editable = ('status',)
 	inlines = [BillLineItemInline, PaymentInline]
 	ordering = ['depart',]

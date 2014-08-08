@@ -1,16 +1,19 @@
 Django==1.6
-django-registration==1.0
-django-tastypie
+django-registration>=1.0
+django-tastypie>=0.11.1
 South>=1.0
-Pillow
+Pillow>=2.5.1
 django-celery>=3.1
-Celery
-eventbrite
-lxml
+Celery>=3.1.13
+eventbrite>=0.45
+billiard>=3.3.0.18
+kombu>=3.0.21
+pytz>=2014.4
+
+# Django Gather code
 git+https://git@github.com/opendoor/django-gather.git
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
 # line using:
 # pip install --index-url https://code.stripe.com --upgrade stripe
-

@@ -33,6 +33,8 @@ from emails import send_receipt, new_reservation_notify, updated_reservation_not
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
+from django.template import Context
 
 def location(request, location_slug):
 	location = my_object = get_object_or_404(Location, slug=location_slug)
@@ -347,8 +349,8 @@ def room_cal_request(request, location_slug, room_id):
 	month = int(request.GET.get("month"))
 	year = int(request.GET.get("year"))
 	cal_html = room.availability_calendar_html(month=month, year=year)
-	print 'here is the calendar info for %s' % room.name
-	print cal_html
+	#print 'here is the calendar info for %s' % room.name
+	#print cal_html
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	link_html = '''
 		<a class="room-cal-req" href="%s?month=%d&year=%d">Previous</a> | 
@@ -478,7 +480,7 @@ def CheckRoomAvailability(request, location_slug):
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
 	if request.method == 'POST':
-		print request.POST
+		#print request.POST
 		#form = get_reservation_form_for_perms(request, post=True, instance=False)
 		form = ReservationForm(location, request.POST)
 		if form.is_valid():
@@ -545,7 +547,7 @@ def UserEdit(request, username):
 				print "request data: image field"
 				img_data = request.POST.get("image")
 				if img_data:
-					print img_data
+					#print img_data
 					img_data = base64.b64decode(img_data)
 					filename = "%s.png" % uuid.uuid4()
 					# XXX make the upload path a fixed setting in models, since it's
@@ -572,8 +574,8 @@ def UserEdit(request, username):
 			has_image = True
 		else:
 			has_image = False
-		print 'profile image already?'
-		print has_image
+		#print 'profile image already?'
+		#print has_image
 		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
 	return HttpResponseRedirect("/")
 
@@ -671,8 +673,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 
 				# if the dates have been changed, and the reservation isn't
 				# still pending to begin with, notify an admin and go back to
-				# pending (unless it's hosted, then we don't generate an
-				# email).
+				# pending.
 				if (not reservation.is_pending and (reservation.arrive != original_arrive or 
 					reservation.depart != original_depart or reservation.room != original_room )):
 
@@ -758,6 +759,27 @@ def ReservationDelete(request, reservation_id, location_slug):
 		return HttpResponseRedirect("/")
 
 @login_required
+def ReservationReceipt(request, location_slug, reservation_id):
+	location = get_location(location_slug)
+	reservation = get_object_or_404(Reservation, id=reservation_id)
+	if request.user != reservation.user or location != reservation.location:
+		if not request.user.is_staff:
+			return HttpResponseRedirect("/404")
+
+	# I want to render the receipt exactly like we do in the email
+	htmltext = get_template('emails/receipt.html')
+	c = Context({
+		'today': timezone.localtime(timezone.now()), 
+		'user': reservation.user, 
+		'location': reservation.location,
+		'reservation': reservation,
+		}) 
+	receipt_html = htmltext.render(c)
+
+	return render(request, 'reservation_receipt.html', {'receipt_html': receipt_html, 'reservation': reservation, 
+		'location': location })
+
+@login_required
 def PeopleDaterangeQuery(request, location_slug):
 	location = get_location(location_slug)
 	start_str = request.POST.get('start_date')
@@ -780,7 +802,6 @@ def PeopleDaterangeQuery(request, location_slug):
 	html = html.strip(", ")
 	html += "</div>"
 	return HttpResponse(html)
-	
 
 # ******************************************************
 #           reservation management views
@@ -904,7 +925,6 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
-
 @house_admin_required
 def ReservationToggleComp(request, location_slug, reservation_id):
 	if not request.method == 'POST':
@@ -928,12 +948,11 @@ def ReservationSendMail(request, location_slug, reservation_id):
 		return HttpResponseRedirect('/404')
 
 	location = get_location(location_slug)
-	print request.POST
 	subject = request.POST.get("subject")
 	recipient = [request.POST.get("recipient"),]
 	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
 	# TODO - This isn't fully implemented yet -JLS
-	send_from_location_address(subject, text_content, html_content, recipient, location)
+	send_from_location_address(subject, body, None, recipient, location)
 
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation.mark_last_msg() 

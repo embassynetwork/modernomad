@@ -2,7 +2,7 @@
 # (ie, ensure local_settings.py is in .gitignore)
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'd+xvh@)+d_iw%%w65+61&amp;2(w7upu*rt7l%n3d_li#1^pt@133^'
+SECRET_KEY = 'yourownprivatekeythatnooneelseknowsbutyou'
 
 # use XS_SHARING_ALLOWED_ORIGINS = '*' for all domains
 XS_SHARING_ALLOWED_ORIGINS = "http://localhost:8989/"
@@ -13,14 +13,6 @@ XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 DEVELOPMENT = 0
 PRODUCTION = 1
 
-# What is the name of this house, building, establishment, etc.?
-LOCATION_NAME = "Embassy SF"
-LOCATION_ADDRESS = "399 Webster Street, San Francisco, 94117"
-
-# HOUSE INFO
-SSID = "Your wireless network name"
-SSID_PASSWORD = "your wireness network password"
-
 # default mode is dev. change to production as appropriate. 
 MODE = DEVELOPMENT
 
@@ -30,9 +22,6 @@ MAX_RESERVATION_DAYS = 14
 # how many days ahead to send the welcome email to guests with relevan house
 # info.
 WELCOME_EMAIL_DAYS_AHEAD = 2
-
-# if your house has a private access code, enter it here. 
-HOUSE_ACCESS_CODE = "1234"
 
 # required for django-gather app
 LOCATION_MODEL = 'gather.Location'
@@ -69,15 +58,6 @@ LOCAL_TEMPLATE_DIRS = (
 EMAIL_SUBJECT_PREFIX = "[Your House Name Here] "
 DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
 
-# social media
-TWITTER = "your twitter handle"
-FACEBOOK_GROUP = "your facebook group"
-EVENTS_LINK = "main events link"
-
-# eventbrite
-EVENTBRITE_APP_KEY = "your app key here"
-EVENTBRITE_USER_KEY = "your user key here"
-
 # celery configuration options
 # note!! you must add the broker and broker user to rabbitmq that corresponds
 # to these credentials. this is done by:
@@ -87,7 +67,6 @@ EVENTBRITE_USER_KEY = "your user key here"
 # and then you MUST restart rabbitmq:
 # sudo rabbitmqctl reset
 BROKER_URL = 'amqp:myusername:mypassword@hostname/vhost'
-
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True

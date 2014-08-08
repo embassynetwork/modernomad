@@ -59,6 +59,7 @@ class Location(models.Model):
 	stay_page = models.TextField()
 	front_page_stay = models.TextField()
 	front_page_participate = models.TextField()
+	announcement = models.TextField(blank=True, null=True)
 	max_reservation_days = models.IntegerField(default=14)
 	welcome_email_days_ahead = models.IntegerField(default=2)
 	house_access_code = models.CharField(max_length=50, blank=True, null=True)
@@ -322,12 +323,6 @@ class Reservation(models.Model):
 			(CANCELED, 'Canceled'),
 		)
 
-	# hosted reservations - only exposed to house_admins. form fields are
-	# rendered in the order they are declared in the model, so leave this
-	# order as-is for these fields to appear at the top of the creation and
-	# edit forms.
-	hosted = models.BooleanField(default=False, help_text="Hosting a guest who doesn't have an account.")
-	guest_name = models.CharField(max_length=200, help_text="Guest name if you are hosting.", blank=True, null=True)
 	location = models.ForeignKey(Location, related_name='reservations', null=True)
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
@@ -554,9 +549,11 @@ class Reservation(models.Model):
 
 	def payment_date(self):
 		# Date of the last payment
-		payment = Payment.objects.filter(reservation=self).order_by('payment_date').reverse()[0]
-		if payment:
-			return payment.payment_date
+		payments = Payment.objects.filter(reservation=self).order_by('payment_date').reverse()
+		if payments:
+			payment = payments[0]
+			if payment:
+				return payment.payment_date
 
 	def bill_line_items(self):
 		return BillLineItem.objects.filter(reservation=self)
@@ -631,11 +628,8 @@ User._meta.ordering = ['username']
 
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):
-	print 'in size images'
-	print instance.image
 	try:
 		obj = UserProfile.objects.get(pk=instance.pk)
-		print obj.image
 	except UserProfile.DoesNotExist:
 		# if the reservation does not exist yet, then it's new. 
 		obj = None

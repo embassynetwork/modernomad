@@ -1,4 +1,6 @@
 {% extends "root.html" %}
+{% load staticfiles %}
+
 {% block body %}
 
 {% if messages %}
@@ -72,7 +74,7 @@ about, and possible connections around work, projects and ideas. It should only 
 {% endblock %}
 
 {% block extrajs %}
-	<script src="/media/js/imgcrop.js"></script>
+	<script src="{% static 'js/imgcrop.js' %}"></script>
 	<script>
 		$("#newprofileform").submit(function (e) {
 			if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {

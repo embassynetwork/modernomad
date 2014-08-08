@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
 {% block content %}
 
 <ul class="nav nav-tabs">
@@ -41,8 +43,8 @@
 {% endblock %}
 
 {% block extrajs %}
-<script type="text/javascript" src="/media/js/jquery.dataTables.js"></script>
-<link href="/media/css/jquery.dataTables.css" rel="stylesheet">
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.js' %}"></script>
+<link href="{% static 'css/jquery.dataTables.css' %}" rel="stylesheet">
 <script>
 
 jQuery.extend( jQuery.fn.dataTableExt.oSort, {
