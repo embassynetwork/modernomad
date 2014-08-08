@@ -35,19 +35,20 @@ def current(request, location_slug):
 
 	# we think that message_headers is a list of strings
 	message_headers = request.POST.get('message-headers')
-	print 'message headers'
-	print message_headers
+	message_header_keys = [item[0] for item in message_headers]
+	print message_header_keys
 	print '\n\nrequest.POST'
 	print request.POST
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
 	# A List-Id header will only be present if it has been added manually in
 	# this function, ie, if we have already processed this message. 
-	if request.POST.get('List-Id') or 'List-Id' in message_headers:
+	if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
 		# mailgun requires a code 200 or it will continue to retry delivery
 		return HttpResponse(status=200)
 
-	if message_headers['Auto-Submitted'] and message_headers['Auto-Submitted'] != 'no':
+	#if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
+	if 'Auto-Submitted' in message_header_keys: 
 		return HttpResponse(status=200)
 
 	# TODO? make sure the sender is on the list?
