@@ -33,7 +33,8 @@ def current(request, location_slug):
 		# XXX TODO reject and bounce back to sender?
 		return HttpResponse(status=200)
 
-	message_headers = json.loads(request.POST.get('message-headers'))
+	# we think that message_headers is a list of strings
+	message_headers = request.POST.get('message-headers')
 	print 'message headers'
 	print message_headers
 	print '\n\nrequest.POST'
