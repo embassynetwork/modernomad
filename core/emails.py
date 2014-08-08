@@ -43,7 +43,7 @@ def current(request, location_slug):
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
 	# A List-Id header will only be present if it has been added manually in
 	# this function, ie, if we have already processed this message. 
-	if request.POST.get('List-Id') or message_headers.get('List-Id'):
+	if request.POST.get('List-Id') or if 'List-Id' in message_headers:
 		# mailgun requires a code 200 or it will continue to retry delivery
 		return HttpResponse(status=200)
 
