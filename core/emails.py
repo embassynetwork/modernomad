@@ -13,6 +13,7 @@ from django.utils import timezone
 import json
 import requests
 import datetime
+import logging
 
 logger = logging.getLogger(__name__)
 
