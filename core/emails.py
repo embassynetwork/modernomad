@@ -37,6 +37,8 @@ def current(request, location_slug):
 		print 'location not found'
 		return HttpResponse(status=200)
 
+	logger.debug('location: %s' % location)
+
 	# we think that message_headers is a list of strings
 	message_headers = request.POST.get('message-headers')
 	message_headers = json.loads(message_headers)
