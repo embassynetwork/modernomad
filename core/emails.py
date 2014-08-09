@@ -121,8 +121,10 @@ def current(request, location_slug):
 			# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
 			# to be common these days 
 			"h:Reply-To": list_address,
-			"o:testmode": "yes"
-
+			if settings.DEBUG:
+				# When this is true you will see this message in the mailgun logs but
+				# nothing will actually be delivered
+				"o:testmode": "yes"
 		}
 	)
 	'message was attempted to be sent. response text was:'
