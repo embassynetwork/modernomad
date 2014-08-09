@@ -104,29 +104,28 @@ def current(request, location_slug):
 	mailgun_api_key = settings.MAILGUN_API_KEY
 	list_domain = settings.LIST_DOMAIN
 	list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
-	resp = requests.post(
-	    "https://api.mailgun.net/v2/%s/messages" % list_domain,
-	    auth=("api", mailgun_api_key),
-	    data={"from": from_address,
-			"to": [recipient, ],
-			"bcc": bcc_list,
-			"subject": subject,
-			"text": body_plain,
-			"html": body_html,
-			# attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
-			# Precedence: list - helps some out of office auto responders know not to send their auto-replies. 
-			"h:List-Id": list_address,
-			"h:Precedence": "list",
-			# Reply-To: list email apparently has some religious debates
-			# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
-			# to be common these days 
-			"h:Reply-To": list_address,
-			if settings.DEBUG:
-				# When this is true you will see this message in the mailgun logs but
-				# nothing will actually be delivered
-				"o:testmode": "yes"
-		}
-	)
+	mailgun_request =  ("https://api.mailgun.net/v2/%s/messages" % list_domain,
+    auth=("api", mailgun_api_key),
+    data={"from": from_address,
+		"to": [recipient, ],
+		"bcc": bcc_list,
+		"subject": subject,
+		"text": body_plain,
+		"html": body_html,
+		# attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
+		# Precedence: list - helps some out of office auto responders know not to send their auto-replies. 
+		"h:List-Id": list_address,
+		"h:Precedence": "list",
+		# Reply-To: list email apparently has some religious debates
+		# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
+		# to be common these days 
+		"h:Reply-To": list_address,
+	})
+	if settings.DEBUG:
+		# When this is true you will see this message in the mailgun logs but
+		# nothing will actually be delivered
+		mailgun_request['data'].append("o:testmode": "yes")
+	resp = requests.post(mailgun_request)
 	'message was attempted to be sent. response text was:'
 	logger.debug("Mailgun response: %s" % resp.text)
 	return HttpResponse(status=200)
