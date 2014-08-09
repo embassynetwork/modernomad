@@ -14,6 +14,8 @@ import json
 import requests
 import datetime
 
+logger = logging.getLogger(__name__)
+
 weekday_number_to_name = {
 	0: "Monday",
 	1: "Tuesday",
@@ -38,28 +40,26 @@ def current(request, location_slug):
 	message_headers = request.POST.get('message-headers')
 	message_headers = json.loads(message_headers)
 	message_header_keys = [item[0] for item in message_headers]
-	print message_header_keys
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
 	# A List-Id header will only be present if it has been added manually in
 	# this function, ie, if we have already processed this message. 
 	if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
 		# mailgun requires a code 200 or it will continue to retry delivery
-		print 'List-Id header was found! Dropping message silently'
+		logger.debug('List-Id header was found! Dropping message silently')
 		return HttpResponse(status=200)
 
 	#if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
 	if 'Auto-Submitted' in message_header_keys: 
-		print 'message appears to be auto-submitted. reject silently'
+		logger.info('message appears to be auto-submitted. reject silently')
 		return HttpResponse(status=200)
 
 	# TODO? make sure the sender is on the list?
 
-	print request.POST
 	recipient = request.POST.get('recipient')
 	from_address = request.POST.get('from')
 	sender = request.POST.get('sender')
-	print 'sender is: %s' % sender
+	logger.debug('sender is: %s' % sender)
 
 	subject = request.POST.get('subject')
 	body_plain = request.POST.get('body-plain')
@@ -91,7 +91,7 @@ def current(request, location_slug):
 	if subject.find(location.email_subject_prefix) < 0:
 		prefix = "["+location.email_subject_prefix + "] [Current Guests and Residents] " 
 		subject = prefix + subject
-	print subject
+	logger.debug("subject: %s" % subject)
 
 	# add in footer
 	footer = '''\n\n-------------------------------------------\nYou are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
@@ -124,7 +124,7 @@ def current(request, location_slug):
 		}
 	)
 	'message was attempted to be sent. response text was:'
-	print resp.text
+	logger.debug("response: %s" % resp.text)
 	return HttpResponse(status=200)
 
 def stay(request, location_slug):
