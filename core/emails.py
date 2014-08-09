@@ -59,6 +59,7 @@ def current(request, location_slug):
 
 	recipient = request.POST.get('recipient')
 	from_address = request.POST.get('from')
+	logger.debug('from: %s' % from_address)
 	sender = request.POST.get('sender')
 	logger.debug('sender: %s' % sender)
 
