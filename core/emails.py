@@ -104,9 +104,7 @@ def current(request, location_slug):
 	mailgun_api_key = settings.MAILGUN_API_KEY
 	list_domain = settings.LIST_DOMAIN
 	list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
-	mailgun_request =  ("https://api.mailgun.net/v2/%s/messages" % list_domain,
-    auth=("api", mailgun_api_key),
-    data={"from": from_address,
+	mailgun_data =  {"from": from_address,
 		"to": [recipient, ],
 		"bcc": bcc_list,
 		"subject": subject,
@@ -120,12 +118,15 @@ def current(request, location_slug):
 		# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
 		# to be common these days 
 		"h:Reply-To": list_address,
-	})
+	}
 	if settings.DEBUG:
 		# When this is true you will see this message in the mailgun logs but
 		# nothing will actually be delivered
-		mailgun_request['data'].append("o:testmode": "yes")
-	resp = requests.post(mailgun_request)
+		mailgun_data["o:testmode"] = "yes"
+	resp = requests.post("https://api.mailgun.net/v2/%s/messages" % list_domain,
+	    auth=("api", mailgun_api_key),
+	    data=mailgun_data
+	)
 	'message was attempted to be sent. response text was:'
 	logger.debug("Mailgun response: %s" % resp.text)
 	return HttpResponse(status=200)
