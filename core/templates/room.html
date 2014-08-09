@@ -22,7 +22,7 @@
 		<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
 		<div><p>{{ room.description }}</p></div>
 
-		<h3>Availability</h3>
+		<h3>Availability Preview</h3>
 		<div class="availability-cal" id="availability-cal-{{room.id}}">
 			{{ room.availability_calendar_html|safe }}
 			<a class="room-cal-req" href="{% url 'room_cal_request' location.slug room.id %}?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 

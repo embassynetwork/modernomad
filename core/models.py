@@ -12,7 +12,7 @@ import stripe
 from django.db.models import Q
 from decimal import Decimal
 from django.utils.safestring import mark_safe
-from calendar import HTMLCalendar
+import calendar
 from django.utils import timezone
 
 # imports for signals
@@ -203,13 +203,15 @@ def room_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)
 
-class RoomCalendar(HTMLCalendar):
+class RoomCalendar(calendar.HTMLCalendar):
 	def __init__(self, room, location, year, month):
 		super(RoomCalendar, self).__init__()
 		self.year = year
 		self.month = month
 		self.room = room
 		self.location = location
+		self.today = timezone.now()
+		self.setfirstweekday(calendar.SUNDAY)
 
 	def formatday(self, day, weekday):
 		# XXX warning: if there are ANY errors this method seems to just punt
@@ -217,12 +219,16 @@ class RoomCalendar(HTMLCalendar):
 		if day == 0:
 			return '<td class="noday">&nbsp;</td>' # day outside month
 		else:
+			if self.today.date() == datetime.date(self.year, self.month, day):
+				cssclasses = self.cssclasses[weekday] + ' today'
+			else:
+				cssclasses = self.cssclasses[weekday]
 			the_day = datetime.date(self.year, self.month, day)
 			available = self.room.available_on(the_day, self.location)
 			if available:
-				return '<td class="%s"><span class="text-success glyphicon glyphicon-ok"></span> %d</td>' % (self.cssclasses[weekday], day)
+				return '<td class="%s"><span class="text-success glyphicon glyphicon-ok"></span> %d</td>' % (cssclasses, day)
 			else:
-				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (self.cssclasses[weekday], day)
+				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (cssclasses, day)
 
 
 class Room(models.Model):

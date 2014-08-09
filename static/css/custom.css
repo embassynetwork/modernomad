@@ -1363,3 +1363,13 @@ table tr.row-even td { background: #eee; }
 .top-spacer {
 	margin-top: 30px;
 }
+
+.availability-cal .today {
+	background-color: #CCC !important;
+	font-weight: bold;
+}
+
+.availability-cal td.sat, .availability-cal td.sun {
+	background-color: #EEE;
+}
+
