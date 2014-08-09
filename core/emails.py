@@ -60,7 +60,7 @@ def current(request, location_slug):
 	recipient = request.POST.get('recipient')
 	from_address = request.POST.get('from')
 	sender = request.POST.get('sender')
-	logger.debug('sender is: %s' % sender)
+	logger.debug('sender: %s' % sender)
 
 	subject = request.POST.get('subject')
 	body_plain = request.POST.get('body-plain')
@@ -85,8 +85,8 @@ def current(request, location_slug):
 	for email in current_emails:
 		if email not in bcc_list:
 			bcc_list.append(email)
-	print bcc_list
-
+	logger.debug("bcc list: %s" % bcc_list)
+	
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
 	if subject.find(location.email_subject_prefix) < 0:
@@ -125,7 +125,7 @@ def current(request, location_slug):
 		}
 	)
 	'message was attempted to be sent. response text was:'
-	logger.debug("response: %s" % resp.text)
+	logger.debug("Mailgun response: %s" % resp.text)
 	return HttpResponse(status=200)
 
 def stay(request, location_slug):
