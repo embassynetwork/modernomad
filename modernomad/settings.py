@@ -125,52 +125,6 @@ INSTALLED_APPS = (
     'gather',
 )
 
-# Logging
-LOGFILE = '/home/embassynetwork/logs/django.log'
-LOGGING = {
-	'version': 1,
-	'disable_existing_loggers': False,
-	'formatters': {
-		'verbose': {
-			'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-			'datefmt' : "%d/%b/%Y %H:%M:%S"
-		  },
-		  'simple': {
-				'format': '%(levelname)s %(message)s'
-		  },
-	 },
-	'handlers': {
-		'file': {
-			'level': 'DEBUG',
-			'class': 'logging.FileHandler',
-			'filename': LOGFILE,
-			'formatter': 'verbose',
-		},
-		'mail_admins': {
-			'level': 'ERROR',
-			'class': 'django.utils.log.AdminEmailHandler',
-			'include_html': True,
-			'formatter': 'verbose',
-		}
-	},
-	'loggers': {
-		'django': {
-			'handlers': ['file'],
-			'level': 'INFO',
-			'propagate': True,
-		},
-		'django.request': {
-			'handlers': ['file', 'mail_admins'],
-			'level': 'INFO',
-			'propagate': True,
-		},
-		'core': {
-			'handlers': ['file'],
-			'level': 'DEBUG',
-		},
-	},
-}
-
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 
