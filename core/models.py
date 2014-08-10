@@ -14,6 +14,7 @@ from decimal import Decimal
 from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
+from django.core.urlresolvers import reverse
 
 # imports for signals
 import django.dispatch
@@ -54,7 +55,7 @@ class Location(models.Model):
 	address = models.CharField(max_length=300)
 	latitude = models.FloatField()
 	longitude = models.FloatField()
-	image = models.ImageField(upload_to=location_img_upload_to)
+	image = models.ImageField(upload_to=location_img_upload_to, help_text="Requires an image with proportions 1400px wide x 300px high")
 	stay_page = models.TextField()
 	front_page_stay = models.TextField()
 	front_page_participate = models.TextField()
@@ -64,7 +65,7 @@ class Location(models.Model):
 	house_access_code = models.CharField(max_length=50, blank=True, null=True)
 	ssid = models.CharField(max_length=200, blank=True, null=True)
 	ssid_password = models.CharField(max_length=200, blank=True, null=True)
-	timezone = models.CharField(max_length=200)
+	timezone = models.CharField(max_length=200, help_text="Must be an accurate timezone name, eg. \"America/Los_Angeles\"")
 	bank_account_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	routing_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	bank_name = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
@@ -75,6 +76,9 @@ class Location(models.Model):
 
 	def __unicode__(self):
 		return self.name
+
+	def get_absolute_url(self):
+		return reverse('core.views.location', args=[str(self.slug)])
 
 	def from_email(self):
 		''' return a location-specific email in the standard format we use.'''
@@ -87,7 +91,18 @@ class Location(models.Model):
 		return Rooms.objects.filter(location=self, primary_use=Room.PRIVATE)
 
 	def get_available(self, arrive, depart):
-		return []
+		today = timezone.now().date()
+		available = []
+		for room in self.rooms.all():
+			if room.available_on(today, self):
+				available.append(room)
+		return available
+
+	def has_availability(self, arrive=None, depart=None):
+		if not self.get_available(arrive, depart):
+			return False
+		return True
+
 
 class LocationNotUniqueException(Exception):
 	pass
