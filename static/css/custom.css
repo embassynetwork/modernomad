@@ -33,7 +33,7 @@ h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-da
 }
 
 span.highlight {
-	color:#ea6f56;
+	color:#D84E33;
 }
 
 
@@ -1373,3 +1373,152 @@ table tr.row-even td { background: #eee; }
 	background-color: #EEE;
 }
 
+.recent-events-row {
+	background-color: gray;
+	padding: 30px;
+}
+
+/* Featurettes
+------------------------- */
+
+.featurette-divider {
+	margin: 80px 0; /* Space out the Bootstrap <hr> more */
+}
+
+.featurette-image {
+	height: 500px;
+	overflow: hidden;
+}
+
+/* Thin out the marketing headings */
+.featurette-heading {
+	font-weight: 300;
+	line-height: 1;
+	letter-spacing: -1px;
+}
+
+@media (min-width: 768px) {
+	.featurette-heading {
+		font-size: 50px;
+  }
+}
+
+@media (min-width: 992px) {
+	.featurette-heading {
+		margin-top: 120px;
+  }
+}
+
+.index-loc-img {
+	width: 170px;
+	height: 170px;
+}
+
+.index-loc-info a {
+	color: #fff;
+}
+
+.index-loc-info {
+	position: absolute;
+	top: 0;
+	left: 0;
+	color: #fff;
+	padding: 5px;
+	height: 170px;
+	line-height: 170px;
+	width: 170px;
+	z-index:1000;
+	text-align: center;
+	font-size: 30px;
+	font-weight: bold;
+}
+
+.index-loc-info span {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;    
+}
+
+.index-intro-text strong, {
+	font-weight: 600;
+}
+
+p.lead strong {
+	font-weight: 500;
+}
+
+#location-availability-block {
+	text-align: center;
+}
+
+#index-check-availability {
+	width: 100%;
+	font-weight: 600;
+}
+
+#index-check-availability h3 {
+	margin-top: 0px;
+	font-weight: bold;
+}
+
+#index-check-availability div {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;    
+}
+
+#index-check-availability form {
+	line-height: normal;
+}
+
+#location-availability-map {
+	height: 400px;
+}
+
+#index-locations-list {
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
+#member-collage {
+	width: 500px;
+	height: 500px;
+}
+
+.member-img-collage-item {
+	width: 50px;
+	height: 50px;
+}
+
+#network-footer {
+	background-color: #333;
+	padding-top: 30px;
+	padding-bottom: 30px;
+	color: #EEE;
+}
+
+.press-logo {
+	height: 40px;
+}
+
+.room-avail-text-success {
+	color: #3c763d !important;
+}
+
+.room-avail-text-danger {
+	color: #a94442 !important;
+}
+
+.location-img-preview {
+	width: 850px;
+	height: 225px;
+}
+
+.location-preview { 
+	margin-top: 50px;
+}
+	
+.location-preview .col-md-3 {
+	height: 225px;
+	overflow: hidden;
+}
