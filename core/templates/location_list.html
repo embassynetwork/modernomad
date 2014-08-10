@@ -2,12 +2,34 @@
 
 {% block body %}
 
-<div>
-	<ul>
-		{% for location in locations %}
-		<li><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></li>
-		{% endfor %}
-	</ul>
+<div class="container">
+	<h1>Embassy Listings</h1>
+	{% for location in locations %}
+	<div class="row location-preview">
+		<div class="col-md-12">
+			<h2><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a>, <em class="small">{{ location.address}}</em></h2>
+		</div>
+
+		{% if forloop.counter|divisibleby:2 %}
+		<div class="col-md-9">
+			<img class="location-img-preview" src="{{location.image.url}}">
+		</div>
+		<div class="col-md-3">
+			<p class="lead">{{ location.short_description|striptags }}</p>
+		</div>
+		
+		{% else %}
+		
+		<div class="col-md-3">
+			<p class="lead">{{ location.short_description|striptags }}</p>
+		</div>
+		<div class="col-md-9">
+			<img class="location-img-preview" src="{{location.image.url}}">
+		</div>
+		
+		{% endif %}
+	</div>
+	{% endfor %}
 </div>
 
 {% endblock %}

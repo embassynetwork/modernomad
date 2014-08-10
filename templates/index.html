@@ -2,16 +2,163 @@
 
 {% block body %}
 
-<h2>Embassy Network</h2>
-<p class="easy-reading">The Embassy Network is a collection of
-coliving houses prototyping a new approach to Home, one in which
-members flow freely between locations as they travel the globe for
-work and collaboration.</p>
+<div class="jumbotron">
+	<div class="container">
+		<h1>The Embassy Network</h1>
+		<h1><span class="text-muted"><em>Be at Home Across the Globe</em></span></h1>
+		<p class="lead index-intro-text">The Embassy Network is an community, a set of resources, and a software
+		platform to connect modern shared living spaces. Embassy locations
+		provide residence and accommodations for creatives, professionals and modern
+		nomads traveling the globe for projects and collaborations. We facilitate
+		<strong>affordable stays in vibrant communities</strong> where members can plug into a lively
+		culture and work together to create a dynamic environment of events, activities
+		and intentional pursuits.</p>
+	</div>
+</div>
 
-<p class="easy-reading">Embassy locations are united through the
-values of co-creation, curiosity and intention. These embassies and
-their residents are ambassadors of a modern culture of 
-openness, collaboration, and connectivity.</p>
+<div class="container" id="index-locations-list">
+	{% for location in locations %}
+	<div class="float-left homepage-user-wrapper">			
+		<img class="index-loc-img" src="{{location.image.url}}" />
+		<a href="{% url 'location_home' location.slug %}">
+		<div class="index-loc-info" id="location-prev-{{location.id}}">
+			<span>{{ location.name }}</span>
+		</div>
+		</a>
+	</div>
+	{% endfor %}
+</div>
+	
+
+<div class="container" id="location-availability-block">
+	<div id="index-check-availability">
+		<h3><span class="highlight">Where are you going?</span></h3>
+	</div>
+	<div id="location-availability-map"></div>
+</div>
 
 
+<div class="container">
+
+	<hr class="featurette-divider">
+
+	<div class="row featurette">
+		<div class="col-md-7">
+			<h2 class="featurette-heading">Vibrant Communities.</h2>
+			<p class="lead">
+			Like other travel networks, Embassy locations are <strong>independently owned and
+				operated</strong>, set their own prices, and have full say over guest stays at their
+				locations; but, the Embassy Network specifically seeks to <strong>connect shared living
+				spaces</strong> characterized by an emphasis on <strong>openness, collaboration and community</strong>.
+				Members may travel freely and live amongst all locations, and travelers from
+				far and wide can seek reprieve in a place that feels like home.
+			</p>
+		</div>
+		<div class="col-md-5">
+			<div id="member-collage">
+				{% for profile in random_profiles %}
+					<img class="member-img-collage-item" src="{{ MEDIA_URL }}{{ profile.image }}">
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+
+	<hr class="featurette-divider">
+
+	<div class="row featurette">
+		<div class="col-md-5">
+			<img class="featurette-image img-responsive" src="/static/img/dining-perspective-crop.jpg">
+		</div>
+		<div class="col-md-7">
+			<h2 class="featurette-heading">Affordable Stays.</h2>
+			<p class="lead">
+				Affordability is a major goal of the Embassy Network. Affordability supports
+				travel and exposure to new experiences, but also exploration and creativity.
+				Emergent from the collection of participating locations is a <strong>collaboratively
+					managed commons</strong> that seeks to make increasingly efficient use of resources,
+				support the development of community ties, and recycle profits back into the
+				communities that generate them.
+			</p>
+		</div>
+	</div>
+
+	<hr class="featurette-divider">
+
+	<div class="row featurette">
+		<div class="col-md-7">
+			<h2 class="featurette-heading">Working Together.</h2>
+			<p class="lead">
+			Together, these locations create a global fabric of <strong>intelligent, creative, and
+				passionate</strong> people leading lives of intention, supported and inspired by their
+				community, and exploring modern notions of Home in the 21st century.
+			</p>
+		</div>
+		<div class="col-md-5">
+			<img class="featurette-image img-responsive" src="/static/img/collab.jpg">
+		</div>
+	</div>
+
+	
+	<hr class="featurette-divider">
+
+	<div class="row center" id="index-get-involved">
+		<button class="col-md-4 btn btn-lg btn-success">Stay at one of our Locations</button>
+		<button class="col-md-4 btn btn-lg btn-success">Add your shared living space</button>
+		<button class="col-md-4 btn btn-lg btn-success">Learn more about membership options</button>
+	</div>
+</div>
+
+{%endblock %}
+
+{% block footer %}
+<div id="network-footer">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8" id="footer-press">
+				<h5>Press</h5>
+			<a href="http://www.ft.com/intl/cms/s/2/091e540a-baf5-11e1-81e0-00144feabdc0.html#axzz2NxTef1Yd" target="blank" title="Over the Rainbow: Communal living is back in vogue, especially among Silicon Valley’s young technology workers"><img class="press-logo" src="/static/img/financial_times_logo.jpg">
+			<a title="" target="blank" href="http://www.nytimes.com/2013/12/12/fashion/Bay-Area-millenials-intentional-communities-communes.html?_r=0&adxnnl=1&rref=fashion&hpw=&pagewanted=all&adxnnlx=1387416498-ClhePTg+t6ZVfKx9MaVw2g"><img class="press-logo" src="/static/img/newyorktimes-logo-250.jpg"></a>
+			<a title="" target="blank" href="http://www.sfgate.com/bayarea/article/Tech-entrepreneurs-revive-communal-living-4988388.php"><img class="press-logo" src="/static/img/sf_chronicle_logo_small.png"></a>
+			<a title="" target="blank" href="http://www.theatlanticcities.com/housing/2013/12/one-answer-san-franciscos-overpriced-housing-co-living/7654/"><img class="press-logo" src="/static/img/atlantic-cities-logo.jpg"></a>
+			<a title="" target="blank" href="http://www.npr.org/blogs/alltechconsidered/2013/12/19/250548681/bay-areas-steep-housing-costs-spark-return-to-communal-living"><img class="press-logo" src="/static/img/npr_logo.png"></a>
+			<a title="" target="blank" href="http://www.csmonitor.com/The-Culture/Family/2014/0330/Shared-housing-The-sharing-economy-gives-roommates-a-new-image"><img class="press-logo" src="/static/img/csr_logo.jpg"></a>
+			</div>
+			<div class="col-md-4" id="footer-socialmedia">
+
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+	<script>
+		$(document).ready(function() {
+			map = L.map('location-availability-map').setView([27.5504444,9.046775], 2);
+			L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+			}).addTo(map);
+			map.scrollWheelZoom.disable();
+			var LocIcon = L.Icon.extend({
+				options: {
+					iconUrl: '/static/img/marker-icon.png',
+				}
+			});
+			locations = {{ location_list|safe}};
+			markers = [];
+			for (var i = 0; i < locations.length; i++) {
+				console.log(locations[i].longitude, locations[i].latitude);
+				var locIcon = new LocIcon();
+				var mark = L.marker([locations[i].latitude, locations[i].longitude], {icon: locIcon}).addTo(map);
+				var popup = L.popup();
+				if (locations[i].has_availability) {
+					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-success">Availability today</span></h3><h5><a href="'+ locations[i].stay_url +'"><span class="glyphicon glyphicon-calendar"></span> Explore rooms and dates</a></h5><p>'+locations[i].short_description+'</p>')
+				} else {
+					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">Full today</span></h3><h5><a href="'+ locations[i].stay_url +'"><span class="glyphicon glyphicon-calendar"></span> Explore rooms and dates</a></h5><p>'+locations[i].short_description+'</p>')
+				}
+				mark.bindPopup(popup);
+			}
+		});
+
+	</script>
 {% endblock %}
