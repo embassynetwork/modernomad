@@ -32,10 +32,10 @@
 
 	<body>
 		<div id="full-page-wrapper">
-		<div class="container-fluid">
-			<div class="row">
+			<div class="container-fluid">
+				<div class="row">
 
-				<nav class="navbar navbar-default" id="nav-network" role="navigation">
+					<nav class="navbar navbar-default" id="nav-network" role="navigation">
 					<div class="navbar-header">
 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
 							<span class="sr-only">Toggle navigation</span>
@@ -47,8 +47,11 @@
 					<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 						<ul class="nav navbar-nav navbar-left">
 							<li><a class="navbar-brand" href="/">The Embassy <span class="highlight">Network</span></a></li>
-							<li><a href="/about">Learn More</a></li>
 							<li><a href="{% url 'location_list' %}">Locations</a></li>
+							<li><a href="/membership">About accommodation & membership</a></li>
+							<li><a href="/host">Add your Space</a></li>
+							<li><a href="/resources">Resources</a></li>
+							<li><a href="/faq">FAQ</a></li>
 						</ul>
 
 						<ul class="nav navbar-nav navbar-right">		
@@ -61,7 +64,7 @@
 								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
 								<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
 								{% if user.is_superuser %}
-									<li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
+								<li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
 								{% endif %}
 								<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
 							</ul>
@@ -72,13 +75,16 @@
 							{% endif %}
 						</ul>
 					</div> <!-- end navbar-collapse -->
-				</nav>
-			</div> <!-- end row -->
-		</div> <!-- end container-fluid -->
+					</nav>
+				</div> <!-- end row -->
+			</div> <!-- end container-fluid -->
 
-		{% block body %}
+			{% block body %}
+			{% endblock %}
+		</div>
+		{% block footer %}
 		{% endblock %}
-	<div>
+
 
 	<!-- Le javascript -->
 	<link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}" />
@@ -90,21 +96,11 @@
 	<!-- javascript for every page -->
 	<script type="text/javascript">
 
-		$('#embassy-logo').on( "mouseover",function(){
-			$('#flyout').animate({right:0})
-			$('.container').append("<div class='curtain'></div>");
-		});
-		
-		$('#flyout').on("mouseleave", function(){
-			$('#flyout').animate({right:-360});
-		});
-
 	</script>
 
 	{% block extrajs %}
 	{% endblock %}
 
-	</div>
   </body>
 </html>
 
