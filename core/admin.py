@@ -23,6 +23,7 @@ class RoomAdminInline(admin.TabularInline):
 
 class LocationAdmin(admin.ModelAdmin):
 	model=Location
+	save_as = True
 	list_display=('name', 'address')
 	list_filter=('name',)
 	filter_horizontal = ['residents', 'house_admins']
