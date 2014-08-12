@@ -52,7 +52,8 @@ def current(request, location_slug):
 	logger.debug('current@ for location: %s' % location)
 
 	# we think that message_headers is a list of strings
-	message_headers = json.loads(request.POST.get('message-headers'))
+	header_txt = request.POST.get('message-headers')
+	message_headers = json.loads(header_txt)
 	message_header_keys = [item[0] for item in message_headers]
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
@@ -145,7 +146,8 @@ def stay(request, location_slug):
 	logger.debug('stay@ for location: %s' % location)
 
 	# we think that message_headers is a list of strings
-	message_headers = json.loads(request.POST.get('message-headers'))
+	header_txt = request.POST.get('message-headers')
+	message_headers = json.loads(header_txt)
 	message_header_keys = [item[0] for item in message_headers]
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
