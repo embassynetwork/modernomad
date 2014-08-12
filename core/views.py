@@ -677,7 +677,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 					reservation.depart != original_depart or reservation.room != original_room )):
 
 					print "reservation room or date was changed. updating status."
-					reservation.pending
+					reservation.pending()
 					# notify house_admins by email
 					updated_reservation_notify(reservation)
 					client_msg = 'The reservation was updated and the new information will be reviewed for availability.'
