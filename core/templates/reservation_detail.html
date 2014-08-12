@@ -20,12 +20,12 @@
 {% ifequal reservation.user user %}
 	{% if reservation.is_pending %}
 		<div>
-			<span class="btn btn-large btn-success disabled res-status-btn" type="button">Pending</span>
+			<span class="btn btn-large btn-default res-status-btn" disabled="disabled" type="button">Pending</span>
 		</div>
 
 	{% elif reservation.is_approved and reservation.user.profile.customer_id %}
 		<div>
-			<p><span class="text-error">Action Required! Please pay for your reservation to confirm. 
+			<p><span class="text-danger">Action Required! Please pay for your reservation to confirm. 
 			Cancellation policy for the {{ reservation.room }} 
 			is {{reservation.room.cancellation_policy}}.</p>
 
@@ -35,36 +35,38 @@
 					value="Submit payment." >
 			</form>
 		</div>
-	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.is_paid %}
-		<div>
-			<p><span class="text-error">Action Required! Please pay for your
-				reservation to confirm. Cancellation policy for the {{ reservation.room }} is
-				{{reservation.room.cancellation_policy}}.</p>
+		{% elif reservation.is_approved or reservation.is_confirmed %}
+			{% if not reservation.is_paid %}
+			<div>
+				<p><span class="text-danger">Action Required! Please pay for your
+					reservation to confirm. Cancellation policy for the {{ reservation.room }} is
+					{{reservation.room.cancellation_policy}}.</p>
 
-			<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
-				{% csrf_token %}
-				<input type="hidden" value={{ reservation.id }} name="res-id">
-				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-					value="Click to enter Payment Details" >
-				<div>
-					<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
-						secure credit card processing with SSL encryption. Your card card
-					information is never stored on our servers.</small></em></p>
-				</div>
-			</form>
-		</div>
+				<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
+					{% csrf_token %}
+					<input type="hidden" value={{ reservation.id }} name="res-id">
+					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+						value="Click to enter Payment Details" >
+					<div>
+						<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+							secure credit card processing with SSL encryption. Your card card
+						information is never stored on our servers.</small></em></p>
+					</div>
+				</form>
+			</div>
+			{% endif %}
 
-	{% elif reservation.is_confirmed and reservation.is_paid %}
-		<div class="btn btn-large disabled res-status-btn" type="button">Reservation Confirmed</div>
-		<a class="btn btn-lg res-status-btn" type="button" href="{% url 'reservation_receipt' location.slug reservation.id %}">View Receipt</a>
+		{% elif reservation.is_confirmed and reservation.is_paid %}
+			<div class="btn btn-lg btn-default res-status-btn" type="button">Reservation Confirmed</div>
+			<a class="btn btn-lg res-status-btn" type="button" href="{% url 'reservation_receipt' location.slug reservation.id %}">View Receipt</a>
 
-	{% elif reservation.is_canceled %}
-		<div class="btn btn-large btn-danger disabled res-status-btn" type="button">Reservation Canceled</div>
+		{% elif reservation.is_canceled %}
+			<div class="btn btn-lg btn-danger res-status-btn" disabled="disabled" type="button">Reservation Canceled</div>
 
 	{% endif %}
 
 {% else %}
-	<div class="btn btn-large disabled res-status-btn" type="button">{{ reservation.status|title }} </div>	
+	<div class="btn btn-lg btn-default res-status-btn" disabled="disabled" type="button">{{ reservation.status|title }} </div>	
 {% endifequal %}
 </div>
 
