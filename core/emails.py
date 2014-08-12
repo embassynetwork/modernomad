@@ -47,7 +47,7 @@ def current(request, location_slug):
 		location = get_location(location_slug)
 	except:
 		# XXX TODO reject and bounce back to sender?
-		print 'location not found'
+		logger.error('location not found')
 		return HttpResponse(status=200)
 	logger.debug('current@ for location: %s' % location)
 
