@@ -6,10 +6,12 @@ Invoice Date: {{ today }}
 Arrival Date: {{ arrive }}
 Departure Date: {{ depart }}
 
-Description .............. Quantity ......... Rate
-{{ room }} ..... {{ num_nights }} ..... {{ rate }}
+Charges
+{% for line_item in reservation.bill_line_items %}{% if not line_item.paid_by_house %}
+{{ line_item.description }}:  ${{ line_item.amount|floatformat:2 }}
+{% endif %}{% endfor %}
 
-..................... Total: {{ total }}
+Total Owed: ${{ reservation.total_owed|floatformat:2 }}
 
 You can pay via credit card, cash, check, bank transfer, or Dwolla. 
 

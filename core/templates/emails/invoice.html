@@ -7,20 +7,22 @@
 			<strong>Invoice Date:</strong> {{ today }}
 		</p>
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
-			<tr><td><strong>Arrival Date:</strong> {{ arrive }}</td></tr>
-			<tr><td><strong>Departure Date:</strong> {{ depart }}</td></tr>
-		</table>
-
-		<table border="0" cellspacing="0" cellpadding="10" border="0">
 		<tr>
-			<th align="left" width="200px">Description</th><th align="center" width="200px">Quantity</th><th align="right" width="200px">Rate</th>
+			<th style="text-align: left; width:200px">Description</th>
+			<th style="text-align: right;">Amount</th>
 		</tr>
+		{% for line_item in reservation.bill_line_items %}
+			{% if not line_item.paid_by_house %}
+				<tr>
+					<td align="left" width="200px">{{ line_item.description }}</td>
+					<td align="right" width="200px">${{ line_item.amount|floatformat:2 }}</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
 		<tr>
-			<td align="left" width="200px">{{ room }}</td><td align="center" width="200px">{{ num_nights }}</td><td align="right" width="200px">${{ rate }}</td>
-		</tr>
-		<tr>
-			<td colspan="3" align="right" width="600px">Total: ${{ total }}</td>
-		</tr>
+			<td colspan="2" align="right" width="600px">
+				<strong>Total Owed:</strong> ${{ reservation.total_owed|floatformat:2 }}
+			</td>
 		</table>
 
 		<p margin="0 0 1.6em 0">You can pay via credit card, cash, check, bank transfer, or Dwolla.</p> 
