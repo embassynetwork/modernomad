@@ -113,8 +113,8 @@ def current(request, location_slug):
 	# add in footer
 	text_footer = '''\n\n-------------------------------------------\nYou are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
 	html_footer = '''<br><br>-------------------------------------------<br>You are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
-	body_plain = body_plain + footer
-	body_html = body_html + footer
+	body_plain = body_plain + text_footer
+	body_html = body_html + html_footer
 
 	# send the message 
 	list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
