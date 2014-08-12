@@ -112,7 +112,8 @@ def current(request, location_slug):
 	logger.debug("subject: %s" % subject)
 
 	# add in footer
-	footer = '''\n\n-------------------------------------------\nYou are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
+	text_footer = '''\n\n-------------------------------------------\nYou are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
+	html_footer = '''<br><br>-------------------------------------------<br>You are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
 	body_plain = body_plain + footer
 	body_html = body_html + footer
 
@@ -193,9 +194,10 @@ def stay(request, location_slug):
 	logger.debug("subject: %s" % subject)
 
 	# add in footer
-	footer = '''\n\n-------------------------------------------\nYou are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
-	body_plain = body_plain + footer
-	body_html = body_html + footer
+	text_footer = '''\n\n-------------------------------------------\nYou are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
+	html_footer = '''<br><br>-------------------------------------------<br>You are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
+	body_plain = body_plain + text_footer
+	body_html = body_html + html_footer
 
 	# send the message 
 	list_address = location.from_email()
