@@ -303,7 +303,7 @@ def new_reservation_notify(reservation):
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
 
-	return send_from_location_address(subject, text_content, html_content, recipient, reservation.location)
+	return send_from_location_address(subject, text_content, html_content, recipients, reservation.location)
 
 def updated_reservation_notify(reservation):
 	domain = Site.objects.get_current().domain
