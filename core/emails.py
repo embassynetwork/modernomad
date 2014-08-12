@@ -245,7 +245,7 @@ def send_receipt(reservation):
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
-	return send_from_location_address(subject, text_content, html_context, recipient, location)
+	return send_from_location_address(subject, text_content, html_content, recipient, location)
 
 def send_invoice(reservation):
 	''' trigger a reminder email to the guest about payment.''' 
@@ -267,7 +267,7 @@ def send_invoice(reservation):
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
-	return send_from_location_address(subject, text_content, html_context, recipient, reservation.location)
+	return send_from_location_address(subject, text_content, html_content, recipient, reservation.location)
 
 def new_reservation_notify(reservation):
 	house_admins = reservation.location.house_admins.all()
@@ -303,7 +303,7 @@ def new_reservation_notify(reservation):
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
 
-	return send_from_location_address(subject, text_content, html_context, recipient, reservation.location)
+	return send_from_location_address(subject, text_content, html_content, recipient, reservation.location)
 
 def updated_reservation_notify(reservation):
 	domain = Site.objects.get_current().domain
