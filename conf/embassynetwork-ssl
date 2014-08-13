@@ -1,13 +1,22 @@
 upstream django_app_server {
-  # fail_timeout=0 means we always retry an upstream even if it failed
-  # to return a good HTTP response (in case the Unicorn master nukes a
-  # single worker for timing out).
   server unix:/home/embassynetwork/webapp/run/gunicorn.sock fail_timeout=0;
-  #server localhost:8000 fail_timeout=0;
+}
+
+# We need to install the following redirects
+# sf.embassynetwork.com -> https://embassynetwork.com/locations/embassysf/
+# farmhouse.embassynetwork.com -> https://embassynetwork.com/locations/farmhouse/
+# sandbox.embassynetwork.com -> https://embassynetwork.com/locations/sandbox/
+# redvic.embassynetwork.com -> https://embassynetwork.com/locations/redvic/
+# redvic.com -> https://embassynetwork.com/locations/redvic/
+
+server {
+    listen 80;
+    server_name  sf.embassynetwork.com;
+    rewrite ^ https://embassynetwork.com/embassysf/$request_uri? permanent;
 }
 
 server {
-    # force everything through https
+    # Catch-all http -> https
     listen 80;
     server_name  *.embassynetwork.com;
     rewrite ^ https://$server_name$request_uri? permanent;
