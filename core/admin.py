@@ -6,6 +6,9 @@ from core.models import *
 from gather.models import EventAdminGroup
 from core.emails import send_invoice, send_receipt
 
+# TODO - Needs to be locked down based on location.
+# http://reinout.vanrees.org/weblog/2011/09/30/django-admin-filtering.html
+
 class EmailTemplateAdmin(admin.ModelAdmin):
 	model = EmailTemplate
 	exclude = ('creator',)
