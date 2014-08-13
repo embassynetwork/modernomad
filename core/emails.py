@@ -315,7 +315,8 @@ def updated_reservation_notify(reservation):
 	text_content = '''Howdy,\n\nA reservation has been updated and requires your review.\n\nYou can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 	recipients = []
 	for admin in reservation.location.house_admins.all():
-		recipients.append(admin.email)
+		if not admin.email in recipients:
+			recipients.append(admin.email)
 	subject = "[%s] Reservation Updated, %s %s, %s - %s" % (reservation.location.email_subject_prefix, reservation.user.first_name, 
 		reservation.user.last_name, str(reservation.arrive), str(reservation.depart))
 	mailgun_data={"from": reservation.location.from_email(),
@@ -347,7 +348,8 @@ def guest_daily_update(location):
 	reservations_here_today = Reservation.today.confirmed(location)
 	guest_emails = []
 	for r in reservations_here_today:
-		guest_emails.append(r.user.email)
+		if not r.user.email in guest_emails:
+			guest_emails.append(r.user.email)
 	
 	mailgun_data={
 		"from": location.from_email(),
@@ -380,7 +382,8 @@ def admin_daily_update(location):
 	
 	admins_emails = []
 	for admin in location.house_admins.all():
-		admins_emails.append(admin.email)
+		if not admin.email in admin_emails:
+			admins_emails.append(admin.email)
 
 	mailgun_data={"from": location.from_email(),
 		"to": admins_emails,
