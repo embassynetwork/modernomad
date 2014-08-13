@@ -35,6 +35,12 @@ def index(request):
 def about(request):
 	return render(request, "about.html")
 
+def host(request):
+	return render(request, "host.html")
+
+def membership(request):
+	return render(request, "membership.html")
+
 def stay(request):
 	return render(request, "stay.html")
 
