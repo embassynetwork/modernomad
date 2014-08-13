@@ -135,6 +135,11 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/people/login/'
 LOGOUT_URL = '/people/logout/'
 
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ENABLE_UTC = True
+CELERY_ACCEPT_CONTENT = ['json', 'yaml']
+
 # import any local settings
 try:
 	from local_settings import *

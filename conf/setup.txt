@@ -17,6 +17,7 @@ apt-get dist-upgrade
 apt-get install nginx gunicorn supervisor
 apt-get install git python-dev python-virtualenv python-pip
 apt-get install zlib1g-dev libxml2-dev libxslt1-dev python-lxml
+apt-get install rabbitmq-server
 
 # PILLOW needs some libs to help with the images
 sudo apt-get install libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
