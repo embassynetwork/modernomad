@@ -316,9 +316,9 @@ def updated_reservation_notify(reservation):
 	recipients = []
 	for admin in reservation.location.house_admins.all():
 		recipients.append(admin.email)
-	subject = "[%s] Reservation Updated, %s %s, %s - %s" % (location.email_subject_prefix, reservation.user.first_name, 
+	subject = "[%s] Reservation Updated, %s %s, %s - %s" % (reservation.location.email_subject_prefix, reservation.user.first_name, 
 		reservation.user.last_name, str(reservation.arrive), str(reservation.depart))
-	mailgun_data={"from": location.from_email(),
+	mailgun_data={"from": reservation.location.from_email(),
 		"to": recipients,
 		"subject": subject,
 		"text": text_content,
