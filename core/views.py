@@ -680,11 +680,11 @@ def ReservationEdit(request, reservation_id, location_slug):
 				# if the dates have been changed, and the reservation isn't
 				# still pending to begin with, notify an admin and go back to
 				# pending.
-				logger.debug("is_pending: %s" % reservation.is_pending)
+				logger.debug("is_pending: %s" % reservation.is_pending())
 				logger.debug("arrive: %s, original: %s" % (reservation.arrive, original_arrive))
 				logger.debug("depart: %s, original: %s" % (reservation.depart, original_depart))
 				logger.debug("room: %s, original: %s" % (reservation.room, original_room))
-				if (not reservation.is_pending and (reservation.arrive != original_arrive or 
+				if (not reservation.is_pending() and (reservation.arrive != original_arrive or 
 					reservation.depart != original_depart or reservation.room != original_room )):
 					logger.debug("reservation room or date was changed. updating status.")
 					reservation.pending()
@@ -712,7 +712,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 def ReservationConfirm(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if not (request.user.is_authenticated() and request.user == reservation.user 
-		and request.method == "POST" and reservation.is_approved):
+		and request.method == "POST" and reservation.is_approved()):
 		return HttpResponseRedirect("/")
 
 	if not reservation.user.profile.customer_id:
