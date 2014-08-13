@@ -331,7 +331,7 @@ def guest_daily_update(location):
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 	domain = Site.objects.get_current().domain
-	events=_today = published_events_today_local(location=location)
+	events_today = published_events_today_local(location=location)
 
 	plaintext = get_template('emails/guest_daily_update.txt')
 	c = Context({
@@ -352,7 +352,7 @@ def guest_daily_update(location):
 	mailgun_data={
 		"from": location.from_email(),
 		"to": guest_emails,
-		"subject": "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today)),
+		"subject": "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today.date())),
 		"text": text_content,
 	}
 	return mailgun_send(mailgun_data)
@@ -384,7 +384,7 @@ def admin_daily_update(location):
 
 	mailgun_data={"from": location.from_email(),
 		"to": admins_emails,
-		"subject": "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today)),
+		"subject": "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today.date())),
 		"text": text_content,
 	}
 	return mailgun_send(mailgun_data)
