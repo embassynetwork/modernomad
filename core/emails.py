@@ -47,12 +47,13 @@ def current(request, location_slug):
 		location = get_location(location_slug)
 	except:
 		# XXX TODO reject and bounce back to sender?
-		print 'location not found'
+		logger.error('location not found')
 		return HttpResponse(status=200)
 	logger.debug('current@ for location: %s' % location)
 
 	# we think that message_headers is a list of strings
-	message_headers = json.loads(request.POST.get('message-headers'))
+	header_txt = request.POST.get('message-headers')
+	message_headers = json.loads(header_txt)
 	message_header_keys = [item[0] for item in message_headers]
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
@@ -146,7 +147,8 @@ def stay(request, location_slug):
 	logger.debug('stay@ for location: %s' % location)
 
 	# we think that message_headers is a list of strings
-	message_headers = json.loads(request.POST.get('message-headers'))
+	header_txt = request.POST.get('message-headers')
+	message_headers = json.loads(header_txt)
 	message_header_keys = [item[0] for item in message_headers]
 
 	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
@@ -247,7 +249,7 @@ def send_receipt(reservation):
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
-	return send_from_location_address(subject, text_content, html_context, recipient, location)
+	return send_from_location_address(subject, text_content, html_content, recipient, location)
 
 def send_invoice(reservation):
 	''' trigger a reminder email to the guest about payment.''' 
@@ -269,7 +271,7 @@ def send_invoice(reservation):
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
-	return send_from_location_address(subject, text_content, html_context, recipient, reservation.location)
+	return send_from_location_address(subject, text_content, html_content, recipient, reservation.location)
 
 def new_reservation_notify(reservation):
 	house_admins = reservation.location.house_admins.all()
@@ -305,7 +307,7 @@ def new_reservation_notify(reservation):
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
 
-	return send_from_location_address(subject, text_content, html_context, recipient, reservation.location)
+	return send_from_location_address(subject, text_content, html_content, recipients, reservation.location)
 
 def updated_reservation_notify(reservation):
 	domain = Site.objects.get_current().domain
@@ -313,10 +315,11 @@ def updated_reservation_notify(reservation):
 	text_content = '''Howdy,\n\nA reservation has been updated and requires your review.\n\nYou can view, approve or deny this request at %s%s.''' % (domain, admin_path)
 	recipients = []
 	for admin in reservation.location.house_admins.all():
-		recipients.append(admin.email)
-	subject = "[%s] Reservation Updated, %s %s, %s - %s" % (location.email_subject_prefix, reservation.user.first_name, 
+		if not admin.email in recipients:
+			recipients.append(admin.email)
+	subject = "[%s] Reservation Updated, %s %s, %s - %s" % (reservation.location.email_subject_prefix, reservation.user.first_name, 
 		reservation.user.last_name, str(reservation.arrive), str(reservation.depart))
-	mailgun_data={"from": location.from_email(),
+	mailgun_data={"from": reservation.location.from_email(),
 		"to": recipients,
 		"subject": subject,
 		"text": text_content,
@@ -329,7 +332,7 @@ def guest_daily_update(location):
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 	domain = Site.objects.get_current().domain
-	events=_today = published_events_today_local(location=location)
+	events_today = published_events_today_local(location=location)
 
 	plaintext = get_template('emails/guest_daily_update.txt')
 	c = Context({
@@ -345,12 +348,13 @@ def guest_daily_update(location):
 	reservations_here_today = Reservation.today.confirmed(location)
 	guest_emails = []
 	for r in reservations_here_today:
-		guest_emails.append(r.user.email)
+		if not r.user.email in guest_emails:
+			guest_emails.append(r.user.email)
 	
 	mailgun_data={
 		"from": location.from_email(),
 		"to": guest_emails,
-		"subject": "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today)),
+		"subject": "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today.date())),
 		"text": text_content,
 	}
 	return mailgun_send(mailgun_data)
@@ -378,11 +382,12 @@ def admin_daily_update(location):
 	
 	admins_emails = []
 	for admin in location.house_admins.all():
-		admins_emails.append(admin.email)
+		if not admin.email in admins_emails:
+			admins_emails.append(admin.email)
 
 	mailgun_data={"from": location.from_email(),
 		"to": admins_emails,
-		"subject": "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today)),
+		"subject": "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today.date())),
 		"text": text_content,
 	}
 	return mailgun_send(mailgun_data)

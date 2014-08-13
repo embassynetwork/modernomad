@@ -34,6 +34,9 @@ from core.models import get_location
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.template import Context
+import logging
+
+logger = logging.getLogger(__name__)
 
 def location(request, location_slug):
 	location = my_object = get_object_or_404(Location, slug=location_slug)
@@ -648,6 +651,8 @@ def UserDeleteCard(request, username):
 
 @login_required
 def ReservationEdit(request, reservation_id, location_slug):
+	logger.debug("Entering ReservationEdit")
+	
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	# need to pull these dates out before we pass the instance into
@@ -658,25 +663,30 @@ def ReservationEdit(request, reservation_id, location_slug):
 	original_depart = reservation.depart
 	original_room = reservation.room
 	if request.user.is_authenticated() and request.user == reservation.user:
-
+		logger.debug("ReservationEdit: Authenticated and same user")
 		if request.user in reservation.location.house_admins.all():
 			is_house_admin = True
 		else:
 			is_house_admin = False
 
 		if request.method == "POST":
+			logger.debug("ReservationEdit: POST")
 			# don't forget to specify the "instance" argument or a new object will get created!
 			#form = get_reservation_form_for_perms(request, post=True, instance=reservation)
 			form = ReservationForm(location, request.POST, instance=reservation)
 			if form.is_valid():
+				logger.debug("ReservationEdit: Valid Form")
 
 				# if the dates have been changed, and the reservation isn't
 				# still pending to begin with, notify an admin and go back to
 				# pending.
-				if (not reservation.is_pending and (reservation.arrive != original_arrive or 
+				logger.debug("is_pending: %s" % reservation.is_pending())
+				logger.debug("arrive: %s, original: %s" % (reservation.arrive, original_arrive))
+				logger.debug("depart: %s, original: %s" % (reservation.depart, original_depart))
+				logger.debug("room: %s, original: %s" % (reservation.room, original_room))
+				if (not reservation.is_pending() and (reservation.arrive != original_arrive or 
 					reservation.depart != original_depart or reservation.room != original_room )):
-
-					print "reservation room or date was changed. updating status."
+					logger.debug("reservation room or date was changed. updating status.")
 					reservation.pending()
 					# notify house_admins by email
 					updated_reservation_notify(reservation)
@@ -702,7 +712,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 def ReservationConfirm(request, reservation_id, location_slug):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if not (request.user.is_authenticated() and request.user == reservation.user 
-		and request.method == "POST" and reservation.is_approved):
+		and request.method == "POST" and reservation.is_approved()):
 		return HttpResponseRedirect("/")
 
 	if not reservation.user.profile.customer_id:
@@ -722,7 +732,6 @@ def ReservationConfirm(request, reservation_id, location_slug):
 			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 
 	return HttpResponseRedirect("/reservation/%s" % reservation_id)
-
 
 @login_required
 def ReservationCancel(request, reservation_id, location_slug):

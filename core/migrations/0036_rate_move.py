@@ -16,7 +16,7 @@ class Migration(DataMigration):
 			
 			# Now generate a bill for this reservation
 			total_nights = (r.depart - r.arrive).days
-			room_charge_desc = "%s (%d * $%d)" % (r.room, total_nights, r.rate)
+			room_charge_desc = "%s (%d * $%d)" % (r.room.name, total_nights, r.rate)
 			room_charge = total_nights * r.rate
 			orm['core.BillLineItem'].objects.create(reservation=r, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 
