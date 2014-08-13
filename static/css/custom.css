@@ -654,6 +654,14 @@ p.notice {
 	font-size: 120%;
 }
 
+#reservation-amount-summary-box {
+	background-color:lightgray;
+}
+#reservation-amount-summary-box h3 {
+	margin-top: 0px;
+	padding-top: 0px;
+}
+
 .new-reservation {
 	padding-top: 30px;
 }

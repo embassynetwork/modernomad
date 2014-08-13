@@ -27,18 +27,27 @@ submit your request with a few days' notice. </p>
 
 <div class="row">
 	
-	<div class="form-container col-md-9">
+	<div class="form-container col-md-12">
 		<form method="post" role="form" action="{% url 'reservation_create' location.slug %}">{% csrf_token %}
 
 			<p>Select arrival and departure dates to show known availability.</p> 
 
-			<div class="reservation-dates form-group">
-				<div class="col-md-6">Arrive: {{ form.arrive }}</div> 
-				<div class="col-md-6">Depart: {{ form.depart}}</div>
+			<div class="reservation-dates form-group row">
+				<div class="col-md-3">Arrive: {{ form.arrive }}</div> 
+				<div class="col-md-3">Depart: {{ form.depart}}</div>
+				<div class="col-md-2"></div>
+				<div class="col-md-4 pull-right" id="reservation-amount-summary-box">
+					<h3>Reservation Summary</h3>
+					<div id="reservation-items"></div>
+					<div class="pull-right"><strong>Total: $<em id="reservation-total">0</em></strong></div>
+				</div>
+				
 			</div>
 
-			<div id="show-room-availability"></div>
-
+			<div class="row">
+				<div class="col-md-8" id="show-room-availability"></div>
+			</div>
+			
 			<div id="reservation-additional-info">
 				<div class="field-wrapper">	
 					<label for="id_purpose">When you're happy with your room selection, 
@@ -76,12 +85,6 @@ submit your request with a few days' notice. </p>
 
 		</form>
 	</div>
-	<div class="col-md-3 pull-right affix" id="reservation-amount-summary-box" data-spy="affix" data-offset-top="60">
-		<h3>Reservation</h3>
-		<div id="reservation-items"></div>
-		<div class="pull-right"><strong>Total: $<em id="reservation-total">0</em></strong></div>
-	</div>
-
 </div>
 {% endblock %}
 
