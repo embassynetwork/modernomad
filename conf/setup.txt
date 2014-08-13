@@ -52,6 +52,10 @@ cp conf/celery_start /home/embassynetwork/bin/
 cp embassynetwork-ssl /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/embassynetwork-ssl /etc/nginx/sites-enabled/
 
+# Move certs into place
+/etc/ssl/certs/embassy-wildcard.crt;
+/etc/ssl/private/embassy-wildcard.key;
+
 # Restart everything
 supervisorctl reload 
 service nginx restart
