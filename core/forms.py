@@ -208,7 +208,7 @@ class EmailTemplateForm(forms.Form):
 			'reservation_url': "https://"+domain+reservation.get_absolute_url()
 		}
 
-		self.fields['subject'].initial = location.email_subject_prefix + Template(tpl.subject).render(Context(template_variables))
+		self.fields['subject'].initial = '['+location.email_subject_prefix+']' + Template(tpl.subject).render(Context(template_variables))
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 
