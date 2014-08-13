@@ -127,13 +127,14 @@ class ReservationForm(forms.ModelForm):
 
 	def __init__(self, location, *args, **kwargs):
 		super(ReservationForm, self).__init__(*args, **kwargs)
+		self.location = location
 		self.fields['room'].queryset = Room.objects.filter(location=location).filter(primary_use="guest")
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
 		arrive = cleaned_data.get('arrive')
 		depart = cleaned_data.get('depart')
-		if (depart - arrive).days > settings.MAX_RESERVATION_DAYS:
+		if (depart - arrive).days > self.location.max_reservation_days:
 			self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
 		return cleaned_data
 

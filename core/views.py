@@ -733,7 +733,6 @@ def ReservationConfirm(request, reservation_id, location_slug):
 
 	return HttpResponseRedirect("/reservation/%s" % reservation_id)
 
-
 @login_required
 def ReservationCancel(request, reservation_id, location_slug):
 	if not request.method == "POST":
