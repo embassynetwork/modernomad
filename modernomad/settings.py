@@ -139,6 +139,7 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 CELERY_ACCEPT_CONTENT = ['json', 'yaml']
+BROKER_URL = "amqp://guest:guest@localhost:5672//"
 
 # import any local settings
 try:
