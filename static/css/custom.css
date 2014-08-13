@@ -1386,7 +1386,6 @@ table tr.row-even td { background: #eee; }
 }
 
 .featurette-image {
-	height: 500px;
 	overflow: hidden;
 }
 
@@ -1485,6 +1484,15 @@ p.lead strong {
 	height: 500px;
 }
 
+/* Small devices (tablets, 768px and up) */
+@media (max-width: @screen-sm-max) { 
+	#member-collage {
+		width: 300px;
+		height: 300px;
+		overflow: hidden;
+	}
+}
+
 .member-img-collage-item {
 	width: 50px;
 	height: 50px;
@@ -1499,6 +1507,8 @@ p.lead strong {
 
 .press-logo {
 	height: 40px;
+	margin-bottom: 20px;
+	margin-right: 10px;
 }
 
 .room-avail-text-success {
@@ -1521,4 +1531,14 @@ p.lead strong {
 .location-preview .col-md-3 {
 	height: 225px;
 	overflow: hidden;
+}
+
+.socialmedia-icon {
+	width: 40px;
+	height: 40px;
+	margin-right: 20px;
+}
+
+.small-spacer {
+	margin-top: 30px;
 }

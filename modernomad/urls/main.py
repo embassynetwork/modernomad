@@ -9,6 +9,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
 	url(r'^$', 'modernomad.views.index'),
 	url(r'^about/$', 'modernomad.views.about'),
+	url(r'^membership/$', 'modernomad.views.membership'),
+	url(r'^host/$', 'modernomad.views.host'),
 	url(r'^stay/$', 'modernomad.views.stay'),
 	url(r'^404/$', 'modernomad.views.ErrorView'),
 	url(r'^admin/', include(admin.site.urls)),
