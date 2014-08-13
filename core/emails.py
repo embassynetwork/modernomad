@@ -382,7 +382,7 @@ def admin_daily_update(location):
 	
 	admins_emails = []
 	for admin in location.house_admins.all():
-		if not admin.email in admin_emails:
+		if not admin.email in admins_emails:
 			admins_emails.append(admin.email)
 
 	mailgun_data={"from": location.from_email(),
