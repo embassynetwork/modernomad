@@ -1,4 +1,5 @@
 {% extends "root.html" %}
+{% load staticfiles %}
 
 {% block body %}
 
@@ -35,6 +36,7 @@
 		<h3><span class="highlight">Where are you going?</span></h3>
 	</div>
 	<div id="location-availability-map"></div>
+	<a href="{% url 'location_list' %}" class="small-spacer btn btn-lg btn-default">Browse All Locations</a>
 </div>
 
 
@@ -54,7 +56,7 @@
 				far and wide can seek reprieve in a place that feels like home.
 			</p>
 		</div>
-		<div class="col-md-5">
+		<div class="col-md-5 col-xs-12">
 			<div id="member-collage">
 				{% for profile in random_profiles %}
 					<img class="member-img-collage-item" src="{{ MEDIA_URL }}{{ profile.image }}">
@@ -101,9 +103,16 @@
 	<hr class="featurette-divider">
 
 	<div class="row center" id="index-get-involved">
-		<div class="col-md-4"><h2>Stay with Us</h2></div>
-		<div class="col-md-4"><h2>Add your space</h2></div>
-		<div class="col-md-4"><h2>Learn about membership</h2></div>
+		<div class="col-md-4">
+			<h2>Stay<br>with Us</h2>
+		</div>
+		<div class="col-md-4">
+			<h2>Add your<br>Community</h2>
+		</div>
+		<div class="col-md-4">
+			<h2>Learn about<br>membership</h2>
+			<hr class="hr-fancy">
+		</div>
 	</div>
 	
 </div>
@@ -115,16 +124,20 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-md-8" id="footer-press">
-				<h5>Press</h5>
-			<a href="http://www.ft.com/intl/cms/s/2/091e540a-baf5-11e1-81e0-00144feabdc0.html#axzz2NxTef1Yd" target="blank" title="Over the Rainbow: Communal living is back in vogue, especially among Silicon Valley’s young technology workers"><img class="press-logo" src="/static/img/financial_times_logo.jpg">
-			<a title="" target="blank" href="http://www.nytimes.com/2013/12/12/fashion/Bay-Area-millenials-intentional-communities-communes.html?_r=0&adxnnl=1&rref=fashion&hpw=&pagewanted=all&adxnnlx=1387416498-ClhePTg+t6ZVfKx9MaVw2g"><img class="press-logo" src="/static/img/newyorktimes-logo-250.jpg"></a>
-			<a title="" target="blank" href="http://www.sfgate.com/bayarea/article/Tech-entrepreneurs-revive-communal-living-4988388.php"><img class="press-logo" src="/static/img/sf_chronicle_logo_small.png"></a>
-			<a title="" target="blank" href="http://www.theatlanticcities.com/housing/2013/12/one-answer-san-franciscos-overpriced-housing-co-living/7654/"><img class="press-logo" src="/static/img/atlantic-cities-logo.jpg"></a>
-			<a title="" target="blank" href="http://www.npr.org/blogs/alltechconsidered/2013/12/19/250548681/bay-areas-steep-housing-costs-spark-return-to-communal-living"><img class="press-logo" src="/static/img/npr_logo.png"></a>
-			<a title="" target="blank" href="http://www.csmonitor.com/The-Culture/Family/2014/0330/Shared-housing-The-sharing-economy-gives-roommates-a-new-image"><img class="press-logo" src="/static/img/csr_logo.jpg"></a>
+				<div class="row">
+				<a href="http://www.ft.com/intl/cms/s/2/091e540a-baf5-11e1-81e0-00144feabdc0.html#axzz2NxTef1Yd" target="blank" title="Over the Rainbow: Communal living is back in vogue, especially among Silicon Valley’s young technology workers"><img class="press-logo" src="{% static 'img/ft-logo.jpg' %}">
+					<a title="" target="blank" href="http://www.nytimes.com/2013/12/12/fashion/Bay-Area-millenials-intentional-communities-communes.html?_r=0&adxnnl=1&rref=fashion&hpw=&pagewanted=all&adxnnlx=1387416498-ClhePTg+t6ZVfKx9MaVw2g"><img class="press-logo" src="{% static 'img/nyt-logo.png' %}"></a>
+					<a title="" target="blank" href="http://www.sfgate.com/bayarea/article/Tech-entrepreneurs-revive-communal-living-4988388.php"><img class="press-logo" src="{% static 'img/sf_chronicle_logo3.gif' %}"></a>
+				</div>
+				<div class="row">
+					<a title="" target="blank" href="http://www.theatlanticcities.com/housing/2013/12/one-answer-san-franciscos-overpriced-housing-co-living/7654/"><img class="press-logo" src="{% static 'img/atlantic-cities-logo.jpg' %}"></a>
+					<a title="" target="blank" href="http://www.npr.org/blogs/alltechconsidered/2013/12/19/250548681/bay-areas-steep-housing-costs-spark-return-to-communal-living"><img class="press-logo" src="{% static 'img/npr_logo.png' %}"></a>
+					<a title="" target="blank" href="http://www.csmonitor.com/The-Culture/Family/2014/0330/Shared-housing-The-sharing-economy-gives-roommates-a-new-image"><img class="press-logo" src="{% static 'img/csr_logo.jpg' %}"></a>
+				</div>
 			</div>
 			<div class="col-md-4" id="footer-socialmedia">
-
+				<img class="pull-right socialmedia-icon" src="{% static 'img/twitter-icon.png' %}">
+				<img class="pull-right socialmedia-icon" src="{% static 'img/facebook-icon.png' %}">
 			</div>
 		</div>
 	</div>
@@ -141,7 +154,7 @@
 			map.scrollWheelZoom.disable();
 			var LocIcon = L.Icon.extend({
 				options: {
-					iconUrl: '/static/img/marker-icon.png',
+					iconUrl: '{% static "img/marker-icon.png" %}',
 				}
 			});
 			locations = {{ location_list|safe}};
@@ -152,9 +165,11 @@
 				var mark = L.marker([locations[i].latitude, locations[i].longitude], {icon: locIcon}).addTo(map);
 				var popup = L.popup();
 				if (locations[i].has_availability) {
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-success">Availability today</span></h3><h5><a href="'+ locations[i].stay_url +'"><span class="glyphicon glyphicon-calendar"></span> Explore rooms and dates</a></h5><p>'+locations[i].short_description+'</p>')
+					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-success">Availability today</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
+				} else if (!locations[i].has_availability && locations[i].num_rooms == 0) { 
+					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">No Availability Info</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
 				} else {
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">Full today</span></h3><h5><a href="'+ locations[i].stay_url +'"><span class="glyphicon glyphicon-calendar"></span> Explore rooms and dates</a></h5><p>'+locations[i].short_description+'</p>')
+					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">Full today</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
 				}
 				mark.bindPopup(popup);
 			}

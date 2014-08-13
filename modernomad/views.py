@@ -21,8 +21,10 @@ def index(request):
 				'longitude': location.longitude,
 				'short_description': strip_tags(location.short_description[:200])+"...",
 				'image': location.image.url,
-				'stay_url': location.get_absolute_url() + "stay",
-				'has_availability': location.has_availability()
+				'url': location.get_absolute_url(),
+				'has_availability': location.has_availability(),
+				'num_rooms': location.rooms.count()
+
 		})
 	print location_list
 	# (JKS) the exclusions here are shenanigans to ensure we exclude older
