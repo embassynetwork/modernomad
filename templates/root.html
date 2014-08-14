@@ -100,6 +100,10 @@
 
 	</script>
 
+	{% if GOOGLE_ANALYTICS_PROPERTY_ID %}
+	  {% include "snippets/google_analytics.html" %}
+	{% endif %}
+	
 	{% block extrajs %}
 	{% endblock %}
 
