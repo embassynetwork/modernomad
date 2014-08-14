@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, include, url
-from django.contrib.auth.views import password_reset, password_reset_done
+from django.contrib.auth.views import password_reset, password_reset_done, password_reset_confirm, password_reset_complete
 import registration.backends.default.urls
 from core.views import Registration
 from django.conf import settings
@@ -23,8 +23,10 @@ urlpatterns += patterns('core.views',
 )
 
 urlpatterns += patterns('',
-	url(r'^password/reset/$', password_reset, {'template_name': 'registration/registration/password_reset_form.html'}, name="password_reset"),
-	url(r'^password/reset/$', password_reset_done, {'template_name': 'registration/registration/password_reset_done.html'}, name="password_reset_done"),
+	url(r'^password/reset/$', password_reset, name="password_reset"),
+	url(r'^password/done/$', password_reset_done, name="password_reset_done"),
+	url(r'^password/confirm/$', password_reset_confirm, name="password_reset_confirm"),
+	url(r'^password/complete/$', password_reset_complete, name="password_reset_complete"),
 )
 
 # XXX can this be extracted and put into the gather app?

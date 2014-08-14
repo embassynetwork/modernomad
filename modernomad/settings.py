@@ -110,6 +110,11 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+	'registration',
+	'south',
+	'core',
+	'djcelery',
+	'gather',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',
@@ -119,11 +124,6 @@ INSTALLED_APPS = (
 	'django.contrib.admin',
 	# Uncomment the next line to enable admin documentation:
 	# 'django.contrib.admindocs',
-	'registration',
-	'south',
-	'core',
-	'djcelery',
-	'gather',
 )
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
