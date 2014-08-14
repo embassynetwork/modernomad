@@ -88,7 +88,7 @@ class Location(models.Model):
 		return Room.objects.filter(location=self, primary_use=Room.GUEST)
 
 	def private_rooms(self):
-		return Rooms.objects.filter(location=self, primary_use=Room.PRIVATE)
+		return Room.objects.filter(location=self, primary_use=Room.PRIVATE)
 
 	def get_available(self, arrive, depart):
 		today = timezone.now().date()
