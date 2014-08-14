@@ -99,6 +99,13 @@
 
 	{% include "snippets/res_status_area.html" %}
 
+	<div id="dialog-warn-full" title="Warning! The room you are trying to book is full.">
+		<p>
+			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+			You are trying to confirm a reservation for a room that is showing as full. Are you sure?
+		</p>
+	</div>
+
 	<hr>
 
 	<h3 class="bottom-pad-thirty">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %} <span class="pull-right">${{ r.total_value }}</span></h3>
@@ -346,6 +353,30 @@ $("#dialog-confirm-cancel").dialog({
 $("#res-cancel").click(function (e) {
     $("#dialog-confirm-cancel").dialog("open");
     e.preventDefault();
+});
+
+
+$("#dialog-warn-full").dialog({
+	autoOpen: false,
+	modal: true,
+	buttons: {
+		"Yes, Confirm anyway": function () {
+			$("#res-charge-card").submit();
+		},
+		"Oops! Do not confirm": function () {
+			$(this).dialog("close");
+		}
+	}
+});
+
+$("#res-charge-card").click(function (e) {
+	$("#dialog-warn-full").dialog("open");
+	e.preventDefault();
+});
+
+$("#set-confirm").click(function (e) {
+	$("#dialog-warn-full").dialog("open");
+	e.preventDefault();
 });
 
 </script>

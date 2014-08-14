@@ -555,7 +555,7 @@ class Reservation(models.Model):
 	def is_pending(self):
 		return self.status == Reservation.PENDING
 
-	def is_apprived(self):
+	def is_approved(self):
 		return self.status == Reservation.APPROVED
 
 	def is_confirmed(self):

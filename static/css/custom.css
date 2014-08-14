@@ -981,7 +981,7 @@ div#spinner
 } 
 
 .paid-bg-img {
-	background: url(/media/img/paid-angle-30-trans.png) 50% 50% no-repeat;
+	background: url(/static/img/paid-angle-30-trans.png) 50% 50% no-repeat;
 	background-size: 70%;
 }
 
@@ -1280,8 +1280,9 @@ h3.no-top-margin {
 	color: #98321C;
 }
 
-#user-detail-heading {
+#page-spacer {
 	margin-bottom: 30px;
+	margin-top: 30px;
 }
 
 #event-actions {
