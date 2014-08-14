@@ -85,11 +85,12 @@ cp data/avatars/default.jpg avatars/
 cp data/avatars/default.jpg locations/
 cp data/avatars/default.jpg rooms/
 cd ..
-rm -rf media/data
 
 ./manage.py migrate --delete-ghost-migrations core
 ./manage.py migrate gather --fake 0009
 ./manage.py migrate gather
+
+rm -rf media/data
 
 # Edit eventadmingroup.json:
 [
