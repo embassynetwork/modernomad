@@ -46,7 +46,7 @@
 		<div class="float-left homepage-user-wrapper">			
 			<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
 			<div class="homepage-user-descr" id="user-{{person.id}}">
-				<p class="homepage-user-text">{{person.profile.bio|title|truncatewords:40 }}</p>
+				<p class="homepage-user-text">{{person.profile.bio|truncatewords:40 }}</p>
 				... <a class="homepage-user-link" href="{% url 'user_detail' person.username %}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
 			</div>
 		</div>
