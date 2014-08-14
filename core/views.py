@@ -887,7 +887,7 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 			if days_until_arrival < location.welcome_email_days_ahead:
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
-			reservation.set_comp()
+			reservation.comp()
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.charge_card()
