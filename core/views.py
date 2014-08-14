@@ -40,57 +40,7 @@ logger = logging.getLogger(__name__)
 
 def location(request, location_slug):
 	location = my_object = get_object_or_404(Location, slug=location_slug)
-
-	today = timezone.localtime(timezone.now())
-
-	if request.user.is_authenticated():
-		current_user = request.user
-	else:
-		current_user = None
-	
-	# pull out all reservations in the coming month
-	coming_month_res = (
-			Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
-			.filter(location=location)
-			.exclude(depart__lt=today)
-			.exclude( arrive__gt=today+datetime.timedelta(days=30))
-		)
-	people_in_coming_month = []
-	for r in coming_month_res:
-		# check for duplicates, add if not already there.
-		if r.user not in people_in_coming_month:
-			people_in_coming_month.append(r.user)
-
-	# add residents to the list of people in the house in the coming month. 
-	residents = list(location.residents.all())
-	for r in residents:
-		# check for duplicates, add if not already there.
-		if r not in people_in_coming_month:
-			people_in_coming_month.append(r)
-
-	# Add all the people from events too if we have gather installed
-	events = None
-	if 'gather' in settings.INSTALLED_APPS:
-		from gather.models import Event
-		events = Event.objects.upcoming(upto=5, current_user=current_user, location=location)
-		coming_month_events = (
-				Event.objects.filter(status="live") 
-				.filter(location=location)
-				.exclude(end__lt=today)
-				.exclude( start__gte=today+datetime.timedelta(days=30))
-			)
-		for e in coming_month_events:
-			# check for duplicates, add if not already there.
-			for u in e.organizers.all():
-				if u not in people_in_coming_month:
-					people_in_coming_month.append(u)
-
-	if not request.user.is_authenticated():
-		new_user_form = NewUserForm()
-	else:
-		new_user_form = None
-
-	return render(request, "landing.html", {'location': location, 'people_in_coming_month': people_in_coming_month, 'events': events, 'new_user_form': new_user_form})
+	return render(request, "landing.html", {'location': location})
 
 def about(request, location_slug):
 	location = get_location(location_slug)

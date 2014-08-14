@@ -15,6 +15,8 @@ from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from gather.tasks import published_events_today_local, events_pending
+from gather.forms import NewUserForm
 
 # imports for signals
 import django.dispatch
@@ -103,6 +105,48 @@ class Location(models.Model):
 			return False
 		return True
 
+	def events(self, user=None):
+		today = timezone.localtime(timezone.now())
+		if 'gather' in settings.INSTALLED_APPS:
+			from gather.models import Event
+			return Event.objects.upcoming(upto=5, current_user=user, location=self)
+		return None
+
+	def coming_month_events(self, days=30):
+		today = timezone.localtime(timezone.now())
+		if 'gather' in settings.INSTALLED_APPS:
+			from gather.models import Event
+			return Event.objects.filter(status="live").filter(location=self).exclude(end__lt=today).exclude(start__gte=today+datetime.timedelta(days=days))
+		return None
+
+	def coming_month_reservations(self, days=30):
+		today = timezone.localtime(timezone.now())
+		return Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).filter(location=self).exclude(depart__lt=today).exclude( arrive__gt=today+datetime.timedelta(days=days))
+	
+	def people_in_coming_month(self):
+		# pull out all reservations in the coming month
+		people = []
+		for r in self.coming_month_reservations():
+			if r.user not in people:
+				people.append(r.user)
+
+		# add residents to the list of people in the house in the coming month. 
+		for r in self.residents.all():
+			if r not in people:
+				people.append(r)
+
+		# add house admins
+		for a in self.house_admins.all():
+			if a not in people:
+				people.append(a)
+
+		# Add all the people from events too
+		for e in self.coming_month_events():
+			for u in e.organizers.all():
+				if u not in people:
+					people.append(u)
+
+		return people
 
 class LocationNotUniqueException(Exception):
 	pass

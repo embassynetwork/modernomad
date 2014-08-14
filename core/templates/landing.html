@@ -42,7 +42,7 @@
 
 <div class="row" id="community-section">
 	<div class="col-md-12" id="profiles">
-		{% for person in people_in_coming_month %}
+		{% for person in location.people_in_coming_month %}
 		<div class="float-left homepage-user-wrapper">			
 			<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
 			<div class="homepage-user-descr" id="user-{{person.id}}">
