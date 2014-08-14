@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block body %}
-<div class="container">
+<div class="container" id="-body">
 {% if messages %}
 <div class="messages">
     {% for message in messages %}
@@ -15,7 +15,7 @@
 {% endif %}
 
 
-<div class="col-md-12" id="user-detail-heading">
+<div class="col-md-12" id="page-spacer">
 	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1> 
 	{% if u.profile.city != "" %}
 	<em> based in {{ u.profile.city }}</em>

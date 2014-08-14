@@ -21,7 +21,6 @@
 	<form method="POST" action="{% url 'reservation_manage_update' location.slug r.id %}" id="res-action-form">
 		
 	{% if not r.is_comped %}
-
 		{% if r.is_pending %}
 			{% if r.user.profile.customer_id %}
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
@@ -80,3 +79,5 @@
 
 	<small><em class="last-contact">Last contact about this reservation: {{ r.last_msg|default:"Never" }}</em></small>
 </div>
+
+
