@@ -3,7 +3,7 @@
 
 {% block body %}
 
-<div class="jumbotron">
+<div class="jumbotron" id="index-header">
 	<div class="container">
 		<h1>The Embassy Network</h1>
 		<h1><span class="text-muted"><em>Be at Home Across the Globe</em></span></h1>
@@ -57,11 +57,7 @@
 			</p>
 		</div>
 		<div class="col-md-5 col-xs-12">
-			<div id="member-collage">
-				{% for profile in random_profiles %}
-					<img class="member-img-collage-item" src="{{ MEDIA_URL }}{{ profile.image }}">
-				{% endfor %}
-			</div>
+			<img class="featurette-image img-responsive" src="{% static 'img/EmbassyNetworkFaces.jpg' %}">
 		</div>
 	</div>
 

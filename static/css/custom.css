@@ -1551,3 +1551,11 @@ p.lead strong {
 .small-spacer {
 	margin-top: 30px;
 }
+
+#index-header {
+	background: url(/static/img/EmbassyNetworkHeaderBackground.png);
+	background-repeat: no-repeat;
+	background-position: bottom right;
+	background-color: #eee;
+
+}
