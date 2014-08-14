@@ -15,6 +15,7 @@
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav">
 						<li><a href="{% url 'location_about' location.slug %}">About</a></li>
+						{% if location.guest_rooms %}
 						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
 						{% ifappexists gather %}
 						<li class="dropdown">
@@ -26,13 +27,13 @@
 							<li><a href="{% url 'gather_create_event' location.slug %}">New Event</a></li>
 							{% if user.is_authenticated %}
 							<li><a href="{% url 'gather_past_events' location.slug %}">Past Events</a></li>
-							{% else %}
 							{% endif %}
 						</ul>
 						</li>
 						{% endifappexists %}
-
+						{% endif %}
 						{% if user.is_authenticated %}
+						{% if location.residents %}
 						<li class="dropdown">
 						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
 							People <b class="caret"></b>
@@ -45,6 +46,7 @@
 							{% endif %}
 						</ul>
 						</li>
+						{% endif %}
 						{% endif %}
 						{% if user in location.house_admins.all %}
 						<li class="dropdown">
