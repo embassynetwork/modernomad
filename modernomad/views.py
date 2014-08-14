@@ -26,11 +26,7 @@ def index(request):
 				'num_rooms': location.rooms.count()
 
 		})
-	print location_list
-	# (JKS) the exclusions here are shenanigans to ensure we exclude older
-	# profiles with missing images or wierd migration issues 
-	random_profiles = UserProfile.objects.exclude(image__endswith='default.jpg').exclude(image='').order_by('?')[:90]
-	return render(request, "index.html", {'location_list': json.dumps(location_list), 'recent_events': recent_events, 'random_profiles': random_profiles})
+	return render(request, "index.html", {'location_list': json.dumps(location_list), 'recent_events': recent_events})
 
 def about(request):
 	return render(request, "about.html")
