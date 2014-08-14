@@ -3,6 +3,7 @@
 {% block body %}
 
 <h2>Log in to your account</h2>
+<p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
 <form enctype="multipart/form-data" method="post">{% csrf_token %}
 	{{ form.as_p }}
 	<input type="submit" value="Submit" />
