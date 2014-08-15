@@ -6,7 +6,7 @@ import datetime
 
 from django.core.management.base import BaseCommand, CommandError
 
-from staff.backup import BackupManager
+from modernomad.backup import BackupManager
 
 class Command(BaseCommand):
 	help = "Creates a backup containing an SQL dump and the media files."
