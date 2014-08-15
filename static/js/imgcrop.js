@@ -5,7 +5,7 @@ canvas.height= 200;
 var ctx = canvas.getContext('2d');
 // load a default blank avatar image
 var img_placeholder = new Image();
-img_placeholder.src = "/media/data/avatars/default.jpg";
+img_placeholder.src = "/static/img/user_icon_placeholder.png";
 img_placeholder.onload = function() {
 	ctx.drawImage(img_placeholder, 0,0, 200, 200);
 };

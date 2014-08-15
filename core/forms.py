@@ -77,6 +77,13 @@ class UserProfileForm(forms.ModelForm):
 					self.error_messages['password_mismatch'])
 		return password2
 
+	def clean_username(self):
+		username = self.cleaned_data['username']
+		if username and User.objects.filter(username=username):
+			raise forms.ValidationError('There is already a user with this username. If this is your account and you need to recover your password, you can do so from the login page.')
+		return username
+
+
 	def clean_links(self):
 		# validates and formats the urls, returning a string of comma-separated urls
 		links = self.cleaned_data['links']

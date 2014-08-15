@@ -102,7 +102,8 @@
 	<div id="dialog-warn-full" title="Warning! The room you are trying to book is full.">
 		<p>
 			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-			You are trying to confirm a reservation for a room that is showing as full. Are you sure?
+			You are trying to confirm a reservation for a room that is showing
+			as full. Make sure you know what you are dong. Are you sure?
 		</p>
 	</div>
 
@@ -230,6 +231,8 @@
 {% block extrajs %}
 <script language="JavaScript">
 
+var action_el;
+
 // don't have a default email selected when the modal pops up
 $("#which-email-select").prop("selectedIndex", -1);
 
@@ -244,6 +247,33 @@ $("#which-email-select").change(function() {
 	$("#selected-email").html($email_templates[template_id]);
 });
 
+function ajax_call(el) {
+	console.log('el is');
+	console.log(action_el);
+	request = $.ajax({ 
+		data: {
+			'reservation-action': $(el).attr('id'),
+			'csrfmiddlewaretoken': '{{ csrf_token }}'
+		}, 
+		type: $("#res-action-form").attr('method'), // GET or POST
+		url: $("#res-action-form").attr('action') // the url to hit
+	});
+	request.done(function(msg) { // on success..
+		console.log("Success!");
+		$("#res-status-area").html(msg);
+		$("#emailModal").modal("show");
+
+		// also need to re-register the ajax calls on the new html divs one
+		// it is injected (or we won't be able to chain multiple calls
+		// together without refreshing the page). 
+		register_actions();
+	});
+	request.fail(function(msg) {
+		console.log("Error in reservation update:");
+		console.log(msg);
+	});
+}
+
 function register_actions() {
 	// comping a reservation reslts in a page reload so we can rely on the
 	// template language here. 
@@ -252,32 +282,21 @@ function register_actions() {
 	if (payment_status == 'paid') {
 		$("#res-action-toggle-comp").remove();
 	}
+
 	$('.res-manage-action').click(function() { 
-		request = $.ajax({ 
-			data: {
-				'reservation-action': $(this).attr('id'),
-				'csrfmiddlewaretoken': '{{ csrf_token }}'
-			}, 
-			type: $("#res-action-form").attr('method'), // GET or POST
-			url: $("#res-action-form").attr('action') // the url to hit
-		});
-		request.done(function(msg) { // on success..
-			console.log("Success!");
-			$("#res-status-area").html(msg);
-			$("#emailModal").modal("show");
-
-			// also need to re-register the ajax calls on the new html divs one
-			// it is injected (or we won't be able to chain multiple calls
-			// together without refreshing the page). 
-			register_actions();
-		});
-		request.fail(function(msg) {
-			console.log("Error in reservation update:");
-			console.log(msg);
-		});
-
+		// action_el gets reset every time res-manage-action is clicked
+		action_el = this;
+		console.log(action_el);
+		console.log('{{r.status}}');
+		console.log('{{room_has_availability}}')
+		if ('{{r.status}}' == 'pending' && '{{ room_has_availability }}' == 'False') {
+			$("#dialog-warn-full").dialog("open");
+		} else {
+			ajax_call(action_el);
+		}
 		return false;
-	});
+	})
+
 };
 
 $(document).ready(function() {
@@ -360,8 +379,9 @@ $("#dialog-warn-full").dialog({
 	autoOpen: false,
 	modal: true,
 	buttons: {
-		"Yes, Confirm anyway": function () {
-			$("#res-charge-card").submit();
+		"Yes, approve anyway": function () {
+			ajax_call(action_el);
+			$(this).dialog("close");
 		},
 		"Oops! Do not confirm": function () {
 			$(this).dialog("close");
@@ -369,15 +389,6 @@ $("#dialog-warn-full").dialog({
 	}
 });
 
-$("#res-charge-card").click(function (e) {
-	$("#dialog-warn-full").dialog("open");
-	e.preventDefault();
-});
-
-$("#set-confirm").click(function (e) {
-	$("#dialog-warn-full").dialog("open");
-	e.preventDefault();
-});
 
 </script>
 
