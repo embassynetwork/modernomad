@@ -49,8 +49,9 @@ cp conf/gunicorn.conf /etc/supervisor/conf.d/
 cp conf/gunicorn_start /home/embassynetwork/bin/
 cp conf/celery.conf /etc/supervisor/conf.d/
 cp conf/celery_start /home/embassynetwork/bin/
-cp embassynetwork-ssl /etc/nginx/sites-available/
-ln -s /etc/nginx/sites-available/embassynetwork-ssl /etc/nginx/sites-enabled/
+cp conf/logrotate /etc/logrotate.d/embassynetwork
+cp conf/nginx /etc/nginx/sites-available/embassynetwork
+ln -s /etc/nginx/sites-available/embassynetwork /etc/nginx/sites-enabled/
 
 # Move certs into place
 /etc/ssl/certs/embassy-wildcard.crt;
