@@ -2,29 +2,15 @@ upstream django_app_server {
   server unix:/home/embassynetwork/webapp/run/gunicorn.sock fail_timeout=0;
 }
 
-# We need to install the following redirects
-# sf.embassynetwork.com -> https://embassynetwork.com/locations/embassysf/
-# farmhouse.embassynetwork.com -> https://embassynetwork.com/locations/farmhouse/
-# sandbox.embassynetwork.com -> https://embassynetwork.com/locations/sandbox/
-# redvic.embassynetwork.com -> https://embassynetwork.com/locations/redvic/
-# redvic.com -> https://embassynetwork.com/locations/redvic/
-
 server {
     listen 80;
-    server_name  sf.embassynetwork.com;
-    rewrite ^ https://embassynetwork.com/embassysf/$request_uri? permanent;
+    server_name embassynetwork.com;
+    return 301 https://embassynetwork.com
 }
 
 server {
-    # Catch-all http -> https
-    listen 80;
-    server_name  *.embassynetwork.com;
-    rewrite ^ https://$server_name$request_uri? permanent;
-}
-
-server {
-    listen 443;
-    server_name  *.embassynetwork.com;
+    listen 443 default_server;
+    server_name  embassynetwork.com;
     access_log  /home/embassynetwork/logs/nginx_access.log;
     error_log  /home/embassynetwork/logs/nginx_error.log notice;
 
@@ -95,4 +81,40 @@ server {
     location = /favicon.ico {
         root /home/embassynetwork/static/;
     }
+}
+
+### Server Redirects ###
+
+# sf.embassynetwork.com -> https://embassynetwork.com/locations/embassysf/
+server {
+    listen 80;
+    listen 443;
+    server_name  sf.embassynetwork.com;
+    return 301 https://embassynetwork.com/locations/embassysf/;
+}
+
+# sandbox.embassynetwork.com -> https://embassynetwork.com/locations/sandbox/
+server {
+    listen 80;
+    listen 443;
+    server_name  sandbox.embassynetwork.com;
+    return 301 https://embassynetwork.com/locations/sandbox/;
+}
+
+# farmhouse.embassynetwork.com -> https://embassynetwork.com/locations/farmhouse/
+server {
+    listen 80;
+    listen 443;
+    server_name  sf.embassynetwork.com;
+    return 301 https://embassynetwork.com/locations/embassysf/;
+}
+
+# redvic.com -> https://embassynetwork.com/locations/redvic/
+# redvic.embassynetwork.com -> https://embassynetwork.com/locations/redvic/
+server {
+    listen 80;
+    listen 443;
+    server_name  redvic.com
+    server_name  redvic.embassynetwork.com;
+    return 301 https://embassynetwork.com/locations/redvic/;
 }
