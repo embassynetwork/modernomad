@@ -310,7 +310,7 @@ def current(request, location_slug):
 	#	# TODO - This shoud possibly send a response so they know they were blocked
 	#	logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
 	#	return HttpResponse(status=200)
-	if sender in bcc_list
+	if sender in bcc_list:
 		bcc_list.remove(sender)
 	
 	# prefix subject, but only if the prefix string isn't already in the
@@ -395,7 +395,7 @@ def stay(request, location_slug):
 	#	# TODO - This shoud possibly send a response so they know they were blocked
 	#	logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
 	#	return HttpResponse(status=200)
-	if sender in bcc_list
+	if sender in bcc_list:
 		bcc_list.remove(sender)
 
 	# prefix subject, but only if the prefix string isn't already in the
