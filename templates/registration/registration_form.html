@@ -80,7 +80,7 @@ about, and possible connections around work, projects and ideas. It should only 
 	<script>
 		$("#newprofileform").submit(function (e) {
 			if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
-				$("#img-upload-error").html('<span class="text-error">This field is required.</span>');
+				$("#img-upload-error").html('<div class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> An image is required.</div>');
 				$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
 				return false;
 			}
