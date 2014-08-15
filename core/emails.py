@@ -40,184 +40,6 @@ def mailgun_send(mailgun_data):
 	logger.debug("Mailgun response: %s" % resp.text)
 	return HttpResponse(status=200)
 
-@csrf_exempt
-def current(request, location_slug):
-	# fail gracefully if location does not exist
-	try:
-		location = get_location(location_slug)
-	except:
-		# XXX TODO reject and bounce back to sender?
-		logger.error('location not found')
-		return HttpResponse(status=200)
-	logger.debug('current@ for location: %s' % location)
-
-	# we think that message_headers is a list of strings
-	header_txt = request.POST.get('message-headers')
-	message_headers = json.loads(header_txt)
-	message_header_keys = [item[0] for item in message_headers]
-
-	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
-	# A List-Id header will only be present if it has been added manually in
-	# this function, ie, if we have already processed this message. 
-	if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
-		# mailgun requires a code 200 or it will continue to retry delivery
-		logger.debug('List-Id header was found! Dropping message silently')
-		return HttpResponse(status=200)
-
-	#if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
-	if 'Auto-Submitted' in message_header_keys: 
-		logger.info('message appears to be auto-submitted. reject silently')
-		return HttpResponse(status=200)
-
-	recipient = request.POST.get('recipient')
-	from_address = request.POST.get('from')
-	logger.debug('from: %s' % from_address)
-	sender = request.POST.get('sender')
-	logger.debug('sender: %s' % sender)
-	subject = request.POST.get('subject')
-	body_plain = request.POST.get('body-plain')
-	body_html = request.POST.get('body-html')
-
-	# Add any current reservations
-	current_emails = [] 
-	for r in Reservation.today.confirmed(location):
-		current_emails.append(r.user.email)
-
-	# Add all the residents at this location
-	for r in location.residents.all():
-		current_emails.append(r.email)
-		
-	# Add the house admins
-	for a in location.house_admins.all():
-		current_emails.append(a.email)
-
-	# TODO? make sure the sender is on the list?
-	#if not sender in current_emails:
-		# Do something about it
-		# Bounce? Moderate?
-
-	# Now loop through all the emails and build the bcc list we will use.
-	# This makes sure there are no duplicate emails.
-	bcc_list = []
-	for email in current_emails:
-		if email not in bcc_list:
-			bcc_list.append(email)
-	logger.debug("bcc list: %s" % bcc_list)
-	
-	# prefix subject, but only if the prefix string isn't already in the
-	# subject line (such as a reply)
-	if subject.find(location.email_subject_prefix) < 0:
-		prefix = "["+location.email_subject_prefix + "] [Current Guests and Residents] " 
-		subject = prefix + subject
-	logger.debug("subject: %s" % subject)
-
-	# add in footer
-	text_footer = '''\n\n-------------------------------------------\nYou are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
-	html_footer = '''<br><br>-------------------------------------------<br>You are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
-	body_plain = body_plain + text_footer
-	body_html = body_html + html_footer
-
-	# send the message 
-	list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
-	mailgun_data =  {"from": from_address,
-		"to": [recipient, ],
-		"bcc": bcc_list,
-		"subject": subject,
-		"text": body_plain,
-		"html": body_html,
-		# attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
-		# Precedence: list - helps some out of office auto responders know not to send their auto-replies. 
-		"h:List-Id": list_address,
-		"h:Precedence": "list",
-		# Reply-To: list email apparently has some religious debates
-		# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
-		# to be common these days 
-		"h:Reply-To": list_address,
-	}
-	return mailgun_send(mailgun_data)
-
-@csrf_exempt
-def stay(request, location_slug):
-	# fail gracefully if location does not exist
-	try:
-		location = get_location(location_slug)
-	except:
-		# XXX TODO reject and bounce back to sender?
-		return HttpResponse(status=200)
-	logger.debug('stay@ for location: %s' % location)
-
-	# we think that message_headers is a list of strings
-	header_txt = request.POST.get('message-headers')
-	message_headers = json.loads(header_txt)
-	message_header_keys = [item[0] for item in message_headers]
-
-	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
-	# A List-Id header will only be present if it has been added manually in
-	# this function, ie, if we have already processed this message. 
-	if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
-		# mailgun requires a code 200 or it will continue to retry delivery
-		logger.debug('List-Id header was found! Dropping message silently')
-		return HttpResponse(status=200)
-
-	#if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
-	if 'Auto-Submitted' in message_header_keys: 
-		logger.info('message appears to be auto-submitted. reject silently')
-		return HttpResponse(status=200)
-
-	recipient = request.POST.get('recipient')
-	from_address = request.POST.get('from')
-	logger.debug('from: %s' % from_address)
-	sender = request.POST.get('sender')
-	logger.debug('sender: %s' % sender)	
-	subject = request.POST.get('subject')
-	body_plain = request.POST.get('body-plain')
-	body_html = request.POST.get('body-html')
-
-	# retrieve the current house admins for this location
-	location_admins = location.house_admins.all()
-	bcc_list = []
-	for person in location_admins:
-		if person.email not in bcc_list:
-			bcc_list.append(person.email)
-	logger.debug("bcc list: %s" % bcc_list)
-
-	# TODO? make sure the sender is on the list?
-	#if not sender in current_emails:
-		# Do something about it
-		# Bounce? Moderate?
-
-	# prefix subject, but only if the prefix string isn't already in the
-	# subject line (such as a reply)
-	if subject.find(location.email_subject_prefix) < 0:
-		prefix = "["+location.email_subject_prefix + "] [Admin] " 
-		subject = prefix + subject
-	logger.debug("subject: %s" % subject)
-
-	# add in footer
-	text_footer = '''\n\n-------------------------------------------\nYou are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
-	html_footer = '''<br><br>-------------------------------------------<br>You are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
-	body_plain = body_plain + text_footer
-	body_html = body_html + html_footer
-
-	# send the message 
-	list_address = location.from_email()
-	mailgun_data = {"from": from_address,
-			"to": [recipient, ],
-			"bcc": bcc_list,
-			"subject": subject,
-			"text": body_plain,
-			"html": body_html,
-			# attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
-			# Precedence: list - helps some out of office auto responders know not to send their auto-replies. 
-			"h:List-Id": list_address,
-			"h:Precedence": "list",
-			# Reply-To: list email apparently has some religious debates
-			# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
-			# to be common these days 
-			"h:Reply-To": list_address
-		}
-	return mailgun_send(mailgun_data)
-
 def send_from_location_address(subject, text_content, html_content, recipient, location):
 	''' a somewhat generic send function using mailgun that sends plaintext
 	from the location's generic stay@ address.'''
@@ -420,3 +242,189 @@ def guest_welcome(reservation):
 			"text": text_content,
 		}
 	return mailgun_send(mailgun_data)
+
+############################################
+########### EMAIL ENDPOINTS ################
+
+@csrf_exempt
+def current(request, location_slug):
+	# fail gracefully if location does not exist
+	try:
+		location = get_location(location_slug)
+	except:
+		# XXX TODO reject and bounce back to sender?
+		logger.error('location not found')
+		return HttpResponse(status=200)
+	logger.debug('current@ for location: %s' % location)
+
+	# we think that message_headers is a list of strings
+	header_txt = request.POST.get('message-headers')
+	message_headers = json.loads(header_txt)
+	message_header_keys = [item[0] for item in message_headers]
+
+	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
+	# A List-Id header will only be present if it has been added manually in
+	# this function, ie, if we have already processed this message. 
+	if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
+		# mailgun requires a code 200 or it will continue to retry delivery
+		logger.debug('List-Id header was found! Dropping message silently')
+		return HttpResponse(status=200)
+
+	#if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
+	if 'Auto-Submitted' in message_header_keys: 
+		logger.info('message appears to be auto-submitted. reject silently')
+		return HttpResponse(status=200)
+
+	recipient = request.POST.get('recipient')
+	from_address = request.POST.get('from')
+	logger.debug('from: %s' % from_address)
+	sender = request.POST.get('sender')
+	logger.debug('sender: %s' % sender)
+	subject = request.POST.get('subject')
+	body_plain = request.POST.get('body-plain')
+	body_html = request.POST.get('body-html')
+
+	# Add any current reservations
+	current_emails = [] 
+	for r in Reservation.today.confirmed(location):
+		current_emails.append(r.user.email)
+
+	# Add all the residents at this location
+	for r in location.residents.all():
+		current_emails.append(r.email)
+
+	# Add the house admins
+	for a in location.house_admins.all():
+		current_emails.append(a.email)
+
+	# Now loop through all the emails and build the bcc list we will use.
+	# This makes sure there are no duplicate emails.
+	bcc_list = []
+	for email in current_emails:
+		if email not in bcc_list:
+			bcc_list.append(email)
+	logger.debug("bcc list: %s" % bcc_list)
+	
+	# Make sure this person can post to our list
+	if not sender in bcc_list:
+		# TODO - This shoud possibly send a response so they know they were blocked
+		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
+		return HttpResponse(status=200)
+	bcc_list.remove(sender)
+	
+	# prefix subject, but only if the prefix string isn't already in the
+	# subject line (such as a reply)
+	if subject.find(location.email_subject_prefix) < 0:
+		prefix = "["+location.email_subject_prefix + "] [Current Guests and Residents] " 
+		subject = prefix + subject
+	logger.debug("subject: %s" % subject)
+
+	# add in footer
+	text_footer = '''\n\n-------------------------------------------\nYou are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
+	html_footer = '''<br><br>-------------------------------------------<br>You are receving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
+	body_plain = body_plain + text_footer
+	body_html = body_html + html_footer
+
+	# send the message 
+	list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
+	mailgun_data =  {"from": from_address,
+		"to": [recipient, ],
+		"bcc": bcc_list,
+		"subject": subject,
+		"text": body_plain,
+		"html": body_html,
+		# attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
+		# Precedence: list - helps some out of office auto responders know not to send their auto-replies. 
+		"h:List-Id": list_address,
+		"h:Precedence": "list",
+		# Reply-To: list email apparently has some religious debates
+		# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
+		# to be common these days 
+		"h:Reply-To": list_address,
+	}
+	return mailgun_send(mailgun_data)
+
+@csrf_exempt
+def stay(request, location_slug):
+	# fail gracefully if location does not exist
+	try:
+		location = get_location(location_slug)
+	except:
+		# XXX TODO reject and bounce back to sender?
+		return HttpResponse(status=200)
+	logger.debug('stay@ for location: %s' % location)
+
+	# we think that message_headers is a list of strings
+	header_txt = request.POST.get('message-headers')
+	message_headers = json.loads(header_txt)
+	message_header_keys = [item[0] for item in message_headers]
+
+	# make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
+	# A List-Id header will only be present if it has been added manually in
+	# this function, ie, if we have already processed this message. 
+	if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
+		# mailgun requires a code 200 or it will continue to retry delivery
+		logger.debug('List-Id header was found! Dropping message silently')
+		return HttpResponse(status=200)
+
+	#if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
+	if 'Auto-Submitted' in message_header_keys: 
+		logger.info('message appears to be auto-submitted. reject silently')
+		return HttpResponse(status=200)
+
+	recipient = request.POST.get('recipient')
+	from_address = request.POST.get('from')
+	logger.debug('from: %s' % from_address)
+	sender = request.POST.get('sender')
+	logger.debug('sender: %s' % sender)	
+	subject = request.POST.get('subject')
+	body_plain = request.POST.get('body-plain')
+	body_html = request.POST.get('body-html')
+
+	# retrieve the current house admins for this location
+	location_admins = location.house_admins.all()
+	bcc_list = []
+	for person in location_admins:
+		if person.email not in bcc_list:
+			bcc_list.append(person.email)
+	logger.debug("bcc list: %s" % bcc_list)
+
+	# Make sure this person can post to our list
+	if not sender in bcc_list:
+		# TODO - This shoud possibly send a response so they know they were blocked
+		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
+		return HttpResponse(status=200)
+	bcc_list.remove(sender)
+
+	# prefix subject, but only if the prefix string isn't already in the
+	# subject line (such as a reply)
+	if subject.find(location.email_subject_prefix) < 0:
+		prefix = "["+location.email_subject_prefix + "] [Admin] " 
+		subject = prefix + subject
+	logger.debug("subject: %s" % subject)
+
+	# add in footer
+	text_footer = '''\n\n-------------------------------------------\nYou are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
+	html_footer = '''<br><br>-------------------------------------------<br>You are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
+	body_plain = body_plain + text_footer
+	body_html = body_html + html_footer
+
+	# send the message 
+	list_address = location.from_email()
+	mailgun_data = {"from": from_address,
+			"to": [recipient, ],
+			"bcc": bcc_list,
+			"subject": subject,
+			"text": body_plain,
+			"html": body_html,
+			# attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
+			# Precedence: list - helps some out of office auto responders know not to send their auto-replies. 
+			"h:List-Id": list_address,
+			"h:Precedence": "list",
+			# Reply-To: list email apparently has some religious debates
+			# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
+			# to be common these days 
+			"h:Reply-To": list_address
+		}
+	return mailgun_send(mailgun_data)
+
