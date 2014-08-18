@@ -172,6 +172,8 @@ def guest_daily_update(location):
 	for r in reservations_here_today:
 		if not r.user.email in guest_emails:
 			guest_emails.append(r.user.email)
+	if len(guest_emails) == 0:
+		return None
 	
 	mailgun_data={
 		"from": location.from_email(),
@@ -206,6 +208,8 @@ def admin_daily_update(location):
 	for admin in location.house_admins.all():
 		if not admin.email in admins_emails:
 			admins_emails.append(admin.email)
+	if len(admins_emails) == 0:
+		return None
 
 	mailgun_data={"from": location.from_email(),
 		"to": admins_emails,
