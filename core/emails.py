@@ -229,8 +229,8 @@ def guest_welcome(reservation):
 		'address': reservation.location.address,
 		'ssid': reservation.location.ssid,
 		'ssid_password': reservation.location.ssid_password,
-		'events_url' : domain + '/events/upcoming/',
 		'current_email' : 'current@%s.mail.embassynetwork.com' % reservation.location.slug,
+		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events'),
 		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
 		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id,)),
 	})

@@ -4,7 +4,7 @@ Here is what's happening at {{ location_name }} today:
 
 Events:
 {% for event in events_today %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, {{ domain }}/events/{{event.id}}/{{ event.slug}} 
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, https://{{ domain }}{% url 'gather_view_event' event.id event.slug %}
 {% empty %}
 	None!
 {% endfor %}
@@ -12,7 +12,7 @@ Events:
 People arriving - welcome!
 {% for r in arriving %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }} {% if not r.is_paid %} (unpaid) {% endif %}
-	  https://{{ domain }}/reservation/{{ r.id }}/ 
+	  https://{{ domain }}{% url 'reservation_manage' r.id %}
 {% empty %}
 	None!
 {% endfor %}
@@ -20,7 +20,7 @@ People arriving - welcome!
 People departing - fare forward and wonderful journeys!
 {% for r in departing %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room }} {% if not r.is_paid %} (unpaid) {% endif %}
-	  https://{{ domain }}/reservation/{{ r.id }}/
+	  https://{{ domain }}{% url 'reservation_manage' r.id %}
 {% empty %}
 	None!
 {% endfor %}
