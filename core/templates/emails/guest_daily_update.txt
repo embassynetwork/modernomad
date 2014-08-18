@@ -4,7 +4,7 @@ Here is what's happening at {{ location_name }} today:
 
 Events:
 {% for event in events_today %}
-    * {{ event.title|title }} at {{ event.start|date:'f A' }}, https://{{ domain }}{% url 'gather_view_event' event.id event.slug %}
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, https://{{ domain }}{% url 'gather_view_event' event.location.slug event.id event.slug %}
 {% empty %}
 	None!
 {% endfor %}
