@@ -139,7 +139,7 @@
 					key: "{{ stripe_publishable_key }}",
 					amount: "{{ reservation.total_owed_in_cents }}",
 					name: "The Embassy Network",
-					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.rate }}/night.",
+					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }} at ${{ reservation.rate }}/night.",
 					panelLabel:"Pay",
 					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
 					token: token
