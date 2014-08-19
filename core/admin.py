@@ -69,11 +69,19 @@ class BillLineItemInline(admin.TabularInline):
 	readonly_fields = ('fee',)
 	extra = 0
 
+def gen_message(queryset, noun, pl_noun, suffix):
+	if len(queryset) == 1:
+		prefix = "1 %s was" % noun
+	else:
+		prefix = "%d %s were" % (len(queryset), pl_noun)
+	msg = prefix + " " + suffix + "."
+	return msg
+
 class ReservationAdmin(admin.ModelAdmin):
 	def rate(self):
-		if self.rate:
-			return "$%d" % self.rate
-		return None
+		if self.rate == None:
+			return None
+		return "$%d" % self.rate
 
 	def value(self):
 		return "$%d" % self.total_value()
@@ -94,16 +102,6 @@ class ReservationAdmin(admin.ModelAdmin):
 		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
 	user_profile.allow_tags = True
 
-	def send_invoice(self, request, queryset):
-		for res in queryset:
-			send_invoice(res)
-		if len(queryset) == 1:
-			prefix = "1 invoice was"
-		else:
-			prefix = "%d invoices were" % len(queryset)
-		msg = prefix + " sent"
-		self.message_user(request, msg)
-
 	def send_receipt(self, request, queryset):
 		success_list = []
 		failure_list = []
@@ -119,44 +117,62 @@ class ReservationAdmin(admin.ModelAdmin):
 			msg += "Receipt sending failed for reservation(s) %s. (Make sure all payment information has been entered in the reservation details and that the status of the reservation is either unpaid or paid.)" % ",".join(failure_list)
 		self.message_user(request, msg)
 
+	def send_invoice(self, request, queryset):
+		for res in queryset:
+			send_invoice(res)
+	 	msg = gen_message(queryset, "invoice", "invoices", "sent")
+		self.message_user(request, msg)
+
 	def mark_as_comp(self, request, queryset):
 		for res in queryset:
 			res.comp()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " marked as comp."
+	 	msg = gen_message(queryset, "reservation", "reservations", "marked as comp")
+		self.message_user(request, msg)
+
+	def revert_to_pending(self, request, queryset):
+		for res in queryset:
+			res.pending()
+		msg = gen_message(queryset, "reservation", "reservations", "reverted to pending")
+		self.message_user(request, msg)
+
+	def approve(self, request, queryset):
+		for res in queryset:
+			res.approve()
+		msg = gen_message(queryset, "reservation", "reservations", "approved")
+		self.message_user(request, msg)
+
+	def confirm(self, request, queryset):
+		for res in queryset:
+			res.confirm()
+		msg = gen_message(queryset, "reservation", "reservations", "confirmed")
+		self.message_user(request, msg)
+
+	def cancel(self, request, queryset):
+		for res in queryset:
+			res.cancel()
+		msg = gen_message(queryset, "reservation", "reservations", "canceled")
 		self.message_user(request, msg)
 
 	def reset_rate(self, request, queryset):
 		for res in queryset:
 			res.reset_rate()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " set to default rate."
+		msg = gen_message(queryset, "reservation", "reservations", "set to default rate")
 		self.message_user(request, msg)
 
-	def generate_bill(self, request, queryset):
+	def recalculate_bill(self, request, queryset):
 		for res in queryset:
 			res.generate_bill()
-		if len(queryset) == 1:
-			prefix = "1 bill was"
-		else:
-			prefix = "%d bills were" % len(queryset)
-		msg = prefix + " generated."
+		msg = gen_message(queryset, "bill", "bills", "recalculated")
 		self.message_user(request, msg)
 
 	model = Reservation
 	list_filter = ('status', 'location')
 	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
-	list_editable = ('status',)
+	#list_editable = ('status',) # Depricated in favor of drop down actions
 	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
 	inlines = [BillLineItemInline, PaymentInline]
-	ordering = ['depart',]
-	actions= ['send_invoice', 'send_receipt', 'generate_bill', 'mark_as_comp', 'reset_rate']
+	ordering = ['-arrive', 'id']
+	actions= ['send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
 	save_as = True
 	
 class UserProfileInline(admin.StackedInline):
