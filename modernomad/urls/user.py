@@ -25,7 +25,7 @@ urlpatterns += patterns('core.views',
 urlpatterns += patterns('',
 	url(r'^password/reset/$', password_reset, name="password_reset"),
 	url(r'^password/done/$', password_reset_done, name="password_reset_done"),
-	url(r'^password/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$', password_reset_confirm, name="password_reset_confirm"),
+	url(r'^password/confirm/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$', password_reset_confirm, name="password_reset_confirm"),
 	url(r'^password/complete/$', password_reset_complete, name="password_reset_complete"),
 )
 
