@@ -45,6 +45,7 @@
 				<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
 					{% csrf_token %}
 					<input type="hidden" value={{ reservation.id }} name="res-id">
+					<input type="hidden" value={{ location.slug }} name="loc-slug">
 					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 						value="Click to enter Payment Details" >
 					<div>
