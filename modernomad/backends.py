@@ -71,7 +71,7 @@ class MailgunBackend(BaseEmailBackend):
 				raise
 			return False
 
-		logger.debug("Mailgun response: %s" % resp.text)
+		logger.debug("Mailgun response: %s" % r.text)
 
 		if r.status_code != 200:
 			if not self.fail_silently:
