@@ -413,7 +413,8 @@ def stay(request, location_slug):
 	text_footer = '''\n\n-------------------------------------------\nYou are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
 	html_footer = '''<br><br>-------------------------------------------<br>You are receving email to %s because you are a location admin at %s. Send mail to this list to reach other admins.''' % (recipient, location.name)
 	body_plain = body_plain + text_footer
-	body_html = body_html + html_footer
+	if body_html:
+		body_html = body_html + html_footer
 
 	# send the message 
 	list_address = location.from_email()
