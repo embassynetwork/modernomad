@@ -541,10 +541,11 @@ class Reservation(models.Model):
 				self.user.last_name, str(self.arrive),
 				str(self.depart), domain + self.get_absolute_url())
 
-		amt_owed = self.total_owed_in_cents()
+		amt_owed = self.total_owed()
+		amt_owed_cents = amt_owed * 100
 		stripe.api_key = settings.STRIPE_SECRET_KEY
 		charge = stripe.Charge.create(
-				amount=amt_owed,
+				amount=amt_owed_cents,
 				currency="usd",
 				customer = self.user.profile.customer_id,
 				description=descr
@@ -553,7 +554,7 @@ class Reservation(models.Model):
 		# Store the charge details in a Payment object
 		Payment.objects.create(reservation=self,
 			payment_service = "Stripe",
-			paid_amount = (charge.amount/100),
+			paid_amount = (amt_owed),
 			transaction_id = charge.id
 		)
 
