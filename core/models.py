@@ -405,7 +405,9 @@ class Reservation(models.Model):
 		return paid
 
 	def total_owed_in_cents(self):
-		return self.total_owed() * 100
+		# this is used to pass the information to stripe, which expects an
+		# integer. 
+		return int(self.total_owed() * 100)
 
 	def calc_non_house_fees(self):
 		# Calculate the amount of fees not paid by the house
