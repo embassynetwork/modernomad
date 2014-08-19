@@ -622,7 +622,7 @@ class Reservation(models.Model):
 				return payment.payment_date
 
 	def bill_line_items(self):
-		return BillLineItem.objects.filter(reservation=self)
+		return BillLineItem.objects.filter(reservation=self).order_by("id")
 
 	def html_color_status(self):
 		if self.is_paid():
