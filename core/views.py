@@ -731,7 +731,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		except stripe.CardError, e:
 			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 
-	return HttpResponseRedirect("/reservation/%s" % reservation_id)
+	return HttpResponseRedirect(reverse('reservation_detail', args=(location.slug, reservation_id)))
 
 @login_required
 def ReservationCancel(request, reservation_id, location_slug):
