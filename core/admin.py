@@ -71,7 +71,9 @@ class BillLineItemInline(admin.TabularInline):
 
 class ReservationAdmin(admin.ModelAdmin):
 	def rate(self):
-		return "$%d" % self.rate
+		if self.rate:
+			return "$%d" % self.rate
+		return None
 
 	def value(self):
 		return "$%d" % self.total_value()
@@ -148,9 +150,10 @@ class ReservationAdmin(admin.ModelAdmin):
 		self.message_user(request, msg)
 
 	model = Reservation
-	list_filter = ('status',)
+	list_filter = ('status', 'location')
 	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
 	list_editable = ('status',)
+	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
 	inlines = [BillLineItemInline, PaymentInline]
 	ordering = ['depart',]
 	actions= ['send_invoice', 'send_receipt', 'generate_bill', 'mark_as_comp', 'reset_rate']
