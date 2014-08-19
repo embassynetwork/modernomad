@@ -109,7 +109,7 @@
 
 	<hr>
 
-	<h3 class="bottom-pad-thirty">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %} <span class="pull-right">${{ r.total_value }}</span></h3>
+	<h3 class="bottom-pad-thirty">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %} <span class="pull-right">Value: ${{ r.total_value }}</span></h3>
 
 	<!-- availability calendar -->
 	<table id="rooms-available-calendar">
@@ -167,7 +167,11 @@
 
 	<hr>
 
-	<h2>Bill Details</h2>
+	{% if not r.is_comp and r.total_value != r.bill_amount %}
+		<div class="red-text">The Total Value and the Bill Amount don't match!  You may need to recalculate the bill!</div>
+	{% endif %}
+	
+	<h2>Bill Details</h2>	
 	<table id="bill-details">
 		{% for item in r.bill_line_items %}
 			{% if item.paid_by_house %}
