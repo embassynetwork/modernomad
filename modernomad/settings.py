@@ -67,6 +67,13 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+AUTHENTICATION_BACKENDS = (
+	'modernomad.backends.EmailOrUsernameModelBackend',
+	'django.contrib.auth.backends.ModelBackend'
+)
+
+EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
