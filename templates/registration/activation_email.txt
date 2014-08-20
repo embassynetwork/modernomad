@@ -1,8 +1,8 @@
 Thanks for signing up for {{ site.name }}!
 
-Please click on the following URL (or copy it into your browser's address bar) to finish activating your acount:
+Please click on the following URL (or copy it into your browser's address bar) to finish activating your account:
 
-http://{{ site.domain }}{% url registration_activate activation_key %}
+https://{{ site.domain }}{% url registration_activate activation_key %}
 
 This key will expire in {{ expiration_days }} days, so please activate your account before then!
 
