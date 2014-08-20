@@ -162,7 +162,7 @@ def guest_daily_update(location):
 		'departing' : departing_today,
 		'domain': Site.objects.get_current().domain,
 		'events_today': events_today,
-		'location_name': location.name,
+		'location': location,
 	})
 	text_content = plaintext.render(c)
 	
@@ -188,16 +188,15 @@ def admin_daily_update(location):
 	today = timezone.localtime(timezone.now())
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
-	domain = Site.objects.get_current().domain
 	events_today = published_events_today_local(location=location)
 	pending_or_feedback = events_pending(location=location)
 	
 	plaintext = get_template('emails/admin_daily_update.txt')
 	c = Context({
+		'domain': Site.objects.get_current().domain,
+		'location': location,
 		'arriving' : arriving_today,
 		'departing' : departing_today,
-		'domain': domain,
-		'location_name': location.name,
 		'events_today': events_today,
 		'events_pending': pending_or_feedback['pending'],
 		'events_feedback': pending_or_feedback['feedback'],
