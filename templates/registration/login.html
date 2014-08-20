@@ -3,11 +3,12 @@
 {% block body %}
 
 <h2>Log in to your account</h2>
+<p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
 <form enctype="multipart/form-data" method="post">{% csrf_token %}
 	{{ form.as_p }}
 	<input type="submit" value="Submit" />
 </form>
 
-<p><a href="/people/password/reset/">Forgot your username or password?</a></p>
+<p><a href="{% url 'password_reset' %}">Forgot your username or password?</a></p>
 
 {% endblock %}

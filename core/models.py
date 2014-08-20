@@ -15,6 +15,8 @@ from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
+from gather.tasks import published_events_today_local, events_pending
+from gather.forms import NewUserForm
 
 # imports for signals
 import django.dispatch
@@ -88,7 +90,7 @@ class Location(models.Model):
 		return Room.objects.filter(location=self, primary_use=Room.GUEST)
 
 	def private_rooms(self):
-		return Rooms.objects.filter(location=self, primary_use=Room.PRIVATE)
+		return Room.objects.filter(location=self, primary_use=Room.PRIVATE)
 
 	def get_available(self, arrive, depart):
 		today = timezone.now().date()
@@ -103,6 +105,48 @@ class Location(models.Model):
 			return False
 		return True
 
+	def events(self, user=None):
+		today = timezone.localtime(timezone.now())
+		if 'gather' in settings.INSTALLED_APPS:
+			from gather.models import Event
+			return Event.objects.upcoming(upto=5, current_user=user, location=self)
+		return None
+
+	def coming_month_events(self, days=30):
+		today = timezone.localtime(timezone.now())
+		if 'gather' in settings.INSTALLED_APPS:
+			from gather.models import Event
+			return Event.objects.filter(status="live").filter(location=self).exclude(end__lt=today).exclude(start__gte=today+datetime.timedelta(days=days))
+		return None
+
+	def coming_month_reservations(self, days=30):
+		today = timezone.localtime(timezone.now())
+		return Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).filter(location=self).exclude(depart__lt=today).exclude( arrive__gt=today+datetime.timedelta(days=days))
+	
+	def people_in_coming_month(self):
+		# pull out all reservations in the coming month
+		people = []
+		for r in self.coming_month_reservations():
+			if r.user not in people:
+				people.append(r.user)
+
+		# add residents to the list of people in the house in the coming month. 
+		for r in self.residents.all():
+			if r not in people:
+				people.append(r)
+
+		# add house admins
+		for a in self.house_admins.all():
+			if a not in people:
+				people.append(a)
+
+		# Add all the people from events too
+		for e in self.coming_month_events():
+			for u in e.organizers.all():
+				if u not in people:
+					people.append(u)
+
+		return people
 
 class LocationNotUniqueException(Exception):
 	pass
@@ -494,15 +538,16 @@ class Reservation(models.Model):
 		# stripe will raise a stripe.CardError if the charge fails. this
 		# function purposefully does not handle that error so the calling
 		# function can decide what to do.
-		domain = 'http://' + Site.objects.get_current().domain
+		domain = 'https://' + Site.objects.get_current().domain
 		descr = "%s %s from %s - %s. Details: %s." % (self.user.first_name,
 				self.user.last_name, str(self.arrive),
 				str(self.depart), domain + self.get_absolute_url())
 
-		amt_owed = self.total_owed_in_cents()
+		amt_owed = self.total_owed()
+		amt_owed_cents = int(amt_owed * 100)
 		stripe.api_key = settings.STRIPE_SECRET_KEY
 		charge = stripe.Charge.create(
-				amount=amt_owed,
+				amount=amt_owed_cents,
 				currency="usd",
 				customer = self.user.profile.customer_id,
 				description=descr
@@ -511,11 +556,13 @@ class Reservation(models.Model):
 		# Store the charge details in a Payment object
 		Payment.objects.create(reservation=self,
 			payment_service = "Stripe",
-			paid_amount = (charge.amount/100),
+			paid_amount = (amt_owed),
 			transaction_id = charge.id
 		)
 
 	def set_rate(self, rate):
+		if rate == None:
+			rate = 0
 		self.rate = rate
 		self.save()
 		self.generate_bill()
@@ -578,7 +625,7 @@ class Reservation(models.Model):
 				return payment.payment_date
 
 	def bill_line_items(self):
-		return BillLineItem.objects.filter(reservation=self)
+		return BillLineItem.objects.filter(reservation=self).order_by("id")
 
 	def html_color_status(self):
 		if self.is_paid():

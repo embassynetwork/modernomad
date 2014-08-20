@@ -17,6 +17,7 @@ apt-get dist-upgrade
 apt-get install nginx gunicorn supervisor
 apt-get install git python-dev python-virtualenv python-pip
 apt-get install zlib1g-dev libxml2-dev libxslt1-dev python-lxml
+apt-get install rabbitmq-server
 
 # PILLOW needs some libs to help with the images
 sudo apt-get install libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
@@ -43,11 +44,18 @@ pip install psycopg2
 MEDIA_ROOT = "/home/embassynetwork/webapp/media"
 STATIC_ROOT = "/home/embassynetwork/webapp/static"
 
-# Config Nginx and Gunicorn
-cp gunicorn.conf /etc/supervisor/conf.d/gunicorn.conf
-cp gunicorn_start /home/embassynetwork/bin/gunicorn_start
-cp embassynetwork /etc/nginx/sites-available/embassynetwork
+# Config Nginx and Gunicorn and Celery
+cp conf/gunicorn.conf /etc/supervisor/conf.d/
+cp conf/gunicorn_start /home/embassynetwork/bin/
+cp conf/celery.conf /etc/supervisor/conf.d/
+cp conf/celery_start /home/embassynetwork/bin/
+cp conf/logrotate /etc/logrotate.d/embassynetwork
+cp conf/nginx /etc/nginx/sites-available/embassynetwork
 ln -s /etc/nginx/sites-available/embassynetwork /etc/nginx/sites-enabled/
+
+# Move certs into place
+/etc/ssl/certs/embassy-wildcard.crt;
+/etc/ssl/private/embassy-wildcard.key;
 
 # Restart everything
 supervisorctl reload 
@@ -78,11 +86,12 @@ cp data/avatars/default.jpg avatars/
 cp data/avatars/default.jpg locations/
 cp data/avatars/default.jpg rooms/
 cd ..
-rm -rf media/data
 
 ./manage.py migrate --delete-ghost-migrations core
 ./manage.py migrate gather --fake 0009
 ./manage.py migrate gather
+
+rm -rf media/data
 
 # Edit eventadmingroup.json:
 [

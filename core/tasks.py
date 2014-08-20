@@ -2,6 +2,7 @@ from celery.task.schedules import crontab
 from celery.task import periodic_task
 from core.models import Reservation, Location
 from core.emails import guest_daily_update, admin_daily_update, guest_welcome
+from modernomad.backup import BackupManager
 import datetime
 
 #@periodic_task(run_every=crontab(hour=22, minute=53, day_of_week="*"))  
@@ -31,7 +32,10 @@ def send_guest_welcome():
 		for reservation in upcoming:
 			guest_welcome(reservation)
 
-
+@periodic_task(run_every=crontab(hour=1, minute=0))
+def make_backup():
+	manager = BackupManager()
+	manager.make_backup()
 
 
 

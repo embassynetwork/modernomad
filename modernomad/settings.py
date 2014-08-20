@@ -5,6 +5,8 @@ import os
 ROOT = os.path.dirname(os.path.abspath(__file__))
 path = lambda *a: os.path.join(ROOT, *a)
 
+BACKUP_ROOT = ROOT + '/backups/'
+
 ADMINS = (
     ('Jessy Kate Schingler', 'jessy@embassynetwork.com'),
 )
@@ -65,6 +67,13 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+AUTHENTICATION_BACKENDS = (
+	'modernomad.backends.EmailOrUsernameModelBackend',
+	'django.contrib.auth.backends.ModelBackend'
+)
+
+EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -73,26 +82,27 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
 	'modernomad.middleware.crossdomainxhr.CORSMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	# Uncomment the next line for simple clickjacking protection:
+	# 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 #default template context processors
 TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
+	"django.core.context_processors.debug",
+	"django.core.context_processors.i18n",
+	"django.core.context_processors.media",
+	"django.core.context_processors.static",
+	"django.core.context_processors.tz",
+	"django.contrib.messages.context_processors.messages",
 	"core.context_processors.location.network_locations",
+	"core.context_processors.analytics.google_analytics",
 )
 
 ROOT_URLCONF = 'modernomad.urls.main'
@@ -101,28 +111,29 @@ ROOT_URLCONF = 'modernomad.urls.main'
 WSGI_APPLICATION = 'modernomad.wsgi.application'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+	# Always use forward slashes, even on Windows.
+	# Don't forget to use absolute paths, not relative paths.
 	path("../templates/"),
 	path("core/templates/"),
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
-    'registration',
-    'south',
-    'core',
-    'djcelery',
-    'gather',
+	'registration',
+	'south',
+	'core',
+	'djcelery',
+	'gather',
+	'modernomad',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.sites',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'django.contrib.admin',
+	# Uncomment the next line to enable admin documentation:
+	# 'django.contrib.admindocs',
 )
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
@@ -131,9 +142,15 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 # If we add a page for the currently-logged-in user to view and edit
 # their profile, we might want to use that here instead.
 LOGIN_REDIRECT_URL = '/'
-
 LOGIN_URL = '/people/login/'
 LOGOUT_URL = '/people/logout/'
+
+# Celery configuration options
+BROKER_URL = "amqp://guest:guest@localhost:5672//"
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ENABLE_UTC = True
+CELERY_ACCEPT_CONTENT = ['json', 'yaml']
 
 # import any local settings
 try:
