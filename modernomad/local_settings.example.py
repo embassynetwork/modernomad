@@ -19,6 +19,9 @@ STRIPE_PUBLISHABLE_KEY = "insert your key here"
 
 MAILGUN_API_KEY = "your private key from mailgun"
 LIST_DOMAIN = "the mail domain used for sending and receiving via mailgun - eg. mail.housename.com"
+# If MAILGUN_DEBUG is present and False then you can stil send emails in DEBUG mode
+# Otherwise testmode=yes gets set and the mail will never be delivered.
+#MAILGUN_DEBUG=False
 
 ALLOWED_HOSTS=['localhost', '127.0.0.1', ]
 TEMPLATE_DEBUG = True
