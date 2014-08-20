@@ -1,6 +1,6 @@
 Dear {{ first_name }},
 
-Thanks for staying with us! This email contains your invoice information. As a reminder, your reservation details are available online at http://embassynetwork.com/reservation/{{res_id}}/. 
+Thanks for staying with us! This email contains your invoice information. Your reservation details are available online at https://{{ domain }}{% url 'reservation_detail' location.slug reservation.id %}. 
 
 Invoice Date: {{ today }}
 Arrival Date: {{ arrive }}
@@ -15,7 +15,7 @@ Total Owed: ${{ reservation.total_owed|floatformat:2 }}
 
 You can pay via credit card, cash, check, bank transfer, or Dwolla. 
 
-Credit card: embassynetwork.com/payment
+Credit card: https://{{ domain }}{% url 'reservation_detail' location.slug reservation.id %}
 Dwolla: https://www.dwolla.com/hub/embassynetwork
 Bank Details: Account number 164108426532 // Routing number 121000358
 
