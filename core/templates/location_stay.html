@@ -20,6 +20,9 @@
 				<h3>
 					<a href="{% url 'view_room' location.slug room.id %}">{{ room.name|title }}</a>
 					- ${{ room.default_rate }}/night
+					{% if room.shared %}
+						<div class="btn btn-danger" disabled="disabled"> <span class="glyphicon glyphicon-bullhorn"></span> This is a shared room</div>
+					{% endif %}
 				</h3>
 			</div>
 			<div class="col-md-8">
