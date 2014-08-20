@@ -29,7 +29,7 @@
 			Cancellation policy for the {{ reservation.room }} 
 			is {{reservation.room.cancellation_policy}}.</p>
 
-			<form action="{% url 'reservation_confirm' reservation.id %}" method="POST" id="payform">
+			<form action="{% url 'reservation_confirm' reservation.location.slug reservation.id %}" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 					value="Submit payment." >
