@@ -73,7 +73,7 @@ $(".room-select").click(function() {
 
 	// inject the fees and subtotal info for this room when selected
 	{% for room, res_dict in available_reservations.items %}
-	if ('{{room.name}}' == room_name) {
+	if ('{{room.id}}' == room_id) {
 		{% for line_item in res_dict.bill_line_items %}
 			{% if not line_item.paid_by_house %}
 				$("#reservation-items").append('<div class="a-room-fee">')

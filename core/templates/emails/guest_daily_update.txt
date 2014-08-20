@@ -1,6 +1,6 @@
 Good Morning! 
 
-Here is what's happening at {{ location_name }} today:
+Here is what's happening at {{ location.name }} today:
 
 Events:
 {% for event in events_today %}
@@ -12,7 +12,7 @@ Events:
 People arriving - welcome!
 {% for r in arriving %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }} {% if not r.is_paid %} (unpaid) {% endif %}
-	  https://{{ domain }}{% url 'reservation_manage' r.id %}
+	  https://{{ domain }}{% url 'reservation_detail' r.location.slug r.id %}
 {% empty %}
 	None!
 {% endfor %}
@@ -20,9 +20,12 @@ People arriving - welcome!
 People departing - fare forward and wonderful journeys!
 {% for r in departing %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room }} {% if not r.is_paid %} (unpaid) {% endif %}
-	  https://{{ domain }}{% url 'reservation_manage' r.id %}
+	  https://{{ domain }}{% url 'reservation_detail' r.location.slug r.id %}
 {% empty %}
 	None!
 {% endfor %}
+
+Thank you!
+{{ location.name }}
 
 

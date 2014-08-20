@@ -30,9 +30,10 @@ weekday_number_to_name = {
 def mailgun_send(mailgun_data):
 	logger.debug("Mailgun send: %s" % mailgun_data)
 	if settings.DEBUG:
-		# When this is true you will see this message in the mailgun logs but
-		# nothing will actually be delivered
-		mailgun_data["o:testmode"] = "yes"
+		if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
+			# We will see this message in the mailgun logs but nothing will actually be delivered
+			logger.debug("mailgun_send: setting testmode=yes")
+			mailgun_data["o:testmode"] = "yes"
 	resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
 		auth=("api", settings.MAILGUN_API_KEY),
 		data=mailgun_data
@@ -43,16 +44,18 @@ def mailgun_send(mailgun_data):
 def send_from_location_address(subject, text_content, html_content, recipient, location):
 	''' a somewhat generic send function using mailgun that sends plaintext
 	from the location's generic stay@ address.'''
-	location_address = location.from_email()
-	if not html_content:
-		html_content = text_content
-	mailgun_data={"from": location_address,
+	mailgun_data={"from": location.from_email(),
 		"to": [recipient, ],
 		"subject": subject,
 		"text": text_content,
-		"html": html_content,
 	}
+	if html_content:
+		mailgun_data["html"] = html_content
 	return mailgun_send(mailgun_data)
+
+############################################
+#            RESERVATION EMAILS            #
+############################################
 
 def send_receipt(reservation):
 	location = reservation.location
@@ -67,7 +70,6 @@ def send_receipt(reservation):
 		}) 
 
 	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))  
-	sender = location.from_email()
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
 	html_content = htmltext.render(c)
@@ -87,8 +89,8 @@ def send_invoice(reservation):
 		'user': reservation.user, 
 		'location': reservation.location,
 		'reservation': reservation,
+		'domain': Site.objects.get_current().domain,
 		}) 
-
 	subject = "[%s] Thanks for Staying with us!" % reservation.location.email_subject_prefix 
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
@@ -148,21 +150,49 @@ def updated_reservation_notify(reservation):
 	}
 	return mailgun_send(mailgun_data)
 
+def guest_welcome(reservation):
+	''' Send guest a welcome email'''
+	# this is split out by location because each location has a timezone that affects the value of 'today'
+	domain = Site.objects.get_current().domain
+	plaintext = get_template('emails/pre_arrival_welcome.txt')
+	day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
+	c = Context({
+		'first_name': reservation.user.first_name,
+		'day_of_week' : day_of_week,
+		'location': reservation.location,
+		'current_email' : 'current@%s.mail.embassynetwork.com' % reservation.location.slug,
+		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(reservation.location.slug,)),
+		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(reservation.location.slug,)),
+		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
+		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id,)),
+	})
+	text_content = plaintext.render(c)
+	mailgun_data={
+			"from": reservation.location.from_email(),
+			"to": [reservation.user.email,],
+			"subject": "[%s] See you on %s" % (reservation.location.email_subject_prefix, day_of_week),
+			"text": text_content,
+		}
+	return mailgun_send(mailgun_data)
+
+############################################
+#             LOCATION EMAILS              #
+############################################
+
 def guest_daily_update(location):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	today = timezone.localtime(timezone.now())
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
-	domain = Site.objects.get_current().domain
 	events_today = published_events_today_local(location=location)
 
 	plaintext = get_template('emails/guest_daily_update.txt')
 	c = Context({
 		'arriving' : arriving_today,
 		'departing' : departing_today,
-		'domain': domain,
+		'domain': Site.objects.get_current().domain,
 		'events_today': events_today,
-		'location_name': location.name,
+		'location': location,
 	})
 	text_content = plaintext.render(c)
 	
@@ -188,16 +218,15 @@ def admin_daily_update(location):
 	today = timezone.localtime(timezone.now())
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
-	domain = Site.objects.get_current().domain
 	events_today = published_events_today_local(location=location)
 	pending_or_feedback = events_pending(location=location)
 	
 	plaintext = get_template('emails/admin_daily_update.txt')
 	c = Context({
+		'domain': Site.objects.get_current().domain,
+		'location': location,
 		'arriving' : arriving_today,
 		'departing' : departing_today,
-		'domain': domain,
-		'location_name': location.name,
 		'events_today': events_today,
 		'events_pending': pending_or_feedback['pending'],
 		'events_feedback': pending_or_feedback['feedback'],
@@ -218,37 +247,9 @@ def admin_daily_update(location):
 	}
 	return mailgun_send(mailgun_data)
 
-def guest_welcome(reservation):
-	''' Send guest a welcome email'''
-	# this is split out by location because each location has a timezone that affects the value of 'today'
-	domain = Site.objects.get_current().domain
-	plaintext = get_template('emails/pre_arrival_welcome.txt')
-	day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
-	c = Context({
-		'first_name': reservation.user.first_name,
-		'day_of_week' : day_of_week,
-		'site_url': urlresolvers.reverse('location_home', args=(reservation.location.slug,)),
-		'house_code': reservation.location.house_access_code,
-		'location_name': reservation.location.name,
-		'address': reservation.location.address,
-		'ssid': reservation.location.ssid,
-		'ssid_password': reservation.location.ssid_password,
-		'current_email' : 'current@%s.mail.embassynetwork.com' % reservation.location.slug,
-		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events'),
-		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
-		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id,)),
-	})
-	text_content = plaintext.render(c)
-	mailgun_data={
-			"from": reservation.location.from_email(),
-			"to": [reservation.user.email,],
-			"subject": "[%s] See you on %s" % (reservation.location.email_subject_prefix, day_of_week),
-			"text": text_content,
-		}
-	return mailgun_send(mailgun_data)
-
 ############################################
-########### EMAIL ENDPOINTS ################
+#              EMAIL ENDPOINTS             #
+############################################
 
 @csrf_exempt
 def current(request, location_slug):

@@ -10,7 +10,7 @@ Events happening today:
 People arriving today:
 {% for r in arriving %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room }} {% if not r.is_paid %} (unpaid) {% endif %}
-	  https://{{ domain }}{% url 'reservation_manage' r.id %}
+	  https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
 {% empty %}
 	None!
 {% endfor %}
@@ -18,7 +18,7 @@ People arriving today:
 People departing today:
 {% for r in departing %}
 	* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room }} {% if not r.is_paid %} (unpaid) {% endif %}
-	  https://{{ domain }}{% url 'reservation_manage' r.id %}
+	  https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
 {% empty %}
 	None!
 {% endfor %}
@@ -39,3 +39,5 @@ Events seeking feedback:
 	None!
 {% endfor %}
 
+Thank you!
+{{ location.name }}

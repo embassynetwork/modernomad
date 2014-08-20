@@ -1,7 +1,7 @@
 Howdy, 
 
-A new reservation has been submitted. The current status of this reservation 
-is {{ status }}. You can reply-all to discuss this reservation with other house admins. 
+A new reservation has been submitted. The current status of this reservation is [ {{ status }} ]. 
+You can reply-all to discuss this reservation with all house admins. 
 
 --------------------------------------------------- 
 
