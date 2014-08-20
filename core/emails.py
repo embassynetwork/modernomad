@@ -30,9 +30,10 @@ weekday_number_to_name = {
 def mailgun_send(mailgun_data):
 	logger.debug("Mailgun send: %s" % mailgun_data)
 	if settings.DEBUG:
-		# When this is true you will see this message in the mailgun logs but
-		# nothing will actually be delivered
-		mailgun_data["o:testmode"] = "yes"
+		if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
+			# We will see this message in the mailgun logs but nothing will actually be delivered
+			logger.debug("mailgun_send: setting testmode=yes")
+			mailgun_data["o:testmode"] = "yes"
 	resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
 		auth=("api", settings.MAILGUN_API_KEY),
 		data=mailgun_data
@@ -87,8 +88,8 @@ def send_invoice(reservation):
 		'user': reservation.user, 
 		'location': reservation.location,
 		'reservation': reservation,
+		'domain': Site.objects.get_current().domain,
 		}) 
-
 	subject = "[%s] Thanks for Staying with us!" % reservation.location.email_subject_prefix 
 	recipient = [reservation.user.email,]
 	text_content = plaintext.render(c)
@@ -153,14 +154,13 @@ def guest_daily_update(location):
 	today = timezone.localtime(timezone.now())
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
-	domain = Site.objects.get_current().domain
 	events_today = published_events_today_local(location=location)
 
 	plaintext = get_template('emails/guest_daily_update.txt')
 	c = Context({
 		'arriving' : arriving_today,
 		'departing' : departing_today,
-		'domain': domain,
+		'domain': Site.objects.get_current().domain,
 		'events_today': events_today,
 		'location_name': location.name,
 	})
