@@ -192,7 +192,7 @@ class EmailTemplateForm(forms.Form):
 		self.fields['footer'].initial = forms.CharField(
 				widget=forms.Textarea(attrs={'readonly':'readonly'})
 			)
-		self.fields['footer'].initial = '''--------------------------------\nYour reservation is from %s to %s.\nManage your reservation at http://%s%s.''' % (reservation.arrive, reservation.depart, domain, reservation.get_absolute_url())
+		self.fields['footer'].initial = '''--------------------------------\nYour reservation is from %s to %s.\nManage your reservation at https://%s%s.''' % (reservation.arrive, reservation.depart, domain, reservation.get_absolute_url())
 
 		# both the subject and body fields expect to have access to all fields
 		# associated with a reservation, so all reservation model fields are
