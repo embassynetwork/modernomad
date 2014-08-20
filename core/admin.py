@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 from core.models import *
 from gather.models import EventAdminGroup
-from core.emails import send_invoice, send_receipt
+from core.emails import *
 
 # TODO - Needs to be locked down based on location.
 # http://reinout.vanrees.org/weblog/2011/09/30/django-admin-filtering.html
@@ -25,11 +25,25 @@ class RoomAdminInline(admin.TabularInline):
 	extra = 0
 
 class LocationAdmin(admin.ModelAdmin):
+	def send_admin_daily_update(self, request, queryset):
+		for res in queryset:
+			admin_daily_update(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
+
+	def send_guest_daily_update(self, request, queryset):
+		for res in queryset:
+			guest_daily_update(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
+
 	model=Location
 	save_as = True
 	list_display=('name', 'address')
 	list_filter=('name',)
 	filter_horizontal = ['residents', 'house_admins']
+	actions= ['send_admin_daily_update', 'send_guest_daily_update']
+
 	inlines = [RoomAdminInline]
 	if 'gather' in settings.INSTALLED_APPS:
 		 inlines.append(EventAdminGroupInline)
@@ -123,6 +137,24 @@ class ReservationAdmin(admin.ModelAdmin):
 	 	msg = gen_message(queryset, "invoice", "invoices", "sent")
 		self.message_user(request, msg)
 
+	def send_new_reservation_notify(self, request, queryset):
+		for res in queryset:
+			new_reservation_notify(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
+
+	def send_updated_reservation_notify(self, request, queryset):
+		for res in queryset:
+			updated_reservation_notify(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
+
+	def send_guest_welcome(self, request, queryset):
+		for res in queryset:
+			guest_welcome(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
+
 	def mark_as_comp(self, request, queryset):
 		for res in queryset:
 			res.comp()
@@ -172,7 +204,7 @@ class ReservationAdmin(admin.ModelAdmin):
 	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
 	inlines = [BillLineItemInline, PaymentInline]
 	ordering = ['-arrive', 'id']
-	actions= ['send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
+	actions= ['send_guest_welcome', 'send_new_reservation_notify', 'send_updated_reservation_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
 	save_as = True
 	
 class UserProfileInline(admin.StackedInline):
