@@ -536,13 +536,13 @@ class Reservation(models.Model):
 		# stripe will raise a stripe.CardError if the charge fails. this
 		# function purposefully does not handle that error so the calling
 		# function can decide what to do.
-		domain = 'http://' + Site.objects.get_current().domain
+		domain = 'https://' + Site.objects.get_current().domain
 		descr = "%s %s from %s - %s. Details: %s." % (self.user.first_name,
 				self.user.last_name, str(self.arrive),
 				str(self.depart), domain + self.get_absolute_url())
 
 		amt_owed = self.total_owed()
-		amt_owed_cents = amt_owed * 100
+		amt_owed_cents = int(amt_owed * 100)
 		stripe.api_key = settings.STRIPE_SECRET_KEY
 		charge = stripe.Charge.create(
 				amount=amt_owed_cents,
