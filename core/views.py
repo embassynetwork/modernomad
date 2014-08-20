@@ -545,6 +545,7 @@ def UserAddCard(request, username):
 		messages.add_message(request, messages.INFO, "No credit card information was given.")
 		return HttpResponseRedirect("/people/%s" % username)
 
+	location_slug = request.POST.get('loc-slug')
 	reservation_id = request.POST.get('res-id')
 	if reservation_id:
 		reservation = Reservation.objects.get(id=reservation_id)
@@ -572,7 +573,7 @@ def UserAddCard(request, username):
 				if days_until_arrival < reservation.location.welcome_email_days_ahead:
 					guest_welcome(reservation)
 				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, reservation.location.welcome_email_days_ahead))
-				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 			except stripe.CardError, e:
 				raise stripe.CardError(e)
 		# if the card is being added from the user profile page, just save it. 
@@ -582,7 +583,7 @@ def UserAddCard(request, username):
 	except stripe.CardError, e:
 		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 		if reservation_id:
-			return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+			return HttpResponseRedirect(reverse('reservation_detail', args=(location.slug, reservation.id)))
 		else:
 			return HttpResponseRedirect("/people/%s" % username)
 
@@ -681,7 +682,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		except stripe.CardError, e:
 			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 
-	return HttpResponseRedirect("/reservation/%s" % reservation_id)
+	return HttpResponseRedirect(reverse('reservation_detail', args=(location.slug, reservation_id)))
 
 @login_required
 def ReservationCancel(request, reservation_id, location_slug):

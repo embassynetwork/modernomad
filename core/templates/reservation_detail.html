@@ -45,6 +45,7 @@
 				<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
 					{% csrf_token %}
 					<input type="hidden" value={{ reservation.id }} name="res-id">
+					<input type="hidden" value={{ location.slug }} name="loc-slug">
 					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 						value="Click to enter Payment Details" >
 					<div>
@@ -139,9 +140,9 @@
 					key: "{{ stripe_publishable_key }}",
 					amount: "{{ reservation.total_owed_in_cents }}",
 					name: "The Embassy Network",
-					description: "{{ reservation.total_nights }} nights in {{ reservation.room }} at ${{ reservation.rate }}/night.",
+					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }} at ${{ reservation.rate }}/night.",
 					panelLabel:"Pay",
-					image: "{% static '/img/embassy-front-1-128x128.jpg' %}",
+					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
 					token: token
 				});
 			}
