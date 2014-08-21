@@ -18,7 +18,7 @@
 		{% endif %}
 	</div>
 	
-	<div class="col-md-9 top-spacer">
+	<div class="col-md-6 top-spacer">
 		<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
 		<div><p>{{ room.description }}</p></div>
 
@@ -31,7 +31,7 @@
 	</div>
 	
 	{% if room.image %} 
-		<div class="col-md-3 room-info-image">
+		<div class="col-md-6 room-info-image">
 			<img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-info-image" />
 		</div> 
 	{% endif %}
