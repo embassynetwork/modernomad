@@ -571,7 +571,7 @@ def UserAddCard(request, username):
 				if days_until_arrival < reservation.location.welcome_email_days_ahead:
 					guest_welcome(reservation)
 				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, reservation.location.welcome_email_days_ahead))
-				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
+				return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 			except stripe.CardError, e:
 				raise stripe.CardError(e)
 		# if the card is being added from the user profile page, just save it. 
@@ -772,10 +772,10 @@ def ReservationManageList(request, location_slug):
 		return HttpResponseRedirect(reverse('reservation_manage', args=(reservation.location.slug, reservation.id)))
 		
 	location = get_location(location_slug)
-	pending = Reservation.objects.filter(location=location).filter(status="pending")
-	approved = Reservation.objects.filter(location=location).filter(status="approved")
-	confirmed = Reservation.objects.filter(location=location).filter(status="confirmed")
-	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending")
+	pending = Reservation.objects.filter(location=location).filter(status="pending").order_by('-id')
+	approved = Reservation.objects.filter(location=location).filter(status="approved").order_by('-id')
+	confirmed = Reservation.objects.filter(location=location).filter(status="confirmed").order_by('-id')
+	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending").order_by('-id')
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
 		"confirmed": confirmed, "canceled": canceled, 'location': location})
 
