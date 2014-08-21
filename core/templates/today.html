@@ -22,7 +22,7 @@
 		<div class="big-img">
 			<div>
 			<img class="carousel-img" 
-			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}" 
+			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'avatars/default.thumb.jpg'}}" 
 			/>
 			</div>
 		</div>
@@ -49,21 +49,19 @@
 <div class="row-fluid row-spacer"> 
 
 {% for person in subset %}
-
 	<div class="span2">
 		<div id="img-name-back"><div id="img-name">{{ person.first_name }}</div></div>
 		
-		<div class="img-polaroid float-left">			
+		<div class="img-polaroid float-left">
 			<!-- THIS IS BROKEN - clicking the link does not advance the slide to the specific slide position -->
 			<!-- <a href="#profileCarousel" data-slide-to="{{ forloop.counter0 }}"> -->
 			<img 
 				class="profile-img-thumb" 
-				src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
+				src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'avatars/default.thumb.jpg'}}"
 			/>
 			<!-- </a> -->
 		</div>
 	</div>
-
 {% endfor %}
 
 </div>

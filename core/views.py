@@ -113,7 +113,7 @@ def today(request, location_slug):
 	residents = location.residents.all()
 	people_today = guests_today + list(residents)
 
-	events_today = published_events_today_local()
+	events_today = published_events_today_local(location)
 	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
 
 @house_admin_required
