@@ -596,8 +596,6 @@ def UserDeleteCard(request, username):
 	messages.add_message(request, messages.INFO, "Card deleted.")
 	return HttpResponseRedirect("/people/%s" % profile.user.username)
 
-
-
 @login_required
 def ReservationEdit(request, reservation_id, location_slug):
 	logger.debug("Entering ReservationEdit")
@@ -770,7 +768,8 @@ def ReservationManageList(request, location_slug):
 		reservation_id = request.POST.get('reservation_id')
 		reservation = get_object_or_404(Reservation, id=reservation_id)
 		return HttpResponseRedirect(reverse('reservation_manage', args=(reservation.location.slug, reservation.id)))
-		
+
+	# TODO - This is not sustainable!!  We need to limit these lists in some way -JLS
 	location = get_location(location_slug)
 	pending = Reservation.objects.filter(location=location).filter(status="pending").order_by('-id')
 	approved = Reservation.objects.filter(location=location).filter(status="approved").order_by('-id')
@@ -778,7 +777,6 @@ def ReservationManageList(request, location_slug):
 	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending").order_by('-id')
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
 		"confirmed": confirmed, "canceled": canceled, 'location': location})
-
 
 @house_admin_required
 def ReservationManage(request, location_slug, reservation_id):
@@ -823,7 +821,6 @@ def ReservationManage(request, location_slug, reservation_id):
 		"domain": domain, 'location': location,
 	})
 
-
 @house_admin_required
 def ReservationManageUpdate(request, location_slug, reservation_id):
 	if not request.method == 'POST':
@@ -842,6 +839,13 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.comp()
+		elif reservation_action == 'recalculate-bill':
+			reservation.generate_bill()
+		elif reservation_action == 'refund-card':
+			try:
+				reservation.issue_refund()
+			except stripe.CardError, e:
+				raise Reservation.ResActionError(e)
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.charge_card()
@@ -863,18 +867,19 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 		messages.add_message(request, messages.INFO, "Error: %s" % e)
 		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 
-@house_admin_required
-def ReservationChargeCard(request, location_slug, reservation_id):
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
-	#location = get_location(location_slug)
-	reservation = Reservation.objects.get(id=reservation_id)
-	try:
-		reservation.charge_card()
-		send_receipt(reservation)
-		return HttpResponse()
-	except stripe.CardError, e:
-		return HttpResponse(status=500)
+# This doesn't seem to be used anywhere --JLS
+#@house_admin_required
+#def ReservationChargeCard(request, location_slug, reservation_id):
+#	if not request.method == 'POST':
+#		return HttpResponseRedirect('/404')
+#	#location = get_location(location_slug)
+#	reservation = Reservation.objects.get(id=reservation_id)
+#	try:
+#		reservation.charge_card()
+#		send_receipt(reservation)
+#		return HttpResponse()
+#	except stripe.CardError, e:
+#		return HttpResponse(status=500)
 
 @house_admin_required
 def ReservationSendReceipt(request, location_slug, reservation_id):

@@ -985,12 +985,12 @@ div#spinner
 } 
 
 .paid-bg-img {
-	background: url(/static/img/paid-angle-30-trans.png) 50% 50% no-repeat;
+	background: url(/static/img/watermark-paid.jpg) 50% 50% no-repeat;
 	background-size: 70%;
 }
 
 .comp-bg-img {
-	background: url(/static/img/comp-angle-30-trans.png) 50% 50% no-repeat;
+	background: url(/static/img/watermark-comp.jpg) 50% 50% no-repeat;
 	background-size: 70%;
 }
 
