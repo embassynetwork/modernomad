@@ -188,18 +188,18 @@ def guest_daily_update(location):
 
 	plaintext = get_template('emails/guest_daily_update.txt')
 	c = Context({
+		'today': today,
+		'domain': Site.objects.get_current().domain,
+		'location': location,		
 		'arriving' : arriving_today,
 		'departing' : departing_today,
-		'domain': Site.objects.get_current().domain,
 		'events_today': events_today,
-		'location': location,
 	})
 	text_content = plaintext.render(c)
+	subject = "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today.date()))
 	
-	# who should we tell?
-	reservations_here_today = Reservation.today.confirmed(location)
 	guest_emails = []
-	for r in reservations_here_today:
+	for r in Reservation.today.confirmed(location):
 		if not r.user.email in guest_emails:
 			guest_emails.append(r.user.email)
 	if len(guest_emails) == 0:
@@ -208,7 +208,7 @@ def guest_daily_update(location):
 	mailgun_data={
 		"from": location.from_email(),
 		"to": guest_emails,
-		"subject": "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today.date())),
+		"subject": subject,
 		"text": text_content,
 	}
 	return mailgun_send(mailgun_data)
@@ -223,6 +223,7 @@ def admin_daily_update(location):
 	
 	plaintext = get_template('emails/admin_daily_update.txt')
 	c = Context({
+		'today': today,
 		'domain': Site.objects.get_current().domain,
 		'location': location,
 		'arriving' : arriving_today,
@@ -232,6 +233,7 @@ def admin_daily_update(location):
 		'events_feedback': pending_or_feedback['feedback'],
 	})
 	text_content = plaintext.render(c)
+	subject = "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today.date()))
 	
 	admins_emails = []
 	for admin in location.house_admins.all():
@@ -240,9 +242,10 @@ def admin_daily_update(location):
 	if len(admins_emails) == 0:
 		return None
 
-	mailgun_data={"from": location.from_email(),
+	mailgun_data={
+		"from": location.from_email(),
 		"to": admins_emails,
-		"subject": "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today.date())),
+		"subject": subject,
 		"text": text_content,
 	}
 	return mailgun_send(mailgun_data)
