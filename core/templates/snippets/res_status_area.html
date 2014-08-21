@@ -40,14 +40,17 @@
 				opportunity to cancel if desired. 
 			{% else %}
 				This reservation is waiting on the user to confirm; there is no
-				action to take. Optionally, you can nudge this user by <a href="#emailModal" id="email-user-button" role="button" class="btn" data-toggle="modal">sending
-					them an email reminder to confirm</a>. 
+				action to take. Optionally, you can nudge this user by 
+				<a href="#emailModal" data-toggle="modal">sending them an email reminder to confirm</a>. 
 			{% endif %}
 
 		{% elif r.is_confirmed %}
 			{% if r.user.profile.customer_id %}
 				{% if r.is_paid %}
-					<p>This reservation is confirmed and paid. No action needed.</p>
+					<p>This reservation is confirmed and paid. No action needed.</p>  
+					<!--<p>Was there a mistake?  Do you need to
+						<a href="#" class="res-manage-action res-manage-btn" id="refund-card" onclick="return confirm('Are you sure?');">refund their card</a>?-->
+					</p>
 				{% else %}
 					The reservation is confirmed and the user has valid payment
 					details, but their card has not been charged. 
@@ -76,7 +79,7 @@
 	{% endif %} <!-- end comp section -->
 
 	</form>
-
+	
 	<small><em class="last-contact">Last contact about this reservation: {{ r.last_msg|default:"Never" }}</em></small>
 </div>
 

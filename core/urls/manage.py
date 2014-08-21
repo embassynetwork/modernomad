@@ -11,6 +11,7 @@ urlpatterns = patterns('core.views',
 	url(r'reservation/(?P<reservation_id>\d+)/togglecomp/$', 'ReservationToggleComp', name='reservation_toggle_comp'), 
 	url(r'reservation/(?P<reservation_id>\d+)/sendreceipt/$', 'ReservationSendReceipt', name='reservation_send_receipt'), 
 	url(r'reservation/(?P<reservation_id>\d+)/sendmail/$', 'ReservationSendMail', name='reservation_send_mail'), 
+	url(r'reservation/(?P<reservation_id>\d+)/recalculate/$', 'ReservationRecalculateBill', name='reservation_recalculate_bill'), 
 )
 
 

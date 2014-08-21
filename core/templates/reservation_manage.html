@@ -56,6 +56,11 @@
 
 		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 
+		<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
+			{% csrf_token %}
+			<input class="btn-default btn" type="submit" value="Recalculate Bill">
+		</form>
+
 		{% if r.is_paid %}
 		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
 			{% csrf_token %}
@@ -252,9 +257,10 @@ $("#which-email-select").change(function() {
 function ajax_call(el) {
 	console.log('el is');
 	console.log(action_el);
+	res_action = $(el).attr('id')
 	request = $.ajax({ 
 		data: {
-			'reservation-action': $(el).attr('id'),
+			'reservation-action': res_action,
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
 		}, 
 		type: $("#res-action-form").attr('method'), // GET or POST
@@ -263,8 +269,9 @@ function ajax_call(el) {
 	request.done(function(msg) { // on success..
 		console.log("Success!");
 		$("#res-status-area").html(msg);
-		$("#emailModal").modal("show");
-
+		if(res_action == "set-tentative" || res_action == 'res-charge-card') {
+			$("#emailModal").modal("show");
+		}
 		// also need to re-register the ajax calls on the new html divs one
 		// it is injected (or we won't be able to chain multiple calls
 		// together without refreshing the page). 

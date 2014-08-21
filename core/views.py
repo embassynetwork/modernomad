@@ -839,8 +839,6 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.comp()
-		elif reservation_action == 'recalculate-bill':
-			reservation.generate_bill()
 		elif reservation_action == 'refund-card':
 			try:
 				reservation.issue_refund()
@@ -890,6 +888,16 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 	if reservation.is_paid():
 		send_receipt(reservation)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
+def ReservationRecalculateBill(request, location_slug, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
+	reservation = Reservation.objects.get(id=reservation_id)
+	reservation.generate_bill()
+	messages.add_message(request, messages.INFO, "The bill has been recalculated.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required
