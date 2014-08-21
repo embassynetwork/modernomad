@@ -391,7 +391,7 @@ def GetUser(request, username):
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
-	locations = Location.objects.all()
+	locations = Location.objects.all().order_by("name")
 	return render(request, "location_list.html", {"locations": locations})
 
 @login_required
