@@ -3,6 +3,15 @@
 
 {% block content %}
 
+<div style="margin-bottom: 12px;">
+	<form method="POST">
+		<strong>Go To Reservation:</strong>
+		<input name="reservation_id" size="4" placeholder="ID"/>
+		<input type="submit" value="Go!"/>
+		{% csrf_token %}
+	</form>
+</div>
+
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#pending" data-toggle="tab">Pending</a></li>
 	<li><a href="#approved" data-toggle="tab">Approved</a></li>
@@ -37,7 +46,6 @@
 	</div>
 
 	<div id="reservation-manage-detail"> </div>
-
 </div>
 
 {% endblock %}

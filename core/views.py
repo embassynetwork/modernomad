@@ -766,6 +766,11 @@ def PeopleDaterangeQuery(request, location_slug):
 
 @house_admin_required
 def ReservationManageList(request, location_slug):
+	if request.method == "POST":
+		reservation_id = request.POST.get('reservation_id')
+		reservation = get_object_or_404(Reservation, id=reservation_id)
+		return HttpResponseRedirect(reverse('reservation_manage', args=(reservation.location.slug, reservation.id)))
+		
 	location = get_location(location_slug)
 	pending = Reservation.objects.filter(location=location).filter(status="pending")
 	approved = Reservation.objects.filter(location=location).filter(status="approved")
