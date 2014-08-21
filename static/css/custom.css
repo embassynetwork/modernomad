@@ -989,6 +989,11 @@ div#spinner
 	background-size: 70%;
 }
 
+.comp-bg-img {
+	background: url(/static/img/comp-angle-30-trans.png) 50% 50% no-repeat;
+	background-size: 70%;
+}
+
 #email-user-button {
 	margin-bottom: 20px;
 }

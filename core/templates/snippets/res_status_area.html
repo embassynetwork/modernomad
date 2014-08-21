@@ -1,4 +1,4 @@
-<div id="res-status-area" {% if r.is_paid %} class="paid-bg-img" {% endif %} >
+<div id="res-status-area" {% if r.is_comped %} class="comp-bg-img" {% else %}{% if r.is_paid %} class="paid-bg-img" {% endif %}{% endif %} >
 
 	{% include "snippets/messages.html" %}
 
