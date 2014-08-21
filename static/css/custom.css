@@ -1090,6 +1090,10 @@ div#spinner
 	cursor: pointer;
 }
 
+.room-preview-image {
+	width: 200px;
+}
+
 .room-info-image {
 	width: 600px;
 }
