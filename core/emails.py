@@ -432,7 +432,7 @@ def stay(request, location_slug):
 			# Reply-To: list email apparently has some religious debates
 			# (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
 			# to be common these days 
-			"h:Reply-To": list_address
+			"h:Reply-To": from_address
 		}
 	return mailgun_send(mailgun_data)
 
