@@ -12,6 +12,6 @@ celery
 local_templates/
 local_templates_hidden/
 build/
-backups/
+backup/
 gather
 django.log
