@@ -25,7 +25,7 @@ from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
@@ -809,6 +809,7 @@ def ReservationManage(request, location_slug, reservation_id):
 	else:
 		room_has_availability = False
 
+	edit_form = ReservationForm(location, request.POST, instance=reservation)
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
@@ -819,10 +820,11 @@ def ReservationManage(request, location_slug, reservation_id):
 		"room_has_availability" : room_has_availability,
 		"avail": availability, "dates": dates,
 		"domain": domain, 'location': location,
+		"edit_form": edit_form,
 	})
 
 @house_admin_required
-def ReservationManageUpdate(request, location_slug, reservation_id):
+def ReservationManageAction(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -878,6 +880,55 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 #		return HttpResponse()
 #	except stripe.CardError, e:
 #		return HttpResponse(status=500)
+
+@house_admin_required
+def ReservationManageEdit(request, location_slug, reservation_id):
+	logger.debug("ReservationManageEdit")
+	location = get_location(location_slug)
+	reservation = Reservation.objects.get(id=reservation_id)
+	logger.debug(request.POST)
+	if 'username' in request.POST:
+		try:
+			new_user = User.objects.get(username=request.POST.get("username"))
+			reservation.user = new_user
+			reservation.save()
+			messages.add_message(request, messages.INFO, "User changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid user given!")
+	elif 'arrive' in request.POST:
+		try:
+			arrive = datetime.datetime.strptime(request.POST.get("arrive"), "%Y-%m-%d")
+			depart = datetime.datetime.strptime(request.POST.get("depart"), "%Y-%m-%d")
+			if arrive >= depart:
+				messages.add_message(request, messages.INFO, "Arrival must be at least 1 day before Departure.")
+			else:
+				reservation.arrive = arrive
+				reservation.depart = depart
+				reservation.save()
+				reservation.generate_bill()
+				messages.add_message(request, messages.INFO, "Dates changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid dates given!")
+		
+	elif 'room_id' in request.POST:
+		try:
+			new_room = Room.objects.get(pk=request.POST.get("room_id"))
+			reservation.room = new_room
+			reservation.save()
+			reservation.reset_rate()
+			messages.add_message(request, messages.INFO, "Room changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid room given!")
+	elif 'rate' in request.POST:
+		rate = request.POST.get("rate")
+		if not rate.isdigit():
+			messages.add_message(request, messages.ERROR, "Invalid rate given!")
+		else:
+			int_rate = int(rate)
+			if int_rate >= 0 and int_rate != reservation.get_rate():
+				reservation.set_rate(int_rate)
+				messages.add_message(request, messages.INFO, "Rate changed.")
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required
 def ReservationSendReceipt(request, location_slug, reservation_id):

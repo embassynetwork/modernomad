@@ -426,9 +426,9 @@ class Reservation(models.Model):
 		return self.room.default_rate
 
 	def get_rate(self):
-		if self.rate:
-			return self.rate
-		return self.default_rate()
+		if self.rate == None:
+			return self.default_rate()
+		return self.rate
 
 	def total_value(self):
 		# value of the reservation, regardless of what has been paid

@@ -18,7 +18,7 @@
 	{% endif %}
 
 
-	<form method="POST" action="{% url 'reservation_manage_update' location.slug r.id %}" id="res-action-form">
+	<form method="POST" action="{% url 'reservation_manage_action' location.slug r.id %}" id="res-action-form">
 		
 	{% if not r.is_comped %}
 		{% if r.is_pending %}
