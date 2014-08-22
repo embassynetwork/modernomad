@@ -223,8 +223,8 @@
 	<table id="bill-details">
 		<tr>
 			<th>Description</th>
-			<th class="money">House</th>
-			<th class="money">User</th>
+			<th class="money">Paid by<br>House</th>
+			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
 		</tr>
 		{% for item in r.bill_line_items %}
 			{% if item.paid_by_house %}
