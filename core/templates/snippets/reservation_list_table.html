@@ -1,36 +1,43 @@
 <table class="dataTable">
 	<thead>
 		<tr>
-			<th>Reservation</th>
+			<th>ID</th>
 			<th>User</th>
-			<th>Status</th>
+			<!--<th>Status</th>-->
 			<th>Arrival</th>
 			<th>Departure</th>
 			<th>Room</th>
-			<th>Nights</th>
+			<th style="width:3em;">Nights</th>
 			<th>Rate</th>
 			<th>Value</th>
-			<th>Paid Status</th>
+			<th>Paid</th>
 		</tr>
 	</thead>
 	<tbody>
 			{% for r in reservations %}
-			<tr class="{% cycle 'row-even' 'row-odd' %}">
-				<td>
-					<a href="{% url 'reservation_manage' location.slug r.id %}">Reservation {{r.id}}</a>
-				</td>
-				<td>
-					<a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a> ({{r.user.username}})
-				</td>
-				<td>{{r.status}}</td>
-				<td>{{r.arrive}}</td>
-				<td>{{r.depart}}</td>
-				<td>{{r.room}}</td>
-				<td>{{r.total_nights}}</td>
-				<td>${{r.rate}}</td>
-				<td>${{r.total_value}}</td>
-				<td>{{r.html_color_status|safe}}</td>
-			</tr>
+				<tr class="{% cycle 'row-even' 'row-odd' %}">
+					<td>
+						<a href="{% url 'reservation_manage' location.slug r.id %}">{{ r.id }}</a>
+					</td>
+					<td>
+						<a href="{% url 'user_detail' r.user.username %}">{{ r.user.get_full_name|truncatechars:16 }}</a> 
+						<!-- ({{r.user.username}})-->
+					</td>
+					<!--<td>{{r.status}}</td>-->
+					<td>{{r.arrive}}</td>
+					<td>{{r.depart}}</td>
+					<td>{{r.room}}</td>
+					<td style="text-align:center;">{{r.total_nights}}</td>
+					<td>${{r.rate}}</td>
+					<td>${{r.total_value}}</td>
+					<td>
+						{% if r.is_paid %}
+							<span class="text-success glyphicon glyphicon-ok"></span>
+						{% else %}
+							<span class="text-danger glyphicon glyphicon-remove"></span>
+						{% endif %}
+					</td>
+				</tr>
 			{% endfor %}
 	</tbody>
 </table>

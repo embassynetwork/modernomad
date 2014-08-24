@@ -28,6 +28,9 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 # there is a weird db issue it seems with setting a field to null=False after it has been defined as null=True.
 # see http://od-eon.com/blogs/stefan/adding-not-null-column-south/ and
@@ -423,9 +426,9 @@ class Reservation(models.Model):
 		return self.room.default_rate
 
 	def get_rate(self):
-		if self.rate:
-			return self.rate
-		return self.default_rate()
+		if self.rate == None:
+			return self.default_rate()
+		return self.rate
 
 	def total_value(self):
 		# value of the reservation, regardless of what has been paid
@@ -535,6 +538,8 @@ class Reservation(models.Model):
 		return self.total_value() - self.house_fees()
 
 	def charge_card(self):
+		logger.debug("charge_card")
+		
 		# stripe will raise a stripe.CardError if the charge fails. this
 		# function purposefully does not handle that error so the calling
 		# function can decide what to do.
@@ -559,6 +564,11 @@ class Reservation(models.Model):
 			paid_amount = (amt_owed),
 			transaction_id = charge.id
 		)
+
+	def issue_refund(self):
+		# TODO - Call the Stripe calls that issue the refund
+		logger.debug("issue_refund")	
+		pass
 
 	def set_rate(self, rate):
 		if rate == None:

@@ -25,7 +25,7 @@ from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
@@ -113,7 +113,7 @@ def today(request, location_slug):
 	residents = location.residents.all()
 	people_today = guests_today + list(residents)
 
-	events_today = published_events_today_local()
+	events_today = published_events_today_local(location)
 	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
 
 @house_admin_required
@@ -391,7 +391,7 @@ def GetUser(request, username):
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
-	locations = Location.objects.all()
+	locations = Location.objects.all().order_by("name")
 	return render(request, "location_list.html", {"locations": locations})
 
 @login_required
@@ -571,7 +571,7 @@ def UserAddCard(request, username):
 				if days_until_arrival < reservation.location.welcome_email_days_ahead:
 					guest_welcome(reservation)
 				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, reservation.location.welcome_email_days_ahead))
-				return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+				return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 			except stripe.CardError, e:
 				raise stripe.CardError(e)
 		# if the card is being added from the user profile page, just save it. 
@@ -581,7 +581,7 @@ def UserAddCard(request, username):
 	except stripe.CardError, e:
 		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 		if reservation_id:
-			return HttpResponseRedirect("/reservation/%d" % int(reservation_id))
+			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 		else:
 			return HttpResponseRedirect("/people/%s" % username)
 
@@ -595,8 +595,6 @@ def UserDeleteCard(request, username):
 	
 	messages.add_message(request, messages.INFO, "Card deleted.")
 	return HttpResponseRedirect("/people/%s" % profile.user.username)
-
-
 
 @login_required
 def ReservationEdit(request, reservation_id, location_slug):
@@ -680,7 +678,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		except stripe.CardError, e:
 			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
 
-	return HttpResponseRedirect("/reservation/%s" % reservation_id)
+	return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 
 @login_required
 def ReservationCancel(request, reservation_id, location_slug):
@@ -766,14 +764,19 @@ def PeopleDaterangeQuery(request, location_slug):
 
 @house_admin_required
 def ReservationManageList(request, location_slug):
+	if request.method == "POST":
+		reservation_id = request.POST.get('reservation_id')
+		reservation = get_object_or_404(Reservation, id=reservation_id)
+		return HttpResponseRedirect(reverse('reservation_manage', args=(reservation.location.slug, reservation.id)))
+
+	# TODO - This is not sustainable!!  We need to limit these lists in some way -JLS
 	location = get_location(location_slug)
-	pending = Reservation.objects.filter(location=location).filter(status="pending")
-	approved = Reservation.objects.filter(location=location).filter(status="approved")
-	confirmed = Reservation.objects.filter(location=location).filter(status="confirmed")
-	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending")
+	pending = Reservation.objects.filter(location=location).filter(status="pending").order_by('-id')
+	approved = Reservation.objects.filter(location=location).filter(status="approved").order_by('-id')
+	confirmed = Reservation.objects.filter(location=location).filter(status="confirmed").order_by('-id')
+	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending").order_by('-id')
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
 		"confirmed": confirmed, "canceled": canceled, 'location': location})
-
 
 @house_admin_required
 def ReservationManage(request, location_slug, reservation_id):
@@ -806,6 +809,7 @@ def ReservationManage(request, location_slug, reservation_id):
 	else:
 		room_has_availability = False
 
+	edit_form = ReservationForm(location, request.POST, instance=reservation)
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
@@ -816,11 +820,11 @@ def ReservationManage(request, location_slug, reservation_id):
 		"room_has_availability" : room_has_availability,
 		"avail": availability, "dates": dates,
 		"domain": domain, 'location': location,
+		"edit_form": edit_form,
 	})
 
-
 @house_admin_required
-def ReservationManageUpdate(request, location_slug, reservation_id):
+def ReservationManageAction(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -837,6 +841,11 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.comp()
+		elif reservation_action == 'refund-card':
+			try:
+				reservation.issue_refund()
+			except stripe.CardError, e:
+				raise Reservation.ResActionError(e)
 		elif reservation_action == 'res-charge-card':
 			try:
 				reservation.charge_card()
@@ -858,18 +867,68 @@ def ReservationManageUpdate(request, location_slug, reservation_id):
 		messages.add_message(request, messages.INFO, "Error: %s" % e)
 		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 
+# This doesn't seem to be used anywhere --JLS
+#@house_admin_required
+#def ReservationChargeCard(request, location_slug, reservation_id):
+#	if not request.method == 'POST':
+#		return HttpResponseRedirect('/404')
+#	#location = get_location(location_slug)
+#	reservation = Reservation.objects.get(id=reservation_id)
+#	try:
+#		reservation.charge_card()
+#		send_receipt(reservation)
+#		return HttpResponse()
+#	except stripe.CardError, e:
+#		return HttpResponse(status=500)
+
 @house_admin_required
-def ReservationChargeCard(request, location_slug, reservation_id):
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
-	#location = get_location(location_slug)
+def ReservationManageEdit(request, location_slug, reservation_id):
+	logger.debug("ReservationManageEdit")
+	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
-	try:
-		reservation.charge_card()
-		send_receipt(reservation)
-		return HttpResponse()
-	except stripe.CardError, e:
-		return HttpResponse(status=500)
+	logger.debug(request.POST)
+	if 'username' in request.POST:
+		try:
+			new_user = User.objects.get(username=request.POST.get("username"))
+			reservation.user = new_user
+			reservation.save()
+			messages.add_message(request, messages.INFO, "User changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid user given!")
+	elif 'arrive' in request.POST:
+		try:
+			arrive = datetime.datetime.strptime(request.POST.get("arrive"), "%Y-%m-%d")
+			depart = datetime.datetime.strptime(request.POST.get("depart"), "%Y-%m-%d")
+			if arrive >= depart:
+				messages.add_message(request, messages.INFO, "Arrival must be at least 1 day before Departure.")
+			else:
+				reservation.arrive = arrive
+				reservation.depart = depart
+				reservation.save()
+				reservation.generate_bill()
+				messages.add_message(request, messages.INFO, "Dates changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid dates given!")
+		
+	elif 'room_id' in request.POST:
+		try:
+			new_room = Room.objects.get(pk=request.POST.get("room_id"))
+			reservation.room = new_room
+			reservation.save()
+			reservation.reset_rate()
+			messages.add_message(request, messages.INFO, "Room changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid room given!")
+	elif 'rate' in request.POST:
+		rate = request.POST.get("rate")
+		if not rate.isdigit():
+			messages.add_message(request, messages.ERROR, "Invalid rate given!")
+		else:
+			int_rate = int(rate)
+			if int_rate >= 0 and int_rate != reservation.get_rate():
+				reservation.set_rate(int_rate)
+				messages.add_message(request, messages.INFO, "Rate changed.")
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required
 def ReservationSendReceipt(request, location_slug, reservation_id):
@@ -880,6 +939,16 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 	if reservation.is_paid():
 		send_receipt(reservation)
 	messages.add_message(request, messages.INFO, "The receipt was sent.")
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
+def ReservationRecalculateBill(request, location_slug, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
+	reservation = Reservation.objects.get(id=reservation_id)
+	reservation.generate_bill()
+	messages.add_message(request, messages.INFO, "The bill has been recalculated.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required

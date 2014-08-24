@@ -8,7 +8,6 @@
 </div>	
 
 <!-- Email Modal -->
-
 <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -32,7 +31,6 @@
 				<!-- the selected email will be inserted here -->
 				<div id="selected-email">
 				</div>
-
 			</div>
 		</div>
 	</div>
@@ -57,6 +55,11 @@
 	<div class="res-actions-secondary"><h2>Manage</h2></div>
 
 		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+
+		<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
+			{% csrf_token %}
+			<input class="btn-default btn" type="submit" value="Recalculate Bill">
+		</form>
 
 		{% if r.is_paid %}
 		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
@@ -109,8 +112,52 @@
 
 	<hr>
 
-	<h3 class="bottom-pad-thirty">{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %} <span class="pull-right">Value: ${{ r.total_value }}</span></h3>
-
+	<!-- Reservation Details -->
+	<div class="bottom-pad-thirty">
+		<div id="reservation-details">
+			<h3>
+				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
+				<span class="pull-right">Value: ${{ r.total_value }}</span>
+			</h3>
+		</div>
+		<div id="reservation-details-form">
+			<h3>Edit Reservation Details</h3>
+			<div class="form-help-text" style="margin-bottom: 12px;">
+				Be very careful when you edit these details!
+			</div>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>User:</strong> <input name="username" value="{{ r.user.username }}"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change User"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Rate:</strong> <input name="rate" value="{{ r.rate }}" size="3"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Rate"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Arrive:</strong> <input name="arrive" value="{{ r.arrive|date:'Y-m-d' }}" size="8"/>
+					<strong>Depart:</strong> <input name="depart" value="{{ r.depart|date:'Y-m-d' }}" size="8"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Dates"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Room:</strong> <select name="room_id">
+							{% for room in location.guest_rooms %}
+								<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
+							{% endfor %}
+						</select>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Room"/>
+				</div>
+			</form>
+		</div>
+		<p>[ <a href="#" id="reservation-details-link" onclick="toggleEditDetails(); return false;"></a> ]</p>
+	</div>
+	
 	<!-- availability calendar -->
 	<table id="rooms-available-calendar">
 		<tr>
@@ -171,8 +218,14 @@
 		<div class="red-text">The Total Value and the Bill Amount don't match!  You may need to recalculate the bill!</div>
 	{% endif %}
 	
+	<!-- Bill Details -->
 	<h2>Bill Details</h2>	
 	<table id="bill-details">
+		<tr>
+			<th>Description</th>
+			<th class="money">Paid by<br>House</th>
+			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
+		</tr>
 		{% for item in r.bill_line_items %}
 			{% if item.paid_by_house %}
 				<tr>
@@ -194,6 +247,8 @@
 			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
 	</table>
 
+	<!-- Payment Details -->
+	{% if r.payments %}
 	<h2>Payments</h2>
 	<table id="payment-details">
 		{% for p in r.payments %}
@@ -206,6 +261,7 @@
 			<td></td>
 			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
 	</table>
+	{% endif %}
 	<hr>
 	
 	<h2>User Details</h2>
@@ -235,13 +291,25 @@
 {% block extrajs %}
 <script language="JavaScript">
 
-var action_el;
+function toggleEditDetails(){
+	if($('#reservation-details-form').is(':hidden')) {
+		console.log('reservation-details-form');
+		$('#reservation-details').hide();
+		$('#reservation-details-form').show();
+		$('#reservation-details-link').html('cancel edit');
+	} else {
+		console.log('reservation-details');
+		$('#reservation-details').show();
+		$('#reservation-details-form').hide();
+		$('#reservation-details-link').html('edit details');
+	}
+}
+toggleEditDetails();
 
 // don't have a default email selected when the modal pops up
 $("#which-email-select").prop("selectedIndex", -1);
 
 $("#which-email-select").change(function() {
-
 	// remove the previously active email form, if any
 	$("#selected-email").empty();
 
@@ -251,12 +319,14 @@ $("#which-email-select").change(function() {
 	$("#selected-email").html($email_templates[template_id]);
 });
 
+var action_el;
 function ajax_call(el) {
 	console.log('el is');
 	console.log(action_el);
+	res_action = $(el).attr('id')
 	request = $.ajax({ 
 		data: {
-			'reservation-action': $(el).attr('id'),
+			'reservation-action': res_action,
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
 		}, 
 		type: $("#res-action-form").attr('method'), // GET or POST
@@ -265,8 +335,9 @@ function ajax_call(el) {
 	request.done(function(msg) { // on success..
 		console.log("Success!");
 		$("#res-status-area").html(msg);
-		$("#emailModal").modal("show");
-
+		if(res_action == "set-tentative" || res_action == 'res-charge-card') {
+			$("#emailModal").modal("show");
+		}
 		// also need to re-register the ajax calls on the new html divs one
 		// it is injected (or we won't be able to chain multiple calls
 		// together without refreshing the page). 
@@ -393,7 +464,6 @@ $("#dialog-warn-full").dialog({
 		}
 	}
 });
-
 
 </script>
 
