@@ -6,9 +6,8 @@ The majority of the configuration is around
 - customizing templates 
 - customizing default emails 
 
-## Local Settings
+## Location Settings
 
-- While getting set up, leave the MODE set to DEVELOPMENT
 - `MAX_RESERVATION_DAYS` sets a limit for the longest a guest can request a
   booking for. This is easily to override in the admin interface, but we have
   found a sane default to be helpful. 
@@ -17,10 +16,6 @@ The majority of the configuration is around
 -  The stripe keys are available in your `stripe.js` account. The payment
    processing in modernomad is closely integrated with stripe and requires you
    to have your own stripe account. 
-- When in DEVELOPMENT mode, modernomad will send emails to stdout. In
-  PRODUCTION mode, you will need an email account that you can configure to
-  send and receive real emails. Configure the email settings for production
-  mode with the correct SMTP settings. 
 - EMAIL_SUBJECT_PREFIX and DEFAULT_FROM_EMAIL are used when generating emails
   to send to guests from the manage pages and elsewhere on the site. Usually
   DEFAULT_FROM_EMAIL will be the same as your production email setting. The
@@ -29,6 +24,14 @@ The majority of the configuration is around
 - The social media settings are used to share with guests info about how to get
   connected with the house and its activities. They are sent to guests in the
   welcome email so make sure to populate these. 
+
+## Local Settings
+
+- While getting set up, leave the MODE set to DEVELOPMENT
+- When in DEVELOPMENT mode, modernomad will send emails to stdout. In
+  PRODUCTION mode, you will need an email account that you can configure to
+  send and receive real emails. Configure the email settings for production
+  mode with the correct SMTP settings. 
 - the celery configuration options are the vanilla celery and broker
   settings. You only need to change these if you have customized the settings
   of your celery install.  

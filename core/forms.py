@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate
+from core.models import UserProfile, Reservation, EmailTemplate, Room
 from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -77,6 +77,13 @@ class UserProfileForm(forms.ModelForm):
 					self.error_messages['password_mismatch'])
 		return password2
 
+	def clean_username(self):
+		username = self.cleaned_data['username']
+		if not self.instance.id:
+			if username and User.objects.filter(username=username):
+				raise forms.ValidationError('There is already a user with this username. If this is your account and you need to recover your password, you can do so from the login page.')
+		return username
+
 	def clean_links(self):
 		# validates and formats the urls, returning a string of comma-separated urls
 		links = self.cleaned_data['links']
@@ -88,7 +95,7 @@ class UserProfileForm(forms.ModelForm):
 			for l in raw_link_list:
 				try:
 					cleaned = url.clean(l.strip())
-					print cleaned 
+					#print cleaned 
 					cleaned_links.append(cleaned)
 				except forms.ValidationError:
 					# customize the error raised by UrlField.
@@ -119,21 +126,22 @@ class UserProfileForm(forms.ModelForm):
 class ReservationForm(forms.ModelForm):
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'user', 'last_msg', 'status']
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker form-control'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker form-control'}),
 		}
 
+	def __init__(self, location, *args, **kwargs):
+		super(ReservationForm, self).__init__(*args, **kwargs)
+		self.location = location
+		self.fields['room'].queryset = Room.objects.filter(location=location).filter(primary_use="guest")
+
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
-		hosted = cleaned_data.get('hosted')
-		guest_name = cleaned_data.get('guest_name')
-		if hosted and not guest_name:
-			self._errors["guest_name"] = self.error_class(['Hosted reservations require a guest name.'])
 		arrive = cleaned_data.get('arrive')
 		depart = cleaned_data.get('depart')
-		if (depart - arrive).days > settings.MAX_RESERVATION_DAYS:
+		if (depart - arrive).days > self.location.max_reservation_days:
 			self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
 		return cleaned_data
 
@@ -171,7 +179,7 @@ class EmailTemplateForm(forms.Form):
 	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
 	body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
 
-	def __init__(self, tpl, reservation):
+	def __init__(self, tpl, reservation, location):
 		''' pass in an EmailTemplate instance, and a reservation object '''
 
 		domain = Site.objects.get_current().domain
@@ -179,12 +187,12 @@ class EmailTemplateForm(forms.Form):
 		super(EmailTemplateForm, self).__init__()
 
 		# add in the extra fields
-		self.fields['sender'].initial = EmailTemplate.FROM_ADDRESS
+		self.fields['sender'].initial = location.from_email()
 		self.fields['recipient'].initial = reservation.user.email
 		self.fields['footer'].initial = forms.CharField(
 				widget=forms.Textarea(attrs={'readonly':'readonly'})
 			)
-		self.fields['footer'].initial = '''--------------------------------\nYour reservation is from %s to %s.\nManage your reservation at http://%s%s.''' % (reservation.arrive, reservation.depart, domain, reservation.get_absolute_url())
+		self.fields['footer'].initial = '''--------------------------------\nYour reservation is from %s to %s.\nManage your reservation at https://%s%s.''' % (reservation.arrive, reservation.depart, domain, reservation.get_absolute_url())
 
 		# both the subject and body fields expect to have access to all fields
 		# associated with a reservation, so all reservation model fields are
@@ -204,40 +212,11 @@ class EmailTemplateForm(forms.Form):
 			'num_nights': reservation.total_nights(), 
 			'purpose': reservation.purpose,
 			'comments': reservation.comments,
-			'welcome_email_days_ahead': settings.WELCOME_EMAIL_DAYS_AHEAD,
+			'welcome_email_days_ahead': location.welcome_email_days_ahead,
 			'reservation_url': "https://"+domain+reservation.get_absolute_url()
 		}
 
-		self.fields['subject'].initial = EmailTemplate.SUBJECT_PREFIX + Template(tpl.subject).render(Context(template_variables))
+		self.fields['subject'].initial = '['+location.email_subject_prefix+']' + Template(tpl.subject).render(Context(template_variables))
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
-
-
-class MessageCurrentPeopleForm(forms.Form):
-	start_date = forms.DateField()
-	end_date = forms.DateField()
-	replyto = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly'}))
-	subject = forms.CharField()
-	body = forms.CharField(widget=forms.Textarea)
-	footer = forms.CharField(widget=forms.Textarea(attrs={'readonly':'readonly'}))
-
-	def __init__(self, *args, **kwargs):
-		domain = Site.objects.get_current().domain
-		if kwargs.has_key('sender'):
-			# pop the ender kwarg out so it doesn't get passed to the parent class
-			sender = kwargs.pop('sender')
-		super(MessageCurrentPeopleForm, self).__init__(*args, **kwargs)
-
-		# add in the extra fields
-		self.fields['replyto'].initial = sender.email
-		self.fields['footer'].initial = forms.CharField(
-				widget=forms.Textarea(attrs={'readonly':'readonly'})
-			)
-		self.fields['footer'].initial = '''--------------------------------\nThis message is a social courtesy service for members of %s. You may reply-all to this email, generate your own network broadcast at http://%s/broadcast, or email the sender directly at %s.''' % (settings.LOCATION_NAME, domain, sender.email,)
-
-		self.fields['subject'].initial = settings.EMAIL_SUBJECT_PREFIX
-		widgets = { 
-			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
-			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
-		}
 
 

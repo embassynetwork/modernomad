@@ -1,5 +1,9 @@
-{% extends "content-base.html" %}
-{% block content %}
+{% extends "root.html" %}
+{% load staticfiles %}
+
+{% block body %}
+
+<div class="container">
 
 {% if messages %}
 <div class="messages">
@@ -15,7 +19,7 @@
 {% if not user.is_authenticated %}
 	<h2>Register a new account</h2>
 
-	<p>If you already have an account, you can <a href="/people/login?next=/reservation/create/">log in</a> instead. </p>
+	<p>If you already have an account, you can <a href="/people/login/">log in</a> instead. </p>
 {% else %}
 	<h2>Tell us about yourself</h2>
 {% endif %}
@@ -72,16 +76,29 @@ about, and possible connections around work, projects and ideas. It should only 
 {% endblock %}
 
 {% block extrajs %}
-	<script src="/media/js/imgcrop.js"></script>
+	<script src="{% static 'js/imgcrop.js' %}"></script>
 	<script>
 		$("#newprofileform").submit(function (e) {
 			if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
-				$("#img-upload-error").html('<span class="text-error">This field is required.</span>');
+				$("#img-upload-error").html('<div class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
 				$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
 				return false;
 			}
 		}) 
 
 	</script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
+	<script>
+		$("#id_city").keyup(function() {
+			autocomplete = new google.maps.places.Autocomplete(this);
+			google.maps.event.addListener(autocomplete, 'place_changed', function() {
+				var place = autocomplete.getPlace();
+				console.log(place);
+				console.log(place.address_components);
+
+			});
+		});
+	</script>
+</div>
 {% endblock %}
 

@@ -1,4 +1,4 @@
-media/data
+media
 *.*~
 *.swp
 *.swo
@@ -11,3 +11,7 @@ celery.db
 celery
 local_templates/
 local_templates_hidden/
+build/
+backup/
+gather
+django.log

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% for user in residents %}
+<div class="row resident-row">
+	<div class="col-md-3">
+		<img class="resident-listing-page-img" src="{{ MEDIA_URL }}{{ user.profile.image|default:'data/avatars/default.jpg'}}" />
+	</div>
+	<div class="col-md-9">
+		<h3><a href="/people/{{user.username}}">{{ user.first_name }} {{ user.last_name }}</a></h3>
+		<div>{{ user.profile.bio }}</div>
+	</div>
+</div>
+	
+{% endfor %}
+
+{% endblock %}
+
