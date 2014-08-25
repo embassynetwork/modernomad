@@ -769,12 +769,20 @@ def ReservationManageList(request, location_slug):
 		reservation = get_object_or_404(Reservation, id=reservation_id)
 		return HttpResponseRedirect(reverse('reservation_manage', args=(reservation.location.slug, reservation.id)))
 
-	# TODO - This is not sustainable!!  We need to limit these lists in some way -JLS
 	location = get_location(location_slug)
+
+	show_all = False
+	if 'show_all' in request.GET and request.GET.get('show_all') == "True":
+		show_all = True
+
 	pending = Reservation.objects.filter(location=location).filter(status="pending").order_by('-id')
 	approved = Reservation.objects.filter(location=location).filter(status="approved").order_by('-id')
 	confirmed = Reservation.objects.filter(location=location).filter(status="confirmed").order_by('-id')
 	canceled = Reservation.objects.filter(location=location).exclude(status="confirmed").exclude(status="approved").exclude(status="pending").order_by('-id')
+	if not show_all:
+		today = timezone.localtime(timezone.now())
+		confirmed = confirmed.filter(depart__gt=today)
+		canceled =  canceled.filter(depart__gt=today)
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
 		"confirmed": confirmed, "canceled": canceled, 'location': location})
 
