@@ -11,3 +11,4 @@ celery.db
 celery
 local_templates/
 local_templates_hidden/
+backups
