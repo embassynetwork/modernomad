@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load ifappexists %}
+{% load staticfiles %}
+
+{% block content %}
+
+{% include 'snippets/email-signup-modal.html' %}
+
+<div class="row">
+	<div class="col-sm-10 col-sm-offset-1"> {% include "snippets/messages.html" %} </div>
+</div>
+
+<div class="row" id="house-desc">
+	<div class="col-sm-12">
+		{{ location.short_description|safe }}
+	</div>
+</div>
+
+<div class="row">
+
+		<div class="col-md-4" id="participate">
+			<h2 class="fancy-header center">Announcements</h2>
+			<p class="easy-reading">{{ location.announcement|safe }}</p> 
+		</div>
+
+		<div class="col-md-4" id="participate">
+			<h2 class="fancy-header center">Accommodations</h2>
+			<p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
+			<!--<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>-->
+		</div>
+
+		<div class="col-md-4" id="participate">
+			<h2 class="fancy-header center">Events</h2>
+			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
+			{% ifappexists gather %}
+			<!--<a href="{% url 'gather_upcoming_events' location.slug %}"  class="btn btn-large btn-block btn-large-text">See Upcoming</a>-->
+			{% endifappexists %}
+		</div>
+
+
+</div>
+
+<div class="row" id="community-section">
+	<div class="col-md-12" id="profiles">
+		{% for person in location.people_in_coming_month %}
+		<div class="float-left homepage-user-wrapper">			
+			<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image|default:'data/avatars/default.jpg'}}" />
+			<div class="homepage-user-descr" id="user-{{person.id}}">
+				<p class="homepage-user-text">{{person.profile.bio|truncatewords:40 }}</p>
+				... <a class="homepage-user-link" href="{% url 'user_detail' person.username %}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+
+<div class="row" id="location">
+	<div id="location-map"></div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+
+	<script language="JavaScript">
+		$(document).ready(function() {
+
+			$("#events-button").click(function() {
+				$('#email-signup-modal').modal();
+			});
+
+			var map = L.map('location-map').setView([{{location.latitude}}, {{location.longitude}}], 15);
+			L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+				maxZoom: 18
+			}).addTo(map);
+			map.scrollWheelZoom.disable();
+			var RougeIcon = L.Icon.extend({
+				options: {
+					iconUrl: '{% static 'img/droplet.png'%}',
+					iconSize: [100,170],
+					popupAnchor: [220,60]
+				}
+			});
+			var rougeIcon = new RougeIcon();
+			var marker = L.marker([{{location.latitude}}, {{location.longitude}}], {icon: rougeIcon}).addTo(map);
+			var popup = L.popup({closeButton: false});
+			popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
+			marker.bindPopup(popup).openPopup();
+		});
+
+	</script>
+
+{% endblock %}
+
+
+</body>
+</html>
+

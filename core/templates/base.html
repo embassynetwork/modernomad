@@ -1,0 +1,33 @@
+{% extends 'root.html' %}
+{% load staticfiles %}
+
+<!-- block body -->
+{% block body %}
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">
+			<div class="row">
+				<img src="{{ MEDIA_URL }}{{ location.image }}" id="house-image">
+			</div>
+
+			{% include 'snippets/house_nav.html' %}
+
+			<hr>
+
+			{% block content %}
+			{% endblock %}
+		</div>
+	</div>
+{% endblock %}
+
+<!-- Le javascript -->
+<link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}" />    
+<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+<script src="{% static 'js/jquery-ui-1.9.1.custom.js' %}"></script>	
+<script src="{% static 'js/bootstrap.js' %}"></script>
+<script src="{% static 'js/leaflet.js' %}"></script>
+
+{% block extrajs %}
+{% endblock %}
+
+
+

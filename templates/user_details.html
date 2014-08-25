@@ -1,6 +1,8 @@
-{% extends "content-base.html" %}
-{% block content %}
+{% extends "root.html" %}
+{% load staticfiles %}
 
+{% block body %}
+<div class="container" id="-body">
 {% if messages %}
 <div class="messages">
     {% for message in messages %}
@@ -13,8 +15,15 @@
 {% endif %}
 
 
-<div class="col-md-12" id="user-detail-heading">
-	<h1>{{ u.first_name|title }} {{ u.last_name|title }}</h1>
+<div class="col-md-12" id="page-spacer">
+	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1> 
+	{% if u.profile.city != "" %}
+	<em> based in {{ u.profile.city }}</em>
+	{% else %}
+		{% ifequal u user %}
+			<span class="alert bg-danger">Important! Please <a href="{% url 'user_edit' user.username%}">update your home city</a></span>
+		{% endifequal %}
+	{% endif %}
 </div>
 
 <div class="col-md-3">
@@ -26,14 +35,14 @@
 
 	{% ifequal u user %}
 		<div id="edit-profile">
-			<a class="btn btn-dark btn-small" href="/people/{{user.username}}/edit/">Edit Profile</a>
+			<a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
 			{% if user.profile.customer_id %}
-			<form class="userprofile-card-form" method="post" action="/people/{{user.username}}/deletecard/">{% csrf_token %}
+			<form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
 				<input type="submit" class="btn btn-danger btn-small" value="Delete my saved credit card">
 			</form>
 			{% else %}
 			<div>
-				<form class="userprofile-card-form" action="/people/{{user.username}}/addcard/" method="POST" id="payform">
+				<form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
 					{% csrf_token %}
 					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 						value="Add Credit Card" >
@@ -71,22 +80,43 @@
 	{% endif %}
 	
 	{% ifequal u user %} 
+	<div class="row">
 		<h2>Email Notifications</h2>
 		<div class="row">
 			<div class="col-md-12">
-				<form class="" method="post" action="/events/emailpreferences/{{ u.username }}/">{% csrf_token %}
-					<div>Receive automatic reminders of events you are attending: <input class="form-control" type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}></div>
-					<div>Receive weekly emails about upcoming events: <input class="form-control" type="checkbox" name="weekly_updates" id="weekly_updates" {% if u.event_notifications.weekly %} checked {% endif %}></div>
+				<form class="" method="post" action="{% url 'gather_email_preferences' u.username %}">{% csrf_token %}
+					<div class="checkbox">
+						<label> Receive automatic reminders of events you are attending
+							<input type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}>
+						</label>
+					</div>
+					<hr>
+					<div>Receive weekly emails about upcoming events: 
+
+						{% for location in network_locations %}
+						<div class="checkbox">
+							<label>
+								<input 
+									type="checkbox" 
+									name="{{ location.slug }}" 
+									id="{{ location.slug }}" 
+									{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
+								> {{ location.name }}
+							</label>
+						</div>
+						{% endfor %}
+					<hr>
 					<input type="submit" value="Save" class="btn btn-default">
 				</form>
 			</div>
 		</div>
+	</div>
 	{% endifequal %}
-
 
 	<h2>Reservations</h2>
 	{% include "snippets/user_reservations.html" %}
 
+</div>
 </div>
 
 {% endblock %}
@@ -115,7 +145,7 @@
 					key: "{{ stripe_publishable_key }}",
 					name: "The Embassy Network",
 					panelLabel:"Save Card",
-					image: "/media/img/embassy-front-1-128x128.jpg",
+					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
 					token: token
 				});
 			} else {

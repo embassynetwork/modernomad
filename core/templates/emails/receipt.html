@@ -1,0 +1,76 @@
+<body>
+	<table cellspacing="0" cellpadding="0" border="0">
+	
+		<tr><td width="600px">
+
+		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>RECEIPT</strong></td></tr> 
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>The Embassy Network</strong></td></tr>
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>Be at Home Across the Globe</strong></td></tr>
+		</table>
+
+		<p margin="0 0 1.6em 0" style="font-size:120%;"> {{ user.first_name }} {{ user.last_name }} </p>
+		
+		
+		{% if reservation.payment_date %}
+			 <p margin="0 0 1.6em 0">Paid on: {{ reservation.payment_date }}</p>
+		{% else %}
+			<p style="width:100%; text-align:center;"><em>*** UNPAID ***</em></p>
+		{% endif %}
+		
+		<table border="0" cellspacing="0" cellpadding="0" border="0">
+			<tr><td width="150px"><strong>Location:</strong></td><td width="150px"> {{ location }}</td></tr>
+			<tr><td width="150px"><strong>Arrival Date:</strong></td><td width="150px"> {{ reservation.arrive }}</td></tr>
+			<tr><td width="150px"><strong>Departure Date:</strong></td><td width="150px"> {{ reservation.depart }}</td></tr>
+			<tr><td width="150px"><strong>Total Nights:</strong></td><td width="150px"> {{ reservation.total_nights }}</td></tr>
+		</table>
+
+		<tr><td width="600px"><p margin="1.6em 0 1.6em 0"><hr></p></td></tr>
+
+		<table border="0" cellspacing="0" cellpadding="0" border="0">
+		<tr>
+			<th style="text-align: left; width:200px">Description</th>
+			<th style="text-align: right;">Amount</th>
+		</tr>
+		{% for line_item in reservation.bill_line_items %}
+			{% if not line_item.paid_by_house %}
+				<tr>
+					<td align="left" width="200px">{{ line_item.description }}</td>
+					<td align="right" width="200px">${{ line_item.amount|floatformat:2 }}</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+		<tr>
+			<td colspan="2" align="right" width="600px">
+				<strong>Total Paid:</strong> ${{ reservation.total_paid|floatformat:2 }}
+			</td>
+		</table>
+
+		<!--
+		<p><strong>Payments</strong></p>
+		<table border="0" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<th>Date</th>
+				<th>Method</th>
+				<th>Transaction ID</th>
+				<th align="right">Amount</th>
+			</tr>
+			{% for payment in reservation.payments %}
+			<tr>
+				<td width="150px">{{ payment.payment_date }}</td>
+				<td width="150px">{{ payment.payment_method|title }}</td>
+				<td width="150px">{{ payment.transaction_id }}</td>
+				<td width="150px" align="right">${{ payment.paid_amount|floatformat:2 }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		-->
+		
+		<p style="margin: 1em 0 0 0;">
+			Have fun on your onward adventures!<br/>
+			The Embassy Team<br/>
+			support@embassynetwork.com
+		</p>
+
+	</td></tr>
+</body></table>

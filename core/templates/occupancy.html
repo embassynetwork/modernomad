@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h3>Occupancy report for {{report_date|date:"F, Y"}}</h3>
+
+<div id="by-month-nav">
+	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
+	<a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
+	<a href="{% url 'location_occupancy' location.slug %}"> Current </a> |
+	<a href="?month={{next_month.month}}&year={{next_month.year}}">Next</a>
+	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
+</div>
+<div class="row">
+	<h4> Breakdown by Person Nights</h4>
+	<p>Total person nights for {{report_date|date:"F"}}: {{total_nights}}</p>
+	<p>Total private nights: {{total_private_nights}}</p>
+	<p>Total shared nights: {{total_shared_nights}}</p>
+</div>
+<div class="row">
+	<h4> Breakdown by Payment Date</h4>
+	<p>Income received for this month: ${{ income_for_this_month }} <small>(includes payments with no payment date (rare))</small></p>
+	<p>Income applied from past months: ${{ income_from_past_months }}</p>
+	<p><strong class="badge">Total payments for this month: ${{ total_income_this_month }}</strong></p>
+	<br>
+	<p><em>Income received for past months: ${{ income_for_past_months }}</em></p>
+	<p><em>Income received for future months: ${{ income_for_future_months }}</em></p>
+	<p><strong class="badge">Total payments during this month: ${{ total_income_during_month }}</strong></p>
+</div>
+
+<div class="row">
+	<h4> Breakdown by Room</h4>
+	{% for room, amt in room_income.items %}
+		<p>{{ room|title }}: ${{ amt }} </p>
+	{% empty %}
+		None
+	{% endfor %}
+	<p><strong class="badge">Total by rooms: ${{ total_by_rooms }}</strong></p>
+</div>
+<div class="row">
+	<h4> Breakdown by Private and Shared</h4>
+	<p>Total estimated income from shared : ${{total_income_shared}}</p>
+	<p>Total estimated income from private: ${{total_income_private}}</p>
+	<p><strong class="badge">Total income estimated by occupancy: ${{total_income}}</span></strong></h5>
+</div>
+
+<div class="row">
+	<h4>Error Checking</h4>
+	<p>Paid rate discrepancy (paid rate - rate): $ {{ paid_rate_discrepancy }}</p>
+	<p>Payment discrepancies on reservations: {{ payment_discrepancies|default:"none" }}</p>
+	<p>Paid amount was missing from reservations: {{paid_amount_missing|default:"none"}}</p>
+</div>
+
+<div class="row">
+	<h4>Comped and Unpaid</h4>
+	<p>Total comped nights: {{total_comped_nights}}</p>
+	<p>Total unpaid: ${{unpaid_total}}</p>
+	<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
+</div>
+
+<hr>
+
+{% for item in data %}
+	<div>
+	<p>
+		{{ item.reservation.user.first_name|title }} {{ item.reservation.user.last_name|title }}, 
+		<a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 
+		{{ item.nights_this_month }} nights @ ${{item.rate}} ({{item.room}}) = 
+		{% if item.unpaid %}
+			<span class="red-text">
+			${{item.total}}
+			</span>
+		{% else %}
+			${{item.total}}
+		{% endif %}
+		{% if item.comp %}
+		(COMP)
+		{% endif %}
+	</p>
+	</div>
+{% endfor %}
+
+
+
+{% endblock %}

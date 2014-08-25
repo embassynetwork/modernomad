@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div id="spinner">
+    <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
+</div>	
+
+<!-- Email Modal -->
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3 class="modal-title" id="myModalLabel">Email {{ r.user.first_name }} </h3>
+			</div>
+			<div class="modal-body">
+				<!-- select menu specifies which email to show -->
+				<div>Select a template from the dropdown list to populate an email
+					with relevant default text. If you would like to add a new
+					template, visit the admin section of the site!</div>
+				<select name="select-email" id="which-email-select">
+					{% for template_name in email_templates_by_name %}
+					<option id="option{{forloop.counter}}" name="select-email" value="{{ template.name }}">
+					{{template_name}}
+					</option>
+					{% endfor %}
+				</select>
+
+				<!-- the selected email will be inserted here -->
+				<div id="selected-email">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row" id="reservation-nav">
+	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
+</div>
+
+{% if r.is_canceled %}
+<div class="greyed-out">
+{% endif %}
+
+<div class="row">
+<div class="col-md-3">
+	{% if r.user.profile.image %}
+	<div class="img-polaroid">
+		<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.user.profile.image|default:'data/avatars/default.jpg' }}" />
+	</div>
+	{% endif %}
+
+	<div class="res-actions-secondary"><h2>Manage</h2></div>
+
+		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+
+		<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
+			{% csrf_token %}
+			<input class="btn-default btn" type="submit" value="Recalculate Bill">
+		</form>
+
+		{% if r.is_paid %}
+		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
+			{% csrf_token %}
+			<input class="btn-default btn" type="submit" value="Send Receipt">
+		</form>
+		{% endif %}
+
+		{% if not r.is_canceled %}
+
+			{% if r.is_comped or not r.is_paid %}
+				<form id="res-action-toggle-comp" class="res-action" method="post" action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
+					{% csrf_token %}
+					<input type="submit" 
+					{% if r.is_comped %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
+					class="btn-default btn" id="toggle-comp-input">
+				</form>
+			{% endif %}
+
+			<form id="res-cancel" method="post" action="{% url 'reservation_cancel' location.slug r.id %}">
+				{% csrf_token %} 
+				<input type="hidden" name="redirect" value="{% url 'reservation_manage' location.slug r.id %}">
+				<input class="btn btn-default" type="submit" value="Cancel This Reservation">
+			</form>
+
+			<div id="dialog-confirm-cancel" title="Cancel this Reservation?">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					This reservation will be cancelled. Are you sure?
+				</p>
+			</div>
+
+		{% endif %} {% comment %} endif != 'canceled' {% endcomment %}
+</div>
+
+
+<div class="col-md-7">
+
+	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
+
+	{% include "snippets/res_status_area.html" %}
+
+	<div id="dialog-warn-full" title="Warning! The room you are trying to book is full.">
+		<p>
+			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+			You are trying to confirm a reservation for a room that is showing
+			as full. Make sure you know what you are dong. Are you sure?
+		</p>
+	</div>
+
+	<hr>
+
+	<!-- Reservation Details -->
+	<div class="bottom-pad-thirty">
+		<div id="reservation-details">
+			<h3>
+				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
+				<span class="pull-right">Value: ${{ r.total_value }}</span>
+			</h3>
+		</div>
+		<div id="reservation-details-form">
+			<h3>Edit Reservation Details</h3>
+			<div class="form-help-text" style="margin-bottom: 12px;">
+				Be very careful when you edit these details!
+			</div>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>User:</strong> <input name="username" value="{{ r.user.username }}"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change User"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Rate:</strong> <input name="rate" value="{{ r.rate }}" size="3"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Rate"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Arrive:</strong> <input name="arrive" value="{{ r.arrive|date:'Y-m-d' }}" size="8"/>
+					<strong>Depart:</strong> <input name="depart" value="{{ r.depart|date:'Y-m-d' }}" size="8"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Dates"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Room:</strong> <select name="room_id">
+							{% for room in location.guest_rooms %}
+								<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
+							{% endfor %}
+						</select>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Room"/>
+				</div>
+			</form>
+		</div>
+		<p>[ <a href="#" id="reservation-details-link" onclick="toggleEditDetails(); return false;"></a> ]</p>
+	</div>
+	
+	<!-- availability calendar -->
+	<table id="rooms-available-calendar">
+		<tr>
+		<th>Room</th>
+		{% for date in dates %}
+		<th>{{ date|date:"M d" }}</th>
+		{% endfor %}
+		</tr>
+
+		{% for room_obj, days_list in avail.items %}
+		<tr>
+			<td> 
+				{{room_obj.name}}
+			</td>
+
+			{% for the_day, beds_free in days_list %}
+				{% if room_obj == r.room and room_has_availability %}
+					<td class="bg-success">
+				{% elif room_obj == r.room and r.status == 'approved' and beds_free >= 0 %}
+					<td class="bg-success">
+				{% elif room_obj == r.room and r.status == 'confirmed' and beds_free >= 0 %}
+					<td class="bg-success">
+				{% elif room_obj == r.room and not room_has_availability %}
+					<td class="bg-danger">
+				{% else %}
+					<td>
+				{% endif %}
+
+				{% comment %} {% if r.status == 'pending' or r.status == 'canceled'%} {% endcomment %}
+
+				{% if r.status == 'approved' and r.room == room_obj %}
+					<div class="yes-available"><i class="text-danger glyphicon glyphicon-user"></i> {{beds_free}}</div>
+				{% elif r.status == 'confirmed' and r.room == room_obj %}
+					<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{beds_free}}</div>
+				{% else %}
+					{% if beds_free %}
+						<div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{beds_free}}</div>
+					{% else %}
+						<div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{beds_free}}</div>
+					{% endif %}
+				{% endif %}
+			</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+
+	<hr>
+
+	<div class="res-field field"><strong>Room:</strong> {{ r.room }}</div>
+	<div class="res-field field"><strong>Tags:</strong> {{ r.tags }}</div>
+	<div class="res-field field"><strong>Purpose:</strong> {{ r.purpose }}</div>
+	<div class="res-field field"><strong>Comments:</strong> {{ r.comments }}</div>
+
+	<hr>
+
+	{% if not r.is_comp and r.total_value != r.bill_amount %}
+		<div class="red-text">The Total Value and the Bill Amount don't match!  You may need to recalculate the bill!</div>
+	{% endif %}
+	
+	<!-- Bill Details -->
+	<h2>Bill Details</h2>	
+	<table id="bill-details">
+		<tr>
+			<th>Description</th>
+			<th class="money">Paid by<br>House</th>
+			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
+		</tr>
+		{% for item in r.bill_line_items %}
+			{% if item.paid_by_house %}
+				<tr>
+					<td class="paid-by-house">{{ item.description }}</td>
+					<td class="money paid-by-house">{{ item.amount|floatformat:2 }}</td>
+					<td class="money">0.00</td>
+				</tr>
+			{% else %}
+			<tr>
+				<td>{{ item.description }}</td>
+				<td></td>
+				<td class="money">{{ item.amount|floatformat:2 }}</td>
+			</tr>
+			{% endif %}
+		{% endfor %}
+		<tr class="total-row">
+			<td></td>
+			<td class="money paid-by-house">${{ r.house_fees|floatformat:2 }}</td>
+			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
+	</table>
+
+	<!-- Payment Details -->
+	{% if r.payments %}
+	<h2>Payments</h2>
+	<table id="payment-details">
+		{% for p in r.payments %}
+			<tr>
+				<td>{{ p.payment_method }}</td>
+				<td class="money">{{ p.paid_amount|floatformat:2 }}</td>
+			</tr>
+		{% endfor %}
+		<tr class="total-row">
+			<td></td>
+			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
+	</table>
+	{% endif %}
+	<hr>
+	
+	<h2>User Details</h2>
+	<div class="user-field field"><strong>How they heard about us:</strong> {{ r.user.profile.referral }}</div>
+	<div class="user-field field"><strong>About them:</strong> {{ r.user.profile.bio }}</div>
+	<div class="user-field field"><strong>Projects:</strong> {{ r.user.profile.projects }}</div>
+	<div class="user-field field"><strong>Sharing Interests</strong>: {{ r.user.profile.sharing }}</div>
+	<div class="user-field field"><strong>Discussion Interests</strong>: {{ r.user.profile.discussion }}</div>
+	{% with u=r.user %}
+		{% include "snippets/profile_links.html" %}
+
+		<h3>Other Reservations</h3>
+		{% include "snippets/user_reservations.html" %}
+
+	{% endwith %}
+
+</div> <!-- end res-info-main -->
+</div> 
+
+{% if r.is_canceled %}
+</div>
+{% endif %}
+
+
+{% endblock %}
+
+{% block extrajs %}
+<script language="JavaScript">
+
+function toggleEditDetails(){
+	if($('#reservation-details-form').is(':hidden')) {
+		console.log('reservation-details-form');
+		$('#reservation-details').hide();
+		$('#reservation-details-form').show();
+		$('#reservation-details-link').html('cancel edit');
+	} else {
+		console.log('reservation-details');
+		$('#reservation-details').show();
+		$('#reservation-details-form').hide();
+		$('#reservation-details-link').html('edit details');
+	}
+}
+toggleEditDetails();
+
+// don't have a default email selected when the modal pops up
+$("#which-email-select").prop("selectedIndex", -1);
+
+$("#which-email-select").change(function() {
+	// remove the previously active email form, if any
+	$("#selected-email").empty();
+
+	// insert form fields with selected email template
+	var email_selection = $("select option:selected").prop("id")
+	var template_id = email_selection.match(/\d+/)
+	$("#selected-email").html($email_templates[template_id]);
+});
+
+var action_el;
+function ajax_call(el) {
+	console.log('el is');
+	console.log(action_el);
+	res_action = $(el).attr('id')
+	request = $.ajax({ 
+		data: {
+			'reservation-action': res_action,
+			'csrfmiddlewaretoken': '{{ csrf_token }}'
+		}, 
+		type: $("#res-action-form").attr('method'), // GET or POST
+		url: $("#res-action-form").attr('action') // the url to hit
+	});
+	request.done(function(msg) { // on success..
+		console.log("Success!");
+		$("#res-status-area").html(msg);
+		if(res_action == "set-tentative" || res_action == 'res-charge-card') {
+			$("#emailModal").modal("show");
+		}
+		// also need to re-register the ajax calls on the new html divs one
+		// it is injected (or we won't be able to chain multiple calls
+		// together without refreshing the page). 
+		register_actions();
+	});
+	request.fail(function(msg) {
+		console.log("Error in reservation update:");
+		console.log(msg);
+	});
+}
+
+function register_actions() {
+	// comping a reservation reslts in a page reload so we can rely on the
+	// template language here. 
+	payment_status = $("#payment-status").html();
+	
+	if (payment_status == 'paid') {
+		$("#res-action-toggle-comp").remove();
+	}
+
+	$('.res-manage-action').click(function() { 
+		// action_el gets reset every time res-manage-action is clicked
+		action_el = this;
+		console.log(action_el);
+		console.log('{{r.status}}');
+		console.log('{{room_has_availability}}')
+		if ('{{r.status}}' == 'pending' && '{{ room_has_availability }}' == 'False') {
+			$("#dialog-warn-full").dialog("open");
+		} else {
+			ajax_call(action_el);
+		}
+		return false;
+	})
+
+};
+
+$(document).ready(function() {
+	register_actions();
+
+	$email_templates = {};
+	{% for f in email_forms %}
+		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
+			'<form id="res-action-email-user" method=POST action="{% url 'reservation_send_mail' location.slug r.id %}" >' +
+			"{% csrf_token %}" +
+			'<div class="form-group">' +
+			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
+			'<span class="email-form-label">From: </span> {{f.sender}} <br>' +
+			'<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
+			'{{f.body|escapejs}}' +
+			'{{f.footer|escapejs}}' +
+			'</div>' + 
+			'<submit value="Send">' +
+			'<div class="modal-footer">' +
+				'<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
+				'<button type="submit" class="btn btn-primary">Send Email</button>' +
+			'</div>' +
+			'</div>'
+	{% endfor %}
+	console.log($email_templates);
+
+	$('#res-action-charge').submit(function() { 
+		submitdata = {
+			'csrfmiddlewaretoken': '{{ csrf_token }}'
+		};
+		console.log(submitdata);
+		request = $.ajax({ 
+			data: submitdata, 
+			type: $("#res-action-charge").attr('method'), // GET or POST
+			url: $("#res-action-charge").attr('action'), // the file to call
+		});
+		request.done(function(msg) { // on success..
+			console.log("Success!");
+			$("#res-action-charge-submit").val("PAID");
+			$("#res-action-charge-submit").addClass("disabled");
+			$("#res-status-area").addClass("paid-bg-img");
+		});
+		request.fail(function(msg) {
+			console.log("Error in reservation update:");
+			console.log(msg);
+		});
+
+		return false;
+	});
+
+
+	// wire up the ajax-y spinning animated GIF when an ajax call is made. 	
+	$('#spinner').ajaxStart(function () {
+        $(this).fadeIn('fast');
+    }).ajaxStop(function () {
+        $(this).stop().fadeOut('fast');
+    });	
+});
+
+$("#dialog-confirm-cancel").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Cancel": function () {
+            $("#res-cancel").submit();
+         },
+        "Do Not Cancel": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-cancel").click(function (e) {
+    $("#dialog-confirm-cancel").dialog("open");
+    e.preventDefault();
+});
+
+
+$("#dialog-warn-full").dialog({
+	autoOpen: false,
+	modal: true,
+	width: 400,
+	buttons: {
+		"Yes, approve anyway": function () {
+			ajax_call(action_el);
+			$(this).dialog("close");
+		},
+		"Oops! Do not confirm": function () {
+			$(this).dialog("close");
+		}
+	}
+});
+
+</script>
+
+{% endblock %}

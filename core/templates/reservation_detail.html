@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+{% include "snippets/messages.html" %}
+
+<h3>Reservation for 
+	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+
+	{% ifequal reservation.user user %}
+		<span class="res-value text-success">Total: ${{ reservation.bill_amount|floatformat:2 }}</span>
+	{% endifequal %}
+</h3>
+<h4>
+	{{reservation.arrive }} - {{reservation.depart}}.   Tags: {{ reservation.tags }}
+</h4>
+
+<div class="res-statusline">
+{% ifequal reservation.user user %}
+	{% if reservation.is_pending %}
+		<div>
+			<span class="btn btn-large btn-default res-status-btn" disabled="disabled" type="button">Pending</span>
+		</div>
+
+	{% elif reservation.is_approved and reservation.user.profile.customer_id %}
+		<div>
+			<p><span class="text-danger">Action Required! Please pay for your reservation to confirm. 
+			Cancellation policy for the {{ reservation.room }} 
+			is {{reservation.room.cancellation_policy}}.</p>
+
+			<form action="{% url 'reservation_confirm' reservation.location.slug reservation.id %}" method="POST" id="payform">
+				{% csrf_token %}
+				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+					value="Submit payment." >
+			</form>
+		</div>
+		{% elif reservation.is_approved or reservation.is_confirmed and not reservation.is_paid %}
+			<div>
+				<p><span class="text-danger">Action Required! Please pay for your
+					reservation to confirm. Cancellation policy for the {{ reservation.room }} is
+					{{reservation.room.cancellation_policy}}.</p>
+
+				<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
+					{% csrf_token %}
+					<input type="hidden" value={{ reservation.id }} name="res-id">
+					<input type="hidden" value={{ location.slug }} name="loc-slug">
+					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+						value="Click to enter Payment Details" >
+					<div>
+						<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+							secure credit card processing with SSL encryption. Your card card
+						information is never stored on our servers.</small></em></p>
+					</div>
+				</form>
+			</div>
+		{% elif reservation.is_confirmed and reservation.is_paid %}
+			<div class="btn btn-lg btn-default res-status-btn" type="button">Reservation Confirmed</div>
+			<a class="btn btn-lg res-status-btn" type="button" href="{% url 'reservation_receipt' location.slug reservation.id %}">View Receipt</a>
+
+		{% elif reservation.is_canceled %}
+			<div class="btn btn-lg btn-danger res-status-btn" disabled="disabled" type="button">Reservation Canceled</div>
+
+	{% endif %}
+
+{% else %}
+	<div class="btn btn-lg btn-default res-status-btn" disabled="disabled" type="button">{{ reservation.status|title }} </div>	
+{% endifequal %}
+</div>
+
+
+<div class="res-detail"><b>Approximate arrival Time</b>: {{ reservation.arrival_time }}</div>
+<div class="res-detail"><b>Room:</b> {{ reservation.room.name|title }}</div>
+<div class="res-detail"><b>In town for?</b> {{ reservation.purpose }}</div>
+<div class="res-detail"><b>Additional Comments:</b> {{ reservation.comments }}</div>
+
+{% with guest=reservation.user%}
+	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
+	<div class="res-detail"><b>Current Projects:</b> {{ guest.profile.projects }}</div>
+	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.profile.sharing }}</div>
+	<div class="res-detail"><b>Discussion topics:</b> {{ guest.profile.discussion }}</div>
+	<div class="res-detail"><b>Referral: </b> {{ guest.profile.referral }}</div>
+{% endwith %}
+
+{% ifequal reservation.user user %}
+	<div class="res-modify-btn">
+	{% if past %}
+		<p class="notice">This reservation is in the past and cannot be modified</p>
+	{% elif paid %}
+		<p class="notice">This reservation has already been paid for. Please
+		contact {{ contact }} if you need to make changes. </p>
+	{% else %}
+		<div>
+			<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>
+			<form id="res-delete" class="btn-inline" method="post" action="{% url 'reservation_delete' location.slug reservation.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
+		</div> 
+
+		<div id="dialog-confirm" title="Delete this Reservation?">
+		    <p>
+		        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		        This reservation will be permanently deleted and cannot be recovered. Are you sure?
+		    </p>
+		</div>
+
+	{% endif %}
+	</div>
+{% endifequal %}
+
+
+<p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
+
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+
+<script>
+	$(document).ready(function() {
+		$customer_id = "{{ reservation.user.profile.customer_id }}";
+		$('#pay-button').click(function(event){
+			event.preventDefault();
+
+			// if the user has a saved card, go straight to the
+			// payment processing page. (note: this shouldn't happen for new
+			// reservations but might for legacy reservations)
+			$customer_id = "{{ reservation.user.profile.customer_id }}";
+			if ($customer_id && $customer_id != "None") {
+				$('#payform').submit();
+			}
+			else {
+				var token = function(res){
+					var $input = $('<input type=hidden name=stripeToken />').val(res.id);
+					$('#payform').append($input).submit();
+				};
+
+				StripeCheckout.open({
+					key: "{{ stripe_publishable_key }}",
+					amount: "{{ reservation.total_owed_in_cents }}",
+					name: "The Embassy Network",
+					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }} at ${{ reservation.rate }}/night.",
+					panelLabel:"Pay",
+					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
+					token: token
+				});
+			}
+		});
+	});
+</script>
+
+<script>
+$("#dialog-confirm").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Delete": function () {
+            $("#res-delete").submit();
+         },
+        "Cancel": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-delete").click(function (e) {
+    $("#dialog-confirm").dialog("open");
+    e.preventDefault();
+});
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div style="margin-bottom: 12px;">
+	<form method="POST">
+		<strong>Go To Reservation:</strong>
+		<input name="reservation_id" size="4" placeholder="ID"/>
+		<input type="submit" value="Go!"/>
+		{% csrf_token %}
+	</form>
+</div>
+
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#pending" data-toggle="tab">Pending</a></li>
+	<li><a href="#approved" data-toggle="tab">Approved</a></li>
+	<li><a href="#confirmed" data-toggle="tab">Confirmed</a></li>
+	<li><a href="#canceled" data-toggle="tab">Canceled</a></li>
+</ul>
+
+<div class="tab-content">
+	
+	<div class="tab-pane active" id="pending">
+		{% with reservations=pending %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div class="tab-pane" id="approved">
+		{% with reservations=approved %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div class="tab-pane" id="confirmed">
+		{% with reservations=confirmed %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div class="tab-pane" id="canceled">
+		{% with reservations=canceled %}
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div id="reservation-manage-detail"> </div>
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="{% static 'js/jquery.dataTables.js' %}"></script>
+<link href="{% static 'css/jquery.dataTables.css' %}" rel="stylesheet">
+<script>
+
+jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+    "currency-pre": function ( a ) {
+        a = (a==="-") ? 0 : a.replace( /[^\d\-\.]/g, "" );
+        return parseFloat( a );
+    },
+ 
+    "currency-asc": function ( a, b ) {
+        return a - b;
+    },
+ 
+    "currency-desc": function ( a, b ) {
+        return b - a;
+    }
+} );
+
+$(document).ready(function() {
+	$('.reservation-list').dataTable({
+	"iDisplayLength": 50,
+	"aLengthMenu": [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "All"]],
+	"aoColumns": [
+                { "sType": "html" },
+                { "sType": "html" },
+                { "sType": "string" },
+                { "sType": "date" },
+                { "sType": "date" },
+                { "sType": "string" },
+                { "sType": "string" },
+                { "sType": "numeric" },
+                { "sType": "currency" },
+                { "sType": "currency" },
+                { "sType": "string" }
+            ]
+	});
+} );
+</script>
+{% endblock %}

@@ -2,7 +2,12 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from core.models import UserProfile, Reservation, Reconcile, Room, EmailTemplate
+from core.models import *
+from gather.models import EventAdminGroup
+from core.emails import *
+
+# TODO - Needs to be locked down based on location.
+# http://reinout.vanrees.org/weblog/2011/09/30/django-admin-filtering.html
 
 class EmailTemplateAdmin(admin.ModelAdmin):
 	model = EmailTemplate
@@ -11,57 +16,114 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 		obj.creator = request.user 
 		obj.save() 
 
-class RoomAdmin(admin.ModelAdmin):
+class EventAdminGroupInline(admin.TabularInline):
+	model = EventAdminGroup
+	filter_horizontal = ['users',]
+
+class RoomAdminInline(admin.TabularInline):
 	model = Room
-	list_display = ('name', 'default_rate', 'primary_use')
-	list_filter = ('primary_use',)
+	extra = 0
 
-class ReconcileInline(admin.TabularInline):
-	model = Reconcile
+class LocationAdmin(admin.ModelAdmin):
+	def send_admin_daily_update(self, request, queryset):
+		for res in queryset:
+			admin_daily_update(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
 
-def reconcile_status(obj):
-	return obj.reconcile.status
+	def send_guest_daily_update(self, request, queryset):
+		for res in queryset:
+			guest_daily_update(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
+		self.message_user(request, msg)
 
-def rate(obj):
-	rate = obj.reconcile.get_rate()
-	return "$%d" % rate
+	model=Location
+	save_as = True
+	list_display=('name', 'address')
+	list_filter=('name',)
+	filter_horizontal = ['residents', 'house_admins']
+	actions= ['send_admin_daily_update', 'send_guest_daily_update']
 
-def automatic_invoice(obj):
-	return obj.reconcile.automatic_invoice
+	inlines = [RoomAdminInline]
+	if 'gather' in settings.INSTALLED_APPS:
+		 inlines.append(EventAdminGroupInline)
 
-def value(obj):
-	value = obj.reconcile.get_rate()*obj.total_nights()
-	return "$%d" % value
+class PaymentAdmin(admin.ModelAdmin):
+	def user(self):
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+	user.allow_tags = True
 
-def user_profile(obj):
-	return '''<a href="/people/%s">%s %s</a> (%s)''' % (obj.user.username, obj.user.first_name, obj.user.last_name, obj.user.username)
-user_profile.allow_tags = True
+	def reservation(self):
+		return '''<a href="/locations/%s/reservation/%s/">%s''' % (self.reservation.location.slug, self.reservation.id, self.reservation)
+	reservation.allow_tags = True
 
-def paid_status(obj):
-	return obj.reconcile.html_color_status()
-# allow_tags tells django not to escape the html returned by the
-# html_color_status function.
-paid_status.allow_tags = True
+	model=Payment
+	list_display=('payment_date', user,  reservation, 'payment_method', 'paid_amount')
+	list_filter = ('payment_method',)
+	ordering = ['-payment_date',]
+
+class PaymentInline(admin.TabularInline):
+	model = Payment
+	extra = 0
+
+class BillLineItemAdmin(admin.ModelAdmin):
+	def user(self):
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+	user.allow_tags = True
+
+	def location(self):
+		return self.reservation.location
+
+	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
+	list_filter = ('fee', 'paid_by_house', 'reservation__location')
+
+class BillLineItemInline(admin.TabularInline):
+	model = BillLineItem
+	fields = ('fee', 'description', 'amount', 'paid_by_house')
+	readonly_fields = ('fee',)
+	extra = 0
+
+def gen_message(queryset, noun, pl_noun, suffix):
+	if len(queryset) == 1:
+		prefix = "1 %s was" % noun
+	else:
+		prefix = "%d %s were" % (len(queryset), pl_noun)
+	msg = prefix + " " + suffix + "."
+	return msg
 
 class ReservationAdmin(admin.ModelAdmin):
-	def send_invoice(self, request, queryset):
-		for item in queryset:
-			item.reconcile.send_invoice()
-		if len(queryset) == 1:
-			prefix = "1 invoice was"
-		else:
-			prefix = "%d invoices were" % len(queryset)
-		msg = prefix + " sent"
-		self.message_user(request, msg)
+	def rate(self):
+		if self.rate == None:
+			return None
+		return "$%d" % self.rate
+
+	def value(self):
+		return "$%d" % self.total_value()
+
+	def bill(self):
+		return "$%d" % self.bill_amount()
+
+	def fees(self):
+		return "$%d" % self.non_house_fees()
+
+	def to_house(self):
+		return "$%d" % self.to_house()
+		
+	def paid(self):
+		return "$%d" % self.total_paid()
+
+	def user_profile(self):
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
+	user_profile.allow_tags = True
 
 	def send_receipt(self, request, queryset):
 		success_list = []
 		failure_list = []
-		for item in queryset:
-			if item.reconcile.send_receipt():
-				success_list.append(str(item.id))
+		for res in queryset:
+			if send_receipt(res):
+				success_list.append(str(res.id))
 			else:
-				failure_list.append(str(item.id))
+				failure_list.append(str(res.id))
 		msg = ""
 		if len(success_list) > 0:
 			msg += "Receipts sent for reservation(s) %s. " % ",".join(success_list)
@@ -69,88 +131,97 @@ class ReservationAdmin(admin.ModelAdmin):
 			msg += "Receipt sending failed for reservation(s) %s. (Make sure all payment information has been entered in the reservation details and that the status of the reservation is either unpaid or paid.)" % ",".join(failure_list)
 		self.message_user(request, msg)
 
-	def reconcile_as_paid(self, request, queryset):
-		for item in queryset:
-			rec = item.reconcile
-			rec.status = Reconcile.PAID
-			rec.save()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " marked as paid."
+	def send_invoice(self, request, queryset):
+		for res in queryset:
+			send_invoice(res)
+	 	msg = gen_message(queryset, "invoice", "invoices", "sent")
 		self.message_user(request, msg)
 
-	def reconcile_as_unpaid(self, request, queryset):
-		for item in queryset:
-			rec = item.reconcile
-			rec.status = Reconcile.UNPAID
-			rec.save()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " marked as unpaid."
+	def send_new_reservation_notify(self, request, queryset):
+		for res in queryset:
+			new_reservation_notify(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
 		self.message_user(request, msg)
 
-	def reconcile_as_comp(self, request, queryset):
-		for item in queryset:
-			rec = item.reconcile
-			rec.status = Reconcile.COMP
-			rec.save()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " marked as comp."
+	def send_updated_reservation_notify(self, request, queryset):
+		for res in queryset:
+			updated_reservation_notify(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
 		self.message_user(request, msg)
 
-	def reconcile_as_invalid(self, request, queryset):
-		for item in queryset:
-			rec = item.reconcile
-			rec.status = Reconcile.INVALID
-			rec.save()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " marked as invalid."
+	def send_guest_welcome(self, request, queryset):
+		for res in queryset:
+			guest_welcome(res)
+	 	msg = gen_message(queryset, "email", "emails", "sent")
 		self.message_user(request, msg)
 
-	def reconcile_as_invoiced(self, request, queryset):
-		for item in queryset:
-			rec = item.reconcile
-			rec.status = Reconcile.INVOICED
-			rec.save()
-		if len(queryset) == 1:
-			prefix = "1 reservation was"
-		else:
-			prefix = "%d reservations were" % len(queryset)
-		msg = prefix + " marked as invoiced."
+	def mark_as_comp(self, request, queryset):
+		for res in queryset:
+			res.comp()
+	 	msg = gen_message(queryset, "reservation", "reservations", "marked as comp")
 		self.message_user(request, msg)
 
+	def revert_to_pending(self, request, queryset):
+		for res in queryset:
+			res.pending()
+		msg = gen_message(queryset, "reservation", "reservations", "reverted to pending")
+		self.message_user(request, msg)
+
+	def approve(self, request, queryset):
+		for res in queryset:
+			res.approve()
+		msg = gen_message(queryset, "reservation", "reservations", "approved")
+		self.message_user(request, msg)
+
+	def confirm(self, request, queryset):
+		for res in queryset:
+			res.confirm()
+		msg = gen_message(queryset, "reservation", "reservations", "confirmed")
+		self.message_user(request, msg)
+
+	def cancel(self, request, queryset):
+		for res in queryset:
+			res.cancel()
+		msg = gen_message(queryset, "reservation", "reservations", "canceled")
+		self.message_user(request, msg)
+
+	def reset_rate(self, request, queryset):
+		for res in queryset:
+			res.reset_rate()
+		msg = gen_message(queryset, "reservation", "reservations", "set to default rate")
+		self.message_user(request, msg)
+
+	def recalculate_bill(self, request, queryset):
+		for res in queryset:
+			res.generate_bill()
+		msg = gen_message(queryset, "bill", "bills", "recalculated")
+		self.message_user(request, msg)
 
 	model = Reservation
-	list_filter = ('status','hosted', 'reconcile__status')
-	list_display = ('__unicode__', user_profile, 'status', 'arrive', 'depart', 'room', 'hosted', 'total_nights', rate, value, paid_status )
-	list_editable = ('status',)
-	inlines = [ReconcileInline]
-	ordering = ['depart',]
-	actions= ['send_invoice', 'send_receipt', 'reconcile_as_paid', 'reconcile_as_unpaid', 'reconcile_as_comp', 'reconcile_as_invalid', 'reconcile_as_invoiced']
+	list_filter = ('status', 'location')
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
+	#list_editable = ('status',) # Depricated in favor of drop down actions
+	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
+	inlines = [BillLineItemInline, PaymentInline]
+	ordering = ['-arrive', 'id']
+	actions= ['send_guest_welcome', 'send_new_reservation_notify', 'send_updated_reservation_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
 	save_as = True
 	
 class UserProfileInline(admin.StackedInline):
-    model = UserProfile
+	model = UserProfile
  
 class UserProfileAdmin(UserAdmin):
-    inlines = [UserProfileInline]
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
-
+	inlines = [UserProfileInline]
+	list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
 
 admin.site.register(Reservation, ReservationAdmin)
-#admin.site.register(Reconcile, ReconcileAdmin)
-admin.site.register(Room, RoomAdmin)
+admin.site.register(Location, LocationAdmin)
+admin.site.register(Payment, PaymentAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(BillLineItem, BillLineItemAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
+
+admin.site.register(Fee)
+admin.site.register(LocationFee)
