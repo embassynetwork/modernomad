@@ -50,6 +50,16 @@
 		<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
 	</tr>
 {% endfor %}
+<tr class="total-row">
+	<td colspan="2"></td>
+	<td colspan="3">{{ totals.count }} Payments</td>
+	<td class="money">${{ totals.house_fees|floatformat:2 }}</td>
+	<td class="money">${{ totals.to_house|floatformat:2 }}</td>
+	<td class="money">${{ totals.non_house_fees|floatformat:2 }}</td>
+	<td class="money">${{ totals.bill_amount|floatformat:2 }}</td>
+	<td></td>
+	<td class="money">${{ totals.paid_amount|floatformat:2 }}</td>
+</tr>
 </tbody>
 </table>
 {% endblock %}

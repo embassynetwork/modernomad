@@ -1007,7 +1007,17 @@ def payments(request, location_slug, year, month):
 	day_next_month = this_month + timedelta(days=35)
 	end = date(year=day_next_month.year, month=day_next_month.month, day=1)
 	payments = Payment.objects.filter(reservation__location=location, payment_date__gt=start, payment_date__lt=end).order_by('payment_date').reverse()
-	return render(request, "payments.html", {'payments': payments, 'location': location, 'this_month':this_month, 'previous_date':start, 'next_date':end })
+	
+	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'bill_amount':0, 'paid_amount':0}
+	for p in payments:
+		totals['count'] = totals['count'] + 1
+		totals['house_fees'] = totals['house_fees'] + p.reservation.house_fees()
+		totals['to_house'] = totals['to_house'] + p.reservation.to_house()
+		totals['non_house_fees'] = totals['non_house_fees'] + p.reservation.non_house_fees()
+		totals['bill_amount'] = totals['bill_amount'] + p.reservation.bill_amount()
+		totals['paid_amount'] = totals['paid_amount'] + p.paid_amount
+
+	return render(request, "payments.html", {'payments': payments, 'totals':totals, 'location': location, 'this_month':this_month, 'previous_date':start, 'next_date':end })
 
 # ******************************************************
 #           registration callbacks and views
