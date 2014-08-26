@@ -941,13 +941,14 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 	if action == "Refund":
 		payment_id = request.POST.get("payment_id")
 		payment = get_object_or_404(Payment, id=payment_id)
+		payment_gateway.issue_refund(payment)
 	elif action == "Add":
-		payment_method = request.POST.get("payment_method")
-		paid_amount = request.POST.get("paid_amount")
+		payment_method = request.POST.get("payment_method").strip().title()
+		paid_amount = request.POST.get("paid_amount").strip()
 		Payment.objects.create(reservation=reservation,
 			payment_method = payment_method,
 			paid_amount = paid_amount,
-			transaction_id = "manually entered"
+			transaction_id = "Manual"
 		)
 
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
