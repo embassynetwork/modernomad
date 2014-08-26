@@ -16,6 +16,12 @@
 	{{reservation.arrive }} - {{reservation.depart}}.   Tags: {{ reservation.tags }}
 </h4>
 
+{% if user in location.house_admins.all %}
+	<div style="margin: 12px;">
+		<a class="btn-inline btn btn-info pull-right" href="{% url 'reservation_manage' location.slug reservation.id %}">Manage Reservation</a>
+	</div>
+{% endif %}
+
 <div class="res-statusline">
 {% ifequal reservation.user user %}
 	{% if reservation.is_pending %}
@@ -105,7 +111,6 @@
 	{% endif %}
 	</div>
 {% endifequal %}
-
 
 <p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
 
