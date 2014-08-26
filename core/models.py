@@ -573,7 +573,7 @@ class Reservation(models.Model):
 		self.set_rate(0)
 
 	def is_paid(self):
-		return self.total_owed() == 0
+		return self.total_owed() <= 0
 
 	def is_comped(self):
 		return self.rate == 0
