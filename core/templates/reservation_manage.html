@@ -92,6 +92,13 @@
 				</p>
 			</div>
 
+			<div id="dialog-confirm-refund" title="Refund this Reservation?">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					This payment will be refunded. Are you sure?
+				</p>
+			</div>
+			
 		{% endif %} {% comment %} endif != 'canceled' {% endcomment %}
 </div>
 
@@ -214,7 +221,7 @@
 
 	<hr>
 
-	{% if not r.is_comp and r.total_value != r.bill_amount %}
+	{% if not r.is_comp and not r.is_canceled and r.total_value != r.bill_amount %}
 		<div class="red-text">The Total Value and the Bill Amount don't match!  You may need to recalculate the bill!</div>
 	{% endif %}
 	
@@ -230,14 +237,14 @@
 			{% if item.paid_by_house %}
 				<tr>
 					<td class="paid-by-house">{{ item.description }}</td>
-					<td class="money paid-by-house">{{ item.amount|floatformat:2 }}</td>
-					<td class="money">0.00</td>
+					<td class="money paid-by-house">${{ item.amount|floatformat:2 }}</td>
+					<td class="money">$0.00</td>
 				</tr>
 			{% else %}
 			<tr>
 				<td>{{ item.description }}</td>
 				<td></td>
-				<td class="money">{{ item.amount|floatformat:2 }}</td>
+				<td class="money">${{ item.amount|floatformat:2 }}</td>
 			</tr>
 			{% endif %}
 		{% endfor %}
@@ -258,13 +265,19 @@
 			<th></th>
 		</tr>
 		{% for p in r.payments %}
-			<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
+			<form class="res-refund" id="res-refund-{{payment_id}}" 
+				method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">
+				{% csrf_token %}
 				<input name="payment_id" type="hidden" value="{{p.id}}">
 			<tr>
 				<td>{{ p.transaction_id }}
 				<td>{{ p.payment_method }}</td>
-				<td class="money">{{ p.paid_amount|floatformat:2 }}</td>
-				<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Refund"></a>
+				<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
+				<td>
+					{% if p.paid_amount > 0 %}
+					<input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Refund" onclick="return confirm('Are you sure?');">
+					{% endif %}
+				</a>
 			</tr>
 			</form>
 		{% endfor %}
@@ -468,6 +481,25 @@ $("#dialog-confirm-cancel").dialog({
 
 $("#res-cancel").click(function (e) {
     $("#dialog-confirm-cancel").dialog("open");
+    e.preventDefault();
+});
+
+$("#dialog-confirm-refund").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Refund": function () {
+            $("#res-refund").submit();
+         },
+        "Do Not Refund": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$(".res-refund").click(function (e) {
+	console.log(".res_refund.click")
+    $("#dialog-confirm-refund").dialog("open");
     e.preventDefault();
 });
 
