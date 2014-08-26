@@ -8,9 +8,9 @@
 <h3>Reservation for 
 	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
 
-	{% ifequal reservation.user user %}
+	{% if reservation.user == user or user in location.house_admins.all %}
 		<span class="res-value text-success">Total: ${{ reservation.bill_amount|floatformat:2 }}</span>
-	{% endifequal %}
+	{% endif %}
 </h3>
 <h4>
 	{{reservation.arrive }} - {{reservation.depart}}.   Tags: {{ reservation.tags }}
