@@ -931,6 +931,28 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required
+def ReservationManagePayment(request, location_slug, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
+	reservation = get_object_or_404(Reservation, id=reservation_id)
+	
+	action = request.POST.get("action")
+	if action == "Refund":
+		payment_id = request.POST.get("payment_id")
+		payment = get_object_or_404(Payment, id=payment_id)
+	elif action == "Add":
+		payment_method = request.POST.get("payment_method")
+		paid_amount = request.POST.get("paid_amount")
+		Payment.objects.create(reservation=reservation,
+			payment_method = payment_method,
+			paid_amount = paid_amount,
+			transaction_id = "manually entered"
+		)
+
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
+
+@house_admin_required
 def ReservationSendReceipt(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')

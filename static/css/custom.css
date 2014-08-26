@@ -1353,10 +1353,14 @@ table tr.row-even td { background: #eee; }
 }
 
 #bill-details, #payment-details {
+	border-spacing: 12px;
 	margin-left:3em; 
 	width:80%
 }
 
+#bill-details, #payment-details td {
+	padding: 6px;	
+}
 .paid-by-house {
 	color:red;
 }
