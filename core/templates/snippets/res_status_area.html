@@ -52,11 +52,10 @@
 						<a href="#" class="res-manage-action res-manage-btn" id="refund-card" onclick="return confirm('Are you sure?');">refund their card</a>?-->
 					</p>
 				{% else %}
-					The reservation is confirmed and the user has valid payment
-					details, but their card has not been charged. 
-					<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-					Charge the user's card.</a>. (A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
-					 
+					<p>The reservation is confirmed, although unpaid.</p>
+					<p><a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
+					Charge the user's card ${{r.total_owed}}</a>.</p>
+					<p>(A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)</p>
 				{% endif %}
 			{% else %}
 				This user is confirmed but has not entered payment info. You can always remind them 

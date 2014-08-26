@@ -17,7 +17,7 @@ from core.decorators import house_admin_required
 from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee
 from core.tasks import guest_welcome
-from core import payments
+from core import payment_gateway
 import uuid, base64, os
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
@@ -565,7 +565,7 @@ def UserAddCard(request, username):
 			try:
 				# charges card, saves payment details and emails a receipt to
 				# the user
-				payments.charge_card(reservation)
+				payment_gateway.charge_card(reservation)
 				send_receipt(reservation)
 				reservation.confirm()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -667,7 +667,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
 	else:
 		try:
-			payments.charge_card(reservation)
+			payment_gateway.charge_card(reservation)
 			reservation.confirm()
 			send_receipt(reservation)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
@@ -852,17 +852,17 @@ def ReservationManageAction(request, location_slug, reservation_id):
 			reservation.comp()
 		elif reservation_action == 'refund-card':
 			try:
-				res_payments = reservation.payments()
-				if res_payments.count() == 0:
+				payments = reservation.payments()
+				if payments.count() == 0:
 					Reservation.ResActionError("No payments to refund!")
-				if res_payments.count() > 1:
+				if payments.count() > 1:
 					Reservation.ResActionError("Multiple payments found!")
-				payments.issue_refund(res_payments[0])
+				payment_gateway.issue_refund(payments[0])
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)
 		elif reservation_action == 'res-charge-card':
 			try:
-				payments.charge_card(reservation)
+				payment_gateway.charge_card(reservation)
 				reservation.confirm()
 				send_receipt(reservation)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days

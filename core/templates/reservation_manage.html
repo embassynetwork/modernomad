@@ -251,14 +251,20 @@
 	{% if r.payments %}
 	<h2>Payments</h2>
 	<table id="payment-details">
+		<tr>
+			<th>Method</th>
+			<th>Transaction ID</th>
+			<th class="money">Amount</th>
+		</tr>
 		{% for p in r.payments %}
 			<tr>
 				<td>{{ p.payment_method }}</td>
+				<td>{{ p.transaction_id }}
 				<td class="money">{{ p.paid_amount|floatformat:2 }}</td>
 			</tr>
 		{% endfor %}
 		<tr class="total-row">
-			<td></td>
+			<td colspan="2"></td>
 			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
 	</table>
 	{% endif %}
