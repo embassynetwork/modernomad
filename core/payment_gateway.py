@@ -56,8 +56,8 @@ def stripe_charge_card(reservation):
 	# Store the charge details in a Payment object
 	return Payment.objects.create(reservation=reservation,
 		payment_service = "Stripe",
-		payment_method = "Credit Card",
-		paid_amount = (amt_owed),
+		payment_method = charge.card.brand,
+		paid_amount = amt_owed,
 		transaction_id = charge.id
 	)
 
