@@ -17,6 +17,7 @@ from core.decorators import house_admin_required
 from django.db.models import Q
 from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee
 from core.tasks import guest_welcome
+from core import payments
 import uuid, base64, os
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
@@ -564,7 +565,7 @@ def UserAddCard(request, username):
 			try:
 				# charges card, saves payment details and emails a receipt to
 				# the user
-				reservation.charge_card()
+				payments.charge_card(reservation)
 				send_receipt(reservation)
 				reservation.confirm()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -666,7 +667,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
 	else:
 		try:
-			reservation.charge_card()
+			payments.charge_card(reservation)
 			reservation.confirm()
 			send_receipt(reservation)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
@@ -851,12 +852,17 @@ def ReservationManageAction(request, location_slug, reservation_id):
 			reservation.comp()
 		elif reservation_action == 'refund-card':
 			try:
-				reservation.issue_refund()
+				res_payments = reservation.payments()
+				if res_payments.count() == 0:
+					Reservation.ResActionError("No payments to refund!")
+				if res_payments.count() > 1:
+					Reservation.ResActionError("Multiple payments found!")
+				payments.issue_refund(res_payments[0])
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)
 		elif reservation_action == 'res-charge-card':
 			try:
-				reservation.charge_card()
+				payments.charge_card(reservation)
 				reservation.confirm()
 				send_receipt(reservation)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -874,20 +880,6 @@ def ReservationManageAction(request, location_slug, reservation_id):
 	except Reservation.ResActionError, e:
 		messages.add_message(request, messages.INFO, "Error: %s" % e)
 		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
-
-# This doesn't seem to be used anywhere --JLS
-#@house_admin_required
-#def ReservationChargeCard(request, location_slug, reservation_id):
-#	if not request.method == 'POST':
-#		return HttpResponseRedirect('/404')
-#	#location = get_location(location_slug)
-#	reservation = Reservation.objects.get(id=reservation_id)
-#	try:
-#		reservation.charge_card()
-#		send_receipt(reservation)
-#		return HttpResponse()
-#	except stripe.CardError, e:
-#		return HttpResponse(status=500)
 
 @house_admin_required
 def ReservationManageEdit(request, location_slug, reservation_id):

@@ -537,39 +537,6 @@ class Reservation(models.Model):
 	def to_house(self):
 		return self.total_value() - self.house_fees()
 
-	def charge_card(self):
-		logger.debug("charge_card")
-		
-		# stripe will raise a stripe.CardError if the charge fails. this
-		# function purposefully does not handle that error so the calling
-		# function can decide what to do.
-		domain = 'https://' + Site.objects.get_current().domain
-		descr = "%s %s from %s - %s. Details: %s." % (self.user.first_name,
-				self.user.last_name, str(self.arrive),
-				str(self.depart), domain + self.get_absolute_url())
-
-		amt_owed = self.total_owed()
-		amt_owed_cents = int(amt_owed * 100)
-		stripe.api_key = settings.STRIPE_SECRET_KEY
-		charge = stripe.Charge.create(
-				amount=amt_owed_cents,
-				currency="usd",
-				customer = self.user.profile.customer_id,
-				description=descr
-				)
-
-		# Store the charge details in a Payment object
-		Payment.objects.create(reservation=self,
-			payment_service = "Stripe",
-			paid_amount = (amt_owed),
-			transaction_id = charge.id
-		)
-
-	def issue_refund(self):
-		# TODO - Call the Stripe calls that issue the refund
-		logger.debug("issue_refund")	
-		pass
-
 	def set_rate(self, rate):
 		if rate == None:
 			rate = 0
