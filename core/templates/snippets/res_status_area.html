@@ -24,8 +24,8 @@
 		{% if r.is_pending %}
 			{% if r.user.profile.customer_id %}
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-				Charge the user's card and notify them via email
-				</a> to confirm this reservation. (A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
+				Charge the user's card ${{r.total_owed}} and notify them via email
+				</a> to confirm this reservation. (A receipt will be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
 			{% else %}
 			You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
 				tentatively confirm this reservation</a> and prompt the user to confirm with payment.
