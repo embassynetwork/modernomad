@@ -580,7 +580,7 @@ def UserAddCard(request, username):
 			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 			return HttpResponseRedirect("/people/%s" % username)
 	except stripe.CardError, e:
-		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
+		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s.' % (e))
 		if reservation_id:
 			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 		else:
@@ -677,7 +677,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 				guest_welcome(reservation)
 			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
 		except stripe.CardError, e:
-			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: <em>%s</em>. Please try again.' % (e))
+			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s.' % (e))
 
 	return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 
