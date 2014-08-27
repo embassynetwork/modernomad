@@ -74,10 +74,10 @@ def stripe_issue_refund(payment):
 	
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	charge = stripe.Charge.retrieve(payment.transaction_id)
-	refund = charge.refunds.create()
+	refund = charge.refund()
 
 	# Store the charge details in a Payment object
-	return Payment.objects.create(reservation=reservation,
+	return Payment.objects.create(reservation=payment.reservation,
 		payment_service = "Stripe",
 		payment_method = "Refund",
 		paid_amount = -1 * payment.paid_amount,
