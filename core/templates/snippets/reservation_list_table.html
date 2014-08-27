@@ -31,7 +31,9 @@
 					<td>${{r.rate}}</td>
 					<td>${{r.total_value}}</td>
 					<td>
-						{% if r.is_paid %}
+						{% if r.is_comped %}
+							<span class="text-danger glyphicon glyphicon-heart"></span>
+						{% elif r.is_paid %}
 							<span class="text-success glyphicon glyphicon-ok"></span>
 						{% else %}
 							<span class="text-danger glyphicon glyphicon-remove"></span>
