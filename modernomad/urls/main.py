@@ -3,6 +3,7 @@ from django.contrib import admin
 from modernomad.urls import user
 from modernomad import settings
 from django.views.generic import RedirectView
+from django.http import HttpResponse, HttpResponseRedirect
 
 admin.autodiscover()
 
@@ -20,15 +21,14 @@ urlpatterns = patterns('',
 	url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', 'gather.views.email_preferences', name='gather_email_preferences'),
 
 	# various other useful things
-	url(r'^ico/favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
+	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
+	url(r'^robots\.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: ", mimetype="text/plain")),
 )
 
 # media url hackery. 
 media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
-
 urlpatterns += patterns('',
-	(r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
-	 { 'document_root': settings.MEDIA_ROOT, 'show_indexes':True }),
+	(r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT, 'show_indexes':True }),
 )
 
 
