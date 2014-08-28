@@ -17,7 +17,6 @@
 </div>
 
 <div class="row">
-
 		<div class="col-md-4" id="participate">
 			<h2 class="fancy-header center">Announcements</h2>
 			<p class="easy-reading">{{ location.announcement|safe }}</p> 
@@ -26,18 +25,16 @@
 		<div class="col-md-4" id="participate">
 			<h2 class="fancy-header center">Accommodations</h2>
 			<p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
-			<!--<a href="{% url 'location_stay' location.slug %}" id="stay-button" class="btn btn-large btn-block btn-large-text">Make a Reservation</a>-->
+			<h2 class="center"><a href="{% url 'location_stay' location.slug %}">Stay with us!</a></h2>
 		</div>
 
 		<div class="col-md-4" id="participate">
 			<h2 class="fancy-header center">Events</h2>
 			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
 			{% ifappexists gather %}
-			<!--<a href="{% url 'gather_upcoming_events' location.slug %}"  class="btn btn-large btn-block btn-large-text">See Upcoming</a>-->
+			<h2 class="center"><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming Events</a></h2>
 			{% endifappexists %}
 		</div>
-
-
 </div>
 
 <div class="row" id="community-section">
