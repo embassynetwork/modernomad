@@ -29,6 +29,7 @@ weekday_number_to_name = {
 
 def mailgun_send(mailgun_data, mailgun_files=None):
 	logger.debug("Mailgun send: %s" % mailgun_data)
+	logger.debug("Mailgun files: %s" % mailgun_files)
 	if settings.DEBUG:
 		if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
 			# We will see this message in the mailgun logs but nothing will actually be delivered
