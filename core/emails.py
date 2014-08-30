@@ -27,7 +27,7 @@ weekday_number_to_name = {
 	6: "Sunday"
 }
 
-def mailgun_send(mailgun_data):
+def mailgun_send(mailgun_data, mailgun_files=None):
 	logger.debug("Mailgun send: %s" % mailgun_data)
 	if settings.DEBUG:
 		if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
@@ -36,7 +36,8 @@ def mailgun_send(mailgun_data):
 			mailgun_data["o:testmode"] = "yes"
 	resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
 		auth=("api", settings.MAILGUN_API_KEY),
-		data=mailgun_data
+		data=mailgun_data, 
+		files=mailgun_files
 	)
 	logger.debug("Mailgun response: %s" % resp.text)
 	return HttpResponse(status=200)
@@ -504,6 +505,12 @@ def residents(request, location_slug):
 	if sender in bcc_list:
 		bcc_list.remove(sender)
 	
+	# pass through attachments
+	attachments = []
+	for key in request.FILES:
+		file_obj = request.FILES[key]
+		attachments.append(("attachment-%d" % key, file_obj))
+
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
 	if subject.find(location.email_subject_prefix) < 0:
@@ -516,6 +523,7 @@ def residents(request, location_slug):
 	html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s residents email list *~*~*~* '''% location.name
 	body_plain = body_plain + text_footer
 	body_html = body_html + html_footer
+
 
 	# send the message 
 	list_address = "residents@%s.%s" % (location.slug, settings.LIST_DOMAIN)
@@ -534,5 +542,5 @@ def residents(request, location_slug):
 		# to be common these days 
 		"h:Reply-To": list_address,
 	}
-	return mailgun_send(mailgun_data)
+	return mailgun_send(mailgun_data, attachments)
 
