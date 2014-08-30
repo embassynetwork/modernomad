@@ -12,6 +12,7 @@ per_location_patterns = [
 	url(r'^today/$', 'core.views.today', name='location_today'),
 	url(r'^email/current$', 'core.emails.current', name='location_email_current'),
 	url(r'^email/stay$', 'core.emails.stay', name='location_email_stay'),
+	url(r'^email/residents$', 'core.emails.residents', name='location_email_residents'),
 
 	url(r'^events/', include('gather.urls')),
 
