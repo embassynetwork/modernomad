@@ -509,7 +509,7 @@ def residents(request, location_slug):
 	attachments = []
 	for key in request.FILES:
 		file_obj = request.FILES[key]
-		attachments.append(("attachment-%d" % key, file_obj))
+		attachments.append(("attachment-%s" % key, file_obj))
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
