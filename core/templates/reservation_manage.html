@@ -196,7 +196,7 @@
 				{% comment %} {% if r.status == 'pending' or r.status == 'canceled'%} {% endcomment %}
 
 				{% if r.status == 'approved' and r.room == room_obj %}
-					<div class="yes-available"><i class="text-danger glyphicon glyphicon-user"></i> {{beds_free}}</div>
+					<div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{beds_free}}</div>
 				{% elif r.status == 'confirmed' and r.room == room_obj %}
 					<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{beds_free}}</div>
 				{% else %}

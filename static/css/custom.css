@@ -1577,3 +1577,6 @@ p.lead strong {
 	padding-right: 200px;
 }
 
+.text-caution {
+	color: rgb(202, 188, 27);
+}
