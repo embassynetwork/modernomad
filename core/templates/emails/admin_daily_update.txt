@@ -32,7 +32,7 @@ Heads up! The following reservations are approved and show an arrival date of to
 {% endif %}
 
 {% if pending_now or approved_now %}
-The following reservations are pending awaiting action:
+The following reservations are awaiting action:
 	{% for r in pending_now %}
 		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room }} ({{r.status}})
 		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
