@@ -36,17 +36,15 @@ class GuestCalendar(HTMLCalendar):
 				for reservation in self.reservations[day]:
 					if reservation.room.shared:
 						num_shared += 1
-						room_type = "S"
 					else:
 						num_private += 1
-						room_type = "P"
 
 					body.append('<li id="res%d-cal-item">' %reservation.id)
 					if reservation.is_approved():
 						body.append('<a href="#reservation%d" class="greyed-out">' % reservation.id)
 					else:
 						body.append('<a href="#reservation%d">' % reservation.id)
-					body.append(esc("%s (%s)" % (reservation.user.first_name.title(), room_type)))
+					body.append(esc("%s (%s)" % (reservation.user.first_name.title(), reservation.room.name)))
 					body.append('</a>')
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					
