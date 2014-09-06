@@ -188,7 +188,7 @@ class EmailTemplateForm(forms.Form):
 
 		# add in the extra fields
 		self.fields['sender'].initial = location.from_email()
-		self.fields['recipient'].initial = reservation.user.email
+		self.fields['recipient'].initial = "%s, %s" % (reservation.user.email, location.from_email())
 		self.fields['footer'].initial = forms.CharField(
 				widget=forms.Textarea(attrs={'readonly':'readonly'})
 			)
