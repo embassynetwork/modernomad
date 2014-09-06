@@ -12,7 +12,7 @@
 
 	<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 		<tr>
-			<td width="300px" style="font-size:140%;"><p margin="0 0 1.6em 0">{{ first_name }} {{ last_name }} <br> {{ room_name }}  <br> {{ arrive }} to {{ depart }}</p></td> 
+			<td width="300px" style="font-size:140%;"><p margin="0 0 1.6em 0">{{ first_name }} {{ last_name }} <br> {{ room_name|safe }}  <br> {{ arrive }} to {{ depart }}</p></td> 
 			<td width="300px" align="center"><p margin="0 0 1.6em 0"><img src="{{ user_image }}" style="border: solid 1px #AAAAAA; padding: 7px"></p></td>
 		</tr>
 	</table>
