@@ -521,10 +521,11 @@ def residents(request, location_slug):
 
 	# add in footer
 	text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s residents email list *~*~*~* '''% location.name
-	html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s residents email list *~*~*~* '''% location.name
 	body_plain = body_plain + text_footer
-	body_html = body_html + html_footer
 
+	if body_html:
+		html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s residents email list *~*~*~* '''% location.name
+		body_html = body_html + html_footer
 
 	# send the message 
 	list_address = "residents@%s.%s" % (location.slug, settings.LIST_DOMAIN)
