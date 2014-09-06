@@ -188,6 +188,10 @@ def guest_daily_update(location):
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 	events_today = published_events_today_local(location=location)
 
+	if not arriving_today and not departing_today and not events_today:
+		logger.debug("Nothing happening today at %s, skipping daily email" % location.name)
+		return
+
 	plaintext = get_template('emails/guest_daily_update.txt')
 	c = Context({
 		'today': today,
@@ -219,9 +223,16 @@ def admin_daily_update(location):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	today = timezone.localtime(timezone.now())
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	maybe_arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='approved')
+	pending_now = Reservation.objects.filter(location=location).filter(status='pending')
+	approved_now = Reservation.objects.filter(location=location).filter(status='approved')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 	events_today = published_events_today_local(location=location)
 	pending_or_feedback = events_pending(location=location)
+
+	if not arriving_today and not departing_today and not events_today and not maybe_arriving_today and not pending_now and not approved_now:
+		logger.debug("Nothing happening today at %s, skipping daily email" % location.name)
+		return
 	
 	plaintext = get_template('emails/admin_daily_update.txt')
 	c = Context({
@@ -229,6 +240,9 @@ def admin_daily_update(location):
 		'domain': Site.objects.get_current().domain,
 		'location': location,
 		'arriving' : arriving_today,
+		'maybe_arriving' : maybe_arriving_today,
+		'pending_now' : pending_now,
+		'approved_now' : approved_now,
 		'departing' : departing_today,
 		'events_today': events_today,
 		'events_pending': pending_or_feedback['pending'],
