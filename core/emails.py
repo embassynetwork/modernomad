@@ -3,13 +3,14 @@ from django.core import urlresolvers
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.template import Context
+from django.template import Template, Context
 from django.contrib.sites.models import Site
 from models import get_location, Reservation
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+
 import json
 import requests
 import datetime
@@ -156,6 +157,9 @@ def guest_welcome(reservation):
 	''' Send guest a welcome email'''
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
+	
+	#tmpl = Template(reservation.location.welcome_email)
+
 	plaintext = get_template('emails/pre_arrival_welcome.txt')
 	day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
 	c = Context({
@@ -380,6 +384,7 @@ def stay(request, location_slug):
 		# XXX TODO reject and bounce back to sender?
 		return HttpResponse(status=200)
 	logger.debug('stay@ for location: %s' % location)
+	logger.debug(request.POST)
 
 	# we think that message_headers is a list of strings
 	header_txt = request.POST.get('message-headers')
