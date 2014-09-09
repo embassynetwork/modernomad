@@ -628,6 +628,24 @@ class Payment(models.Model):
 	def __unicode__(self):
 		return "%s: %s - $%s" % (str(self.payment_date)[:16], self.reservation.user, self.paid_amount)
 
+	def to_house(self):
+		return self.paid_amount - self.non_house_fees() - self.house_fees()
+
+	def non_house_fees(self):
+		location_fees_not_paid_by_house = LocationFee.objects.filter(location=self.reservation.location, fee__paid_by_house=False)	
+		non_house_fee_on_payment = Decimal(0.0)
+		for fee in location_fees_not_paid_by_house:
+			non_house_fee_on_payment += self.paid_amount * Decimal(fee.fee.percentage)
+		return non_house_fee_on_payment
+
+	def house_fees(self):
+		location_fees_paid_by_house = LocationFee.objects.filter(location=self.reservation.location, fee__paid_by_house=True)	
+		house_fee_on_payment = Decimal(0.0)
+		for fee in location_fees_paid_by_house:
+			house_fee_on_payment += self.paid_amount * Decimal(fee.fee.percentage)
+		return house_fee_on_payment
+
+
 def profile_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
 	# rename file to random string

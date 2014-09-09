@@ -1017,22 +1017,19 @@ def payments_today(request, location_slug):
 @house_admin_required
 def payments(request, location_slug, year, month):
 	location = get_location(location_slug)
-	this_month = date(year=int(year), month=int(month), day=1)
-	start = this_month - timedelta(days=1)
-	day_next_month = this_month + timedelta(days=35)
-	end = date(year=day_next_month.year, month=day_next_month.month, day=1)
-	payments = Payment.objects.filter(reservation__location=location, payment_date__gt=start, payment_date__lt=end).order_by('payment_date').reverse()
-	
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	payments = Payment.objects.filter(reservation__location=location, payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
+
 	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'bill_amount':0, 'paid_amount':0}
 	for p in payments:
 		totals['count'] = totals['count'] + 1
-		totals['house_fees'] = totals['house_fees'] + p.reservation.house_fees()
-		totals['to_house'] = totals['to_house'] + p.reservation.to_house()
-		totals['non_house_fees'] = totals['non_house_fees'] + p.reservation.non_house_fees()
-		totals['bill_amount'] = totals['bill_amount'] + p.reservation.bill_amount()
+		totals['to_house'] = totals['to_house'] + p.to_house()
+		totals['non_house_fees'] = totals['non_house_fees'] + p.non_house_fees()
+		totals['house_fees'] = totals['house_fees'] + p.house_fees()
+		#totals['bill_amount'] = totals['bill_amount'] + p.reservation.bill_amount()
 		totals['paid_amount'] = totals['paid_amount'] + p.paid_amount
 
-	return render(request, "payments.html", {'payments': payments, 'totals':totals, 'location': location, 'this_month':this_month, 'previous_date':start, 'next_date':end })
+	return render(request, "payments.html", {'payments': payments, 'totals':totals, 'location': location, 'this_month':start, 'previous_date':prev_month, 'next_date':next_month })
 
 # ******************************************************
 #           registration callbacks and views

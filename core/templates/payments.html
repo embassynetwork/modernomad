@@ -22,14 +22,12 @@
 		<th>Res ID</th>
 		<th>Nights</th>
 		<th class="money">Rate</th>
-		<th class="money">House Fees</th>
-		<th class="money">To House</th>
-		<th class="money">Taxes</th>
-		<th class="money">Bill Amount</th>
+		<th class="money">Total Bill</th>
 		<th >Method</th>
-		<!--<th>Service</th>-->
-		<!--<th>Transaction</th>-->
 		<th class="money">Paid</th>
+		<th class="money">To House</th>
+		<th class="money">Fees on House</th>
+		<th class="money">Taxes</th>
 	</tr>
 </thead>
 <tbody>
@@ -40,25 +38,24 @@
 		<td><a href="{% url 'reservation_detail' p.reservation.location.slug p.reservation.id %}">{{ p.reservation.id }}</a></td>
 		<td>{{ p.reservation.total_nights }}</td>
 		<td class="money">${{ p.reservation.rate|floatformat:2 }}</td>
-		<td class="money">${{ p.reservation.house_fees|floatformat:2 }}</td>
-		<td class="money">${{ p.reservation.to_house|floatformat:2 }}</td>
-		<td class="money">${{ p.reservation.non_house_fees|floatformat:2 }}</td>
 		<td class="money">${{ p.reservation.bill_amount|floatformat:2 }}</td>
+		
 		<td>{{ p.payment_method }}</td>
-		<!--<td>{{ p.payment_service }}</td>-->
-		<!--<td>{{ p.transaction_id }}</td>-->
-		<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
+		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.paid_amount|floatformat:2 }}</td>
+		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.to_house|floatformat:2 }}</td>
+		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.house_fees|floatformat:2 }}</td>
+		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.non_house_fees|floatformat:2 }}</td>
 	</tr>
 {% endfor %}
 <tr class="total-row">
-	<td colspan="2"></td>
-	<td colspan="3">{{ totals.count }} Payments</td>
-	<td class="money">${{ totals.house_fees|floatformat:2 }}</td>
-	<td class="money">${{ totals.to_house|floatformat:2 }}</td>
-	<td class="money">${{ totals.non_house_fees|floatformat:2 }}</td>
-	<td class="money">${{ totals.bill_amount|floatformat:2 }}</td>
+	<td>{{ totals.count }} Payments</td>
+	<td colspan="6"></td>
+	<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ totals.paid_amount|floatformat:2 }}</td>
+	<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ totals.to_house|floatformat:2 }}</td>
+	<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ totals.house_fees|floatformat:2 }}</td>
+	<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ totals.non_house_fees|floatformat:2 }}</td>
 	<td></td>
-	<td class="money">${{ totals.paid_amount|floatformat:2 }}</td>
+	<td></td>
 </tr>
 </tbody>
 </table>
