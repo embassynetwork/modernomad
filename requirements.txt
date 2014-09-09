@@ -9,6 +9,7 @@ eventbrite>=0.45
 billiard>=3.3.0.18
 kombu>=3.0.21
 pytz>=2014.4
+psycopg2
 
 # Django Gather code
 git+https://git@github.com/opendoor/django-gather.git
