@@ -405,6 +405,11 @@ def stay(request, location_slug):
 		return HttpResponse(status=200)
 
 	recipient = request.POST.get('recipient')
+	try:
+		to = request.POST.get('To')
+		logger.debug('Got "To" field: %s' % to)
+	except:
+		pass
 	from_address = request.POST.get('from')
 	logger.debug('from: %s' % from_address)
 	sender = request.POST.get('sender')
