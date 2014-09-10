@@ -1,4 +1,4 @@
-Django==1.6
+Django==1.6.5
 django-registration>=1.0
 django-tastypie>=0.11.1
 South>=1.0
@@ -9,7 +9,9 @@ eventbrite>=0.45
 billiard>=3.3.0.18
 kombu>=3.0.21
 pytz>=2014.4
-psycopg2
+psycopg2==2.5.4
+lxml==3.4.0
+stripe
 
 # Django Gather code
 git+https://git@github.com/opendoor/django-gather.git
