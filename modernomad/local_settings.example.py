@@ -1,54 +1,137 @@
 # copy this file to local_settings.py. it should be exluded from the repo
-# (ie, ensure local_settings.py is in .gitignore)
+# (ensure local_settings.py is in .gitignore)
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'yourownprivatekeythatnooneelseknowsbutyou'
+SECRET_KEY = 'secret'
+
+ADMINS = (
+          ('Your Name', 'your@email.com'),
+          )
+
+ALLOWED_HOSTS=['domain.com']
+
+DATABASES = {
+    'default': {
+        'ENGINE':'django.db.backends.postgresql_psycopg2',
+        'USER':'postgres',
+        'NAME':'modernomadb',
+        'PASSWORD':'somepassword',
+}
+}
+
+MEDIA_ROOT = "../media"
+BACKUP_ROOT= "../backups/"
+BACKUP_COUNT = 30
 
 # use XS_SHARING_ALLOWED_ORIGINS = '*' for all domains
 XS_SHARING_ALLOWED_ORIGINS = "http://localhost:8989/"
 XS_SHARING_ALLOWED_METHODS = ['POST','GET', 'PUT', 'OPTIONS', 'DELETE']
 XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 
+# what mode are we running in? use this to trigger different settings.
+DEVELOPMENT = 0
+PRODUCTION = 1
+
+# default mode is dev. change to production as appropriate.
+MODE = DEVELOPMENT
+
+# how many days should people be allowed to make a reservation request for?
+MAX_RESERVATION_DAYS = 14
+
+# how many days ahead to send the welcome email to guests with relevan house
+# info.
+WELCOME_EMAIL_DAYS_AHEAD = 2
+
 # required for django-gather app
-#LOCATION_MODEL = 'gather.Location'
 LOCATION_MODEL = 'core.Location'
 
-# if using stripe, enter your stripe *secret* key here
-STRIPE_SECRET_KEY = "insert your key here"
-STRIPE_PUBLISHABLE_KEY = "insert your key here"
+# this should be a TEST or PRODUCTION key depending on whether this is a local
+# test/dev site or production!
+STRIPE_SECRET_KEY = "sk_XXXXX"
+STRIPE_PUBLISHABLE_KEY = "pk_XXXXX"
 
-MAILGUN_API_KEY = "your private key from mailgun"
-LIST_DOMAIN = "the mail domain used for sending and receiving via mailgun - eg. mail.housename.com"
-# If MAILGUN_DEBUG is present and False then you can stil send emails in DEBUG mode
-# Otherwise testmode=yes gets set and the mail will never be delivered.
-#MAILGUN_DEBUG=False
+MAILGUN_API_KEY = "key-XXXX"
 
-ALLOWED_HOSTS=['localhost', '127.0.0.1', ]
-TEMPLATE_DEBUG = True
-DEBUG=True
+LIST_DOMAIN = "somedomain.com"
+
+if MODE == DEVELOPMENT:
+	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+	DEBUG=True
+else:
+	EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+	EMAIL_USE_TLS = True
+	EMAIL_HOST = 'somehost'
+	EMAIL_PORT = 587
+	EMAIL_HOST_USER = 'some@email.com'
+	EMAIL_HOST_PASSWORD = 'password'
+	DEBUG=False
+
+TEMPLATE_DEBUG = DEBUG
 
 # fill in any local template directories. any templates with the same name WILL
 # OVERRIDE included templates. don't forget the trailing slash in the path, and
-# a comma at the end of the tuple item if there is only one path. 
+# a comma at the end of the tuple item if there is only one path.
 LOCAL_TEMPLATE_DIRS = (
-	# eg, "../local_templates/",
-)
-
-# this will be used as the subject line prefix for all emails sent from this app. 
-EMAIL_SUBJECT_PREFIX = "[Embassy Network] "
-DEFAULT_FROM_EMAIL = 'stay@embassynetwork.com'
-
-# Google analytics
-GOOGLE_ANALYTICS_PROPERTY_ID = 'UA-14845987-3'
-GOOGLE_ANALYTICS_DOMAIN = 'mydomain.com'
+                       # eg, "../local_templates/",
+                       )
 
 # celery configuration options
-# note!! you must add the broker and broker user to rabbitmq that corresponds
-# to these credentials. this is done by:
-# sudo rabbitmqctl add_user myusername mypassword
-# sudo rabbitmqctl add_vhost myvhost
-# sudo rabbitmqctl set_permissions -p myvhost myusername ".*" ".*" ".*"
-# and then you MUST restart rabbitmq:
-# sudo rabbitmqctl reset
-#BROKER_URL = 'amqp:myusername:mypassword@hostname/vhost'
+BROKER_URL = 'amqp://'
+CELERY_RESULT_BACKEND = 'amqp://'
 
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ENABLE_UTC = True
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+                },
+                'simple': {
+                    'format': '%(levelname)s %(message)s'
+                },
+                    },
+                'handlers': {
+                    'file': {
+                        'level': 'DEBUG',
+                        'class': 'logging.FileHandler',
+                        'filename': '/Users/jessykate/code/embassynetwork/logs/django.log',
+                        'formatter': 'verbose',
+                    },
+                    'mail_admins': {
+                        'level': 'ERROR',
+                        'class': 'django.utils.log.AdminEmailHandler',
+                        'include_html': True,
+                        'formatter': 'verbose',
+                }
+                },
+                'loggers': {
+                    'django': {
+                        'handlers': ['file'],
+                        'level': 'INFO',
+                        'propagate': True,
+                    },
+                    'django.request': {
+                        'handlers': ['file', 'mail_admins'],
+                        'level': 'INFO',
+                        'propagate': True,
+                    },
+                    'core': {
+                        'handlers': ['file'],
+                        'level': 'DEBUG',
+                    },
+                    'modernomad': {
+                        'handlers': ['file'],
+                        'level': 'DEBUG',
+                    },
+                    'gather': {
+                        'handlers': ['file'],
+                        'level': 'DEBUG',
+                    },
+                },
+}
