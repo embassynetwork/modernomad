@@ -35,13 +35,6 @@ PRODUCTION = 1
 # default mode is dev. change to production as appropriate.
 MODE = DEVELOPMENT
 
-# how many days should people be allowed to make a reservation request for?
-MAX_RESERVATION_DAYS = 14
-
-# how many days ahead to send the welcome email to guests with relevan house
-# info.
-WELCOME_EMAIL_DAYS_AHEAD = 2
-
 # required for django-gather app
 LOCATION_MODEL = 'core.Location'
 
@@ -51,8 +44,8 @@ STRIPE_SECRET_KEY = "sk_XXXXX"
 STRIPE_PUBLISHABLE_KEY = "pk_XXXXX"
 
 MAILGUN_API_KEY = "key-XXXX"
-
 LIST_DOMAIN = "somedomain.com"
+#MAILGUN_DEBUG=True
 
 if MODE == DEVELOPMENT:
 	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -67,6 +60,10 @@ else:
 	DEBUG=False
 
 TEMPLATE_DEBUG = DEBUG
+
+# Leave these blank and they won't be put on every page
+#GOOGLE_ANALYTICS_PROPERTY_ID = 'UA-14845987-3'
+#GOOGLE_ANALYTICS_DOMAIN = 'mydomain.com'
 
 # fill in any local template directories. any templates with the same name WILL
 # OVERRIDE included templates. don't forget the trailing slash in the path, and
