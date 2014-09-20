@@ -10,6 +10,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from core.models import Reservation
+from gather.models import Event
 
 import json
 import requests
@@ -158,9 +160,14 @@ def guest_welcome(reservation):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
 	
-	#tmpl = Template(reservation.location.welcome_email)
+	plaintext = Template(reservation.location.welcome_email)
 
-	plaintext = get_template('emails/pre_arrival_welcome.txt')
+	
+	intersecting_reservations = Reservation.objects.filter(arrive__gte=reservation.arrive).filter(depart__lte=reservation.depart)
+	residents = reservation.location.residents.all()
+	intersecting_events = Event.objects.filter(location=reservation.location).filter(start__gte=reservation.arrive).filter(end__lte=reservation.depart)
+	profiles = None
+
 	day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
 	c = Context({
 		'first_name': reservation.user.first_name,
@@ -171,8 +178,13 @@ def guest_welcome(reservation):
 		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(reservation.location.slug,)),
 		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
 		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id,)),
+		'intersecting_reservations': intersecting_reservations,
+		'intersecting_events': intersecting_events,
+		'residents': residents,
 	})
+
 	text_content = plaintext.render(c)
+	
 	mailgun_data={
 			"from": reservation.location.from_email(),
 			"to": [reservation.user.email,],
@@ -406,11 +418,7 @@ def stay(request, location_slug):
 		return HttpResponse(status=200)
 
 	recipient = request.POST.get('recipient')
-	try:
-		to = request.POST.get('To')
-		logger.debug('Got "To" field: %s' % to)
-	except:
-		pass
+	to = request.POST.get('To')
 	from_address = request.POST.get('from')
 	logger.debug('from: %s' % from_address)
 	sender = request.POST.get('sender')
