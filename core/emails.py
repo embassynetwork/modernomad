@@ -73,14 +73,16 @@ def get_templates(location, email_key):
 		try:
 			text_template = get_template("emails/%s.txt" % email_key)
 			html_template = get_template("emails/%s.html" % email_key)
-	
+		except TemplateDoesNotExist:
+			pass
+
 	return (text_template, html_template)
 
-def render_templates(context, email_key):
+def render_templates(context, location, email_key):
 	text_content = None
 	htm_content = None
 	
-	text_template, html_template = get_templates(email_key)
+	text_template, html_template = get_templates(location, email_key)
 
 	if text_template:
 		text_content = text_template.render(context)
@@ -95,20 +97,15 @@ def render_templates(context, email_key):
 
 def send_receipt(reservation):
 	location = reservation.location
-
-	plaintext = get_template('emails/receipt.txt')
-	htmltext = get_template('emails/receipt.html')
+	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
+	recipient = [reservation.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
 		'user': reservation.user, 
 		'location': reservation.location,
 		'reservation': reservation,
-		}) 
-
-	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))  
-	recipient = [reservation.user.email,]
-	text_content = plaintext.render(c)
-	html_content = htmltext.render(c)
+		})
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
 	return send_from_location_address(subject, text_content, html_content, recipient, location)
 
 def send_invoice(reservation):
