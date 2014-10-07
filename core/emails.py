@@ -3,9 +3,9 @@ from django.core import urlresolvers
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.template import Template, Context
+from django.template import Template, TemplateDoesNotExist, Context
 from django.contrib.sites.models import Site
-from models import get_location, Reservation
+from models import get_location, Reservation, LocationEmailTemplate
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
@@ -55,6 +55,37 @@ def send_from_location_address(subject, text_content, html_content, recipient, l
 	if html_content:
 		mailgun_data["html"] = html_content
 	return mailgun_send(mailgun_data)
+
+def get_templates(location, email_key):
+	text_template = None
+	html_template = None
+	
+	template_override = None
+	#template_override = LocationEmailTemplate.objects.filter(location=location, key=email_key)
+	if template_override:
+		if template.text_body:
+			text_template = Template(template_override.text_template)
+		if template.html_body:
+			html_template = Template(template_override.html_body)
+	else:
+		try:
+			text_template = get_template("emails/%s.txt" % email_key)
+			html_template = get_template("emails/%s.html" % email_key)
+	
+	return (text_template, html_template)
+
+def render_templates(context, email_key):
+	text_content = None
+	htm_content = None
+	
+	text_template, html_template = get_templates(email_key)
+
+	if text_template:
+		text_content = text_template.render(context)
+	if html_template:
+		html_content = html_template.render(context)
+	
+	return (text_content, html_content)
 
 ############################################
 #            RESERVATION EMAILS            #

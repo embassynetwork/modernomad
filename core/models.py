@@ -735,9 +735,9 @@ def size_images(sender, instance, **kwargs):
 			default_storage.delete(obj.image_thumb.path)
 
 class EmailTemplate(models.Model):
-	''' Templates for the typical emails sent by the system. The from-address
-	is usually set by DEFAULT_FROM_ADDRESS in settings, and the recipients are
-	determined by the action and reservation in question. '''
+	''' Templates for the typical emails sent by administrators of the system. 
+	The from-address is usually set by DEFAULT_FROM_ADDRESS in settings, 
+	and the recipients are determined by the action and reservation in question. '''
 
 	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
 	FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
@@ -751,6 +751,30 @@ class EmailTemplate(models.Model):
 	def __unicode__(self):
 		return self.name
 
+class LocationEmailTemplate(models.Model):
+	''' Location Template overrides for system generated emails '''
+	
+	ADMIN_DAILY = 'admin_daily_update'
+	GUEST_DAILY = 'guest_daily_update'
+	INVOICE = 'invoice'
+	RECEIPT = 'receipt'
+	NEW_RESERVATION = 'newreservation'
+	WELCOME = 'pre_arrival_welcome'
+
+	KEYS = (
+			(ADMIN_DAILY, 'Admin Daily Update'),
+			(GUEST_DAILY, 'Guest Daily Update'),
+			(INVOICE, 'Invoice'),
+			(RECEIPT, 'Receipt'),
+			(NEW_RESERVATION, 'New Reservation'),
+			(WELCOME, 'Pre-Arrival Welcome'),
+		)
+
+	location = models.ForeignKey(Location)
+	key = models.CharField(max_length=32, choices=KEYS)
+	text_body = models.TextField(verbose_name="The text body of the email")
+	html_body = models.TextField(verbose_name="The html body of the email")
+	
 class Fee(models.Model):
 	description = models.CharField(max_length=100, verbose_name="Fee Name")
 	percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
