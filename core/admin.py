@@ -16,6 +16,10 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 		obj.creator = request.user 
 		obj.save() 
 
+class LocationEmailTemplateAdmin(admin.ModelAdmin):
+	model = LocationEmailTemplate
+	list_display=('location', 'key')
+
 class EventAdminGroupInline(admin.TabularInline):
 	model = EventAdminGroup
 	filter_horizontal = ['users',]
@@ -218,6 +222,7 @@ admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
+admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)
 
 admin.site.unregister(User)

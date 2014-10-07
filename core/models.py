@@ -80,7 +80,6 @@ class Location(models.Model):
 	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
 	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
-	welcome_email = models.TextField(help_text = "Available variables: first_name, day_of_week, location, current_email, site_url, events_url, profile_url, reservation_url, intersecting_reservations, intersecting_events. Obect variables can be accessed using standard dot notation. Variables must be wrapped in double curly brackets: {{ ... }}, eg. {{ location.check_in }}")
 
 	def __unicode__(self):
 		return self.name
@@ -776,7 +775,7 @@ class LocationEmailTemplate(models.Model):
 	location = models.ForeignKey(Location)
 	key = models.CharField(max_length=32, choices=KEYS)
 	text_body = models.TextField(verbose_name="The text body of the email")
-	html_body = models.TextField(verbose_name="The html body of the email")
+	html_body = models.TextField(blank=True, null=True, verbose_name="The html body of the email")
 	
 class Fee(models.Model):
 	description = models.CharField(max_length=100, verbose_name="Fee Name")
