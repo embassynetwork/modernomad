@@ -54,6 +54,7 @@ class UserProfileForm(forms.ModelForm):
 
 		# image data is processed in the save method 
 		self.fields['image'].required = False
+		self.label_suffix = ''
 
 		# self.instance will always be an instance of UserProfile. if this
 		# is an existing object, then populate the initial values. 

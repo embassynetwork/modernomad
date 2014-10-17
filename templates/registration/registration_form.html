@@ -30,7 +30,7 @@ about, and possible connections around work, projects and ideas. It should only 
 
 <hr>
 
-<form class="cropping_image_container">
+<form class="cropping_image_container registration-form">
 {% if has_image %}
 	<p id="img-upload-instruction">Update your Profile image here (optional).</p>
 {% else %}
@@ -53,15 +53,14 @@ about, and possible connections around work, projects and ideas. It should only 
 </form>
 
 
-<form id="newprofileform" class="" enctype="multipart/form-data" method="post">{% csrf_token %}
+<form class="registration-form" id="newprofileform" class="" enctype="multipart/form-data" method="post">{% csrf_token %}
 	{% for field in form %}
 		<div class="form-group">
 			{% if field.name != "image" %}
 				{{ field.errors }}
 				{{ field.label_tag }}
-				<span class="form-help-text">{{ field.help_text}}</span>
+				<span class="form-help-text">{{ field.help_text }}</span>
 				<div class="form-field-body">
-				{% if field.field.required %} * {% endif %}
 				{{ field }}
 				</div>
 			{% else %}
@@ -70,7 +69,7 @@ about, and possible connections around work, projects and ideas. It should only 
 			{% endif %}
 		</div>
 	{% endfor %}
-  <input id="profilesubmit" type="submit" value="Submit" />
+  <input id="profilesubmit" class="btn btn-primary" type="submit" value="Submit" />
 </form>
 
 {% endblock %}
