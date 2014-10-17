@@ -88,6 +88,7 @@ MIDDLEWARE_CLASSES = (
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'modernomad.middleware.crossdomainxhr.CORSMiddleware',
+	'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 	# Uncomment the next line for simple clickjacking protection:
 	# 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -132,8 +133,8 @@ INSTALLED_APPS = (
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	'django.contrib.admin',
-	# Uncomment the next line to enable admin documentation:
-	# 'django.contrib.admindocs',
+	'django.contrib.flatpages',
+	'django.contrib.admindocs',
 )
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
