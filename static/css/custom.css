@@ -130,7 +130,7 @@ a:hover {
 }
 
 #house-image {
-	height:300px;
+	height:auto;
 	width:100%;
 	padding:0;
 }
@@ -685,8 +685,9 @@ div.ui-datepicker{
 }
 
 .form-help-text {
-	font-style: italic;
-	font-size: 90%;
+	color: #666;
+	font-size: .8em;
+    margin-left: .2em;
 }
 
 .float-right {
@@ -1579,4 +1580,11 @@ p.lead strong {
 
 .text-caution {
 	color: rgb(202, 188, 27);
+}
+
+/* Registration Form */
+.registration-form {
+    max-width: 70rem;
+    margin: 0 auto;
+    font-size: 1.2em;
 }
