@@ -16,3 +16,4 @@ build/
 backup/
 gather
 django.log
+.vagrant/
