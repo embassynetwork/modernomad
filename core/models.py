@@ -57,7 +57,6 @@ class Location(models.Model):
 	name = models.CharField(max_length=200)
 	slug = models.CharField(max_length=60, unique=True, help_text="Try to make this short and sweet. It will also be used to form several location-specific email addresses in the form of xxx@<your_slug>.mail.embassynetwork.com")
 	short_description = models.TextField()
-	about_page = models.TextField()
 	address = models.CharField(max_length=300)
 	latitude = models.FloatField()
 	longitude = models.FloatField()

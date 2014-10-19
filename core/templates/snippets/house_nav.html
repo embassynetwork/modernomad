@@ -32,7 +32,6 @@
 								</li>
 							{% endif %}
 						{% endfor %}
-						<li><a href="{% url 'location_about' location.slug %}">About</a></li>
 						{% if location.guest_rooms %}
 						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
 						{% ifappexists gather %}
