@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
+from django.contrib.flatpages.models import FlatPage
 
 # imports for signals
 import django.dispatch
@@ -152,6 +153,10 @@ class Location(models.Model):
 					people.append(u)
 
 		return people
+	
+	def get_menus(self):
+		return LocationMenu.objects.filter(location=self)
+
 
 class LocationNotUniqueException(Exception):
 	pass
@@ -801,3 +806,13 @@ class BillLineItem(models.Model):
 
 	def __unicode__(self):
 		return '%s: %s' % (self.reservation.location, self.description)
+
+class LocationMenu(models.Model):
+	location = models.ForeignKey(Location)
+	name = models.CharField(max_length=15, help_text="A short title for your menu")
+
+class LocationFlatPage(models.Model):
+	menu = models.ForeignKey(LocationMenu, related_name = "pages")
+	flatpage = models.OneToOneField(FlatPage)
+	
+

@@ -102,6 +102,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.core.context_processors.static",
 	"django.core.context_processors.tz",
 	"django.contrib.messages.context_processors.messages",
+	"core.context_processors.location.location_variables",
 	"core.context_processors.location.network_locations",
 	"core.context_processors.analytics.google_analytics",
 )

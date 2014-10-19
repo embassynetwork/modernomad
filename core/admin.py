@@ -218,6 +218,15 @@ class UserProfileAdmin(UserAdmin):
 	inlines = [UserProfileInline]
 	list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
 
+class LocationFlatPageInline(admin.StackedInline):
+	model = LocationFlatPage
+
+class LocationMenuAdmin(admin.ModelAdmin):
+	model = LocationMenu
+	inlines = [LocationFlatPageInline]
+	list_display = ('location', 'name')
+
+admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Payment, PaymentAdmin)
