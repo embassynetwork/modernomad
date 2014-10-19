@@ -809,10 +809,13 @@ class BillLineItem(models.Model):
 
 class LocationMenu(models.Model):
 	location = models.ForeignKey(Location)
-	name = models.CharField(max_length=15, help_text="A short title for your menu")
+	name = models.CharField(max_length=15, help_text="A short title for your menu. Note: If there is only one page in the menu, it will be used as a top level nav item, and the menu name will not be used.")
+
+	def page_count(self):
+		return len(self.pages.all())
 
 class LocationFlatPage(models.Model):
-	menu = models.ForeignKey(LocationMenu, related_name = "pages")
+	menu = models.ForeignKey(LocationMenu, related_name = "pages", help_text="Note: If there is only one page in the menu, it will be used as a top level nav item, and the menu name will not be used.")
 	flatpage = models.OneToOneField(FlatPage)
 	
 
