@@ -52,7 +52,11 @@ class UserProfileForm(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
 
-		# image data is processed in the save method 
+		# JKS I think because the image is being submitted as the value
+		# attribute of the image field and not a file upload, the form submit
+		# fails if this field is required. 
+		# JKS TODO presumably there is a btter way to do this, like by changing
+		# the field type of the form?
 		self.fields['image'].required = False
 		self.label_suffix = ''
 
@@ -67,7 +71,6 @@ class UserProfileForm(forms.ModelForm):
 
 			self.fields['password1'].required = False
 			self.fields['password2'].required = False
-
 
 	def clean_password2(self):
 		password1 = self.cleaned_data.get('password1')
