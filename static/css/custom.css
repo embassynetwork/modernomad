@@ -1404,6 +1404,27 @@ table tr.row-even td { background: #eee; }
 	padding: 30px;
 }
 
+/* FAQ
+------------------------- */
+
+.faq-wrapper {
+	line-height: 2em;
+}
+
+.faq-q {
+	list-style: none;
+	font-weight: bold;
+}
+
+.faq-a {
+	text-indent: 30px;
+	list-style-position: inside;
+}
+
+
+
+
+
 /* Featurettes
 ------------------------- */
 
