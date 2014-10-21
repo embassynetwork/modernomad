@@ -10,6 +10,7 @@ from django.template import RequestContext
 from registration import signals
 import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
+from core.forms import LocationSettingsForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -754,6 +755,14 @@ def PeopleDaterangeQuery(request, location_slug):
 	html = html.strip(", ")
 	html += "</div>"
 	return HttpResponse(html)
+
+
+@house_admin_required
+def LocationEditSettings(request, location_slug):
+	location = get_location(location_slug)
+	location_form = LocationSettingsForm(instance=location)
+	return render(request, 'location_edit_settings.html', {"location": location, 'location_form':location_form})
+
 
 # ******************************************************
 #           reservation management views

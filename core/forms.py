@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Location
 from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -123,6 +123,10 @@ class UserProfileForm(forms.ModelForm):
 		user.save()
 		return user
 
+class LocationSettingsForm(forms.ModelForm):     
+	class Meta:
+		model = Location
+		exclude = ['short_description', 'image', 'stay_page', 'front_page_stay', 'front_page_participate', 'announcement', 'house_admins', 'residents', ]
 
 class ReservationForm(forms.ModelForm):
 	class Meta:
