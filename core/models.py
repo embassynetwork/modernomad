@@ -80,6 +80,7 @@ class Location(models.Model):
 	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
 	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
+	public = models.BooleanField(default=False, verbose_name="Is this location open to the public?")
 
 	def __unicode__(self):
 		return self.name
