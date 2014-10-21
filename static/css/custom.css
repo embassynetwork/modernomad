@@ -1417,7 +1417,7 @@ table tr.row-even td { background: #eee; }
 }
 
 .faq-a {
-	text-indent: 30px;
+	margin-left: 20px;
 	list-style-position: inside;
 }
 
