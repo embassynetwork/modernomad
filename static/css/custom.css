@@ -579,7 +579,7 @@ html, body {
 	color: green;
 }
 
-#cropped-header {
+#cropping-area {
 	display: none;
 }
 
@@ -781,7 +781,7 @@ input#id_expiration_year {
 	margin-left: 15px;
 }
 
-ul.errorlist {
+ul.errorlist,u {
 	background-color: #f2dede;
 	list-style-type: none;
 	padding-left: 20px;
@@ -1587,4 +1587,11 @@ p.lead strong {
     max-width: 70rem;
     margin: 0 auto;
     font-size: 1.2em;
+}
+
+.error {
+	color: rgb(228, 73, 73);
+	font-size: 80%;
+	background-color: beige;
+	padding: 10px;
 }
