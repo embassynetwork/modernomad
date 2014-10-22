@@ -61,8 +61,12 @@ between locations for work and play.</p>
 	{% for field in form %}
 		<div class="form-group">
 			{% if field.name != "image" %}
-				{{ field.errors }}
-				{{ field.label_tag }}
+				{{ field.errors|safe }}
+				{% if field.field.required %}
+				<span class="text-danger"><sup><span class="small glyphicon glyphicon-asterisk"></span></sup>{{ field.label_tag }}</span>
+				{% else %}
+					{{ field.label_tag }}
+				{% endif %}
 				<span class="form-help-text">{{ field.help_text }}</span>
 				<div class="form-field-body">
 				{{ field }}
@@ -79,6 +83,54 @@ between locations for work and play.</p>
 
 {% block extrajs %}
 
+<!-- client side form validation -->
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script>
+		$.validator.addMethod("strictEmail", function(value, element) {
+			return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
+			}, "Please provide a valid email address."
+		);
+
+		$.validator.addMethod("listOfUrls", function(value, element) {
+			console.log("in listOfUrls");
+			console.log(value);
+			items = value.split(",");
+			console.log(items.length);
+			for (var i=0; i< items.length; i++) {
+				var val_to_test = $.trim(items[i]);
+				console.log("val to test");
+				console.log(val_to_test);
+				// new gTLDs can be up to 65 characters long :-O
+				var valid = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,64}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g.test(val_to_test);
+				if (val_to_test.length > 0 && !valid) {
+					console.log(valid)
+					return false;
+				}
+				// JKS second check to see if there's a space. not sure where
+				// the above regex IS allowing a space, but it is.  
+				if (/ +/.test(val_to_test)) {
+					return false;
+				}
+			}
+			console.log("valid")
+			return true;
+			}, "One of the entered URLs is incorrectly formatted."
+		);
+
+		$("#newprofileform").validate({
+			rules: {
+				email: {
+					required: true,
+					strictEmail: true
+				}, 
+				links: {
+					listOfUrls: true
+				}
+			}	
+		});
+</script>
+
+<!-- image cropping -->
 <script src="{% static 'js/jquery.Jcrop.min.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.Jcrop.min.css' %}" />
 
@@ -128,8 +180,9 @@ between locations for work and play.</p>
 
 				// JKS i don't understand the encoding scheme well enough
 				// to know why we need to strip out the beginning data
-				// prefix but apparently it is necessary. 
+				// prefix but it is necessary. 
 				var img_data = canvas.toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2];
+
 				$('#id_image').val(img_data);
 			}
 			}
@@ -141,8 +194,8 @@ between locations for work and play.</p>
 
 	$("#newprofileform").submit(function (e) {
 		if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
-			$("#img-upload-error").html('<div class="alert alert-danger"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
-			$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 20})
+			$("#img-upload-error").html('<div class="error"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
+			$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
 			return false;
 		}
 	})
