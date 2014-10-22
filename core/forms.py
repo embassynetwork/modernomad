@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Location
 from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -28,32 +28,42 @@ class UserProfileForm(forms.ModelForm):
 					  "@/./+/-/_ only."),
 		error_messages = {
 			'invalid': _("This value may contain only letters, numbers and "
-						 "@/./+/-/_ characters.")}, widget=forms.TextInput(attrs={'class':'form-control'}))
-	first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control'}))
-	last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control'}))
+						 "@/./+/-/_ characters.")}, 
+			widget=forms.TextInput(attrs={'class':'form-control', 'required': 'true'})
+	)
+	first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true'}))
+	last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true'}))
 
-	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control'}))
-	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password"))
-	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password (again)"))
+	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true'}))
+	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true'}), label=_("New Password"))
+	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true'}), label=_("New Password (again)"))
 
 	class Meta:
 		model = UserProfile
 		exclude = ['user', 'status', 'image_thumb', 'customer_id', ]
 		# fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
 		widgets = {
-			'bio': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
+			'bio': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
 			'links': forms.TextInput(attrs={'class':'form-control'}),
-			'projects': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
-			'sharing': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
-			'discussion': forms.Textarea(attrs={'class':'form-control', 'rows': '3'}),
-			'referral': forms.TextInput(attrs={'class':'form-control'}),
+			'projects': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
+			'sharing': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
+			'discussion': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
+			'referral': forms.TextInput(attrs={'class':'form-control', 'required': 'true'}),
+			'city': forms.TextInput(attrs={'class':'form-control', 'required': 'true'}),
 		}
 
 	def __init__(self, *args, **kwargs):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
 
-		# image data is processed in the save method 
+		# JKS I think because the image is being submitted as the value
+		# attribute of the image field and not a file upload, the form submit
+		# fails if this field is required. 
+		# JKS TODO presumably there is a btter way to do this, like by changing
+		# the field type of the form?
 		self.fields['image'].required = False
+		self.label_suffix = ''
+		self.fields['bio'].required = True
+
 
 		# self.instance will always be an instance of UserProfile. if this
 		# is an existing object, then populate the initial values. 
@@ -64,7 +74,9 @@ class UserProfileForm(forms.ModelForm):
 			self.fields['username'].initial = self.instance.user.username
 			self.fields['email'].initial = self.instance.user.email	
 
+			self.fields['password1'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password"))
 			self.fields['password1'].required = False
+			self.fields['password2'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password (again)"))
 			self.fields['password2'].required = False
 
 
@@ -122,6 +134,10 @@ class UserProfileForm(forms.ModelForm):
 		user.save()
 		return user
 
+class LocationSettingsForm(forms.ModelForm):     
+	class Meta:
+		model = Location
+		exclude = ['short_description', 'image', 'stay_page', 'front_page_stay', 'front_page_participate', 'announcement', 'house_admins', 'residents', ]
 
 class ReservationForm(forms.ModelForm):
 	class Meta:

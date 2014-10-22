@@ -4,7 +4,7 @@
 			<div class="col-md-12">
 				<nav class="navbar navbar-default" id="nav-location" role="navigation">
 				<div class="navbar-header">
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#house-navbar">
 						<span class="sr-only">Toggle navigation</span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
@@ -12,9 +12,26 @@
 					</button>
 					<a class="navbar-brand" href="{% url 'location_home' location.slug %}">{{ location.name }}</a>
 				</div>
-				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<div class="collapse navbar-collapse" id="house-navbar">
 					<ul class="nav navbar-nav">
-						<li><a href="{% url 'location_about' location.slug %}">About</a></li>
+						{% for menu in location.get_menus %}
+							{% if menu.page_count == 1 %}
+								{% for page in menu.pages.all %}
+									<li><a href="{{ page.flatpage.url }}">{{ page.flatpage.title }}</a></li>
+								{% endfor %}
+							{% else %}
+								<li class="dropdown">
+								<a class="dropdown-toggle" id="drop{{ forloop.counter }}" role="button" data-toggle="dropdown" href="#">
+									{{ menu.name }} <b class="caret"></b>
+								</a>
+								<ul id="menu0" class="dropdown-menu" role="menu" aria-labelledby="drop{{ forloop.counter }}">
+									{% for page in menu.pages.all %}
+									<li><a href="{{ page.flatpage.url }}">{{ page.flatpage.title }}</a></li>
+									{% endfor %}
+								</ul>
+								</li>
+							{% endif %}
+						{% endfor %}
 						{% if location.guest_rooms %}
 						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
 						{% ifappexists gather %}

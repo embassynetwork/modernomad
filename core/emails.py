@@ -3,13 +3,15 @@ from django.core import urlresolvers
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.template import Template, Context
+from django.template import Template, TemplateDoesNotExist, Context
 from django.contrib.sites.models import Site
-from models import get_location, Reservation
+from models import get_location, Reservation, LocationEmailTemplate
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from core.models import Reservation
+from gather.models import Event
 
 import json
 import requests
@@ -56,65 +58,93 @@ def send_from_location_address(subject, text_content, html_content, recipient, l
 		mailgun_data["html"] = html_content
 	return mailgun_send(mailgun_data)
 
+def get_templates(location, email_key):
+	text_template = None
+	html_template = None
+
+	template_override = LocationEmailTemplate.objects.filter(location=location, key=email_key)
+	if template_override and template_override.count() > 0:
+		t = template_override[0]
+		if t.text_body:
+			text_template = Template(t.text_body)
+		if t.html_body:
+			html_template = Template(t.html_body)
+	else:
+		try:
+			text_template = get_template("emails/%s.txt" % email_key)
+			html_template = get_template("emails/%s.html" % email_key)
+		except TemplateDoesNotExist:
+			pass
+
+	return (text_template, html_template)
+
+def render_templates(context, location, email_key):
+	text_content = None
+	html_content = None
+	
+	text_template, html_template = get_templates(location, email_key)
+
+	if text_template:
+		text_content = text_template.render(context)
+	if html_template:
+		html_content = html_template.render(context)
+	
+	return (text_content, html_content)
+
 ############################################
 #            RESERVATION EMAILS            #
 ############################################
 
 def send_receipt(reservation):
 	location = reservation.location
-
-	plaintext = get_template('emails/receipt.txt')
-	htmltext = get_template('emails/receipt.html')
+	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
+	recipient = [reservation.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
 		'user': reservation.user, 
-		'location': reservation.location,
+		'location': location,
 		'reservation': reservation,
-		}) 
-
-	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))  
-	recipient = [reservation.user.email,]
-	text_content = plaintext.render(c)
-	html_content = htmltext.render(c)
+		})
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
 	return send_from_location_address(subject, text_content, html_content, recipient, location)
 
 def send_invoice(reservation):
 	''' trigger a reminder email to the guest about payment.''' 
 	if reservation.is_comped():
-		# XXX TODO eventually send an email for COMPs too, but a
-		# different once, with thanks/asking for feedback.
-		return
+		return send_comp_invoice(reservation)
 
-	plaintext = get_template('emails/invoice.txt')
-	htmltext = get_template('emails/invoice.html')
+	location = reservation.location
+	subject = "[%s] Thanks for Staying with us!" % location.email_subject_prefix 
+	recipient = [reservation.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
 		'user': reservation.user, 
-		'location': reservation.location,
+		'location': location,
 		'reservation': reservation,
 		'domain': Site.objects.get_current().domain,
 		}) 
-	subject = "[%s] Thanks for Staying with us!" % reservation.location.email_subject_prefix 
-	recipient = [reservation.user.email,]
-	text_content = plaintext.render(c)
-	html_content = htmltext.render(c)
-	return send_from_location_address(subject, text_content, html_content, recipient, reservation.location)
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.INVOICE)
+	return send_from_location_address(subject, text_content, html_content, recipient, location)
+
+def send_comp_invoice(reservation):
+	# XXX TODO eventually send an email for COMPs too, but a
+	# different once, with thanks/asking for feedback.
+	return
 
 def new_reservation_notify(reservation):
 	house_admins = reservation.location.house_admins.all()
 	domain = Site.objects.get_current().domain
+	location = reservation.location
 
-	subject = "[%s] Reservation Request, %s %s, %s - %s" % (reservation.location.email_subject_prefix, reservation.user.first_name, 
+	subject = "[%s] Reservation Request, %s %s, %s - %s" % (location.email_subject_prefix, reservation.user.first_name, 
 		reservation.user.last_name, str(reservation.arrive), str(reservation.depart))
-	sender = reservation.location.from_email()
+	sender = location.from_email()
 	recipients = []
 	for admin in house_admins:
 		recipients.append(admin.email)
 
-	plaintext = get_template('emails/newreservation.txt')
-	htmltext = get_template('emails/newreservation.html')
 	c = Context({
-		'location': reservation.location.name,
+		'location': location.name,
 		'status': reservation.status, 
 		'user_image' : "https://" + domain+"/media/"+ str(reservation.user.profile.image_thumb),
 		'first_name': reservation.user.first_name, 
@@ -129,10 +159,9 @@ def new_reservation_notify(reservation):
 		'projects' : reservation.user.profile.projects, 
 		'sharing': reservation.user.profile.sharing, 
 		'discussion' : reservation.user.profile.discussion, 
-		"admin_url" : "https://" + domain + urlresolvers.reverse('reservation_manage', args=(reservation.location.slug, reservation.id,))
+		"admin_url" : "https://" + domain + urlresolvers.reverse('reservation_manage', args=(location.slug, reservation.id,))
 	})
-	text_content = plaintext.render(c)
-	html_content = htmltext.render(c)
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.NEW_RESERVATION)
 
 	return send_from_location_address(subject, text_content, html_content, recipients, reservation.location)
 
@@ -157,28 +186,37 @@ def guest_welcome(reservation):
 	''' Send guest a welcome email'''
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
-	
-	#tmpl = Template(reservation.location.welcome_email)
-
-	plaintext = get_template('emails/pre_arrival_welcome.txt')
+	location = reservation.location
+	intersecting_reservations = Reservation.objects.filter(arrive__gte=reservation.arrive).filter(depart__lte=reservation.depart)
+	residents = location.residents.all()
+	intersecting_events = Event.objects.filter(location=location).filter(start__gte=reservation.arrive).filter(end__lte=reservation.depart)
+	profiles = None
 	day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
+	
 	c = Context({
 		'first_name': reservation.user.first_name,
 		'day_of_week' : day_of_week,
 		'location': reservation.location,
-		'current_email' : 'current@%s.mail.embassynetwork.com' % reservation.location.slug,
-		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(reservation.location.slug,)),
-		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(reservation.location.slug,)),
+		'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
+		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
+		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
 		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
-		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id,)),
+		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(location.slug, reservation.id,)),
+		'intersecting_reservations': intersecting_reservations,
+		'intersecting_events': intersecting_events,
+		'residents': residents,
 	})
-	text_content = plaintext.render(c)
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.WELCOME)
+	
 	mailgun_data={
 			"from": reservation.location.from_email(),
 			"to": [reservation.user.email,],
 			"subject": "[%s] See you on %s" % (reservation.location.email_subject_prefix, day_of_week),
 			"text": text_content,
 		}
+	if html_content:
+		mailgun_data["html"] = html_content
+	
 	return mailgun_send(mailgun_data)
 
 ############################################
@@ -196,16 +234,6 @@ def guest_daily_update(location):
 		logger.debug("Nothing happening today at %s, skipping daily email" % location.name)
 		return
 
-	plaintext = get_template('emails/guest_daily_update.txt')
-	c = Context({
-		'today': today,
-		'domain': Site.objects.get_current().domain,
-		'location': location,		
-		'arriving' : arriving_today,
-		'departing' : departing_today,
-		'events_today': events_today,
-	})
-	text_content = plaintext.render(c)
 	subject = "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today.date()))
 	
 	guest_emails = []
@@ -215,12 +243,25 @@ def guest_daily_update(location):
 	if len(guest_emails) == 0:
 		return None
 	
+	c = Context({
+		'today': today,
+		'domain': Site.objects.get_current().domain,
+		'location': location,
+		'arriving' : arriving_today,
+		'departing' : departing_today,
+		'events_today': events_today,
+	})
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.GUEST_DAILY)
+
 	mailgun_data={
 		"from": location.from_email(),
 		"to": guest_emails,
 		"subject": subject,
 		"text": text_content,
 	}
+	if html_content:
+		mailgun_data["html"] = html_content
+
 	return mailgun_send(mailgun_data)
 
 def admin_daily_update(location):
@@ -237,8 +278,16 @@ def admin_daily_update(location):
 	if not arriving_today and not departing_today and not events_today and not maybe_arriving_today and not pending_now and not approved_now:
 		logger.debug("Nothing happening today at %s, skipping daily email" % location.name)
 		return
+
+	subject = "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today.date()))
 	
-	plaintext = get_template('emails/admin_daily_update.txt')
+	admins_emails = []
+	for admin in location.house_admins.all():
+		if not admin.email in admins_emails:
+			admins_emails.append(admin.email)
+	if len(admins_emails) == 0:
+		return None
+
 	c = Context({
 		'today': today,
 		'domain': Site.objects.get_current().domain,
@@ -252,15 +301,7 @@ def admin_daily_update(location):
 		'events_pending': pending_or_feedback['pending'],
 		'events_feedback': pending_or_feedback['feedback'],
 	})
-	text_content = plaintext.render(c)
-	subject = "[%s] %s Events and Guests" % (location.email_subject_prefix, str(today.date()))
-	
-	admins_emails = []
-	for admin in location.house_admins.all():
-		if not admin.email in admins_emails:
-			admins_emails.append(admin.email)
-	if len(admins_emails) == 0:
-		return None
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.ADMIN_DAILY)
 
 	mailgun_data={
 		"from": location.from_email(),
@@ -268,6 +309,9 @@ def admin_daily_update(location):
 		"subject": subject,
 		"text": text_content,
 	}
+	if html_content:
+		mailgun_data["html"] = html_content
+
 	return mailgun_send(mailgun_data)
 
 ############################################
@@ -406,11 +450,7 @@ def stay(request, location_slug):
 		return HttpResponse(status=200)
 
 	recipient = request.POST.get('recipient')
-	try:
-		to = request.POST.get('To')
-		logger.debug('Got "To" field: %s' % to)
-	except:
-		pass
+	to = request.POST.get('To')
 	from_address = request.POST.get('from')
 	logger.debug('from: %s' % from_address)
 	sender = request.POST.get('sender')

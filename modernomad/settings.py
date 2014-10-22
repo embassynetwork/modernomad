@@ -88,6 +88,7 @@ MIDDLEWARE_CLASSES = (
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'modernomad.middleware.crossdomainxhr.CORSMiddleware',
+	'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 	# Uncomment the next line for simple clickjacking protection:
 	# 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -101,6 +102,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.core.context_processors.static",
 	"django.core.context_processors.tz",
 	"django.contrib.messages.context_processors.messages",
+	"core.context_processors.location.location_variables",
 	"core.context_processors.location.network_locations",
 	"core.context_processors.analytics.google_analytics",
 )
@@ -132,8 +134,8 @@ INSTALLED_APPS = (
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	'django.contrib.admin',
-	# Uncomment the next line to enable admin documentation:
-	# 'django.contrib.admindocs',
+	'django.contrib.flatpages',
+	'django.contrib.admindocs',
 )
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'

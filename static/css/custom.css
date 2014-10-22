@@ -130,7 +130,7 @@ a:hover {
 }
 
 #house-image {
-	height:300px;
+	height:auto;
 	width:100%;
 	padding:0;
 }
@@ -579,7 +579,7 @@ html, body {
 	color: green;
 }
 
-#cropped-header {
+#cropping-area {
 	display: none;
 }
 
@@ -685,8 +685,9 @@ div.ui-datepicker{
 }
 
 .form-help-text {
-	font-style: italic;
-	font-size: 90%;
+	color: #666;
+	font-size: .8em;
+    margin-left: .2em;
 }
 
 .float-right {
@@ -780,7 +781,7 @@ input#id_expiration_year {
 	margin-left: 15px;
 }
 
-ul.errorlist {
+ul.errorlist,u {
 	background-color: #f2dede;
 	list-style-type: none;
 	padding-left: 20px;
@@ -1602,6 +1603,7 @@ p.lead strong {
 	color: rgb(202, 188, 27);
 }
 
+<<<<<<< HEAD
 /*Mobile Styles*/
 
 @media (max-width: 450px) {
@@ -1625,3 +1627,18 @@ p.lead strong {
 	}
 	
 }
+=======
+/* Registration Form */
+.registration-form {
+    max-width: 70rem;
+    margin: 0 auto;
+    font-size: 1.2em;
+}
+
+.error {
+	color: rgb(228, 73, 73);
+	font-size: 80%;
+	background-color: beige;
+	padding: 10px;
+}
+>>>>>>> 32850394d9d575cfa92ff667fd0d2ce57aa7e705

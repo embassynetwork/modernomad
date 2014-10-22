@@ -10,6 +10,7 @@ from django.template import RequestContext
 from registration import signals
 import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
+from core.forms import LocationSettingsForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -42,10 +43,6 @@ logger = logging.getLogger(__name__)
 def location(request, location_slug):
 	location = my_object = get_object_or_404(Location, slug=location_slug)
 	return render(request, "landing.html", {'location': location})
-
-def about(request, location_slug):
-	location = get_location(location_slug)
-	return render(request, "location_about.html", {'location_about_text': location.about_page, 'location': location})
 
 def guest_rooms(request, location_slug):
 	location = get_location(location_slug)
@@ -392,7 +389,7 @@ def GetUser(request, username):
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
-	locations = Location.objects.all().order_by("name")
+	locations = Location.objects.filter(public=True).order_by("name")
 	return render(request, "location_list.html", {"locations": locations})
 
 @login_required
@@ -569,7 +566,7 @@ def UserAddCard(request, username):
 				send_receipt(reservation)
 				reservation.confirm()
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
-				if days_until_arrival < reservation.location.welcome_email_days_ahead:
+				if days_until_arrival <= reservation.location.welcome_email_days_ahead:
 					guest_welcome(reservation)
 				messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, reservation.location.welcome_email_days_ahead))
 				return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
@@ -673,7 +670,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
-			if days_until_arrival < reservation.location.welcome_email_days_ahead:
+			if days_until_arrival <= reservation.location.welcome_email_days_ahead:
 				guest_welcome(reservation)
 			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
 		except stripe.CardError, e:
@@ -758,6 +755,14 @@ def PeopleDaterangeQuery(request, location_slug):
 	html = html.strip(", ")
 	html += "</div>"
 	return HttpResponse(html)
+
+
+@house_admin_required
+def LocationEditSettings(request, location_slug):
+	location = get_location(location_slug)
+	location_form = LocationSettingsForm(instance=location)
+	return render(request, 'location_edit_settings.html', {"location": location, 'location_form':location_form})
+
 
 # ******************************************************
 #           reservation management views
@@ -846,7 +851,7 @@ def ReservationManageAction(request, location_slug, reservation_id):
 		elif reservation_action == 'set-confirm':
 			reservation.confirm()
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
-			if days_until_arrival < location.welcome_email_days_ahead:
+			if days_until_arrival <= location.welcome_email_days_ahead:
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.comp()
@@ -866,7 +871,7 @@ def ReservationManageAction(request, location_slug, reservation_id):
 				reservation.confirm()
 				send_receipt(reservation)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
-				if days_until_arrival < location.welcome_email_days_ahead:
+				if days_until_arrival <= location.welcome_email_days_ahead:
 					guest_welcome(reservation)
 			except stripe.CardError, e:
 				raise Reservation.ResActionError(e)

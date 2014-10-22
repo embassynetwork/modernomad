@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
+from django.contrib.flatpages.models import FlatPage
 
 # imports for signals
 import django.dispatch
@@ -56,7 +57,6 @@ class Location(models.Model):
 	name = models.CharField(max_length=200)
 	slug = models.CharField(max_length=60, unique=True, help_text="Try to make this short and sweet. It will also be used to form several location-specific email addresses in the form of xxx@<your_slug>.mail.embassynetwork.com")
 	short_description = models.TextField()
-	about_page = models.TextField()
 	address = models.CharField(max_length=300)
 	latitude = models.FloatField()
 	longitude = models.FloatField()
@@ -78,6 +78,9 @@ class Location(models.Model):
 	email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
 	house_admins = models.ManyToManyField(User, related_name='house_admin', blank=True, null=True)
 	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
+	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
+	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
+	public = models.BooleanField(default=False, verbose_name="Is this location open to the public?")
 
 	def __unicode__(self):
 		return self.name
@@ -150,6 +153,10 @@ class Location(models.Model):
 					people.append(u)
 
 		return people
+	
+	def get_menus(self):
+		return LocationMenu.objects.filter(location=self)
+
 
 class LocationNotUniqueException(Exception):
 	pass
@@ -735,9 +742,9 @@ def size_images(sender, instance, **kwargs):
 			default_storage.delete(obj.image_thumb.path)
 
 class EmailTemplate(models.Model):
-	''' Templates for the typical emails sent by the system. The from-address
-	is usually set by DEFAULT_FROM_ADDRESS in settings, and the recipients are
-	determined by the action and reservation in question. '''
+	''' Templates for the typical emails sent by administrators of the system. 
+	The from-address is usually set by DEFAULT_FROM_ADDRESS in settings, 
+	and the recipients are determined by the action and reservation in question. '''
 
 	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
 	FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
@@ -751,6 +758,30 @@ class EmailTemplate(models.Model):
 	def __unicode__(self):
 		return self.name
 
+class LocationEmailTemplate(models.Model):
+	''' Location Template overrides for system generated emails '''
+	
+	ADMIN_DAILY = 'admin_daily_update'
+	GUEST_DAILY = 'guest_daily_update'
+	INVOICE = 'invoice'
+	RECEIPT = 'receipt'
+	NEW_RESERVATION = 'newreservation'
+	WELCOME = 'pre_arrival_welcome'
+
+	KEYS = (
+			(ADMIN_DAILY, 'Admin Daily Update'),
+			(GUEST_DAILY, 'Guest Daily Update'),
+			(INVOICE, 'Invoice'),
+			(RECEIPT, 'Receipt'),
+			(NEW_RESERVATION, 'New Reservation'),
+			(WELCOME, 'Pre-Arrival Welcome'),
+		)
+
+	location = models.ForeignKey(Location)
+	key = models.CharField(max_length=32, choices=KEYS)
+	text_body = models.TextField(verbose_name="The text body of the email")
+	html_body = models.TextField(blank=True, null=True, verbose_name="The html body of the email")
+	
 class Fee(models.Model):
 	description = models.CharField(max_length=100, verbose_name="Fee Name")
 	percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
@@ -775,3 +806,16 @@ class BillLineItem(models.Model):
 
 	def __unicode__(self):
 		return '%s: %s' % (self.reservation.location, self.description)
+
+class LocationMenu(models.Model):
+	location = models.ForeignKey(Location)
+	name = models.CharField(max_length=15, help_text="A short title for your menu. Note: If there is only one page in the menu, it will be used as a top level nav item, and the menu name will not be used.")
+
+	def page_count(self):
+		return len(self.pages.all())
+
+class LocationFlatPage(models.Model):
+	menu = models.ForeignKey(LocationMenu, related_name = "pages", help_text="Note: If there is only one page in the menu, it will be used as a top level nav item, and the menu name will not be used.")
+	flatpage = models.OneToOneField(FlatPage)
+	
+
