@@ -7,24 +7,23 @@ Here is what's happening at {{ location.name }} today:
 	{% for event in events_today %}
 		* {{ event.title|title }} at {{ event.start|date:'f A' }}, https://{{ domain }}{% url 'gather_view_event' event.location.slug event.id event.slug %} 
 	{% endfor %}
-{% endif %}
 
+{% endif %}
 {% if arriving %}
 	People arriving - welcome!
 	{% for r in arriving %}
-		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
+		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.room|safe }} 
 		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
 	{% endfor %}
-{% endif %}
 
+{% endif %}
 {% if departing %}
 	People departing - fare forward and wonderful journeys!
 	{% for r in departing %}
-		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
+		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.room|safe }} 
 		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
 	{% endfor %}
 {% endif %}
-
 
 Thank you!
 {{ location.name }}
