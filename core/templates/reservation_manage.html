@@ -255,8 +255,8 @@
 	</table>
 
 	<!-- Payment Details -->
-	{% if r.payments %}
 	<h2>Payments</h2>
+	{% if r.payments %}
 	<table id="payment-details">
 		<tr>
 			<th>Transaction ID</th>
@@ -286,6 +286,7 @@
 			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
 			<td></td>
 		</tr>
+	{% endif %}
 	<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
 		<input name="payment_id" type="hidden" value="{{p.id}}">
 		<tr style="padding-top:24px;">
@@ -296,7 +297,6 @@
 		</tr>
 	</form>
 	</table>
-	{% endif %}
 	<hr>
 	
 	<h2>User Details</h2>
