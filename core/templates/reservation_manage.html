@@ -227,12 +227,12 @@
 	
 	<!-- Bill Details -->
 	<h2>Bill Details</h2>	
-	<table id="bill-details">
-		<tr>
+	<table id="bill-details" class="table">
+		<thead>
 			<th>Description</th>
 			<th class="money">Paid by<br>House</th>
 			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
-		</tr>
+		</thead>
 		{% for item in r.bill_line_items %}
 			{% if item.paid_by_house %}
 				<tr>
@@ -257,13 +257,13 @@
 	<!-- Payment Details -->
 	<h2>Payments</h2>
 	{% if r.payments %}
-	<table id="payment-details">
-		<tr>
+	<table id="payment-details" class="table">
+		<thead>
 			<th>Transaction ID</th>
 			<th>Method</th>
 			<th class="money">Amount</th>
 			<th></th>
-		</tr>
+		</thead>
 		{% for p in r.payments %}
 			<form class="res-refund" id="res-refund-{{payment_id}}" 
 				method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">
