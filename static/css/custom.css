@@ -1405,6 +1405,27 @@ table tr.row-even td { background: #eee; }
 	padding: 30px;
 }
 
+/* FAQ
+------------------------- */
+
+.faq-wrapper {
+	line-height: 2em;
+}
+
+.faq-q {
+	list-style: none;
+	font-weight: bold;
+}
+
+.faq-a {
+	margin-left: 20px;
+	list-style-position: inside;
+}
+
+
+
+
+
 /* Featurettes
 ------------------------- */
 
@@ -1580,6 +1601,30 @@ p.lead strong {
 
 .text-caution {
 	color: rgb(202, 188, 27);
+}
+
+/*Mobile Styles*/
+
+@media (max-width: 450px) {
+	
+	.navbar-brand {
+		float: none;
+		height: auto;
+		margin-bottom: 10px;
+		border-bottom: 1px solid #e2e2e2;
+		
+		
+	}
+	
+	#index-header {
+		padding-right: 0;
+		background-image: none; 
+	}
+	
+	.featurette-divider {
+		margin: 30px 0;
+	}
+	
 }
 
 /* Registration Form */
