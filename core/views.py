@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.conf import settings
 from core.decorators import house_admin_required
 from django.db.models import Q
-from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee
+from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee, BillLineItem
 from core.tasks import guest_welcome
 from core import payment_gateway
 import uuid, base64, os
@@ -161,14 +161,12 @@ def occupancy(request, location_slug):
 		if r.arrive < start and r.depart < start:
 			# all nights for this reservation were in a previous month
 			nights_before_this_month = (r.depart - r.arrive)
-			print "nights before this month from res %d." % (r.id)
 		
 		elif r.arrive < start and r.depart <= end:
 			# only nights before and during this month, but night for this
 			# month are calculated below so only tally the nights for before
 			# this month here.
 			nights_before_this_month = (start - r.arrive)
-			print "nights before this month from res %d." % (r.id)
 		
 		elif r.arrive >= start and r.depart <= end:
 			# only nights this month, don't need to calculate this here because
@@ -186,7 +184,6 @@ def occupancy(request, location_slug):
 		elif r.arrive < start and r.depart > end:  
 			# there are some days paid for this month that belong to the previous month
 			nights_before_this_month = (start - r.arrive)
-			print "nights before this month from res %d." % (r.id)
 			nights_after_this_month = (r.depart - end)
 		
 		# in the event that there are multiple payments for a reservation, this
@@ -310,8 +307,6 @@ def room_cal_request(request, location_slug, room_id):
 	month = int(request.GET.get("month"))
 	year = int(request.GET.get("year"))
 	cal_html = room.availability_calendar_html(month=month, year=year)
-	#print 'here is the calendar info for %s' % room.name
-	#print cal_html
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	link_html = '''
 		<a class="room-cal-req" href="%s?month=%d&year=%d">Previous</a> | 
@@ -440,8 +435,6 @@ def CheckRoomAvailability(request, location_slug):
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
 	if request.method == 'POST':
-		#print request.POST
-		#form = get_reservation_form_for_perms(request, post=True, instance=False)
 		form = ReservationForm(location, request.POST)
 		if form.is_valid():
 			reservation = form.save(commit=False)
@@ -457,7 +450,6 @@ def ReservationSubmit(request, location_slug):
 			print form.errors
 	# GET request
 	else: 
-		#form = get_reservation_form_for_perms(request, post=False, instance=False)
 		form = ReservationForm(location)
 	# pass the rate for each room to the template so we can update the cost of
 	# a reservation in real time. 
@@ -504,10 +496,8 @@ def UserEdit(request, username):
 				updated_user = profile_form.save()
 				profile = updated_user.profile
 
-				print "request data: image field"
 				img_data = request.POST.get("image")
 				if img_data:
-					#print img_data
 					img_data = base64.b64decode(img_data)
 					filename = "%s.png" % uuid.uuid4()
 					# XXX make the upload path a fixed setting in models, since it's
@@ -534,8 +524,6 @@ def UserEdit(request, username):
 			has_image = True
 		else:
 			has_image = False
-		#print 'profile image already?'
-		#print has_image
 		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
 	return HttpResponseRedirect("/")
 
@@ -1008,6 +996,29 @@ def ReservationToggleComp(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required
+def ReservationAddBillLineItem(request, location_slug, reservation_id):
+	# can be used to apply a discount or a one time charge for, for example, a
+	# cleaning fee.
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
+	reservation = Reservation.objects.get(pk=reservation_id)
+
+	reason = request.POST.get("reason")
+	try:
+		amount = -float(request.POST.get("discount"))
+		reason = "Discount: " + reason
+	except:
+		# then it's a fee
+		amount = float(request.POST.get("extra_fee"))
+		reason = "Fee: " + reason
+	new_line_item = BillLineItem(reservation=reservation, description=reason, amount=amount, paid_by_house=False, custom=True)
+	new_line_item.save()
+	# regenerate the bill now that we've applied some new fees
+	reservation.generate_bill()
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
 def ReservationSendMail(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -1075,7 +1086,6 @@ class Registration(registration.views.RegistrationView):
 			if field.name in cleaned_data:
 				setattr(profile, field.name, cleaned_data[field.name])
 
-		print "request data: image field"
 		img_data = request.POST.get("image")
 		# If none or len 0, means illegal image data
 		if img_data == None or len(img_data) == 0:

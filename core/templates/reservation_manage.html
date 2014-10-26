@@ -144,6 +144,20 @@
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Rate"/>
 				</div>
 			</form>
+			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Discount: $</strong> <input name="discount" value="0" size="3"/>
+					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Additional Fee: $</strong> <input name="extra_fee" value="0" size="3"/>
+					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
+				</div>
+			</form>
 			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
 					<strong>Arrive:</strong> <input name="arrive" value="{{ r.arrive|date:'Y-m-d' }}" size="8"/>
@@ -221,10 +235,6 @@
 
 	<hr>
 
-	{% if not r.is_comp and not r.is_canceled and r.total_value != r.bill_base_amount %}
-		<div class="alert alert-warning" role="alert">The total value and the bill's rate don't match! You may need to recalculate the bill!</div>
-	{% endif %}
-	
 	<!-- Bill Details -->
 	<h2>Bill Details</h2>	
 	<table id="bill-details" class="table">
@@ -239,6 +249,12 @@
 					<td class="paid-by-house text-danger">{{ item.description }}</td>
 					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
 					<td class="money"></td>
+				</tr>
+			{% elif item.custom %}
+				<tr>
+					<td><em>{{ item.description }}</em></td>
+					<td></td>
+					<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
 				</tr>
 			{% else %}
 			<tr>
@@ -284,7 +300,7 @@
 			</form>
 		{% endfor %}
 		<tr class="total-row">
-			<td colspan="2"></td>
+			<td colspan="3"></td>
 			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
 			<td></td>
 		</tr>

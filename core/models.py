@@ -466,6 +466,8 @@ class Reservation(models.Model):
 		return False
 		
 	def bill_base_amount(self):
+		# incorporates any manual discounts or fees into the base amount.
+		# automatic fees are calculated on top of this. 
 		base_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True)
 		return sum([item.amount for item in base_fees])
 		
@@ -507,6 +509,11 @@ class Reservation(models.Model):
 		return total
 
 	def generate_bill(self, delete_old_items=True, save=True):
+		# impt! save the custom items first or they'll be blown away when the
+		# bill is regenerated. 
+		custom_items = list(BillLineItem.objects.filter(reservation=self).filter(custom=True))
+		print custom_items
+		print "now deleting old..."
 		if delete_old_items:
 			self.delete_bill()
 
@@ -517,11 +524,20 @@ class Reservation(models.Model):
 		room_charge = self.total_value()
 		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
+		
+		# Incorporate any custom fees or discounts
+		effective_room_charge = room_charge
+		print "custom items are now..."
+		print custom_items
+		for item in custom_items:
+			line_items.append(item)
+			effective_room_charge += item.amount #may be negative
+		print effective_room_charge
 
 		# A line item for every fee that applies to this location
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-			amount = room_charge * location_fee.fee.percentage
+			amount = float(effective_room_charge) * location_fee.fee.percentage
 			fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 			line_items.append(fee_line_item)
 
@@ -629,7 +645,13 @@ class Reservation(models.Model):
 				return payment.payment_date
 
 	def bill_line_items(self):
-		return BillLineItem.objects.filter(reservation=self).order_by("id")
+		# return bill line items orderer first with the room item, then the
+		# custom items, then the fees
+		items = BillLineItem.objects.filter(reservation=self)
+		room_item = items.filter(custom=False).filter(fee=None)
+		custom_items = items.filter(custom=True)
+		fees = items.filter(fee__isnull=False)
+		return list(room_item) + list(custom_items) + list(fees)
 
 	def html_color_status(self):
 		if self.is_paid():
@@ -862,6 +884,7 @@ class BillLineItem(models.Model):
 	# necessarily)
 	amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	paid_by_house = models.BooleanField(default=True)
+	custom = models.BooleanField(default=False)
 
 	def __unicode__(self):
 		return '%s: %s' % (self.reservation.location, self.description)
