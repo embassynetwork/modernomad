@@ -43,8 +43,8 @@
 		<td>{{ p.payment_method }}</td>
 		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.paid_amount|floatformat:2 }}</td>
 		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.to_house|floatformat:2 }}</td>
-		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.house_fees|floatformat:2 }}</td>
-		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.non_house_fees|floatformat:2 }}</td>
+		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">{% if p.house_fees = 0 %} -- {% else %} ${{ p.house_fees|floatformat:2 }} {% endif %}</td>
+		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">{% if p.non_house_fees = 0 %} -- {% else %} ${{ p.non_house_fees|floatformat:2 }} {% endif %}</td>
 	</tr>
 {% endfor %}
 <tr class="total-row">

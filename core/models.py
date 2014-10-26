@@ -458,6 +458,23 @@ class Reservation(models.Model):
 			paid = paid + payment.paid_amount
 		return paid
 
+	def refunded(self):
+		payments = Payment.objects.filter(reservation=self)
+		if payments and sum([p.paid_amount for p in payments]) == 0:
+			return True
+		return False
+		
+	def bill_base_amount(self):
+		base_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True)
+		return sum([item.amount for item in base_fees])
+		
+	def paid_date(self):
+		if self.total_owed() == 0:
+			# order by most recent first
+			bill_payments = self.payments().order_by('-payment_date')
+			return bill_payments[0].payment_date
+		return None
+
 	def total_owed_in_cents(self):
 		# this is used to pass the information to stripe, which expects an
 		# integer. 
@@ -572,9 +589,11 @@ class Reservation(models.Model):
 
 	def cancel(self):
 		# cancel this reservation.
+		# JKS note: we *don't* delete the bill here, because if there was a
+		# refund, we want to keep it around to know how much to refund from the
+		# associated fees. 
 		self.status = Reservation.CANCELED
 		self.save()
-		self.delete_bill()
 
 	def comp(self):
 		self.set_rate(0)
@@ -639,17 +658,51 @@ class Payment(models.Model):
 		return self.paid_amount - self.non_house_fees() - self.house_fees()
 
 	def non_house_fees(self):
-		location_fees_not_paid_by_house = LocationFee.objects.filter(location=self.reservation.location, fee__paid_by_house=False)	
+		# takes the appropriate bill line items and applies them proportionately to the payment. 
+		fee_line_items_not_paid_by_house = BillLineItem.objects.filter(reservation=self.reservation).filter(fee__isnull=False).filter(paid_by_house=False)
+		base_amount = self.reservation.bill_base_amount()
+		print base_amount
 		non_house_fee_on_payment = Decimal(0.0)
-		for fee in location_fees_not_paid_by_house:
-			non_house_fee_on_payment += self.paid_amount * Decimal(fee.fee.percentage)
+		# this payment may or may not represent the entire bill amount. we need
+		# to know what fraction of the total bill amount it was so that we can
+		# apply the fees proportionately to the payment amount. note: in many
+		# cases, the fraction will be 1. 
+		print self.reservation.id
+		try:
+			fraction = self.paid_amount/self.reservation.bill_amount()
+		except:
+			# if the bill amount is zero but there was a payment on the reservation, then the bill must be b0rked in some way
+			self.reservation.generate_bill()
+			fraction = self.paid_amount/self.reservation.bill_amount()
+
+		fractional_base_amount = base_amount * fraction
+		for line_item in fee_line_items_not_paid_by_house:
+				# JKS important! this assumes that the line item value accurately
+				# reflects the fee percentage. this should be true, but technically
+				# could be edited in the admin page to be anything. do we want to
+				# enforce this?
+			non_house_fee_on_payment += fractional_base_amount * Decimal(line_item.fee.percentage)
+
 		return non_house_fee_on_payment
 
 	def house_fees(self):
-		location_fees_paid_by_house = LocationFee.objects.filter(location=self.reservation.location, fee__paid_by_house=True)	
+		# takes the appropriate bill line items and applies them proportionately to the payment. 
+		fee_line_items_paid_by_house = BillLineItem.objects.filter(reservation=self.reservation).filter(paid_by_house=True)
+		base_amount = self.reservation.bill_base_amount()
+		print base_amount
 		house_fee_on_payment = Decimal(0.0)
-		for fee in location_fees_paid_by_house:
-			house_fee_on_payment += self.paid_amount * Decimal(fee.fee.percentage)
+		# this payment may or may not represent the entire bill amount. we need
+		# to know what fraction of the total bill amount it was so that we can
+		# apply the fees proportionately to the payment amount. note: in many
+		# cases, the fraction will be 1. 
+		fraction = self.paid_amount/self.reservation.bill_amount()
+		fractional_base_amount = base_amount * fraction
+		for line_item in fee_line_items_paid_by_house:
+			# JKS important! this assumes that the line item value accurately
+			# reflects the fee percentage. this should be true, but technically
+			# could be edited in the admin page to be anything. do we want to
+			# enforce this?
+			house_fee_on_payment += fractional_base_amount * Decimal(line_item.fee.percentage)
 		return house_fee_on_payment
 
 
@@ -799,8 +852,13 @@ class LocationFee(models.Model):
 
 class BillLineItem(models.Model):
 	reservation = models.ForeignKey(Reservation)
+	# the fee that this line item was based on, if any (line items are also
+	# generated for the base room rate, which doesn't have an associated fee)
 	fee = models.ForeignKey(Fee, null=True)
 	description = models.CharField(max_length=200)
+	# the actual amount of this line item (if this is a line item derived from
+	# a fee, generally it will be the fee amount but, technically, not
+	# necessarily)
 	amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	paid_by_house = models.BooleanField(default=True)
 
