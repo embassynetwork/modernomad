@@ -259,6 +259,7 @@
 	{% if r.payments %}
 	<table id="payment-details" class="table">
 		<thead>
+			<th>Date</th>
 			<th>Transaction ID</th>
 			<th>Method</th>
 			<th class="money">Amount</th>
@@ -270,6 +271,7 @@
 				{% csrf_token %}
 				<input name="payment_id" type="hidden" value="{{p.id}}">
 			<tr>
+				<td>{{ p.payment_date }}
 				<td>{{ p.transaction_id }}
 				<td>{{ p.payment_method }}</td>
 				<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
