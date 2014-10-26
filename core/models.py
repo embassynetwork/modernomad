@@ -458,7 +458,8 @@ class Reservation(models.Model):
 			paid = paid + payment.paid_amount
 		return paid
 
-	def refunded(self):
+	def fully_refunded(self):
+		# says whether the reservation was fully refunded or not
 		payments = Payment.objects.filter(reservation=self)
 		if payments and sum([p.paid_amount for p in payments]) == 0:
 			return True
