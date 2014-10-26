@@ -11,42 +11,49 @@
 	<a href="?month={{next_month.month}}&year={{next_month.year}}">Next</a>
 	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
 </div>
+
 <div class="row">
-	<h4> Breakdown by Person Nights</h4>
-	<p>Total person nights for {{report_date|date:"F"}}: {{total_nights}}</p>
-	<p>Total private nights: {{total_private_nights}}</p>
-	<p>Total shared nights: {{total_shared_nights}}</p>
-</div>
-<div class="row">
-	<h4> Breakdown by Payment Date</h4>
-	<p>Income received for this month: ${{ income_for_this_month }} <small>(includes payments with no payment date (rare))</small></p>
-	<p>Income applied from past months: ${{ income_from_past_months }}</p>
-	<p><strong class="badge">Total payments for this month: ${{ total_income_this_month }}</strong></p>
-	<br>
-	<p><em>Income received for past months: ${{ income_for_past_months }}</em></p>
-	<p><em>Income received for future months: ${{ income_for_future_months }}</em></p>
-	<p><strong class="badge">Total payments during this month: ${{ total_income_during_month }}</strong></p>
+	<div class="alert alert-warning" role="alert"><b>Warning</b> There's still a few errors on this page, possibly off-by-one errors. The <a href="{% url 'location_payments_today' location.slug %}">payments page</a> is authoritative, but this is pretty close and still a good reference. Want to improve this page? Check it out on <a href="">github</a> :).</div>
 </div>
 
 <div class="row">
-	<h4> Breakdown by Room</h4>
+	<h4> Occupancy by Person Nights</h4>
+	<p>Total guest nights for {{report_date|date:"F"}}: {{total_nights}}</p>
+	<p>Total private nights: {{total_private_nights}}</p>
+	<p>Total shared nights: {{total_shared_nights}}</p>
+	<p>Average guests per night: {{average_guests_per_day|floatformat:1}}</p>
+</div>
+<div class="row">
+	<h4> Total Payments by Month Received</h4>
+	<p>Income received this month, for this month: ${{ income_for_this_month|floatformat:2 }} </p>
+	<p>Income applied from past months: ${{ income_from_past_months|floatformat:2 }}</p>
+	<p>Income received for past months might be because someone who has stayed with us before was extending their reservation, or appended to their reservation, etc. It's not super meaningful but, *shrug*. </p>
+	<p><em>Income received for past months: ${{ income_for_past_months|floatformat:2 }}</em></p>
+	<p><em>Income received for future months: ${{ income_for_future_months|floatformat:2 }}</em></p>
+	<br>
+	<p><strong class="badge">Total payments for this month (includes external fees, if applicable): ${{ total_income_for_this_month|floatformat:2 }}</strong></p>
+	<p><strong class="badge">Total payments during this month (includes external fees, if applicable): ${{ total_income_during_this_month|floatformat:2 }}</strong></p>
+</div>
+
+<div class="row">
+	<h4> Breakdown by Room (does not include external fees)</h4>
 	{% for room, amt in room_income.items %}
 		<p>{{ room|title }}: ${{ amt }} </p>
 	{% empty %}
 		None
 	{% endfor %}
-	<p><strong class="badge">Total by rooms: ${{ total_by_rooms }}</strong></p>
+	<p><strong class="badge">Total net income by rooms (without external fees): ${{ total_by_rooms|floatformat:2 }}</strong></p>
 </div>
 <div class="row">
-	<h4> Breakdown by Private and Shared</h4>
-	<p>Total estimated income from shared : ${{total_income_shared}}</p>
-	<p>Total estimated income from private: ${{total_income_private}}</p>
-	<p><strong class="badge">Total income estimated by occupancy: ${{total_income}}</span></strong></h5>
+	<h4> Breakdown by Private and Shared (does not include external fees)</h4>
+	<p>Total estimated income from shared : ${{total_income_shared|floatformat:2}}</p>
+	<p>Total estimated income from private: ${{total_income_private|floatformat:2}}</p>
+	<p><strong class="badge">Total net income estimated by occupancy (without external fees): ${{total_income|floatformat:2}}</span></strong></h5>
 </div>
 
 <div class="row">
 	<h4>Error Checking</h4>
-	<p>Paid rate discrepancy (paid rate - rate): $ {{ paid_rate_discrepancy }}</p>
+	<p>Paid rate discrepancy (paid rate - rate): $ {{ paid_rate_discrepancy|floatformat:2 }}</p>
 	<p>Payment discrepancies on reservations: {{ payment_discrepancies|default:"none" }}</p>
 	<p>Paid amount was missing from reservations: {{paid_amount_missing|default:"none"}}</p>
 </div>
@@ -55,7 +62,7 @@
 	<h4>Comped and Unpaid</h4>
 	<p>Total comped nights: {{total_comped_nights}}</p>
 	<p>Total unpaid: ${{unpaid_total}}</p>
-	<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income}}</span></p>
+	<p>Est. lost income from comps (@ default rates): <span class="badge">${{total_comped_income|floatformat:2}}</span></p>
 </div>
 
 <hr>

@@ -146,37 +146,53 @@ def occupancy(request, location_slug):
 	payment_discrepancies = []
 	paid_amount_missing = []
 
+	# JKS note: this section breaks down income by whether it is income for this
+	# month, for future months, from past months, for past months, for this
+	# month, etc... but it turns out that this gets almost impossible to track
+	# because there's many edge cases causd by reservations being edited,
+	# appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
+	# work on it, don't say i didn't warn you :). 
+
 	payments_this_month = Payment.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end)
-	for r in payments_this_month:
+	for p in payments_this_month:
+		r = p.reservation
 		nights_before_this_month = datetime.timedelta(0)
 		nights_after_this_month = datetime.timedelta(0)
-		if r.reservation.arrive < start and r.reservation.depart < start:
+		if r.arrive < start and r.depart < start:
 			# all nights for this reservation were in a previous month
-			nights_before_this_month = (r.reservation.depart - r.reservation.arrive)
+			nights_before_this_month = (r.depart - r.arrive)
+			print "nights before this month from res %d." % (r.id)
 		
-		elif r.reservation.arrive < start and r.reservation.depart <= end:
-			# only nights this month, don't need to calculate this here because
-			# it's calculated below. 
-			nights_before_this_month = (start - r.reservation.arrive)
+		elif r.arrive < start and r.depart <= end:
+			# only nights before and during this month, but night for this
+			# month are calculated below so only tally the nights for before
+			# this month here.
+			nights_before_this_month = (start - r.arrive)
+			print "nights before this month from res %d." % (r.id)
 		
-		elif r.reservation.arrive >= start and r.reservation.depart <= end:
+		elif r.arrive >= start and r.depart <= end:
 			# only nights this month, don't need to calculate this here because
 			# it's calculated below. 
 			continue
 		
-		elif r.reservation.arrive >= start and r.reservation.arrive <= end and r.reservation.depart > end:
-			nights_after_this_month = (r.reservation.depart - end)
+		elif r.arrive >= start and r.arrive <= end and r.depart > end:
+			# some nights are after this month
+			nights_after_this_month = (r.depart - end)
 		
-		elif r.reservation.arrive > end:  
-			nights_after_this_month = (r.reservation.depart - r.reservation.arrive)
+		elif r.arrive > end:  
+			# all nights are after this month
+			nights_after_this_month = (r.depart - r.arrive)
 
-		elif r.reservation.arrive < start and r.reservation.depart > end:  
+		elif r.arrive < start and r.depart > end:  
 			# there are some days paid for this month that belong to the previous month
-			nights_before_this_month = (start - r.reservation.arrive)
-			nights_after_this_month = (r.reservation.depart - end)
+			nights_before_this_month = (start - r.arrive)
+			print "nights before this month from res %d." % (r.id)
+			nights_after_this_month = (r.depart - end)
 		
-		income_for_future_months += nights_after_this_month.days*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
-		income_for_past_months += nights_before_this_month.days*(r.paid_amount/(r.reservation.depart - r.reservation.arrive).days)
+		# in the event that there are multiple payments for a reservation, this
+		# will basically amortize each payment across all nights
+		income_for_future_months += nights_after_this_month.days*(p.paid_amount/(r.depart - r.arrive).days)
+		income_for_past_months += nights_before_this_month.days*(p.paid_amount/(r.depart - r.arrive).days)
 
 	for r in reservations:
 		comp = False
@@ -189,12 +205,12 @@ def occupancy(request, location_slug):
 		elif r.depart > end:
 			nights_this_month = (end - r.arrive).days
 		# if it's the first of the month and the person left on the 1st, then
-		# that's actuallu 0 days this month which we don't need to include.
+		# that's actually 0 days this month which we don't need to include.
 		if nights_this_month == 0:
 			continue
-		# get_rate grabs the custom rate if it exists, else default rate as
-		# defined in the room definition.
-		rate = r.rate
+		# XXX Note! get_rate() returns the base rate, not the rate with taxes.
+		# it also does not account for fees paid by the house
+		rate = r.get_rate()
 		if r.is_comped():
 			total_comped_nights += nights_this_month
 			total_comped_income += nights_this_month*r.default_rate()
@@ -208,31 +224,25 @@ def occupancy(request, location_slug):
 
 			# If there are payments, calculate the payment rate
 			if r.payments():
-				paid_rate = r.total_paid() / r.total_nights()
+				paid_rate = (r.total_paid() - r.non_house_fees()) / r.total_nights()
 				if paid_rate != rate:
-					print "reservation %d has paid rate = $%d and rate set to $%d"
+					print "reservation %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate)
 					paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
 					payment_discrepancies.append(r.id)
 
-			# XXX I don't understand this part.  I'm going to just put the payment amount on this month
-			# and move on for now.  --JLS
-			#if r.is_paid():
-			#	if (r.payment.payment_date and r.payment.payment_date < start):
-			#		income_from_past_months += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days)
-			#	else:
-			#		# if there's no payment date but the reservation is marked
-			#		# as paid, the payment was probably manually entered. since
-			#		# we have no knowledge of when the payment was issued,
-			#		# applying it to this month seems like a reasonable guess. 
-			#		# XXX todo would be nice to highlight these items somehow. 
-			#		# TODO This should not happen anymore.  Date defaults to today and amount defaults to 0 --JLS
-			#		if r.payment.paid_amount:
-			#			income_for_this_month += nights_this_month*(r.payment.paid_amount/(r.depart - r.arrive).days) 
-			#		else:
-			#			paid_amount_missing.append(r.id)
+			# JKS this section just tracks whether payment for this reservation
+			# were made in a prior month or in this month. mostly it's a
+			# curiosity. 
 			if r.is_paid():
-				income_for_this_month += r.total_paid()
-				unpaid = False
+				for p in r.payments():
+					if p.payment_date.date() < start:
+						income_from_past_months += nights_this_month*(p.paid_amount/(r.depart - r.arrive).days)
+					# if the payment was sometime this month, we account for
+					# it. if it was in a future month, we'll show it as "income
+					# for previous months" in that month. we skip it here. 
+					elif p.payment_date.date() <= end: 
+						income_for_this_month += nights_this_month*(p.paid_amount/(r.depart - r.arrive).days) 
+					unpaid = False
 			else:
 				unpaid_total += r.total_owed()
 				unpaid = True
@@ -256,8 +266,8 @@ def occupancy(request, location_slug):
 			if not r.is_comped():
 				total_income_private += nights_this_month*rate
 
-	total_income_this_month = income_for_this_month + income_from_past_months
-	total_income_during_month = income_for_this_month + income_for_future_months
+	total_income_for_this_month = income_for_this_month + income_from_past_months
+	total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
 	total_by_rooms = sum(room_income.itervalues())
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 'location': location,
@@ -268,9 +278,10 @@ def occupancy(request, location_slug):
 		"total_income_private": total_income_private, "report_date": report_date, 'room_income':room_income, 
 		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
 		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
-		'total_income_this_month':total_income_this_month, 'total_by_rooms': total_by_rooms, 
+		'total_income_for_this_month':total_income_for_this_month, 'total_by_rooms': total_by_rooms, 
 		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies, 
-		'total_income_during_month': total_income_during_month, 'paid_amount_missing':paid_amount_missing })
+		'total_income_during_this_month': total_income_during_this_month, 'paid_amount_missing':paid_amount_missing,
+		'average_guests_per_day': float(total_person_nights)/(end -start).days })
 
 @login_required
 def calendar(request, location_slug):
