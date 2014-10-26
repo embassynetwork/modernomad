@@ -221,8 +221,8 @@
 
 	<hr>
 
-	{% if not r.is_comp and not r.is_canceled and r.total_value != r.bill_amount %}
-		<div class="red-text">The Total Value and the Bill Amount don't match!  You may need to recalculate the bill!</div>
+	{% if not r.is_comp and not r.is_canceled and r.total_value != r.bill_base_amount %}
+		<div class="alert alert-warning" role="alert">The total value and the bill's rate don't match! You may need to recalculate the bill!</div>
 	{% endif %}
 	
 	<!-- Bill Details -->
@@ -236,9 +236,9 @@
 		{% for item in r.bill_line_items %}
 			{% if item.paid_by_house %}
 				<tr>
-					<td class="paid-by-house">{{ item.description }}</td>
-					<td class="money paid-by-house">${{ item.amount|floatformat:2 }}</td>
-					<td class="money">$0.00</td>
+					<td class="paid-by-house text-danger">{{ item.description }}</td>
+					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
+					<td class="money"></td>
 				</tr>
 			{% else %}
 			<tr>
@@ -250,7 +250,7 @@
 		{% endfor %}
 		<tr class="total-row">
 			<td></td>
-			<td class="money paid-by-house">${{ r.house_fees|floatformat:2 }}</td>
+			<td class="money"><span class="text-danger">${{ r.house_fees|floatformat:2 }}</span></td>
 			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
 	</table>
 
