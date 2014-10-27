@@ -479,7 +479,7 @@ def stay(request, location_slug):
 	logger.debug(request)
 	logger.debug(request.FILES)
 	for attachment in request.FILES.values():
-		data = attachment.stream.read()
+		data = attachment.read()
 		with open('/tmp/'+attachment.filename, "w") as f:
 			f.write(data)
 	attachments = {}
@@ -588,7 +588,7 @@ def residents(request, location_slug):
 	logger.debug(request)
 	logger.debug(request.FILES)
 	for attachment in request.FILES.values():
-		data = attachment.stream.read()
+		data = attachment.read()
 		with open('/tmp/'+attachment.filename, "w") as f:
 			f.write(data)
 	attachments = {}
