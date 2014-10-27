@@ -12,6 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from core.models import Reservation
 from gather.models import Event
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 import json
 import requests
@@ -479,13 +481,11 @@ def stay(request, location_slug):
 	logger.debug(request)
 	logger.debug(request.FILES)
 	for attachment in request.FILES.values():
-		data = attachment.read()
-		with open('/tmp/'+attachment.filename, "w") as f:
-			f.write(data)
+		a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
 	attachments = {}
 	num = 0
 	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.filename, open('/tmp/'+attachment.filename, 'rb'))
+		attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
@@ -588,13 +588,11 @@ def residents(request, location_slug):
 	logger.debug(request)
 	logger.debug(request.FILES)
 	for attachment in request.FILES.values():
-		data = attachment.read()
-		with open('/tmp/'+attachment.filename, "w") as f:
-			f.write(data)
+		a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
 	attachments = {}
 	num = 0
 	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.filename, open('/tmp/'+attachment.filename, 'rb'))
+		attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
