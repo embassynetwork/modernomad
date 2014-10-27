@@ -30,9 +30,9 @@ weekday_number_to_name = {
 	6: "Sunday"
 }
 
-def mailgun_send(mailgun_data, mailgun_files=None):
+def mailgun_send(mailgun_data, files_dict=None):
 	logger.debug("Mailgun send: %s" % mailgun_data)
-	logger.debug("Mailgun files: %s" % mailgun_files)
+	logger.debug("Mailgun files: %s" % files_dict)
 	if settings.DEBUG:
 		if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
 			# We will see this message in the mailgun logs but nothing will actually be delivered
@@ -41,7 +41,7 @@ def mailgun_send(mailgun_data, mailgun_files=None):
 	resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
 		auth=("api", settings.MAILGUN_API_KEY),
 		data=mailgun_data, 
-		files=mailgun_files
+		files=files_dict
 	)
 	logger.debug("Mailgun response: %s" % resp.text)
 	return HttpResponse(status=200)
@@ -475,6 +475,19 @@ def stay(request, location_slug):
 	if sender in bcc_list:
 		bcc_list.remove(sender)
 
+	# pass through attachments
+	logger.debug(request)
+	logger.debug(request.FILES)
+	for attachment in request.FILES.values():
+		data = attachment.stream.read()
+		with open('/tmp/'+attachment.filename, "w") as f:
+			f.write(data)
+	attachments = {}
+	num = 0
+	for attachment in request.FILES.values():
+		attachments["attachment[%d]"] = (attachment.filename, open('/tmp/'+attachment.filename, 'rb'))
+		num+= 1
+
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
 	if subject.find(location.email_subject_prefix) < 0:
@@ -506,7 +519,7 @@ def stay(request, location_slug):
 			# to be common these days 
 			"h:Reply-To": from_address
 		}
-	return mailgun_send(mailgun_data)
+	return mailgun_send(mailgun_data, attachments)
 
 # XXX TODO there is a lot of duplication in these email endpoints. should be
 # able to pull out this code into some common reuseable functions. 
@@ -572,10 +585,17 @@ def residents(request, location_slug):
 		bcc_list.remove(sender)
 	
 	# pass through attachments
-	attachments = []
-	for key in request.FILES:
-		file_obj = request.FILES[key]
-		attachments.append(("attachment-%s" % key, file_obj))
+	logger.debug(request)
+	logger.debug(request.FILES)
+	for attachment in request.FILES.values():
+		data = attachment.stream.read()
+		with open('/tmp/'+attachment.filename, "w") as f:
+			f.write(data)
+	attachments = {}
+	num = 0
+	for attachment in request.FILES.values():
+		attachments["attachment[%d]"] = (attachment.filename, open('/tmp/'+attachment.filename, 'rb'))
+		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
