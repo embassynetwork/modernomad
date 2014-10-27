@@ -32,7 +32,7 @@
 								</li>
 							{% endif %}
 						{% endfor %}
-						{% if location.guest_rooms %}
+						{% if location.rooms_with_future_reservability %}
 						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
 						{% ifappexists gather %}
 						<li class="dropdown">

@@ -24,6 +24,13 @@ class EventAdminGroupInline(admin.TabularInline):
 	model = EventAdminGroup
 	filter_horizontal = ['users',]
 
+class ReservableAdminInline(admin.TabularInline):
+	model = Reservable
+
+class RoomAdmin(admin.ModelAdmin):
+	model = Room
+	inlines = [ReservableAdminInline]
+
 class RoomAdminInline(admin.TabularInline):
 	model = Room
 	extra = 0
@@ -228,6 +235,7 @@ class LocationMenuAdmin(admin.ModelAdmin):
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
