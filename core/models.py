@@ -141,7 +141,10 @@ class Location(models.Model):
 				the_day = the_day + datetime.timedelta(1)
 		return available
 
-	def has_availability(self, arrive, depart):
+	def has_availability(self, arrive=None, depart=None):
+		if not arrive:
+			arrive = timezone.localtime(timezone.now())
+			depart = arrive + datetime.timedelta(1)
 		if not self.rooms_free(arrive, depart):
 			return False
 		return True
