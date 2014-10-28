@@ -10,7 +10,7 @@ from django.template import RequestContext
 from registration import signals
 import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
-from core.forms import LocationSettingsForm
+from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -759,9 +759,52 @@ def PeopleDaterangeQuery(request, location_slug):
 @house_admin_required
 def LocationEditSettings(request, location_slug):
 	location = get_location(location_slug)
-	location_form = LocationSettingsForm(instance=location)
-	return render(request, 'location_edit_settings.html', {"location": location, 'location_form':location_form})
+	if request.method == 'POST':
+		form = LocationSettingsForm(request.POST, instance=location)
+		if form.is_valid():
+			form.save()
+			messages.add_message(request, messages.INFO, "Location Updated.")
+	else:
+		form = LocationSettingsForm(instance=location)
+	return render(request, 'location_edit_settings.html', {'page':'settings', 'location': location, 'form':form})
 
+@house_admin_required
+def LocationEditUsers(request, location_slug):
+	location = get_location(location_slug)
+	if request.method == 'POST':
+		username = request.POST.get('username')
+		user = User.objects.get(username=username)
+		action = request.POST.get('action')
+		if action == "Remove":
+			# Remove user
+			location.house_admins.remove(user)
+			location.save()
+			messages.add_message(request, messages.INFO, "User '%s' Removed." % username)
+		elif action == "Add":
+			# Add user
+			location.house_admins.add(user)
+			location.save()
+			messages.add_message(request, messages.INFO, "User '%s' Added." % username)
+	all_users = User.objects.all().order_by('username')
+	return render(request, 'location_edit_users.html', {'page':'users', 'location': location, 'all_users':all_users})
+
+@house_admin_required
+def LocationEditContent(request, location_slug):
+	location = get_location(location_slug)
+	if request.method == 'POST':
+		form = LocationContentForm(request.POST, instance=location)
+		if form.is_valid():
+			form.save()
+			messages.add_message(request, messages.INFO, "Location Updated.")
+	else:
+		form = LocationContentForm(instance=location)
+	return render(request, 'location_edit_content.html', {'page':'content', 'location': location, 'form':form})
+
+@house_admin_required
+def LocationEditEmails(request, location_slug):
+	location = get_location(location_slug)
+	form = LocationSettingsForm(instance=location)
+	return render(request, 'location_edit_settings.html', {'page':'emails', 'location': location, 'form':form})
 
 # ******************************************************
 #           reservation management views

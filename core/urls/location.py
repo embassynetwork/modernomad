@@ -10,7 +10,10 @@ per_location_patterns = [
 	url(r'^thanks/$', 'core.views.thanks', name='location_thanks'),
 	url(r'^today/$', 'core.views.today', name='location_today'),
 	
-	url(r'^edit/$', 'core.views.LocationEditSettings', name='location_edit'),
+	url(r'^edit/settings/$', 'core.views.LocationEditSettings', name='location_edit_settings'),
+	url(r'^edit/users/$', 'core.views.LocationEditUsers', name='location_edit_users'),
+	url(r'^edit/content/$', 'core.views.LocationEditContent', name='location_edit_content'),
+	url(r'^edit/emails/$', 'core.views.LocationEditEmails', name='location_edit_emails'),
 
 	url(r'^email/current$', 'core.emails.current', name='location_email_current'),
 	url(r'^email/stay$', 'core.emails.stay', name='location_email_stay'),

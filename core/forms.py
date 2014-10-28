@@ -134,10 +134,44 @@ class UserProfileForm(forms.ModelForm):
 		user.save()
 		return user
 
-class LocationSettingsForm(forms.ModelForm):     
+class LocationSettingsForm(forms.ModelForm):
 	class Meta:
 		model = Location
-		exclude = ['short_description', 'image', 'stay_page', 'front_page_stay', 'front_page_participate', 'announcement', 'house_admins', 'residents', ]
+		# Not sure about Timezones and Bank Information.  Not including for now - JLS
+		fields = ['name', 'slug', 'address', 'latitude', 'longitude',  'max_reservation_days', 'welcome_email_days_ahead', 'house_access_code',
+					'ssid', 'ssid_password', 'email_subject_prefix', 'check_out', 'check_in', 'public']
+		widgets = {
+			'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+			'slug': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
+			'address': forms.TextInput(attrs={'class':'form-control', 'size': '64'}),
+			'latitude': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
+			'longitude': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
+			'max_reservation_days': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
+			'welcome_email_days_ahead': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
+			'house_access_code': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+			'ssid': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+			'ssid_password': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+			'email_subject_prefix': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+			'check_out': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
+			'check_in': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
+		}
+		
+class LocationUsersForm(forms.ModelForm):
+	class Meta:
+		model = Location
+		fields = ['house_admins', ]
+
+class LocationContentForm(forms.ModelForm):
+	class Meta:
+		model = Location
+		fields = ['short_description', 'stay_page', 'announcement', 'front_page_stay', 'front_page_participate', 'image']
+		widgets = {
+			'short_description': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+			'stay_page': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+			'announcement': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+			'front_page_stay': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+			'front_page_participate': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+		}
 
 class ReservationForm(forms.ModelForm):
 	class Meta:
