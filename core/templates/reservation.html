@@ -25,52 +25,47 @@ locations are able to accept last minute or day-of requests so please
 submit your request with a few days' notice. </p>
 <hr>
 
-<div class="row">
-	
-	<div class="form-container col-md-12">
-		<form method="post" role="form" action="{% url 'reservation_create' location.slug %}">{% csrf_token %}
+<form method="post" role="form" action="{% url 'reservation_create' location.slug %}">{% csrf_token %}
+    <div class="form-container row">
+        <div class="col-md-8">
+		    <p class="lead">Choose your preferred dates</p> 
 
-			<p>Select arrival and departure dates to show known availability.</p> 
-
-			<div class="reservation-dates form-group row">
-				<div class="col-md-3">Arrive: {{ form.arrive }}</div> 
-				<div class="col-md-3">Depart: {{ form.depart}}</div>
-				<div class="col-md-2"></div>
-				<div class="col-md-4 pull-right" id="reservation-amount-summary-box">
-					<h3>Reservation Summary</h3>
-					<div id="reservation-items"></div>
-					<div class="pull-right"><strong>Total: $<em id="reservation-total">0</em></strong></div>
-				</div>
-				
+			<div class="reservation-dates row">
+				<div class="col-md-6 form-group">
+                    <label for="arrive">Arrive</label>
+                    {{ form.arrive }}
+                </div> 
+				<div class="col-md-6 form-group">
+                    <label for="depart">Depart</label>
+                    {{ form.depart }}
+                </div>
 			</div>
 
-			<div class="row">
-				<div class="col-md-8" id="show-room-availability"></div>
-			</div>
+			<div id="show-room-availability"></div>
 			
 			<div id="reservation-additional-info">
 				<div class="field-wrapper">	
-					<label for="id_purpose">When you're happy with your room selection, 
-						tell us a bit about the purpose of your trip, and hit submit!</label>
+					<label for="id_purpose">Tell us a little about the purpose of your trip</label>
 					<span class="form-help-text"></span>
 					<div class="form-field-body form-group">
 						<textarea class="form-control" id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
 					</div>
 				</div>
 
-				<div id="optional-fields-header">
-					<i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i> Optional fields: arrival time or additional comments... let us know!
-				</div>
+				<p id="optional-fields-header">
+                    <i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i>
+                    Optional fields: arrival time and additional comments
+                </p>
 
 				<div id="optional-fields">
 					<div class="field-wrapper">	
-						<label class="label-optional-field" for="id_arrival_time">Arrival time if known?</label>
+						<label for="id_arrival_time">Arrival time</label>
 						<div class="form-field-body form-group">
 							<input class="form-control" id="id_arrival_time" type="text" name="arrival_time" maxlength="200" />	
 						</div>
 					</div>
 					<div class="field-wrapper">	
-						<label class="label-optional-field" for="id_comments">Any additional comments. (Optional)</label>
+						<label for="id_comments">Additional comments</label>
 						<span class="form-help-text"></span>
 						<div class="form-field-body form-group">
 							<textarea class="form-control" id="id_comments" rows="3" cols="40" name="comments"></textarea>							
@@ -78,17 +73,35 @@ submit your request with a few days' notice. </p>
 					</div>
 				</div>
 			</div>
-
-			<br>
-			<input id="submit-reservation" type="submit" class="btn btn-default disabled" value="Submit">
-			<div id="reassure"></div>
-
-		</form>
-	</div>
-</div>
+        </div>
+        <div class="col-md-4">
+            <div id="reservation-amount-summary-box">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Reservation Summary</h3>
+                    </div>
+                    <table class="table">
+                        <tbody id="reservation-items">
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td><strong>Total</strong></td>
+                                <td><strong>$<span id="reservation-total">0</span></strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input id="submit-reservation" type="submit" class="btn btn-default disabled" value="Submit">
+</form>
 {% endblock %}
 
 {% block extrajs %}
+
+<script src="{% static 'js/waypoints.js' %}"></script>
+<script src="{% static 'js/waypoints-sticky.js' %}"></script>
 
 <script>
 
@@ -169,6 +182,20 @@ submit your request with a few days' notice. </p>
 		$("#optional-fields").slideToggle("slow");
 		$("#optional-fields-header-icon").toggleClass("icon-plus icon-minus")
 	});
+
+    $('[data-toggle="tooltip"]').tooltip();
+    $('#reservation-amount-summary-box').waypoint('sticky');
+
+    function set_summary_width() {
+        box_width = $('#reservation-amount-summary-box').parent().width();
+        $('#reservation-amount-summary-box').width(box_width);
+    }
+    $(document).ready(function() {
+        set_summary_width();
+    });
+    $(window).resize(function() {
+        set_summary_width();
+    });
 
 </script>
 
