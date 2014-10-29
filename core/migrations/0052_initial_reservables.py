@@ -16,7 +16,7 @@ class Migration(DataMigration):
 		# create open-ended reservables for all rooms that were previously "guest rooms"
 		start_date = datetime.date(2012,8,01)
 		guest_rooms = []
-		room_ids = [1,2,3,9,10,12,13,14,16,18,19,24,26,29,30,31,32]
+		room_ids = [1,2,3,9,10,12,13,14,16,18,19,24,26,29,30,31]
 		for the_id in room_ids:
 			room = Room.objects.get(id=the_id)
 			reserv = Reservable(room=room, start_date = start_date)
