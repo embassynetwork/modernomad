@@ -587,12 +587,15 @@ def residents(request, location_slug):
 	# pass through attachments
 	logger.debug(request)
 	logger.debug(request.FILES)
+	to_attach = []
 	for attachment in request.FILES.values():
-		a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
+		a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
+		to_attach.append(a_file)
+	num=0
 	attachments = {}
-	num = 0
-	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
+	for f in to_attach:
+		attachments["attachment[%d]" % num] = (f.name, default_storage.open(f.name).read())
+		default_storage.delete(attachment)
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
