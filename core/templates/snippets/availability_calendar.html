@@ -1,4 +1,4 @@
-<p class="lead">... Now select a room for details</p>
+<p class="lead">Choose an available room</p>
 <table id="rooms-available-calendar">
 	<tr>
 	<th>Room</th>
@@ -11,11 +11,15 @@
 	<tr>
 		<td class="cell-breather"> 
 		{% if room in available_reservations %}
-			<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="btn btn-default room-select">{{room.name}}</label>
+			<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="btn btn-default btn-block room-select">{{room.name}}</label>
 			<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
 		{% else %}
-			<div class="btn disabled">
-				{{room.name}}
+			<div data-toggle="tooltip"
+                 data-placement="top"
+                 title="This room is unavailable for your date range">
+                <div class="btn btn-block disabled">
+				    {{room.name}}
+                </div>
 			</div>
 		{% endif %}
 		</td>
@@ -23,9 +27,17 @@
 		{% for the_day, beds_free in days_list.items %}
 		<td>
 			{% if beds_free > 0 %}
-				<div class="yes-available bg-success"><i class="glyphicon glyphicon-ok"></i> {{beds_free}}</div>
+				<div class="yes-available bg-success"
+                     data-toggle="tooltip"
+                     data-placement="top"
+                     title="{{ beds_free }} bed{{ beds_free|pluralize }} available">
+                     {{ beds_free }}
+                 </div>
 			{% else %}
-				<div class="no-available bg-danger"><i class="glyphicon glyphicon-remove"></i></div>
+				<div class="no-available bg-muted"
+                     data-toggle="tooltip"
+                     data-placement="top"
+                     title="No beds available">0</div>
 			{% endif %}
 		</td>
 		{% endfor %}
@@ -36,19 +48,20 @@
 <div class="room-info-area">
 {% for room, res_dict in available_reservations.items %}
 <div class="room-info" id="room-info-{{room.id}}">
-	<h3>{{room.name}}</h3>
-	{% if room.image %} 
-		<div class="pull-right room-info-image">
-			<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
-		</div> 
+	{% if room.image %}
+        <div class="row">
+		    <div class="col-md-6">
 	{% endif %}
-	<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p></div>
-	<div><p>{{ room.description }}</p></div>
-	<div><p><strong>Total (including fees): </strong><span id="res-value-{{room.id}}">${{res_dict.total|floatformat:2}}</span></p></div>
-	<div>
-
-	</div>
-	<div class="clear"></div>
+                <h3>{{room.name}}</h3>
+                <p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p>
+                <p>{{ room.description }}</p>
+    {% if room.image %}
+            </div>
+            <div class="col-md-6">
+                <img src="/media/{{room.image}}" class="img-rounded room-info-image" />
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endfor %}
 </div>
@@ -76,14 +89,16 @@ $(".room-select").click(function() {
 	if ('{{room.id}}' == room_id) {
 		{% for line_item in res_dict.bill_line_items %}
 			{% if not line_item.paid_by_house %}
-				$("#reservation-items").append('<div class="a-room-fee">')
-				$("#reservation-items").append('<em>{{ line_item.description }}:</em>')
-				$("#reservation-items").append('<span class="pull-right">${{ line_item.amount|floatformat:2 }}</span>')
-				$("#reservation-items").append('</div>')
+				$("#reservation-items").append('<tr class="a-room-fee"> \
+				                                <td>{{ line_item.description }}</td> \
+				                                <td>${{ line_item.amount|floatformat:2 }}</td> \
+				                                </tr>');
 			{% endif %}
 		{% endfor %}
 		$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
 	}
 	{% endfor %}
 });
+
+$('[data-toggle="tooltip"]').tooltip();
 </script>

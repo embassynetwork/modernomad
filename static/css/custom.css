@@ -654,14 +654,6 @@ p.notice {
 	font-size: 120%;
 }
 
-#reservation-amount-summary-box {
-	background-color:lightgray;
-}
-#reservation-amount-summary-box h3 {
-	margin-top: 0px;
-	padding-top: 0px;
-}
-
 .new-reservation {
 	padding-top: 30px;
 }
@@ -689,7 +681,13 @@ div.ui-datepicker{
 	font-size: .8em;
     margin-left: .2em;
 }
-
+.bg-muted {
+    background-color: #eee;
+}
+.room-select {
+    padding-left: .5em;
+    padding-right: .5em;
+}
 .float-right {
 	float:right;
 }
@@ -807,6 +805,16 @@ ul.errorlist,u {
 	padding-top: 25px;
 }
 
+@media (min-width: 992px) {
+    #reservation-amount-summary-box.stuck {
+        position: fixed;
+        top: 0;
+    }
+    #reservation-amount-summary-box .panel {
+        margin-top: 10px;
+    }
+}
+
 #reservation-sticky-info {
 	background: #cfedb1;
     padding: 10px;
@@ -814,12 +822,6 @@ ul.errorlist,u {
     right:310px;
     top:30px;
     width:250px;
-}
-
-#reassure {
-	padding-top: 10px;
-	font-style: italic;
-	color: #e5ae09;
 }
 
 #by-month-nav {
@@ -1082,10 +1084,6 @@ div#spinner
 	height: 35px;
 }
 
-.label-optional-field  {
-	color: #999;
-}
-
 #optional-fields {
 	display: none;
 }
@@ -1101,7 +1099,7 @@ div#spinner
 }
 
 .room-info-image {
-	width: 600px;
+	width: 100%;
 }
 
 .room-info-image-wrapper {
@@ -1589,6 +1587,8 @@ p.lead strong {
 .text-caution {
 	color: rgb(202, 188, 27);
 }
+
+
 
 /*Mobile Styles*/
 
