@@ -20,7 +20,7 @@
 		{% endif %}
 		</td>
 
-		{% for the_day, beds_free in days_list %}
+		{% for the_day, beds_free in days_list.items %}
 		<td>
 			{% if beds_free > 0 %}
 				<div class="yes-available bg-success"><i class="glyphicon glyphicon-ok"></i> {{beds_free}}</div>

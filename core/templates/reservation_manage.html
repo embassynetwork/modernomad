@@ -194,7 +194,7 @@
 				{{room_obj.name}}
 			</td>
 
-			{% for the_day, beds_free in days_list %}
+			{% for the_day, beds_free in days_list.items %}
 				{% if room_obj == r.room and room_has_availability %}
 					<td class="bg-success">
 				{% elif room_obj == r.room and r.status == 'approved' and beds_free >= 0 %}

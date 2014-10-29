@@ -318,7 +318,7 @@ def room_cal_request(request, location_slug, room_id):
 def stay(request, location_slug):
 	location = get_location(location_slug)
 
-	rooms = location.guest_rooms()
+	rooms = location.rooms_with_future_reservability()
 	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
 	year = request.GET.get("year")
@@ -398,6 +398,14 @@ def location_list(request):
 	locations = Location.objects.filter(public=True).order_by("name")
 	return render(request, "location_list.html", {"locations": locations})
 
+def date_range_to_list(start, end):
+	the_day = start
+	date_list = []
+	while the_day < end: 
+		date_list.append(the_day)
+		the_day = the_day + datetime.timedelta(1)
+	return date_list
+
 @login_required
 def CheckRoomAvailability(request, location_slug):
 	if not request.method == 'POST':
@@ -410,15 +418,12 @@ def CheckRoomAvailability(request, location_slug):
 	d_month, d_day, d_year = depart_str.split("/")
 	arrive = datetime.date(int(a_year), int(a_month), int(a_day))
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
-	availability_table = Room.objects.availability(arrive, depart, location)
-	# all rooms should have an associated list of the same length that covers
-	# all days, so just grab the dates from any one of them (they are already
-	# sorted).
-	per_date_avail = availability_table[availability_table.keys()[0]]
-	dates = [tup[0] for tup in per_date_avail]
+	availability = location.availability(arrive, depart)
+	date_list = date_range_to_list(arrive, depart)
 	available_reservations = {}
 	# Create some mock reservations for each available room so we can generate the bill
-	for room in Room.objects.free(arrive, depart, location):
+	free_rooms = location.rooms_free(arrive, depart)
+	for room in free_rooms:
 		reservation = Reservation(id=-1, room=room, arrive=arrive, depart=depart, location=location)
 		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
 		total = 0
@@ -428,7 +433,7 @@ def CheckRoomAvailability(request, location_slug):
 		nights = reservation.total_nights()
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
-	return render(request, "snippets/availability_calendar.html", {"availability_table": availability_table, "dates": dates, 
+	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
 		'available_reservations': available_reservations, })
 
 @login_required(login_url='registration_register')
@@ -856,10 +861,9 @@ def ReservationManage(request, location_slug, reservation_id):
 		email_forms.append(form)
 		email_templates_by_name.append(email_template.name)
 	
-	availability = Room.objects.availability(reservation.arrive, reservation.depart, location)
-	free = Room.objects.free(reservation.arrive, reservation.depart, location)
-	per_date_avail = availability[availability.keys()[0]]
-	dates = [tup[0] for tup in per_date_avail]
+	availability = location.availability(reservation.arrive, reservation.depart)
+	free = location.rooms_free(reservation.arrive, reservation.depart)
+	date_list = date_range_to_list(reservation.arrive, reservation.depart)
 	if reservation.room in free:
 		room_has_availability = True
 	else:
@@ -874,7 +878,7 @@ def ReservationManage(request, location_slug, reservation_id):
 		"email_templates_by_name" : email_templates_by_name,
 		"days_before_welcome_email" : location.welcome_email_days_ahead,
 		"room_has_availability" : room_has_availability,
-		"avail": availability, "dates": dates,
+		"avail": availability, "dates": date_list,
 		"domain": domain, 'location': location,
 		"edit_form": edit_form,
 	})

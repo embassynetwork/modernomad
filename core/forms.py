@@ -185,7 +185,7 @@ class ReservationForm(forms.ModelForm):
 	def __init__(self, location, *args, **kwargs):
 		super(ReservationForm, self).__init__(*args, **kwargs)
 		self.location = location
-		self.fields['room'].queryset = Room.objects.filter(location=location).filter(primary_use="guest")
+		self.fields['room'].queryset = self.location._rooms_with_future_reservability_queryset()
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()

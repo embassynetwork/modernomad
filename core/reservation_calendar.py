@@ -27,10 +27,7 @@ class GuestCalendar(HTMLCalendar):
 				num_private = 0
 				num_shared = 0
 				this_date = date(self.year, self.month, day)
-				any_availability = Room.objects.free(this_date, tomorrow, self.location)
-				print this_date
-				print tomorrow
-				print any_availability
+				any_availability = self.location.rooms_free(this_date, tomorrow)
 				if not any_availability:
 					cssclass += ' full-today'
 				for reservation in self.reservations[day]:

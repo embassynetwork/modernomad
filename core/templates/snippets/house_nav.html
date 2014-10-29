@@ -32,22 +32,24 @@
 								</li>
 							{% endif %}
 						{% endfor %}
-						{% if location.guest_rooms %}
-							<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
-							{% ifappexists gather %}
-								<li class="dropdown">
-								<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-									Events <b class="caret"></b>
-								</a>
-								<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-									<li><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming</a></li>
-									<li><a href="{% url 'gather_create_event' location.slug %}">New Event</a></li>
-									{% if user.is_authenticated %}
-									<li><a href="{% url 'gather_past_events' location.slug %}">Past Events</a></li>
-									{% endif %}
-								</ul>
-								</li>
-							{% endifappexists %}
+
+						{% if location.rooms_with_future_reservability %}
+						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+						{% ifappexists gather %}
+						<li class="dropdown">
+						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
+							Events <b class="caret"></b>
+						</a>
+						<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
+							<li><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming</a></li>
+							<li><a href="{% url 'gather_create_event' location.slug %}">New Event</a></li>
+							{% if user.is_authenticated %}
+							<li><a href="{% url 'gather_past_events' location.slug %}">Past Events</a></li>
+							{% endif %}
+						</ul>
+						</li>
+						{% endifappexists %}
+
 						{% endif %}
 						
 						{% if user.is_authenticated %}
