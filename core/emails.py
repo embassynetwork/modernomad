@@ -478,15 +478,15 @@ def stay(request, location_slug):
 		bcc_list.remove(sender)
 
 	# pass through attachments
-	logger.debug(request)
-	logger.debug(request.FILES)
-	for attachment in request.FILES.values():
-		a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
-	attachments = {}
-	num = 0
-	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
-		num+= 1
+	#logger.debug(request)
+	#logger.debug(request.FILES)
+	#for attachment in request.FILES.values():
+	#	a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
+	#attachments = {}
+	#num = 0
+	#for attachment in request.FILES.values():
+	#	attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
+	#	num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
@@ -585,18 +585,18 @@ def residents(request, location_slug):
 		bcc_list.remove(sender)
 	
 	# pass through attachments
-	logger.debug(request)
-	logger.debug(request.FILES)
-	to_attach = []
-	for attachment in request.FILES.values():
-		a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
-		to_attach.append(a_file)
-	num=0
-	attachments = {}
-	for f in to_attach:
-		attachments["attachment[%d]" % num] = (f.name, default_storage.open(f.name).read())
-		default_storage.delete(attachment)
-		num+= 1
+	#logger.debug(request)
+	#logger.debug(request.FILES)
+	#to_attach = []
+	#for attachment in request.FILES.values():
+	#	a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
+	#	to_attach.append(a_file)
+	#num=0
+	#attachments = {}
+	#for f in to_attach:
+	#	attachments["attachment[%d]" % num] = (f.name, default_storage.open(f.name).read())
+	#	default_storage.delete(attachment)
+	#	num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
