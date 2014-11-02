@@ -168,7 +168,7 @@
 			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
 					<strong>Room:</strong> <select name="room_id">
-							{% for room in location.guest_rooms %}
+							{% for room in location.rooms_with_future_reservability %}
 								<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
 							{% endfor %}
 						</select>

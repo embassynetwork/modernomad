@@ -869,7 +869,6 @@ def ReservationManage(request, location_slug, reservation_id):
 	else:
 		room_has_availability = False
 
-	edit_form = ReservationForm(location, request.POST, instance=reservation)
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
@@ -880,7 +879,6 @@ def ReservationManage(request, location_slug, reservation_id):
 		"room_has_availability" : room_has_availability,
 		"avail": availability, "dates": date_list,
 		"domain": domain, 'location': location,
-		"edit_form": edit_form,
 	})
 
 @house_admin_required

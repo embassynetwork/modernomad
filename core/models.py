@@ -104,7 +104,7 @@ class Location(models.Model):
 
 	def _rooms_with_future_reservability_queryset(self):
 		today = timezone.localtime(timezone.now())
-		return Room.objects.filter(reservables__isnull=False).filter(location=self).filter(Q(reservables__end_date__gte=today) | Q(reservables__end_date=None))
+		return Room.objects.filter(reservables__isnull=False).filter(location=self).filter(Q(reservables__end_date__gte=today) | Q(reservables__end_date=None)).distinct()
 
 	def reservable_rooms_on_day(self, the_day):
 		rooms_at_location = self.filter(location=self)
