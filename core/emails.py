@@ -482,7 +482,7 @@ def stay(request, location_slug):
 	#logger.debug(request.FILES)
 	#for attachment in request.FILES.values():
 	#	a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
-	#attachments = {}
+	attachments = {}
 	#num = 0
 	#for attachment in request.FILES.values():
 	#	attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
@@ -592,7 +592,7 @@ def residents(request, location_slug):
 	#	a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
 	#	to_attach.append(a_file)
 	#num=0
-	#attachments = {}
+	attachments = {}
 	#for f in to_attach:
 	#	attachments["attachment[%d]" % num] = (f.name, default_storage.open(f.name).read())
 	#	default_storage.delete(attachment)
