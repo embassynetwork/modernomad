@@ -36,6 +36,7 @@ from core.models import get_location
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.template import Context
+from django.core.serializers.json import DateTimeAwareJSONEncoder
 import logging
 
 logger = logging.getLogger(__name__)
@@ -406,7 +407,6 @@ def date_range_to_list(start, end):
 		the_day = the_day + datetime.timedelta(1)
 	return date_list
 
-@login_required
 def CheckRoomAvailability(request, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -436,21 +436,37 @@ def CheckRoomAvailability(request, location_slug):
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
 		'available_reservations': available_reservations, })
 
-@login_required(login_url='registration_register')
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
 	if request.method == 'POST':
 		form = ReservationForm(location, request.POST)
 		if form.is_valid():
 			reservation = form.save(commit=False)
-			reservation.user = request.user
 			reservation.location = location
-			reservation.save()
-			# Resetting the rate will also generate a bill
-			reservation.reset_rate()
-			new_reservation_notify(reservation)
-			messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
-			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
+			if request.user.is_authenticated():
+				reservation.user = request.user
+				reservation.save()
+				# Make sure the rate is set and then generate a bill
+				reservation.reset_rate()
+				new_reservation_notify(reservation)
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
+				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
+			else:
+				e= DateTimeAwareJSONEncoder()
+				res_info = {'arrive': e.default(reservation.arrive),
+						'depart': e.default(reservation.depart),
+						'location_id': reservation.location.id,
+						'room_id': reservation.room.id,
+						'purpose': reservation.purpose,
+						'arrival_time': reservation.arrival_time,
+						'comments': reservation.comments,
+						}
+				request.session['reservation'] = res_info
+				print 'session info'
+				print request.session.keys()
+				print request.session.items()
+				messages.add_message(request, messages.INFO, 'Please make a profile before submitting your reservation')			
+				return HttpResponseRedirect(reverse('registration_register'))
 		else:
 			print form.errors
 	# GET request
@@ -1158,6 +1174,9 @@ class Registration(registration.views.RegistrationView):
 		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
 		login(request, new_user)
 		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
+		if request.session.get('reservation'):
+			print 'found reservation'
+			print request.session['reservation']
 		return new_user
 
 	def registration_allowed(self, request):
