@@ -225,7 +225,7 @@ def guest_welcome(reservation):
 #             LOCATION EMAILS              #
 ############################################
 
-def guest_daily_update(location):
+def guests_residents_daily_update(location):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	today = timezone.localtime(timezone.now())
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
@@ -238,11 +238,28 @@ def guest_daily_update(location):
 
 	subject = "[%s] Events, Arrivals and Departures for %s" % (location.email_subject_prefix, str(today.date()))
 	
-	guest_emails = []
+	admin_emails = []
+	for admin in location.house_admins.all():
+		if not admin.email in admin_emails:
+			admin_emails.append(admin.email)
+	
+	print admin_emails
+
+	to_emails = []
 	for r in Reservation.objects.confirmed_on_date(today, location):
-		if not r.user.email in guest_emails:
-			guest_emails.append(r.user.email)
-	if len(guest_emails) == 0:
+		if (not r.user.email in admin_emails) and (not r.user.email in to_emails):
+			to_emails.append(r.user.email)
+
+	# Add all the non-admin residents at this location (admins get a different
+	# email)
+	for r in location.residents.all():
+		if (not r.email in admin_emails) and (not r.email in to_emails):
+			to_emails.append(r.email)
+	
+	print "people receiving the non-admin daily update"
+	print to_emails
+
+	if len(to_emails) == 0:
 		return None
 	
 	c = Context({
@@ -257,7 +274,7 @@ def guest_daily_update(location):
 
 	mailgun_data={
 		"from": location.from_email(),
-		"to": guest_emails,
+		"to": to_emails,
 		"subject": subject,
 		"text": text_content,
 	}

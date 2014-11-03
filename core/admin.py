@@ -42,9 +42,9 @@ class LocationAdmin(admin.ModelAdmin):
 	 	msg = gen_message(queryset, "email", "emails", "sent")
 		self.message_user(request, msg)
 
-	def send_guest_daily_update(self, request, queryset):
+	def send_guests_residents_daily_update(self, request, queryset):
 		for res in queryset:
-			guest_daily_update(res)
+			guests_residents_daily_update(res)
 	 	msg = gen_message(queryset, "email", "emails", "sent")
 		self.message_user(request, msg)
 
@@ -53,7 +53,7 @@ class LocationAdmin(admin.ModelAdmin):
 	list_display=('name', 'address')
 	list_filter=('name',)
 	filter_horizontal = ['residents', 'house_admins']
-	actions= ['send_admin_daily_update', 'send_guest_daily_update']
+	actions= ['send_admin_daily_update', 'send_guests_residents_daily_update']
 
 	inlines = [RoomAdminInline]
 	if 'gather' in settings.INSTALLED_APPS:

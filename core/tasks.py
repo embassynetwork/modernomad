@@ -1,7 +1,7 @@
 from celery.task.schedules import crontab
 from celery.task import periodic_task
 from core.models import Reservation, Location
-from core.emails import guest_daily_update, admin_daily_update, guest_welcome
+from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome
 from modernomad.backup import BackupManager
 import datetime
 
@@ -10,10 +10,10 @@ import datetime
 #    print "HELLO WORLD"                    
 
 @periodic_task(run_every=crontab(hour=5, minute=30))
-def send_guest_daily_update():
+def send_guests_residents_daily_update():
 	locations = Location.objects.all()
 	for location in locations:
-		guest_daily_update(location)
+		guests_residents_daily_update(location)
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
 def send_admin_daily_update():
