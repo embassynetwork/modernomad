@@ -9,7 +9,7 @@
 <a href="{% url 'location_payments' location.slug next_date.year next_date.month %}">&rarr;</a>
 </div>
 
-<table id="payment-list">
+<table id="payment-list" class="table table-striped table-hover">
 <thead>
 	<tr>
 		<th colspan="2"></th>
@@ -59,4 +59,19 @@
 </tr>
 </tbody>
 </table>
+
+<div class="row">
+	<div class="col-sm-6">
+	<table class="table table-striped table-hover">
+		<tbody>
+		<tr><td>Gross Rent this Month</td><td> ${{gross_rent|floatformat:2 }}</td></tr>
+		<tr><td>Gross Income from Transient Occupants</td><td>${{ gross_rent_transient|floatformat:2 }}</td></tr>
+		<tr><td>Net Income from Transient Occupants (minus Embassy Network fee)</td><td>${{ net_rent_transient|floatformat:2 }}</td></tr>
+		<tr><td>Hotel Tax ({{ hotel_tax_percent }}% * Gross Transient Income)</td><td>  ${{ hotel_tax|floatformat:2 }}</td></tr>
+		<tr><td>Rent from Residents</td><td>  ${{ net_rent_resident|floatformat:2 }}</td></tr>
+	</tbody>
+	</table>
+</div>
+</div>
+
 {% endblock %}

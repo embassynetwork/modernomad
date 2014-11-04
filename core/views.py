@@ -1092,6 +1092,31 @@ def payments(request, location_slug, year, month):
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	payments_this_month = Payment.objects.filter(reservation__location=location, payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
 
+	# which payments were for transient guests versus residents?
+	gross_rent = 0
+	net_rent_resident = 0 
+	gross_rent_transient = 0
+	net_rent_transient = 0
+	hotel_tax = 0
+	# JKS if the reservation has bill line items that are not paid by the house
+	# (so-called non_house_fees), then the amount to_house counts as transient
+	# occupancy income. otherwise it counts as resident occupancy income. 
+	# TODO: we;re essentially equating non house fees with hotel taxes. we
+	# should max this explicit in some way. 
+	for p in payments_this_month:
+		gross_rent += p.to_house()
+		if p.reservation.non_house_fees() > 0:
+			gross_rent_transient += (p.to_house() + p.house_fees())
+			net_rent_transient += p.to_house()
+			hotel_tax += p.non_house_fees()
+		else:
+			net_rent_resident += p.to_house()
+
+	hotel_tax_percent = 0.0
+	not_paid_by_house = LocationFee.objects.filter(location=location).filter(fee__paid_by_house=False)
+	for loc_fee in not_paid_by_house:
+		hotel_tax_percent += loc_fee.fee.percentage
+
 	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'bill_amount':0, 'paid_amount':0}
 	for p in payments_this_month:
 		totals['count'] = totals['count'] + 1
@@ -1101,7 +1126,8 @@ def payments(request, location_slug, year, month):
 		totals['paid_amount'] = totals['paid_amount'] + p.paid_amount
 
 	return render(request, "payments.html", {'payments': payments_this_month, 'totals':totals, 'location': location, 
-		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, })
+		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, 'gross_rent': gross_rent, 
+		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 'hotel_tax': hotel_tax, 'hotel_tax_percent': hotel_tax_percent*100 })
 
 # ******************************************************
 #           registration callbacks and views
