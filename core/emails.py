@@ -348,6 +348,7 @@ def current(request, location_slug):
 		logger.error('location not found')
 		return HttpResponse(status=200)
 	logger.debug('current@ for location: %s' % location)
+	today = timezone.localtime(timezone.now())
 
 	# we think that message_headers is a list of strings
 	header_txt = request.POST.get('message-headers')
