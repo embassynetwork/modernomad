@@ -1127,7 +1127,8 @@ def payments(request, location_slug, year, month):
 
 	return render(request, "payments.html", {'payments': payments_this_month, 'totals':totals, 'location': location, 
 		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, 'gross_rent': gross_rent, 
-		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 'hotel_tax': hotel_tax, 'hotel_tax_percent': hotel_tax_percent*100 })
+		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 
+		'hotel_tax': hotel_tax, 'hotel_tax_percent': hotel_tax_percent*100, 'total_transfer': gross_rent+hotel_tax })
 
 # ******************************************************
 #           registration callbacks and views
