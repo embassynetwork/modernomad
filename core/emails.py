@@ -13,7 +13,7 @@ from django.utils import timezone
 from core.models import Reservation
 from gather.models import Event
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
+from django.core.files.base import File
 
 import json
 import requests
@@ -498,7 +498,7 @@ def test80085(request, location_slug):
 	logger.debug(request)
 	logger.debug(request.FILES)
 	for attachment in request.FILES.values():
-		a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
+		a_file = default_storage.save(attachment.name, File(attachment.read()))
 	attachments = {}
 	num = 0
 	for attachment in request.FILES.values():
@@ -600,7 +600,7 @@ def stay(request, location_slug):
 	#logger.debug(request)
 	#logger.debug(request.FILES)
 	#for attachment in request.FILES.values():
-	#	a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
+	#	a_file = default_storage.save('/tmp/'+attachment.name, File(attachment.read()))
 	attachments = {}
 	#num = 0
 	#for attachment in request.FILES.values():
@@ -708,7 +708,7 @@ def residents(request, location_slug):
 	#logger.debug(request.FILES)
 	#to_attach = []
 	#for attachment in request.FILES.values():
-	#	a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
+	#	a_file = default_storage.save(attachment.name, File(attachment.read()))
 	#	to_attach.append(a_file)
 	#num=0
 	attachments = {}
