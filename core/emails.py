@@ -498,11 +498,11 @@ def test80085(request, location_slug):
 	logger.debug(request)
 	logger.debug(request.FILES)
 	for attachment in request.FILES.values():
-		a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
+		a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
 	attachments = {}
 	num = 0
 	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
+		attachments["attachment[%d]"] = (attachment.name, open(attachment.name, 'rb'))
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
