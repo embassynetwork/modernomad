@@ -480,7 +480,7 @@ def test80085(request, location_slug):
 	body_html = request.POST.get('body-html')
 
 	# retrieve the current house admins for this location
-	bcc_list = ['jessy@jessykate.com', 'jsayles@gmail.com', 'jessy@embassynetwork.com']
+	bcc_list = ['jessy@jessykate.com', 'jsayles@gmail.com', 'jessy@embassynetwork.com', sender]
 	logger.debug("bcc list: %s" % bcc_list)
 
 	# Make sure this person can post to our list
@@ -488,8 +488,11 @@ def test80085(request, location_slug):
 	#	# TODO - This shoud possibly send a response so they know they were blocked
 	#	logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
 	#	return HttpResponse(status=200)
-	if sender in bcc_list:
-		bcc_list.remove(sender)
+	
+	# usually we would remove the sender from receiving the email but because
+	# we're testing, let 'em have it.  
+	#if sender in bcc_list:
+	#	bcc_list.remove(sender)
 
 	# pass through attachments
 	logger.debug(request)
