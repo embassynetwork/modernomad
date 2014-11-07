@@ -502,7 +502,7 @@ def test80085(request, location_slug):
 	attachments = {}
 	num = 0
 	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.name, open(attachment.name, 'rb'))
+		attachments["attachment[%d]"] = (attachment.name, default_storage.open(attachment.name, 'rb'))
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
