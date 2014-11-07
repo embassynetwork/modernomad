@@ -480,7 +480,7 @@ def test80085(request, location_slug):
 	body_html = request.POST.get('body-html')
 
 	# retrieve the current house admins for this location
-	bcc_list = ['jessy@jessykate.com', 'jsayles@gmail.com', 'jessy@embassynetwork.com', sender]
+	bcc_list = [sender]
 	logger.debug("bcc list: %s" % bcc_list)
 
 	# Make sure this person can post to our list
@@ -520,7 +520,7 @@ def test80085(request, location_slug):
 		body_html = body_html + html_footer
 
 	# send the message 
-	list_address = location.from_email()
+	list_address = "test80085@"+location.slug+".mail.embassynetwork.com"
 	mailgun_data = {"from": from_address,
 			"to": [recipient, ],
 			"bcc": bcc_list,
