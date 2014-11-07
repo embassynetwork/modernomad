@@ -14,7 +14,7 @@ from core.models import Reservation
 from gather.models import Event
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-import os.path.join
+from os.path import join
 
 import json
 import requests
@@ -508,7 +508,7 @@ def test80085(request, location_slug):
 	num = 0
 	for attachment in request.FILES.values():
 		#attachments["attachment[%d]"] = (attachment.name, default_storage.open(attachment.name, 'rb').read())
-		attachments["attachment[%d]"] = (attachment.name, open(os.path.join(settings.MEDIA_ROOT, attachment.name), 'rb').read())
+		attachments["attachment[%d]"] = (attachment.name, open(join(settings.MEDIA_ROOT, attachment.name), 'rb').read())
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
