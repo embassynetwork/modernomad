@@ -506,7 +506,7 @@ def test80085(request, location_slug):
 	attachments = {}
 	num = 0
 	for attachment in request.FILES.values():
-		attachments["attachment[%d]"] = (attachment.name, default_storage.open(attachment.name, 'rb').read())
+		attachments["attachment-%d" % num] = (attachment.name, default_storage.open(attachment.name, 'rb').read())
 		default_storage.delete(attachment.name)
 		num+= 1
 
