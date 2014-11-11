@@ -797,7 +797,7 @@ def LocationEditUsers(request, location_slug):
 def LocationEditContent(request, location_slug):
 	location = get_location(location_slug)
 	if request.method == 'POST':
-		form = LocationContentForm(request.POST, instance=location)
+		form = LocationContentForm(request.POST, request.FILES, instance=location)
 		if form.is_valid():
 			form.save()
 			messages.add_message(request, messages.INFO, "Location Updated.")
