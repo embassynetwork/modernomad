@@ -7,8 +7,6 @@ def network_locations(request):
 def location_variables(request):
 	match = re.match(r'^/locations/(?P<location_slug>[^/]*)/.*', request.path)
 	if match:
-		print "context variable"
-		print match.group('location_slug')
 		location_slug = match.group('location_slug')
 		location = Location.objects.get(slug = location_slug)
 		location_about_path = 'locations/%s/about/' % location_slug
