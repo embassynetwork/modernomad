@@ -405,6 +405,11 @@ def current(request, location_slug):
 	#	return HttpResponse(status=200)
 	if sender in bcc_list:
 		bcc_list.remove(sender)
+
+	# Include attachements
+	attachments = []
+	for attachment in request.FILES.values():
+		attachments.append(("attachment", attachment))
 	
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
@@ -437,7 +442,7 @@ def current(request, location_slug):
 		# to be common these days 
 		"h:Reply-To": list_address,
 	}
-	return mailgun_send(mailgun_data)
+	return mailgun_send(mailgun_data, attachments)
 
 @csrf_exempt
 def test80085(request, location_slug):
@@ -510,8 +515,6 @@ def test80085(request, location_slug):
 	# 	#default_storage.delete(attachment.name)
 	# 	num+= 1
 
-	logger.debug(request)
-	logger.debug(request.FILES)
 	attachments = []
 	for attachment in request.FILES.values():
 		attachments.append(("attachment", attachment))
@@ -605,16 +608,10 @@ def stay(request, location_slug):
 	if sender in bcc_list:
 		bcc_list.remove(sender)
 
-	# pass through attachments
-	#logger.debug(request)
-	#logger.debug(request.FILES)
-	#for attachment in request.FILES.values():
-	#	a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
-	#attachments = {}
-	#num = 0
-	#for attachment in request.FILES.values():
-	#	attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
-	#	num+= 1
+	# Include attachements
+	attachments = []
+	for attachment in request.FILES.values():
+		attachments.append(("attachment", attachment))
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
@@ -647,8 +644,7 @@ def stay(request, location_slug):
 			# to be common these days 
 			"h:Reply-To": from_address
 		}
-	#return mailgun_send(mailgun_data, attachments)
-	return mailgun_send(mailgun_data)
+	return mailgun_send(mailgun_data, attachments)
 
 # XXX TODO there is a lot of duplication in these email endpoints. should be
 # able to pull out this code into some common reuseable functions. 
@@ -713,19 +709,10 @@ def residents(request, location_slug):
 	if sender in bcc_list:
 		bcc_list.remove(sender)
 	
-	# pass through attachments
-	#logger.debug(request)
-	#logger.debug(request.FILES)
-	#to_attach = []
-	#for attachment in request.FILES.values():
-	#	a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
-	#	to_attach.append(a_file)
-	#num=0
-	#attachments = {}
-	#for f in to_attach:
-	#	attachments["attachment[%d]" % num] = (f.name, default_storage.open(f.name).read())
-	#	default_storage.delete(attachment)
-	#	num+= 1
+	# Include attachements
+	attachments = []
+	for attachment in request.FILES.values():
+		attachments.append(("attachment", attachment))
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
@@ -759,6 +746,4 @@ def residents(request, location_slug):
 		# to be common these days 
 		"h:Reply-To": list_address,
 	}
-	#return mailgun_send(mailgun_data, attachments)
-	return mailgun_send(mailgun_data)
-
+	return mailgun_send(mailgun_data, attachments)
