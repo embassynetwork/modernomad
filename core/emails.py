@@ -368,6 +368,9 @@ def current(request, location_slug):
 		logger.info('message appears to be auto-submitted. reject silently')
 		return HttpResponse(status=200)
 
+	logger.debug(request.POST)
+	logger.debug(request.FILES)
+	
 	recipient = request.POST.get('recipient')
 	from_address = request.POST.get('from')
 	logger.debug('from: %s' % from_address)
