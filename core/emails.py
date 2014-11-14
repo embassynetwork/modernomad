@@ -514,7 +514,7 @@ def test80085(request, location_slug):
 	logger.debug(request.FILES)
 	attachments = []
 	for attachment in request.FILES.values():
-		attachments.append(("attachment", attachment))
+		attachments.append(("image", attachment))
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
