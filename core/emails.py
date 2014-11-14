@@ -480,7 +480,7 @@ def test80085(request, location_slug):
 	body_html = request.POST.get('body-html')
 
 	# retrieve the current house admins for this location
-	bcc_list = [sender]
+	bcc_list = ['jsayles@gmail.com', 'jessy@jessykate.com']
 	logger.debug("bcc list: %s" % bcc_list)
 
 	# Make sure this person can post to our list
@@ -495,19 +495,27 @@ def test80085(request, location_slug):
 	#	bcc_list.remove(sender)
 
 	# pass through attachments
+	# logger.debug(request)
+	# logger.debug(request.FILES)
+	# for attachment in request.FILES.values():
+	# 	# JKS NOTE! this does NOT work with unicode-encoded data. i'm not
+	# 	# actually sure that we should *expect* to receive unicode-encoded
+	# 	# attachments, but it definitely breaks (which i disocvered because
+	# 	# mailgun sends its test POST with a unicode-encoded attachment). 
+	# 	a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
+	# attachments = {}
+	# num = 0
+	# for attachment in request.FILES.values():
+	# 	attachments["attachment-%d" % num] = (attachment.name, default_storage.open(attachment.name, 'rb').read())
+	# 	#default_storage.delete(attachment.name)
+	# 	num+= 1
+
 	logger.debug(request)
 	logger.debug(request.FILES)
-	for attachment in request.FILES.values():
-		# JKS NOTE! this does NOT work with unicode-encoded data. i'm not
-		# actually sure that we should *expect* to receive unicode-encoded
-		# attachments, but it definitely breaks (which i disocvered because
-		# mailgun sends its test POST with a unicode-encoded attachment). 
-		a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
-	attachments = {}
 	num = 0
+	attachments = {}
 	for attachment in request.FILES.values():
-		attachments["attachment-%d" % num] = (attachment.name, default_storage.open(attachment.name, 'rb').read())
-		default_storage.delete(attachment.name)
+		attachments["attachment-%d" % num] = (attachment.name, attachment.read())
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
