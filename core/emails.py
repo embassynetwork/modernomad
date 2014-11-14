@@ -515,7 +515,7 @@ def test80085(request, location_slug):
 	num = 0
 	attachments = {}
 	for attachment in request.FILES.values():
-		attachments["attachment-%d" % num] = (attachment.name, ContentFile(attachment.read()))
+		attachments["attachment-%d" % num] = (attachment.name, attachment)
 		num+= 1
 
 	# prefix subject, but only if the prefix string isn't already in the
