@@ -512,11 +512,9 @@ def test80085(request, location_slug):
 
 	logger.debug(request)
 	logger.debug(request.FILES)
-	num = 0
-	attachments = {}
+	attachments = []
 	for attachment in request.FILES.values():
-		attachments["attachment-%d" % num] = (attachment.name, attachment.read())
-		num+= 1
+		attachments.append(("attachment", attachment.read()))
 
 	# prefix subject, but only if the prefix string isn't already in the
 	# subject line (such as a reply)
@@ -550,8 +548,6 @@ def test80085(request, location_slug):
 			"h:Reply-To": from_address
 		}
 	return mailgun_send(mailgun_data, attachments)
-
-
 
 @csrf_exempt
 def stay(request, location_slug):
@@ -614,7 +610,7 @@ def stay(request, location_slug):
 	#logger.debug(request.FILES)
 	#for attachment in request.FILES.values():
 	#	a_file = default_storage.save('/tmp/'+attachment.name, ContentFile(attachment.read()))
-	attachments = {}
+	#attachments = {}
 	#num = 0
 	#for attachment in request.FILES.values():
 	#	attachments["attachment[%d]"] = (attachment.name, open('/tmp/'+attachment.name, 'rb'))
@@ -651,7 +647,8 @@ def stay(request, location_slug):
 			# to be common these days 
 			"h:Reply-To": from_address
 		}
-	return mailgun_send(mailgun_data, attachments)
+	#return mailgun_send(mailgun_data, attachments)
+	return mailgun_send(mailgun_data)
 
 # XXX TODO there is a lot of duplication in these email endpoints. should be
 # able to pull out this code into some common reuseable functions. 
@@ -724,7 +721,7 @@ def residents(request, location_slug):
 	#	a_file = default_storage.save(attachment.name, ContentFile(attachment.read()))
 	#	to_attach.append(a_file)
 	#num=0
-	attachments = {}
+	#attachments = {}
 	#for f in to_attach:
 	#	attachments["attachment[%d]" % num] = (f.name, default_storage.open(f.name).read())
 	#	default_storage.delete(attachment)
@@ -762,5 +759,6 @@ def residents(request, location_slug):
 		# to be common these days 
 		"h:Reply-To": list_address,
 	}
-	return mailgun_send(mailgun_data, attachments)
+	#return mailgun_send(mailgun_data, attachments)
+	return mailgun_send(mailgun_data)
 
