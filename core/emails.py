@@ -368,9 +368,6 @@ def current(request, location_slug):
 		logger.info('message appears to be auto-submitted. reject silently')
 		return HttpResponse(status=200)
 
-	logger.debug(request.POST)
-	logger.debug(request.FILES)
-	
 	recipient = request.POST.get('recipient')
 	from_address = request.POST.get('from')
 	logger.debug('from: %s' % from_address)
@@ -456,8 +453,9 @@ def test80085(request, location_slug):
 	except:
 		# XXX TODO reject and bounce back to sender?
 		return HttpResponse(status=200)
-	logger.debug('stay@ for location: %s' % location)
+	logger.debug('test80085@ for location: %s' % location)
 	logger.debug(request.POST)
+	logger.debug(request.FILES)
 
 	# we think that message_headers is a list of strings
 	header_txt = request.POST.get('message-headers')
