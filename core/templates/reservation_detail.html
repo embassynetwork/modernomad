@@ -138,13 +138,18 @@
 					$('#payform').append($input).submit();
 				};
 
-				StripeCheckout.open({
+				handler = StripeCheckout.configure({
+					zipCode: true
+				}); 
+			
+				handler.open({
 					key: "{{ stripe_publishable_key }}",
 					amount: "{{ reservation.total_owed_in_cents }}",
 					name: "The Embassy Network",
-					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }} at ${{ reservation.rate }}/night.",
+					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }}.",
 					panelLabel:"Pay",
 					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
+					zipCode: true,
 					token: token
 				});
 			}
