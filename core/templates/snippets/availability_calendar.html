@@ -81,22 +81,24 @@ $(".room-select").click(function() {
 	$(room_info_div_id).show();
 	$("#reservation-additional-info").show();
 	room_name = $(this).text();
-	res_value = $("#res-value-" + room_id).text();
-	$("#submit-reservation").val("Submit request for " + room_name + " at " + res_value);
+	//res_value = $("#res-value-" + room_id).text();
+	//$("#submit-reservation").val("Submit request for " + room_name + " at " );
 
 	// inject the fees and subtotal info for this room when selected
+	// XXX JKS why is there a for loop here? this whole section should probably be re-written
 	{% for room, res_dict in available_reservations.items %}
-	if ('{{room.id}}' == room_id) {
-		{% for line_item in res_dict.bill_line_items %}
+		if ('{{room.id}}' == room_id) {
+			{% for line_item in res_dict.bill_line_items %}
 			{% if not line_item.paid_by_house %}
-				$("#reservation-items").append('<tr class="a-room-fee"> \
-				                                <td>{{ line_item.description }}</td> \
-				                                <td>${{ line_item.amount|floatformat:2 }}</td> \
-				                                </tr>');
+			$("#reservation-items").append('<tr class="a-room-fee"> \
+				<td>{{ line_item.description }}</td> \
+				<td>${{ line_item.amount|floatformat:2 }}</td> \
+			</tr>');
 			{% endif %}
-		{% endfor %}
-		$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
-	}
+			{% endfor %}
+			$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
+			$("#submit-reservation").val("Submit request for " + room_name + " at " + {{ res_dict.total|floatformat:2 }});
+		}
 	{% endfor %}
 });
 
