@@ -452,9 +452,10 @@ def ReservationSubmit(request, location_slug):
 				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 			else:
-				e= DateTimeAwareJSONEncoder()
-				res_info = {'arrive': e.default(reservation.arrive),
-						'depart': e.default(reservation.depart),
+				date_encode = DateTimeAwareJSONEncoder()
+				res_info = {
+						'arrive': {'year': reservation.arrive.year, 'month': reservation.arrive.month, 'day': reservation.arrive.day},
+						'depart': {'year': reservation.depart.year, 'month': reservation.depart.month, 'day': reservation.depart.day},
 						'location_id': reservation.location.id,
 						'room_id': reservation.room.id,
 						'purpose': reservation.purpose,
@@ -1177,6 +1178,23 @@ class Registration(registration.views.RegistrationView):
 		if request.session.get('reservation'):
 			print 'found reservation'
 			print request.session['reservation']
+			details = request.session.pop('reservation')
+			new_res = Reservation(
+					arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
+					depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']), 
+					location = Location.objects.get(id=details['location_id']), 
+					room = Room.objects.get(id=details['room_id']), 
+					purpose = details['purpose'], 
+					arrival_time = details['arrival_time'], 
+					comments = details['comments'],
+					user = request.user,
+				)
+			new_res.save()
+			new_res.generate_bill()
+			print 'new reservation %d saved.' % new_res.id
+			# we can't just redirect here because the user doesn't get logged
+			# in. so save the reservaton ID and redirect below. 
+			request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
 		return new_user
 
 	def registration_allowed(self, request):
@@ -1193,9 +1211,12 @@ class Registration(registration.views.RegistrationView):
 		interrupt the registration process here.
 		"""
 		url_path = request.get_full_path().split("next=")
-		if len(url_path) > 1 and url_path[1] == "/reservation/create/":
-			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to make a reservation!')
-			return (url_path[1], (), {'username' : user.username})
+		if request.session.get('new_res_redirect'):
+			res_id = request.session['new_res_redirect']['res_id']
+			location_slug = request.session['new_res_redirect']['location_slug']
+			request.session.pop('new_res_redirect')
+			messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
+			return reverse('reservation_detail', args=(location_slug, res_id))
 		elif len(url_path) > 1 and url_path[1] == "/events/create/":
 			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to propose your event!')
 			return (url_path[1], (), {'username' : user.username})
