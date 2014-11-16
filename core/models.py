@@ -850,5 +850,12 @@ class Reservable(models.Model):
 	start_date = models.DateField()
 	end_date = models.DateField(null=True, blank=True)
 
-	
+class UserNote(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	created_by = models.ForeignKey(User, null=True, related_name="created_by")
+	user = models.ForeignKey(User, blank=False, null=False)
+	note = models.TextField(blank=True, null=True)
+
+	def __str__(self): 
+		return '%s - %s: %s' % (self.created.date(), self.user.username, self.note)
 

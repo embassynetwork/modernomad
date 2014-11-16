@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.conf import settings
 from core.decorators import house_admin_required
 from django.db.models import Q
-from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee, BillLineItem
+from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee, BillLineItem, UserNote
 from core.tasks import guest_welcome
 from core import payment_gateway
 import uuid, base64, os
@@ -866,10 +866,18 @@ def ReservationManage(request, location_slug, reservation_id):
 	else:
 		room_has_availability = False
 
+	# Pull all the user notes for this person
+	if 'user_note' in request.POST:
+		note = request.POST['user_note']
+		if note:
+			UserNote.objects.create(user=user, created_by=request.user, note=note)
+	user_notes = UserNote.objects.filter(user=user)
+
 	return render(request, 'reservation_manage.html', {
 		"r": reservation, 
 		"past_reservations":past_reservations, 
 		"upcoming_reservations": upcoming_reservations,
+		"user_notes": user_notes,
 		"email_forms" : email_forms,
 		"email_templates_by_name" : email_templates_by_name,
 		"days_before_welcome_email" : location.welcome_email_days_ahead,

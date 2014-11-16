@@ -233,6 +233,9 @@ class LocationMenuAdmin(admin.ModelAdmin):
 	inlines = [LocationFlatPageInline]
 	list_display = ('location', 'name')
 
+class UserNoteAdmin(admin.ModelAdmin):
+	model = UserNote
+
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Room, RoomAdmin)
@@ -241,6 +244,7 @@ admin.site.register(Payment, PaymentAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)
+admin.site.register(UserNote, UserNoteAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)

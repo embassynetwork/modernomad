@@ -323,14 +323,23 @@
 	<div class="user-field field"><strong>Projects:</strong> {{ r.user.profile.projects }}</div>
 	<div class="user-field field"><strong>Sharing Interests</strong>: {{ r.user.profile.sharing }}</div>
 	<div class="user-field field"><strong>Discussion Interests</strong>: {{ r.user.profile.discussion }}</div>
+
+	<h3>User Notes</h3>
+	{% for note in user_notes %}
+		<div class="user-field field"><strong>{{ note.created }} ({{note.created_by}}):</strong> <pre>{{ note.note }}</pre>
+	{% endfor %}
+	<form method="POST" action=".">{% csrf_token %}
+		<textarea name="user_note" class="form-control" cols="32" rows="2" style="margin-top:1em;"></textarea>
+		<input class="btn" style="width:100px; margin-top:1em;" type="submit" value="Add Note"/>
+	</form>
+
 	{% with u=r.user %}
 		{% include "snippets/profile_links.html" %}
 
 		<h3>Other Reservations</h3>
 		{% include "snippets/user_reservations.html" %}
-
 	{% endwith %}
-
+	
 </div> <!-- end res-info-main -->
 </div> 
 
