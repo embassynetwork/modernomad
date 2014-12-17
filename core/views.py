@@ -775,18 +775,21 @@ def LocationEditUsers(request, location_slug):
 	location = get_location(location_slug)
 	if request.method == 'POST':
 		username = request.POST.get('username')
-		user = User.objects.get(username=username)
-		action = request.POST.get('action')
-		if action == "Remove":
-			# Remove user
-			location.house_admins.remove(user)
-			location.save()
-			messages.add_message(request, messages.INFO, "User '%s' Removed." % username)
-		elif action == "Add":
-			# Add user
-			location.house_admins.add(user)
-			location.save()
-			messages.add_message(request, messages.INFO, "User '%s' Added." % username)
+		user = User.objects.filter(username=username).first()
+		if user:
+			action = request.POST.get('action')
+			if action == "Remove":
+				# Remove user
+				location.house_admins.remove(user)
+				location.save()
+				messages.add_message(request, messages.INFO, "User '%s' Removed." % username)
+			elif action == "Add":
+				# Add user
+				location.house_admins.add(user)
+				location.save()
+				messages.add_message(request, messages.INFO, "User '%s' Added." % username)
+		else:
+			messages.add_message(request, messages.ERROR, "User '%s' Not Found!" % username)
 	all_users = User.objects.all().order_by('username')
 	return render(request, 'location_edit_users.html', {'page':'users', 'location': location, 'all_users':all_users})
 
