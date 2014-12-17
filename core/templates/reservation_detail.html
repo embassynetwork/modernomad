@@ -139,7 +139,7 @@
 				};
 
 				handler = StripeCheckout.configure({
-					zipCode: true
+					//zipCode: true
 				}); 
 			
 				handler.open({
@@ -149,7 +149,7 @@
 					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }}.",
 					panelLabel:"Pay",
 					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
-					zipCode: true,
+					//zipCode: true,
 					token: token
 				});
 			}
