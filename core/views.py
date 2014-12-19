@@ -579,7 +579,7 @@ def UserAddCard(request, username):
 			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 			return HttpResponseRedirect("/people/%s" % username)
 	except stripe.CardError, e:
-		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s. Please add a different card on your <a href="/people/%s/edit/">profile</a>.' % (e))
+		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s. Please add a different card on your <a href="/people/%s/edit/">profile</a>.' % (reservation.user.username, e))
 		if reservation_id:
 			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 		else:
