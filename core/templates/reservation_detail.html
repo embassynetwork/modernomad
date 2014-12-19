@@ -38,7 +38,7 @@
 			<form action="{% url 'reservation_confirm' reservation.location.slug reservation.id %}" method="POST" id="payform">
 				{% csrf_token %}
 				<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-					value="Submit payment." >
+					value="Submit payment with card on file" >
 			</form>
 		</div>
 		{% elif reservation.is_approved or reservation.is_confirmed and not reservation.is_paid %}
@@ -121,36 +121,33 @@
 
 <script>
 	$(document).ready(function() {
+
+		handler = StripeCheckout.configure({
+			token: function(new_token){
+				var $input = $('<input type=hidden name=stripeToken />').val(new_token.id);
+				$('#payform').append($input).submit();
+			},
+			key: "{{ stripe_publishable_key }}",
+			image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
+			panelLabel:"Pay",
+			name: "The Embassy Network"	
+		}); 
+
 		$customer_id = "{{ reservation.user.profile.customer_id }}";
+
 		$('#pay-button').click(function(event){
 			event.preventDefault();
-
-			// if the user has a saved card, go straight to the
-			// payment processing page. (note: this shouldn't happen for new
-			// reservations but might for legacy reservations)
 			$customer_id = "{{ reservation.user.profile.customer_id }}";
+			// if the user has a saved card, submit payment. 
 			if ($customer_id && $customer_id != "None") {
 				$('#payform').submit();
 			}
-			else {
-				var token = function(res){
-					var $input = $('<input type=hidden name=stripeToken />').val(res.id);
-					$('#payform').append($input).submit();
-				};
-
-				handler = StripeCheckout.configure({
-					//zipCode: true
-				}); 
 			
+			//otherwise prompt them to enter a new card. 
+			else {	
 				handler.open({
-					key: "{{ stripe_publishable_key }}",
 					amount: "{{ reservation.total_owed_in_cents }}",
-					name: "The Embassy Network",
 					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }}.",
-					panelLabel:"Pay",
-					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
-					//zipCode: true,
-					token: token
 				});
 			}
 		});

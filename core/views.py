@@ -537,6 +537,7 @@ def UserAddCard(request, username):
 	''' Adds a card from either the reservation page or the user profile page.
 	Displays success or error message and returns user to originating page.'''
 
+	print "in user add card"
 	user = User.objects.get(username=username)
 	if not request.method == 'POST' or request.user != user:
 		return HttpResponseRedirect('/404')
@@ -578,11 +579,18 @@ def UserAddCard(request, username):
 			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 			return HttpResponseRedirect("/people/%s" % username)
 	except stripe.CardError, e:
-		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s. Please try again or try a different card.' % (e))
+		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s. Please add a different card on your <a href="/people/%s/edit/">profile</a>.' % (e))
 		if reservation_id:
-			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
+			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 		else:
 			return HttpResponseRedirect("/people/%s" % username)
+	except Exception, e:
+		messages.add_message(request, messages.ERROR, 'Drat, there was a problem processing your transaction: %s. Please try again or report this error to support@embassynetwork.com.' % (e))
+		if reservation_id:
+			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
+		else:
+			return HttpResponseRedirect("/people/%s" % username)
+
 
 def UserDeleteCard(request, username):
 	if not request.method == 'POST':
@@ -675,7 +683,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 				guest_welcome(reservation)
 			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been received and a receipt emailed to you at %s' % reservation.user.email)
 		except stripe.CardError, e:
-			messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s.' % (e))
+			messages.add_message(request, messages.WARNING, 'Drat, it looks like there was a problem with your card: %s. Please add a different card on your <a href="/people/%s/edit/">profile</a>.' % (reservation.user.username, e))
 
 	return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 
