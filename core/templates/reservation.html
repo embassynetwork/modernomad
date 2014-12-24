@@ -129,27 +129,37 @@ submit your request with a few days' notice. </p>
 
 		// once the dates are selected, poll for a list of available rooms
 		if ($arrive && $depart) {
-			console.log("checking availability...");
-			request = $.ajax({ 
-				data: {
-					'arrive' : $arrive,
-					'depart' : $depart,
-					'csrfmiddlewaretoken': '{{ csrf_token }}'
-				}, 
-				type: "POST",
-				url: '{% url "room_availability" location.slug %}'
-			});
-			
-			request.done(function(msg) { // on success..
-				$("#show-room-availability").html(msg)
-			});
 
-			request.fail(function(msg) {
-				$("#show-room-availability").html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
-			});
-			$("#reservation-items").empty()
-			$("#reservation-total").html("0")
-		} // end room availability check
+			$delta_ms = new Date($depart) - new Date($arrive)
+			$delta_days = $delta_ms/(1000*60*60*24)
+
+			if ($delta_days > {{ max_days }}) {
+				$("#show-room-availability").html("<p class='bg-danger general-pad'>Please limit your request dates to {{ max_days }} days.</p>");
+
+			} else {
+
+				console.log("checking availability...");
+				request = $.ajax({ 
+					data: {
+						'arrive' : $arrive,
+						'depart' : $depart,
+						'csrfmiddlewaretoken': '{{ csrf_token }}'
+					}, 
+					type: "POST",
+					url: '{% url "room_availability" location.slug %}'
+				});
+			
+				request.done(function(msg) { // on success..
+					$("#show-room-availability").html(msg)
+				});
+
+				request.fail(function(msg) {
+					$("#show-room-availability").html("<p class='bg-danger general-pad'>Hmm, there was a problem. Please try selecting your dates again.</p>")
+				});
+				$("#reservation-items").empty()
+				$("#reservation-total").html("0")
+			} // end room availability check
+		} 
 
 
 		// wire up the ajax-y spinning animated GIF to show when an ajax call

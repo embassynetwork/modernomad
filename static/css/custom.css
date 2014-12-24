@@ -1588,6 +1588,9 @@ p.lead strong {
 	color: rgb(202, 188, 27);
 }
 
+.general-pad {
+	padding: 10px;
+}
 
 
 /*Mobile Styles*/
@@ -1627,3 +1630,4 @@ p.lead strong {
 	background-color: beige;
 	padding: 10px;
 }
+
