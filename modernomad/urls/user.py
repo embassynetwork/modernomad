@@ -10,9 +10,9 @@ import core.forms
 urlpatterns = patterns('',
 	url(r'^register/$', Registration.as_view(form_class = core.forms.UserProfileForm), name='registration_register'),
 )
-urlpatterns += registration.backends.default.urls.urlpatterns
 
 urlpatterns += patterns('core.views',
+	url(r'^login/$', 'user_login', name='user_login'),
 	url(r'^$', 'ListUsers', name='user_list'),
 	url(r'^daterange/$', 'PeopleDaterangeQuery', name='people_daterange'),
 	url(r'^(?P<username>(?!logout)(?!login)(?!register)[\w\d\-\.@+_]+)/$', 'GetUser', name='user_detail'),
@@ -27,6 +27,9 @@ urlpatterns += patterns('',
 	url(r'^password/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$', 'django.contrib.auth.views.password_reset_confirm', name="password_reset_confirm"),
 	url(r'^password/complete/$', 'django.contrib.auth.views.password_reset_complete', name="password_reset_complete"),
 )
+
+# default patterns 
+urlpatterns += registration.backends.default.urls.urlpatterns
 
 # XXX can this be extracted and put into the gather app?
 urlpatterns += url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'gather.views.user_events', name='user_events'),

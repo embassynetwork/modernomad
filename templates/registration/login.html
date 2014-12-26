@@ -5,8 +5,27 @@
 <h2>Log in to your account</h2>
 <p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
 <form enctype="multipart/form-data" method="post">{% csrf_token %}
-	{{ form.as_p }}
-	<input type="submit" value="Submit" />
+
+	{% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+        {% endif %}
+        <div class="control-group">
+            <label class="control-label" for="username">Username</label>
+            <div class="controls">
+                <input type="text" id="username" name="username"  placeholder="Username">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+                <input type="password" name="password" id="password" placeholder="Password">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button type="submit" class="btn">Login</button>
+            </div>
+        </div>
 </form>
 
 <p><a href="{% url 'password_reset' %}">Forgot your username or password?</a></p>

@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.signals import user_logged_in
 from django.shortcuts import render
 from django.db import transaction
 from PIL import Image
@@ -364,11 +365,6 @@ def GenericPayment(request, location_slug):
 def thanks(request):
 	# TODO generate receipt
 	return render(request, "thanks.html")
-
-def logout(request, location_slug = None):
-	logout(request)
-	messages.add_message(request, messages.INFO, 'You have been logged out.')
-	return HttpResponseRedirect("/")
 
 @login_required
 def ListUsers(request):
@@ -1121,8 +1117,64 @@ def payments(request, location_slug, year, month):
 		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, })
 
 # ******************************************************
-#           registration callbacks and views
+#           registration and login callbacks and views
 # ******************************************************
+
+def process_unsaved_reservation(request):
+	print "in process_unsaved_reservation"
+	if request.session.get('reservation'):
+		print 'found reservation'
+		print request.session['reservation']
+		details = request.session.pop('reservation')
+		new_res = Reservation(
+				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
+				depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']), 
+				location = Location.objects.get(id=details['location_id']), 
+				room = Room.objects.get(id=details['room_id']), 
+				purpose = details['purpose'], 
+				arrival_time = details['arrival_time'], 
+				comments = details['comments'],
+				user = request.user,
+				)
+		new_res.save()
+		new_res.generate_bill()
+		print 'new reservation %d saved.' % new_res.id
+		# we can't just redirect here because the user doesn't get logged
+		# in. so save the reservaton ID and redirect below. 
+		request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
+	print "no reservation found"
+	return
+
+
+def user_login(request):
+	print 'in user_login'
+	username = password = ''
+	if request.POST:
+		username = request.POST['username']
+		password = request.POST['password']
+
+		user = authenticate(username=username, password=password)
+		print 'user authenticated'
+		print user
+		if user is not None:
+			if user.is_active:
+				login(request, user)
+
+			process_unsaved_reservation(request)
+			print request.session.keys()
+			if request.session.get('new_res_redirect'):
+				res_id = request.session['new_res_redirect']['res_id']
+				location_slug = request.session['new_res_redirect']['location_slug']
+				request.session.pop('new_res_redirect')
+				messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
+				# if there was a pending reservation redirect to the reservation page
+				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
+
+			# this is where they go on successful login if there is not pending reservation
+			return HttpResponseRedirect('/')
+
+	# redirect to the login page if there was a problem
+	return render(request, 'registration/login.html', context_instance=RequestContext(request))
 
 
 '''A registration backend that supports capturing user profile
@@ -1175,26 +1227,7 @@ class Registration(registration.views.RegistrationView):
 		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
 		login(request, new_user)
 		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
-		if request.session.get('reservation'):
-			print 'found reservation'
-			print request.session['reservation']
-			details = request.session.pop('reservation')
-			new_res = Reservation(
-					arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
-					depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']), 
-					location = Location.objects.get(id=details['location_id']), 
-					room = Room.objects.get(id=details['room_id']), 
-					purpose = details['purpose'], 
-					arrival_time = details['arrival_time'], 
-					comments = details['comments'],
-					user = request.user,
-				)
-			new_res.save()
-			new_res.generate_bill()
-			print 'new reservation %d saved.' % new_res.id
-			# we can't just redirect here because the user doesn't get logged
-			# in. so save the reservaton ID and redirect below. 
-			request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
+		process_unsaved_reservation(request)	
 		return new_user
 
 	def registration_allowed(self, request):
