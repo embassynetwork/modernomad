@@ -462,7 +462,7 @@ def ReservationSubmit(request, location_slug):
 				print 'session info'
 				print request.session.keys()
 				print request.session.items()
-				messages.add_message(request, messages.INFO, 'Please make a profile before submitting your reservation')			
+				messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your reservation request.')			
 				return HttpResponseRedirect(reverse('registration_register'))
 		else:
 			print form.errors
