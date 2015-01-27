@@ -32,6 +32,16 @@ def send_guest_welcome():
 		for reservation in upcoming:
 			guest_welcome(reservation)
 
+@periodic_task(run_every=crontab(hour=2, minute=0))
+def send_departure_email():
+	# get all reservations departing today
+	locations = Location.objects.all()
+	for location in locations:
+		today = timezone.localtime(timezone.now())
+		departing = Reservation.objects.filter(location=location).filter(arrivedepart=today).filter(status='confirmed')
+		for reservation in departing:
+			goodbye_email(reservation)
+
 @periodic_task(run_every=crontab(hour=1, minute=0))
 def make_backup():
 	manager = BackupManager()
