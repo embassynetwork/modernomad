@@ -24,14 +24,18 @@
 		{% endif %}
 		</td>
 
-		{% for the_day, beds_free in days_list.items %}
+		{% comment %} 
+			important! days_list is an ordered list of dicts in the form {'the_date': datetime obj, 'beds_free': x }, so should always be date ordered. 
+		{% endcomment %}
+
+		{% for day_info in days_list %}
 		<td>
-			{% if beds_free > 0 %}
+			{% if day_info.beds_free > 0 %}
 				<div class="yes-available bg-success"
                      data-toggle="tooltip"
                      data-placement="top"
-                     title="{{ beds_free }} bed{{ beds_free|pluralize }} available">
-                     {{ beds_free }}
+                     title="{{ day_info.beds_free }} bed{{ beds_free|pluralize }} available">
+                     {{ day_info.beds_free }}
                  </div>
 			{% else %}
 				<div class="no-available bg-muted"

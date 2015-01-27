@@ -118,15 +118,16 @@ class Location(models.Model):
 		available_beds = {}
 		for room in rooms_at_location:
 			the_day = start
-			available_beds[room] = {}
+			available_beds[room] = []
 			while the_day < end:
 				if not room.is_reservable(the_day):
-					available_beds[room][the_day] = 0
+					available_beds[room].append({'the_date': the_day, 'beds_free' : 0})
 				else:
-					available_beds[room][the_day] = room.beds
+					beds_this_room = room.beds
 					bookings_today = Reservation.objects.confirmed_approved_on_date(the_day, self, room=room)
 					for booking in bookings_today:
-						available_beds[room][the_day] = available_beds[room][the_day] - 1
+						beds_this_room = beds_this_room - 1
+					available_beds[room].append({'the_date': the_day, 'beds_free' : beds_this_room })
 				the_day = the_day + datetime.timedelta(1)
 		return available_beds
 
