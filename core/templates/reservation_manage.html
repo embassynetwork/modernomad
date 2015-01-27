@@ -194,12 +194,12 @@
 				{{room_obj.name}}
 			</td>
 
-			{% for the_day, beds_free in days_list.items %}
+			{% for day_info in days_list %}
 				{% if room_obj == r.room and room_has_availability %}
 					<td class="bg-success">
-				{% elif room_obj == r.room and r.status == 'approved' and beds_free >= 0 %}
+				{% elif room_obj == r.room and r.status == 'approved' and day_info.beds_free >= 0 %}
 					<td class="bg-success">
-				{% elif room_obj == r.room and r.status == 'confirmed' and beds_free >= 0 %}
+				{% elif room_obj == r.room and r.status == 'confirmed' and day_info.beds_free >= 0 %}
 					<td class="bg-success">
 				{% elif room_obj == r.room and not room_has_availability %}
 					<td class="bg-danger">
@@ -210,14 +210,14 @@
 				{% comment %} {% if r.status == 'pending' or r.status == 'canceled'%} {% endcomment %}
 
 				{% if r.status == 'approved' and r.room == room_obj %}
-					<div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{beds_free}}</div>
+					<div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
 				{% elif r.status == 'confirmed' and r.room == room_obj %}
-					<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{beds_free}}</div>
+					<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
 				{% else %}
-					{% if beds_free %}
-						<div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{beds_free}}</div>
+					{% if day_info.beds_free %}
+						<div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{day_info.beds_free}}</div>
 					{% else %}
-						<div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{beds_free}}</div>
+						<div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{day_info.beds_free}}</div>
 					{% endif %}
 				{% endif %}
 			</td>
