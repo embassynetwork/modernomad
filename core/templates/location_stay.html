@@ -9,6 +9,46 @@
 	</div>
 </div>
 
+<table class="dataTable">
+	<thead>
+		<tr>
+			<th class="center"></th>
+			<th class="center">Shared</th>
+			<th class="center">Bathroom</th>
+			<th class="center">Beds</th>
+			<th class="center">Sleeps</th>
+			<th class="center">Rate</th>
+		</tr>
+	</thead>
+	<tbody>
+			{% for room in rooms %}
+				<tr class="{% cycle 'row-even' 'row-odd' %}">
+					<td>
+						<h3>{{room.name}}</h3>
+						<p class="pull-left"><img src="{{ MEDIA_URL }}{{room.image}}" class="room-preview-image" /></p>
+						<p>{{ room.description}}</p>
+					</td>
+					<td>
+						{% if room.shared %} Shared {% else %} Private {% endif %}
+					</td>
+					<td>
+						{{ room.bathroom }}
+					</td>
+					<td>
+						{{ room.beds }}
+					</td>
+					<td>
+						{{ room.sleeps_max }}
+					</td>
+					<td>
+						{{ room.default_rate }}
+					</td>
+				</tr>
+			{% endfor %}
+	</tbody>
+</table>
+
+
 <div class="room-list">
 	<h2>Explore the Rooms</h2>
 	{% for room in rooms %}

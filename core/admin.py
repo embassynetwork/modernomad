@@ -27,6 +27,9 @@ class EventAdminGroupInline(admin.TabularInline):
 class ReservableAdminInline(admin.TabularInline):
 	model = Reservable
 
+class BedTypeAdmin(admin.ModelAdmin):
+	model = BedType
+	
 class RoomAdmin(admin.ModelAdmin):
 	model = Room
 	inlines = [ReservableAdminInline]
@@ -239,6 +242,7 @@ class UserNoteAdmin(admin.ModelAdmin):
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Room, RoomAdmin)
+admin.site.register(BedType, BedTypeAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)

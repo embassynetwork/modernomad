@@ -227,6 +227,17 @@ def room_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)
 
+def bedtype_icon_upload_to(instance, filename):
+	ext = filename.split('.')[-1]
+	# rename file to random string
+	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
+
+	upload_path = "room/bed_types/"
+	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+	if not os.path.exists(upload_abs_path):
+		os.makedirs(upload_abs_path)
+	return os.path.join(upload_path, filename)
+
 class RoomCalendar(calendar.HTMLCalendar):
 	def __init__(self, room, location, year, month):
 		super(RoomCalendar, self).__init__()
@@ -253,7 +264,21 @@ class RoomCalendar(calendar.HTMLCalendar):
 			else:
 				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (cssclasses, day)
 
+class BedType(models.Model):
+	name = models.CharField(max_length=200)
+	icon = models.ImageField(upload_to=bedtype_icon_upload_to, blank=True, null=True)
+
 class Room(models.Model):
+
+	SHARED = 'shared'
+	PRIVATE_HALF = 'privatehalf'
+	PRIVATE_FULL = 'privatefull'
+	BATHROOM_OPTIONS = (
+			(SHARED, 'Shared'),
+			(PRIVATE_HALF, 'Private Half Bath'),
+			(PRIVATE_FULL, 'Private Full Bath'),
+	)
+	
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.IntegerField()
@@ -261,6 +286,9 @@ class Room(models.Model):
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
 	beds = models.IntegerField()
+	bed_types = models.ManyToManyField(BedType, help_text="Let users know what types of beds are available in this room")
+	sleeps_max = models.IntegerField(verbose_name="The max number of people this room will accommodate", default=1)
+	bathroom = models.CharField(max_length=200, choices=BATHROOM_OPTIONS, default=SHARED)
 	residents = models.ManyToManyField(User, blank=True, null=True, related_name="residents") # a room may have many residents and a resident may have many rooms
 	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 
