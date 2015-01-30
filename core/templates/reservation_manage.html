@@ -124,7 +124,7 @@
 		<div id="reservation-details">
 			<h3>
 				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
-				<span class="pull-right">Value: ${{ r.total_value }}</span>
+				<span class="pull-right">Value: ${{ r.bill_amount }}</span>
 			</h3>
 		</div>
 		<div id="reservation-details-form">
@@ -363,7 +363,7 @@ function toggleEditDetails(){
 		console.log('reservation-details');
 		$('#reservation-details').show();
 		$('#reservation-details-form').hide();
-		$('#reservation-details-link').html('edit details');
+		$('#reservation-details-link').html('advanced edit');
 	}
 }
 toggleEditDetails();
