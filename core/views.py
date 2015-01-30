@@ -903,6 +903,7 @@ def ReservationManage(request, location_slug, reservation_id):
 		"upcoming_reservations": upcoming_reservations,
 		"user_notes": user_notes,
 		"email_forms" : email_forms,
+		"reservation_statuses": Reservation.RESERVATION_STATUSES,
 		"email_templates_by_name" : email_templates_by_name,
 		"days_before_welcome_email" : location.welcome_email_days_ahead,
 		"room_has_availability" : room_has_availability,
@@ -988,6 +989,17 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 		except:
 			messages.add_message(request, messages.INFO, "Invalid dates given!")
 		
+	elif 'status' in request.POST:
+		try:
+			status = request.POST.get("status")
+			reservation.status = status
+			reservation.save()
+			if status == "confirmed":
+				messages.add_message(request, messages.INFO, "Status changed. You must manually send a confirmation email if desired.")
+			else:
+				messages.add_message(request, messages.INFO, "Status changed.")
+		except:
+			messages.add_message(request, messages.INFO, "Invalid room given!")
 	elif 'room_id' in request.POST:
 		try:
 			new_room = Room.objects.get(pk=request.POST.get("room_id"))
@@ -1032,6 +1044,19 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required
+def ReservationSendWelcomeEmail(request, location_slug, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
+	reservation = Reservation.objects.get(id=reservation_id)
+	if reservation.is_confirmed():
+		guest_welcome(reservation)
+		messages.add_message(request, messages.INFO, "The welcome email was sent.")
+	else:
+		messages.add_message(request, messages.INFO, "The reservation is not comfirmed, so the welcome email was not sent.")
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
 def ReservationSendReceipt(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -1039,7 +1064,9 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.is_paid():
 		send_receipt(reservation)
-	messages.add_message(request, messages.INFO, "The receipt was sent.")
+		messages.add_message(request, messages.INFO, "The receipt was sent.")
+	else:
+		messages.add_message(request, messages.INFO, "This reservation has not been paid, so the receipt was not sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required

@@ -61,6 +61,13 @@
 			<input class="btn-default btn" type="submit" value="Recalculate Bill">
 		</form>
 
+		{% if r.is_confirmed %}
+		<form id="res-action-send-welcome" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_welcome' location.slug r.id %}" >
+			{% csrf_token %}
+			<input class="btn-default btn" type="submit" value="(Re) Send Welcome Email">
+		</form>
+		{% endif %}
+
 		{% if r.is_paid %}
 		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
 			{% csrf_token %}
@@ -84,6 +91,15 @@
 				<input type="hidden" name="redirect" value="{% url 'reservation_manage' location.slug r.id %}">
 				<input class="btn btn-default" type="submit" value="Cancel This Reservation">
 			</form>
+
+			<div id="dialog-confirm-send-welcome" title="Send Welcome Email">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					The welcome email is normally
+					sent to the user automatically {{days_before_welcome_email}} days prior to the reservation. Are you
+					sure you want to send it yourself now?
+				</p>
+			</div>
 
 			<div id="dialog-confirm-cancel" title="Cancel this Reservation?">
 				<p>
@@ -173,6 +189,18 @@
 							{% endfor %}
 						</select>
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Room"/>
+				</div>
+			</form>
+			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+				<div class="form-group">
+					<strong>Status:</strong> 
+					<select name="status">
+						{% for status_tup in reservation_statuses %}
+							<option value="{{status_tup.0}}" {% if r.status == status_tup.0 %}SELECTED{% endif %}>{{status_tup.1}}</option>
+						{% endfor %}
+					</select>
+					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Status"/>
+					<p class="small">The confirmed and payment statuses should generally be aligned. Only edit this in special circumstances if you need to override what The Man thinks is right :).</p>
 				</div>
 			</form>
 		</div>
@@ -491,6 +519,24 @@ $(document).ready(function() {
     }).ajaxStop(function () {
         $(this).stop().fadeOut('fast');
     });	
+});
+
+$("#dialog-confirm-send-welcome").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Send": function () {
+            $("#res-action-send-welcome").submit();
+         },
+        "Do Not Send": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-action-send-welcome").click(function (e) {
+    $("#dialog-confirm-send-welcome").dialog("open");
+    e.preventDefault();
 });
 
 $("#dialog-confirm-cancel").dialog({
