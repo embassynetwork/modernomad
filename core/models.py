@@ -198,7 +198,8 @@ class Location(models.Model):
 		reservations_today = Reservation.objects.filter(location=self).filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=today).exclude(arrive__gt=today)
 		guests_today = []
 		for r in reservations_today:
-			guests_today.append(r.user)
+			if r.user not in guests_today:
+				guests_today.append(r.user)
 		return guests_today
 
 	def get_menus(self):
