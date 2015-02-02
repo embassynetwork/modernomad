@@ -315,6 +315,11 @@ def calendar(request, location_slug):
 	for room in rooms:
 		num_rows_in_chart += room.beds
 
+	if len(reservations) == 0:
+		any_reservations = False
+	else:
+		any_reservations = True
+
 	for room in rooms:
 		reservations_this_room = []
 
@@ -343,7 +348,7 @@ def calendar(request, location_slug):
 
 	return render(request, "calendar.html", {'reservations': reservations, 'reservations_by_room': reservations_by_room, 
 		'month_start': start, 'month_end': end, "next_month": next_month, "prev_month": prev_month, 'rows_in_chart': num_rows_in_chart,
-		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms })
+		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations })
 
 
 def room_cal_request(request, location_slug, room_id):
