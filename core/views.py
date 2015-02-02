@@ -305,12 +305,45 @@ def calendar(request, location_slug):
 	reservations = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
 		.filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
 	
-	# create the calendar object
-	guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
+	rooms = Room.objects.filter(location=location)
+	reservations_by_room = []
+	empty_rooms = 0
 
-	return render(request, "calendar.html", {'reservations': reservations, 
-		'calendar': mark_safe(guest_calendar), "next_month": next_month, 
-		"prev_month": prev_month, "report_date": report_date, 'location': location })
+	# this is tracked here to help us determine what height the timeline div
+	# should be. it's kind of a hack. 
+	num_rows_in_chart = 0
+	for room in rooms:
+		num_rows_in_chart += room.beds
+
+	for room in rooms:
+		reservations_this_room = []
+
+		reservation_list_this_room = list(reservations.filter(room=room))
+		
+		if len(reservation_list_this_room) == 0:
+			empty_rooms += 1
+			num_rows_in_chart -= room.beds
+
+		else:
+			for r in reservation_list_this_room:
+				if r.arrive < start:
+					display_start = start
+				else:
+					display_start = r.arrive
+				if r.depart > end:
+					display_end = end
+				else:
+					display_end = r.depart
+				reservations_this_room.append({'reservation':r, 'display_start':display_start, 'display_end':display_end})
+
+			reservations_by_room.append((room, reservations_this_room))
+
+	# create the calendar object
+	#guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
+
+	return render(request, "calendar.html", {'reservations': reservations, 'reservations_by_room': reservations_by_room, 
+		'month_start': start, 'month_end': end, "next_month": next_month, "prev_month": prev_month, 'rows_in_chart': num_rows_in_chart,
+		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms })
 
 
 def room_cal_request(request, location_slug, room_id):
