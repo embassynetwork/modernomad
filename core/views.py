@@ -347,11 +347,11 @@ def calendar(request, location_slug):
 	logger.debug(reservations_by_room)
 
 	# create the calendar object
-	#guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
+	guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
 
 	return render(request, "calendar.html", {'reservations': reservations, 'reservations_by_room': reservations_by_room, 
 		'month_start': start, 'month_end': end, "next_month": next_month, "prev_month": prev_month, 'rows_in_chart': num_rows_in_chart,
-		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations })
+		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
 
 
 def room_cal_request(request, location_slug, room_id):
