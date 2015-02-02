@@ -343,6 +343,9 @@ def calendar(request, location_slug):
 
 			reservations_by_room.append((room, reservations_this_room))
 
+	logger.debug("Reservations by Room for calendar view:")
+	logger.debug(reservations_by_room)
+
 	# create the calendar object
 	#guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
 
