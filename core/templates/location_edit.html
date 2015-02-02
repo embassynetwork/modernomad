@@ -30,10 +30,28 @@
 		{% endif %}
 
 		{% if page == 'content' %}
-			Content |
+			Content Blocks |
 		{% else %}
 			<a href="{% url 'location_edit_content' location.slug %}">Content</a> |
 		{% endif %}
+
+		<em>Pages | </em>
+		<!--
+		{% if page == 'pages' %}
+			Pages
+		{% else %}
+			<a href="{% url 'location_edit_pages' location.slug %}">Pages</a>
+		{% endif %}
+		-->
+
+		<em>Rooms | </em>
+		<!--
+		{% if page == 'rooms' %}
+			Rooms
+		{% else %}
+			<a href="{% url 'location_edit_rooms' location.slug %}">Rooms</a>
+		{% endif %}
+		-->
 
 		<em>Emails</em>
 		<!--

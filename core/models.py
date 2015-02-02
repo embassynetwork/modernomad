@@ -61,16 +61,16 @@ class Location(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	image = models.ImageField(upload_to=location_img_upload_to, help_text="Requires an image with proportions 1400px wide x 300px high")
-	stay_page = models.TextField()
-	front_page_stay = models.TextField()
-	front_page_participate = models.TextField()
-	announcement = models.TextField(blank=True, null=True)
+	stay_page = models.TextField(default="This is the page which has some descriptive text at the top (this text), and then lists the available rooms. HTML is supported.")
+	front_page_stay = models.TextField(default="This is the middle of three sections underneath the main landing page text to entice people to stay with you, and then links to the stay page (above). HTML is supported.")
+	front_page_participate = models.TextField(default="This is far right of three sections underneath the main landing page text to tell people how to get involved with your community. There is a link to the Events page underneath. HTML is supported. ")
+	announcement = models.TextField(blank=True, null=True, default="This is far left of three sections underneath the main landing page text to use for announcements and news. HTML is supported.")
 	max_reservation_days = models.IntegerField(default=14)
 	welcome_email_days_ahead = models.IntegerField(default=2)
 	house_access_code = models.CharField(max_length=50, blank=True, null=True)
 	ssid = models.CharField(max_length=200, blank=True, null=True)
 	ssid_password = models.CharField(max_length=200, blank=True, null=True)
-	timezone = models.CharField(max_length=200, help_text="Must be an accurate timezone name, eg. \"America/Los_Angeles\"")
+	timezone = models.CharField(max_length=200, help_text="Must be an accurate timezone name, eg. \"America/Los_Angeles\". Check here for your time zone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
 	bank_account_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	routing_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	bank_name = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
@@ -193,6 +193,14 @@ class Location(models.Model):
 
 		return people
 	
+	def guests_today(self):
+		today = timezone.now()
+		reservations_today = Reservation.objects.filter(location=self).filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=today).exclude(arrive__gt=today)
+		guests_today = []
+		for r in reservations_today:
+			guests_today.append(r.user)
+		return guests_today
+
 	def get_menus(self):
 		return LocationMenu.objects.filter(location=self)
 

@@ -65,6 +65,16 @@ def residents(request, location_slug):
 	residents = location.residents.all()
 	return render(request, "location_residents.html", {'residents': residents, 'location': location})
 
+def team(request, location_slug):
+	location = get_location(location_slug)
+	team = location.house_admins.all()
+	return render(request, "location_team.html", {'team': team, 'location': location})
+
+def guests(request, location_slug):
+	location = get_location(location_slug)
+	guests_today = location.guests_today()
+	return render(request, "location_guests.html", {'guests': guests_today, 'location': location})
+
 def projects(request, location_slug):
 	pass
 
@@ -795,24 +805,50 @@ def LocationEditSettings(request, location_slug):
 def LocationEditUsers(request, location_slug):
 	location = get_location(location_slug)
 	if request.method == 'POST':
-		username = request.POST.get('username')
-		user = User.objects.filter(username=username).first()
-		if user:
+		admin_user = resident_user = None
+		if 'admin_username' in request.POST:
+			admin_username = request.POST.get('admin_username')
+			admin_user = User.objects.filter(username=admin_username).first()
+		elif 'resident_username' in request.POST:
+			resident_username = request.POST.get('resident_username')
+			resident_user = User.objects.filter(username=resident_username).first()
+
+		if admin_user:
 			action = request.POST.get('action')
 			if action == "Remove":
 				# Remove user
-				location.house_admins.remove(user)
+				location.house_admins.remove(admin_user)
 				location.save()
-				messages.add_message(request, messages.INFO, "User '%s' Removed." % username)
+				messages.add_message(request, messages.INFO, "User '%s' removed from house admin group." % admin_username)
 			elif action == "Add":
 				# Add user
-				location.house_admins.add(user)
+				location.house_admins.add(admin_user)
 				location.save()
-				messages.add_message(request, messages.INFO, "User '%s' Added." % username)
+				messages.add_message(request, messages.INFO, "User '%s' added to house admin group." % admin_username)
+		elif resident_user:
+			action = request.POST.get('action')
+			if action == "Remove":
+				# Remove user
+				location.residents.remove(resident_user)
+				location.save()
+				messages.add_message(request, messages.INFO, "User '%s' removed from residents group." % resident_username)
+			elif action == "Add":
+				# Add user
+				location.residents.add(resident_user)
+				location.save()
+				messages.add_message(request, messages.INFO, "User '%s' added to residents group." % resident_username)
 		else:
 			messages.add_message(request, messages.ERROR, "User '%s' Not Found!" % username)
 	all_users = User.objects.all().order_by('username')
 	return render(request, 'location_edit_users.html', {'page':'users', 'location': location, 'all_users':all_users})
+
+@house_admin_required
+def LocationEditPages(request, location_slug):
+	pass
+
+@house_admin_required
+def LocationEditRooms(request, location_slug):
+	pass
 
 @house_admin_required
 def LocationEditContent(request, location_slug):

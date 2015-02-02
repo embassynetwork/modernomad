@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="row-spacer">The {{ location.name|title}} Residents</h1>
+<h1 class="row-spacer">The {{ location.name|title}} Team</h1>
 
 <div class="row">
-	{% for user in residents %}
+	{% for user in team %}
 	<div class="row people-row">
 		<div class="col-md-3">
 			<img class="resident-listing-page-img" src="{{ MEDIA_URL }}{{ user.profile.image|default:'data/avatars/default.jpg'}}" />
@@ -16,6 +16,7 @@
 	</div>
 	{% endfor %}
 </div>
+
 
 {% endblock %}
 
