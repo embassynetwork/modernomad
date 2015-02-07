@@ -18,6 +18,7 @@ from django.core.urlresolvers import reverse
 from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.contrib.flatpages.models import FlatPage
+from uuidfield import UUIDField
 
 # imports for signals
 import django.dispatch
@@ -376,6 +377,8 @@ class Reservation(models.Model):
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
+	uuid = UUIDField(auto=True, blank=True, null=True)
+	
 
 	objects = ReservationManager()
 

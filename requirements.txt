@@ -12,6 +12,7 @@ pytz>=2014.4
 psycopg2==2.5.4
 lxml==3.4.0
 stripe
+django-uuidfield
 
 # Django Gather code
 git+https://git@github.com/opendoor/django-gather.git

@@ -1219,6 +1219,9 @@ def payments_today(request, location_slug):
 	today = timezone.localtime(timezone.now())
 	return HttpResponseRedirect(reverse('core.views.payments', args=[], kwargs={'location_slug':location_slug, 'year':today.year, 'month':today.month}))
 
+def submit_payment(request, reservation_uuid, location_slug):
+	pass
+
 @house_admin_required
 def payments(request, location_slug, year, month):
 	location = get_location(location_slug)
