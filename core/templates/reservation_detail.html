@@ -59,13 +59,16 @@
 		{% else %}
 	
 			<div>
-				<p><span class="text-danger">Action Required! Please pay for your reservation to confirm.  </p>
+				<p><span class="text-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+					Action Required! Please pay for your reservation to confirm. 
+				</p>
 
 				<form action="{% url 'reservation_confirm' reservation.location.slug reservation.id %}" method="POST" id="payform">
 					{% csrf_token %}
 					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
 					value="Submit payment with card on file" >
 				</form>
+				<p>(Is someone else paying for your reservation? Grab the <a href="" data-toggle="modal" data-target="#myModal"> 3rd party payment link </a>)</p>
 			</div>
 		{% endif %}
 
