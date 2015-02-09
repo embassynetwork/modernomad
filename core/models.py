@@ -377,7 +377,7 @@ class Reservation(models.Model):
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
-	uuid = UUIDField(auto=True, blank=True, null=True)
+	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
 	
 
 	objects = ReservationManager()

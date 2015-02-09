@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 class PaymentException(Exception):
 	pass
 
-def charge_card(reservation):
+def charge_customer(reservation):
 	if settings.STRIPE_SECRET_KEY:
-		return stripe_charge_card(reservation)
+		return stripe_charge_customer(reservation)
 	elif settings.USA_E_PAY_KEY:
-		return usaepay_charge_card(reservation)
+		return usaepay_charge_customer(reservation)
 	else:
 		raise PaymentException("No payment system configured")
 
@@ -41,15 +41,42 @@ def issue_refund(payment):
 # Stripe Methods
 ###################################################################
 
-def stripe_charge_card(reservation):
-	logger.debug("stripe_charge_card(reservation=%s)" % reservation.id)
+def charge_description(reservation):
+	reservation_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id))
+	descr = "%s from %s - %s. Details: %s." % (reservation.user.get_full_name(),
+			str(reservation.arrive), str(reservation.depart), reservation_url)
+	return descr
+
+
+def stripe_charge_card_third_party(reservation, amount, token, charge_descr):
+	logger.debug("stripe_charge_card_third_party(reservation=%s)" % reservation.id)
+	print 'in charge card 3rd party'
 	
 	# stripe will raise a stripe.CardError if the charge fails. this
 	# function purposefully does not handle that error so the calling
 	# function can decide what to do.
-	reservation_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id))
-	descr = "%s from %s - %s. Details: %s." % (reservation.user.get_full_name(),
-			str(reservation.arrive), str(reservation.depart), reservation_url)
+	descr = charge_description(reservation)
+	descr += charge_descr
+
+	amt_owed_cents = int(amount * 100)
+	stripe.api_key = settings.STRIPE_SECRET_KEY
+
+	charge = stripe.Charge.create(
+			amount=amt_owed_cents, 
+			currency="usd",
+			card=token,
+			description= descr
+	)
+	return charge
+
+
+def stripe_charge_customer(reservation):
+	logger.debug("stripe_charge_customer(reservation=%s)" % reservation.id)
+	
+	# stripe will raise a stripe.CardError if the charge fails. this
+	# function purposefully does not handle that error so the calling
+	# function can decide what to do.
+	descr = charge_description(reservation)
 
 	amt_owed = reservation.total_owed()
 	amt_owed_cents = int(amt_owed * 100)
@@ -88,7 +115,7 @@ def stripe_issue_refund(payment):
 # USAePay Methods
 ###################################################################
 
-def usaepay_charge_card(reservation):
+def usaepay_charge_customer(reservation):
 	logger.debug("usaepay_charge_card(reservation=%s)" % reservation.id)
 	return None
 

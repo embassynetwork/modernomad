@@ -9,7 +9,7 @@
 			<tr><td width="600px" align="center" style="font-size:140%;"><strong>Be at Home Across the Globe</strong></td></tr>
 		</table>
 
-		<p margin="0 0 1.6em 0" style="font-size:120%;"> {{ user.first_name }} {{ user.last_name }} </p>
+		<p margin="0 0 1.6em 0" style="font-size:120%;"> Reservation for {{ user.first_name }} {{ user.last_name }} </p>
 		
 		
 		{% if reservation.payment_date %}
@@ -46,26 +46,6 @@
 			</td>
 		</table>
 
-		<!--
-		<p><strong>Payments</strong></p>
-		<table border="0" cellspacing="0" cellpadding="0" border="0">
-			<tr>
-				<th>Date</th>
-				<th>Method</th>
-				<th>Transaction ID</th>
-				<th align="right">Amount</th>
-			</tr>
-			{% for payment in reservation.payments %}
-			<tr>
-				<td width="150px">{{ payment.payment_date }}</td>
-				<td width="150px">{{ payment.payment_method|title }}</td>
-				<td width="150px">{{ payment.transaction_id }}</td>
-				<td width="150px" align="right">${{ payment.paid_amount|floatformat:2 }}</td>
-			</tr>
-			{% endfor %}
-		</table>
-		-->
-		
 		<p style="margin: 1em 0 0 0;">
 			Have fun on your onward adventures!<br/>
 			The Embassy Team<br/>

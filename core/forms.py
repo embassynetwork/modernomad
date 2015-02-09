@@ -200,15 +200,26 @@ class ReservationForm(forms.ModelForm):
 
 
 class PaymentForm(forms.Form):
-	name = forms.CharField()
-	email = forms.EmailField()
-	card_number = forms.CharField()
-	cvc = forms.IntegerField()
-	expiration_month = forms.IntegerField(label='(MM)')
-	expiration_year = forms.IntegerField(label='(YYYY)')
-	amount = forms.IntegerField(label="Amount in whole dollars")
-	comment = forms.CharField(widget=forms.Textarea, required=False, help_text="Optional. If you are\
-contributing for someone else, make sure we know who this payment is for.")
+	name = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	email = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'email'}))
+	card_number = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	cvc = forms.IntegerField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
+	expiration_month = forms.IntegerField(label='(MM)', widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
+	expiration_year = forms.IntegerField(label='(YYYY)', widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
+	amount = forms.FloatField(label="Amount", widget=forms.TextInput(attrs={'class':"form-control inline", 'type': 'number', 'min': '0', 'step': '0.01'}))
+	comment = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}), required=False)
+
+	def __init__ (self, *args, **kwargs):
+		# have to call super first, which initializes the 'fields' dictionary
+
+		try:
+			default_amount = kwargs.pop('default_amount')
+		except:
+			default_amount = None
+		super(PaymentForm, self).__init__(*args, **kwargs)
+		if default_amount:
+			self.fields['amount'].initial = default_amount
+
 
 class StripeCustomerCreationForm(forms.Form):
 	name = forms.CharField()
@@ -223,7 +234,7 @@ class EmailTemplateForm(forms.Form):
 	''' We don't actually make this a model form because it's a derivative
 	function of a model but not directly constructed from the model fields
 	itself.''' 
-	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
+	sender = forms.EmailField(widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
 	recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control"}))
 	footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
 	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))

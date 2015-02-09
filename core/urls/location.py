@@ -8,7 +8,6 @@ per_location_patterns = [
 	url(r'^guests/$', 'core.views.guests', name='location_guests'),
 	url(r'^occupancy/$', 'core.views.occupancy', name='location_occupancy'),
 	url(r'^calendar/$', 'core.views.calendar', name='location_calendar'),
-	url(r'^payment/$', 'core.views.GenericPayment', name='location_payment'),
 	url(r'^thanks/$', 'core.views.thanks', name='location_thanks'),
 	url(r'^today/$', 'core.views.today', name='location_today'),
 	

@@ -734,11 +734,11 @@ img.profile-img-thumb {
 }
 
 input#id_cvc {
-	width: 35px;
+	width: 65px;
 }
 
 input#id_expiration_month {
-	width: 35px;
+	width: 65px;
 }
 
 input#id_expiration_year {
@@ -997,7 +997,7 @@ div#spinner
 	background-size: 70%;
 }
 
-#email-user-button {
+#email-user-button, #payment-link-button {
 	margin-bottom: 20px;
 }
 
@@ -1637,4 +1637,20 @@ p.lead strong {
 
 .guestinfo-tooltip {
 	padding: 0px 10px 10px 10px;
+}
+
+.para-padding {
+	padding: 15px;
+}
+
+#submit-payment-header {
+	margin-bottom: 40px;
+}
+
+#id_comment {
+	height: 100px;
+}
+
+#payment-errors {
+	margin-bottom: 20px;
 }

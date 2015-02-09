@@ -36,6 +36,24 @@
 	</div>
 </div>
 
+<!-- 3rd party payment link Modal -->
+<div class="modal fade" id="paymentlinkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body center">
+		<p class="para-padding">
+			Share this link with a 3rd party if they are submitting payment for you. 
+		</p>
+		<p class="bg-warning para-padding">
+			https://{{domain}}{% url 'reservation_payment' location.slug r.uuid %}
+		</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <div class="row" id="reservation-nav">
 	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
 </div>
@@ -55,6 +73,9 @@
 	<div class="res-actions-secondary"><h2>Manage</h2></div>
 
 		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+
+		<button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
+
 
 		<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
 			{% csrf_token %}

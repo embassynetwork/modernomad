@@ -380,40 +380,7 @@ def stay(request, location_slug):
 		"prev_month": prev_month, 'location': location})
 
 
-def GenericPayment(request, location_slug):
-	if request.method == 'POST':
-		form = PaymentForm(request.POST)
-		if form.is_valid():
-			# account secret key 
-			stripe.api_key = settings.STRIPE_SECRET_KEY
-			
-			# get the payment details from the form
-			token = request.POST.get('stripeToken')
-			charge_amt = int(request.POST.get('amount'))
-			pay_name = request.POST.get('name')
-			pay_email = request.POST.get('email')
-			comment  = request.POST.get('comment')
-
-			# create the charge on Stripe's servers - this will charge the user's card
-			charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
-			if comment:
-				charge_descr += " comment: %s" % comment
-			charge = stripe.Charge.create(
-					amount=charge_amt*100, # convert dollars to cents
-					currency="usd",
-					card=token,
-					description= charge_descr
-			)
-
-			# TODO error handling if charge does not succeed
-			return HttpResponseRedirect("/thanks")
-	else:
-		form = PaymentForm()		
-	return render(request, "payment.html", {'form': form, 
-		'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY})
-
-
-def thanks(request):
+def thanks(request, location_slug):
 	# TODO generate receipt
 	return render(request, "thanks.html")
 
@@ -551,7 +518,9 @@ def ReservationDetail(request, reservation_id, location_slug):
 			paid = True
 		else:
 			paid = False
-		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 'location': location,
+
+		domain = Site.objects.get_current().domain
+		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 'location': location, "domain": domain,
 			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : location.from_email()})
 
 @login_required
@@ -630,7 +599,7 @@ def UserAddCard(request, username):
 		if reservation_id:
 			# charges card, saves payment details and emails a receipt to
 			# the user. if there is an error with charging the card, it will happen here. 
-			payment_gateway.charge_card(reservation)
+			payment_gateway.charge_customer(reservation)
 			send_receipt(reservation)
 			reservation.confirm()
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -737,7 +706,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
 	else:
 		try:
-			payment_gateway.charge_card(reservation)
+			payment_gateway.charge_customer(reservation)
 			reservation.confirm()
 			send_receipt(reservation)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
@@ -784,48 +753,6 @@ def ReservationDelete(request, reservation_id, location_slug):
 	else:
 		return HttpResponseRedirect("/")
 
-@login_required
-def ReservationReceipt(request, location_slug, reservation_id):
-	location = get_location(location_slug)
-	reservation = get_object_or_404(Reservation, id=reservation_id)
-	if request.user != reservation.user or location != reservation.location:
-		if not request.user.is_staff:
-			return HttpResponseRedirect("/404")
-
-	# I want to render the receipt exactly like we do in the email
-	htmltext = get_template('emails/receipt.html')
-	c = Context({
-		'today': timezone.localtime(timezone.now()), 
-		'user': reservation.user, 
-		'location': reservation.location,
-		'reservation': reservation,
-		}) 
-	receipt_html = htmltext.render(c)
-
-	return render(request, 'reservation_receipt.html', {'receipt_html': receipt_html, 'reservation': reservation, 
-		'location': location })
-
-@login_required
-def PeopleDaterangeQuery(request, location_slug):
-	location = get_location(location_slug)
-	start_str = request.POST.get('start_date')
-	end_str = request.POST.get('end_date')
-	s_month, s_day, s_year = start_str.split("/")
-	e_month, e_day, e_year = end_str.split("/")
-	start_date = datetime.date(int(s_year), int(s_month), int(s_day))
-	end_date = datetime.date(int(e_year), int(e_month), int(e_day))
-	reservations_for_daterange = Reservation.objects.filter(Q(status="confirmed")).exclude(depart__lt=start_date).exclude(arrive__gte=end_date)
-	recipients = []
-	for r in reservations_for_daterange:
-		recipients.append(r.user)
-	residents = location.residents.all()
-	recipients = recipients + list(residents)
-	html = "<div class='btn btn-info disabled' id='recipient-list'>Your message will go to these people: "
-	for person in recipients:
-		info = "<a class='link-light-color' href='/people/" + person.username + "'>" + person.first_name + " " + person.last_name + "</a>, "
-		html += info;
-
-	html = html.strip(", ")
 	html += "</div>"
 	return HttpResponse(html)
 
@@ -1018,7 +945,7 @@ def ReservationManageAction(request, location_slug, reservation_id):
 				raise Reservation.ResActionError(e)
 		elif reservation_action == 'res-charge-card':
 			try:
-				payment_gateway.charge_card(reservation)
+				payment_gateway.charge_customer(reservation)
 				reservation.confirm()
 				send_receipt(reservation)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -1219,8 +1146,118 @@ def payments_today(request, location_slug):
 	today = timezone.localtime(timezone.now())
 	return HttpResponseRedirect(reverse('core.views.payments', args=[], kwargs={'location_slug':location_slug, 'year':today.year, 'month':today.month}))
 
+@login_required
+def PeopleDaterangeQuery(request, location_slug):
+	location = get_location(location_slug)
+	start_str = request.POST.get('start_date')
+	end_str = request.POST.get('end_date')
+	s_month, s_day, s_year = start_str.split("/")
+	e_month, e_day, e_year = end_str.split("/")
+	start_date = datetime.date(int(s_year), int(s_month), int(s_day))
+	end_date = datetime.date(int(e_year), int(e_month), int(e_day))
+	reservations_for_daterange = Reservation.objects.filter(Q(status="confirmed")).exclude(depart__lt=start_date).exclude(arrive__gte=end_date)
+	recipients = []
+	for r in reservations_for_daterange:
+		recipients.append(r.user)
+	residents = location.residents.all()
+	recipients = recipients + list(residents)
+	html = "<div class='btn btn-info disabled' id='recipient-list'>Your message will go to these people: "
+	for person in recipients:
+		info = "<a class='link-light-color' href='/people/" + person.username + "'>" + person.first_name + " " + person.last_name + "</a>, "
+		html += info;
+
+	html = html.strip(", ")
+
+@login_required
+def ReservationReceipt(request, location_slug, reservation_id):
+	location = get_location(location_slug)
+	reservation = get_object_or_404(Reservation, id=reservation_id)
+	if request.user != reservation.user or location != reservation.location:
+		if not request.user.is_staff:
+			return HttpResponseRedirect("/404")
+
+	# I want to render the receipt exactly like we do in the email
+	htmltext = get_template('emails/receipt.html')
+	c = Context({
+		'today': timezone.localtime(timezone.now()), 
+		'user': reservation.user, 
+		'location': reservation.location,
+		'reservation': reservation,
+		}) 
+	receipt_html = htmltext.render(c)
+
+	return render(request, 'reservation_receipt.html', {'receipt_html': receipt_html, 'reservation': reservation, 
+		'location': location })	
+
 def submit_payment(request, reservation_uuid, location_slug):
-	pass
+	reservation = Reservation.objects.get(uuid = reservation_uuid)
+	location = get_location(location_slug)
+	print "submit payment"
+	if request.method == 'POST':
+		form = PaymentForm(request.POST, default_amount=None)
+		print "got payment form"
+		print form
+		if form.is_valid():
+			# account secret key 
+			stripe.api_key = settings.STRIPE_SECRET_KEY
+			
+			# get the payment details from the form
+			token = request.POST.get('stripeToken')
+			amount = float(request.POST.get('amount'))
+			pay_name = request.POST.get('name')
+			pay_email = request.POST.get('email')
+			comment  = request.POST.get('comment')
+
+			# create the charge on Stripe's servers - this will charge the user's card
+			charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
+			print charge_descr
+			if comment:
+				charge_descr += " Comment added: %s" % comment
+			try:
+
+				charge = payment_gateway.stripe_charge_card_third_party(reservation, amount, token, charge_descr)
+				print 'charge result'
+				print charge
+
+				# associate payment information with reservation
+				Payment.objects.create(reservation=reservation,
+					payment_service = "Stripe",
+					payment_method = charge.card.brand,
+					paid_amount = (charge.amount/100.00),
+					transaction_id = charge.id
+				)
+
+				if reservation.total_owed() <= 0.0:
+					# if the reservation is all paid up, do All the Things to confirm.
+					reservation.confirm()
+					send_receipt(reservation, send_to=pay_email)
+
+					# XXX TODO need a way to check if this has already been sent :/
+					days_until_arrival = (reservation.arrive - datetime.date.today()).days
+					if days_until_arrival <= reservation.location.welcome_email_days_ahead:
+						guest_welcome(reservation)
+					messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)
+				else:
+					messages.add_message(request, messages.INFO, 'Thanks you for your payment! There is now a pending amount due of $%.2f' % reservation.total_owed())
+					form = PaymentForm(default_amount=reservation.total_owed)		
+
+			except Exception, e:
+				messages.add_message(request, messages.INFO, 'Drat, there was a problem with your card. Sometimes this reflects a card transaction limit, or bank hold due to an unusual charge. Please contact your bank or credit card, or try a different card. The error returned was: <em>%s</em>' % e)
+		else:
+			print 'payment form not valid'
+			print form.errors
+
+	else:
+		form = PaymentForm(default_amount=reservation.total_owed)		
+
+
+	if reservation.total_owed() > 0.0:
+		owed_color = "text-danger"
+	else:
+		owed_color = "text-success"
+	return render(request, "payment.html", {"r": reservation, 'location': location, 'total_owed_color': owed_color,
+		'form': form, 'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY})
+
 
 @house_admin_required
 def payments(request, location_slug, year, month):

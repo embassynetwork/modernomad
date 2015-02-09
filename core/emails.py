@@ -97,10 +97,13 @@ def render_templates(context, location, email_key):
 #            RESERVATION EMAILS            #
 ############################################
 
-def send_receipt(reservation):
+def send_receipt(reservation, send_to=None):
 	location = reservation.location
-	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
-	recipient = [reservation.user.email,]
+	subject = "[%s] Receipt for Reservation %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
+	if send_to:
+		recipient = [send_to,]
+	else:
+		recipient = [reservation.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
 		'user': reservation.user, 
