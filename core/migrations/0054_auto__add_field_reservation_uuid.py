@@ -14,7 +14,7 @@ class Migration(SchemaMigration):
 				keep_default=False)
 
 		# populate the UUID field for existing models 
-		for r in orm['core.Reservation'].all():
+		for item in orm['core.Reservation'].objects.all():
 			if not item.uuid:
 				item.uuid = uuid.uuid4() #creates a random GUID
 				item.save()
