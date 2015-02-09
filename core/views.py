@@ -1287,8 +1287,10 @@ def process_unsaved_reservation(request):
 				user = request.user,
 				)
 		new_res.save()
+		new_res.reset_rate()
 		new_res.generate_bill()
 		print 'new reservation %d saved.' % new_res.id
+		new_reservation_notify(new_res)
 		# we can't just redirect here because the user doesn't get logged
 		# in. so save the reservaton ID and redirect below. 
 		request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
