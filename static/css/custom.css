@@ -1654,3 +1654,7 @@ p.lead strong {
 #payment-errors {
 	margin-bottom: 20px;
 }
+
+#reservation-list-tab-content {
+	margin-top: 40px;
+}
