@@ -430,7 +430,7 @@ function toggleReservationNotes(){
 		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes ');
 	} else {
 		$('#reservation-notes-area').hide();
-		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation notes');
+		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}');
 	}
 }
 
