@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.conf import settings
 from core.decorators import house_admin_required
 from django.db.models import Q
-from core.models import UserProfile, Reservation, Room, Payment, EmailTemplate, Location, LocationFee, BillLineItem, UserNote
+from core.models import *
 from core.tasks import guest_welcome
 from core import payment_gateway
 import uuid, base64, os
@@ -894,11 +894,24 @@ def ReservationManage(request, location_slug, reservation_id):
 	else:
 		room_has_availability = False
 
+	# Pull all the reservation notes for this person
+	if 'reservation_note' in request.POST:
+		note = request.POST['reservation_note']
+		if note:
+			ReservationNote.objects.create(reservation=reservation, created_by=request.user, note=note)
+			# The Right Thing is to do an HttpResponseRedirect after a form
+			# submission, which clears the POST request data (even though we
+			# are redirecting to the same view)
+			return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
+	reservation_notes = ReservationNote.objects.filter(reservation=reservation)
+
 	# Pull all the user notes for this person
 	if 'user_note' in request.POST:
 		note = request.POST['user_note']
 		if note:
 			UserNote.objects.create(user=user, created_by=request.user, note=note)
+			# The Right Thing is to do an HttpResponseRedirect after a form submission
+			return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 	user_notes = UserNote.objects.filter(user=user)
 
 	return render(request, 'reservation_manage.html', {
@@ -906,6 +919,7 @@ def ReservationManage(request, location_slug, reservation_id):
 		"past_reservations":past_reservations, 
 		"upcoming_reservations": upcoming_reservations,
 		"user_notes": user_notes,
+		"reservation_notes": reservation_notes,
 		"email_forms" : email_forms,
 		"reservation_statuses": Reservation.RESERVATION_STATUSES,
 		"email_templates_by_name" : email_templates_by_name,

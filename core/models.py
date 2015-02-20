@@ -865,10 +865,19 @@ class Reservable(models.Model):
 
 class UserNote(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
-	created_by = models.ForeignKey(User, null=True, related_name="created_by")
-	user = models.ForeignKey(User, blank=False, null=False)
+	created_by = models.ForeignKey(User, null=True)
+	user = models.ForeignKey(User, blank=False, null=False, related_name="user_notes")
 	note = models.TextField(blank=True, null=True)
 
 	def __str__(self): 
 		return '%s - %s: %s' % (self.created.date(), self.user.username, self.note)
+
+class ReservationNote(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	created_by = models.ForeignKey(User, null=True)
+	reservation = models.ForeignKey(Reservation, blank=False, null=False, related_name="reservation_notes")
+	note = models.TextField(blank=True, null=True)
+
+	def __str__(self): 
+		return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
 

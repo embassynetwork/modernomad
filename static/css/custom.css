@@ -1658,3 +1658,7 @@ p.lead strong {
 #reservation-list-tab-content {
 	margin-top: 40px;
 }
+
+#reservation-notes-wrapper {
+	padding: 10px;
+}

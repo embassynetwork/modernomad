@@ -144,7 +144,29 @@
 
 	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
 
+	<div id="reservation-notes-wrapper" class="bg-warning">
+		<h4><a href="#" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;"><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Close reservation notes </a></h4>
+		<div id="reservation-notes-area" class="">
+			{% for note in reservation_notes %}
+				<div class="user-field field"><strong>{{ note.created }} from {{note.created_by.first_name}}:</strong> <pre>{{ note.note }}</pre></div>
+			{% endfor %}
+			<form class="form-horizontal" method="POST" action=".">{% csrf_token %}
+				<div class="form-group" id="reservation-notes-input-group">
+					<div class="col-sm-9">
+						<textarea name="reservation_note" class="form-control" rows=1></textarea>
+					</div>
+					<div class="col-sm-3">
+						<button type="submit" class="btn btn-default">Add new note</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+
+
 	{% include "snippets/res_status_area.html" %}
+
 
 	<div id="dialog-warn-full" title="Warning! The room you are trying to book is full.">
 		<p>
@@ -375,7 +397,7 @@
 
 	<h3>User Notes</h3>
 	{% for note in user_notes %}
-		<div class="user-field field"><strong>{{ note.created }} ({{note.created_by}}):</strong> <pre>{{ note.note }}</pre>
+		<div class="user-field field"><strong>{{ note.created }} ({{note.created_by}}):</strong> <pre>{{ note.note }}</pre></div>
 	{% endfor %}
 	<form method="POST" action=".">{% csrf_token %}
 		<textarea name="user_note" class="form-control" cols="32" rows="2" style="margin-top:1em;"></textarea>
@@ -402,17 +424,32 @@
 {% block extrajs %}
 <script language="JavaScript">
 
+function toggleReservationNotes(){
+	if($('#reservation-notes-area').is(':hidden')) {
+		$('#reservation-notes-area').show();
+		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes ');
+	} else {
+		$('#reservation-notes-area').hide();
+		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation notes');
+	}
+}
+
+console.log({{reservation_notes|length}});
+if ({{reservation_notes|length}} == 0) {
+	toggleReservationNotes();
+}
+
 function toggleEditDetails(){
 	if($('#reservation-details-form').is(':hidden')) {
 		console.log('reservation-details-form');
 		$('#reservation-details').hide();
 		$('#reservation-details-form').show();
-		$('#reservation-details-link').html('cancel edit');
+		$('#reservation-details-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> cancel edit');
 	} else {
 		console.log('reservation-details');
 		$('#reservation-details').show();
 		$('#reservation-details-form').hide();
-		$('#reservation-details-link').html('advanced edit');
+		$('#reservation-details-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> advanced edit');
 	}
 }
 toggleEditDetails();
