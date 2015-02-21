@@ -403,7 +403,7 @@ class Reservation(models.Model):
 			return self.default_rate()
 		return self.rate
 
-	def total_value(self):
+	def bill_base_value(self):
 		# value of the reservation, regardless of what has been paid
 		# get_rate checks for comps and custom rates.
 		return self.total_nights() * self.get_rate()
@@ -431,12 +431,27 @@ class Reservation(models.Model):
 			return True
 		return False
 		
-	def bill_base_amount(self):
+	def bill_subtotal_amount(self):
 		# incorporates any manual discounts or fees into the base amount.
-		# automatic fees are calculated on top of this. 
-		base_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True)
+		# automatic fees are calculated on top of the total value here. 
+		base_fees = self.bill_subtotal_items()
 		return sum([item.amount for item in base_fees])
 		
+	def bill_subtotal_items(self):
+		# items that go into the subtotal before calculating taxes and fees.
+		# NOTE: will return an *ordered* list with the base room fee first. 
+
+		# the base room fee is not derived from a standing fee, and is not a custom fee
+		base_room_fee = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True).filter(custom=False)
+		# all other line items that go into the subtotal are custom fees
+		addl_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True).filter(custom=True)
+		return list(base_room_fee) + list(addl_fees)
+
+	def bill_fees(self):
+		# the taxes and fees on top of subtotal
+		bill_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=False)
+		return list(bill_fees)
+
 	def paid_date(self):
 		if self.total_owed() == 0:
 			# order by most recent first
@@ -451,7 +466,7 @@ class Reservation(models.Model):
 
 	def calc_non_house_fees(self):
 		# Calculate the amount of fees not paid by the house
-		room_charge = self.total_value()
+		room_charge = self.bill_base_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if not location_fee.fee.paid_by_house:
@@ -460,7 +475,7 @@ class Reservation(models.Model):
 
 	def calc_house_fees(self):
 		# Calculate the amount of fees the house owes
-		room_charge = self.total_value()
+		room_charge = self.bill_base_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if location_fee.fee.paid_by_house:
@@ -485,7 +500,7 @@ class Reservation(models.Model):
 
 		# The first line item is for the room charge
 		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
-		room_charge = self.total_value()
+		room_charge = self.bill_base_value()
 		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
 		
@@ -537,7 +552,7 @@ class Reservation(models.Model):
 		return amount
 
 	def to_house(self):
-		return self.total_value() - self.house_fees()
+		return self.bill_base_value() - self.house_fees()
 
 	def set_rate(self, rate):
 		if rate == None:
@@ -644,7 +659,7 @@ class Payment(models.Model):
 	def non_house_fees(self):
 		# takes the appropriate bill line items and applies them proportionately to the payment. 
 		fee_line_items_not_paid_by_house = BillLineItem.objects.filter(reservation=self.reservation).filter(fee__isnull=False).filter(paid_by_house=False)
-		base_amount = self.reservation.bill_base_amount()
+		subtotal = self.reservation.bill_subtotal_amount()
 		non_house_fee_on_payment = Decimal(0.0)
 		# this payment may or may not represent the entire bill amount. we need
 		# to know what fraction of the total bill amount it was so that we can
@@ -657,7 +672,7 @@ class Payment(models.Model):
 			self.reservation.generate_bill()
 			fraction = self.paid_amount/self.reservation.bill_amount()
 
-		fractional_base_amount = base_amount * fraction
+		fractional_base_amount = subtotal * fraction
 		for line_item in fee_line_items_not_paid_by_house:
 				# JKS important! this assumes that the line item value accurately
 				# reflects the fee percentage. this should be true, but technically
@@ -670,14 +685,14 @@ class Payment(models.Model):
 	def house_fees(self):
 		# takes the appropriate bill line items and applies them proportionately to the payment. 
 		fee_line_items_paid_by_house = BillLineItem.objects.filter(reservation=self.reservation).filter(paid_by_house=True)
-		base_amount = self.reservation.bill_base_amount()
+		subtotal = self.reservation.bill_subtotal_amount()
 		house_fee_on_payment = Decimal(0.0)
 		# this payment may or may not represent the entire bill amount. we need
 		# to know what fraction of the total bill amount it was so that we can
 		# apply the fees proportionately to the payment amount. note: in many
 		# cases, the fraction will be 1. 
 		fraction = self.paid_amount/self.reservation.bill_amount()
-		fractional_base_amount = base_amount * fraction
+		fractional_base_amount = subtotal * fraction
 		for line_item in fee_line_items_paid_by_house:
 			# JKS important! this assumes that the line item value accurately
 			# reflects the fee percentage. this should be true, but technically

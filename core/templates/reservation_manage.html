@@ -185,6 +185,12 @@
 				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
 				<span class="pull-right">Value: ${{ r.bill_amount }}</span>
 			</h3>
+			<div class="res-field field"><strong>Room:</strong> {{ r.room }}</div>
+			<div class="res-field field"><strong>Purpose:</strong> {{ r.purpose }}</div>
+			<div class="res-field field"><strong>Comments:</strong> {{ r.comments|default:"None"  }}</div>
+
+			<hr>
+
 		</div>
 		<div id="reservation-details-form">
 			<h3>Edit Reservation Details</h3>
@@ -205,14 +211,24 @@
 			</form>
 			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
-					<strong>Discount: $</strong> <input name="discount" value="0" size="7"/>
+					<strong>Discount:
+					<select name="calculation_type">
+						<option value="absolute">$</option>
+						<option value="percent">%</option>
+					</select>
+					</strong> <input name="discount" value="0" size="7"/>
 					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
 				</div>
 			</form>
 			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
-					<strong>Additional Fee: $</strong> <input name="extra_fee" value="0" size="7"/>
+					<strong>Additional Fee: 
+					<select name="calculation_type">
+						<option value="absolute">$</option>
+						<option value="percent">%</option>
+					</select>
+					</strong> <input name="extra_fee" value="0" size="7"/>
 					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
 				</div>
@@ -299,14 +315,6 @@
 
 	<hr>
 
-	<div class="res-field field"><strong>Room:</strong> {{ r.room }}</div>
-	<div class="res-field field"><strong>Tags:</strong> {{ r.tags }}</div>
-	<div class="res-field field"><strong>Purpose:</strong> {{ r.purpose }}</div>
-	<div class="res-field field"><strong>Comments:</strong> {{ r.comments }}</div>
-
-	<hr>
-
-	<!-- Bill Details -->
 	<h2>Bill Details</h2>	
 	<table id="bill-details" class="table">
 		<thead>
@@ -314,29 +322,35 @@
 			<th class="money">Paid by<br>House</th>
 			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
 		</thead>
-		{% for item in r.bill_line_items %}
+		{% for item in r.bill_subtotal_items %}
+			<tr class="bill-line-item">
+				<td><em>{{ item.description }}</em></td>
+				<td></td>
+				<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
+			</tr>
+		{% endfor %}
+		<tr class="total-row">
+			<td>Subtotal</td>
+			<td></td>
+			<td class="money">${{ r.bill_subtotal_amount|floatformat:2 }}</td>
+		</tr>
+		{% for item in r.bill_fees %}
 			{% if item.paid_by_house %}
-				<tr>
-					<td class="paid-by-house text-danger">{{ item.description }}</td>
-					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
+				<tr class="bill-line-item">
+					<td class="paid-by-house text-danger"><em>{{ item.description }}</em></td>
+					<td class="money"><span class="text-danger"><em>${{ item.amount|floatformat:2 }}</em></span></td>
 					<td class="money"></td>
 				</tr>
-			{% elif item.custom %}
-				<tr>
-					<td><em>{{ item.description }}</em></td>
-					<td></td>
-					<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
-				</tr>
 			{% else %}
-			<tr>
-				<td>{{ item.description }}</td>
+			<tr class="bill-line-item">
+				<td><em>{{ item.description }}</em></td>
 				<td></td>
-				<td class="money">${{ item.amount|floatformat:2 }}</td>
+				<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
 			</tr>
 			{% endif %}
 		{% endfor %}
 		<tr class="total-row">
-			<td></td>
+			<td>Total</td>
 			<td class="money"><span class="text-danger">${{ r.house_fees|floatformat:2 }}</span></td>
 			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
 	</table>
@@ -442,12 +456,10 @@ if ({{reservation_notes|length}} == 0) {
 function toggleEditDetails(){
 	if($('#reservation-details-form').is(':hidden')) {
 		console.log('reservation-details-form');
-		$('#reservation-details').hide();
 		$('#reservation-details-form').show();
 		$('#reservation-details-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> cancel edit');
 	} else {
 		console.log('reservation-details');
-		$('#reservation-details').show();
 		$('#reservation-details-form').hide();
 		$('#reservation-details-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> advanced edit');
 	}

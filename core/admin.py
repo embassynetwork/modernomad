@@ -109,7 +109,7 @@ class ReservationAdmin(admin.ModelAdmin):
 		return "$%d" % self.rate
 
 	def value(self):
-		return "$%d" % self.total_value()
+		return "$%d" % self.bill_base_value()
 
 	def bill(self):
 		return "$%d" % self.bill_amount()

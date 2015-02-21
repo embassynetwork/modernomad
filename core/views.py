@@ -1123,13 +1123,37 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 	reservation = Reservation.objects.get(pk=reservation_id)
 
 	reason = request.POST.get("reason")
-	try:
-		amount = -float(request.POST.get("discount"))
-		reason = "Discount: " + reason
-	except:
+	calculation_type = request.POST.get("calculation_type")
+	if request.POST.get("discount"):
+		if calculation_type == "absolute":
+			reason = "Discount: " + reason
+			amount = -Decimal(request.POST.get("discount"))
+		elif calculation_type == "percent":
+			percent = Decimal(request.POST.get("discount"))/100
+			reason = "Discount (%s%%): %s" % (percent*Decimal(100.0), reason)
+			if percent < 0.0 or percent > 100.0:
+				messages.add_message(request, messages.INFO, "Invalid percent value given.")
+				return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+			amount = -(reservation.bill_subtotal_amount() * percent)
+		else:
+			messages.add_message(request, messages.INFO, "Invalid discount type.")
+			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+	else:
 		# then it's a fee
-		amount = float(request.POST.get("extra_fee"))
-		reason = "Fee: " + reason
+		if calculation_type == "absolute":
+			reason = "Fee: " + reason
+			amount = float(request.POST.get("extra_fee"))
+		elif calculation_type == "percent":
+			percent = Decimal(request.POST.get("extra_fee"))/100
+			reason = "Fee (%s%%): %s" % (percent*Decimal(100.0), reason)
+			if percent < 0.0 or percent > 100.0:
+				messages.add_message(request, messages.INFO, "Invalid percent value given.")
+				return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+			amount = (reservation.bill_subtotal_amount() * percent)
+		else:
+			messages.add_message(request, messages.INFO, "Invalid fee type.")
+			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
 	new_line_item = BillLineItem(reservation=reservation, description=reason, amount=amount, paid_by_house=False, custom=True)
 	new_line_item.save()
 	# regenerate the bill now that we've applied some new fees
