@@ -612,6 +612,9 @@ class Reservation(models.Model):
 	def payments(self):
 		return Payment.objects.filter(reservation=self)
 
+	def non_refund_payments(self):
+		return Payment.objects.filter(reservation=self).filter(paid_amount__gt=0)
+
 	def payment_date(self):
 		# Date of the last payment
 		payments = Payment.objects.filter(reservation=self).order_by('payment_date').reverse()
@@ -655,6 +658,32 @@ class Payment(models.Model):
 
 	def to_house(self):
 		return self.paid_amount - self.non_house_fees() - self.house_fees()
+
+	def is_refund(self):
+		return self.paid_amount < 0
+
+	def refund_payments(self):
+		payments = Payment.objects.filter(transaction_id = self.transaction_id)
+		refunds = []
+		for p in payments:
+			if p.is_refund():
+				refunds.append(p)
+		print refunds
+		return refunds
+
+	def net_paid(self):
+		payments = Payment.objects.filter(transaction_id = self.transaction_id)
+		balance = 0
+		for p in payments:
+			balance += p.paid_amount
+		return balance
+
+	def is_fully_refunded(self):
+		balance = self.net_paid()
+		if balance > 0:
+			return False
+		return True
+
 
 	def non_house_fees(self):
 		# takes the appropriate bill line items and applies them proportionately to the payment. 

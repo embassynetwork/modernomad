@@ -4,6 +4,7 @@ from django.core import urlresolvers
 from models import Reservation, Payment
 from django.conf import settings
 from django.utils import timezone
+from decimal import Decimal
 import stripe
 
 import logging
@@ -21,11 +22,11 @@ def charge_customer(reservation):
 	else:
 		raise PaymentException("No payment system configured")
 
-def issue_refund(payment):
+def issue_refund(payment, amount=None):
 	if payment.payment_service == "Stripe" and settings.STRIPE_SECRET_KEY:
-		return stripe_issue_refund(payment)
+		return stripe_issue_refund(payment, amount)
 	elif payment.payment_service == "USAePay" and settings.USA_E_PAY_KEY:
-		return usaepay_issue_refund(payment)
+		return usaepay_issue_refund(payment, amount)
 	elif not payment.payment_service == "Stripe" and not payment.payment_service == "USAePay":
 		logger.info("issue_refund: Payment not issued through service so we can't refund it.")
 		return Payment.objects.create(reservation=payment.reservation,
@@ -96,18 +97,26 @@ def stripe_charge_customer(reservation):
 		transaction_id = charge.id
 	)
 
-def stripe_issue_refund(payment):
+def stripe_issue_refund(payment, refund_amount=None):
 	logger.debug("stripe_issue_refund(payment=%s)" % payment.id)
 	
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	charge = stripe.Charge.retrieve(payment.transaction_id)
-	refund = charge.refund()
+	print "refunding amount"
+	print refund_amount
+	if refund_amount:
+		# amount refunded has to be given in cents
+		refund_amount_cents = int(float(refund_amount)*100)
+		print refund_amount_cents
+		refund = charge.refund(amount=refund_amount_cents)
+	else:
+		refund = charge.refund()
 
 	# Store the charge details in a Payment object
 	return Payment.objects.create(reservation=payment.reservation,
 		payment_service = "Stripe",
 		payment_method = "Refund",
-		paid_amount = -1 * payment.paid_amount,
+		paid_amount = -1 * Decimal(refund_amount),
 		transaction_id = refund.id
 	)
 	

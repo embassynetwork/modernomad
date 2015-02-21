@@ -145,10 +145,10 @@
 	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
 
 	<div class="panel panel-warning">
-			<div class="panel-heading">
-				<h4><a href="#" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;">
+			<div class="panel-heading" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;">
+				<h4>
 					<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close reservation notes 
-				</a></h4>
+				</h4>
 			</div>
 		<div id="reservation-notes-area" class="panel-body">
 			{% for note in reservation_notes %}
@@ -373,29 +373,59 @@
 	<table id="payment-details" class="table">
 		<thead>
 			<th>Date</th>
-			<th>Transaction ID</th>
 			<th>Method</th>
 			<th class="money">Amount</th>
 			<th></th>
 		</thead>
-		{% for p in r.payments %}
+		{% for p in r.non_refund_payments %}
 			<form class="res-refund" id="res-refund-{{payment_id}}" 
 				method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">
 				{% csrf_token %}
 				<input name="payment_id" type="hidden" value="{{p.id}}">
-			<tr>
-				<td>{{ p.payment_date }}
-				<td>{{ p.transaction_id }}
-				<td>{{ p.payment_method }}</td>
-				<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
-				<td>
-					{% if p.paid_amount > 0 %}
-					<input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Refund" onclick="return confirm('Are you sure?');">
-					{% endif %}
-				</a>
-			</tr>
+				<tr {% if p.is_fully_refunded %} class="greyed-out" {% endif %}>
+					<td>{{ p.payment_date }}
+					<td>{{ p.payment_method }}</td>
+					<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
+					<td class="money">
+						{% if not p.is_fully_refunded %}
+						<a class="btn btn-danger pull-right" id="show-refund-details-{{forloop.counter}}" onclick="toggleRefundDetails({{forloop.counter}}); return false;">Refund?</a>
+						{% else %}
+						<em>Refunded</em>
+						{% endif %}
+					</td>
+				</tr>
+				{% for refund in p.refund_payments %}
+				{% if not refund.is_fully_refunded %}
+					<tr>
+						<td><small><em>{{ refund.payment_date }}</em></small></td>
+						<td><small><em>Partial refund</em></small></td>
+						<td class="money"><small><em>{{ refund.paid_amount }}</em></small></td>
+						<td> </td>
+					</tr>
+				{% endif %}
+				{% endfor %}
+		
+				<tr id="refund-details-{{forloop.counter}}">
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{forloop.counter}}, {{p.net_paid}})" value="full-refund" checked> Full 
+						</label>
+					</td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{forloop.counter}}, '')" value="partial-refund"> Partial
+						</label>
+					</td>
+					<td>
+						<input type="text" name="refund-amount" id="refund-amount-{{forloop.counter}}" value="{{p.net_paid}}">
+					</td>
+					<td>
+						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?');">
+					</td>
+				</tr>
 			</form>
 		{% endfor %}
+
 		<tr class="total-row">
 			<td colspan="3"></td>
 			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
@@ -450,6 +480,19 @@
 {% block extrajs %}
 <script language="JavaScript">
 
+function UpdateRefundValue(id, val) { 
+	$("#refund-amount-"+id).val(val)
+} 
+
+function toggleRefundDetails(id){
+	if($('#refund-details-'+id).is(':hidden')) {
+		$('#refund-details-'+id).show();
+	} else {
+		$('#refund-details-'+id).hide();
+	}
+}
+toggleRefundDetails();
+
 function toggleReservationNotes(){
 	if($('#reservation-notes-area').is(':hidden')) {
 		$('#reservation-notes-area').show();
@@ -460,7 +503,6 @@ function toggleReservationNotes(){
 	}
 }
 
-console.log({{reservation_notes|length}});
 if ({{reservation_notes|length}} == 0) {
 	toggleReservationNotes();
 }

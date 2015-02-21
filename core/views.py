@@ -947,16 +947,6 @@ def ReservationManageAction(request, location_slug, reservation_id):
 				guest_welcome(reservation)
 		elif reservation_action == 'set-comp':
 			reservation.comp()
-		elif reservation_action == 'refund-card':
-			try:
-				payments = reservation.payments()
-				if payments.count() == 0:
-					Reservation.ResActionError("No payments to refund!")
-				if payments.count() > 1:
-					Reservation.ResActionError("Multiple payments found!")
-				payment_gateway.issue_refund(payments[0])
-			except stripe.CardError, e:
-				raise Reservation.ResActionError(e)
 		elif reservation_action == 'res-charge-card':
 			try:
 				payment_gateway.charge_customer(reservation)
@@ -1045,10 +1035,16 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 	reservation = get_object_or_404(Reservation, id=reservation_id)
 	
 	action = request.POST.get("action")
-	if action == "Refund":
+	if action == "Submit":
 		payment_id = request.POST.get("payment_id")
 		payment = get_object_or_404(Payment, id=payment_id)
-		payment_gateway.issue_refund(payment)
+		refund_amount = request.POST.get("refund-amount")
+		print refund_amount
+		print payment.net_paid()
+		if Decimal(refund_amount) > Decimal(payment.net_paid()):
+			messages.add_message(request, messages.INFO, "Cannot refund more than payment balance")
+		else:
+			payment_gateway.issue_refund(payment, refund_amount)
 	elif action == "Add":
 		payment_method = request.POST.get("payment_method").strip().title()
 		paid_amount = request.POST.get("paid_amount").strip()

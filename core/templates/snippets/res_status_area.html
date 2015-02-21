@@ -48,9 +48,6 @@
 			{% if r.user.profile.customer_id %}
 				{% if r.is_paid %}
 					<p>This reservation is confirmed and paid. No action needed.</p>  
-					<!--<p>Was there a mistake?  Do you need to
-						<a href="#" class="res-manage-action res-manage-btn" id="refund-card" onclick="return confirm('Are you sure?');">refund their card</a>?-->
-					</p>
 				{% else %}
 					<p>The reservation is confirmed, although unpaid.</p>
 					<p><a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
