@@ -144,11 +144,19 @@
 
 	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
 
-	<div id="reservation-notes-wrapper" class="bg-warning">
-		<h4><a href="#" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;"><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Close reservation notes </a></h4>
-		<div id="reservation-notes-area" class="">
+	<div class="panel panel-warning">
+			<div class="panel-heading">
+				<h4><a href="#" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;">
+					<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close reservation notes 
+				</a></h4>
+			</div>
+		<div id="reservation-notes-area" class="panel-body">
 			{% for note in reservation_notes %}
-				<div class="user-field field"><strong>{{ note.created }} from {{note.created_by.first_name}}:</strong> <pre>{{ note.note }}</pre></div>
+				<div class="user-field field">
+					<small>{{ note.created }} from {{note.created_by.first_name}}:</small> 
+					<p>{{ note.note }}</p>
+				</div>
+				<hr>
 			{% endfor %}
 			<form class="form-horizontal" method="POST" action=".">{% csrf_token %}
 				<div class="form-group" id="reservation-notes-input-group">
@@ -324,35 +332,39 @@
 		</thead>
 		{% for item in r.bill_subtotal_items %}
 			<tr class="bill-line-item">
-				<td><em>{{ item.description }}</em></td>
+				<td>{{ item.description }}</td>
 				<td></td>
-				<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
+				<td class="money">${{ item.amount|floatformat:2 }}</td>
 			</tr>
 		{% endfor %}
 		<tr class="total-row">
-			<td>Subtotal</td>
 			<td></td>
+			<td>Subtotal</td>
 			<td class="money">${{ r.bill_subtotal_amount|floatformat:2 }}</td>
+		</tr>
+		{% for item in r.bill_fees %}
+			{% if not item.paid_by_house %}
+				<tr class="bill-line-item">
+					<td></td>
+					<td>{{ item.description }}</td>
+					<td class="money">${{ item.amount|floatformat:2 }}</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+		<tr class="total-row">
+			<td></td>
+			<td>Total</td>
+			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
 		</tr>
 		{% for item in r.bill_fees %}
 			{% if item.paid_by_house %}
 				<tr class="bill-line-item">
-					<td class="paid-by-house text-danger"><em>{{ item.description }}</em></td>
-					<td class="money"><span class="text-danger"><em>${{ item.amount|floatformat:2 }}</em></span></td>
 					<td class="money"></td>
+					<td class="paid-by-house text-danger"><em>{{ item.description }} Fee</em></td>
+					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
 				</tr>
-			{% else %}
-			<tr class="bill-line-item">
-				<td><em>{{ item.description }}</em></td>
-				<td></td>
-				<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
-			</tr>
 			{% endif %}
 		{% endfor %}
-		<tr class="total-row">
-			<td>Total</td>
-			<td class="money"><span class="text-danger">${{ r.house_fees|floatformat:2 }}</span></td>
-			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
 	</table>
 
 	<!-- Payment Details -->
@@ -441,10 +453,10 @@
 function toggleReservationNotes(){
 	if($('#reservation-notes-area').is(':hidden')) {
 		$('#reservation-notes-area').show();
-		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes ');
+		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes</h4>');
 	} else {
 		$('#reservation-notes-area').hide();
-		$('#reservation-notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}');
+		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}</h4>');
 	}
 }
 
