@@ -266,7 +266,7 @@ class RoomCalendar(calendar.HTMLCalendar):
 class Room(models.Model):
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
-	default_rate = models.IntegerField()
+	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
 	description = models.TextField(blank=True, null=True)
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
@@ -376,7 +376,7 @@ class Reservation(models.Model):
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
-	rate = models.IntegerField(null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
+	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
 	
 
@@ -484,7 +484,7 @@ class Reservation(models.Model):
 		line_items = []
 
 		# The first line item is for the room charge
-		room_charge_desc = "%s (%d * $%d)" % (self.room.name, self.total_nights(), self.get_rate())
+		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
 		room_charge = self.total_value()
 		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)

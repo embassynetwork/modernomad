@@ -1029,13 +1029,12 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 			messages.add_message(request, messages.INFO, "Invalid room given!")
 	elif 'rate' in request.POST:
 		rate = request.POST.get("rate")
-		if not rate.isdigit():
-			messages.add_message(request, messages.ERROR, "Invalid rate given!")
+		if rate >= 0 and rate != reservation.get_rate():
+			reservation.set_rate(rate)
+			messages.add_message(request, messages.INFO, "Rate changed.")
 		else:
-			int_rate = int(rate)
-			if int_rate >= 0 and int_rate != reservation.get_rate():
-				reservation.set_rate(int_rate)
-				messages.add_message(request, messages.INFO, "Rate changed.")
+			messages.add_message(request, messages.ERROR, "Room rate must be a positive number")
+
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required

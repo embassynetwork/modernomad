@@ -199,20 +199,20 @@
 			</form>
 			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
-					<strong>Rate:</strong> <input name="rate" value="{{ r.rate }}" size="3"/>
+					<strong>Rate:</strong> <input name="rate" value="{{ r.rate }}" size="7"/>
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Rate"/>
 				</div>
 			</form>
 			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
-					<strong>Discount: $</strong> <input name="discount" value="0" size="3"/>
+					<strong>Discount: $</strong> <input name="discount" value="0" size="7"/>
 					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
 				</div>
 			</form>
 			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
 				<div class="form-group">
-					<strong>Additional Fee: $</strong> <input name="extra_fee" value="0" size="3"/>
+					<strong>Additional Fee: $</strong> <input name="extra_fee" value="0" size="7"/>
 					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
 					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
 				</div>
