@@ -440,10 +440,10 @@ def CheckRoomAvailability(request, location_slug):
 	for room in free_rooms:
 		reservation = Reservation(id=-1, room=room, arrive=arrive, depart=depart, location=location)
 		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
-		total = 0
+		total = Decimal(0.0)
 		for item in bill_line_items:
 			if not item.paid_by_house:
-				total = total + item.amount
+				total = Decimal(total) + Decimal(item.amount)
 		nights = reservation.total_nights()
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
@@ -492,7 +492,7 @@ def ReservationSubmit(request, location_slug):
 	rooms = Room.objects.all()
 	room_list = {}
 	for room in rooms:
-		room_list[room.name] = room.default_rate
+		room_list[room.name] = round(room.default_rate)
 	room_list = json.dumps(room_list)
 	return render(request, 'reservation.html', {'form': form, "room_list": room_list, 
 		'max_days': location.max_reservation_days, 'location': location })
