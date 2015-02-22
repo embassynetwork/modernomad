@@ -1088,7 +1088,11 @@ def ReservationRecalculateBill(request, location_slug, reservation_id):
 		return HttpResponseRedirect('/404')
 	location = get_location(location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
-	reservation.generate_bill()
+	reset_suppressed = request.POST.get('reset_suppressed')
+	if reset_suppressed == "true":
+		reservation.generate_bill(reset_suppressed=True)
+	else:
+		reservation.generate_bill()
 	messages.add_message(request, messages.INFO, "The bill has been recalculated.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
@@ -1108,6 +1112,24 @@ def ReservationToggleComp(request, location_slug, reservation_id):
 		if reservation.is_confirmed():
 			reservation.approve()
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
+def ReservationDeleteBillLineItem(request, location_slug, reservation_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_location(location_slug)
+	reservation = Reservation.objects.get(pk=reservation_id)
+	print "in delete bill line item"
+	print request.POST
+	item_id = int(request.POST.get("payment_id"))
+	line_item = BillLineItem.objects.get(id=item_id)
+	line_item.delete()
+	if line_item.fee:
+		reservation.suppress_fee(line_item)
+	reservation.generate_bill()
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+	
+
 
 @house_admin_required
 def ReservationAddBillLineItem(request, location_slug, reservation_id):

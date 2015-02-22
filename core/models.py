@@ -317,6 +317,14 @@ class Room(models.Model):
 		month_html = room_cal.formatmonth(year, month)
 		return month_html
 
+class Fee(models.Model):
+	description = models.CharField(max_length=100, verbose_name="Fee Name")
+	percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
+	paid_by_house = models.BooleanField(default=False)
+
+	def __unicode__(self):
+		return self.description
+
 class ReservationManager(models.Manager):
 
 	def on_date(self, the_day, status, location):
@@ -378,7 +386,7 @@ class Reservation(models.Model):
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
-	
+	suppressed_fees = models.ManyToManyField(Fee, blank=True, null=True)	
 
 	objects = ReservationManager()
 
@@ -388,6 +396,12 @@ class Reservation(models.Model):
 
 	def __unicode__(self):
 		return "reservation %d" % self.id
+
+	def suppress_fee(self, line_item):
+		print 'suppressing fee'
+		print line_item.fee
+		self.suppressed_fees.add(line_item.fee)
+		self.save()
 
 	def total_nights(self):
 		return (self.depart - self.arrive).days
@@ -489,9 +503,11 @@ class Reservation(models.Model):
 				total = total + item.amount
 		return total
 
-	def generate_bill(self, delete_old_items=True, save=True):
+	def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
 		# impt! save the custom items first or they'll be blown away when the
 		# bill is regenerated. 
+		print 'reset suppressed'
+		print reset_suppressed
 		custom_items = list(BillLineItem.objects.filter(reservation=self).filter(custom=True))
 		if delete_old_items:
 			self.delete_bill()
@@ -511,11 +527,16 @@ class Reservation(models.Model):
 			effective_room_charge += item.amount #may be negative
 
 		# A line item for every fee that applies to this location
+		if reset_suppressed:
+			self.suppressed_fees.clear()
 		for location_fee in LocationFee.objects.filter(location = self.location):
-			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-			amount = float(effective_room_charge) * location_fee.fee.percentage
-			fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
-			line_items.append(fee_line_item)
+			print location_fee.fee.description
+			print location_fee.fee not in self.suppressed_fees.all()
+			if location_fee.fee not in self.suppressed_fees.all():
+				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
+				amount = float(effective_room_charge) * location_fee.fee.percentage
+				fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+				line_items.append(fee_line_item)
 
 		# Optionally save the line items to the database
 		if save:
@@ -860,14 +881,6 @@ class LocationEmailTemplate(models.Model):
 	text_body = models.TextField(verbose_name="The text body of the email")
 	html_body = models.TextField(blank=True, null=True, verbose_name="The html body of the email")
 	
-class Fee(models.Model):
-	description = models.CharField(max_length=100, verbose_name="Fee Name")
-	percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
-	paid_by_house = models.BooleanField(default=False)
-
-	def __unicode__(self):
-		return self.description
-
 class LocationFee(models.Model):
 	location = models.ForeignKey(Location)
 	fee = models.ForeignKey(Fee)
