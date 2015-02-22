@@ -79,13 +79,14 @@
 
 		<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
 			{% csrf_token %}
-			<input class="btn-default btn" type="submit" value="Recalculate Bill">
+			<input class="btn-default btn" type="submit" value="Reset Bill Fees">
+			<input type="hidden" name="reset_suppressed" value="true">
 		</form>
 
 		{% if r.is_confirmed %}
 		<form id="res-action-send-welcome" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_welcome' location.slug r.id %}" >
 			{% csrf_token %}
-			<input class="btn-default btn" type="submit" value="(Re) Send Welcome Email">
+			<input class="btn-default btn" type="submit" value="Send Welcome Email">
 		</form>
 		{% endif %}
 
@@ -119,6 +120,21 @@
 					The welcome email is normally
 					sent to the user automatically {{days_before_welcome_email}} days prior to the reservation. Are you
 					sure you want to send it yourself now?
+				</p>
+			</div>
+
+			<div id="dialog-confirm-fee-remove" title="Remove this Bill Item?">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					<p>This fee will be removed. If you want to reset the fees applied to this reservation, use the "Reset Bill Fees" button.</p> 
+					<p>Are you sure?</p>
+				</p>
+			</div>
+
+			<div id="dialog-confirm-line-item-remove" title="Remove this Bill Item?">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					This line item will be removed. Are you sure?
 				</p>
 			</div>
 
@@ -332,7 +348,17 @@
 		</thead>
 		{% for item in r.bill_subtotal_items %}
 			<tr class="bill-line-item">
-				<td>{{ item.description }}</td>
+				<td>
+					{% if item.custom %}
+						<form method="post" id="remove-line-item-{{item.id}}" action="{% url 'reservation_delete_bill_item' location.slug r.id %}"> {% csrf_token %}
+							<a class="remove-line-item" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
+							<input type="hidden" name="payment_id" value="{{item.id}}">
+							{{ item.description }}
+						</form>
+					{% else %}
+						{{ item.description }}
+					{% endif %} 
+				</td>
 				<td></td>
 				<td class="money">${{ item.amount|floatformat:2 }}</td>
 			</tr>
@@ -345,7 +371,13 @@
 		{% for item in r.bill_fees %}
 			{% if not item.paid_by_house %}
 				<tr class="bill-line-item">
-					<td></td>
+					<td>
+						<form method="post" id="remove-line-item-{{item.id}}" action="{% url 'reservation_delete_bill_item' location.slug r.id %}"> {% csrf_token %}
+							<a class="remove-fee" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
+							<input type="hidden" name="payment_id" value="{{item.id}}">
+							{{ item.description }}
+						</form>
+					</td>
 					<td>{{ item.description }}</td>
 					<td class="money">${{ item.amount|floatformat:2 }}</td>
 				</tr>
@@ -662,6 +694,47 @@ $("#res-action-send-welcome").click(function (e) {
     $("#dialog-confirm-send-welcome").dialog("open");
     e.preventDefault();
 });
+
+
+$("#dialog-confirm-fee-remove").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Remove": function () {
+            $(this).data('form-link').parentElement.submit();
+         },
+        "Do Not Remove": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$(".remove-fee").click(function (e) {
+    $("#dialog-confirm-fee-remove").data('form-link', this).dialog("open");
+    e.preventDefault();
+});
+
+
+$("#dialog-confirm-line-item-remove").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Remove": function () {
+            $(this).data('form-link').parentElement.submit();
+         },
+        "Do Not Remove": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$(".remove-line-item").click(function (e) {
+    $("#dialog-confirm-line-item-remove").data('form-link', this).dialog("open");
+    e.preventDefault();
+});
+
+
+
 
 $("#dialog-confirm-cancel").dialog({
     autoOpen: false,
