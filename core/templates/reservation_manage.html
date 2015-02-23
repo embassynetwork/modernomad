@@ -419,10 +419,10 @@
 					<td>{{ p.payment_method }}</td>
 					<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
 					<td class="money">
-						{% if not p.is_fully_refunded %}
-						<a class="btn btn-danger pull-right" id="show-refund-details-{{forloop.counter}}" onclick="toggleRefundDetails({{forloop.counter}}); return false;">Refund?</a>
-						{% else %}
-						<em>Refunded</em>
+						{% if p.is_fully_refunded %} 
+							<em>Refunded</em>
+						{% elif not p.transaction_id == "Manual" %}
+							<a class="btn btn-danger pull-right" id="show-refund-details-{{forloop.counter}}" onclick="toggleRefundDetails({{forloop.counter}}); return false;">Refund?</a>
 						{% endif %}
 					</td>
 				</tr>
@@ -467,7 +467,7 @@
 	<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
 		<input name="payment_id" type="hidden" value="{{p.id}}">
 		<tr style="padding-top:24px;">
-			<th>Add Payment</th>
+			<th>Record Manual Payment</th>
 			<td><input name="payment_method" value="Cash"></td>
 			<td><input name="paid_amount" value="{{r.total_owed}}"></td>
 			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>

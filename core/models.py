@@ -693,6 +693,10 @@ class Payment(models.Model):
 		return refunds
 
 	def net_paid(self):
+		# manual/cash transactions will not have a transaction id. this feels a
+		# bit fragile but probably the best we can do with this data structure?
+		if self.transaction_id == "Manual":
+			return self.paid_amount
 		payments = Payment.objects.filter(transaction_id = self.transaction_id)
 		balance = 0
 		for p in payments:
