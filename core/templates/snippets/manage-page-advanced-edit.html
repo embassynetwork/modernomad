@@ -1,0 +1,146 @@
+<div id="reservation-details-form">
+	<h3>Edit Reservation Details</h3>
+	<div class="form-help-text" style="margin-bottom: 12px;">
+		Be very careful when you edit these details!
+	</div>
+
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">User</label> 
+			<div class="col-sm-7">
+				<input class="form-control" name="username" value="{{ r.user.username }}"/>
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change User"/>
+		</div>
+	</form>
+
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Rate</label> 
+			<div class="col-sm-7">
+				<input class="form-control" name="rate" value="{{ r.rate }}"/>
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-sm-3" style="width:120px;" value="Change Rate"/>
+		</div>
+	</form>
+	
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label"> Discount </label> 
+			<div class="col-sm-2">
+				<select name="calculation_type" class="form-control">
+					<option value="absolute">$</option>
+					<option value="percent">%</option>
+				</select>
+			</div>
+			<div class="col-sm-2">
+				<input name="discount" class="form-control" value="0">
+			</div>
+			<label class="col-sm-1 control-label">Reason</label> 
+			<div class="col-sm-2">
+				<input class="form-control" name="reason" value="">
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Apply"/>
+		</div>
+	</form>
+
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label"> Additional Fee </label> 
+			<div class="col-sm-2">
+				<select name="calculation_type" class="form-control">
+					<option value="absolute">$</option>
+					<option value="percent">%</option>
+				</select>
+			</div>
+			<div class="col-sm-2">
+				<input name="extra_fee" class="form-control" value="0"/>
+			</div>
+			<label class="col-sm-1 control-label">Reason</label> 
+			<div class="col-sm-2">
+				<input class="form-control" name="reason" value="">
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Apply"/>
+		</div>
+	</form>
+
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Dates</label> 
+			<label class="col-sm-2 control-label">Arrive</label> 
+			<div class="col-sm-2">
+				<input class="form-control" name="arrive" value="{{ r.arrive|date:'Y-m-d' }}" size="8"/>
+			</div>
+			<label class="col-sm-1 control-label">Depart</label> 
+			<div class="col-sm-2">
+				<input class="form-control" name="depart" value="{{ r.depart|date:'Y-m-d' }}" size="8"/>
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change Dates"/>
+		</div>
+	</form>
+
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Room</label> 
+			<div class="col-sm-4">
+				<select class="form-control" name="room_id">
+					{% for room in location.rooms_with_future_reservability %}
+					<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-md-2" style="width:120px;" value="Change Room"/>
+		</div>
+	</form>
+	
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+		<div class="form-group">
+			<label class="col-sm-2 control-label">Status</label> 
+			<div class="col-sm-4">
+				<select name="status" class="form-control">
+					{% for status_tup in reservation_statuses %}
+					<option value="{{status_tup.0}}" {% if r.status == status_tup.0 %}SELECTED{% endif %}>{{status_tup.1}}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change Status"/>
+		</div>
+		<p class="small">The confirmed and payment statuses should generally be aligned. Only edit this in special circumstances if you need to override what The Man thinks is right :).</p>
+	</form>
+
+	{% if r.is_confirmed %}
+	<form id="res-action-send-welcome" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_welcome' location.slug r.id %}" >
+		{% csrf_token %}
+		<input class="btn-default btn" type="submit" value="Send Welcome Email">
+	</form>
+	{% endif %}
+
+	{% if not r.is_canceled %}
+
+		{% if r.is_comped or not r.is_paid %}
+		<form id="res-action-toggle-comp" class="res-action" method="post" action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
+			<div class="form-group">
+				{% csrf_token %}
+				<input type="submit" 
+				{% if r.is_comped %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
+				class="btn btn-default" id="toggle-comp-input">
+			</div>
+		</form>
+		{% endif %}
+
+		<div class="clear"></div>
+		<form id="res-cancel" method="post" action="{% url 'reservation_cancel' location.slug r.id %}">
+			<div class="form-group">
+				{% csrf_token %} 
+				<input type="hidden" name="redirect" value="{% url 'reservation_manage' location.slug r.id %}">
+				<input class="btn btn-default" type="submit" value="Cancel This Reservation">
+			</div>
+		</form>
+		<div class="clear"></div>
+
+	{% endif %} {% comment %} endif != 'canceled' {% endcomment %}
+
+
+</div>
+
+

@@ -997,7 +997,7 @@ div#spinner
 	background-size: 70%;
 }
 
-#email-user-button, #payment-link-button {
+#payment-link-button {
 	margin-bottom: 20px;
 }
 
