@@ -578,7 +578,7 @@ class Reservation(models.Model):
 	def set_rate(self, rate):
 		if rate == None:
 			rate = 0
-		self.rate = rate
+		self.rate = Decimal(rate)
 		self.save()
 		self.generate_bill()
 
