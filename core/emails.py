@@ -769,8 +769,17 @@ def newsletter(request, location_slug):
 	# Make sure this person can post to our list
 	sender = request.POST.get('from')
 	location_event_admins = EventAdminGroup.objects.get(location=location).users.all()
-	if not sender in [user.email for user in location_event_admins]:
-		# TODO - This shoud possibly send a response so they know they were blocked
+	allowed_senders = [user.email for user in location_event_admins]
+	# have to be careful here because the "sender" email address is likely a
+	# substring of the entire 'from' field in the POST request, ie, "Jessy Kate
+	# Schingler <jessy@jessykate.com>"
+	this_sender_allowed = False
+	for sender_email in allowed_senders:
+		if sender_email in sender:
+			this_sender_allowed = True
+			break
+	if not this_sender_allowed:
+		# TODO - This could send a response so they know they were blocked
 		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
 		return HttpResponse(status=200)
 
