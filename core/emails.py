@@ -768,6 +768,7 @@ def newsletter(request, location_slug):
 
 	# Make sure this person can post to our list
 	location_event_admins = EventAdminGroup.objects.get(location=location)
+	sender = request.POST.get('from')
 	if not sender in location_event_admins.all():
 		# TODO - This shoud possibly send a response so they know they were blocked
 		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
@@ -784,8 +785,7 @@ def newsletter(request, location_slug):
 
 def send_newsletter(request, user, location):
 
-	sender = location.from_email()
-	logger.debug('sender: %s' % sender)
+	from_address = location.from_email()
 	subject = request.POST.get('subject')
 	body_plain = request.POST.get('body-plain')
 	body_html = request.POST.get('body-html')	
@@ -809,7 +809,7 @@ def send_newsletter(request, user, location):
 
 	# send the message 
 	mailgun_data =  {
-		"from": sender,
+		"from": from_address,
 		"to": [user.email, ],
 		"subject": subject,
 		"text": body_plain,
