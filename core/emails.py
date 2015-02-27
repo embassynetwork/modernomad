@@ -11,7 +11,7 @@ from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from core.models import Reservation
-from gather.models import Event
+from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
@@ -751,3 +751,70 @@ def residents(request, location_slug):
 		"h:Reply-To": list_address,
 	}
 	return mailgun_send(mailgun_data, attachments)
+
+
+@csrf_exempt
+def newsletter(request, location_slug):
+	''' email all people signed up for event activity notifications at this location.'''
+
+	# fail gracefully if location does not exist
+	try:
+		location = get_location(location_slug)
+	except:
+		# XXX TODO reject and bounce back to sender?
+		logger.error('location not found')
+		return HttpResponse(status=200)
+	logger.debug('newsletter@ for location: %s' % location)
+
+	# Make sure this person can post to our list
+	location_event_admins = EventAdminGroup.objects.get(location=location)
+	if not sender in location_event_admins.all():
+		# TODO - This shoud possibly send a response so they know they were blocked
+		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
+		return HttpResponse(status=200)
+
+	weekly_notifications_on = EventNotifications.objects.filter(location_weekly = location)
+	remindees_for_location = [notify.user for notify in weekly_notifications_on]
+	
+	# TESTING
+	for user in ["jessy@jessykate.com", "jessy@embassynetwork.com"]:
+	#for user in remindees_for_location:
+		send_newsletter(request, user, location)
+
+
+def send_newsletter(request, user, location):
+
+	sender = location.from_email()
+	logger.debug('sender: %s' % sender)
+	subject = request.POST.get('subject')
+	body_plain = request.POST.get('body-plain')
+	body_html = request.POST.get('body-html')	
+	
+	# Include attachements
+	attachments = []
+	for attachment in request.FILES.values():
+		attachments.append(("attachment", attachment))
+
+	prefix = "["+location.email_subject_prefix + "] " 
+	subject = prefix + subject
+	logger.debug("subject: %s" % subject)
+
+	# add in footer
+	text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s Newsletter *~*~*~* '''% location.name
+	body_plain = body_plain + text_footer
+
+	if body_html:
+		html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s Newsletter *~*~*~* '''% location.name
+		body_html = body_html + html_footer
+
+	# send the message 
+	mailgun_data =  {
+		"from": sender,
+		"to": [user.email, ],
+		"subject": subject,
+		"text": body_plain,
+		"html": body_html,
+	}
+	return mailgun_send(mailgun_data, attachments)
+
+
