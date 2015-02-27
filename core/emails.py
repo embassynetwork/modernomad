@@ -754,7 +754,7 @@ def residents(request, location_slug):
 
 
 @csrf_exempt
-def newsletter(request, location_slug):
+def announce(request, location_slug):
 	''' email all people signed up for event activity notifications at this location.'''
 
 	# fail gracefully if location does not exist
@@ -764,7 +764,7 @@ def newsletter(request, location_slug):
 		# XXX TODO reject and bounce back to sender?
 		logger.error('location not found')
 		return HttpResponse(status=200)
-	logger.debug('newsletter@ for location: %s' % location)
+	logger.debug('announce@ for location: %s' % location)
 
 	# Make sure this person can post to our list
 	sender = request.POST.get('from')
@@ -790,10 +790,12 @@ def newsletter(request, location_slug):
 	jessy = User.objects.get(id=1)
 	for user in [jessy,]:
 	#for user in remindees_for_location:
-		send_newsletter(request, user, location)
+		send_announce(request, user, location)
+
+	return HttpResponse(status=200)
 
 
-def send_newsletter(request, user, location):
+def send_announce(request, user, location):
 
 	from_address = location.from_email()
 	subject = request.POST.get('subject')
@@ -810,11 +812,11 @@ def send_newsletter(request, user, location):
 	logger.debug("subject: %s" % subject)
 
 	# add in footer
-	text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s Newsletter *~*~*~* '''% location.name
+	text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s Announce *~*~*~* '''% location.name
 	body_plain = body_plain + text_footer
 
 	if body_html:
-		html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s Newsletter *~*~*~* '''% location.name
+		html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s Announce *~*~*~* '''% location.name
 		body_html = body_html + html_footer
 
 	# send the message 

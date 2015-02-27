@@ -22,7 +22,7 @@ per_location_patterns = [
 	url(r'^email/stay$', 'core.emails.stay', name='location_email_stay'),
 	url(r'^email/residents$', 'core.emails.residents', name='location_email_residents'),
 	url(r'^email/test80085$', 'core.emails.test80085', name='location_email_test'),
-	url(r'^email/newsletter$', 'core.emails.newsletter', name='location_email_newsletter'),
+	url(r'^email/announce$', 'core.emails.announce', name='location_email_announce'),
 
 	url(r'^reservation/', include('core.urls.reservations')),
 	url(r'^manage/', include('core.urls.manage')),
