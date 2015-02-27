@@ -787,7 +787,7 @@ def newsletter(request, location_slug):
 	remindees_for_location = [notify.user for notify in weekly_notifications_on]
 	
 	# TESTING
-	jessy = Users.objects.get(id=1)
+	jessy = User.objects.get(id=1)
 	for user in [jessy,]:
 	#for user in remindees_for_location:
 		send_newsletter(request, user, location)
