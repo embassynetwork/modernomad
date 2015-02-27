@@ -769,7 +769,7 @@ def newsletter(request, location_slug):
 	# Make sure this person can post to our list
 	location_event_admins = EventAdminGroup.objects.get(location=location)
 	sender = request.POST.get('from')
-	if not sender in location_event_admins.all():
+	if not sender in location_event_admins.users.all():
 		# TODO - This shoud possibly send a response so they know they were blocked
 		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
 		return HttpResponse(status=200)
