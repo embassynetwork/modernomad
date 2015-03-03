@@ -7,51 +7,48 @@
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			{% for name in room_names %}
-			<li {% if forloop.first %}class="active" {% endif %}><a href="#room-{{forloop.counter}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
+				<li {% if forloop.first %}class="active" {% endif %}><a href="#{{name|slugify}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
 			{% endfor %}
 		</ul>
 	</div>
 
-	<div class="col-md-9">
+	<div class="col-md-6">
 		<div class="tab-content">
-			{% for room_form, reservables_forms, room_id in room_forms %}
+			{% for room_form, reservables_forms, room_id, room_name in room_forms %}
 
-			<div role="tabpanel" class="tab-pane {% if forloop.first %}active{% endif %}" id="room-{{forloop.counter}}">
-				<form class="form-inline" method="post" enctype="multipart/form-data" action=".">
+			<div role="tabpanel" class="tab-pane {% if forloop.first %}active{% endif %}" id="{{room_name|slugify}}">
+				<form class="form-horizontal" method="post" enctype="multipart/form-data" action="."> {% csrf_token %}
 					{% for field in room_form %}
-						<div class="field-wrapper">
-							{{ field.errors }}
-							{{ field.label_tag }}
-							<span class="form-help-text">{{ field.help_text}}</span>
-							<div class="form-field-body">
-								{{ field }}
-							</div>
-						</div>
+					<div class="form-group">
+						{{ field.errors }}
+						{{ field.label_tag }}
+						<span class="form-help-text">{{ field.help_text}}</span>
+						{{ field }}
+					</div>
 					{% endfor %}
 					<input type="hidden" name="room_id" value="{{room_id}}">
-					<input class="form-control" type="submit" value="Submit">
-					{% csrf_token %}
+					<div class="form-group">
+						<button type="submit" class="btn btn-large btn-default">Submit Room Changes</button>
+					</div>
 				</form>
 
 				<hr>
 
 				{% if reservables_forms %}
-					<h4>Date Ranges Reservable</h4>
+					<h4>Date Ranges that this room should be reservable</h4>
+					<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
 					{% for reservable_form, reservable_id in reservables_forms %}
 						<form class="form-inline" method="post" enctype="multipart/form-data" action=".">
-							{% for field in reservable_form %}
-								<div class="field-wrapper">
+							<div class="form-group">
+								{% for field in reservable_form %}
 									{{ field.errors }}
-									{{ field.label_tag }}
-									<span class="form-help-text">{{ field.help_text}}</span>
-									<div class="form-field-body">
-										{{ field }}
-									</div>
-								</div>
-							{% endfor %}
-							<input type="hidden" name="reservable_id" value="{{reservable_id}}">
-							<input type="hidden" name="room_fk" value="{{room_id}}">
-							<input class="form-control" type="submit" value="Submit">
+									<label>{{ field.label }}</label>
+									{{ field }}
+								{% endfor %}
+								<input type="hidden" name="reservable_id" value="{{reservable_id}}">
+								<input type="hidden" name="room_fk" value="{{room_id}}">
+								<input class="form-control" type="submit" value="Submit">
+							</div>
 							{% csrf_token %}
 						</form>
 					{% endfor %}
@@ -82,6 +79,18 @@
 			// input or it won't fire on its own!
 			$(this).change();
         }
+	});
+
+	$(document).ready(function() {
+		var hash = window.location.hash;
+		hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+		$('.nav-pills a').click(function (e) {
+			$(this).tab('show');
+			var scrollmem = $('body').scrollTop();
+			window.location.hash = this.hash;
+			$('html,body').scrollTop(scrollmem);
+		});
 	});
 
 </script>

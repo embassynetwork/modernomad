@@ -173,18 +173,26 @@ class LocationContentForm(forms.ModelForm):
 			'front_page_participate': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
 		}
 
-class LocationRoomForm(forms.ModelForm):
+class BootstrapModelForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(BootstrapModelForm, self).__init__(*args, **kwargs)
+		for field_name, field in self.fields.items():
+			field.widget.attrs['class'] = 'form-control'
+
+class LocationRoomForm(BootstrapModelForm):
 	class Meta:
 		model = Room
-	exclude = ['location',]
+		exclude = ['location',]
+		widgets = { 
+		}
 
-class LocationReservableForm(forms.ModelForm):
+class LocationReservableForm(BootstrapModelForm):
 	class Meta:
 		model = Reservable
 		exclude = ['room',]
 		widgets = { 
-			'start_date': forms.DateInput(attrs={'class':'datepicker form-control'}),
-			'end_date': forms.DateInput(attrs={'class':'datepicker form-control'}),
+			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
+			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
 		}
 
 class ReservationForm(forms.ModelForm):

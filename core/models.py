@@ -269,9 +269,9 @@ class Room(models.Model):
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
 	description = models.TextField(blank=True, null=True)
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
-	shared = models.BooleanField(default=False, verbose_name="Is this room a hostel/shared accommodation?")
+	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
-	residents = models.ManyToManyField(User, blank=True, null=True, related_name="residents") # a room may have many residents and a resident may have many rooms
+	residents = models.ManyToManyField(User, blank=True, null=True, related_name="residents", help_text="This field is optional.") # a room may have many residents and a resident may have many rooms
 	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 
 	def __unicode__(self):
@@ -922,7 +922,7 @@ class LocationFlatPage(models.Model):
 class Reservable(models.Model):
 	room = models.ForeignKey(Room, related_name="reservables")
 	start_date = models.DateField()
-	end_date = models.DateField(null=True, blank=True)
+	end_date = models.DateField(null=True, blank=True, help_text="Leave this blank for a guest room or room with open ended reservability.")
 
 class UserNote(models.Model):
 	created = models.DateTimeField(auto_now_add=True)

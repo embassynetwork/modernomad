@@ -818,7 +818,7 @@ def LocationEditPages(request, location_slug):
 def LocationEditRooms(request, location_slug):
 	location = get_location(location_slug)
 
-	location_rooms = location.rooms.all()
+	location_rooms = location.rooms.all().order_by('name')
 
 	if request.method == 'POST':
 		print request.POST
@@ -834,10 +834,14 @@ def LocationEditRooms(request, location_slug):
 				action = "created"
 				form = LocationRoomForm(request.POST, request.FILES)
 			if form.is_valid():
-				new_room = form.save(commit=False)
-				new_room.location = location
-				new_room.save()
-				messages.add_message(request, messages.INFO, "Room %s." % action)
+				if action == "updated":
+					form.save()
+					messages.add_message(request, messages.INFO, "%s %s." % (room.name, action))
+				else:
+					new_room = form.save(commit=False)
+					new_room.location = location
+					new_room.save()
+					messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
 				return HttpResponseRedirect(reverse('location_edit_rooms', args=(location_slug, )))
 			else:
 				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
@@ -872,15 +876,15 @@ def LocationEditRooms(request, location_slug):
 	room_forms = []
 	room_names = []
 	for room in location_rooms:
-		room_reservables = room.reservables.all()
+		room_reservables = room.reservables.all().order_by('start_date')
 		reservables_forms = []
 		for reservable in room_reservables:
 			reservables_forms.append((LocationReservableForm(instance=reservable), reservable.id))
 		reservables_forms.append((LocationReservableForm(), -1))
-		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id))
+		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
 		room_names.append(room.name)
 	room_names.append("New Room")
-	room_forms.append((LocationRoomForm(), None, -1))
+	room_forms.append((LocationRoomForm(), None, -1, "new room"))
 	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required
