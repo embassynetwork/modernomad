@@ -1,18 +1,89 @@
 {% extends "location_edit.html" %}
 
 {% block sub-content %}
-	<form class="well form-inline" method="post" enctype="multipart/form-data" action=".">
-		{% for field in form %}
-			<div class="field-wrapper">
-				{{ field.errors }}
-				{{ field.label_tag }}
-				<span class="form-help-text">{{ field.help_text}}</span>
-				<div class="form-field-body">
-					{{ field }}
-				</div>
-			</div>
-		{% endfor %}
-		<input class="form-control" type="submit" value="Submit">
-		{% csrf_token %}
-	</form>
+
+<div class="row">
+
+	<div class="col-md-3">
+		<ul class="nav nav-pills nav-stacked" role="tablist">
+			{% for name in room_names %}
+			<li {% if forloop.first %}class="active" {% endif %}><a href="#room-{{forloop.counter}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
+			{% endfor %}
+		</ul>
+	</div>
+
+	<div class="col-md-9">
+		<div class="tab-content">
+			{% for room_form, reservables_forms, room_id in room_forms %}
+
+			<div role="tabpanel" class="tab-pane {% if forloop.first %}active{% endif %}" id="room-{{forloop.counter}}">
+				<form class="form-inline" method="post" enctype="multipart/form-data" action=".">
+					{% for field in room_form %}
+						<div class="field-wrapper">
+							{{ field.errors }}
+							{{ field.label_tag }}
+							<span class="form-help-text">{{ field.help_text}}</span>
+							<div class="form-field-body">
+								{{ field }}
+							</div>
+						</div>
+					{% endfor %}
+					<input type="hidden" name="room_id" value="{{room_id}}">
+					<input class="form-control" type="submit" value="Submit">
+					{% csrf_token %}
+				</form>
+
+				<hr>
+
+				{% if reservables_forms %}
+					<h4>Date Ranges Reservable</h4>
+					{% for reservable_form, reservable_id in reservables_forms %}
+						<form class="form-inline" method="post" enctype="multipart/form-data" action=".">
+							{% for field in reservable_form %}
+								<div class="field-wrapper">
+									{{ field.errors }}
+									{{ field.label_tag }}
+									<span class="form-help-text">{{ field.help_text}}</span>
+									<div class="form-field-body">
+										{{ field }}
+									</div>
+								</div>
+							{% endfor %}
+							<input type="hidden" name="reservable_id" value="{{reservable_id}}">
+							<input type="hidden" name="room_fk" value="{{room_id}}">
+							<input class="form-control" type="submit" value="Submit">
+							{% csrf_token %}
+						</form>
+					{% endfor %}
+				{% endif %}
+
+			</div>		
+			{% endfor %}
+		</div>		
+	</div>		
+
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+
+<script>
+
+	$("#id_start_date, #id_end_date").datepicker({
+		minDate: 0,
+		onSelect: function( selectedDate ) {
+			if(this.id == 'id_start_date') {
+				startDate = $('#id_start_date').datepicker("getDate");
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+	          	$('#id_end_date').datepicker("option","minDate",rMin);
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	});
+
+</script>
+
 {% endblock %}

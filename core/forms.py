@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Location
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, Reservable
 from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -171,6 +171,20 @@ class LocationContentForm(forms.ModelForm):
 			'announcement': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
 			'front_page_stay': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
 			'front_page_participate': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+		}
+
+class LocationRoomForm(forms.ModelForm):
+	class Meta:
+		model = Room
+	exclude = ['location',]
+
+class LocationReservableForm(forms.ModelForm):
+	class Meta:
+		model = Reservable
+		exclude = ['room',]
+		widgets = { 
+			'start_date': forms.DateInput(attrs={'class':'datepicker form-control'}),
+			'end_date': forms.DateInput(attrs={'class':'datepicker form-control'}),
 		}
 
 class ReservationForm(forms.ModelForm):

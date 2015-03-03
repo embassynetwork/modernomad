@@ -11,7 +11,7 @@ from django.template import RequestContext
 from registration import signals
 import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
-from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm
+from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -816,7 +816,72 @@ def LocationEditPages(request, location_slug):
 
 @house_admin_required
 def LocationEditRooms(request, location_slug):
-	pass
+	location = get_location(location_slug)
+
+	location_rooms = location.rooms.all()
+
+	if request.method == 'POST':
+		print request.POST
+		if request.POST.get("room_id"):
+			room_id = int(request.POST.get("room_id"))
+			if room_id > 0:
+				# editing an existing item
+				action = "updated"
+				room = Room.objects.get(id=room_id)
+				form = LocationRoomForm(request.POST, request.FILES, instance=room)
+			else:
+				# new item
+				action = "created"
+				form = LocationRoomForm(request.POST, request.FILES)
+			if form.is_valid():
+				new_room = form.save(commit=False)
+				new_room.location = location
+				new_room.save()
+				messages.add_message(request, messages.INFO, "Room %s." % action)
+				return HttpResponseRedirect(reverse('location_edit_rooms', args=(location_slug, )))
+			else:
+				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
+		elif request.POST.get("reservable_id"):
+			reservable_id = int(request.POST.get("reservable_id"))
+			if reservable_id > 0:
+				# editing an existing reservable
+				action = "updated"
+				reservable = Reservable.objects.get(id=reservable_id)
+				form = LocationReservableForm(request.POST, request.FILES, instance=reservable)
+			else:
+				# creating a new reservable
+				action = "created"
+				form = LocationReservableForm(request.POST, request.FILES)
+
+			if form.is_valid():
+				if action == "updated":
+					form.save()
+				else:
+					room_fk = request.POST.get('room_fk')
+					room = Room.objects.get(id=room_fk)
+					new_reservable = form.save(commit=False)
+					new_reservable.room = room
+					new_reservable.save()
+				messages.add_message(request, messages.INFO, "Reservable date range %s." % action)
+				return HttpResponseRedirect(reverse('location_edit_rooms', args=(location_slug, )))
+			else:
+				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
+		else:
+			messages.add_message(request, messages.INFO, "Error: no id was provided.")
+
+	room_forms = []
+	room_names = []
+	for room in location_rooms:
+		room_reservables = room.reservables.all()
+		reservables_forms = []
+		for reservable in room_reservables:
+			reservables_forms.append((LocationReservableForm(instance=reservable), reservable.id))
+		reservables_forms.append((LocationReservableForm(), -1))
+		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id))
+		room_names.append(room.name)
+	room_names.append("New Room")
+	room_forms.append((LocationRoomForm(), None, -1))
+	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required
 def LocationEditContent(request, location_slug):
