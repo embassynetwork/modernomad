@@ -202,6 +202,7 @@ def guest_welcome(reservation):
 		'first_name': reservation.user.first_name,
 		'day_of_week' : day_of_week,
 		'location': reservation.location,
+		'reservation': reservation,
 		'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
 		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
 		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
