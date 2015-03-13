@@ -77,6 +77,7 @@
 							<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
 							<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>
 							<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
+							<li><a href="{% url 'manage_today' location.slug %}">Arrivals & Departures</a></li>
 							{% ifappexists gather %}
 								<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
 							{% endifappexists %}
