@@ -293,6 +293,23 @@ def occupancy(request, location_slug):
 		'average_guests_per_day': float(total_person_nights)/(end -start).days })
 
 @login_required
+def manage_today(request, location_slug):
+	location = get_location(location_slug)
+	today = timezone.localtime(timezone.now())
+
+	departing_today = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+		.filter(location=location).filter(depart=today))
+		
+	arriving_today = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+		.filter(location=location).filter(arrive=today))
+
+	events_today = published_events_today_local(location)
+
+	return render(request, "location_manage_today.html", {'location': location, 'arriving_today': arriving_today, 
+		'departing_today': departing_today, 'events_today': events_today}) 
+
+
+@login_required
 def calendar(request, location_slug):
 	location = get_location(location_slug)
 	today = timezone.localtime(timezone.now())

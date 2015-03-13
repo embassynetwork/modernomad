@@ -4,6 +4,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('core.views', 
 	url(r'^payments/$', 'payments_today', name='location_payments_today'),
 	url(r'^payments/(?P<year>\d+)/(?P<month>\d+)$', 'payments', name='location_payments'),
+	url(r'^today/$', 'manage_today', name='manage_today'),
 	url(r'reservations/$', 'ReservationManageList', name='reservation_manage_list'),
 	url(r'reservation/(?P<reservation_id>\d+)/$', 'ReservationManage', name='reservation_manage'),
 	url(r'reservation/(?P<reservation_id>\d+)/action/$', 'ReservationManageAction', name='reservation_manage_action'), 
