@@ -1477,21 +1477,24 @@ def process_unsaved_reservation(request):
 
 
 def user_login(request):
-	print 'in user_login'
+	if 'next' in request.GET:
+		next_page = request.GET['next']
+		
 	username = password = ''
 	if request.POST:
 		username = request.POST['username']
 		password = request.POST['password']
+		if 'next' in request.POST:
+			next_page = request.POST['next']
 
 		user = authenticate(username=username, password=password)
-		print 'user authenticated'
-		print user
+		#print 'user authenticated'
 		if user is not None:
 			if user.is_active:
 				login(request, user)
 
 			process_unsaved_reservation(request)
-			print request.session.keys()
+			#print request.session.keys()
 			if request.session.get('new_res_redirect'):
 				res_id = request.session['new_res_redirect']['res_id']
 				location_slug = request.session['new_res_redirect']['location_slug']
@@ -1501,7 +1504,9 @@ def user_login(request):
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
 
 			# this is where they go on successful login if there is not pending reservation
-			return HttpResponseRedirect('/')
+			if not next_page or len(next_page) == 0:
+				next_page = "/"
+			return HttpResponseRedirect(next_page)
 
 	# redirect to the login page if there was a problem
 	return render(request, 'registration/login.html', context_instance=RequestContext(request))

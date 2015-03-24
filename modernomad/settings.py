@@ -101,6 +101,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.core.context_processors.media",
 	"django.core.context_processors.static",
 	"django.core.context_processors.tz",
+	"django.core.context_processors.request",
 	"django.contrib.messages.context_processors.messages",
 	"core.context_processors.location.location_variables",
 	"core.context_processors.location.network_locations",
