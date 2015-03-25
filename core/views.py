@@ -11,7 +11,7 @@ from django.template import RequestContext
 from registration import signals
 import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
-from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationRoomForm, LocationReservableForm
+from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -829,7 +829,68 @@ def LocationEditUsers(request, location_slug):
 
 @house_admin_required
 def LocationEditPages(request, location_slug):
-	pass
+	location = get_location(location_slug)
+	
+	if request.method == 'POST':
+		action = request.POST['action']
+		#print "action=%s" % action
+		#print request.POST
+		if "Add Menu" == action:
+			try:
+				menu = request.POST['menu'].strip().title()
+				if menu and not LocationMenu.objects.filter(location=location, name=menu).count() > 0:
+					LocationMenu.objects.create(location=location, name=menu)
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not create menu: %s" % e)
+		elif "Delete Menu" == action and 'menu_id' in request.POST:
+			try:
+				menu = LocationMenu.objects.get(pk=request.POST['menu_id'])
+				menu.delete()
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not delete menu: %s" % e)
+		elif "Edit Page" == action and 'page_id' in request.POST:
+			try:
+				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
+				menu = LocationMenu.objects.get(pk=request.POST['menu'])
+				page.menu = menu
+				page.save()
+
+				url_slug = request.POST['slug'].strip().lower()
+				page.flatpage.url = "/locations/%s/%s/" % (location.slug, url_slug)
+				page.flatpage.title = request.POST['title']
+				page.flatpage.content = request.POST['content']
+				page.flatpage.save()
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
+		elif "Delete Page" == action and 'page_id' in request.POST:
+			try:
+				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
+				page.delete()
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not delete page: %s" % e)
+		elif "Create Page" == action:
+			try:
+				menu = LocationMenu.objects.get(pk=request.POST['menu'])
+				url_slug = request.POST['slug'].strip().lower()
+				url = "/locations/%s/%s/" % (location.slug, url_slug)
+				if not url_slug or FlatPage.objects.filter(url=url).count() != 0:
+					raise Exception("Invalid slug (%s)" % url_slug)
+				flatpage = FlatPage.objects.create(url=url, title=request.POST['title'], content=request.POST['content'])
+				flatpage.sites.add(Site.objects.get_current())
+				LocationFlatPage.objects.create(menu=menu, flatpage=flatpage)
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
+
+	menus = location.get_menus()
+	new_page_form = LocationPageForm(location=location)
+	
+	page_forms = {}
+	for page in LocationFlatPage.objects.filter(menu__location=location):
+		form = LocationPageForm(location=location, initial={'menu':page.menu, 'slug':page.slug, 'title':page.title, 'content':page.content})
+		page_forms[page] = form
+			
+	return render(request, 'location_edit_pages.html', {'page':'pages', 'location': location, 'menus':menus, 
+		'page_forms':page_forms, 'new_page_form':new_page_form})
 
 @house_admin_required
 def LocationEditRooms(request, location_slug):
