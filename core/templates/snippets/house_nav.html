@@ -19,7 +19,7 @@
 								{% for page in menu.pages.all %}
 									<li><a href="{{ page.flatpage.url }}">{{ page.flatpage.title }}</a></li>
 								{% endfor %}
-							{% else %}
+							{% elif menu.page_count >= 2 %}
 								<li class="dropdown">
 								<a class="dropdown-toggle" id="drop{{ forloop.counter }}" role="button" data-toggle="dropdown" href="#">
 									{{ menu.name }} <b class="caret"></b>
