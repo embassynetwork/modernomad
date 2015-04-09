@@ -347,6 +347,12 @@ class ReservationManager(models.Manager):
 			confirmed_reservations = confirmed_reservations.filter(room=room)
 		return list(confirmed_reservations)
 
+
+class Bill(models.Model):
+	generated_on = models.DateTimeField(auto_now=True)
+	comment = models.TextField(blank=True, null=True)
+
+
 class Reservation(models.Model):
 
 	class ResActionError(Exception):
@@ -386,6 +392,7 @@ class Reservation(models.Model):
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
+	bill = models.ForeignKey(Bill, null=True)
 	suppressed_fees = models.ManyToManyField(Fee, blank=True, null=True)	
 
 	objects = ReservationManager()
@@ -393,6 +400,50 @@ class Reservation(models.Model):
 	@models.permalink
 	def get_absolute_url(self):
 		return ('core.views.ReservationDetail', [str(self.location.slug), str(self.id)])
+
+
+	def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
+
+		# impt! save the custom items first or they'll be blown away when the
+		# bill is regenerated. 
+		custom_items = list(BillLineItem.objects.filter(reservation=self).filter(custom=True))
+		if delete_old_items:
+			self.delete_bill()
+
+		line_items = []
+
+		# The first line item is for the room charge
+		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
+		room_charge = self.bill_base_value()
+		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+		line_items.append(room_line_item)
+		
+		# Incorporate any custom fees or discounts
+		effective_room_charge = room_charge
+		for item in custom_items:
+			line_items.append(item)
+			effective_room_charge += item.amount #may be negative
+
+		# A line item for every fee that applies to this location
+		if reset_suppressed:
+			self.suppressed_fees.clear()
+		for location_fee in LocationFee.objects.filter(location = self.location):
+			print location_fee.fee.description
+			print location_fee.fee not in self.suppressed_fees.all()
+			if location_fee.fee not in self.suppressed_fees.all():
+				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
+				amount = float(effective_room_charge) * location_fee.fee.percentage
+				fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+				line_items.append(fee_line_item)
+
+		# Optionally save the line items to the database
+		if save:
+			for item in line_items:
+				item.save()
+
+		return line_items
+
+
 
 	def __unicode__(self):
 		return "reservation %d" % self.id
@@ -502,48 +553,6 @@ class Reservation(models.Model):
 			if not item.paid_by_house:
 				total = total + item.amount
 		return total
-
-	def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
-		# impt! save the custom items first or they'll be blown away when the
-		# bill is regenerated. 
-		print 'reset suppressed'
-		print reset_suppressed
-		custom_items = list(BillLineItem.objects.filter(reservation=self).filter(custom=True))
-		if delete_old_items:
-			self.delete_bill()
-
-		line_items = []
-
-		# The first line item is for the room charge
-		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
-		room_charge = self.bill_base_value()
-		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
-		line_items.append(room_line_item)
-		
-		# Incorporate any custom fees or discounts
-		effective_room_charge = room_charge
-		for item in custom_items:
-			line_items.append(item)
-			effective_room_charge += item.amount #may be negative
-
-		# A line item for every fee that applies to this location
-		if reset_suppressed:
-			self.suppressed_fees.clear()
-		for location_fee in LocationFee.objects.filter(location = self.location):
-			print location_fee.fee.description
-			print location_fee.fee not in self.suppressed_fees.all()
-			if location_fee.fee not in self.suppressed_fees.all():
-				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-				amount = float(effective_room_charge) * location_fee.fee.percentage
-				fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
-				line_items.append(fee_line_item)
-
-		# Optionally save the line items to the database
-		if save:
-			for item in line_items:
-				item.save()
-
-		return line_items
 
 	def delete_bill(self):
 		BillLineItem.objects.filter(reservation=self).delete()
@@ -665,10 +674,26 @@ class Reservation(models.Model):
 		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
 	html_color_status.allow_tags = True
 
+@receiver(pre_save, sender=Reservation)
+def reservation_create_bill(sender, instance, **kwargs):
+	''' always create a basic bill with the room charge, and any default fees.'''
+
+	# create a new bill object if this is a new reservation
+	try:
+		obj = Reservation.objects.get(pk=instance.pk)
+	except Reservation.DoesNotExist:
+		# if the reservation does not exist yet, then it's new.
+		obj = None
+	if not obj:
+		instance.bill = Bill()
+
+	# and regardless, always regenerate the bill when a reservation is saved.
+	instance.generate_bill()
+
 class Payment(models.Model):
 	reservation = models.ForeignKey(Reservation)
+	bill = models.ForeignKey(Bill, related_name="payments", null=True)
 	payment_date = models.DateTimeField(auto_now_add=True)
-	automatic_invoice = models.BooleanField(default=False, help_text="If True, an invoice will be sent to the user automatically at the end of their stay.")
 	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
 	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
 	paid_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
@@ -754,7 +779,6 @@ class Payment(models.Model):
 			# enforce this?
 			house_fee_on_payment += fractional_base_amount * Decimal(line_item.fee.percentage)
 		return house_fee_on_payment
-
 
 def profile_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
@@ -894,6 +918,7 @@ class LocationFee(models.Model):
 
 class BillLineItem(models.Model):
 	reservation = models.ForeignKey(Reservation)
+	bill = models.ForeignKey(Bill, related_name="line_items", null=True)
 	# the fee that this line item was based on, if any (line items are also
 	# generated for the base room rate, which doesn't have an associated fee)
 	fee = models.ForeignKey(Fee, null=True)
