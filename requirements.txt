@@ -5,7 +5,7 @@ billiard==3.3.0.19
 celery==3.1.17
 django-celery==3.1.16
 django-flatpages-tinymce==0.1.1
-django-gather==0.1
+#django-gather==0.1
 django-registration-redux==1.1
 django-uuidfield==0.5.0
 eventbrite==3.0.4
