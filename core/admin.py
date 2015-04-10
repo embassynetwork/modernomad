@@ -109,10 +109,10 @@ class ReservationAdmin(admin.ModelAdmin):
 		return "$%d" % self.rate
 
 	def value(self):
-		return "$%d" % self.bill_base_value()
+		return "$%d" % self.base_value()
 
 	def bill(self):
-		return "$%d" % self.bill_amount()
+		return "$%d" % self.bill.amount()
 
 	def fees(self):
 		return "$%d" % self.non_house_fees()
@@ -121,7 +121,7 @@ class ReservationAdmin(admin.ModelAdmin):
 		return "$%d" % self.to_house()
 		
 	def paid(self):
-		return "$%d" % self.total_paid()
+		return "$%d" % self.bill.total_paid()
 
 	def user_profile(self):
 		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)

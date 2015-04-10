@@ -12,7 +12,7 @@
 			<th class="money">Paid by<br>House</th>
 			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
 		</thead>
-		{% for item in r.bill_subtotal_items %}
+		{% for item in r.bill.subtotal_items %}
 			<tr class="bill-line-item">
 				<td>
 					{% if item.custom %}
@@ -32,9 +32,9 @@
 		<tr class="total-row">
 			<td></td>
 			<td>Subtotal</td>
-			<td class="money">${{ r.bill_subtotal_amount|floatformat:2 }}</td>
+			<td class="money">${{ r.bill.subtotal_amount|floatformat:2 }}</td>
 		</tr>
-		{% for item in r.bill_fees %}
+		{% for item in r.bill.fees %}
 			{% if not item.paid_by_house %}
 				<tr class="bill-line-item">
 					<td>
@@ -52,9 +52,9 @@
 		<tr class="total-row">
 			<td></td>
 			<td>Total</td>
-			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
+			<td class="money">${{ r.bill.amount|floatformat:2 }}</td>
 		</tr>
-		{% for item in r.bill_fees %}
+		{% for item in r.bill.fees %}
 			{% if item.paid_by_house %}
 				<tr class="bill-line-item">
 					<td class="money"></td>

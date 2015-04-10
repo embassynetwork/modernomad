@@ -79,7 +79,7 @@ def stripe_charge_customer(reservation):
 	# function can decide what to do.
 	descr = charge_description(reservation)
 
-	amt_owed = reservation.total_owed()
+	amt_owed = reservation.bill.total_owed()
 	amt_owed_cents = int(amt_owed * 100)
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	charge = stripe.Charge.create(

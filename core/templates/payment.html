@@ -6,7 +6,7 @@
 
 	<div class="row">
 
-	{% if r.total_owed > 0 %}
+	{% if r.bill.total_owed > 0 %}
 
 		<div class="col-md-5">
 
@@ -111,7 +111,7 @@
 					<tbody id="reservation-items">
 					</tbody>
 					<tbody>
-						{% for line_item in r.bill_line_items %}
+						{% for line_item in r.bill.ordered_line_items %}
 							{% if not line_item.paid_by_house %}
 								<tr class="a-room-fee">
 									<td>{{ line_item.description }}</td> 
@@ -121,7 +121,7 @@
 						{% endfor %}
 						<tr class="a-room-fee">
 							<td><strong>Total Bill</strong></td>
-							<td><strong><span id="reservation-total" class="pull-right">${{r.bill_amount}} </span></strong></td>
+							<td><strong><span id="reservation-total" class="pull-right">${{r.bill.amount}} </span></strong></td>
 						</tr>
 
 						{% for payment in r.payments %}
@@ -133,7 +133,7 @@
 						
 						<tr class="a-room-fee">
 							<td><strong>Total Owed</strong></td>
-							<td><strong><span id="reservation-total" class="{{total_owed_color}} pull-right">${{r.total_owed}} </span></strong></td>
+							<td><strong><span id="reservation-total" class="{{total_owed_color}} pull-right">${{r.bill.total_owed}} </span></strong></td>
 						</tr>
 					</tbody>
 				</table>
