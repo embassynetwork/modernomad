@@ -233,7 +233,7 @@ def occupancy(request, location_slug):
 
 			# If there are payments, calculate the payment rate
 			if r.payments():
-				paid_rate = (r.total_paid() - r.non_house_fees()) / r.total_nights()
+				paid_rate = (r.bill.total_paid() - r.non_house_fees()) / r.total_nights()
 				if paid_rate != rate:
 					print "reservation %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate)
 					paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
@@ -253,7 +253,7 @@ def occupancy(request, location_slug):
 						income_for_this_month += nights_this_month*(p.paid_amount/(r.depart - r.arrive).days) 
 					unpaid = False
 			else:
-				unpaid_total += r.total_owed()
+				unpaid_total += r.bill.total_owed()
 				unpaid = True
 
 		person_nights_data.append({
@@ -1301,7 +1301,7 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 			if percent < 0.0 or percent > 100.0:
 				messages.add_message(request, messages.INFO, "Invalid percent value given.")
 				return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
-			amount = -(reservation.bill_subtotal_amount() * percent)
+			amount = -(reservation.bill.subtotal_amount() * percent)
 		else:
 			messages.add_message(request, messages.INFO, "Invalid discount type.")
 			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
@@ -1316,7 +1316,7 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 			if percent < 0.0 or percent > 100.0:
 				messages.add_message(request, messages.INFO, "Invalid percent value given.")
 				return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
-			amount = (reservation.bill_subtotal_amount() * percent)
+			amount = (reservation.bill.subtotal_amount() * percent)
 		else:
 			messages.add_message(request, messages.INFO, "Invalid fee type.")
 			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
@@ -1431,7 +1431,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 					transaction_id = charge.id
 				)
 
-				if reservation.total_owed() <= 0.0:
+				if reservation.bill.total_owed() <= 0.0:
 					# if the reservation is all paid up, do All the Things to confirm.
 					reservation.confirm()
 					send_receipt(reservation, send_to=pay_email)
@@ -1443,7 +1443,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 					messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)
 				else:
 					messages.add_message(request, messages.INFO, 'Thanks you for your payment! There is now a pending amount due of $%.2f' % reservation.total_owed())
-					form = PaymentForm(default_amount=reservation.total_owed)		
+					form = PaymentForm(default_amount=reservation.bill.total_owed)
 
 			except Exception, e:
 				messages.add_message(request, messages.INFO, 'Drat, there was a problem with your card. Sometimes this reflects a card transaction limit, or bank hold due to an unusual charge. Please contact your bank or credit card, or try a different card. The error returned was: <em>%s</em>' % e)
@@ -1452,10 +1452,10 @@ def submit_payment(request, reservation_uuid, location_slug):
 			print form.errors
 
 	else:
-		form = PaymentForm(default_amount=reservation.total_owed)		
+		form = PaymentForm(default_amount=reservation.bill.total_owed)		
 
 
-	if reservation.total_owed() > 0.0:
+	if reservation.bill.total_owed() > 0.0:
 		owed_color = "text-danger"
 	else:
 		owed_color = "text-success"
@@ -1494,7 +1494,7 @@ def payments(request, location_slug, year, month):
 	for loc_fee in not_paid_by_house:
 		hotel_tax_percent += loc_fee.fee.percentage
 
-	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'bill_amount':0, 'paid_amount':0}
+	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'paid_amount':0}
 	for p in payments_this_month:
 		totals['count'] = totals['count'] + 1
 		totals['to_house'] = totals['to_house'] + p.to_house()

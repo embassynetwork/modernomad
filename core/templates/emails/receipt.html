@@ -12,8 +12,8 @@
 		<p margin="0 0 1.6em 0" style="font-size:120%;"> Reservation for {{ user.first_name }} {{ user.last_name }} </p>
 		
 		
-		{% if reservation.payment_date %}
-			 <p margin="0 0 1.6em 0">Paid on: {{ reservation.payment_date }}</p>
+		{% if reservation.bill.payment_date %}
+			 <p margin="0 0 1.6em 0">Paid on: {{ reservation.bill.payment_date }}</p>
 		{% else %}
 			<p style="width:100%; text-align:center;"><em>*** UNPAID ***</em></p>
 		{% endif %}
@@ -32,7 +32,7 @@
 			<th style="text-align: left; width:200px">Description</th>
 			<th style="text-align: right;">Amount</th>
 		</tr>
-		{% for line_item in reservation.bill_line_items %}
+		{% for line_item in reservation.bill.line_items %}
 			{% if not line_item.paid_by_house %}
 				<tr>
 					<td align="left" width="200px">{{ line_item.description }}</td>
@@ -42,7 +42,7 @@
 		{% endfor %}
 		<tr>
 			<td colspan="2" align="right" width="600px">
-				<strong>Total Paid:</strong> ${{ reservation.total_paid|floatformat:2 }}
+				<strong>Total Paid:</strong> ${{ reservation.bill.total_paid|floatformat:2 }}
 			</td>
 		</table>
 

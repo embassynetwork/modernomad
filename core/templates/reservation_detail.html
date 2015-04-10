@@ -26,7 +26,7 @@
 	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
 
 	{% if reservation.user == user or user in location.house_admins.all %}
-		<span class="res-value text-success">Total: ${{ reservation.bill_amount|floatformat:2 }}</span>
+		<span class="res-value text-success">Total: ${{ reservation.bill.amount|floatformat:2 }}</span>
 	{% endif %}
 </h3>
 <h4>
@@ -207,7 +207,7 @@
 			//otherwise prompt them to enter a new card. 
 			else {	
 				handler.open({
-					amount: "{{ reservation.total_owed_in_cents }}",
+					amount: "{{ reservation.bill.total_owed_in_cents }}",
 					description: "{{ reservation.total_nights }} nights in {{ reservation.room|safe }}.",
 				});
 			}

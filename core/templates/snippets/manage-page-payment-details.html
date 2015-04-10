@@ -69,7 +69,7 @@
 
 		<tr class="total-row">
 			<td colspan="3"></td>
-			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
+			<td class="money">${{ r.bill.total_paid|floatformat:2 }}</td>
 			<td></td>
 		</tr>
 	{% else %}
@@ -83,7 +83,7 @@
 		<tr style="padding-top:24px;">
 			<th>Record Manual Payment</th>
 			<td><input name="payment_method" value="Cash"></td>
-			<td><input name="paid_amount" value="{{r.total_owed}}"></td>
+			<td><input name="paid_amount" value="{{r.bill.total_owed}}"></td>
 			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>
 		</tr>
 	</form>
