@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+from django.conf import settings
 
 def forward(apps, schema_editor):
 	Reservation = apps.get_model("core", "Reservation")
@@ -68,7 +69,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='payment',
             name='user',
-            field=models.ForeignKey(related_name='payments', to='django.contrib.auth.models.User'),
+            field=models.ForeignKey(related_name='payments', to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
         migrations.AddField(

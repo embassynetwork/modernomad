@@ -655,7 +655,7 @@ def reservation_create_bill(sender, instance, **kwargs):
 
 class Payment(models.Model):
 	bill = models.ForeignKey(Bill, related_name="payments", null=True)
-	user = models.ForeignKey(User, related_name="payments")
+	user = models.ForeignKey(User, related_name="payments", null=True)
 	payment_date = models.DateTimeField(auto_now_add=True)
 	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
 	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
