@@ -1540,6 +1540,7 @@ def process_unsaved_reservation(request):
 
 
 def user_login(request):
+	next_page = None
 	if 'next' in request.GET:
 		next_page = request.GET['next']
 		
