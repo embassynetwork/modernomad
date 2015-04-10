@@ -652,6 +652,11 @@ def reservation_create_bill(sender, instance, **kwargs):
 		bill = Bill.objects.create()
 		instance.bill = bill
 
+class PaymentManager(models.Manager):
+	def payments_by_location(location):
+		# Theoretically this can be extended to different kinds of payments when we have more then just payments on reservations
+		reservation_payments = Payment.objects.filter(bill__in=Bill.objects.filter(reservations__in=Reservation.objects.filter(location=location)))
+		return reservation_payments
 
 class Payment(models.Model):
 	bill = models.ForeignKey(Bill, related_name="payments", null=True)
