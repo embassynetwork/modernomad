@@ -666,6 +666,8 @@ class Payment(models.Model):
 	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
 	paid_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	transaction_id = models.CharField(max_length=200, null=True, blank=True)
+	
+	objects = PaymentManager()
 
 	def __unicode__(self):
 		return "%s: %s - $%s" % (str(self.payment_date)[:16], self.user, self.paid_amount)
