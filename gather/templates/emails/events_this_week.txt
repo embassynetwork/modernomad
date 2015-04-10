@@ -1,0 +1,19 @@
+Howdy,
+
+Here are the upcoming events at {{location_name}} for the week of {{ week_name }}.
+
+{% for event in events %}
+	* {{ event.title }}, hosted by {{ event.organizers.all }}, https://{{domain}}/events/{{event.id}}/{{event.slug}}
+	  {{ event.start|date:"F j" }} at {{ event.start|time:"h A"}} to {{ event.end|date:"F j" }} at {{ event.end|time:"h A"}}
+{% endfor %}
+	
+Browse more events online at https://{{domain}}/events/upcoming
+Want to host your own event? Learn more about hosting and membership options. 
+
+We hope that you will join us and we look forward to seeing you soon!
+
+-------------------
+
+{{ footer }}
+
+

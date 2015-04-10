@@ -1,0 +1,113 @@
+{% load staticfiles %}
+{% if event.limit > 0 %}
+	<h3>This event has limited RSVPs</h3>
+	<span id="event-limits-info"><span id="spots-remaining">{{spots_remaining}}</span> of <span id="event-cap">{{ event.limit }}</span> spots remaining</span>
+{% else %}
+	<h3>Attendees</h3>
+	<span id="num-attendees">{{num_attendees}}</span> {% if in_the_past %} attended. {% else %} are attending. {% endif %}
+{% endif %}
+
+<span id="attendance-message"></span>
+{% if user_is_organizer %}
+	{% if in_the_past %}
+		You hosted
+	{% else %}
+		<p>You are hosting.</p> 
+	{% endif %}
+{% endif %}
+<div id="event-attendance-status">
+	{% if current_user in event.attendees.all %}
+		{% if in_the_past %}
+			<div> <button class="btn btn-default disabled" id="rsvp-status-yes"><span class="glyphicon glyphicon-calendar"></span> You went</button> </div>
+		{% else %}
+			<div> <button class="btn btn-default" id="rsvp-status-yes"><span class="glyphicon glyphicon-calendar"></span> You are Going</button> </div>
+		{% endif %}
+	{% else %}
+		{% if not in_the_past %}
+			{% if event.limit > 0 %} 
+				{% if spots_remaining > 0 %}
+					<div> <button class="btn btn-default" id="rsvp-status-no">RSVP</button> </div>
+				{% else %}
+					<div> <button class="btn btn-default" id="rsvp-full" disabled="disabled">This event is full</button> </div>
+				{% endif %}
+			{% else %}
+				<div> <button class="btn btn-default" id="rsvp-status-no">RSVP</button> </div>
+			{% endif %}
+		{% endif %}
+	{% endif %}
+</div>
+<div class="attendees-list">
+	{% for u in event.attendees.all %}
+		{% if user.is_authenticated %}
+		<div class="attendees-item"><a href="{% url 'user_detail' u.username %}">{{u.first_name}} {{u.last_name}}</a></div>
+		{% else %}
+			<div class="attendees-item">{{u.first_name}} {{u.last_name}}</div>
+		{% endif %}
+
+	{% endfor %}
+</div>
+
+<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+<script>
+
+	rsvp_yes = function() {
+
+		if ( '{{current_user}}' == 'None' ) {
+			$('#new-user-modal').modal();
+
+		} else {
+
+			request = $.ajax({ 
+				data: {
+					'user_id' : {{ user.id }},
+					'csrfmiddlewaretoken': '{{ csrf_token }}'
+				}, 
+				type: "POST",
+				url: "{% url 'gather_rsvp_event' location.slug event.id event.slug %}"
+			});
+
+			request.done(function(msg) {
+				$("#rsvp-info").html(msg)
+			});
+
+			request.fail(function(msg) {
+				$("#attendance-message").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
+			});
+
+		} // end else
+	};
+ 
+	rsvp_no = function() {
+		request = $.ajax({ 
+			data: {
+				'user_id' : {{ user.id }},
+				'csrfmiddlewaretoken': '{{ csrf_token }}'
+			}, 
+			type: "POST",
+				url: "{% url 'gather_rsvp_cancel' location.slug event.id event.slug %}"
+		});
+
+		request.done(function(msg) { // on success..
+			$("#rsvp-info").html(msg)
+		});
+
+		request.fail(function(msg) {
+			$("#attendance-message").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
+		});
+
+	};
+
+
+	$("#rsvp-status-no").click(rsvp_yes);
+	$("#rsvp-status-yes").click(rsvp_no);
+	
+	$("#rsvp-status-yes").mouseover(function() {
+		$("#rsvp-status-yes").html('Click to Cancel');
+	});
+
+	$("#rsvp-status-yes").mouseleave(function() {
+		$("#rsvp-status-yes").html('<span class="glyphicon glyphicon-calendar"></span> You are Going');
+	});
+
+
+</script>

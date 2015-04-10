@@ -1,0 +1,9 @@
+Hello!
+
+Your event {{ event.title }}, proposed for {{event.start|date:"F j"}} at {{ event.start|time:"h A"}}, has been approved! 
+
+You are invited to make your event live at https://{{domain}}{% url 'gather_view_event' location.slug event.id event.slug %} and begin promoting it to your community.
+
+Thanks for playing with us,
+{{ location.name }}
+

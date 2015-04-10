@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block content %}
+
+<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
+<meta property="og:title" content="{{event.title|title}}"/>
+<meta property="og:url" content="https://{{domain}}/events/{{event.id}}/{{event.slug}}"/>
+<meta property="og:description" content="{{event.description}}"/>
+
+<div id="event-view-wrapper">
+	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-med">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3 class="modal-title">Almost There...</h3>
+			</div>
+			<div class="modal-body">
+				<h4>We need a bit more info to keep you posted on this event. </h4> 	
+				<p><em>Already a member? <a href="{% url 'django.contrib.auth.views.login' %}">Login instead</a></em></p>
+				<div id="new-user-form-errors"></div>
+				<form id="new-user-form" class="form-horizontal">
+					<div class="form-group">
+						<span class="col-sm-3">
+						{{ new_user_form.first_name.label_tag }}
+						</span>
+						<span class="col-sm-9">
+						{{ new_user_form.first_name }}
+						{{ new_user_form.first_name.errors }}
+						</span>
+					</div>
+					<div class="form-group">
+						<span class="col-sm-3">
+						{{ new_user_form.last_name.label_tag }}
+						</span>
+						<span class="col-sm-9">
+						{{ new_user_form.last_name }}
+						{{ new_user_form.last_name.errors }}
+						</span>
+					</div>
+					<div class="form-group">
+						<span class="col-sm-3">
+						{{ new_user_form.username.label_tag }}
+						</span>
+						<span class="col-sm-9">
+						{{ new_user_form.username }}
+						{{ new_user_form.username.errors }}
+						</span>
+					</div>
+					<div class="form-group">
+						<span class="col-sm-3">
+						{{ new_user_form.email.label_tag }}
+						</span>
+						<span class="col-sm-9">
+						{{ new_user_form.email }}
+						{{ new_user_form.email.errors }}
+						</span>
+					</div>
+					<div class="form-group">
+						<span class="col-sm-3">
+						{{ new_user_form.password1.label_tag }}
+						</span>
+						<span class="col-sm-9">
+						{{ new_user_form.password1 }}
+						{{ new_user_form.password1.errors }}
+						</span>
+					</div>
+					<div class="form-group">
+						<span class="col-sm-3">
+						{{ new_user_form.password2.label_tag }}
+						</span>
+						<span class="col-sm-9">
+						{{ new_user_form.password2 }}
+						{{ new_user_form.password2.errors }}
+						</span>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-12">
+							<div class="checkbox">
+								<label for="email-notifications">
+									<input id="id_email_notifications" type="checkbox" name="email-notifications" false> Sign up for weekly event emails?
+								</label>
+							</div>
+							<div class="text-muted">We won't send you any other emails unless you ask for them!</div>
+						</div>
+					</div>
+					<input class="btn btn-default" type="submit" value="Submit RSVP">
+				</form>
+			</div>
+		</div>
+	</div>
+	</div>
+
+
+	{% if messages %}
+	<div class="messages">
+		{% for message in messages %}
+		<div class="alert alert-info">
+			<button type="button" class="close" data-dismiss="alert">×</button>
+			<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</div>
+		</div>
+		{% endfor %}
+</div>
+	{% endif %}
+
+	{% comment %} this area has an if statement and only displays if the event is not live {% endcomment %}
+	<div id="event-status-area">
+		{% include 'snippets/event_status_area.html' %}
+	</div>
+
+	{% if event.status == 'live' and event.private %}
+		<div class="text-danger event-status">
+			<span class="glyphicon glyphicon-star"></span> This event is viewable to those with the link.
+		</div>
+	{% endif %}
+
+
+	<h1 class="event-detail-title">{{ event.title|title }}</h1> 
+	{% if user_is_organizer %}
+		<a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
+	{% endif %}
+	<div class="event-time"> 
+	{% with event.start|date as start_date %}
+	{% with event.end|date as end_date %}
+		<span class="event-date-day pull-left"> {{ event.start|date:'D'}}</span>
+		<span class="event-date-month pull-left">{{ event.start|date:'b'|title}}</span>
+		<span class="event-date-day pull-left"> {{ event.start|date:'j'}}</span>
+		<span class="event-date-time pull-left">{{ event.start|date:'f A'}}</span>
+		<span class="event-date-separator pull-left"><em>until</em></span>
+		{% if start_date != end_date %}
+		<span class="event-date-day pull-left"> {{ event.end|date:'D'}}</span>
+		<span class="event-date-month pull-left">{{ event.end|date:'b'|title}}</span>
+		<span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
+		{% endif %}
+		<span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
+		<span class="event-location">, {{event.location }}</span>
+	{% endwith %}
+	{% endwith %}
+	</div>
+
+	<div class="col-md-8">
+		<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
+
+		{% with event.organizers.get_query_set as organizers %}
+		<h3>Organized by 
+			{% for o in organizers %}
+			<a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}
+			{% endfor %}
+		</h3>
+		{% endwith %}
+		{{ event.description|safe|linebreaks }}
+	</div>
+
+	<div class="col-md-4" id="rsvp-info">
+		{% include 'snippets/rsvp_info.html' %}
+	</div>
+
+	{% if user_is_organizer %}
+	<div class="col-md-12" id="organizer-notes">
+		<hr>
+		<h4>Organizer Notes</h4>
+		<p>{{event.organizer_notes|default:"No notes"}}</p>
+	</div>
+	{% endif %}
+
+</div>
+
+{% if event.status == 'live' and not event.private %}
+<div class="row">
+<div class="col-md-2 col-md-offset-5" id="facebook-share-link">
+	<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" target="_blank"> Share on Facebook </a>
+</div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+
+	$("#new-user-form").submit(function(event) {
+		form_data = $("#new-user-form").serialize();
+		form_data = form_data + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
+		request = $.ajax({ 
+			data: form_data,	
+			type: "POST",
+			url: "{% url 'gather_rsvp_new_user' location.slug event.id event.slug %}"
+		});
+
+		request.done(function(msg) {
+			if (msg.length > 0) {
+				data = JSON.parse(JSON.parse(msg));
+				if (data.errors) {
+					console.log("errors");
+					errors = data.errors;
+					error_html = "<div class='text-danger'>There were errors in the form:</div>";
+					for (var k in errors) {
+						error_html += '<div class="text-danger">' + k + ': ' + errors[k] + '</div>';
+					}
+					console.log(error_html);
+					$("#new-user-form-errors").html(error_html);
+				} else {
+					console.log("shouldn't be here...");
+				} 
+			} else {
+				console.log("success");
+				location.reload();
+			}
+		});
+
+		request.fail(function(msg) {
+			$("#attendance-message").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
+		});
+
+		event.preventDefault();
+	});
+
+	$("#approve-for-publication").click(function() {
+		request = $.ajax({ 
+			data: {
+				'csrfmiddlewaretoken': '{{ csrf_token }}'
+			},	
+			type: "POST",
+			url: "{% url 'gather_event_approve' location.slug event.id event.slug %}"
+		});
+		request.done(function(msg) {
+			$("#event-status-area").html(msg);
+		});
+
+		request.fail(function(msg) {
+			$("#event-status-area").html('<span class="text-danger">Oops, there was a problem. Please try again.</span>')
+		});
+
+		event.preventDefault();
+	});
+
+	$("#publish-event").click(function() {
+		request = $.ajax({ 
+			data: {
+				'csrfmiddlewaretoken': '{{ csrf_token }}'
+			},	
+			type: "POST",
+			url: "{% url 'gather_event_publish' location.slug event.id event.slug %}",
+		});
+
+	});
+
+</script>
+{% endblock %}
