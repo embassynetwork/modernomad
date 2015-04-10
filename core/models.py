@@ -371,7 +371,7 @@ class Bill(models.Model):
 	def amount(self):
 		# Bill amount comes from generated bill line items
 		amount = 0
-		for line_item in self.line_items:
+		for line_item in self.line_items.all():
 			if not line_item.fee or not line_item.paid_by_house:
 				amount = amount + line_item.amount
 		return amount
