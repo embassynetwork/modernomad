@@ -348,6 +348,11 @@ class ReservationManager(models.Manager):
 
 
 class Bill(models.Model):
+	''' there are foreign keys (many to one) pointing towards this Bill object
+	from BillLineItem and Payment. Each bill can have many bill line items and
+	many payments. Line items can be accessed with the related name
+	bill.line_items, and payments can be accessed with the related name
+	bill.payments.'''
 	generated_on = models.DateTimeField(auto_now=True)
 	comment = models.TextField(blank=True, null=True)
 
