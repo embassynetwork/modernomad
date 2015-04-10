@@ -833,8 +833,8 @@ def LocationEditPages(request, location_slug):
 	
 	if request.method == 'POST':
 		action = request.POST['action']
-		#print "action=%s" % action
-		#print request.POST
+		print "action=%s" % action
+		print request.POST
 		if "Add Menu" == action:
 			try:
 				menu = request.POST['menu'].strip().title()
@@ -848,7 +848,7 @@ def LocationEditPages(request, location_slug):
 				menu.delete()
 			except Exception as e:
 				messages.add_message(request, messages.ERROR, "Could not delete menu: %s" % e)
-		elif "Edit Page" == action and 'page_id' in request.POST:
+		elif "Save Changes" == action and 'page_id' in request.POST:
 			try:
 				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
 				menu = LocationMenu.objects.get(pk=request.POST['menu'])
@@ -860,12 +860,14 @@ def LocationEditPages(request, location_slug):
 				page.flatpage.title = request.POST['title']
 				page.flatpage.content = request.POST['content']
 				page.flatpage.save()
+				messages.add_message(request, messages.INFO, "The page was updated.")
 			except Exception as e:
 				messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
 		elif "Delete Page" == action and 'page_id' in request.POST:
 			try:
 				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
 				page.delete()
+				messages.add_message(request, messages.INFO, "The page was deleted")
 			except Exception as e:
 				messages.add_message(request, messages.ERROR, "Could not delete page: %s" % e)
 		elif "Create Page" == action:
@@ -953,6 +955,8 @@ def LocationEditRooms(request, location_slug):
 
 	room_forms = []
 	room_names = []
+	room_names.append("New Room")
+	room_forms.append((LocationRoomForm(), None, -1, "new room"))
 	for room in location_rooms:
 		room_reservables = room.reservables.all().order_by('start_date')
 		reservables_forms = []
@@ -961,8 +965,6 @@ def LocationEditRooms(request, location_slug):
 		reservables_forms.append((LocationReservableForm(), -1))
 		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
 		room_names.append(room.name)
-	room_names.append("New Room")
-	room_forms.append((LocationRoomForm(), None, -1, "new room"))
 	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required

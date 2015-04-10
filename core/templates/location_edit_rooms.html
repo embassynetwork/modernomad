@@ -6,17 +6,39 @@
 
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
+			<li class="active"><a href="#help" data-toggle="pill"><h5>Help</h5></a></li>
 			{% for name in room_names %}
-				<li {% if forloop.first %}class="active" {% endif %}><a href="#{{name|slugify}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
+				<li><a href="#{{name|slugify}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
+				{% if forloop.counter == 1 %}<hr>{% endif %}
 			{% endfor %}
 		</ul>
 	</div>
 
 	<div class="col-md-6">
 		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="help">
+				<h3>Editing Rooms</h3>
+				<p>
+				<ul>
+					<li>Room descriptions do not support HTML. 
+					<li>If you mark a room as a hostel/shared accommodation, then it will show up with a shared room flag on the stay page.
+					<li>If you mark a room as having multiple beds, reservations will be available per bed, rather than per-room. This is true <em>regardless</em> of whether the shared room flag is checked (this behaviour is slightly confusing and should be improved in the future).
+					<li>All rooms require a photo. 
+				</ul>
+				</p>
+				<h3>Editing Reservable Date Ranges</h3>
+				<p>
+				<ul>
+					<li>Date ranges mark when a room is reservable. For a permanent guest room, leave an open ended date range (no end date). 
+					<li>Be careful with dates! The start date that you enter is the <em>first</em> night that the room is reservable, and the end date entered is the <em>last </em> night that it is reservable. 
+					<li>A room can have any number of date ranges for which it is reservable. 
+				</ul>
+				</p>
+			</div>
+
 			{% for room_form, reservables_forms, room_id, room_name in room_forms %}
 
-			<div role="tabpanel" class="tab-pane {% if forloop.first %}active{% endif %}" id="{{room_name|slugify}}">
+			<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
 				<form class="form-horizontal" method="post" enctype="multipart/form-data" action="."> {% csrf_token %}
 					{% for field in room_form %}
 					<div class="form-group">

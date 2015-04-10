@@ -2,22 +2,50 @@
 
 {% block sub-content %}
 
-<div class="row">
+	<div id="dialog-confirm-delete-page" title="Delete this menu and all pages?">
+		<p>
+			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+			<p>This page will be deleted.</p> 
+			<p>Are you sure?</p>
+		</p>
+	</div>
 
+<div class="row">
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
+			<li class="active"><a href="#help" data-toggle="pill"><h5>Help</h5></a></li>
+			<li><a href="#menus" data-toggle="pill"><h5>Menus</h5></a></li>
+			<li><a href="#new-page" data-toggle="pill"><h5>New Page</h5></a></li>
+			<hr>
 			{% for menu in menus %}
 				{% for page in menu.pages.all %}
 					<li><a href="#page-{{page.id}}" data-toggle="pill"><h5>{{menu.name}}: {{page.title}}</h5></a></li>
 				{% endfor %}
 			{% endfor %}
-			<li><a href="#menus" data-toggle="pill"><h5>Menus</h5></a></li>
-			<li class="active"><a href="#new-page" data-toggle="pill"><h5>New Page</h5></a></li>
 		</ul>
 	</div>
 
 	<div class="col-md-9">
 		<div class="tab-content">
+
+			<div role="tabpanel" class="tab-pane active" id="help">
+				<h3>Static Content Pages</h3>
+				<p>
+				Here you can create static pages and menus. The static pages can be
+				formatted with HTML, including linking to externally hosted images.
+				Warning: If you submit broken HTML, it can break the page, so double check
+				your tags and make sure they are properly closed.</p> 
+				<h3>About Menus</h3>
+				<p>
+				In order to add a page to a menu, you need to create the menu first. If you
+				delete a menu, any associated pages will be deleted. If you want to keep
+				them, then move the associated pages to another menu first. A menu will
+				only show up if there is a page associated with it.  if there is only one
+				page associated with a menu, then the "menu" will show up as the single
+				page, and will show up with the name of the page (not the menu). 
+				</p>
+			</div>
+
 			{% for page, form in page_forms.items %}
 				<div role="tabpanel" class="tab-pane" id="page-{{page.id}}">
 					<h3>{{page.menu.name}}: {{page.title}}</h3>
@@ -33,8 +61,9 @@
 								</div>
 							</div>
 						{% endfor %}
-						<input class="form-control" name="action" type="submit" value="Edit Page">
-						<input class="form-control" name="action" type="submit" value="Delete Page">
+						<input class="form-control" name="action" type="submit" value="Save Changes">
+						<input name="action" type="hidden" value="Delete Page">
+						<input id="delete-page-id-{{page.id}}" class="form-control" name="action" type="submit" value="Delete Page">
 						{% csrf_token %}
 					</form>
 				</div>
@@ -43,29 +72,28 @@
 			<!-- New Menu Form -->
 			<div role="tabpanel" class="tab-pane" id="menus">
 				<h3>Menus</h3>
+				<div id="dialog-confirm-delete-menu" title="Delete this menu and all pages?">
+					<p>
+						<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+						<p>This menu will be deleted along with all pages under this menu.</p> 
+						<p>Are you sure?</p>
+					</p>
+				</div>
 				{% for menu in menus %}
 					<div class="row">
 						<div class="col-sm-4 col-sm-offset-1">
 							<strong>{{ menu.name }}</strong> ({{ menu.page_count }} pages)
 						</div>
 						<div class="col-sm-2">
-							<form id="menu-{{ menu.id }}-delete" class="btn-inline" method="post" action="#menus">
+							<form id="form-menu-{{ menu.id }}-delete" class="btn-inline" method="post" action="#menus">
 								<input type="hidden" name="menu_id" value="{{ menu.id }}"/>
-								<input class="btn-inline btn-red btn btn-link" name="action" type="submit" value="Delete Menu">
+								<input type="hidden" name="action" value="Delete Menu"/>
+								<input id="menu-delete-{{menu.id}}" class="btn-inline btn-red btn btn-link" name="action" type="submit" value="Delete Menu">
 								{% csrf_token %}
 							</form>
 						</div>
 					</div>
 					
-					<!--
-					<div id="dialog-confirm-delete-menu" title="Delete this menu and all pages?">
-						<p>
-							<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-							<p>This menu will be deleted along with all pages under this menu.</p> 
-							<p>Are you sure?</p>
-						</p>
-					</div>
-					-->
 				{% endfor %}
 				
 				<form method="post" action=".#menus">
@@ -81,7 +109,7 @@
 			</div>
 			
 			<!-- New Page Form -->
-			<div role="tabpanel" class="tab-pane active" id="new-page">
+			<div role="tabpanel" class="tab-pane" id="new-page">
 				<h3>New Page</h3>
 				<form class="well form-inline" method="post" enctype="multipart/form-data" action=".">
 					{% for field in new_page_form %}
@@ -119,12 +147,25 @@
 		});
 	});
 	
+	$("#dialog-confirm-delete-page").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: {
+			"Yes, Delete": function () {
+				$(this).data('delete-button').parentElement.submit();
+			},
+			"Do Not Delete": function () {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
 	$("#dialog-confirm-delete-menu").dialog({
 		autoOpen: false,
 		modal: true,
 		buttons: {
 			"Yes, Delete": function () {
-				$(this).data('form-link').parentElement.submit();
+				$(this).data('delete-button').parentElement.submit();
 			},
 			"Do Not Delete": function () {
 				$(this).dialog("close");
@@ -132,8 +173,13 @@
 		}
 	});
 
-	$(".delete-menu").click(function (e) {
-		$("#dialog-confirm-delete-menu").data('form-link', this).dialog("open");
+	$("[id^='menu-delete']").click(function (e) {
+		$("#dialog-confirm-delete-menu").data('delete-button', this).dialog("open");
+		e.preventDefault();
+	});
+
+	$("[id^='delete-page-id']").click(function (e) {
+		$("#dialog-confirm-delete-page").data('delete-button', this).dialog("open");
 		e.preventDefault();
 	});
 </script>
