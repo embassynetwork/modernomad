@@ -492,7 +492,9 @@ class Reservation(models.Model):
 		# bill is regenerated. 
 		custom_items = list(self.bill.line_items.filter(custom=True))
 		if delete_old_items:
-			self.bill.line_items.delete() 
+			line_items = self.bill.line_items.all()
+			for item in line_items:
+				item.delete()
 
 		line_items = []
 

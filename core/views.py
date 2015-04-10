@@ -1321,7 +1321,8 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 			messages.add_message(request, messages.INFO, "Invalid fee type.")
 			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
-	new_line_item = BillLineItem(reservation=reservation, description=reason, amount=amount, paid_by_house=False, custom=True)
+	new_line_item = BillLineItem(description=reason, amount=amount, paid_by_house=False, custom=True)
+	new_line_item.bill = reservation.bill
 	new_line_item.save()
 	# regenerate the bill now that we've applied some new fees
 	reservation.generate_bill()
