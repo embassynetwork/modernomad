@@ -69,7 +69,7 @@ class PaymentAdmin(admin.ModelAdmin):
 	reservation.allow_tags = True
 
 	model=Payment
-	list_display=('payment_date', user,  reservation, 'payment_method', 'paid_amount')
+	list_display=('payment_date', user, 'payment_method', 'paid_amount')
 	list_filter = ('payment_method',)
 	ordering = ['-payment_date',]
 
@@ -79,20 +79,22 @@ class PaymentInline(admin.TabularInline):
 
 class BillLineItemAdmin(admin.ModelAdmin):
 	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
 	user.allow_tags = True
 
-	def location(self):
-		return self.reservation.location
-
-	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
-	list_filter = ('fee', 'paid_by_house', 'reservation__location')
+	list_display = ('id', user, 'description', 'amount', 'paid_by_house')
+	list_filter = ('fee', 'paid_by_house')
 
 class BillLineItemInline(admin.TabularInline):
 	model = BillLineItem
 	fields = ('fee', 'description', 'amount', 'paid_by_house')
 	readonly_fields = ('fee',)
 	extra = 0
+
+class BillInline(admin.StackedInline):
+	model = Bill
+	extra=0
+	inlines = [BillLineItemInline, PaymentInline]
 
 def gen_message(queryset, noun, pl_noun, suffix):
 	if len(queryset) == 1:
@@ -213,7 +215,6 @@ class ReservationAdmin(admin.ModelAdmin):
 	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
 	#list_editable = ('status',) # Depricated in favor of drop down actions
 	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
-	inlines = [BillLineItemInline, PaymentInline]
 	ordering = ['-arrive', 'id']
 	actions= ['send_guest_welcome', 'send_new_reservation_notify', 'send_updated_reservation_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
 	save_as = True
