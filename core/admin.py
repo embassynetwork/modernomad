@@ -117,10 +117,10 @@ class ReservationAdmin(admin.ModelAdmin):
 		return "$%d" % self.bill.amount()
 
 	def fees(self):
-		return "$%d" % self.non_house_fees()
+		return "$%d" % self.bill.non_house_fees()
 
 	def to_house(self):
-		return "$%d" % self.to_house()
+		return "$%d" % self.bill.to_house()
 		
 	def paid(self):
 		return "$%d" % self.bill.total_paid()

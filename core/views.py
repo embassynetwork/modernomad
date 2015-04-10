@@ -165,7 +165,7 @@ def occupancy(request, location_slug):
 	# appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
 	# work on it, don't say i didn't warn you :). 
 
-	payments_this_month = Payment.objects.filter(reservation__location=location).filter(payment_date__gte=start).filter(payment_date__lte=end)
+	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	for p in payments_this_month:
 		r = p.reservation
 		nights_before_this_month = datetime.timedelta(0)
@@ -1467,7 +1467,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 def payments(request, location_slug, year, month):
 	location = get_location(location_slug)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	payments_this_month = Payment.objects.filter(reservation__location=location, payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
+	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
 
 	# which payments were for transient guests versus residents?
 	gross_rent = 0
@@ -1482,7 +1482,7 @@ def payments(request, location_slug, year, month):
 	# should max this explicit in some way. 
 	for p in payments_this_month:
 		gross_rent += p.to_house()
-		if p.reservation.non_house_fees() > 0:
+		if p.bill.non_house_fees() > 0:
 			gross_rent_transient += (p.to_house() + p.house_fees())
 			net_rent_transient += p.to_house()
 			hotel_tax += p.non_house_fees()
