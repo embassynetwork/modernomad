@@ -20,6 +20,7 @@ def forward(apps, schema_editor):
 		payments = Payment.objects.filter(reservation =r)
 		for p in payments:
 			p.bill = bill
+			p.user = r.user
 			p.save()
 		lineitems = BillLineItem.objects.filter(reservation=r)
 		for l in lineitems:
@@ -29,8 +30,6 @@ def forward(apps, schema_editor):
 		# reservation creation date.
 		bill.created_on = r.created
 		bill.save()
-
-
 
 class Migration(migrations.Migration):
 
@@ -67,12 +66,18 @@ class Migration(migrations.Migration):
             preserve_default=True,
         ),
         migrations.AddField(
+            model_name='payment',
+            name='user',
+            field=models.ForeignKey(related_name='payments', to='django.contrib.auth.models.User'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
             model_name='reservation',
             name='bill',
             field=models.ForeignKey(related_name='reservations', to='core.Bill', null=True),
             preserve_default=True,
         ),
-		migrations.RunPython(forward),
+        migrations.RunPython(forward),
         migrations.RemoveField(
             model_name='payment',
             name='reservation',
