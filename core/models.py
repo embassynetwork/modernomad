@@ -356,6 +356,70 @@ class Bill(models.Model):
 	generated_on = models.DateTimeField(auto_now=True)
 	comment = models.TextField(blank=True, null=True)
 
+	def total_paid(self):
+		payments = self.payments.all()
+		if not payments:
+			return 0
+		paid = Decimal(0)
+		for payment in payments:
+			paid = paid + payment.paid_amount
+		return paid
+
+	def total_owed(self):
+		return self.amount() - self.total_paid()
+
+	def amount(self):
+		# Bill amount comes from generated bill line items
+		amount = 0
+		for line_item in self.line_items:
+			if not line_item.fee or not line_item.paid_by_house:
+				amount = amount + line_item.amount
+		return amount
+
+	def total_owed_in_cents(self):
+		# this is used to pass the information to stripe, which expects an
+		# integer. 
+		return int(self.total_owed() * 100)
+
+	def subtotal_amount(self):
+		# incorporates any manual discounts or fees into the base amount.
+		# automatic fees are calculated on top of the total value here. 
+		base_fees = self.subtotal_items()
+		return sum([item.amount for item in base_fees])
+		
+	def subtotal_items(self):
+		# items that go into the subtotal before calculating taxes and fees.
+		# NOTE: will return an *ordered* list with the base room fee first. 
+
+		# the base room fee is not derived from a standing fee, and is not a custom fee
+		base_room_fee = self.line_items.filter(fee__isnull=True).filter(custom=False)
+		# all other line items that go into the subtotal are custom fees
+		addl_fees = self.line_items.filter(fee__isnull=True).filter(custom=True)
+		return list(base_room_fee) + list(addl_fees)
+
+	def fees(self):
+		# the taxes and fees on top of subtotal
+		bill_fees = self.line_items.filter(fee__isnull=False)
+		return list(bill_fees)
+
+	def is_paid(self):
+		return self.total_owed() <= 0
+
+	def payment_date(self):
+		# Date of the last payment
+		last_payment = self.payments.order_by('payment_date').reverse().first()
+		if last_payment:
+			return last_payment.payment_date
+		else:
+			return None
+
+	def ordered_line_items(self):
+		# return bill line items orderer first with the room item, then the
+		# custom items, then the fees
+		room_item = self.line_items.filter(custom=False).filter(fee=None)
+		custom_items = self.line_items.filter(custom=True)
+		fees = self.line_items.filter(fee__isnull=False)
+		return list(room_item) + list(custom_items) + list(fees)
 
 class Reservation(models.Model):
 
@@ -410,16 +474,16 @@ class Reservation(models.Model):
 
 		# impt! save the custom items first or they'll be blown away when the
 		# bill is regenerated. 
-		custom_items = list(BillLineItem.objects.filter(reservation=self).filter(custom=True))
+		custom_items = list(self.bill.line_tems.filter(custom=True))
 		if delete_old_items:
-			self.delete_bill()
+			self.bill.line_items.delete() 
 
 		line_items = []
 
 		# The first line item is for the room charge
 		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
-		room_charge = self.bill_base_value()
-		room_line_item = BillLineItem(reservation=self, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+		room_charge = self.base_value()
+		room_line_item = BillLineItem(bill=self.bill, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
 		
 		# Incorporate any custom fees or discounts
@@ -437,7 +501,7 @@ class Reservation(models.Model):
 			if location_fee.fee not in self.suppressed_fees.all():
 				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
 				amount = float(effective_room_charge) * location_fee.fee.percentage
-				fee_line_item = BillLineItem(reservation=self, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+				fee_line_item = BillLineItem(bill=self.bill, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 				line_items.append(fee_line_item)
 
 		# Optionally save the line items to the database
@@ -446,7 +510,6 @@ class Reservation(models.Model):
 				item.save()
 
 		return line_items
-
 
 
 	def __unicode__(self):
@@ -472,70 +535,14 @@ class Reservation(models.Model):
 			return self.default_rate()
 		return self.rate
 
-	def bill_base_value(self):
+	def base_value(self):
 		# value of the reservation, regardless of what has been paid
 		# get_rate checks for comps and custom rates.
 		return self.total_nights() * self.get_rate()
 
-	def total_owed(self):
-		# Maybe someone was nice and they don't owe anything!
-		if self.is_comped():
-			return 0
-
-		return self.bill_amount() - self.total_paid()
-
-	def total_paid(self):
-		payments = Payment.objects.filter(reservation=self)
-		if not payments:
-			return 0
-		paid = Decimal(0)
-		for payment in payments:
-			paid = paid + payment.paid_amount
-		return paid
-
-	def fully_refunded(self):
-		# says whether the reservation was fully refunded or not
-		payments = Payment.objects.filter(reservation=self)
-		if payments and sum([p.paid_amount for p in payments]) == 0:
-			return True
-		return False
-		
-	def bill_subtotal_amount(self):
-		# incorporates any manual discounts or fees into the base amount.
-		# automatic fees are calculated on top of the total value here. 
-		base_fees = self.bill_subtotal_items()
-		return sum([item.amount for item in base_fees])
-		
-	def bill_subtotal_items(self):
-		# items that go into the subtotal before calculating taxes and fees.
-		# NOTE: will return an *ordered* list with the base room fee first. 
-
-		# the base room fee is not derived from a standing fee, and is not a custom fee
-		base_room_fee = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True).filter(custom=False)
-		# all other line items that go into the subtotal are custom fees
-		addl_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=True).filter(custom=True)
-		return list(base_room_fee) + list(addl_fees)
-
-	def bill_fees(self):
-		# the taxes and fees on top of subtotal
-		bill_fees = BillLineItem.objects.filter(reservation=self).filter(fee__isnull=False)
-		return list(bill_fees)
-
-	def paid_date(self):
-		if self.total_owed() == 0:
-			# order by most recent first
-			bill_payments = self.payments().order_by('-payment_date')
-			return bill_payments[0].payment_date
-		return None
-
-	def total_owed_in_cents(self):
-		# this is used to pass the information to stripe, which expects an
-		# integer. 
-		return int(self.total_owed() * 100)
-
 	def calc_non_house_fees(self):
 		# Calculate the amount of fees not paid by the house
-		room_charge = self.bill_base_value()
+		room_charge = self.base_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if not location_fee.fee.paid_by_house:
@@ -544,7 +551,7 @@ class Reservation(models.Model):
 
 	def calc_house_fees(self):
 		# Calculate the amount of fees the house owes
-		room_charge = self.bill_base_value()
+		room_charge = self.base_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if location_fee.fee.paid_by_house:
@@ -558,21 +565,10 @@ class Reservation(models.Model):
 				total = total + item.amount
 		return total
 
-	def delete_bill(self):
-		BillLineItem.objects.filter(reservation=self).delete()
-
-	def bill_amount(self):
-		# Bill amount comes from generated bill line items
-		amount = 0
-		for line_item in BillLineItem.objects.filter(reservation=self):
-			if not line_item.fee or not line_item.paid_by_house:
-				amount = amount + line_item.amount
-		return amount
-
 	def house_fees(self):
 		# Pull the house fees from the generated bill line items
 		amount = 0
-		for line_item in BillLineItem.objects.filter(reservation=self):
+		for line_item in self.bill.line_items.all():
 			if line_item.fee and line_item.paid_by_house:
 				amount = amount + line_item.amount
 		return amount
@@ -580,13 +576,13 @@ class Reservation(models.Model):
 	def non_house_fees(self):
 		# Pull the non-house fees from the generated bill line items
 		amount = 0
-		for line_item in BillLineItem.objects.filter(reservation=self):
+		for line_item in self.bill.line_items.all():
 			if line_item.fee and not line_item.paid_by_house:
 				amount = amount + line_item.amount
 		return amount
 
 	def to_house(self):
-		return self.bill_base_value() - self.house_fees()
+		return self.base_value() - self.house_fees()
 
 	def set_rate(self, rate):
 		if rate == None:
@@ -626,7 +622,7 @@ class Reservation(models.Model):
 		self.set_rate(0)
 
 	def is_paid(self):
-		return self.total_owed() <= 0
+		return self.bill.total_owed() <= 0
 
 	def is_comped(self):
 		return self.rate == 0
@@ -644,58 +640,22 @@ class Reservation(models.Model):
 		return self.status == Reservation.CANCELED
 
 	def payments(self):
-		return Payment.objects.filter(reservation=self)
+		return self.bill.payments.all()
 
 	def non_refund_payments(self):
-		return Payment.objects.filter(reservation=self).filter(paid_amount__gt=0)
+		return self.payments.filter(paid_amount__gt=0)
 
-	def payment_date(self):
-		# Date of the last payment
-		payments = Payment.objects.filter(reservation=self).order_by('payment_date').reverse()
-		if payments:
-			payment = payments[0]
-			if payment:
-				return payment.payment_date
+@receiver(pre_save, sender=Reservation)
+def reservation_create_bill(sender, instance, **kwargs):
+	# create a new bill object if the reservation does not already have one. 
+	if not instance.bill:
+		bill = Bill.objects.create()
+		instance.bill = bill
 
-	def bill_line_items(self):
-		# return bill line items orderer first with the room item, then the
-		# custom items, then the fees
-		items = BillLineItem.objects.filter(reservation=self)
-		room_item = items.filter(custom=False).filter(fee=None)
-		custom_items = items.filter(custom=True)
-		fees = items.filter(fee__isnull=False)
-		return list(room_item) + list(custom_items) + list(fees)
-
-	def html_color_status(self):
-		if self.is_paid():
-			color_code = "#5fbf00"
-		elif self.is_comped():
-			color_code = "#ffc000"
-		elif self.is_pending():
-			color_code = "#bf0000"
-		else:
-			color_code = "#000000"
-		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
-	html_color_status.allow_tags = True
-
-#@receiver(pre_save, sender=Reservation)
-#def reservation_create_bill(sender, instance, **kwargs):
-#	''' always create a basic bill with the room charge, and any default fees.'''
-#
-#	# create a new bill object if this is a new reservation
-#	try:
-#		obj = Reservation.objects.get(pk=instance.pk)
-#	except Reservation.DoesNotExist:
-#		# if the reservation does not exist yet, then it's new.
-#		obj = None
-#	if not obj:
-#		instance.bill = Bill()
-#
-#	# and regardless, always regenerate the bill when a reservation is saved.
-#	instance.generate_bill()
 
 class Payment(models.Model):
 	bill = models.ForeignKey(Bill, related_name="payments", null=True)
+	user = models.ForeignKey(User, related_name="payments")
 	payment_date = models.DateTimeField(auto_now_add=True)
 	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
 	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
@@ -703,7 +663,7 @@ class Payment(models.Model):
 	transaction_id = models.CharField(max_length=200, null=True, blank=True)
 
 	def __unicode__(self):
-		return "%s: %s - $%s" % (str(self.payment_date)[:16], self.reservation.user, self.paid_amount)
+		return "%s: %s - $%s" % (str(self.payment_date)[:16], self.user, self.paid_amount)
 
 	def to_house(self):
 		return self.paid_amount - self.non_house_fees() - self.house_fees()
@@ -737,22 +697,20 @@ class Payment(models.Model):
 			return False
 		return True
 
-
 	def non_house_fees(self):
 		# takes the appropriate bill line items and applies them proportionately to the payment. 
-		fee_line_items_not_paid_by_house = BillLineItem.objects.filter(reservation=self.reservation).filter(fee__isnull=False).filter(paid_by_house=False)
-		subtotal = self.reservation.bill_subtotal_amount()
+		fee_line_items_not_paid_by_house = self.bill.line_items.filter(fee__isnull=False).filter(paid_by_house=False)
+		subtotal = self.bill.subtotal_amount()
 		non_house_fee_on_payment = Decimal(0.0)
 		# this payment may or may not represent the entire bill amount. we need
 		# to know what fraction of the total bill amount it was so that we can
 		# apply the fees proportionately to the payment amount. note: in many
 		# cases, the fraction will be 1. 
-		try:
-			fraction = self.paid_amount/self.reservation.bill_amount()
-		except:
-			# if the bill amount is zero but there was a payment on the reservation, then the bill must be b0rked in some way
-			self.reservation.generate_bill()
-			fraction = self.paid_amount/self.reservation.bill_amount()
+
+		if self.bill.amount() == 0:
+			fraction = 0
+		else:
+			fraction = self.paid_amount/self.bill.amount()
 
 		fractional_base_amount = subtotal * fraction
 		for line_item in fee_line_items_not_paid_by_house:
@@ -766,14 +724,17 @@ class Payment(models.Model):
 
 	def house_fees(self):
 		# takes the appropriate bill line items and applies them proportionately to the payment. 
-		fee_line_items_paid_by_house = BillLineItem.objects.filter(reservation=self.reservation).filter(paid_by_house=True)
-		subtotal = self.reservation.bill_subtotal_amount()
+		fee_line_items_paid_by_house = self.bill.line_items.filter(paid_by_house=True)
+		subtotal = self.bill.subtotal_amount()
 		house_fee_on_payment = Decimal(0.0)
 		# this payment may or may not represent the entire bill amount. we need
 		# to know what fraction of the total bill amount it was so that we can
 		# apply the fees proportionately to the payment amount. note: in many
 		# cases, the fraction will be 1. 
-		fraction = self.paid_amount/self.reservation.bill_amount()
+		if self.bill.amount() == 0:
+			fraction = 0
+		else:
+			fraction = self.paid_amount/self.bill.amount()
 		fractional_base_amount = subtotal * fraction
 		for line_item in fee_line_items_paid_by_house:
 			# JKS important! this assumes that the line item value accurately
