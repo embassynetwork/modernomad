@@ -349,10 +349,10 @@ class ReservationManager(models.Manager):
 
 class Bill(models.Model):
 	''' there are foreign keys (many to one) pointing towards this Bill object
-	from BillLineItem and Payment. Each bill can have many bill line items and
-	many payments. Line items can be accessed with the related name
-	bill.line_items, and payments can be accessed with the related name
-	bill.payments.'''
+	from Reservation, BillLineItem and Payment. Each bill can have many
+	reservations, bill line items and many payments. Line items can be accessed
+	with the related name bill.line_items, and payments can be accessed with
+	the related name bill.payments.'''
 	generated_on = models.DateTimeField(auto_now=True)
 	comment = models.TextField(blank=True, null=True)
 
@@ -396,7 +396,7 @@ class Reservation(models.Model):
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
-	bill = models.ForeignKey(Bill, null=True)
+	bill = models.ForeignKey(Bill, null=True, related_name="reservations")
 	suppressed_fees = models.ManyToManyField(Fee, blank=True, null=True)	
 
 	objects = ReservationManager()
@@ -678,24 +678,23 @@ class Reservation(models.Model):
 		return '<span style="color: %s;">%s</span>' % (color_code, self.status)
 	html_color_status.allow_tags = True
 
-@receiver(pre_save, sender=Reservation)
-def reservation_create_bill(sender, instance, **kwargs):
-	''' always create a basic bill with the room charge, and any default fees.'''
-
-	# create a new bill object if this is a new reservation
-	try:
-		obj = Reservation.objects.get(pk=instance.pk)
-	except Reservation.DoesNotExist:
-		# if the reservation does not exist yet, then it's new.
-		obj = None
-	if not obj:
-		instance.bill = Bill()
-
-	# and regardless, always regenerate the bill when a reservation is saved.
-	instance.generate_bill()
+#@receiver(pre_save, sender=Reservation)
+#def reservation_create_bill(sender, instance, **kwargs):
+#	''' always create a basic bill with the room charge, and any default fees.'''
+#
+#	# create a new bill object if this is a new reservation
+#	try:
+#		obj = Reservation.objects.get(pk=instance.pk)
+#	except Reservation.DoesNotExist:
+#		# if the reservation does not exist yet, then it's new.
+#		obj = None
+#	if not obj:
+#		instance.bill = Bill()
+#
+#	# and regardless, always regenerate the bill when a reservation is saved.
+#	instance.generate_bill()
 
 class Payment(models.Model):
-	reservation = models.ForeignKey(Reservation)
 	bill = models.ForeignKey(Bill, related_name="payments", null=True)
 	payment_date = models.DateTimeField(auto_now_add=True)
 	payment_service = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Stripe, Paypal, Dwolla, etc. May be empty")
@@ -921,7 +920,6 @@ class LocationFee(models.Model):
 		return '%s: %s' % (self.location, self.fee)
 
 class BillLineItem(models.Model):
-	reservation = models.ForeignKey(Reservation)
 	bill = models.ForeignKey(Bill, related_name="line_items", null=True)
 	# the fee that this line item was based on, if any (line items are also
 	# generated for the base room rate, which doesn't have an associated fee)
