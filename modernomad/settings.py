@@ -101,6 +101,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	"django.core.context_processors.media",
 	"django.core.context_processors.static",
 	"django.core.context_processors.tz",
+	"django.core.context_processors.request",
 	"django.contrib.messages.context_processors.messages",
 	"core.context_processors.location.location_variables",
 	"core.context_processors.location.network_locations",
@@ -122,7 +123,6 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
 	'registration',
-	'south',
 	'core',
 	'djcelery',
 	'gather',
@@ -140,6 +140,10 @@ INSTALLED_APPS = (
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
+
+# Discourse discussion group
+DISCOURSE_BASE_URL = 'http://your-discourse-site.com'
+DISCOURSE_SSO_SECRET = 'paste_your_secret_here'
 
 # If we add a page for the currently-logged-in user to view and edit
 # their profile, we might want to use that here instead.

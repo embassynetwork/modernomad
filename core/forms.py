@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, Reservable
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable
 from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -178,6 +178,26 @@ class BootstrapModelForm(forms.ModelForm):
 		super(BootstrapModelForm, self).__init__(*args, **kwargs)
 		for field_name, field in self.fields.items():
 			field.widget.attrs['class'] = 'form-control'
+
+class LocationMenuForm(BootstrapModelForm):
+	class Meta:
+		model = LocationMenu
+		exclude = ['location',]
+		widgets = { 
+			'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+		}
+
+class LocationPageForm(forms.Form):
+	def __init__(self, *args, **kwargs):
+		location = kwargs.pop('location', None)
+		super(LocationPageForm, self).__init__(*args, **kwargs)
+		if location:
+			self.fields['menu'].queryset = LocationMenu.objects.filter(location=location)
+	
+	menu = forms.ModelChoiceField(queryset=None, empty_label=None)
+	slug = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
+	title = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
+	content = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
 
 class LocationRoomForm(BootstrapModelForm):
 	class Meta:

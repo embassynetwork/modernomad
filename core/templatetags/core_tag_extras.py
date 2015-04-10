@@ -16,7 +16,11 @@ def split(value, arg):
 @register.filter
 def subsets_size(value, set_size):
     ''' Breaks up a list into subsets (lists) of size <set_size>, with the last set
-    containing the remainder if less than set_size '''
+	containing the remainder if less than set_size. use like so:
+		{% for subset in coming_month|subsets_size: 6 %}
+		...
+		{% endfor %} 
+	'''
 
     set_len = int(set_size)
     i = iter(value)

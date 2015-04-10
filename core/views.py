@@ -11,7 +11,7 @@ from django.template import RequestContext
 from registration import signals
 import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
-from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationRoomForm, LocationReservableForm
+from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -291,6 +291,23 @@ def occupancy(request, location_slug):
 		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies, 
 		'total_income_during_this_month': total_income_during_this_month, 'paid_amount_missing':paid_amount_missing,
 		'average_guests_per_day': float(total_person_nights)/(end -start).days })
+
+@login_required
+def manage_today(request, location_slug):
+	location = get_location(location_slug)
+	today = timezone.localtime(timezone.now())
+
+	departing_today = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+		.filter(location=location).filter(depart=today))
+		
+	arriving_today = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
+		.filter(location=location).filter(arrive=today))
+
+	events_today = published_events_today_local(location)
+
+	return render(request, "location_manage_today.html", {'location': location, 'arriving_today': arriving_today, 
+		'departing_today': departing_today, 'events_today': events_today}) 
+
 
 @login_required
 def calendar(request, location_slug):
@@ -812,7 +829,70 @@ def LocationEditUsers(request, location_slug):
 
 @house_admin_required
 def LocationEditPages(request, location_slug):
-	pass
+	location = get_location(location_slug)
+	
+	if request.method == 'POST':
+		action = request.POST['action']
+		print "action=%s" % action
+		print request.POST
+		if "Add Menu" == action:
+			try:
+				menu = request.POST['menu'].strip().title()
+				if menu and not LocationMenu.objects.filter(location=location, name=menu).count() > 0:
+					LocationMenu.objects.create(location=location, name=menu)
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not create menu: %s" % e)
+		elif "Delete Menu" == action and 'menu_id' in request.POST:
+			try:
+				menu = LocationMenu.objects.get(pk=request.POST['menu_id'])
+				menu.delete()
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not delete menu: %s" % e)
+		elif "Save Changes" == action and 'page_id' in request.POST:
+			try:
+				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
+				menu = LocationMenu.objects.get(pk=request.POST['menu'])
+				page.menu = menu
+				page.save()
+
+				url_slug = request.POST['slug'].strip().lower()
+				page.flatpage.url = "/locations/%s/%s/" % (location.slug, url_slug)
+				page.flatpage.title = request.POST['title']
+				page.flatpage.content = request.POST['content']
+				page.flatpage.save()
+				messages.add_message(request, messages.INFO, "The page was updated.")
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
+		elif "Delete Page" == action and 'page_id' in request.POST:
+			try:
+				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
+				page.delete()
+				messages.add_message(request, messages.INFO, "The page was deleted")
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not delete page: %s" % e)
+		elif "Create Page" == action:
+			try:
+				menu = LocationMenu.objects.get(pk=request.POST['menu'])
+				url_slug = request.POST['slug'].strip().lower()
+				url = "/locations/%s/%s/" % (location.slug, url_slug)
+				if not url_slug or FlatPage.objects.filter(url=url).count() != 0:
+					raise Exception("Invalid slug (%s)" % url_slug)
+				flatpage = FlatPage.objects.create(url=url, title=request.POST['title'], content=request.POST['content'])
+				flatpage.sites.add(Site.objects.get_current())
+				LocationFlatPage.objects.create(menu=menu, flatpage=flatpage)
+			except Exception as e:
+				messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
+
+	menus = location.get_menus()
+	new_page_form = LocationPageForm(location=location)
+	
+	page_forms = {}
+	for page in LocationFlatPage.objects.filter(menu__location=location):
+		form = LocationPageForm(location=location, initial={'menu':page.menu, 'slug':page.slug, 'title':page.title, 'content':page.content})
+		page_forms[page] = form
+			
+	return render(request, 'location_edit_pages.html', {'page':'pages', 'location': location, 'menus':menus, 
+		'page_forms':page_forms, 'new_page_form':new_page_form})
 
 @house_admin_required
 def LocationEditRooms(request, location_slug):
@@ -875,6 +955,8 @@ def LocationEditRooms(request, location_slug):
 
 	room_forms = []
 	room_names = []
+	room_names.append("New Room")
+	room_forms.append((LocationRoomForm(), None, -1, "new room"))
 	for room in location_rooms:
 		room_reservables = room.reservables.all().order_by('start_date')
 		reservables_forms = []
@@ -883,8 +965,6 @@ def LocationEditRooms(request, location_slug):
 		reservables_forms.append((LocationReservableForm(), -1))
 		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
 		room_names.append(room.name)
-	room_names.append("New Room")
-	room_forms.append((LocationRoomForm(), None, -1, "new room"))
 	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required
@@ -1460,21 +1540,25 @@ def process_unsaved_reservation(request):
 
 
 def user_login(request):
-	print 'in user_login'
+	next_page = None
+	if 'next' in request.GET:
+		next_page = request.GET['next']
+		
 	username = password = ''
 	if request.POST:
 		username = request.POST['username']
 		password = request.POST['password']
+		if 'next' in request.POST:
+			next_page = request.POST['next']
 
 		user = authenticate(username=username, password=password)
-		print 'user authenticated'
-		print user
+		#print 'user authenticated'
 		if user is not None:
 			if user.is_active:
 				login(request, user)
 
 			process_unsaved_reservation(request)
-			print request.session.keys()
+			#print request.session.keys()
 			if request.session.get('new_res_redirect'):
 				res_id = request.session['new_res_redirect']['res_id']
 				location_slug = request.session['new_res_redirect']['location_slug']
@@ -1484,7 +1568,9 @@ def user_login(request):
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
 
 			# this is where they go on successful login if there is not pending reservation
-			return HttpResponseRedirect('/')
+			if not next_page or len(next_page) == 0:
+				next_page = "/"
+			return HttpResponseRedirect(next_page)
 
 	# redirect to the login page if there was a problem
 	return render(request, 'registration/login.html', context_instance=RequestContext(request))

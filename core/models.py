@@ -15,7 +15,6 @@ from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
 from django.contrib.flatpages.models import FlatPage
 from uuidfield import UUIDField
@@ -940,10 +939,29 @@ class LocationMenu(models.Model):
 	def page_count(self):
 		return len(self.pages.all())
 
+	def __unicode__(self):
+		return self.name
+
 class LocationFlatPage(models.Model):
 	menu = models.ForeignKey(LocationMenu, related_name = "pages", help_text="Note: If there is only one page in the menu, it will be used as a top level nav item, and the menu name will not be used.")
 	flatpage = models.OneToOneField(FlatPage)
 	
+	def slug(self):
+		url = self.flatpage.url
+		u_split = url.split('/')
+		if len(u_split) > 3:
+			return u_split[3]
+		return None
+
+	def title(self):
+		return self.flatpage.title
+
+	def content(self):
+		return self.flatpage.content
+
+	def __unicode__(self):
+		return self.flatpage.title
+
 class Reservable(models.Model):
 	room = models.ForeignKey(Room, related_name="reservables")
 	start_date = models.DateField()

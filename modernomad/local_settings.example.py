@@ -50,6 +50,10 @@ LOCATION_MODEL = 'core.Location'
 STRIPE_SECRET_KEY = "sk_XXXXX"
 STRIPE_PUBLISHABLE_KEY = "pk_XXXXX"
 
+# Discourse discussion group
+DISCOURSE_BASE_URL = 'http://your-discourse-site.com'
+DISCOURSE_SSO_SECRET = 'paste_your_secret_here'
+
 MAILGUN_API_KEY = "key-XXXX"
 
 LIST_DOMAIN = "somedomain.com"
