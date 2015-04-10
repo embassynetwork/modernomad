@@ -139,6 +139,8 @@ INSTALLED_APPS = (
 	#'debug_toolbar',
 )
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 
