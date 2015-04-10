@@ -136,6 +136,7 @@ INSTALLED_APPS = (
 	'django.contrib.admin',
 	'django.contrib.flatpages',
 	'django.contrib.admindocs',
+	#'debug_toolbar',
 )
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'

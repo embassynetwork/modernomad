@@ -1,0 +1,11 @@
+Hello!
+
+A new event has been submitted. '{{ event.title }},' has been proposed by {{ event.creator.first_name }} {{ event.creator.last_name}} for {{ event.start|date:"F j" }} at {{ event.start|time:"h A" }}. 
+
+The event is {{ event.status }}. You can view the event at https://{{domain}}{% url 'gather_view_event' location.slug event.id event.slug %}.
+
+As an event administrator, you are encouraged to endorse the event if you think it sounds cool, and approve or publish it as appropriate. 
+
+Thanks for playing,
+{{ location.name }}
+

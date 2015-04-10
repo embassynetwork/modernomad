@@ -14,7 +14,6 @@ local_templates_hidden/
 backups
 build/
 backup/
-gather
 django.log
 .vagrant
 modernomad.komodoproject
