@@ -488,6 +488,13 @@ class Reservation(models.Model):
 
 	def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
 
+		# during the reservation process, we simulate a reservation to generate
+		# a bill and show the user what the reservation would cost. in this
+		# case, the reservation object will not yet have a bill because it has
+		# not been saved. 
+		if not self.bill:
+			self.bill = Bill()
+
 		# impt! save the custom items first or they'll be blown away when the
 		# bill is regenerated. 
 		custom_items = list(self.bill.line_items.filter(custom=True))
