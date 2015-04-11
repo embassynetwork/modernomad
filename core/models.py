@@ -346,7 +346,6 @@ class ReservationManager(models.Manager):
 			confirmed_reservations = confirmed_reservations.filter(room=room)
 		return list(confirmed_reservations)
 
-
 class Bill(models.Model):
 	''' there are foreign keys (many to one) pointing towards this Bill object
 	from Reservation, BillLineItem and Payment. Each bill can have many
@@ -437,6 +436,31 @@ class Bill(models.Model):
 		fees = self.line_items.filter(fee__isnull=False)
 		return list(room_item) + list(custom_items) + list(fees)
 
+class SubscriptionBill(Bill):
+	period_start = models.DateField()
+	period_end = models.DateField()
+	
+class Subscription(models.Model):
+	location = models.ForeignKey(Location)
+	user = models.ForeignKey(User)
+	price = models.DecimalField(decimal_places=2, max_digits=9)
+	start_date = models.DateField()
+	end_date = models.DateField(blank=True, null=True)
+	recurring_charge_date = models.IntegerField(default=1, help_text="The day of the month that the subscription will be charged. This is an integer value.")
+	bills = models.ManyToManyField(SubscriptionBill, null=True)
+
+	class Meta:
+		abstract = True
+
+class RoomSubscription(Subscription):
+	nights = models.IntegerField(help_text="How many nights does this subscription entitle the member to?")
+
+class CoworkingSubscription(Subscription):
+	pass
+
+class ReservationBill(Bill):
+	pass
+
 class Reservation(models.Model):
 
 	class ResActionError(Exception):
@@ -476,7 +500,7 @@ class Reservation(models.Model):
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
-	bill = models.OneToOneField(Bill, null=True, related_name="reservation")
+	bill = models.OneToOneField(ReservationBill, null=True, related_name="reservation")
 	suppressed_fees = models.ManyToManyField(Fee, blank=True, null=True)	
 
 	objects = ReservationManager()
@@ -493,7 +517,7 @@ class Reservation(models.Model):
 		# case, the reservation object will not yet have a bill because it has
 		# not been saved. 
 		if not self.bill:
-			self.bill = Bill()
+			self.bill = ReservationBill()
 
 		# impt! save the custom items first or they'll be blown away when the
 		# bill is regenerated. 
@@ -910,7 +934,7 @@ class BillLineItem(models.Model):
 	custom = models.BooleanField(default=False)
 
 	def __unicode__(self):
-		return '%s: %s' % (self.reservation.location, self.description)
+		return self.description
 
 class LocationMenu(models.Model):
 	location = models.ForeignKey(Location)
@@ -964,4 +988,3 @@ class ReservationNote(models.Model):
 
 	def __str__(self): 
 		return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
-
