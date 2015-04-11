@@ -218,7 +218,7 @@ class LocationReservableForm(BootstrapModelForm):
 class ReservationForm(forms.ModelForm):
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate']
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker form-control'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker form-control'}),
