@@ -1198,7 +1198,7 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 		payment_method = request.POST.get("payment_method").strip().title()
 		paid_amount = request.POST.get("paid_amount").strip()
 		pmt = Payment.objects.create(payment_method = payment_method,
-			paid_amount = paid_amount, bill = reservation.bill,
+			paid_amount = paid_amount, bill = reservation.bill, user = reservation.user,
 			transaction_id = "Manual"
 		)
 
@@ -1425,6 +1425,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 
 				# associate payment information with reservation
 				Payment.objects.create(bill=reservation.bill,
+					user = reservation.user,
 					payment_service = "Stripe",
 					payment_method = charge.card.brand,
 					paid_amount = (charge.amount/100.00),
