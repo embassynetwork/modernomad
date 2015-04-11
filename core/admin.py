@@ -61,11 +61,11 @@ class LocationAdmin(admin.ModelAdmin):
 
 class PaymentAdmin(admin.ModelAdmin):
 	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.last_name, self.user.username)
 	user.allow_tags = True
 
 	def reservation(self):
-		return '''<a href="/locations/%s/reservation/%s/">%s''' % (self.reservation.location.slug, self.reservation.id, self.reservation)
+		return '''<a href="/locations/%s/reservation/%s/">%s''' % (self.bill.reservation.location.slug, self.bill.reservation.id, self.bill.reservation)
 	reservation.allow_tags = True
 
 	model=Payment
