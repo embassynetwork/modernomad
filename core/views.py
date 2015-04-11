@@ -1424,7 +1424,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 				print charge
 
 				# associate payment information with reservation
-				Payment.objects.create(reservation=reservation,
+				Payment.objects.create(bill=reservation.bill,
 					payment_service = "Stripe",
 					payment_method = charge.card.brand,
 					paid_amount = (charge.amount/100.00),
