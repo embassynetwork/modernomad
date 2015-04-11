@@ -1412,6 +1412,12 @@ def submit_payment(request, reservation_uuid, location_slug):
 			pay_email = request.POST.get('email')
 			comment  = request.POST.get('comment')
 
+			pay_user = None
+			try:
+				pay_user = User.objects.filter(email=pay_email).first()
+			except:
+				pass
+				
 			# create the charge on Stripe's servers - this will charge the user's card
 			charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
 			print charge_descr
@@ -1425,7 +1431,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 
 				# associate payment information with reservation
 				Payment.objects.create(bill=reservation.bill,
-					user = reservation.user,
+					user = pay_user,
 					payment_service = "Stripe",
 					payment_method = charge.card.brand,
 					paid_amount = (charge.amount/100.00),
