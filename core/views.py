@@ -1197,9 +1197,8 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 	elif action == "Add":
 		payment_method = request.POST.get("payment_method").strip().title()
 		paid_amount = request.POST.get("paid_amount").strip()
-		Payment.objects.create(reservation=reservation,
-			payment_method = payment_method,
-			paid_amount = paid_amount,
+		pmt = Payment.objects.create(payment_method = payment_method,
+			paid_amount = paid_amount, bill = reservation.bill,
 			transaction_id = "Manual"
 		)
 

@@ -645,7 +645,7 @@ class Reservation(models.Model):
 		return self.bill.payments.all()
 
 	def non_refund_payments(self):
-		return self.payments.filter(paid_amount__gt=0)
+		return self.bill.payments.filter(paid_amount__gt=0)
 
 @receiver(pre_save, sender=Reservation)
 def reservation_create_bill(sender, instance, **kwargs):
