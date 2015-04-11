@@ -29,7 +29,7 @@ def issue_refund(payment, amount=None):
 		return usaepay_issue_refund(payment, amount)
 	elif not payment.payment_service == "Stripe" and not payment.payment_service == "USAePay":
 		logger.info("issue_refund: Payment not issued through service so we can't refund it.")
-		return Payment.objects.create(reservation=payment.reservation,
+		return Payment.objects.create(bill=reservation.bill,
 			payment_service = payment.payment_service,
 			paid_amount = -1 * payment.paid_amount,
 			payment_method = "Refund",
@@ -90,7 +90,7 @@ def stripe_charge_customer(reservation):
 		)
 
 	# Store the charge details in a Payment object
-	return Payment.objects.create(reservation=reservation,
+	return Payment.objects.create(bill=reservation.bill,
 		payment_service = "Stripe",
 		payment_method = charge.card.brand,
 		paid_amount = amt_owed,
@@ -113,7 +113,7 @@ def stripe_issue_refund(payment, refund_amount=None):
 		refund = charge.refund()
 
 	# Store the charge details in a Payment object
-	return Payment.objects.create(reservation=payment.reservation,
+	return Payment.objects.create(bill=reservation.bill,
 		payment_service = "Stripe",
 		payment_method = "Refund",
 		paid_amount = -1 * Decimal(refund_amount),
