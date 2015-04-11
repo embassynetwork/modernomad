@@ -1449,7 +1449,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 						guest_welcome(reservation)
 					messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)
 				else:
-					messages.add_message(request, messages.INFO, 'Thanks you for your payment! There is now a pending amount due of $%.2f' % reservation.total_owed())
+					messages.add_message(request, messages.INFO, 'Thanks you for your payment! There is now a pending amount due of $%.2f' % reservation.bill.total_owed())
 					form = PaymentForm(default_amount=reservation.bill.total_owed)
 
 			except Exception, e:
