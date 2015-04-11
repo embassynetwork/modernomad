@@ -32,7 +32,7 @@
 			<th style="text-align: left; width:200px">Description</th>
 			<th style="text-align: right;">Amount</th>
 		</tr>
-		{% for line_item in reservation.bill.line_items %}
+		{% for line_item in reservation.bill.line_items.all %}
 			{% if not line_item.paid_by_house %}
 				<tr>
 					<td align="left" width="200px">{{ line_item.description }}</td>
