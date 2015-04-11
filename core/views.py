@@ -1568,7 +1568,7 @@ def user_login(request):
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
 
 			# this is where they go on successful login if there is not pending reservation
-			if not next_page or len(next_page) == 0:
+			if not next_page or len(next_page) == 0 or "logout" in next_page:
 				next_page = "/"
 			return HttpResponseRedirect(next_page)
 
