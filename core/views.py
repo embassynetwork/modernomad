@@ -167,7 +167,7 @@ def occupancy(request, location_slug):
 
 	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	for p in payments_this_month:
-		r = p.reservation
+		r = p.bill.reservation
 		nights_before_this_month = datetime.timedelta(0)
 		nights_after_this_month = datetime.timedelta(0)
 		if r.arrive < start and r.depart < start:
@@ -233,7 +233,7 @@ def occupancy(request, location_slug):
 
 			# If there are payments, calculate the payment rate
 			if r.payments():
-				paid_rate = (r.bill.total_paid() - r.non_house_fees()) / r.total_nights()
+				paid_rate = (r.bill.total_paid() - r.bill.non_house_fees()) / r.total_nights()
 				if paid_rate != rate:
 					print "reservation %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate)
 					paid_rate_discrepancy += nights_this_month * (paid_rate - rate)

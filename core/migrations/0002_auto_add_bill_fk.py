@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='reservation',
             name='bill',
-            field=models.ForeignKey(related_name='reservations', to='core.Bill', null=True),
+            field=models.OneToOneField(related_name='reservation', to='core.Bill', null=True),
             preserve_default=True,
         ),
         migrations.RunPython(forward),
