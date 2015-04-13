@@ -59,6 +59,9 @@ class LocationAdmin(admin.ModelAdmin):
 	if 'gather' in settings.INSTALLED_APPS:
 		 inlines.append(EventAdminGroupInline)
 
+class BillAdmin(admin.ModelAdmin):
+	model = Bill
+
 class PaymentAdmin(admin.ModelAdmin):
 	def user(self):
 		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.last_name, self.user.username)
@@ -241,7 +244,10 @@ admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Location, LocationAdmin)
+admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)
+admin.site.register(RoomSubscription)
+admin.site.register(CommunitySubscription)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)

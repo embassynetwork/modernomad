@@ -447,7 +447,7 @@ class Subscription(models.Model):
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
 	recurring_charge_date = models.IntegerField(default=1, help_text="The day of the month that the subscription will be charged. This is an integer value.")
-	bills = models.ManyToManyField(SubscriptionBill, null=True)
+	bills = models.ManyToManyField(SubscriptionBill, null=True, blank=True)
 
 	class Meta:
 		abstract = True
