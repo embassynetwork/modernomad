@@ -32,13 +32,13 @@
 </thead>
 <tbody>
 {% for p in payments %}
-	{% with p.bill.reservation as r %}
+	{% with p.bill.reservationbill.reservation as r %}
 	<tr class="{% cycle 'row-even' 'row-odd' %}">
 		<td>{{ p.payment_date|date:"m/d/y" }}</td>
 		<td>{% if p.user %}<a href="{% url 'user_detail' p.user.username %}">{{ p.user }}</a>{% else %} No user {% endif %}</td>
-		<td><a href="{% url 'reservation_detail' r.location.slug r.id %}">{{ p.bill.reservation.id }}</a></td>
-		<td>{{ p.bill.reservation.total_nights }}</td>
-		<td class="money">${{ p.bill.reservation.rate|floatformat:2 }}</td>
+		<td><a href="{% url 'reservation_detail' r.location.slug r.id %}">{{ r.id }}</a></td>
+		<td>{{ r.total_nights }}</td>
+		<td class="money">${{ r.rate|floatformat:2 }}</td>
 		<td class="money">${{ p.bill.amount|floatformat:2 }}</td>
 		<td>{{ p.payment_method }}</td>
 		<td class="money {% if p.payment_method == "Refund" %} text-danger {% endif %} ">${{ p.paid_amount|floatformat:2 }}</td>
