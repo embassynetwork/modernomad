@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CoworkingSubscription',
+            name='CommunitySubscription',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('price', models.DecimalField(max_digits=9, decimal_places=2)),
@@ -90,19 +90,19 @@ class Migration(migrations.Migration):
             preserve_default=True,
         ),
         migrations.AddField(
-            model_name='coworkingsubscription',
+            model_name='communitysubscription',
             name='bills',
             field=models.ManyToManyField(to='core.SubscriptionBill', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
-            model_name='coworkingsubscription',
+            model_name='communitysubscription',
             name='location',
             field=models.ForeignKey(to='core.Location'),
             preserve_default=True,
         ),
         migrations.AddField(
-            model_name='coworkingsubscription',
+            model_name='communitysubscription',
             name='user',
             field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
             preserve_default=True,

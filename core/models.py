@@ -455,7 +455,7 @@ class Subscription(models.Model):
 class RoomSubscription(Subscription):
 	nights = models.IntegerField(help_text="How many nights does this subscription entitle the member to?")
 
-class CoworkingSubscription(Subscription):
+class CommunitySubscription(Subscription):
 	pass
 
 class ReservationBill(Bill):
