@@ -615,7 +615,7 @@ class Reservation(models.Model):
 		return total
 
 	def to_house(self):
-		return self.base_value() - self.house_fees()
+		return self.base_value() - self.bill.house_fees()
 
 	def set_rate(self, rate):
 		if rate == None:

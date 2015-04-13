@@ -68,7 +68,8 @@ class PaymentAdmin(admin.ModelAdmin):
 	user.allow_tags = True
 
 	def reservation(self):
-		return '''<a href="/locations/%s/reservation/%s/">%s''' % (self.bill.reservation.location.slug, self.bill.reservation.id, self.bill.reservation)
+		r = self.bill.reservationbill.reservation
+		return '''<a href="/locations/%s/reservation/%s/">%s''' % (r.location.slug, r.id, r)
 	reservation.allow_tags = True
 
 	model=Payment
@@ -123,7 +124,7 @@ class ReservationAdmin(admin.ModelAdmin):
 		return "$%d" % self.bill.non_house_fees()
 
 	def to_house(self):
-		return "$%d" % self.bill.to_house()
+		return "$%d" % self.to_house()
 		
 	def paid(self):
 		return "$%d" % self.bill.total_paid()

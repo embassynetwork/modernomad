@@ -167,7 +167,7 @@ def occupancy(request, location_slug):
 
 	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	for p in payments_this_month:
-		r = p.bill.reservation
+		r = p.bill.reservationbill.reservation
 		nights_before_this_month = datetime.timedelta(0)
 		nights_after_this_month = datetime.timedelta(0)
 		if r.arrive < start and r.depart < start:
