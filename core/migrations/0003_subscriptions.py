@@ -125,8 +125,8 @@ class Migration(migrations.Migration):
             preserve_default=True,
         ),
         migrations.RunPython(forward),
-#        migrations.RemoveField(
-#            model_name='reservation',
-#            name='old_bill',
-#        ),
+        migrations.RemoveField(
+            model_name='reservation',
+            name='old_bill',
+        ),
     ]
