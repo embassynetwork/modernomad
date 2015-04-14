@@ -961,8 +961,11 @@ def LocationEditRooms(request, location_slug):
 		room_reservables = room.reservables.all().order_by('start_date')
 		reservables_forms = []
 		for reservable in room_reservables:
-			reservables_forms.append((LocationReservableForm(instance=reservable), reservable.id))
-		reservables_forms.append((LocationReservableForm(), -1))
+		 	id_str = "reservable-%d-%%s" % reservable.id
+			print id_str
+			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
+			id_str = "room-%d-new-reservable-%%s" % room.id
+		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
 		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
 		room_names.append(room.name)
 	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})

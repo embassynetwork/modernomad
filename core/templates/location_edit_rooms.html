@@ -59,6 +59,10 @@
 				{% if reservables_forms %}
 					<h4>Date Ranges that this room should be reservable</h4>
 					<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
+					<p>The end date entered <em>will</em> be reservable; i.e.,
+					if you enter an end date of April 15, then the room will be
+					reservable on the night of April 15, but not on April 16.
+					</p>
 					{% for reservable_form, reservable_id in reservables_forms %}
 						<form class="form-inline" method="post" enctype="multipart/form-data" action=".">
 							<div class="form-group">
@@ -89,13 +93,16 @@
 
 <script>
 
-	$("#id_start_date, #id_end_date").datepicker({
+	$("[id$=start_date], [id$=end_date]").datepicker({
 		minDate: 0,
 		onSelect: function( selectedDate ) {
-			if(this.id == 'id_start_date') {
-				startDate = $('#id_start_date').datepicker("getDate");
+			start_id = this.id
+			if(start_id.endsWith('start_date')) {
+				startDate = $('#'+ start_id).datepicker("getDate");
+				console.log(startDate);
 	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
-	          	$('#id_end_date').datepicker("option","minDate",rMin);
+				endDate = start_id.replace("start", "end")
+	          	$('#'+endDate).datepicker("option","minDate",rMin);
 			}
 			// we need to explicitly fire the change event on the underlying
 			// input or it won't fire on its own!
