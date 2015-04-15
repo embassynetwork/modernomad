@@ -17,38 +17,31 @@
 </div>
 
 <div class="row">
-	<h4> Occupancy by Person Nights</h4>
-	<p>Total guest nights for {{report_date|date:"F"}}: {{total_nights}}</p>
-	<p>Total private nights: {{total_private_nights}}</p>
-	<p>Total shared nights: {{total_shared_nights}}</p>
+	<h4> Occupancy by Person Nights for {{report_date|date:"F"}}</h4>
+	<p>Total guest nights: {{total_occupied_person_nights}}</p>
+	<p>Total available guest nights: {{total_available_person_nights}}</p>
+	<p>Overall occupancy rate: {{overall_occupancy|floatformat:2}}%</p>
 	<p>Average guests per night: {{average_guests_per_day|floatformat:1}}</p>
 </div>
 <div class="row">
 	<h4> Total Payments by Month Received</h4>
 	<p>Income received this month, for this month: ${{ income_for_this_month|floatformat:2 }} </p>
 	<p>Income applied from past months: ${{ income_from_past_months|floatformat:2 }}</p>
-	<p>Income received for past months might be because someone who has stayed with us before was extending their reservation, or appended to their reservation, etc. It's not super meaningful but, *shrug*. </p>
 	<p><em>Income received for past months: ${{ income_for_past_months|floatformat:2 }}</em></p>
 	<p><em>Income received for future months: ${{ income_for_future_months|floatformat:2 }}</em></p>
 	<br>
-	<p><strong class="badge">Total payments for this month (includes external fees, if applicable): ${{ total_income_for_this_month|floatformat:2 }}</strong></p>
-	<p><strong class="badge">Total payments during this month (includes external fees, if applicable): ${{ total_income_during_this_month|floatformat:2 }}</strong></p>
+	<p><strong class="badge">Total payments to house during this month (cash): ${{ total_income_during_this_month|floatformat:2 }}</strong></p>
+	<p><strong class="badge">Total payments to house for this month (accrual): ${{ total_income_for_this_month|floatformat:2 }}</strong></p>
 </div>
 
 <div class="row">
-	<h4> Breakdown by Room (does not include external fees)</h4>
-	{% for room, amt in room_income.items %}
-		<p>{{ room|title }}: ${{ amt }} </p>
+	<h4> Income to House by Room, for Occupancy this month</h4>
+	{% for room, tup in room_income_occupancy.items %}
+	<p>{{ room.name|title }}: ${{ tup.0 }}, occupancy rate {{tup.2|floatformat:2}}% ({{tup.1}} nights) </p>
 	{% empty %}
 		None
 	{% endfor %}
-	<p><strong class="badge">Total net income by rooms (without external fees): ${{ total_by_rooms|floatformat:2 }}</strong></p>
-</div>
-<div class="row">
-	<h4> Breakdown by Private and Shared (does not include external fees)</h4>
-	<p>Total estimated income from shared : ${{total_income_shared|floatformat:2}}</p>
-	<p>Total estimated income from private: ${{total_income_private|floatformat:2}}</p>
-	<p><strong class="badge">Total net income estimated by occupancy (without external fees): ${{total_income|floatformat:2}}</span></strong></h5>
+	<p><strong class="badge">Total income to location by rooms ${{ total_by_rooms|floatformat:2 }}</strong></p>
 </div>
 
 <div class="row">

@@ -417,6 +417,9 @@ class Bill(models.Model):
 				amount = amount + line_item.amount
 		return amount
 
+	def to_house(self):
+		return self.amount() - self.non_house_fees() - self.house_fees()
+
 	def is_paid(self):
 		return self.total_owed() <= 0
 

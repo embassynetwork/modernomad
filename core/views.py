@@ -140,16 +140,15 @@ def occupancy(request, location_slug):
 	reservations = Reservation.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
 	person_nights_data = []
-	total_person_nights = 0
+	total_occupied_person_nights = 0
 	total_income = 0
-	total_income_shared = 0
-	total_income_private = 0
 	total_comped_nights = 0
 	total_comped_income = 0
 	total_shared_nights = 0
 	total_private_nights = 0
 	unpaid_total = 0
 	room_income = {}
+	room_occupancy = {}
 	income_for_this_month = 0
 	income_for_future_months = 0
 	income_from_past_months = 0
@@ -157,6 +156,9 @@ def occupancy(request, location_slug):
 	paid_rate_discrepancy = 0
 	payment_discrepancies = []
 	paid_amount_missing = []
+	room_income_occupancy = {}
+	total_available_person_nights = 0
+	overall_occupancy = 0
 
 	# JKS note: this section breaks down income by whether it is income for this
 	# month, for future months, from past months, for past months, for this
@@ -200,8 +202,8 @@ def occupancy(request, location_slug):
 		
 		# in the event that there are multiple payments for a reservation, this
 		# will basically amortize each payment across all nights
-		income_for_future_months += nights_after_this_month.days*(p.paid_amount/(r.depart - r.arrive).days)
-		income_for_past_months += nights_before_this_month.days*(p.paid_amount/(r.depart - r.arrive).days)
+		income_for_future_months += nights_after_this_month.days*(p.to_house()/(r.depart - r.arrive).days)
+		income_for_past_months += nights_before_this_month.days*(p.to_house()/(r.depart - r.arrive).days)
 
 	for r in reservations:
 		comp = False
@@ -226,10 +228,16 @@ def occupancy(request, location_slug):
 			comp = True
 			unpaid = False
 		else:
-			total_income += nights_this_month*rate
-			this_room_income = room_income.get(r.room.name, 0)
-			this_room_income += rate*nights_this_month
-			room_income[r.room.name] = this_room_income
+			this_room_occupancy = room_occupancy.get(r.room, 0)
+			this_room_occupancy += nights_this_month
+			room_occupancy[r.room] = this_room_occupancy
+
+			# the bill has the amount that goes to the house after fees
+			to_house_per_night = r.bill.to_house()/r.total_nights()
+			total_income += nights_this_month*to_house_per_night
+			this_room_income = room_income.get(r.room, 0)
+			this_room_income += nights_this_month*to_house_per_night
+			room_income[r.room] = this_room_income
 
 			# If there are payments, calculate the payment rate
 			if r.payments():
@@ -245,12 +253,12 @@ def occupancy(request, location_slug):
 			if r.is_paid():
 				for p in r.payments():
 					if p.payment_date.date() < start:
-						income_from_past_months += nights_this_month*(p.paid_amount/(r.depart - r.arrive).days)
+						income_from_past_months += nights_this_month*(p.to_house()/(r.depart - r.arrive).days)
 					# if the payment was sometime this month, we account for
 					# it. if it was in a future month, we'll show it as "income
 					# for previous months" in that month. we skip it here. 
 					elif p.payment_date.date() <= end: 
-						income_for_this_month += nights_this_month*(p.paid_amount/(r.depart - r.arrive).days) 
+						income_for_this_month += nights_this_month*(p.to_house()/(r.depart - r.arrive).days) 
 					unpaid = False
 			else:
 				unpaid_total += r.bill.total_owed()
@@ -265,32 +273,31 @@ def occupancy(request, location_slug):
 			'comp': comp,
 			'unpaid': unpaid
 		})
-		total_person_nights += nights_this_month
-		if r.room.shared:
-			total_shared_nights += nights_this_month
-			if not r.is_comped():
-				total_income_shared += nights_this_month*rate
-		else:
-			total_private_nights += nights_this_month
-			if not r.is_comped():
-				total_income_private += nights_this_month*rate
+		total_occupied_person_nights += nights_this_month
 
 	total_income_for_this_month = income_for_this_month + income_from_past_months
 	total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
 	total_by_rooms = sum(room_income.itervalues())
+	for room, income in room_income.iteritems():
+		# tuple with income, num nights occupied, and % occupancy rate
+		available_person_nights_this_room = (end-start).days*room.beds
+		total_available_person_nights += available_person_nights_this_room
+		room_occupancy_rate = 100*float(room_occupancy[room])/available_person_nights_this_room
+		room_income_occupancy[room] = (income, room_occupancy[room], room_occupancy_rate)
+	overall_occupancy = 100*float(total_occupied_person_nights)/total_available_person_nights
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 'location': location,
-		'total_nights':total_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
+		'total_occupied_person_nights':total_occupied_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
+		'total_available_person_nights': total_available_person_nights, 'overall_occupancy': overall_occupancy,
 		'total_shared_nights': total_shared_nights, 'total_private_nights': total_private_nights,
 		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
-		"next_month": next_month, "prev_month": prev_month, "total_income_shared": total_income_shared,
-		"total_income_private": total_income_private, "report_date": report_date, 'room_income':room_income, 
+		"next_month": next_month, "prev_month": prev_month, "report_date": report_date, 'room_income_occupancy':room_income_occupancy, 
 		'income_for_this_month': income_for_this_month, 'income_for_future_months':income_for_future_months, 
 		'income_from_past_months': income_from_past_months, 'income_for_past_months':income_for_past_months, 
 		'total_income_for_this_month':total_income_for_this_month, 'total_by_rooms': total_by_rooms, 
 		'paid_rate_discrepancy': paid_rate_discrepancy, 'payment_discrepancies': payment_discrepancies, 
 		'total_income_during_this_month': total_income_during_this_month, 'paid_amount_missing':paid_amount_missing,
-		'average_guests_per_day': float(total_person_nights)/(end -start).days })
+		'average_guests_per_day': float(total_occupied_person_nights)/(end -start).days })
 
 @login_required
 def manage_today(request, location_slug):
