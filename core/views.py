@@ -971,7 +971,7 @@ def LocationEditRooms(request, location_slug):
 		 	id_str = "reservable-%d-%%s" % reservable.id
 			print id_str
 			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
-			id_str = "room-%d-new-reservable-%%s" % room.id
+		id_str = "room-%d-new-reservable-%%s" % room.id
 		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
 		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
 		room_names.append(room.name)
