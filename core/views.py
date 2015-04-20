@@ -284,7 +284,9 @@ def occupancy(request, location_slug):
 		total_available_person_nights += available_person_nights_this_room
 		room_occupancy_rate = 100*float(room_occupancy[room])/available_person_nights_this_room
 		room_income_occupancy[room] = (income, room_occupancy[room], room_occupancy_rate)
-	overall_occupancy = 100*float(total_occupied_person_nights)/total_available_person_nights
+	overall_occupancy = 0
+	if total_available_person_nights > 0:
+		overall_occupancy = 100*float(total_occupied_person_nights)/total_available_person_nights
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 'location': location,
 		'total_occupied_person_nights':total_occupied_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
