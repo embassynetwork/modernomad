@@ -520,7 +520,7 @@ class Reservation(models.Model):
 		# case, the reservation object will not yet have a bill because it has
 		# not been saved. 
 		if not self.bill:
-			self.bill = ReservationBill()
+			self.bill = ReservationBill.objects.create()
 
 		# impt! save the custom items first or they'll be blown away when the
 		# bill is regenerated. 
@@ -560,6 +560,8 @@ class Reservation(models.Model):
 		if save:
 			for item in line_items:
 				item.save()
+		else:
+			self.bill.delete()
 
 		return line_items
 
