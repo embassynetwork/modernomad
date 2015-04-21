@@ -9,7 +9,7 @@ from django.utils import timezone
 
 class EventAdminGroup(models.Model):
 	''' Define admininstrative groups per location.'''
-	location = models.ForeignKey(settings.LOCATION_MODEL, unique=True)
+	location = models.OneToOneField(settings.LOCATION_MODEL)
 	users = models.ManyToManyField(User)
 
 	def __unicode__(self):
@@ -106,18 +106,18 @@ class Event(models.Model):
 	slug = models.CharField(max_length=60, help_text="This will be auto-suggested based on the event title, but feel free to customize it.", unique=True)
 	description = models.TextField(help_text="Basic HTML markup is supported for your event description.")
 	image = models.ImageField(upload_to=event_img_upload_to)
-	attendees = models.ManyToManyField(User, related_name="events_attending", blank=True, null=True)
+	attendees = models.ManyToManyField(User, related_name="events_attending")
 	notifications = models.BooleanField(default = True)
 	# where, site, place, venue
 	where = models.CharField(verbose_name = 'Where will the event be held?', max_length=500, help_text="Either a specific room at this location or an address if elsewhere")
 	creator = models.ForeignKey(User, related_name="events_created")
-	organizers = models.ManyToManyField(User, related_name="events_organized", blank=True, null=True)
+	organizers = models.ManyToManyField(User, related_name="events_organized")
 	organizer_notes = models.TextField(blank=True, null=True, help_text="These will only be visible to other organizers")
 	limit = models.IntegerField(default=0, help_text="Specify a cap on the number of RSVPs, or 0 for no limit.", blank=True)
 	# public events can be seen by anyone, private events can only be seen by organizers and attendees.
 	private = models.BooleanField(default=False, help_text="Private events will only be seen by organizers, attendees, and those who have the link. It will not be displayed in the public listing.")
 	status = models.CharField(choices = event_statuses, default=PENDING, max_length=200, verbose_name='Review Status', blank=True)
-	endorsements = models.ManyToManyField(User, related_name="events_endorsed", blank=True, null=True)
+	endorsements = models.ManyToManyField(User, related_name="events_endorsed")
 	# the location field is optional but lets you associate an event with a
 	# specific location object that is also managed by this software. a single
 	# location or multiple locations can be defined.

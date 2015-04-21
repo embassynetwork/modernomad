@@ -71,13 +71,13 @@ class Location(models.Model):
 	ssid = models.CharField(max_length=200, blank=True, null=True)
 	ssid_password = models.CharField(max_length=200, blank=True, null=True)
 	timezone = models.CharField(max_length=200, help_text="Must be an accurate timezone name, eg. \"America/Los_Angeles\". Check here for your time zone: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
-	bank_account_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
-	routing_number = models.IntegerField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
+	bank_account_number = models.IntegerField(blank=True, null=True, help_text="We use this to transfer money to you!")
+	routing_number = models.IntegerField(blank=True, null=True, help_text="We use this to transfer money to you!")
 	bank_name = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	name_on_account = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
-	house_admins = models.ManyToManyField(User, related_name='house_admin', blank=True, null=True)
-	residents = models.ManyToManyField(User, related_name='residences', blank=True, null=True)
+	house_admins = models.ManyToManyField(User, related_name='house_admin')
+	residents = models.ManyToManyField(User, related_name='residences')
 	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
 	public = models.BooleanField(default=False, verbose_name="Is this location open to the public?")
@@ -270,7 +270,7 @@ class Room(models.Model):
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
-	residents = models.ManyToManyField(User, blank=True, null=True, related_name="residents", help_text="This field is optional.") # a room may have many residents and a resident may have many rooms
+	residents = models.ManyToManyField(User, related_name="residents", help_text="This field is optional.") # a room may have many residents and a resident may have many rooms
 	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 
 	def __unicode__(self):
@@ -450,7 +450,7 @@ class Subscription(models.Model):
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
 	recurring_charge_date = models.IntegerField(default=1, help_text="The day of the month that the subscription will be charged. This is an integer value.")
-	bills = models.ManyToManyField(SubscriptionBill, null=True, blank=True)
+	bills = models.ManyToManyField(SubscriptionBill)
 
 	class Meta:
 		abstract = True
@@ -504,7 +504,7 @@ class Reservation(models.Model):
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
 	bill = models.OneToOneField(ReservationBill, null=True, related_name="reservation")
-	suppressed_fees = models.ManyToManyField(Fee, blank=True, null=True)	
+	suppressed_fees = models.ManyToManyField(Fee)
 
 	objects = ReservationManager()
 
