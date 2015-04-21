@@ -165,7 +165,7 @@ class EventNotifications(models.Model):
 	# send reminders on day-of the event?
 	reminders = models.BooleanField(default=True)
 	# receive weekly announcements about upcoming events?
-	location_weekly = models.ManyToManyField(settings.LOCATION_MODEL, related_name="")
+	location_weekly = models.ManyToManyField(settings.LOCATION_MODEL, related_name="event_notifications")
 
 	class Meta:
 		app_label = 'gather'

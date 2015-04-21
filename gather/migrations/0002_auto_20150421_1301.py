@@ -32,4 +32,9 @@ class Migration(migrations.Migration):
             name='location',
             field=models.OneToOneField(to='core.Location'),
         ),
+        migrations.AlterField(
+            model_name='eventnotifications',
+            name='location_weekly',
+            field=models.ManyToManyField(related_name='event_notifications', to='core.Location'),
+        ),
     ]
