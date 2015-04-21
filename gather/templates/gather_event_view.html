@@ -141,7 +141,7 @@
 	<div class="col-md-8">
 		<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
 
-		{% with event.organizers.get_query_set as organizers %}
+		{% with event.organizers.get_queryset as organizers %}
 		<h3>Organized by 
 			{% for o in organizers %}
 			<a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}

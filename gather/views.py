@@ -187,7 +187,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 	# this is counter-intuitive - private events are viewable to those who have
 	# the link. so private events are indeed shown to anyone (once they are approved). 
 	if (event.status == 'live' and event.private) or event.is_viewable(current_user):
-		if current_user and current_user in event.organizers.get_query_set():
+		if current_user and current_user in event.organizers.get_queryset():
 			user_is_organizer = True
 		else:
 			user_is_organizer = False

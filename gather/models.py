@@ -67,7 +67,7 @@ class EventManager(models.Manager):
 		today = timezone.now()
 		print today
 
-		upcoming = super(EventManager, self).get_query_set().filter(end__gte = today).exclude(status=Event.CANCELED).order_by('start')
+		upcoming = super(EventManager, self).get_queryset().filter(end__gte = today).exclude(status=Event.CANCELED).order_by('start')
 		if location:
 			upcoming = upcoming.filter(location=location)
 		viewable_upcoming = []

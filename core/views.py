@@ -1601,7 +1601,7 @@ information during registration.'''
 	
 class Registration(registration.views.RegistrationView):
 	
-	@transaction.commit_on_success
+	@transaction.atomic
 	def register(self, request, **cleaned_data):
 		'''Register a new user, saving the User and UserProfile data.'''
 		user = User()

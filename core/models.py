@@ -328,7 +328,7 @@ class ReservationManager(models.Manager):
 
 	def on_date(self, the_day, status, location):
 		# return the reservations that intersect this day, of any status
-		all_on_date = super(ReservationManager, self).get_query_set().filter(location=location).filter(arrive__lte = the_day).filter(depart__gt = the_day)
+		all_on_date = super(ReservationManager, self).get_queryset().filter(location=location).filter(arrive__lte = the_day).filter(depart__gt = the_day)
 		return all_on_date.filter(status=status)
 
 	def confirmed_approved_on_date(self, the_day, location, room=None):
