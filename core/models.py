@@ -518,24 +518,28 @@ class Reservation(models.Model):
 		# during the reservation process, we simulate a reservation to generate
 		# a bill and show the user what the reservation would cost. in this
 		# case, the reservation object will not yet have a bill because it has
-		# not been saved. 
-		if not self.bill:
+		# not been saved.
+		reservation_bill = None
+		if not self.bill and save:
 			self.bill = ReservationBill.objects.create()
+		if self.bill:
+			reservation_bill = self.bill
 
 		# impt! save the custom items first or they'll be blown away when the
-		# bill is regenerated. 
-		custom_items = list(self.bill.line_items.filter(custom=True))
-		if delete_old_items:
-			line_items = self.bill.line_items.all()
-			for item in line_items:
-				item.delete()
+		# bill is regenerated.
+		custom_items = []
+		if reservation_bill:
+			custom_items = list(reservation_bill.line_items.filter(custom=True))
+			if delete_old_items:
+				for item in reservation_bill.line_items.all():
+					item.delete()
 
 		line_items = []
 
 		# The first line item is for the room charge
 		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
 		room_charge = self.base_value()
-		room_line_item = BillLineItem(bill=self.bill, description=room_charge_desc, amount=room_charge, paid_by_house=False)
+		room_line_item = BillLineItem(bill=reservation_bill, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
 		
 		# Incorporate any custom fees or discounts
@@ -553,15 +557,14 @@ class Reservation(models.Model):
 			if location_fee.fee not in self.suppressed_fees.all():
 				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
 				amount = float(effective_room_charge) * location_fee.fee.percentage
-				fee_line_item = BillLineItem(bill=self.bill, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
+				fee_line_item = BillLineItem(bill=reservation_bill, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 				line_items.append(fee_line_item)
 
 		# Optionally save the line items to the database
 		if save:
+			reservation_bill.save()
 			for item in line_items:
 				item.save()
-		else:
-			self.bill.delete()
 
 		return line_items
 
