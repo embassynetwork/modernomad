@@ -873,6 +873,7 @@ def LocationEditPages(request, location_slug):
 			except Exception as e:
 				messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
 		elif "Delete Page" == action and 'page_id' in request.POST:
+			print "in Delete Page"
 			try:
 				page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
 				page.delete()

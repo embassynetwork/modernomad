@@ -61,8 +61,14 @@
 								</div>
 							</div>
 						{% endfor %}
+						<input name="action" type="hidden" value="Save Changes">
 						<input class="form-control" name="action" type="submit" value="Save Changes">
+						{% csrf_token %}
+					</form>
+
+					<form class="form-inline" method="post" enctype="multipart/form-data" action="#page-{{page.id}}">
 						<input name="action" type="hidden" value="Delete Page">
+						<input type="hidden" name="page_id" value="{{page.id}}">
 						<input id="delete-page-id-{{page.id}}" class="form-control" name="action" type="submit" value="Delete Page">
 						{% csrf_token %}
 					</form>
@@ -152,6 +158,7 @@
 		modal: true,
 		buttons: {
 			"Yes, Delete": function () {
+				console.log("going to submit now");
 				$(this).data('delete-button').parentElement.submit();
 			},
 			"Do Not Delete": function () {
