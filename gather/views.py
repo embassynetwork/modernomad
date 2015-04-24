@@ -57,7 +57,6 @@ def create_event(request, location_slug=None):
 	logger.debug("create_event: location:%s, user:%s" % (location, current_user))
 
 	# if the user doesn't have a proper profile, then make sure they extend it first
-	# TODO FIXME This is a direct dependency on an external app (the core app where the UserProfile model lives) 
 	print current_user.id
 	if current_user.id == None :
 		messages.add_message(request, messages.INFO, 'We want to know who you are! Please create a profile before submitting an event.')
@@ -100,6 +99,7 @@ def create_event(request, location_slug=None):
 			return HttpResponseRedirect(reverse('gather_view_event', args=(event.location.slug, event.id, event.slug)))
 		else:
 			print "form error"
+			print form
 			print form.errors
 
 	else:

@@ -77,7 +77,7 @@ class Location(models.Model):
 	name_on_account = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
 	house_admins = models.ManyToManyField(User, related_name='house_admin')
-	residents = models.ManyToManyField(User, related_name='residences')
+	residents = models.ManyToManyField(User, related_name='residences', blank=True)
 	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
 	public = models.BooleanField(default=False, verbose_name="Is this location open to the public?")
@@ -270,7 +270,7 @@ class Room(models.Model):
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
-	residents = models.ManyToManyField(User, related_name="residents", help_text="This field is optional.") # a room may have many residents and a resident may have many rooms
+	residents = models.ManyToManyField(User, related_name="residents", help_text="This field is optional.", blank=True) # a room may have many residents and a resident may have many rooms
 	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 
 	def __unicode__(self):
@@ -504,7 +504,7 @@ class Reservation(models.Model):
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
 	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
 	bill = models.OneToOneField(ReservationBill, null=True, related_name="reservation")
-	suppressed_fees = models.ManyToManyField(Fee)
+	suppressed_fees = models.ManyToManyField(Fee, blank=True)
 
 	objects = ReservationManager()
 
