@@ -83,8 +83,9 @@ def get_templates(location, email_key):
 
 	return (text_template, html_template)
 
-def render_templates(context, location, email_key):
-	translation.activate('en-us')
+def render_templates(context, location, email_key, language='en-us'):
+	prev_language = translation.get_language()
+	translation.activate(language)
 	text_content = None
 	html_content = None
 	
@@ -95,6 +96,7 @@ def render_templates(context, location, email_key):
 	if html_template:
 		html_content = html_template.render(context)
 	
+	translation.activate(prev_language)
 	return (text_content, html_content)
 
 ############################################
