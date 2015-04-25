@@ -20,6 +20,9 @@ import requests
 import datetime
 import logging
 
+from django.utils import translation
+
+
 logger = logging.getLogger(__name__)
 
 weekday_number_to_name = {
@@ -81,6 +84,7 @@ def get_templates(location, email_key):
 	return (text_template, html_template)
 
 def render_templates(context, location, email_key):
+	translation.activate('en-us')
 	text_content = None
 	html_content = None
 	
