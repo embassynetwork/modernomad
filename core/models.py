@@ -933,6 +933,7 @@ class LocationEmailTemplate(models.Model):
 	RECEIPT = 'receipt'
 	NEW_RESERVATION = 'newreservation'
 	WELCOME = 'pre_arrival_welcome'
+	DEPARTURE = 'departure'
 
 	KEYS = (
 			(ADMIN_DAILY, 'Admin Daily Update'),
@@ -941,6 +942,7 @@ class LocationEmailTemplate(models.Model):
 			(RECEIPT, 'Receipt'),
 			(NEW_RESERVATION, 'New Reservation'),
 			(WELCOME, 'Pre-Arrival Welcome'),
+			(DEPARTURE, 'Departure'),
 		)
 
 	location = models.ForeignKey(Location)

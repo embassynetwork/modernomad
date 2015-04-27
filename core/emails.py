@@ -198,31 +198,21 @@ def goodbye_email(reservation):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
 	location = reservation.location
-	intersecting_reservations = Reservation.objects.filter(arrive__gte=reservation.arrive).filter(depart__lte=reservation.depart)
-	residents = location.residents.all()
-	intersecting_events = Event.objects.filter(location=location).filter(start__gte=reservation.arrive).filter(end__lte=reservation.depart)
-	profiles = None
-	day_of_week = weekday_number_to_name[reservation.arrive.weekday()]
 	
 	c = Context({
 		'first_name': reservation.user.first_name,
-		'day_of_week' : day_of_week,
 		'location': reservation.location,
-		'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
-		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
-		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
-		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(reservation.user.username,)),
-		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(location.slug, reservation.id,)),
-		'intersecting_reservations': intersecting_reservations,
-		'intersecting_events': intersecting_events,
-		'residents': residents,
+		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_create', args=(location.slug,)),
 	})
-	text_content, html_content = render_templates(c, location, LocationEmailTemplate.WELCOME)
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.DEPARTURE)
 	
+	subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
+	print 'email subject'
+	print subject
 	mailgun_data={
 			"from": reservation.location.from_email(),
 			"to": [reservation.user.email,],
-			"subject": "[%s] See you on %s" % (reservation.location.email_subject_prefix, day_of_week),
+			"subject": subject,
 			"text": text_content,
 		}
 	if html_content:
