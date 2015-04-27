@@ -94,6 +94,7 @@
 					<div>Receive weekly emails about upcoming events: 
 
 						{% for location in network_locations %}
+						{% if location.public or user in location.house_admins.all %}
 						<div class="checkbox">
 							<label>
 								<input 
@@ -101,9 +102,10 @@
 									name="{{ location.slug }}" 
 									id="{{ location.slug }}" 
 									{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
-								> {{ location.name }}
+									> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
 							</label>
 						</div>
+						{% endif %}
 						{% endfor %}
 					<hr>
 					<input type="submit" value="Save" class="btn btn-default">
