@@ -11,7 +11,7 @@ from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from core.models import Reservation
-from gather.models import Event
+from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
@@ -19,6 +19,9 @@ import json
 import requests
 import datetime
 import logging
+
+from django.utils import translation
+
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +83,9 @@ def get_templates(location, email_key):
 
 	return (text_template, html_template)
 
-def render_templates(context, location, email_key):
+def render_templates(context, location, email_key, language='en-us'):
+	prev_language = translation.get_language()
+	translation.activate(language)
 	text_content = None
 	html_content = None
 	
@@ -91,16 +96,20 @@ def render_templates(context, location, email_key):
 	if html_template:
 		html_content = html_template.render(context)
 	
+	translation.activate(prev_language)
 	return (text_content, html_content)
 
 ############################################
 #            RESERVATION EMAILS            #
 ############################################
 
-def send_receipt(reservation):
+def send_receipt(reservation, send_to=None):
 	location = reservation.location
-	subject = "[%s] Receipt for your Stay %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
-	recipient = [reservation.user.email,]
+	subject = "[%s] Receipt for Reservation %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
+	if send_to:
+		recipient = [send_to,]
+	else:
+		recipient = [reservation.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
 		'user': reservation.user, 
@@ -236,6 +245,7 @@ def guest_welcome(reservation):
 		'first_name': reservation.user.first_name,
 		'day_of_week' : day_of_week,
 		'location': reservation.location,
+		'reservation': reservation,
 		'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
 		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
 		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
@@ -785,3 +795,82 @@ def residents(request, location_slug):
 		"h:Reply-To": list_address,
 	}
 	return mailgun_send(mailgun_data, attachments)
+
+
+@csrf_exempt
+def announce(request, location_slug):
+	''' email all people signed up for event activity notifications at this location.'''
+
+	# fail gracefully if location does not exist
+	try:
+		location = get_location(location_slug)
+	except:
+		# XXX TODO reject and bounce back to sender?
+		logger.error('location not found')
+		return HttpResponse(status=200)
+	logger.debug('announce@ for location: %s' % location)
+
+	# Make sure this person can post to our list
+	sender = request.POST.get('from')
+	location_event_admins = EventAdminGroup.objects.get(location=location).users.all()
+	allowed_senders = [user.email for user in location_event_admins]
+	# have to be careful here because the "sender" email address is likely a
+	# substring of the entire 'from' field in the POST request, ie, "Jessy Kate
+	# Schingler <jessy@jessykate.com>"
+	this_sender_allowed = False
+	for sender_email in allowed_senders:
+		if sender_email in sender:
+			this_sender_allowed = True
+			break
+	if not this_sender_allowed:
+		# TODO - This could send a response so they know they were blocked
+		logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
+		return HttpResponse(status=200)
+
+	weekly_notifications_on = EventNotifications.objects.filter(location_weekly = location)
+	remindees_for_location = [notify.user for notify in weekly_notifications_on]
+	
+	# TESTING
+	jessy = User.objects.get(id=1)
+	for user in [jessy,]:
+	#for user in remindees_for_location:
+		send_announce(request, user, location)
+
+	return HttpResponse(status=200)
+
+
+def send_announce(request, user, location):
+
+	from_address = location.from_email()
+	subject = request.POST.get('subject')
+	body_plain = request.POST.get('body-plain')
+	body_html = request.POST.get('body-html')	
+	
+	# Include attachements
+	attachments = []
+	for attachment in request.FILES.values():
+		attachments.append(("attachment", attachment))
+
+	prefix = "["+location.email_subject_prefix + "] " 
+	subject = prefix + subject
+	logger.debug("subject: %s" % subject)
+
+	# add in footer
+	text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s Announce *~*~*~* '''% location.name
+	body_plain = body_plain + text_footer
+
+	if body_html:
+		html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s Announce *~*~*~* '''% location.name
+		body_html = body_html + html_footer
+
+	# send the message 
+	mailgun_data =  {
+		"from": from_address,
+		"to": [user.email, ],
+		"subject": subject,
+		"text": body_plain,
+		"html": body_html,
+	}
+	return mailgun_send(mailgun_data, attachments)
+
+

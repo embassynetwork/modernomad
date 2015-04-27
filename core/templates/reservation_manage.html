@@ -7,34 +7,26 @@
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
 </div>	
 
-<!-- Email Modal -->
-<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3 class="modal-title" id="myModalLabel">Email {{ r.user.first_name }} </h3>
-			</div>
-			<div class="modal-body">
-				<!-- select menu specifies which email to show -->
-				<div>Select a template from the dropdown list to populate an email
-					with relevant default text. If you would like to add a new
-					template, visit the admin section of the site!</div>
-				<select name="select-email" id="which-email-select">
-					{% for template_name in email_templates_by_name %}
-					<option id="option{{forloop.counter}}" name="select-email" value="{{ template.name }}">
-					{{template_name}}
-					</option>
-					{% endfor %}
-				</select>
+{% include "snippets/reservation-manage-email-modal.html" %}
+{% include "snippets/manage-page-confirm-dialogs.html" %}
 
-				<!-- the selected email will be inserted here -->
-				<div id="selected-email">
-				</div>
-			</div>
-		</div>
-	</div>
+<!-- 3rd party payment link Modal -->
+<div class="modal fade" id="paymentlinkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body center">
+		<p class="para-padding">
+			Share this link with a 3rd party if they are submitting payment for you. 
+		</p>
+		<p class="bg-warning para-padding">
+			https://{{domain}}{% url 'reservation_payment' location.slug r.uuid %}
+		</p>
+      </div>
+    </div>
+  </div>
 </div>
+
+
 
 <div class="row" id="reservation-nav">
 	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
@@ -45,302 +37,91 @@
 {% endif %}
 
 <div class="row">
-<div class="col-md-3">
-	{% if r.user.profile.image %}
-	<div class="img-polaroid">
-		<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.user.profile.image|default:'data/avatars/default.jpg' }}" />
-	</div>
-	{% endif %}
 
-	<div class="res-actions-secondary"><h2>Manage</h2></div>
-
-		<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
-
-		<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
-			{% csrf_token %}
-			<input class="btn-default btn" type="submit" value="Recalculate Bill">
-		</form>
-
-		{% if r.is_paid %}
-		<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
-			{% csrf_token %}
-			<input class="btn-default btn" type="submit" value="Send Receipt">
-		</form>
+	<div class="col-md-3">
+		{% if r.user.profile.image %}
+		<div class="img-polaroid">
+			<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.user.profile.image|default:'data/avatars/default.jpg' }}" />
+		</div>
 		{% endif %}
-
-		{% if not r.is_canceled %}
-
-			{% if r.is_comped or not r.is_paid %}
-				<form id="res-action-toggle-comp" class="res-action" method="post" action="{% url 'reservation_toggle_comp' location.slug r.id %}" >
-					{% csrf_token %}
-					<input type="submit" 
-					{% if r.is_comped %} value="Remove Comp" {% else %} value="Make Comp"{% endif %}
-					class="btn-default btn" id="toggle-comp-input">
-				</form>
-			{% endif %}
-
-			<form id="res-cancel" method="post" action="{% url 'reservation_cancel' location.slug r.id %}">
-				{% csrf_token %} 
-				<input type="hidden" name="redirect" value="{% url 'reservation_manage' location.slug r.id %}">
-				<input class="btn btn-default" type="submit" value="Cancel This Reservation">
-			</form>
-
-			<div id="dialog-confirm-cancel" title="Cancel this Reservation?">
-				<p>
-					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-					This reservation will be cancelled. Are you sure?
-				</p>
-			</div>
-
-			<div id="dialog-confirm-refund" title="Refund this Reservation?">
-				<p>
-					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-					This payment will be refunded. Are you sure?
-				</p>
-			</div>
-			
-		{% endif %} {% comment %} endif != 'canceled' {% endcomment %}
-</div>
-
-
-<div class="col-md-7">
-
-	<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}</h1>
-
-	{% include "snippets/res_status_area.html" %}
-
-	<div id="dialog-warn-full" title="Warning! The room you are trying to book is full.">
-		<p>
-			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-			You are trying to confirm a reservation for a room that is showing
-			as full. Make sure you know what you are dong. Are you sure?
-		</p>
 	</div>
 
-	<hr>
 
-	<!-- Reservation Details -->
-	<div class="bottom-pad-thirty">
+	<div class="col-md-7">
+
+		<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}
+			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+		</h1>
+
+		{% include "snippets/reservation-notes.html" %}
+
 		<div id="reservation-details">
 			<h3>
 				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
-				<span class="pull-right">Value: ${{ r.total_value }}</span>
+				<span class="pull-right">Value: ${{ r.bill.amount }}</span>
 			</h3>
-		</div>
-		<div id="reservation-details-form">
-			<h3>Edit Reservation Details</h3>
-			<div class="form-help-text" style="margin-bottom: 12px;">
-				Be very careful when you edit these details!
+			<div class="row">
+				<div class="col-sm-2"><strong>Room</strong></div><div class="col-sm-10">{{ r.room }}</div>
 			</div>
-			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
-				<div class="form-group">
-					<strong>User:</strong> <input name="username" value="{{ r.user.username }}"/>
-					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change User"/>
-				</div>
-			</form>
-			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
-				<div class="form-group">
-					<strong>Rate:</strong> <input name="rate" value="{{ r.rate }}" size="3"/>
-					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Rate"/>
-				</div>
-			</form>
-			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
-				<div class="form-group">
-					<strong>Discount: $</strong> <input name="discount" value="0" size="3"/>
-					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
-					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
-				</div>
-			</form>
-			<form method="POST" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
-				<div class="form-group">
-					<strong>Additional Fee: $</strong> <input name="extra_fee" value="0" size="3"/>
-					<strong>Reason: </strong> <input name="reason" value="" size="15"/>
-					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Apply"/>
-				</div>
-			</form>
-			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
-				<div class="form-group">
-					<strong>Arrive:</strong> <input name="arrive" value="{{ r.arrive|date:'Y-m-d' }}" size="8"/>
-					<strong>Depart:</strong> <input name="depart" value="{{ r.depart|date:'Y-m-d' }}" size="8"/>
-					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Dates"/>
-				</div>
-			</form>
-			<form method="POST" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
-				<div class="form-group">
-					<strong>Room:</strong> <select name="room_id">
-							{% for room in location.rooms_with_future_reservability %}
-								<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
-							{% endfor %}
-						</select>
-					<input type="submit" class="btn btn-red pull-right" style="width:120px;" value="Change Room"/>
-				</div>
-			</form>
+			<div class="row">
+				<div class="col-sm-2"><strong>Purpose</strong></div><div class="col-sm-10">{{ r.purpose }}</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-2"><strong>Comments</strong></div><div class="col-sm-10">{{ r.comments|default:"None" }}</div>
+			</div>
 		</div>
-		<p>[ <a href="#" id="reservation-details-link" onclick="toggleEditDetails(); return false;"></a> ]</p>
+
 	</div>
-	
-	<!-- availability calendar -->
-	<table id="rooms-available-calendar">
-		<tr>
-		<th>Room</th>
-		{% for date in dates %}
-		<th>{{ date|date:"M d" }}</th>
-		{% endfor %}
-		</tr>
 
-		{% for room_obj, days_list in avail.items %}
-		<tr>
-			<td> 
-				{{room_obj.name}}
-			</td>
+</div>
 
-			{% for the_day, beds_free in days_list.items %}
-				{% if room_obj == r.room and room_has_availability %}
-					<td class="bg-success">
-				{% elif room_obj == r.room and r.status == 'approved' and beds_free >= 0 %}
-					<td class="bg-success">
-				{% elif room_obj == r.room and r.status == 'confirmed' and beds_free >= 0 %}
-					<td class="bg-success">
-				{% elif room_obj == r.room and not room_has_availability %}
-					<td class="bg-danger">
-				{% else %}
-					<td>
-				{% endif %}
+<!-- new row -->
+<hr>
 
-				{% comment %} {% if r.status == 'pending' or r.status == 'canceled'%} {% endcomment %}
 
-				{% if r.status == 'approved' and r.room == room_obj %}
-					<div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{beds_free}}</div>
-				{% elif r.status == 'confirmed' and r.room == room_obj %}
-					<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{beds_free}}</div>
-				{% else %}
-					{% if beds_free %}
-						<div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{beds_free}}</div>
-					{% else %}
-						<div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{beds_free}}</div>
-					{% endif %}
-				{% endif %}
-			</td>
-			{% endfor %}
-		</tr>
-		{% endfor %}
-	</table>
+<div class="row" class="bottom-pad-thirty">
 
-	<hr>
+	<div class="col-md-3">
+		<div class="res-actions-secondary"><h2>Manage</h2></div>
+		<ul class="nav nav-pills nav-stacked" role="tablist">
+			<li class="active"><a href="#reservation-manage-calendar" data-toggle="pill"><h4>Availability</h4></a></li>
+			<li><a role="tab" href="#reservation-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+			<li><a role="tab" href="#reservation-manage-bill" data-toggle="pill"><h4>Bill</h4></a></li>
+			<li><a role="tab" href="#reservation-manage-payment" data-toggle="pill"><h4>Payment</h4></a></li>
+			<li><a role="tab" href="#reservation-manage-user-info" data-toggle="pill"><h4>User</h4></a></li>
+		</ul>
+	</div>
 
-	<div class="res-field field"><strong>Room:</strong> {{ r.room }}</div>
-	<div class="res-field field"><strong>Tags:</strong> {{ r.tags }}</div>
-	<div class="res-field field"><strong>Purpose:</strong> {{ r.purpose }}</div>
-	<div class="res-field field"><strong>Comments:</strong> {{ r.comments }}</div>
+	<div class="col-md-7">	
 
-	<hr>
+		<div class="tab-content">
 
-	<!-- Bill Details -->
-	<h2>Bill Details</h2>	
-	<table id="bill-details" class="table">
-		<thead>
-			<th>Description</th>
-			<th class="money">Paid by<br>House</th>
-			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
-		</thead>
-		{% for item in r.bill_line_items %}
-			{% if item.paid_by_house %}
-				<tr>
-					<td class="paid-by-house text-danger">{{ item.description }}</td>
-					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
-					<td class="money"></td>
-				</tr>
-			{% elif item.custom %}
-				<tr>
-					<td><em>{{ item.description }}</em></td>
-					<td></td>
-					<td class="money"><em>${{ item.amount|floatformat:2 }}</em></td>
-				</tr>
-			{% else %}
-			<tr>
-				<td>{{ item.description }}</td>
-				<td></td>
-				<td class="money">${{ item.amount|floatformat:2 }}</td>
-			</tr>
-			{% endif %}
-		{% endfor %}
-		<tr class="total-row">
-			<td></td>
-			<td class="money"><span class="text-danger">${{ r.house_fees|floatformat:2 }}</span></td>
-			<td class="money">${{ r.bill_amount|floatformat:2 }}</td>
-	</table>
+			<div role="tabpanel" class="tab-pane active" id="reservation-manage-calendar">
+				<h3>Availability</h3>
+				{% include "snippets/res_status_area.html" %}
+				<hr>
+				{% include "snippets/manage-page-availability-calendar.html" %}
+			</div>
 
-	<!-- Payment Details -->
-	<h2>Payments</h2>
-	{% if r.payments %}
-	<table id="payment-details" class="table">
-		<thead>
-			<th>Date</th>
-			<th>Transaction ID</th>
-			<th>Method</th>
-			<th class="money">Amount</th>
-			<th></th>
-		</thead>
-		{% for p in r.payments %}
-			<form class="res-refund" id="res-refund-{{payment_id}}" 
-				method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">
-				{% csrf_token %}
-				<input name="payment_id" type="hidden" value="{{p.id}}">
-			<tr>
-				<td>{{ p.payment_date }}
-				<td>{{ p.transaction_id }}
-				<td>{{ p.payment_method }}</td>
-				<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
-				<td>
-					{% if p.paid_amount > 0 %}
-					<input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Refund" onclick="return confirm('Are you sure?');">
-					{% endif %}
-				</a>
-			</tr>
-			</form>
-		{% endfor %}
-		<tr class="total-row">
-			<td colspan="3"></td>
-			<td class="money">${{ r.total_paid|floatformat:2 }}</td>
-			<td></td>
-		</tr>
-	{% endif %}
-	<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
-		<input name="payment_id" type="hidden" value="{{p.id}}">
-		<tr style="padding-top:24px;">
-			<th>Add Payment</th>
-			<td><input name="payment_method" value="Cash"></td>
-			<td><input name="paid_amount" value="{{r.total_owed}}"></td>
-			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>
-		</tr>
-	</form>
-	</table>
-	<hr>
-	
-	<h2>User Details</h2>
-	<div class="user-field field"><strong>How they heard about us:</strong> {{ r.user.profile.referral }}</div>
-	<div class="user-field field"><strong>About them:</strong> {{ r.user.profile.bio }}</div>
-	<div class="user-field field"><strong>Projects:</strong> {{ r.user.profile.projects }}</div>
-	<div class="user-field field"><strong>Sharing Interests</strong>: {{ r.user.profile.sharing }}</div>
-	<div class="user-field field"><strong>Discussion Interests</strong>: {{ r.user.profile.discussion }}</div>
+			<div role="tabpanel" class="tab-pane" id="reservation-manage-edit">
+				{% include "snippets/manage-page-advanced-edit.html" %}
+			</div>
 
-	<h3>User Notes</h3>
-	{% for note in user_notes %}
-		<div class="user-field field"><strong>{{ note.created }} ({{note.created_by}}):</strong> <pre>{{ note.note }}</pre>
-	{% endfor %}
-	<form method="POST" action=".">{% csrf_token %}
-		<textarea name="user_note" class="form-control" cols="32" rows="2" style="margin-top:1em;"></textarea>
-		<input class="btn" style="width:100px; margin-top:1em;" type="submit" value="Add Note"/>
-	</form>
+			<div role="tabpanel" class="tab-pane" id="reservation-manage-bill">
+				{% include "snippets/manage-page-bill-details.html" %}
+			</div>
 
-	{% with u=r.user %}
-		{% include "snippets/profile_links.html" %}
+			<div role="tabpanel" class="tab-pane" id="reservation-manage-payment">
+				{% include "snippets/manage-page-payment-details.html" %}
+			</div>
 
-		<h3>Other Reservations</h3>
-		{% include "snippets/user_reservations.html" %}
-	{% endwith %}
-	
-</div> <!-- end res-info-main -->
+			<div role="tabpanel" class="tab-pane" id="reservation-manage-user-info">
+				{% include "snippets/manage-page-user-details.html" %}
+			</div>
+
+		</div>
+
+	</div> <!-- end col-md-7 -->
 </div> 
 
 {% if r.is_canceled %}
@@ -353,20 +134,32 @@
 {% block extrajs %}
 <script language="JavaScript">
 
-function toggleEditDetails(){
-	if($('#reservation-details-form').is(':hidden')) {
-		console.log('reservation-details-form');
-		$('#reservation-details').hide();
-		$('#reservation-details-form').show();
-		$('#reservation-details-link').html('cancel edit');
+function UpdateRefundValue(id, val) { 
+	$("#refund-amount-"+id).val(val)
+} 
+
+function toggleRefundDetails(id){
+	if($('#refund-details-'+id).is(':hidden')) {
+		$('#refund-details-'+id).show();
 	} else {
-		console.log('reservation-details');
-		$('#reservation-details').show();
-		$('#reservation-details-form').hide();
-		$('#reservation-details-link').html('edit details');
+		$('#refund-details-'+id).hide();
 	}
 }
-toggleEditDetails();
+toggleRefundDetails();
+
+function toggleReservationNotes(){
+	if($('#reservation-notes-area').is(':hidden')) {
+		$('#reservation-notes-area').show();
+		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes</h4>');
+	} else {
+		$('#reservation-notes-area').hide();
+		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}</h4>');
+	}
+}
+
+if ({{reservation_notes|length}} == 0) {
+	toggleReservationNotes();
+}
 
 // don't have a default email selected when the modal pops up
 $("#which-email-select").prop("selectedIndex", -1);
@@ -492,6 +285,65 @@ $(document).ready(function() {
         $(this).stop().fadeOut('fast');
     });	
 });
+
+$("#dialog-confirm-send-welcome").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Send": function () {
+            $("#res-action-send-welcome").submit();
+         },
+        "Do Not Send": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-action-send-welcome").click(function (e) {
+    $("#dialog-confirm-send-welcome").dialog("open");
+    e.preventDefault();
+});
+
+
+$("#dialog-confirm-fee-remove").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Remove": function () {
+            $(this).data('form-link').parentElement.submit();
+         },
+        "Do Not Remove": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$(".remove-fee").click(function (e) {
+    $("#dialog-confirm-fee-remove").data('form-link', this).dialog("open");
+    e.preventDefault();
+});
+
+
+$("#dialog-confirm-line-item-remove").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Remove": function () {
+            $(this).data('form-link').parentElement.submit();
+         },
+        "Do Not Remove": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$(".remove-line-item").click(function (e) {
+    $("#dialog-confirm-line-item-remove").data('form-link', this).dialog("open");
+    e.preventDefault();
+});
+
+
+
 
 $("#dialog-confirm-cancel").dialog({
     autoOpen: false,

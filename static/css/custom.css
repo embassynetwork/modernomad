@@ -734,11 +734,11 @@ img.profile-img-thumb {
 }
 
 input#id_cvc {
-	width: 35px;
+	width: 65px;
 }
 
 input#id_expiration_month {
-	width: 35px;
+	width: 65px;
 }
 
 input#id_expiration_year {
@@ -886,6 +886,10 @@ b.dark-red-bold {
 	color: #999999;
 }
 
+.sm-row-spacer {
+	padding-bottom: 10px;
+}
+
 .row-spacer {
 	padding-bottom: 25px;
 }
@@ -997,7 +1001,7 @@ div#spinner
 	background-size: 70%;
 }
 
-#email-user-button {
+#payment-link-button {
 	margin-bottom: 20px;
 }
 
@@ -1184,7 +1188,7 @@ div#spinner
 	margin-bottom: 40px;
 }
 
-.resident-row, .user-event-row {
+.people-row, .user-event-row {
 	margin-bottom: 40px;
 }
 
@@ -1629,5 +1633,50 @@ p.lead strong {
 	font-size: 80%;
 	background-color: beige;
 	padding: 10px;
+}
+
+#guestcalendar {
+	width: 100%;
+}
+
+.guestinfo-tooltip {
+	padding: 0px 10px 10px 10px;
+}
+
+.para-padding {
+	padding: 15px;
+}
+
+#submit-payment-header {
+	margin-bottom: 40px;
+}
+
+#id_comment {
+	height: 100px;
+}
+
+#payment-errors {
+	margin-bottom: 20px;
+}
+
+#reservation-list-tab-content {
+	margin-top: 40px;
+}
+
+.bill-line-item td {
+	border-top: 0px !important;
+}
+
+#reservation-notes-link:hover {
+	cursor: pointer;
+	color: #ea6f56; 
+}
+
+[id^="refund-details-"] {
+	display: none;
+}
+
+#room-cal-prev, #room-cal-next {
+	display: inline;
 }
 

@@ -24,7 +24,7 @@
 		{% if r.is_pending %}
 			{% if r.user.profile.customer_id %}
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-				Charge the user's card ${{r.total_owed}} and notify them via email
+				Charge the user's card ${{r.bill.total_owed}} and notify them via email
 				</a> to confirm this reservation. (A receipt will be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
 			{% else %}
 			You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
@@ -48,13 +48,10 @@
 			{% if r.user.profile.customer_id %}
 				{% if r.is_paid %}
 					<p>This reservation is confirmed and paid. No action needed.</p>  
-					<!--<p>Was there a mistake?  Do you need to
-						<a href="#" class="res-manage-action res-manage-btn" id="refund-card" onclick="return confirm('Are you sure?');">refund their card</a>?-->
-					</p>
 				{% else %}
 					<p>The reservation is confirmed, although unpaid.</p>
 					<p><a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-					Charge the user's card ${{r.total_owed}}</a>.</p>
+					Charge the user's card ${{r.bill.total_owed}}</a>.</p>
 					<p>(A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)</p>
 				{% endif %}
 			{% else %}

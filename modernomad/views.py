@@ -15,17 +15,17 @@ def index(request):
 	locations = Location.objects.all()
 	location_list = []
 	for location in locations:
-		location_list.append({
-				'name': location.name,
-				'latitude': location.latitude,
-				'longitude': location.longitude,
-				'short_description': strip_tags(location.short_description[:200])+"...",
-				'image': location.image.url,
-				'url': location.get_absolute_url(),
-				'has_availability': location.has_availability(),
-				'num_rooms': location.rooms.count()
-
-		})
+		if location.public:
+			location_list.append({
+					'name': location.name,
+					'latitude': location.latitude,
+					'longitude': location.longitude,
+					'short_description': strip_tags(location.short_description[:200])+"...",
+					'image': location.image.url,
+					'url': location.get_absolute_url(),
+					'has_availability': location.has_availability(),
+					'num_rooms': location.rooms.count()
+			})
 	return render(request, "index.html", {'location_list': json.dumps(location_list), 'recent_events': recent_events})
 
 def about(request):

@@ -1,4 +1,4 @@
-<table class="dataTable">
+<table class="dataTable table table-striped reservation-list">
 	<thead>
 		<tr>
 			<th>ID</th>
@@ -29,7 +29,7 @@
 					<td>{{r.room}}</td>
 					<td style="text-align:center;">{{r.total_nights}}</td>
 					<td>${{r.rate}}</td>
-					<td>${{r.total_value}}</td>
+					<td>${{r.bill.amount}}</td>
 					<td>
 						{% if r.is_comped %}
 							<span class="text-danger glyphicon glyphicon-heart"></span>

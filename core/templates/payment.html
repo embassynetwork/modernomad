@@ -1,65 +1,156 @@
-{% extends 'main.html' %}
+{% extends 'base.html' %}
 
-{% block main %}
+{% block content %}
 
-	<div class="page-text">
-		Your contributions are greatly appreciated. Thank you! 
-	</div>
+	{% include "snippets/messages.html" %}
 
-	<div id="payment-errors"></div>
-	<form action="/payment/" method="POST" id="payment-form">{% csrf_token %}
+	<div class="row">
 
-	<div class="field-wrapper-tight">
-		{{ form.name.errors }}
-		{{ form.name.label_tag }}
-		<span class="form-help-text">{{ form.name.help_text}}</span>
-		<div class="form-field-body">
-			{{ form.name }}
+	{% if r.bill.total_owed > 0 %}
+
+		<div class="col-md-5">
+
+			<h2 id="submit-payment-header">Submit Payment for this reservation</h2>
+
+			<div id="payment-errors"></div> 
+
+			<form action="{% url 'reservation_payment' location.slug r.uuid %}" method="POST" class="form-horizontal" id="payment-form">{% csrf_token %}
+
+				<div class="form-group">
+					<div class="col-md-2">
+						{{ form.name.errors }}
+						{{ form.name.label_tag }}
+					</div>
+					<div class="col-md-4">
+						{{ form.name }}
+					</div>
+					<div class="col-md-2">
+						{{ form.email.errors }}
+						{{ form.email.label_tag }}
+					</div>
+					<div class="col-md-4">
+						{{ form.email }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-md-2">
+						{{ form.card_number.errors }}
+						{{ form.card_number.label_tag }}
+					</div>
+					<div class="col-md-10">
+						{{ form.card_number }}
+					</div>
+				</div>
+
+
+				<div class="form-group">
+
+					<div class="form-inline">
+						<div class="col-md-2">
+							{{ form.cvc.errors }}
+							{{ form.cvc.label_tag }}
+						</div>
+						<div class="col-md-2">
+							{{ form.cvc }}
+						</div>
+						<div class="col-md-4">
+							{{ form.expiration_month.errors }}
+							{{ form.expiration_year.errors }}
+							<b>Card Exp. (MM/YYYY)</b>
+						</div>
+						<div class="col-md-4">
+							{{ form.expiration_month }} / {{ form.expiration_year }}
+						</div>
+					</div>
+
+				</div>
+
+				<div class="form-group">
+					<div class="col-md-2">
+						{{ form.amount.errors }}
+						{{ form.amount.label_tag }}
+					</div>
+					<div class="col-md-10">
+						{{ form.amount }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-md-2">
+						{{ form.comment.errors }}
+						{{ form.comment.label_tag }}
+					</div>
+					<div class="col-md-10">
+						{{ form.comment }}
+					</div>
+				</div>
+
+				<button type="submit" class="col-md-offset-2 btn btn-default">Submit Payment</button>
+			</form>
+
 		</div>
-	</div>
 
-	<div class="field-wrapper-tight">
-		{{ form.email.errors }}
-		{{ form.email.label_tag }}
-		<span class="form-help-text">{{ form.email.help_text}}</span>
-		<div class="form-field-body">
-			{{ form.email }}
+	{% else %}
+
+		<div class="col-md-5">
+			<img class="img-responsive" src="/static/img/watermark-paid.jpg">
 		</div>
-	</div>
 
-	<div class="field-wrapper-tight">
-		{{ form.card_number.errors }} {{ form.cvc.errors }}
-		<label class="label-inline">Card Number</label><span class="form-field-body"> {{ form.card_number }} </span>
-		<label class="label-inline">CVC</label> <span class="form-field-body"> {{ form.cvc }} </span>
-	</div>
+	{% endif %}
 
-	<div class="field-wrapper-tight">
-		{{ form.expiration_month.errors }} {{ form.expiration_year.errors }}
-		<label class="label-inline">Card Expiration (MM/YYYY)</label><span class="form-field-body"> {{ form.expiration_month }} </span>
-		<label class="label-inline">/</label> <span class="form-field-body"> {{ form.expiration_year }} </span>
-	</div>
 
-	<div class="field-wrapper-tight">
-		{{ form.amount.errors }}
-		{{ form.amount.label_tag }}
-		<span class="form-help-text">{{ form.amount.help_text}}</span>
-		<div class="form-field-body">
-			{{ form.amount }}
+		<div id="reservation-amount-summary-box" class="col-md-5 col-md-offset-1">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3>Reservation for {{ r.user.first_name|title }} {{r.user.last_name}} </h3>
+					<h4>{{ r.room.name|title}}</h4>
+					<h4> {{r.arrive }} - {{r.depart}} </h4>
+				</div>
+				<table class="table">
+					<tbody id="reservation-items">
+					</tbody>
+					<tbody>
+						{% for line_item in r.bill.ordered_line_items %}
+							{% if not line_item.paid_by_house %}
+								<tr class="a-room-fee">
+									<td>{{ line_item.description }}</td> 
+									<td><span class="pull-right">${{ line_item.amount|floatformat:2 }}</span></td> 
+								</tr>
+							{% endif %}
+						{% endfor %}
+						<tr class="a-room-fee">
+							<td><strong>Total Bill</strong></td>
+							<td><strong><span id="reservation-total" class="pull-right">${{r.bill.amount}} </span></strong></td>
+						</tr>
+
+						{% for payment in r.payments %}
+						<tr class="a-room-fee">
+							<td><em>Payment: {{ payment.payment_date }}</em></td>
+							<td><span class="pull-right"><em>-${{ payment.paid_amount|floatformat:2 }}</em></span></td> 
+						</tr>
+						{% endfor %}
+						
+						<tr class="a-room-fee">
+							<td><strong>Total Owed</strong></td>
+							<td><strong><span id="reservation-total" class="{{total_owed_color}} pull-right">${{r.bill.total_owed}} </span></strong></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
+
 	</div>
 
-	<div class="field-wrapper-tight">
-		{{ form.comment.errors }}
-		{{ form.comment.label_tag }}
-		<span class="form-help-text">{{ form.comment.help_text}}</span>
-		<div class="form-field-body">
-			{{ form.comment }}
-		</div>
+	<div class="row text-center">
+		{% ifequal r.user user %}
+			<a href="{% url 'reservation_detail' r.location.slug r.id %}">Return to Reservation Detail</a>
+		{% else %}
+			{% if user in location.house_admins.all %}
+				<a href="{% url 'reservation_manage' r.location.slug r.id %}">Manage Reservation</a>
+			{% endif %}
+		{% endifequal %}
 	</div>
-
-		<button type="submit" class="submit-button">Submit Payment</button>
-	</form>
-
 
 {% endblock %}
 
@@ -114,7 +205,7 @@
 				console.log(response.error);
 
 				// show the errors on the form
-				$("#payment-errors").text(response.error.message);
+				$("#payment-errors").html('<div class="bg-danger para-padding">'+response.error.message+'</div>');
 				// re-enable the submit button so the user can correct
 				// their errors and re-submit.
 				$(".submit-button").removeAttr("disabled");

@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Location
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable
 from django.contrib.sites.models import Site
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
@@ -173,10 +173,52 @@ class LocationContentForm(forms.ModelForm):
 			'front_page_participate': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
 		}
 
+class BootstrapModelForm(forms.ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(BootstrapModelForm, self).__init__(*args, **kwargs)
+		for field_name, field in self.fields.items():
+			field.widget.attrs['class'] = 'form-control'
+
+class LocationMenuForm(BootstrapModelForm):
+	class Meta:
+		model = LocationMenu
+		exclude = ['location',]
+		widgets = { 
+			'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+		}
+
+class LocationPageForm(forms.Form):
+	def __init__(self, *args, **kwargs):
+		location = kwargs.pop('location', None)
+		super(LocationPageForm, self).__init__(*args, **kwargs)
+		if location:
+			self.fields['menu'].queryset = LocationMenu.objects.filter(location=location)
+	
+	menu = forms.ModelChoiceField(queryset=None, empty_label=None)
+	slug = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
+	title = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
+	content = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
+
+class LocationRoomForm(BootstrapModelForm):
+	class Meta:
+		model = Room
+		exclude = ['location',]
+		widgets = { 
+		}
+
+class LocationReservableForm(BootstrapModelForm):
+	class Meta:
+		model = Reservable
+		exclude = ['room',]
+		widgets = { 
+			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
+			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
+		}
+
 class ReservationForm(forms.ModelForm):
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate']
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker form-control'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker form-control'}),
@@ -200,15 +242,26 @@ class ReservationForm(forms.ModelForm):
 
 
 class PaymentForm(forms.Form):
-	name = forms.CharField()
-	email = forms.EmailField()
-	card_number = forms.CharField()
-	cvc = forms.IntegerField()
-	expiration_month = forms.IntegerField(label='(MM)')
-	expiration_year = forms.IntegerField(label='(YYYY)')
-	amount = forms.IntegerField(label="Amount in whole dollars")
-	comment = forms.CharField(widget=forms.Textarea, required=False, help_text="Optional. If you are\
-contributing for someone else, make sure we know who this payment is for.")
+	name = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	email = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'email'}))
+	card_number = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	cvc = forms.IntegerField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
+	expiration_month = forms.IntegerField(label='(MM)', widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
+	expiration_year = forms.IntegerField(label='(YYYY)', widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
+	amount = forms.FloatField(label="Amount", widget=forms.TextInput(attrs={'class':"form-control inline", 'type': 'number', 'min': '0', 'step': '0.01'}))
+	comment = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}), required=False)
+
+	def __init__ (self, *args, **kwargs):
+		# have to call super first, which initializes the 'fields' dictionary
+
+		try:
+			default_amount = kwargs.pop('default_amount')
+		except:
+			default_amount = None
+		super(PaymentForm, self).__init__(*args, **kwargs)
+		if default_amount:
+			self.fields['amount'].initial = default_amount
+
 
 class StripeCustomerCreationForm(forms.Form):
 	name = forms.CharField()
@@ -223,7 +276,7 @@ class EmailTemplateForm(forms.Form):
 	''' We don't actually make this a model form because it's a derivative
 	function of a model but not directly constructed from the model fields
 	itself.''' 
-	sender = forms.EmailField( widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
+	sender = forms.EmailField(widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
 	recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control"}))
 	footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
 	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))

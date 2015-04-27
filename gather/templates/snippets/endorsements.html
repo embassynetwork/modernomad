@@ -1,0 +1,46 @@
+{% load staticfiles %}
+{% if current_user not in endorsements %}
+	<span id="heart-endorse" class="glyphicon glyphicon-heart-empty"></span> 
+{% else %}
+	<span id="heart-endorsed" class="glyphicon glyphicon-heart"></span>
+{% endif %} 
+
+{% if endorsements|length > 0 %}
+	<span class="dropdown">
+		<span type="button" class="dropdown-toggle" data-toggle="dropdown" id="endorsers-list">
+			{{ endorsements|length }} 
+		<span class="caret"></span>
+		</span>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="endorsers-list" id="endorsers-list-body">
+			{% for endorser in endorsements %}
+				<li class="endorser-name-list-item">{{endorser.first_name}} {{ endorser.last_name }}</li>
+			{% endfor %}
+		</ul>
+	</span>
+{% else %}
+	{{ endorsements|length }} 
+{% endif %}
+
+<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+<script>
+	$("#heart-endorse").click(function(e) {
+		request = $.ajax({ 
+			data: {
+				'csrfmiddlewaretoken': '{{ csrf_token }}'
+			},	
+			type: "POST",
+			url: "{% url 'gather_event_endorse' location.slug event.id event.slug %}"
+		});
+
+		request.done(function(msg) {
+			$("#endorsement-area").html(msg);
+		});
+
+		request.fail(function() {
+			console.log("oops, there was a problem");
+		});
+
+		event.preventDefault();
+
+	});
+</script>

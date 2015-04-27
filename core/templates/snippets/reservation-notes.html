@@ -1,0 +1,29 @@
+<div class="panel panel-warning">
+		<div class="panel-heading" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;">
+			<h4>
+				<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close reservation notes 
+			</h4>
+		</div>
+	<div id="reservation-notes-area" class="panel-body">
+		{% for note in reservation_notes %}
+			<div class="user-field field">
+				<small>{{ note.created }} from {{note.created_by.first_name}}:</small> 
+				<p>{{ note.note }}</p>
+			</div>
+			<hr>
+		{% endfor %}
+		<form class="form-horizontal" method="POST" action=".">{% csrf_token %}
+			<div class="form-group" id="reservation-notes-input-group">
+				<div class="col-sm-9">
+					<textarea name="reservation_note" class="form-control" rows=1></textarea>
+				</div>
+				<div class="col-sm-3">
+					<button type="submit" class="btn btn-default">Add new note</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+
+

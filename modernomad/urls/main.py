@@ -23,6 +23,9 @@ urlpatterns = patterns('',
 	# various other useful things
 	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
 	url(r'^robots\.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: ", content_type="text/plain")),
+
+	# Discourse discussion group
+	#url(r'^discourse/sso$', 'modernomad.discourse.sso'),
 )
 
 # media url hackery. 

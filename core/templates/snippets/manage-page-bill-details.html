@@ -1,0 +1,68 @@
+	<h3>Bill Details</h3>	
+
+	<form class="manage-button-spacer res-action" method=POST action="{% url 'reservation_recalculate_bill' location.slug r.id %}">
+		{% csrf_token %}
+		<input class="btn-default btn" type="submit" value="Reset Bill Fees">
+		<input type="hidden" name="reset_suppressed" value="true">
+	</form>
+
+	<table id="bill-details" class="table">
+		<thead>
+			<th>Description</th>
+			<th class="money">Paid by<br>House</th>
+			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
+		</thead>
+		{% for item in r.bill.subtotal_items %}
+			<tr class="bill-line-item">
+				<td>
+					{% if item.custom %}
+						<form method="post" id="remove-line-item-{{item.id}}" action="{% url 'reservation_delete_bill_item' location.slug r.id %}"> {% csrf_token %}
+							<a class="remove-line-item" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
+							<input type="hidden" name="payment_id" value="{{item.id}}">
+							{{ item.description }}
+						</form>
+					{% else %}
+						{{ item.description }}
+					{% endif %} 
+				</td>
+				<td></td>
+				<td class="money">${{ item.amount|floatformat:2 }}</td>
+			</tr>
+		{% endfor %}
+		<tr class="total-row">
+			<td></td>
+			<td>Subtotal</td>
+			<td class="money">${{ r.bill.subtotal_amount|floatformat:2 }}</td>
+		</tr>
+		{% for item in r.bill.fees %}
+			{% if not item.paid_by_house %}
+				<tr class="bill-line-item">
+					<td>
+						<form method="post" id="remove-line-item-{{item.id}}" action="{% url 'reservation_delete_bill_item' location.slug r.id %}"> {% csrf_token %}
+							<a class="remove-fee" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
+							<input type="hidden" name="payment_id" value="{{item.id}}">
+							{{ item.description }}
+						</form>
+					</td>
+					<td>{{ item.description }}</td>
+					<td class="money">${{ item.amount|floatformat:2 }}</td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+		<tr class="total-row">
+			<td></td>
+			<td>Total</td>
+			<td class="money">${{ r.bill.amount|floatformat:2 }}</td>
+		</tr>
+		{% for item in r.bill.fees %}
+			{% if item.paid_by_house %}
+				<tr class="bill-line-item">
+					<td class="money"></td>
+					<td class="paid-by-house text-danger"><em>{{ item.description }} Fee</em></td>
+					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
+				</tr>
+			{% endif %}
+		{% endfor %}
+	</table>
+
+

@@ -1,0 +1,15 @@
+Greetings, {{ user.first_name}}!
+
+You are registerd for the following events today with {{ location_name }}:
+{% for event in events %}
+    * {{ event.title|title }} at {{ event.start|date:'f A' }}, https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %} 
+{% endfor %}
+
+See other upcoming events at https://{{domain}}{% url 'gather_upcoming_events' location.slug %} . 
+
+Happy {{ day_of_week }},
+{{ location_name }}
+
+---------------------------------------------------- 
+
+{{ footer }}

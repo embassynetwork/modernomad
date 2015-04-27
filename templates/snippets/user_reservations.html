@@ -4,13 +4,19 @@
 <h4>Previous</h4>
 {% for reservation in past_reservations %}
 	<div>
-		{% if user == u or reservation.is_confirmed %}
+		{% ifusergroup house_admin %}
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
-		{% endif %}
-		{% if user == u %}
-		- <em>{{reservation.status}}</em>
-		{% endif %}
+			- <em>{{reservation.status}}</em>
+		{% else %}
+			{% if user == u or reservation.is_confirmed %}
+				<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+				at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
+			{% endif %}
+			{% if user == u %}
+				- <em>{{reservation.status}}</em>
+			{% endif %}
+		{% endifusergroup %}	
 	</div>
 {% endfor %}
 {% endif %}
@@ -19,13 +25,19 @@
 <h4>Upcoming</h4>
 {% for reservation in upcoming_reservations %}
 	<div>
-		{% if user == u or reservation.is_confirmed %}
+		{% ifusergroup house_admin %}
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
-		{% endif %}
-		{% if user == u %}
-		- <em>{{reservation.status}}</em>
-		{% endif %}
+			- <em>{{reservation.status}}</em>
+		{% else %}
+			{% if user == u or reservation.is_confirmed %}
+				<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
+				at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
+			{% endif %}
+			{% if user == u %}
+			- <em>{{reservation.status}}</em>
+			{% endif %}
+		{% endifusergroup %}	
 	</div>
 {% endfor %}
 {% endif %}

@@ -62,17 +62,21 @@ class LocationAdmin(admin.ModelAdmin):
 	if 'gather' in settings.INSTALLED_APPS:
 		 inlines.append(EventAdminGroupInline)
 
+class BillAdmin(admin.ModelAdmin):
+	model = Bill
+
 class PaymentAdmin(admin.ModelAdmin):
 	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.last_name, self.user.username)
 	user.allow_tags = True
 
 	def reservation(self):
-		return '''<a href="/locations/%s/reservation/%s/">%s''' % (self.reservation.location.slug, self.reservation.id, self.reservation)
+		r = self.bill.reservationbill.reservation
+		return '''<a href="/locations/%s/reservation/%s/">%s''' % (r.location.slug, r.id, r)
 	reservation.allow_tags = True
 
 	model=Payment
-	list_display=('payment_date', user,  reservation, 'payment_method', 'paid_amount')
+	list_display=('payment_date', user, 'payment_method', 'paid_amount')
 	list_filter = ('payment_method',)
 	ordering = ['-payment_date',]
 
@@ -82,20 +86,22 @@ class PaymentInline(admin.TabularInline):
 
 class BillLineItemAdmin(admin.ModelAdmin):
 	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.reservation.user.username, self.reservation.user.first_name, self.reservation.user.last_name, self.reservation.user.username)
+		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
 	user.allow_tags = True
 
-	def location(self):
-		return self.reservation.location
-
-	list_display = ('id', 'reservation', user, location, 'description', 'amount', 'paid_by_house')
-	list_filter = ('fee', 'paid_by_house', 'reservation__location')
+	list_display = ('id', user, 'description', 'amount', 'paid_by_house')
+	list_filter = ('fee', 'paid_by_house')
 
 class BillLineItemInline(admin.TabularInline):
 	model = BillLineItem
 	fields = ('fee', 'description', 'amount', 'paid_by_house')
 	readonly_fields = ('fee',)
 	extra = 0
+
+class BillInline(admin.StackedInline):
+	model = Bill
+	extra=0
+	inlines = [BillLineItemInline, PaymentInline]
 
 def gen_message(queryset, noun, pl_noun, suffix):
 	if len(queryset) == 1:
@@ -112,19 +118,19 @@ class ReservationAdmin(admin.ModelAdmin):
 		return "$%d" % self.rate
 
 	def value(self):
-		return "$%d" % self.total_value()
+		return "$%d" % self.base_value()
 
 	def bill(self):
-		return "$%d" % self.bill_amount()
+		return "$%d" % self.bill.amount()
 
 	def fees(self):
-		return "$%d" % self.non_house_fees()
+		return "$%d" % self.bill.non_house_fees()
 
 	def to_house(self):
 		return "$%d" % self.to_house()
 		
 	def paid(self):
-		return "$%d" % self.total_paid()
+		return "$%d" % self.bill.total_paid()
 
 	def user_profile(self):
 		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
@@ -216,7 +222,6 @@ class ReservationAdmin(admin.ModelAdmin):
 	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
 	#list_editable = ('status',) # Depricated in favor of drop down actions
 	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
-	inlines = [BillLineItemInline, PaymentInline]
 	ordering = ['-arrive', 'id']
 	actions= ['send_guest_welcome', 'send_new_reservation_notify', 'send_updated_reservation_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
 	save_as = True
@@ -244,7 +249,10 @@ admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(BedType, BedTypeAdmin)
 admin.site.register(Location, LocationAdmin)
+admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)
+admin.site.register(RoomSubscription)
+admin.site.register(CommunitySubscription)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)

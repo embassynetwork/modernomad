@@ -1,0 +1,194 @@
+{% extends "location_edit.html" %}
+
+{% block sub-content %}
+
+	<div id="dialog-confirm-delete-page" title="Delete this menu and all pages?">
+		<p>
+			<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+			<p>This page will be deleted.</p> 
+			<p>Are you sure?</p>
+		</p>
+	</div>
+
+<div class="row">
+	<div class="col-md-3">
+		<ul class="nav nav-pills nav-stacked" role="tablist">
+			<li class="active"><a href="#help" data-toggle="pill"><h5>Help</h5></a></li>
+			<li><a href="#menus" data-toggle="pill"><h5>Menus</h5></a></li>
+			<li><a href="#new-page" data-toggle="pill"><h5>New Page</h5></a></li>
+			<hr>
+			{% for menu in menus %}
+				{% for page in menu.pages.all %}
+					<li><a href="#page-{{page.id}}" data-toggle="pill"><h5>{{menu.name}}: {{page.title}}</h5></a></li>
+				{% endfor %}
+			{% endfor %}
+		</ul>
+	</div>
+
+	<div class="col-md-9">
+		<div class="tab-content">
+
+			<div role="tabpanel" class="tab-pane active" id="help">
+				<h3>Static Content Pages</h3>
+				<p>
+				Here you can create static pages and menus. The static pages can be
+				formatted with HTML, including linking to externally hosted images.
+				Warning: If you submit broken HTML, it can break the page, so double check
+				your tags and make sure they are properly closed.</p> 
+				<h3>About Menus</h3>
+				<p>
+				In order to add a page to a menu, you need to create the menu first. If you
+				delete a menu, any associated pages will be deleted. If you want to keep
+				them, then move the associated pages to another menu first. A menu will
+				only show up if there is a page associated with it.  if there is only one
+				page associated with a menu, then the "menu" will show up as the single
+				page, and will show up with the name of the page (not the menu). 
+				</p>
+			</div>
+
+			{% for page, form in page_forms.items %}
+				<div role="tabpanel" class="tab-pane" id="page-{{page.id}}">
+					<h3>{{page.menu.name}}: {{page.title}}</h3>
+					<form class="well form-inline" method="post" enctype="multipart/form-data" action="#page-{{page.id}}">
+						<input type="hidden" name="page_id" value="{{page.id}}">
+						{% for field in form %}
+							<div class="field-wrapper">
+								{{ field.errors }}
+								{{ field.label_tag }}
+								<span class="form-help-text">{{ field.help_text}}</span>
+								<div class="form-field-body">
+									{{ field }}
+								</div>
+							</div>
+						{% endfor %}
+						<input name="action" type="hidden" value="Save Changes">
+						<input class="form-control" name="action" type="submit" value="Save Changes">
+						{% csrf_token %}
+					</form>
+
+					<form class="form-inline" method="post" enctype="multipart/form-data" action="#page-{{page.id}}">
+						<input name="action" type="hidden" value="Delete Page">
+						<input type="hidden" name="page_id" value="{{page.id}}">
+						<input id="delete-page-id-{{page.id}}" class="form-control" name="action" type="submit" value="Delete Page">
+						{% csrf_token %}
+					</form>
+				</div>
+			{% endfor %}
+
+			<!-- New Menu Form -->
+			<div role="tabpanel" class="tab-pane" id="menus">
+				<h3>Menus</h3>
+				<div id="dialog-confirm-delete-menu" title="Delete this menu and all pages?">
+					<p>
+						<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+						<p>This menu will be deleted along with all pages under this menu.</p> 
+						<p>Are you sure?</p>
+					</p>
+				</div>
+				{% for menu in menus %}
+					<div class="row">
+						<div class="col-sm-4 col-sm-offset-1">
+							<strong>{{ menu.name }}</strong> ({{ menu.page_count }} pages)
+						</div>
+						<div class="col-sm-2">
+							<form id="form-menu-{{ menu.id }}-delete" class="btn-inline" method="post" action="#menus">
+								<input type="hidden" name="menu_id" value="{{ menu.id }}"/>
+								<input type="hidden" name="action" value="Delete Menu"/>
+								<input id="menu-delete-{{menu.id}}" class="btn-inline btn-red btn btn-link" name="action" type="submit" value="Delete Menu">
+								{% csrf_token %}
+							</form>
+						</div>
+					</div>
+					
+				{% endfor %}
+				
+				<form method="post" action=".#menus">
+					<input type="hidden" name="menu_id" value="{{ menu.id }}"/>
+					<div class="row">
+						<div class="col-sm-4 col-sm-offset-1">
+							<input placeholder="Add new menu" name="menu" class="form-control" size="32">
+						</div>
+						<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add Menu"></div>
+					</div>
+					{% csrf_token %}
+				</form>
+			</div>
+			
+			<!-- New Page Form -->
+			<div role="tabpanel" class="tab-pane" id="new-page">
+				<h3>New Page</h3>
+				<form class="well form-inline" method="post" enctype="multipart/form-data" action=".">
+					{% for field in new_page_form %}
+						<div class="field-wrapper">
+							{{ field.errors }}
+							{{ field.label_tag }}
+							<span class="form-help-text">{{ field.help_text}}</span>
+							<div class="form-field-body">
+								{{ field }}
+							</div>
+						</div>
+					{% endfor %}
+					<input class="form-control" name="action" type="submit" value="Create Page">
+					{% csrf_token %}
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+
+<script>
+	$(document).ready(function() {
+		var hash = window.location.hash;
+		hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+		$('.nav-pills a').click(function (e) {
+			$(this).tab('show');
+			var scrollmem = $('body').scrollTop();
+			window.location.hash = this.hash;
+			$('html,body').scrollTop(scrollmem);
+		});
+	});
+	
+	$("#dialog-confirm-delete-page").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: {
+			"Yes, Delete": function () {
+				console.log("going to submit now");
+				$(this).data('delete-button').parentElement.submit();
+			},
+			"Do Not Delete": function () {
+				$(this).dialog("close");
+			}
+		}
+	});
+	
+	$("#dialog-confirm-delete-menu").dialog({
+		autoOpen: false,
+		modal: true,
+		buttons: {
+			"Yes, Delete": function () {
+				$(this).data('delete-button').parentElement.submit();
+			},
+			"Do Not Delete": function () {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("[id^='menu-delete']").click(function (e) {
+		$("#dialog-confirm-delete-menu").data('delete-button', this).dialog("open");
+		e.preventDefault();
+	});
+
+	$("[id^='delete-page-id']").click(function (e) {
+		$("#dialog-confirm-delete-page").data('delete-button', this).dialog("open");
+		e.preventDefault();
+	});
+</script>
+
+{% endblock %}

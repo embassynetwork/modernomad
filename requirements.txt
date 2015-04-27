@@ -1,20 +1,25 @@
-Django==1.6.5
-django-registration>=1.0
-django-tastypie>=0.11.1
-South>=1.0
-Pillow>=2.5.1
-django-celery>=3.1
-Celery>=3.1.13
-eventbrite>=0.45
-billiard>=3.3.0.18
-kombu>=3.0.21
-pytz>=2014.4
-psycopg2==2.5.4
-lxml==3.4.0
+Django>=1.8,<1.9
+amqp==1.4.6
+anyjson==0.3.3
+billiard==3.3.0.20
+celery==3.1.17
+django-celery==3.1.16
+django-flatpages-tinymce==0.1.1
+django-registration-redux==1.1
+django-debug-toolbar==1.3.0
+django-uuidfield==0.5.0
+eventbrite==3.0.4
+kombu==3.0.25
+lxml==3.4.3
+Pillow==2.8.1
+psycopg2==2.6
+python-dateutil==2.4.2
+python-mimeparse==0.1.4
+pytz==2015.2
+requests==2.6.0
+six==1.9.0
 stripe
-
-# Django Gather code
-git+https://git@github.com/opendoor/django-gather.git
+pip-tools
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command

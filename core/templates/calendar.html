@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
+<div id="guestcalendar"></div>
+
 <div id="guest-calendar">
 	{{calendar}}
 </div>
@@ -48,3 +50,81 @@
 {% endfor %}
 
 {% endblock %}
+
+{% block extrajs %}
+
+	<script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
+		'version':'1','packages':['timeline']}]}">
+	</script>
+	
+	<script type="text/javascript">
+
+		{% if any_reservations %}
+			google.setOnLoadCallback(drawChart);
+			function drawChart() {
+				var container = document.getElementById('guestcalendar');
+				chart = new google.visualization.Timeline(container);
+				var dataTable = new google.visualization.DataTable();
+
+				dataTable.addColumn({ type: 'string', id: 'Room' });
+				dataTable.addColumn({ type: 'string', id: 'Name' });
+				dataTable.addColumn({ type: 'date', id: 'Start' });
+				dataTable.addColumn({ type: 'date', id: 'End' });
+				dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
+
+				dataTable.addRows([
+					{% for room, reservations_this_room in reservations_by_room %}
+						{% with last_room=forloop.last %}
+
+						{% for res_info in reservations_this_room %}	
+							[ 
+							"{{room.name|safe}}", "{{res_info.reservation.user.first_name|title}} ({{res_info.reservation.status}})", 
+								new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}, {{res_info.display_start.day}}), 
+								new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}, {{res_info.display_end.day}}), 
+								"<div class='guestinfo-tooltip'><h3>{{res_info.reservation.user.first_name|title}}</h3><p><em>{{res_info.reservation.status}}</em></p><p>Arrive: {{ res_info.reservation.arrive}}</p><p>Depart: {{ res_info.reservation.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.reservation.user.profile.image_thumb}}'></div>"
+
+							{% if last_room and forloop.last %}
+								]
+							{% else %}
+								],
+							{% endif %}
+
+						{% endfor %}
+
+					{% endwith %}
+					{% endfor %}
+				]);
+
+				var rowHeight = 35; // this value is from inspection, we are not setting the height here (indeed, there doesn't seem to be a way to do that)
+
+				// getNumberOfRows is calculating the total possible rows, but empty rows are not being displayed, so the value that function returns is off. 
+				chartHeight = {{rows_in_chart}} * rowHeight;
+				console.log(chartHeight);
+				console.log({{rows_in_chart}});
+				var options = {
+					height: chartHeight,
+					timeline: {singleColor: '#EA6F56'}
+				}	
+				chart.draw(dataTable, options);
+
+				function myMouseOverHandler(e){
+					if(e.row != null){
+						$(".google-visualization-tooltip").html(dataTable.getValue(e.row,4)).css({width:"auto",height:"auto"});
+					}        
+				}
+				function mySelectHandler(e){
+					selection = chart.getSelection()
+				}
+				google.visualization.events.addListener(chart, 'onmouseover', myMouseOverHandler);
+				google.visualization.events.addListener(chart, 'select', mySelectHandler);
+			}
+    
+		{% else %}
+			$("#guestcalendar").html('<h4>No reservations yet this month!</h4>');
+		{% endif %}
+	</script>
+
+{% endblock %}
+
+
+

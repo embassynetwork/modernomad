@@ -1,0 +1,91 @@
+	<!-- Payment Details -->
+	<h3>Payments</h3>
+
+	<button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
+	{% if r.is_paid %}
+	<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
+		{% csrf_token %}
+		<input class="btn-default btn" type="submit" value="Send Receipt">
+	</form>
+	{% endif %}
+
+
+	{% if r.payments %}
+	<table id="payment-details" class="table">
+		<thead>
+			<th>Date</th>
+			<th>Method</th>
+			<th class="money">Amount</th>
+			<th></th>
+		</thead>
+		{% for p in r.non_refund_payments %}
+			<form class="res-refund" id="res-refund-{{payment_id}}" 
+				method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">
+				{% csrf_token %}
+				<input name="payment_id" type="hidden" value="{{p.id}}">
+				<tr {% if p.is_fully_refunded %} class="greyed-out" {% endif %}>
+					<td>{{ p.payment_date }}
+					<td>{{ p.payment_method }}</td>
+					<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
+					<td class="money">
+						{% if p.is_fully_refunded %} 
+							<em>Refunded</em>
+						{% elif not p.transaction_id == "Manual" %}
+							<a class="btn btn-danger pull-right" id="show-refund-details-{{forloop.counter}}" onclick="toggleRefundDetails({{forloop.counter}}); return false;">Refund?</a>
+						{% endif %}
+					</td>
+				</tr>
+				{% for refund in p.refund_payments %}
+				{% if not refund.is_fully_refunded %}
+					<tr>
+						<td><small><em>{{ refund.payment_date }}</em></small></td>
+						<td><small><em>Partial refund</em></small></td>
+						<td class="money"><small><em>{{ refund.paid_amount }}</em></small></td>
+						<td> </td>
+					</tr>
+				{% endif %}
+				{% endfor %}
+		
+				<tr id="refund-details-{{forloop.counter}}">
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{forloop.counter}}, {{p.net_paid}})" value="full-refund" checked> Full 
+						</label>
+					</td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{forloop.counter}}, '')" value="partial-refund"> Partial
+						</label>
+					</td>
+					<td>
+						<input type="text" name="refund-amount" id="refund-amount-{{forloop.counter}}" value="{{p.net_paid}}">
+					</td>
+					<td>
+						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?');">
+					</td>
+				</tr>
+			</form>
+		{% endfor %}
+
+		<tr class="total-row">
+			<td colspan="3"></td>
+			<td class="money">${{ r.bill.total_paid|floatformat:2 }}</td>
+			<td></td>
+		</tr>
+	{% else %}
+	<div>
+		No payments
+	</div>
+
+	{% endif %}
+	<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
+		<input name="payment_id" type="hidden" value="{{p.id}}">
+		<tr style="padding-top:24px;">
+			<th>Record Manual Payment</th>
+			<td><input name="payment_method" value="Cash"></td>
+			<td><input name="paid_amount" value="{{r.bill.total_owed}}"></td>
+			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>
+		</tr>
+	</form>
+	</table>
+
