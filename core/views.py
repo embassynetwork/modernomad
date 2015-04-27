@@ -381,6 +381,8 @@ def calendar(request, location_slug):
 
 
 def room_cal_request(request, location_slug, room_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
 	try:
 		location = get_location(location_slug)
 		room = Room.objects.get(id=room_id)
