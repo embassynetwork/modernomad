@@ -886,6 +886,10 @@ b.dark-red-bold {
 	color: #999999;
 }
 
+.sm-row-spacer {
+	padding-bottom: 10px;
+}
+
 .row-spacer {
 	padding-bottom: 25px;
 }
@@ -1672,5 +1676,7 @@ p.lead strong {
 	display: none;
 }
 
-
+#room-cal-prev, #room-cal-next {
+	display: inline;
+}
 

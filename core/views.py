@@ -381,15 +381,27 @@ def calendar(request, location_slug):
 
 
 def room_cal_request(request, location_slug, room_id):
-	location = get_location(location_slug)
-	room = Room.objects.get(id=room_id)
-	month = int(request.GET.get("month"))
-	year = int(request.GET.get("year"))
+	try:
+		location = get_location(location_slug)
+		room = Room.objects.get(id=room_id)
+	except:
+		return HttpResponseRedirect('/')
+
+	month = int(request.POST.get("month"))
+	year = int(request.POST.get("year"))
 	cal_html = room.availability_calendar_html(month=month, year=year)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	link_html = '''
-		<a class="room-cal-req" href="%s?month=%d&year=%d">Previous</a> | 
-		<a class="room-cal-req" href="%s?month=%d&year=%d">Next</a>
+			<form id="room-cal-prev" action="%s" class="form-inline">
+				<input type="hidden" name="month" value=%s>
+				<input type="hidden" name="year" value=%s>
+				<input class="room-cal-req form-control" type="submit" value="Previous">
+			</form>
+			<form id="room-cal-next" action="%s" class="form-inline">
+				<input type="hidden" name="month" value=%s>
+				<input type="hidden" name="year" value=%s>
+				<input class="room-cal-req form-control" type="submit" value="Next">
+			</form>
 	''' % (reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
 			reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
 	return HttpResponse(cal_html+link_html)
