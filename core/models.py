@@ -136,6 +136,8 @@ class Location(models.Model):
 		for room in self.get_rooms():
 			the_day = arrive
 			while the_day < depart:
+				# if there is any day the room isn't available, then the room
+				# isn't free the whole time 
 				if not room.available_on(the_day):
 					available.remove(room)
 					break
@@ -146,9 +148,9 @@ class Location(models.Model):
 		if not arrive:
 			arrive = timezone.localtime(timezone.now())
 			depart = arrive + datetime.timedelta(1)
-		if not self.rooms_free(arrive, depart):
-			return False
-		return True
+		if self.rooms_free(arrive, depart):
+			return True
+		return False
 
 	def events(self, user=None):
 		today = timezone.localtime(timezone.now())
