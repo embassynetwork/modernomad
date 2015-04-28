@@ -5,7 +5,7 @@ It's been a pleasure having you at {{location.name}}. Checkout time is at
 for the next guest. 
 
 If you would like to extend your stay, please check availability and make a new
-reservation at {{reservation_url}}. 
+reservation at {{new_reservation_url}}. 
 
 As a relatively young operation, we would sincerely appreciate any feedback you
 have, especially on how we could improve. You can respond directly to this
@@ -13,4 +13,7 @@ email with any thoughts, suggestions or compliments.
 
 Thanks and see you next time!
 {{ location.name }}
+
+--- 
+View your reservation details at {{ reservation_url }}.
 

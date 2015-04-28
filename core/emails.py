@@ -202,13 +202,12 @@ def goodbye_email(reservation):
 	c = Context({
 		'first_name': reservation.user.first_name,
 		'location': reservation.location,
-		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_create', args=(location.slug,)),
+		'reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_detail', args=(location.slug, reservation.id,)),
+		'new_reservation_url' : "https://" + domain + urlresolvers.reverse('reservation_create', args=(location.slug,)),
 	})
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.DEPARTURE)
 	
 	subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
-	print 'email subject'
-	print subject
 	mailgun_data={
 			"from": reservation.location.from_email(),
 			"to": [reservation.user.email,],
