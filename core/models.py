@@ -238,17 +238,6 @@ def room_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)
 
-def bedtype_icon_upload_to(instance, filename):
-	ext = filename.split('.')[-1]
-	# rename file to random string
-	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
-
-	upload_path = "room/bed_types/"
-	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-	if not os.path.exists(upload_abs_path):
-		os.makedirs(upload_abs_path)
-	return os.path.join(upload_path, filename)
-
 class RoomCalendar(calendar.HTMLCalendar):
 	def __init__(self, room, location, year, month):
 		super(RoomCalendar, self).__init__()
@@ -275,21 +264,7 @@ class RoomCalendar(calendar.HTMLCalendar):
 			else:
 				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (cssclasses, day)
 
-class BedType(models.Model):
-	name = models.CharField(max_length=200)
-	icon = models.ImageField(upload_to=bedtype_icon_upload_to, blank=True, null=True)
-
 class Room(models.Model):
-
-	SHARED = 'shared'
-	PRIVATE_HALF = 'privatehalf'
-	PRIVATE_FULL = 'privatefull'
-	BATHROOM_OPTIONS = (
-			(SHARED, 'Shared'),
-			(PRIVATE_HALF, 'Private Half Bath'),
-			(PRIVATE_FULL, 'Private Full Bath'),
-	)
-	
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
