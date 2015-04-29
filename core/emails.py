@@ -292,9 +292,6 @@ def guests_residents_daily_update(location):
 		if (not r.email in admin_emails) and (not r.email in to_emails):
 			to_emails.append(r.email)
 	
-	print "people receiving the non-admin daily update"
-	print to_emails
-
 	if len(to_emails) == 0:
 		return None
 	
