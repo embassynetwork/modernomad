@@ -23,57 +23,188 @@
 	<h2>Tell us about yourself</h2>
 {% endif %}
 
-<p class="lead">Tells us a bit about who you are, what you're passionate
-about, and possible connections around work, projects and ideas. </p><p class="lead"> No need to
-write an epic essay, just share some touch points! This information will be
+<p class="lead"> This information will be
 accessible to other members of the Embassy Network community as you travel
 between locations for work and play.</p>
 
 <hr>
 
-<form class="registration-form" id="newprofileform" enctype="multipart/form-data" method="post">{% csrf_token %}
+<form class="registration-form form-horizontal" id="newprofileform" enctype="multipart/form-data" method="post">{% csrf_token %}
 
-	<!-- image cropping -->
-	{% if has_image %}
-		<p id="img-upload-instruction">Update your Profile image here (optional).</p>
-	{% else %}
-	<p id="img-upload-instruction"><span class="text-danger"><sup><b><span class="small glyphicon glyphicon-asterisk"></span></sup>Upload an image for your profile (required).</b><span></p>
-	{% endif %}
-	<p id="img-upload-error"></p>
+	<h3>Profile Image</h3>
+	<hr>
 
-	<input type="file" id="image_file"/>
-
-	<div class="row" id="cropping-area">
-		<div class="col-md-7 pull-left">
-			<h3>Source</h3>
-			<div id="image_input"></div>
-		</div>
-		<div class="col-md-5 pull-left">
-			<h3>Your Avatar</h3>
-			<img id="image_output" style="border:1px solid #000"/>
-			<!-- <textarea id="image_source" style="height:100px;width:100px"> -->
-			<input type="hidden" name="image" id="id_image">
-		</div>
+	<div class="form-group">
+		<!-- image cropping -->
+			<p id="img-upload-error"></p>
+			<label class="light col-sm-4">
+				{% if has_image %}
+					Update your Profile image here (optional)
+				{% else %}
+					Profile Image <strong>(required)</strong>
+				{% endif %}
+			</label>
+			<div class="form-field-body col-sm-8">
+				<input type="file" id="image_file"/>
+			</div>
+			<div class="form-field-body col-sm-12">
+				<div class="form-group" id="cropping-area">
+					<div class="col-md-7 pull-left">
+						<h3>Source</h3>
+						<div id="image_input"></div>
+					</div>
+					<div class="col-md-5 pull-left">
+						<h3>Your Avatar</h3>
+						<img id="image_output" style="border:1px solid #000"/>
+						<!-- <textarea id="image_source" style="height:100px;width:100px"> -->
+						<input type="hidden" name="image" id="id_image">
+					</div>
+				</div>
+			</div>
 	</div>
 	<div class="clear"></div>
 
-	<!-- rest of the form -->
+	<h3>Profile Information</h3>
+	<hr>
+
+	<div class="form-group">
+		{{ form.bio.errors|safe }}
+		<label class="light col-sm-2 control-label" for="{{form.bio.label.id_for_label}}">{{ form.bio.label }}</label>
+		<div class="form-field-body col-sm-10">
+			{{ form.bio }}
+			<span class="form-help-text">{{ form.bio.help_text }}</span>
+		</div>
+	</div>
+
+	<div class="form-group">
+		{{ form.projects.errors|safe }}
+		<label class="light col-sm-2 control-label" for="{{form.projects.label.id_for_label}}">{{ form.projects.label }}</label>
+		<div class="form-field-body col-sm-10">
+			{{ form.projects }}
+			<span class="form-help-text">{{ form.projects.help_text }}</span>
+		</div>
+	</div>
+
+	<div class="form-group">
+		{{ form.sharing.errors|safe }}
+		<label class="light col-sm-2 control-label" for="{{form.sharing.label.id_for_label}}">{{ form.sharing.label }}</label>
+		<div class="form-field-body col-sm-10">
+			{{ form.sharing }}
+			<span class="form-help-text">{{ form.sharing.help_text }}</span>
+		</div>
+	</div>
+
+	<div class="form-group">
+		{{ form.discussion.errors|safe }}
+		<label class="light col-sm-2 control-label" for="{{form.discussion.label.id_for_label}}">{{ form.discussion.label }}</label>
+		<div class="form-field-body col-sm-10">
+			{{ form.discussion }}
+			<span class="form-help-text">{{ form.discussion.help_text }}</span>
+		</div>
+	</div>
+
+	<div class="form-group">
+		{{ form.links.errors|safe }}
+		<label class="light col-sm-2 control-label" for="{{form.links.label.id_for_label}}">{{ form.links.label }}</label>
+		<div class="form-field-body col-sm-10">
+			{{ form.links }}
+			<span class="form-help-text">{{ form.links.help_text }}</span>
+		</div>
+	</div>
+
+	<h3>Account Information</h3>
+	<hr>
+	<!--
+	about
+	projects
+	sharing
+	discussion
+	links
+	first_name
+	last_name
+
+	username
+	email
+
+	referral
+	city
+	
+	password1
+	password2
+	-->
+
+	<div class="form-group">
+		{{ form.first_name.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.first_name }}
+			<span class="form-help-text">{{ form.first_name.help_text }}</span>
+		</div>
+		{{ form.last_name.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.last_name }}
+			<span class="form-help-text">{{ form.last_name.help_text }}</span>
+		</div>
+		{{ form.email.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.email }}
+			<span class="form-help-text">{{ form.email.help_text }}</span>
+		</div>
+	</div>
+
+	<div class="form-group">
+		{{ form.referral.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.referral }}
+			<span class="form-help-text">{{ form.referral.help_text }}</span>
+		</div>
+		{{ form.city.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.city }}
+			<span class="form-help-text">{{ form.city.help_text }}</span>
+		</div>
+	</div>
+
+	<hr>
+
+	<div class="form-group">
+		{{ form.username.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.username }}
+			<span class="form-help-text">{{ form.username.help_text }}</span>
+		</div>
+		{{ form.password1.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.password1 }}
+			<span class="form-help-text">{{ form.password1.help_text }}</span>
+		</div>
+		{{ form.password2.errors|safe }}
+		<div class="form-field-body col-sm-4">
+			{{ form.password2 }}
+			<span class="form-help-text">{{ form.password2.help_text }}</span>
+		</div>
+	</div>
+
+
+	<!-- rest of the form 
 	{% for field in form %}
 		<div class="form-group">
 			{% if field.name != "image" %}
 				{{ field.errors|safe }}
 				{% if field.field.required %}
-				<span class="text-danger"><sup><span class="small glyphicon glyphicon-asterisk"></span></sup>{{ field.label_tag }}</span>
-				{% else %}
-					{{ field.label_tag }}
+					<span class="text-danger"><sup><span class="small glyphicon glyphicon-asterisk"></span></sup>
 				{% endif %}
-				<span class="form-help-text">{{ field.help_text }}</span>
-				<div class="form-field-body">
-				{{ field }}
+					<label class="col-sm-2 control-label" for="field.auto_id}}">{{ field.label }}</label>
+				{% if field.field.required %}
+					</span>
+				{% endif %}
+				 <div class="form-field-body col-sm-10">
+					<span class="form-help-text">{{ field.help_text }}</span>
+					{{ field }}
 				</div>
 			{% endif %}
 		</div>
 	{% endfor %}
+	-->
 
   <input id="profilesubmit" class="btn btn-primary" type="submit" value="Submit" />
 

@@ -29,14 +29,14 @@ class UserProfileForm(forms.ModelForm):
 		error_messages = {
 			'invalid': _("This value may contain only letters, numbers and "
 						 "@/./+/-/_ characters.")}, 
-			widget=forms.TextInput(attrs={'class':'form-control', 'required': 'true'})
+			widget=forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'username'})
 	)
-	first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true'}))
-	last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true'}))
+	first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'first name'}))
+	last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'last name'}))
 
-	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true'}))
-	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true'}), label=_("New Password"))
-	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true'}), label=_("New Password (again)"))
+	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'email'}))
+	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password'}), label=_("New Password"))
+	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password (again)'}), label=_("New Password (again)"))
 
 	class Meta:
 		model = UserProfile
@@ -48,8 +48,8 @@ class UserProfileForm(forms.ModelForm):
 			'projects': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
 			'sharing': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
 			'discussion': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
-			'referral': forms.TextInput(attrs={'class':'form-control', 'required': 'true'}),
-			'city': forms.TextInput(attrs={'class':'form-control', 'required': 'true'}),
+			'referral': forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'referral'}),
+			'city': forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'city'}),
 		}
 
 	def __init__(self, *args, **kwargs):
