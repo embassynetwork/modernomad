@@ -34,7 +34,9 @@
 						{% endfor %}
 
 						{% if location.rooms_with_future_reservability %}
-						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+							<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+						{% endif %}
+
 						{% ifappexists gather %}
 						<li class="dropdown">
 						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
@@ -50,7 +52,6 @@
 						</li>
 						{% endifappexists %}
 
-						{% endif %}
 						
 						{% if location.residents or location.house_admins %}
 							<li class="dropdown">
