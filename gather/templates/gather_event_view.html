@@ -133,7 +133,7 @@
 		<span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
 		{% endif %}
 		<span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
-		<span class="event-location">, {{event.location }}</span>
+		<span class="event-location">, {{event.where }}</span>
 	{% endwith %}
 	{% endwith %}
 	</div>
