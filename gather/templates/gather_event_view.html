@@ -116,7 +116,7 @@
 
 
 	<h1 class="event-detail-title">{{ event.title|title }}</h1> 
-	{% if user_is_organizer %}
+	{% if user_is_organizer or user_is_event_admin %}
 		<a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
 	{% endif %}
 	<div class="event-time"> 

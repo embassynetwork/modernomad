@@ -113,7 +113,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
 	other_users = User.objects.exclude(id=current_user.id)
 	user_list = [u.username for u in other_users]
 	event = Event.objects.get(id=event_id)
-	if not (request.user.is_authenticated() and request.user in event.organizers.all()):
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
 		return HttpResponseRedirect("/")
 
 	if request.method == 'POST':
@@ -121,8 +121,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
 		if form.is_valid():
 			event = form.save(commit=False)
 			co_organizers = form.cleaned_data.get('co_organizers')
-			# always make sure current user is an organizer
-			event.organizers.add(current_user)
+			print co_organizers
 			event.organizers.add(*co_organizers)
 			event.save()
 			messages.add_message(request, messages.INFO, 'The event has been saved.')
