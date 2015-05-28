@@ -20,6 +20,7 @@ requests==2.6.0
 six==1.9.0
 stripe
 pip-tools
+django-import-export
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
