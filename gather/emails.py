@@ -73,7 +73,10 @@ def event_approved_notification(event, location):
 	return mailgun_send(mailgun_data)
 
 def event_published_notification(event, location):
+	''' notify event organizers and subscribed members that their event is live'''
 	logger.debug("event_published_notification")
+
+	# notify organizers
 	recipients = [organizer.email for organizer in event.organizers.all()]
 	event_short_title = event.title[0:50]
 	if len(event.title) > 50:
@@ -92,7 +95,9 @@ def event_published_notification(event, location):
 		"subject": subject,
 		"text": body_plain,
 	}
-	return mailgun_send(mailgun_data)
+	status = mailgun_send(mailgun_data)
+
+
 
 ###############################################
 ########### Email Route Create ################
@@ -210,7 +215,8 @@ def event_message(request, location_slug=None):
 	event_url = request.build_absolute_uri(urlresolvers.reverse('gather_view_event', args=(event.location.slug, event.id, event.slug)))
 	footer_msg = "You are receving this email because you are one of the organizers or an event admin at this location. Visit this event online at %s" % event_url
 	body_plain = body_plain + "\n\n-------------------------------------------\n" + footer_msg
-	body_html = body_html + "<br><br>-------------------------------------------<br>" + footer_msg
+	if body_html:
+		body_html = body_html + "<br><br>-------------------------------------------<br>" + footer_msg
 
 	# send the message 
 	mailgun_data={"from": from_address,
