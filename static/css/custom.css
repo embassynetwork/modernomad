@@ -1680,3 +1680,6 @@ p.lead strong {
 	display: inline;
 }
 
+label.light {
+	font-weight: normal;
+}

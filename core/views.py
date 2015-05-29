@@ -1683,7 +1683,7 @@ class Registration(registration.views.RegistrationView):
 			request.session.pop('new_res_redirect')
 			messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
 			return reverse('reservation_detail', args=(location_slug, res_id))
-		elif len(url_path) > 1 and url_path[1] == "/events/create/":
+		elif len(url_path) > 1 and url_path[1].endswith("events/create/"):
 			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to propose your event!')
 			return (url_path[1], (), {'username' : user.username})
 		else:
