@@ -60,7 +60,8 @@ def create_event(request, location_slug=None):
 	print current_user.id
 	if current_user.id == None :
 		messages.add_message(request, messages.INFO, 'We want to know who you are! Please create a profile before submitting an event.')
-		return HttpResponseRedirect('/people/register/?next=/events/create/')
+		next_url = '/locations/%s/events/create/' % location.slug
+		return HttpResponseRedirect('/people/register/?next=%s' % next_url)
 	elif current_user.is_authenticated and ((not current_user.profile.bio) or (not current_user.profile.image)):
 		messages.add_message(request, messages.INFO, 'We want to know a bit more about you! Please complete your profile before submitting an event.')
 		return HttpResponseRedirect('/people/%s/edit/' % current_user.username)
