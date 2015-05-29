@@ -334,11 +334,19 @@ def email_preferences(request, username, location_slug=None):
 		notifications.reminders = False
 
 	for location in Location.objects.all():
-		weekly_updates = request.POST.get(location.slug)
+		# update preferences on new receiving weekly updates
+		weekly_updates = request.POST.get("weekly_"+location.slug)
 		if weekly_updates == 'on' and location not in notifications.location_weekly.all():
 			notifications.location_weekly.add(location)
 		if weekly_updates == None and location in notifications.location_weekly.all():
 			notifications.location_weekly.remove(location)
+
+		# update preferences on new event notifications
+		publish_notify = request.POST.get("publish_"+location.slug)
+		if publish_notify == 'on' and location not in notifications.location_publish.all():
+			notifications.location_publish.add(location)
+		if publish_notify == None and location in notifications.location_publish.all():
+			notifications.location_publish.remove(location)
 
 	notifications.save()
 	print notifications.location_weekly.all()
@@ -409,13 +417,18 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 	print request.POST
 	# get email signup info and remove from form, since we tacked this field on
 	# but it's not part of the user model. 
-	weekly_updates = request.POST.get('email-notifications')
+	weekly_updates = request.POST.get('weekly-email-notifications')
+	notify_new = request.POST.get('new-event-notifications')
 	if weekly_updates == 'on':
 		weekly_updates = True
 	else:
 		weekly_updates = False
 	print 'weekly updates?'
 	print weekly_updates
+	if notify_new == 'on':
+		notify_new = True
+	else:
+		notify_new = False
 
 	# create new user
 	form = NewUserForm(request.POST)
@@ -427,6 +440,10 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 			# since the signup was related to a specific location we assume
 			# they wanted weekly emails about the same location
 			notifications.location_weekly.add(location)
+		if notify_new:
+			# since the signup was related to a specific location we assume
+			# they wanted weekly emails about the same location
+			notifications.location_publish.add(location)
 		notifications.save()
 
 		password = request.POST.get('password1')

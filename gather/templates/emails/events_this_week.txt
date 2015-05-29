@@ -1,6 +1,6 @@
 Howdy,
 
-Here are the upcoming events at {{location_name}} for the week of {{ week_name }}.
+Here are the upcoming events in the {{location_name}} community for the week of {{ week_name }}.
 
 {% for event in events %}
 	* {{ event.title }}, hosted by {{ event.organizers.all }}, https://{{domain}}/events/{{event.id}}/{{event.slug}}

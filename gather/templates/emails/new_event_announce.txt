@@ -1,0 +1,13 @@
+Howdy,
+
+A new event has been published: {{ event.title }}, hosted by {{ event.organizers.all }}, on {{ event.start|date:"F j" }} at {{ event.start|time:"h A"}} to {{ event.end|date:"F j" }} at {{ event.end|time:"h A"}}. See details at https://{{domain}}/events/{{event.id}}/{{event.slug}}. 
+	
+See all upcoming events online at https://{{domain}}/events/upcoming
+
+We hope that you will join us and we look forward to seeing you soon!
+
+-------------------
+
+{{ footer }}
+
+
