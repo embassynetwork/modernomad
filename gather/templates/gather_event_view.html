@@ -2,10 +2,21 @@
 {% load staticfiles %}
 {% block content %}
 
+<!-- Le facebook SDK -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3&appId=387759831411802";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
 <meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
 <meta property="og:title" content="{{event.title|title}}"/>
 <meta property="og:url" content="https://{{domain}}/events/{{event.id}}/{{event.slug}}"/>
-<meta property="og:description" content="{{event.description}}"/>
+<meta property="og:description" content="{{event.description|safe|linebreaks}}"/>
 
 <div id="event-view-wrapper">
 	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -172,9 +183,15 @@
 
 {% if event.status == 'live' and not event.private %}
 <div class="row">
-<div class="col-md-2 col-md-offset-5" id="facebook-share-link">
-	<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" target="_blank"> Share on Facebook </a>
-</div>
+	<div 
+		id="facebook-share-link" 
+		class="col-md-2 col-md-offset-5 fb-like" 
+		data-href="https%3A%2F%2F{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}"  
+		data-action="like"
+		data-show-faces="false"
+		data-share="true"
+		data-layout="button"
+	> </div>
 </div>
 {% endif %}
 
