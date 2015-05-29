@@ -16,25 +16,28 @@
 	{% endif %}
 {% endif %}
 <div id="event-attendance-status">
+	<div> 
 	{% if current_user in event.attendees.all %}
 		{% if in_the_past %}
-			<div> <button class="btn btn-default disabled" id="rsvp-status-yes"><span class="glyphicon glyphicon-calendar"></span> You went</button> </div>
+			<button class="btn btn-default disabled" id="rsvp-status-yes"><span class="glyphicon glyphicon-calendar"></span> You went</button>
 		{% else %}
-			<div> <button class="btn btn-default" id="rsvp-status-yes"><span class="glyphicon glyphicon-calendar"></span> You are Going</button> </div>
+			<button class="btn btn-default" id="rsvp-status-yes"><span class="glyphicon glyphicon-calendar"></span> You are Going</button> 
 		{% endif %}
 	{% else %}
 		{% if not in_the_past %}
 			{% if event.limit > 0 %} 
 				{% if spots_remaining > 0 %}
-					<div> <button class="btn btn-default" id="rsvp-status-no">RSVP</button> </div>
+					<button class="btn btn-default" id="rsvp-status-no">RSVP</button>
 				{% else %}
-					<div> <button class="btn btn-default" id="rsvp-full" disabled="disabled">This event is full</button> </div>
+					<button class="btn btn-default" id="rsvp-full" disabled="disabled">This event is full</button>
 				{% endif %}
 			{% else %}
-				<div> <button class="btn btn-default" id="rsvp-status-no">RSVP</button> </div>
+				<button class="btn btn-default" id="rsvp-status-no">RSVP</button>
 			{% endif %}
 		{% endif %}
 	{% endif %}
+		<a href="{{ event_google_cal_link }}" class="btn btn-default" target="_blank" id="gcal-export"></span><img src="{% static 'gather/img/google.png' %}"> Add to GCal</a>
+	</div>
 </div>
 <div class="attendees-list">
 	{% for u in event.attendees.all %}

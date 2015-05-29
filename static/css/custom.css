@@ -1260,7 +1260,7 @@ h3.no-top-margin {
 	margin: 20px 0px;
 }
 
-#event-attendance-status button {
+#event-attendance-status button, #event-attendance-status a {
 	font-family:'Open Sans', sans-serif;
 	color: #98321C;
 }

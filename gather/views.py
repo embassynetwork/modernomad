@@ -196,7 +196,12 @@ def view_event(request, event_id, event_slug, location_slug=None):
 		spots_remaining = event.limit - num_attendees
 		event_email = 'event%d@%s.%s' % (event.id, event.location.slug, settings.LIST_DOMAIN)
 		domain = Site.objects.get_current().domain
-		return render(request, 'gather_event_view.html', {'event': event, 'current_user': current_user, 
+		formatted_title = event.title.replace(" ","+")
+		formatted_dates =  event.start.strftime("%Y%m%dT%H%M00Z") + "/" + event.end.strftime("%Y%m%dT%H%M00Z") # "20140127T224000Z/20140320T221500Z"
+		detail_url = "https://" +domain +  reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
+		formatted_location = event.where.replace(" ","+")
+		event_google_cal_link = '''https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s&details=For+details%%3a+%s&location=%s&sf=true&output=xml''' % (formatted_title, formatted_dates, detail_url, formatted_location)
+		return render(request, 'gather_event_view.html', {'event': event, 'current_user': current_user, 'event_google_cal_link': event_google_cal_link,
 			'user_is_organizer': user_is_organizer, 'new_user_form': new_user_form, "event_email": event_email, "domain": domain,
 			'login_form': login_form, "spots_remaining": spots_remaining, 'user_is_event_admin': user_is_event_admin, 
 			"num_attendees": num_attendees, 'in_the_past': past, 'endorsements': event.endorsements.all(), 'location': location})
