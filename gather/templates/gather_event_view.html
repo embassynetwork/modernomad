@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% block extrahead %}
+	<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
+	<meta property="og:title" content="{{event.title|title}}"/>
+	<meta property="og:url" content="https://{{domain}}/events/{{event.id}}/{{event.slug}}"/>
+	<meta property="og:description" content="{{event.description|safe|linebreaks}}"/>
+{% endblock %}
+
 {% block content %}
 
 <!-- Le facebook SDK -->
@@ -12,11 +19,6 @@
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
-
-<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
-<meta property="og:title" content="{{event.title|title}}"/>
-<meta property="og:url" content="https://{{domain}}/events/{{event.id}}/{{event.slug}}"/>
-<meta property="og:description" content="{{event.description|safe|linebreaks}}"/>
 
 <div id="event-view-wrapper">
 	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
