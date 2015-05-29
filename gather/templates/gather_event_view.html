@@ -4,7 +4,7 @@
 	<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
 	<meta property="og:title" content="{{event.title|title}}"/>
 	<meta property="og:url" content="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" />
-	<meta property="og:description" content="{{event.description|safe|linebreaks}}"/>
+	<meta property="og:description" content="{{event.description|striptags}}"/>
 {% endblock %}
 
 {% block content %}
