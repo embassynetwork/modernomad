@@ -4,10 +4,11 @@
 <!-- block body -->
 {% block body %}
 	<div class="row">
+		<img src="{{ MEDIA_URL }}{{ location.image }}" id="house-image">
+	</div>
+
+	<div class="row">
 		<div class="col-md-10 col-md-offset-1">
-			<div class="row">
-				<img src="{{ MEDIA_URL }}{{ location.image }}" id="house-image">
-			</div>
 
 			{% include 'snippets/house_nav.html' %}
 
