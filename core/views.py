@@ -60,10 +60,10 @@ def view_room(request, location_slug, room_id):
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	return render(request, "room.html", {'room': room, 'location': location, "next_month": next_month, "prev_month": prev_month})
 
-def residents(request, location_slug):
+def community(request, location_slug):
 	location = get_location(location_slug)
 	residents = location.residents.all()
-	return render(request, "location_residents.html", {'residents': residents, 'location': location})
+	return render(request, "location_community.html", {'residents': residents, 'location': location})
 
 def team(request, location_slug):
 	location = get_location(location_slug)
