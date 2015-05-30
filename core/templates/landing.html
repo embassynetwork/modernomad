@@ -23,13 +23,11 @@
 
 		<div class="col-md-4" id="participate">
 			<p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
-			<h2 class="center"><a href="{% url 'location_stay' location.slug %}">Stay with us!</a></h2>
 		</div>
 
 		<div class="col-md-4" id="participate">
 			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
 			{% ifappexists gather %}
-			<h2 class="center"><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming Events</a></h2>
 			{% endifappexists %}
 		</div>
 </div>
