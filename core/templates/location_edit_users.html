@@ -2,8 +2,8 @@
 
 {% block sub-content %}
 
-<strong>Add New Admin</strong>
-<div>
+<div class="top-spacer">
+	<strong>Add New Admin</strong>
 	<form method="post" action=".">
 		{% csrf_token %}
 		<div class="row ui-widget">
@@ -13,12 +13,12 @@
 	</form>
 </div>
 
-<strong>Current Admins</strong>
-<div>
+<div class="top-spacer">
+	<strong>Current Admins</strong>
 	{% for u in location.house_admins.all %}
 		<form method="post" action=".">
 			<input type="hidden" name="admin_username" value="{{ u.username }}"/>
-			<div class="row">
+			<div class="row sm-row-spacer">
 				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
 				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
 			</div>
@@ -29,8 +29,8 @@
 
 <hr>
 
-<strong>Add New Resident</strong>
 <div>
+	<strong>Add New Resident</strong>
 	<form method="post" action=".">
 		{% csrf_token %}
 		<div class="row ui-widget">
@@ -40,12 +40,39 @@
 	</form>
 </div>
 
-<strong>Current Residents</strong>
-<div>
+<div class="top-spacer">
+	<strong>Current Residents</strong>
 	{% for u in location.residents.all %}
 		<form method="post" action=".">
 			<input type="hidden" name="resident_username" value="{{ u.username }}"/>
-			<div class="row">
+			<div class="row sm-row-spacer">
+				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
+			</div>
+			{% csrf_token %}
+		</form>
+	{% endfor %}
+</div>
+
+<hr>
+
+<div>
+	<strong>Add New Event Admin</strong>
+	<form method="post" action=".">
+		{% csrf_token %}
+		<div class="row ui-widget">
+			<div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="event-admin-username" name="event_admin_username"/></div>
+			<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
+		</div>
+	</form>
+</div>
+
+<div class="top-spacer">
+	<strong>Current Event Admins</strong>
+	{% for u in location.event_admin_group.users.all %}
+		<form method="post" action=".">
+			<input type="hidden" name="event_admin_username" value="{{ u.username }}"/>
+			<div class="row sm-row-spacer">
 				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
 				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
 			</div>
@@ -70,6 +97,10 @@
 	  });
 	  
 	  $( "#resident-username" ).autocomplete({
+	    source: availableUsers
+	  });
+
+	  $( "#event-admin-username" ).autocomplete({
 	    source: availableUsers
 	  });
 

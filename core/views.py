@@ -813,13 +813,16 @@ def LocationEditSettings(request, location_slug):
 def LocationEditUsers(request, location_slug):
 	location = get_location(location_slug)
 	if request.method == 'POST':
-		admin_user = resident_user = None
+		admin_user = resident_user = event_admin_user = None
 		if 'admin_username' in request.POST:
 			admin_username = request.POST.get('admin_username')
 			admin_user = User.objects.filter(username=admin_username).first()
 		elif 'resident_username' in request.POST:
 			resident_username = request.POST.get('resident_username')
 			resident_user = User.objects.filter(username=resident_username).first()
+		elif 'event_admin_username' in request.POST:
+			event_admin_username = request.POST.get('event_admin_username')
+			event_admin_user = User.objects.filter(username=event_admin_username).first()
 
 		if admin_user:
 			action = request.POST.get('action')
@@ -845,6 +848,20 @@ def LocationEditUsers(request, location_slug):
 				location.residents.add(resident_user)
 				location.save()
 				messages.add_message(request, messages.INFO, "User '%s' added to residents group." % resident_username)
+		elif event_admin_user:
+			action = request.POST.get('action')
+			if action == "Remove":
+				# Remove user
+				event_admin_group = location.event_admin_group
+				event_admin_group.users.remove(event_admin_user)
+				event_admin_group.save()
+				messages.add_message(request, messages.INFO, "User '%s' removed from event admin group." % event_admin_username)
+			elif action == "Add":
+				# Add user
+				event_admin_group = location.event_admin_group
+				event_admin_group.users.add(event_admin_user)
+				event_admin_group.save()
+				messages.add_message(request, messages.INFO, "User '%s' added to event admin group." % event_admin_username)
 		else:
 			messages.add_message(request, messages.ERROR, "User '%s' Not Found!" % username)
 	all_users = User.objects.all().order_by('username')

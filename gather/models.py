@@ -9,7 +9,7 @@ from django.utils import timezone
 
 class EventAdminGroup(models.Model):
 	''' Define admininstrative groups per location.'''
-	location = models.OneToOneField(settings.LOCATION_MODEL)
+	location = models.OneToOneField(settings.LOCATION_MODEL, related_name="event_admin_group")
 	users = models.ManyToManyField(User)
 
 	def __unicode__(self):
