@@ -308,9 +308,6 @@ def past_events(request, location_slug=None):
 	culled_past = []
 	for event in all_past:
 		if event.is_viewable(current_user):
-			print 'event is viewable'
-			print event.title
-			print event.visibility
 			culled_past.append(event)
 	# show 10 events per page
 	paged_past = Paginator(culled_past, 10) 
