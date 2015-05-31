@@ -130,11 +130,11 @@ def published_events_this_week_local(location):
 
 	# get events happening today that are live
 	starts_this_week_local = Event.objects.filter(location=location).filter(start__gte =
-		week_local_start_utc).filter(start__lte=week_local_end_utc).filter(status='live').filter(private=False)
+		week_local_start_utc).filter(start__lte=week_local_end_utc).filter(status='live').filter(visibility=Event.PUBLIC)
 	ends_this_week_local = Event.objects.filter(location=location).filter(end__gte =
-		week_local_start_utc).filter(end__lte=week_local_end_utc).filter(status='live').filter(private=False)
+		week_local_start_utc).filter(end__lte=week_local_end_utc).filter(status='live').filter(visibility=Event.PUBLIC)
 	across_this_week_local = Event.objects.filter(location=location).filter(start__lte =
-		week_local_start_utc).filter(end__gte=week_local_end_utc).filter(status='live').filter(private=False)
+		week_local_start_utc).filter(end__gte=week_local_end_utc).filter(status='live').filter(visibility=Event.PUBLIC)
 
 	events_this_week_local = list(set(chain(starts_this_week_local, ends_this_week_local, across_this_week_local)))
 	return events_this_week_local
@@ -155,13 +155,14 @@ def published_events_today_local(location):
 
 	# get events happening today that are live
 	starts_today_local = Event.objects.filter(location=location).filter(start__gte =
-		today_local_start_utc).filter(end__lte=today_local_end_utc).filter(status='live').filter(private=False)
+		today_local_start_utc).filter(end__lte=today_local_end_utc).filter(status='live')
 	ends_today_local = Event.objects.filter(location=location).filter(end__gte =
-		today_local_start_utc).filter(end__lte=today_local_end_utc).filter(status='live').filter(private=False)
+		today_local_start_utc).filter(end__lte=today_local_end_utc).filter(status='live')
 	across_today_local = Event.objects.filter(location=location).filter(start__lte =
-		today_local_start_utc).filter(end__gte=today_local_end_utc).filter(status='live').filter(private=False)
+		today_local_start_utc).filter(end__gte=today_local_end_utc).filter(status='live')
 
 	events_today_local = list(set(chain(starts_today_local, ends_today_local, across_today_local)))
+	# returns all types of events - private, community and public. 
 	return events_today_local
 
 @shared_task

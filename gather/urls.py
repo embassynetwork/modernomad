@@ -5,7 +5,6 @@ import registration.backends.default.urls
 urlpatterns = patterns('',
 	url(r'^create/$', 'gather.views.create_event', name='gather_create_event'),
 	url(r'^upcoming/$', 'gather.views.upcoming_events', name='gather_upcoming_events'),
-	url(r'^guide/$', 'gather.views.event_guide', name='gather_event_guide'),
 	url(r'^past/$', 'gather.views.past_events', name='gather_past_events'),
 	url(r'^review/$', 'gather.views.needs_review', name='gather_needs_review'),
 	url(r'^message/$', 'gather.emails.event_message', name='gather_event_message'),

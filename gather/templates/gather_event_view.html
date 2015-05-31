@@ -126,9 +126,13 @@
 		{% include 'snippets/event_status_area.html' %}
 	</div>
 
-	{% if event.status == 'live' and event.private %}
-		<div class="text-danger event-status">
-			<span class="glyphicon glyphicon-star"></span> This event is viewable to those with the link.
+	{% if event.visibility = 'private' %}
+		<div class="event-status bg-info">
+			<i class="fa fa-lock"></i> This event is private and is only viewable to those with the link.
+		</div>
+	{% elif event.visibility = 'community' %}
+		<div class="event-status bg-info">
+			<i class="fa fa-eye"></i> This is event is viewable only to members of the {{ event.location.name }} community.
 		</div>
 	{% endif %}
 
@@ -183,7 +187,7 @@
 
 </div>
 
-{% if event.status == 'live' and not event.private %}
+{% if event.status == 'live' and event.visibility == 'public' %}
 <div class="row">
 	<div 
 		id="facebook-share-link" 

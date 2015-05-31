@@ -98,6 +98,16 @@ class Event(models.Model):
 			(CANCELED, 'Canceled'),
 	)
 
+	PUBLIC = 'public'
+	PRIVATE = 'private'
+	COMMUNITY = 'community'
+
+	event_visibility = (
+			(PUBLIC, 'Public'), 
+			(PRIVATE, 'Private'), 
+			(COMMUNITY, 'Community')
+	)
+
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 	start = models.DateTimeField(verbose_name="Start time")
@@ -114,8 +124,7 @@ class Event(models.Model):
 	organizers = models.ManyToManyField(User, related_name="events_organized", blank=True)
 	organizer_notes = models.TextField(blank=True, null=True, help_text="These will only be visible to other organizers")
 	limit = models.IntegerField(default=0, help_text="Specify a cap on the number of RSVPs, or 0 for no limit.", blank=True)
-	# public events can be seen by anyone, private events can only be seen by organizers and attendees.
-	private = models.BooleanField(default=False, help_text="Private events will only be seen by organizers, attendees, and those who have the link. It will not be displayed in the public listing.")
+	visibility = models.CharField(choices = event_visibility, max_length=200, default=PUBLIC, help_text="Community events are visible only to community members. Private events are visible to those who have the link.")
 	status = models.CharField(choices = event_statuses, default=PENDING, max_length=200, verbose_name='Review Status', blank=True)
 	endorsements = models.ManyToManyField(User, related_name="events_endorsed", blank=True)
 	# the location field is optional but lets you associate an event with a
@@ -134,16 +143,38 @@ class Event(models.Model):
 		app_label = 'gather'
 
 	def is_viewable(self, current_user):
-		# an event is viewable only if it's both live and public, or the
-		# current_user is an event admin, created the event, or is an attendee
-		# or organizer. 
+		'''an event is viewable if it's both live and public, OR if it's a
+		community event and the user is a member of the community, OR the
+		current_user is a community event admin, registered attendee or
+		organizer.'''
+
+		# check some priveleges first...
 		if (self.admin and current_user) and (current_user in self.admin.users.all()):
 			is_event_admin = True
 		else:
 			is_event_admin = False
-		if ((self.status == 'live' and self.private == False) or (is_event_admin or
-				current_user == self.creator or current_user in self.organizers.all() or
-				current_user in self.attendees.all())):
+		
+		if current_user and current_user in self.location.residents.all():
+			is_community_member = True
+		else:
+			is_community_member = False
+
+		# ok now let's see...
+		if (
+				(self.status == 'live' and self.visibility == Event.PUBLIC) 
+				or 
+				(
+					is_event_admin 
+					or 
+					current_user == self.creator 
+					or 
+					current_user in self.organizers.all() 
+					or 
+					current_user in self.attendees.all()
+				)
+				or
+				(is_community_member and self.visibility != Event.PRIVATE)
+			):
 			viewable = True
 		else:
 			viewable = False

@@ -273,10 +273,6 @@ a:hover {
 	font-size: 1.2em;
 }
 
-.event:hover, .event:hover .date {
-	color:#ea6f56;
-}
-
 .event-detail-img {
 	width: 600px;
 }

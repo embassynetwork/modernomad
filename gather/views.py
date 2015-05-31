@@ -47,10 +47,6 @@ def get_location(location_slug=None):
 			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
 	return location
 
-def event_guide(request, location_slug=None):
-	location = get_location(location_slug)
-	return render(request, 'gather_event_guide.html')
-
 def create_event(request, location_slug=None):
 	location = get_location(location_slug)
 	current_user = request.user
@@ -186,7 +182,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 
 	# this is counter-intuitive - private events are viewable to those who have
 	# the link. so private events are indeed shown to anyone (once they are approved). 
-	if (event.status == 'live' and event.private) or event.is_viewable(current_user):
+	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user):
 		if current_user and current_user in event.organizers.get_queryset():
 			user_is_organizer = True
 		else:
@@ -312,6 +308,9 @@ def past_events(request, location_slug=None):
 	culled_past = []
 	for event in all_past:
 		if event.is_viewable(current_user):
+			print 'event is viewable'
+			print event.title
+			print event.visibility
 			culled_past.append(event)
 	# show 10 events per page
 	paged_past = Paginator(culled_past, 10) 
