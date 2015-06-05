@@ -160,7 +160,7 @@
 	{% endwith %}
 	</div>
 
-	<div class="col-md-8">
+	<div class="col-md-7">
 		<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
 
 		{% with event.organizers.get_queryset as organizers %}
@@ -173,7 +173,7 @@
 		{{ event.description|safe|linebreaks }}
 	</div>
 
-	<div class="col-md-4" id="rsvp-info">
+	<div class="col-md-4 col-md-offset-1" id="rsvp-info">
 		{% include 'snippets/rsvp_info.html' %}
 	</div>
 
