@@ -202,8 +202,15 @@ def view_event(request, event_id, event_slug, location_slug=None):
 			'login_form': login_form, "spots_remaining": spots_remaining, 'user_is_event_admin': user_is_event_admin, 
 			"num_attendees": num_attendees, 'in_the_past': past, 'endorsements': event.endorsements.all(), 'location': location})
 
+	elif not current_user:
+		# if the user is not logged in and this is not a public event, have them login and try again
+		messages.add_message(request, messages.INFO, 'Please log in to view this event.')
+		next_url = reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
+		return HttpResponseRedirect('/people/login/?next=%s' % next_url)
 	else:
-		return HttpResponseRedirect('/404')
+		# the user is logged in but the event is not viewable to them based on their status
+		messages.add_message(request, messages.INFO, 'Oops! You do not have permission to view this event.')
+		return HttpResponseRedirect('/locations/%s' % location.slug)
 
 
 def upcoming_events_all_locations(request):
