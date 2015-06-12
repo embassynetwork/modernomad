@@ -207,6 +207,8 @@ def occupancy(request, location_slug):
 
 	for r in reservations:
 		comp = False
+		partial_payment = False
+		total_owed = 0.0
 		if r.arrive >=start and r.depart <= end:
 			nights_this_month = (r.depart - r.arrive).days
 		elif r.arrive <=start and r.depart >= end:
@@ -219,9 +221,9 @@ def occupancy(request, location_slug):
 		# that's actually 0 days this month which we don't need to include.
 		if nights_this_month == 0:
 			continue
-		# XXX Note! get_rate() returns the base rate, not the rate with taxes.
-		# it also does not account for fees paid by the house
-		rate = r.get_rate()
+		# XXX Note! get_rate() returns the base rate, but does not incorporate
+		# any discounts. so we use subtotal_amount here. 
+		rate = r.bill.subtotal_amount()/r.total_nights()
 		if r.is_comped():
 			total_comped_nights += nights_this_month
 			total_comped_income += nights_this_month*r.default_rate()
@@ -247,9 +249,8 @@ def occupancy(request, location_slug):
 					paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
 					payment_discrepancies.append(r.id)
 
-			# JKS this section just tracks whether payment for this reservation
-			# were made in a prior month or in this month. mostly it's a
-			# curiosity. 
+			# JKS this section tracks whether payment for this reservation
+			# were made in a prior month or in this month. 
 			if r.is_paid():
 				for p in r.payments():
 					if p.payment_date.date() < start:
@@ -261,36 +262,87 @@ def occupancy(request, location_slug):
 						income_for_this_month += nights_this_month*(p.to_house()/(r.depart - r.arrive).days) 
 					unpaid = False
 			else:
-				unpaid_total += r.bill.total_owed()
+				unpaid_total += (to_house_per_night*nights_this_month)
 				unpaid = True
+				if r.bill.total_owed() < r.bill.amount():
+					print 'bill amount'
+					print r.bill.amount()
+					partial_payment = True
+					total_owed = r.bill.total_owed()
 
 		person_nights_data.append({
 			'reservation': r,
 			'nights_this_month': nights_this_month,
 			'room': r.room.name,
 			'rate': rate,
+			'partial_payment': partial_payment,
+			'total_owed': total_owed,
 			'total': nights_this_month*rate,
 			'comp': comp,
 			'unpaid': unpaid
 		})
 		total_occupied_person_nights += nights_this_month
 
+	rooms_with_availability_this_month = []
+	location_rooms = location.rooms.all()
+	total_reservable_days = 0
+	reservable_days_per_room = {}
+	for room in location_rooms:
+		room_reservables = room.reservables.all()
+		reservable_days_this_room = 0
+		for reservable in room_reservables:
+			if not reservable.end_date:
+				# XXX  account for reservables without end date by temporarily
+				# setting the end date to be the end of the month.  IMPT: do
+				# NOT save this. it's a temporary hack so that we can work with
+				# end dates. 	
+				reservable.end_date = end 
+
+			if reservable.end_date < start or reservable.start_date > end:
+				# no reservable dates in this month
+				continue
+			if reservable.start_date < start:
+				start_reservable = start
+			else:
+				start_reservable = reservable.start_date
+			if reservable.end_date > end:
+				end_reservable = end
+			else:
+				end_reservable = reservable.end_date
+			reservable_days_this_room += (end_reservable - start_reservable).days
+
+		if room.shared:
+			reservable_days_this_room *= room.beds
+		reservable_days_per_room[room] = reservable_days_this_room
+
 	total_income_for_this_month = income_for_this_month + income_from_past_months
 	total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
 	total_by_rooms = sum(room_income.itervalues())
 	for room, income in room_income.iteritems():
+		# this is a bit weird, but a room can be booked by an admin even if it
+		# isn't listed as reservable, effectively increasing the reservable
+		# nights. we're not changing the "reservable" objects, but since it was
+		# reserved, it will throw off the occupancy calculation unless we add
+		# those days to the number of reservable days per room. 
+		# TODO *should* we add create reservables here? 
+		if reservable_days_per_room[room] < room_occupancy[room]: 
+			reservable_days_per_room[room] = room_occupancy[room]
+			print 'updated %s' % room.name
+			print room_occupancy[room]
+		if reservable_days_per_room[room] > 0:
+			room_occupancy_rate = 100*float(room_occupancy[room])/reservable_days_per_room[room]
+		else:
+			room_occupancy_rate = 0
 		# tuple with income, num nights occupied, and % occupancy rate
-		available_person_nights_this_room = (end-start).days*room.beds
-		total_available_person_nights += available_person_nights_this_room
-		room_occupancy_rate = 100*float(room_occupancy[room])/available_person_nights_this_room
 		room_income_occupancy[room] = (income, room_occupancy[room], room_occupancy_rate)
+		total_reservable_days += reservable_days_per_room[room]
 	overall_occupancy = 0
-	if total_available_person_nights > 0:
-		overall_occupancy = 100*float(total_occupied_person_nights)/total_available_person_nights
+	if total_reservable_days > 0:
+		overall_occupancy = 100*float(total_occupied_person_nights)/total_reservable_days
 
 	return render(request, "occupancy.html", {"data": person_nights_data, 'location': location,
 		'total_occupied_person_nights':total_occupied_person_nights, 'total_income':total_income, 'unpaid_total': unpaid_total,
-		'total_available_person_nights': total_available_person_nights, 'overall_occupancy': overall_occupancy,
+		'total_reservable_days': total_reservable_days, 'overall_occupancy': overall_occupancy,
 		'total_shared_nights': total_shared_nights, 'total_private_nights': total_private_nights,
 		'total_comped_income': total_comped_income, 'total_comped_nights': total_comped_nights,
 		"next_month": next_month, "prev_month": prev_month, "report_date": report_date, 'room_income_occupancy':room_income_occupancy, 
