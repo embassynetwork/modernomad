@@ -2,7 +2,7 @@
 
 Modernomad is an operating platform for collaborative spaces. It aims to
 facilitate democratic management, empower people with information, and enable
-effective coordination for spaces that value openness, collaboration and
+meaningful connections for groups that value openness, collaboration and
 participation. 
 
 Main features include profiles, mailing lists, guest and reservation
