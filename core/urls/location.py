@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 per_location_patterns = [
 	url(r'^$', 'core.views.location', name='location_home'),
-	url(r'^stay/$', 'core.views.stay', name='location_stay'),
+	url(r'^stay/$', 'core.views.ReservationSubmit', name='location_stay'),
 	url(r'^community/$', 'core.views.community', name='location_community'),
 	url(r'^team/$', 'core.views.team', name='location_team'),
 	url(r'^guests/$', 'core.views.guests', name='location_guests'),

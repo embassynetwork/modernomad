@@ -1065,7 +1065,6 @@ div#spinner
 
 #reservation-additional-info {
 	display: none;
-	padding-top: 50px;
 }
 
 #submit-reservation {
@@ -1086,6 +1085,10 @@ div#spinner
 
 #optional-fields {
 	display: none;
+}
+
+#optional-fields-header:hover {
+	color: #ea6f56;
 }
 
 #optional-fields-header {
@@ -1678,4 +1681,8 @@ p.lead strong {
 
 label.light {
 	font-weight: normal;
+}
+
+#availability-area {
+	overflow: scroll;
 }

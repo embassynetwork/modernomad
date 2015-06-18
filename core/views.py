@@ -460,18 +460,6 @@ def room_cal_request(request, location_slug, room_id):
 			reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
 	return HttpResponse(cal_html+link_html)
 
-def stay(request, location_slug):
-	location = get_location(location_slug)
-
-	rooms = location.rooms_with_future_reservability()
-	today = timezone.localtime(timezone.now())
-	month = request.GET.get("month")
-	year = request.GET.get("year")
-	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, "next_month": next_month, 
-		"prev_month": prev_month, 'location': location})
-
-
 def thanks(request, location_slug):
 	# TODO generate receipt
 	return render(request, "thanks.html")
