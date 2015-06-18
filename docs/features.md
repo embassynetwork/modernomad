@@ -1,6 +1,6 @@
 # Modernomad Features and Functionality
 
-High level
+## High level
 
 * Profiles
 * Content
@@ -8,21 +8,21 @@ High level
 * Events
 * Reservation management
 
-Specifics (may be behind, please nudge someone if this seems incomplete)
+## Specifics (may be behind, please nudge someone if this seems incomplete)
 
-# Profiles
+### Profiles
 
 * linked across locations
 * email and notification preferences
 * store credit card info
 
-# General
+### General
 
 * Customizable landing page for your community
 * HTML content blocks
 * Custom pages and menus
 
-# Mailing lists
+### Mailing lists
 
 * each community has a set of automatic mailing lists
 * residents@ for all community members (to become community@)
@@ -30,7 +30,7 @@ Specifics (may be behind, please nudge someone if this seems incomplete)
 * current@for all current guests and residents today
 * announce@ for all people following the community 
 
-# Reservation Management
+### Reservation Management
 
 * Rooms
  * room features include title, price, description, shared, private bath, num beds, photo 
@@ -52,7 +52,7 @@ Specifics (may be behind, please nudge someone if this seems incomplete)
 * Automated, customizable departure emails
 * Other customizable emails for new reservations, receipts, daily updates 
 
-# Events
+### Events
 
 * any community member (with an account/profile) can propose an event 
 * propose → endorse → approve/publish workflow with email notifications. 
