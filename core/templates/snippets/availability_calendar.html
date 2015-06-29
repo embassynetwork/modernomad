@@ -1,133 +1,28 @@
 {% load staticfiles %}
 
 <div class="row">
-	<p class="lead">Choose an available room</p>
 
-	<div class="col-md-8" id="availability-area">
-		<table id="rooms-available-calendar">
-			<tr>
-			<th>Room</th>
-			{% for date in dates %}
-			<th>{{ date|date:"M d" }}</th>
-			{% endfor %}
-			</tr>
+	<ul class="nav nav-pills nav-justified" id="reservation-pills" role="tablist">
+		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms {{dates.0|date:"m/d"}} - {{dates|last|date:"m/d"}}</a></li>
+		<li class="reservation-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Details</a></li>
+	</ul>
 
-			{% for room, days_list in availability_table.items %}
-			<tr>
-				<td class="cell-breather"> 
-				{% if room in available_reservations %}
-					<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="btn btn-default btn-block room-select">{{room.name}}</label>
-					<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
-				{% else %}
-					<div data-toggle="tooltip"
-						data-placement="top"
-						title="This room is unavailable for your date range">
-						<div class="btn btn-block disabled">
-							{{room.name}}
-						</div>
-					</div>
-				{% endif %}
-				</td>
+	<div class="tab-content">
+		<div role="tabpanel" class="tab-pane active" id="chooseroom">
+			{% include 'snippets/available_rooms.html' %}
+		</div><!-- end tab chooseroom -->
 
-				{% comment %} 
-					important! days_list is an ordered list of dicts in the form {'the_date': datetime obj, 'beds_free': x }, so should always be date ordered. 
-				{% endcomment %}
-
-				{% for day_info in days_list %}
-				<td>
-					{% if day_info.beds_free > 0 %}
-						<div class="yes-available bg-success"
-							data-toggle="tooltip"
-							data-placement="top"
-							title="{{ day_info.beds_free }} bed{{ beds_free|pluralize }} available">
-							{{ day_info.beds_free }}
-						</div>
-					{% else %}
-						<div class="no-available bg-muted"
-							data-toggle="tooltip"
-							data-placement="top"
-							title="No beds available">0</div>
-					{% endif %}
-				</td>
-				{% endfor %}
-			</tr>
-			{% endfor %}
-		</table>
-	</div>
-
-	<div class="col-md-4">
-		
-		<div id="reservation-summary-box">
-			{% for room, res_dict in available_reservations.items %}
-			<div class="room-info" id="room-info-{{room.id}}">
-					<div class="row">
-						<div class="col-md-12">
-							<h3>{{room.name}}</h3>
-							<p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p>
-							<p>{{ room.description }}</p>
-						</div>
-						<div class="col-md-12">
-							<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
-						</div>
-					</div>
-			</div>
-			{% endfor %}
-
-			<div class="panel panel-default top-spacer">
-				<div class="panel-heading">
-					<h3 class="panel-title">Reservation Summary</h3>
-				</div>
-				<table class="table">
-					<tbody id="reservation-items">
-					</tbody>
-					<tbody>
-						<tr>
-							<td><strong>Total</strong></td>
-							<td><strong>$<span id="reservation-total">0</span></strong></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-
-			<div id="reservation-additional-info">
-				<div class="field-wrapper">	
-					<label for="id_purpose"><sup><i class="fa fa-asterisk text-danger"></i></sup> Tell us a little about the purpose of your trip</label>
-					<span class="form-help-text"></span>
-					<div class="form-field-body form-group">
-						<textarea class="form-control" id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
-					</div>
-				</div>
-
-				<p id="optional-fields-header">
-					<i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i>
-					Optional fields: arrival time and additional comments
-				</p>
-
-				<div id="optional-fields">
-					<div class="field-wrapper">	
-						<label for="id_arrival_time">Arrival time</label>
-						<div class="form-field-body form-group">
-							<input class="form-control" id="id_arrival_time" type="text" name="arrival_time" maxlength="200" />	
-						</div>
-					</div>
-					<div class="field-wrapper">	
-						<label for="id_comments">Additional comments</label>
-						<span class="form-help-text"></span>
-						<div class="form-field-body form-group">
-							<textarea class="form-control" id="id_comments" rows="3" cols="40" name="comments"></textarea>							
-						</div>
-					</div>
-				</div>
-
-			</div>
-			<input id="submit-reservation" type="submit" class="btn btn-success disabled" value="Submit">
+		<div role="tabpanel" class="tab-pane" id="showavailability">
+			{% include 'snippets/availability_details.html' %}
 		</div>
+	
 	</div>
-</div>
 
+<script src="{% static 'js/waypoints.js' %}"></script>
+<script src="{% static 'js/waypoints-sticky.js' %}"></script>
+<script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 <script>
 $(function(){
-	$('#reservation-summary-box').waypoint('sticky');
 
 	$("#optional-fields-header").click(function() {
 		$("#optional-fields").slideToggle("slow");
@@ -151,42 +46,38 @@ $(function(){
 	});
 
     $('[data-toggle="tooltip"]').tooltip();
+	$("#the-reservation-form").waypoint('sticky');
 
-	console.log("inside function");
 	$(".room-select").click(function() {
-		console.log("inside room-select");
+		$("#the-reservation-form").hide();
 		// relies on the fact that the input tag is directly after the label tag
 		// for each room option.
 		$(this).next().prop("checked", true);
 		room_id = $(this).next().val();
+		console.log(room_id);
 		room_info_div_id = "#room-info-" + room_id;
+		console.log(room_info_div_id);
 
 		$(".room-info").hide();
-		$("#reservation-items").empty()
-		$(".room-select").removeClass("btn-success")
-		$(this).addClass("btn-success");
+		$(".room-select").addClass("room-subtle")
+		$(this).removeClass("room-subtle");
+		$("#the-reservation-form").show();
 		$(room_info_div_id).show();
-		$("#reservation-additional-info").show();
-		room_name = $(this).text();
-
-		// inject the fees and subtotal info for this room when selected
-		// XXX JKS why is there a for loop here? this whole section should probably be re-written
-		{% for room, res_dict in available_reservations.items %}
-			if ('{{room.id}}' == room_id) {
-				{% for line_item in res_dict.bill_line_items %}
-				{% if not line_item.paid_by_house %}
-				$("#reservation-items").append('<tr class="a-room-fee"> \
-					<td>{{ line_item.description }}</td> \
-					<td>${{ line_item.amount|floatformat:2 }}</td> \
-				</tr>');
-				{% endif %}
-				{% endfor %}
-				$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
-				$("#submit-reservation").val("Submit request for " + room_name + " at $" + {{ res_dict.total|floatformat:2 }});
-			}
-		{% endfor %}
 	});
 
-	$('[data-toggle="tooltip"]').tooltip();
+	// display info about the first room
+	$(".room-select")[0].click();
+
+	function set_summary_width() {
+        box_width = $('#the-reservation-form').parent().width();
+        $('#the-reservation-form').width(box_width);
+    }
+    $(document).ready(function() {
+        set_summary_width();
+    });
+    $(window).resize(function() {
+        set_summary_width();
+    });
 })
+
 </script>

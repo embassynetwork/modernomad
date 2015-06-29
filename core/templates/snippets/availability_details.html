@@ -1,0 +1,70 @@
+<div class="col-md-8 top-spacer-large" id="availability-area">
+	<table id="rooms-available-calendar" class="table">
+		<tr>
+			<th></th>
+			{% for date in dates %}
+			<th>{{ date|date:"M d" }}</th>
+			{% endfor %}
+		</tr>
+
+		{% for room, days_list in availability_table.items %}	
+		<tr>
+			<td class="cell-right-breather"> 
+				{% if room in available_reservations %}
+				<div id="info-room-{{room.id}}">{{room.name}}</div>
+				{% else %}
+				<div data-toggle="tooltip" data-placement="top" title="This room is unavailable for your date range">
+					<div class="" id="info-room-{{room.id}}">
+					{{room.name}}
+					</div>
+				</div>
+				{% endif %}
+			</td>
+
+			{% comment %} 
+			important! days_list is an ordered list of dicts in the form {'the_date': datetime obj, 'beds_free': x }, so should always be date ordered. 
+			{% endcomment %}
+
+			{% for day_info in days_list %}
+			<td {% if day_info.beds_free > 0 %}class="success"{% else %}class="active""{% endif %}>
+				{% if day_info.beds_free > 0 %}
+				<div class="yes-available bg-success"
+					data-toggle="tooltip"
+					data-placement="top"
+					title="{{ day_info.beds_free }} bed{{ beds_free|pluralize }} available">
+					{{ day_info.beds_free }}
+				</div>
+				{% else %}
+				<div class="no-available"
+					data-toggle="tooltip"
+					data-placement="top"
+					title="No beds available">0</div>
+				{% endif %}
+			</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</table>
+</div><!-- end availability area -->
+
+<div class="col-md-4">
+
+	<div id="reservation-summary-box">
+		{% for room, res_dict in available_reservations.items %}
+		<div class="room-info" id="room-info-{{room.id}}">
+			<div class="row">
+				<div class="col-md-12">
+					<h3>{{room.name}}</h3>
+					<p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p>
+					<p>{{ room.description }}</p>
+				</div>
+				<div class="col-md-12">
+					<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+
+</div>
+

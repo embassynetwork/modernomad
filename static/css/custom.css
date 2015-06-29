@@ -261,6 +261,11 @@ a:hover {
 
 .cell-breather {
 	padding-right: 25px;
+	padding-bottom: 40px;
+}
+
+.cell-right-breather {
+	padding-right: 25px;
 }
 
 .event {
@@ -681,9 +686,14 @@ div.ui-datepicker{
     background-color: #eee;
 }
 .room-select {
-    padding-left: .5em;
-    padding-right: .5em;
+	font-size: 120%;
+	margin-top: 10px;
 }
+
+.room-subtle {
+	opacity: 0.75;
+}
+
 .float-right {
 	float:right;
 }
@@ -802,12 +812,9 @@ ul.errorlist,u {
 }
 
 @media (min-width: 992px) {
-    #reservation-amount-summary-box.stuck {
+    #the-reservation-form.stuck {
         position: fixed;
         top: 0;
-    }
-    #reservation-amount-summary-box .panel {
-        margin-top: 10px;
     }
 }
 
@@ -1033,8 +1040,12 @@ div#spinner
 }
 
 #rooms-available-calendar th {
-	padding: 0 5px 0 5px;
 	font-size: 90%;
+	border-top: 0px;
+}
+
+.room-info .alert-warning {
+	color: inherit;
 }
 
 #rooms-available-calendar input[type=radio] {
@@ -1046,6 +1057,20 @@ div#spinner
 	display: none;
 }
 
+.room-select .panel-body {
+	padding: 0px;
+}
+
+.room-select .panel:hover {
+	cursor: pointer;
+}
+
+.room-select .panel {
+	margin-bottom: 0px;
+	font-family: 'Clarendon Light', serif;
+	font-weight: normal;
+	text-align: center;
+}
 
 .room-list {
 	margin-top: 60px;
@@ -1057,14 +1082,6 @@ div#spinner
 
 .room-info-area {
 	padding-top: 25px;
-}
-
-#rooms-available-calendar tr {
-	margin-bottom: 10px
-}
-
-#reservation-additional-info {
-	display: none;
 }
 
 #submit-reservation {
@@ -1371,12 +1388,14 @@ table tr.row-even td { background: #eee; }
 }
 
 .affix {
-	top: 520px;
-	right: 85px;
 }
 
 .top-spacer {
 	margin-top: 30px;
+}
+
+.top-spacer-large {
+	margin-top: 60px;
 }
 
 .availability-cal .today {
@@ -1686,3 +1705,25 @@ label.light {
 #availability-area {
 	overflow: scroll;
 }
+
+.reservation-label {
+	font-weight: normal;
+}
+
+.reservation-info-tab {
+	font-size: 120%;
+}
+
+#reservation-pills > li.active > a, #reservation-pills  > li.active > a:hover, #reservation-pills > li.active > a:focus {
+	background-color: #ea6f56;
+	color: #eee;
+}
+
+#reservation-pills {
+	background-color: #eee;
+}
+
+.fixed {
+	position: fixed;
+}
+

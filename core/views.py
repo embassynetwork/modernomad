@@ -514,6 +514,7 @@ def CheckRoomAvailability(request, location_slug):
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
 	availability = location.availability(arrive, depart)
 	date_list = date_range_to_list(arrive, depart)
+	print date_list
 	available_reservations = {}
 	# Create some mock reservations for each available room so we can generate the bill
 	free_rooms = location.rooms_free(arrive, depart)
@@ -528,7 +529,7 @@ def CheckRoomAvailability(request, location_slug):
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
-		'available_reservations': available_reservations, })
+		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str})
 
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
