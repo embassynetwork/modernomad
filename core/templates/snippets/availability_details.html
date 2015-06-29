@@ -1,4 +1,4 @@
-<div class="col-md-8 top-spacer-large" id="availability-area">
+<div class="col-md-12 top-spacer-large" id="availability-area">
 	<table id="rooms-available-calendar" class="table">
 		<tr>
 			<th></th>
@@ -47,24 +47,4 @@
 	</table>
 </div><!-- end availability area -->
 
-<div class="col-md-4">
-
-	<div id="reservation-summary-box">
-		{% for room, res_dict in available_reservations.items %}
-		<div class="room-info" id="room-info-{{room.id}}">
-			<div class="row">
-				<div class="col-md-12">
-					<h3>{{room.name}}</h3>
-					<p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p>
-					<p>{{ room.description }}</p>
-				</div>
-				<div class="col-md-12">
-					<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
-				</div>
-			</div>
-		</div>
-		{% endfor %}
-	</div>
-
-</div>
 

@@ -20,10 +20,10 @@
 		</table>
 	</div>
 
-	<div class="col-md-6 col-md-offset-1">
+	<div class="col-md-6 col-md-offset-1" id="detail-sidebar">
 
-		<div>
-		<form method="post" role="form" action="{% url 'location_stay' location.slug %}"  id="the-reservation-form">{% csrf_token %}
+		<div id="the-reservation-form">
+		<form method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
 			<input id="id_arrive" type="hidden" name="arrive" value="{{arrive_date}}">
 			<input id="id_depart" type="hidden" name="depart" value="{{depart_date}}">
 
