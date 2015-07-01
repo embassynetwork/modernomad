@@ -34,7 +34,9 @@
 						{% endfor %}
 
 						{% if location.rooms_with_future_reservability %}
-						<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+							<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
+						{% endif %}
+
 						{% ifappexists gather %}
 						<li class="dropdown">
 						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
@@ -50,7 +52,6 @@
 						</li>
 						{% endifappexists %}
 
-						{% endif %}
 						
 						{% if location.residents or location.house_admins %}
 							<li class="dropdown">
@@ -58,8 +59,8 @@
 									People <b class="caret"></b>
 								</a>
 								<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-									<li><a href="{% url 'location_residents' location.slug %}">Residents</a></li>
-									<li><a href="{% url 'location_team' location.slug %}">Team</a></li>
+									<li><a href="{% url 'location_community' location.slug %}">Community</a></li>
+									<li><a href="{% url 'location_team' location.slug %}">Core Team</a></li>
 									{% if user.is_authenticated and location.guests_today %}
 										<li><a href="{% url 'location_guests' location.slug %}">Guests Today</a></li>
 									{% endif %}
@@ -73,11 +74,13 @@
 							Manage <b class="caret"></b>
 						</a>
 						<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">See Occupancy</a></li>
-							<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
-							<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Reservation Payments</a></li>
-							<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
-							<li><a href="{% url 'manage_today' location.slug %}">Arrivals & Departures</a></li>
+							{% if location.rooms.count > 0 %}
+								<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">See Occupancy</a></li>
+								<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
+								<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Reservation Payments</a></li>
+								<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
+								<li><a href="{% url 'manage_today' location.slug %}">Arrivals & Departures</a></li>
+							{% endif %}
 							{% ifappexists gather %}
 								<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
 							{% endifappexists %}

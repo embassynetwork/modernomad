@@ -273,12 +273,8 @@ a:hover {
 	font-size: 1.2em;
 }
 
-.event:hover, .event:hover .date {
-	color:#ea6f56;
-}
-
 .event-detail-img {
-	width: 600px;
+	width: 100%;
 }
 
 .event .date {
@@ -1260,7 +1256,7 @@ h3.no-top-margin {
 	margin: 20px 0px;
 }
 
-#event-attendance-status button {
+#event-attendance-status button, #event-attendance-status a {
 	font-family:'Open Sans', sans-serif;
 	color: #98321C;
 }
@@ -1680,3 +1676,6 @@ p.lead strong {
 	display: inline;
 }
 
+label.light {
+	font-weight: normal;
+}

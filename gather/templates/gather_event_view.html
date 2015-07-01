@@ -1,11 +1,24 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% block extrahead %}
+	<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
+	<meta property="og:title" content="{{event.title|title}}"/>
+	<meta property="og:url" content="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" />
+	<meta property="og:description" content="{{event.description|striptags}}"/>
+{% endblock %}
+
 {% block content %}
 
-<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
-<meta property="og:title" content="{{event.title|title}}"/>
-<meta property="og:url" content="https://{{domain}}/events/{{event.id}}/{{event.slug}}"/>
-<meta property="og:description" content="{{event.description}}"/>
+<!-- Le facebook SDK -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3&appId=387759831411802";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 
 <div id="event-view-wrapper">
 	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
@@ -77,8 +90,13 @@
 					<div class="form-group">
 						<div class="col-sm-12">
 							<div class="checkbox">
-								<label for="email-notifications">
-									<input id="id_email_notifications" type="checkbox" name="email-notifications" false> Sign up for weekly event emails?
+								<label for="weekly-email-notifications">
+									<input id="id_email_notifications" type="checkbox" name="weekly-email-notifications" false> Receive a summary of weekly upcoming events in this community?
+								</label>
+							</div>
+							<div class="checkbox">
+								<label for="new-event-email-notifications">
+									<input id="id_new_event_notifications" type="checkbox" name="new-event-notifications" false> Get notified of newly published events in this community?
 								</label>
 							</div>
 							<div class="text-muted">We won't send you any other emails unless you ask for them!</div>
@@ -108,15 +126,19 @@
 		{% include 'snippets/event_status_area.html' %}
 	</div>
 
-	{% if event.status == 'live' and event.private %}
-		<div class="text-danger event-status">
-			<span class="glyphicon glyphicon-star"></span> This event is viewable to those with the link.
+	{% if event.visibility = 'private' %}
+		<div class="event-status bg-info">
+			<i class="fa fa-lock"></i> This event is private and is only viewable to those with the link.
+		</div>
+	{% elif event.visibility = 'community' %}
+		<div class="event-status bg-info">
+			<i class="fa fa-eye"></i> This is event is viewable only to members of the {{ event.location.name }} community.
 		</div>
 	{% endif %}
 
 
 	<h1 class="event-detail-title">{{ event.title|title }}</h1> 
-	{% if user_is_organizer %}
+	{% if user_is_organizer or user_is_event_admin %}
 		<a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
 	{% endif %}
 	<div class="event-time"> 
@@ -133,12 +155,12 @@
 		<span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
 		{% endif %}
 		<span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
-		<span class="event-location">, {{event.location }}</span>
+		<span class="event-location">, {{event.where }}</span>
 	{% endwith %}
 	{% endwith %}
 	</div>
 
-	<div class="col-md-8">
+	<div class="col-md-7">
 		<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
 
 		{% with event.organizers.get_queryset as organizers %}
@@ -151,7 +173,7 @@
 		{{ event.description|safe|linebreaks }}
 	</div>
 
-	<div class="col-md-4" id="rsvp-info">
+	<div class="col-md-4 col-md-offset-1" id="rsvp-info">
 		{% include 'snippets/rsvp_info.html' %}
 	</div>
 
@@ -165,11 +187,17 @@
 
 </div>
 
-{% if event.status == 'live' and not event.private %}
+{% if event.status == 'live' and event.visibility == 'public' %}
 <div class="row">
-<div class="col-md-2 col-md-offset-5" id="facebook-share-link">
-	<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" target="_blank"> Share on Facebook </a>
-</div>
+	<div 
+		id="facebook-share-link" 
+		class="col-md-2 col-md-offset-5 fb-like" 
+		data-href="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}"  
+		data-action="like"
+		data-show-faces="false"
+		data-share="true"
+		data-layout="button"
+	> </div>
 </div>
 {% endif %}
 

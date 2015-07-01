@@ -91,6 +91,23 @@
 						</label>
 					</div>
 					<hr>
+					<div>Receive notifications when new events are published: 
+
+						{% for location in network_locations %}
+						{% if location.public or user in location.house_admins.all %}
+						<div class="checkbox">
+							<label>
+								<input 
+									type="checkbox" 
+									name="publish_{{ location.slug }}" 
+									id="publish_{{ location.slug }}" 
+									{% if location in u.event_notifications.location_publish.all %} checked {% endif %}
+									> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
+							</label>
+						</div>
+						{% endif %}
+						{% endfor %}
+					<hr>
 					<div>Receive weekly emails about upcoming events: 
 
 						{% for location in network_locations %}
@@ -99,8 +116,8 @@
 							<label>
 								<input 
 									type="checkbox" 
-									name="{{ location.slug }}" 
-									id="{{ location.slug }}" 
+									name="weekly_{{ location.slug }}" 
+									id="weekly_{{ location.slug }}" 
 									{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
 									> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
 							</label>

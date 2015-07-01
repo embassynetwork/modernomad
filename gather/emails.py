@@ -73,11 +73,15 @@ def event_approved_notification(event, location):
 	return mailgun_send(mailgun_data)
 
 def event_published_notification(event, location):
+	''' notify event organizers and subscribed members that their event is live'''
 	logger.debug("event_published_notification")
-	recipients = [organizer.email for organizer in event.organizers.all()]
+
 	event_short_title = event.title[0:50]
 	if len(event.title) > 50:
 		event_short_title = event_short_title + "..."
+
+	# notify organizers
+	recipients = [organizer.email for organizer in event.organizers.all()]
 	subject = '[' + location.email_subject_prefix + ']' + " Your event is now live: %s" % event_short_title
 	from_address = location.from_email()
 	plaintext = get_template('emails/event_published_notify.txt')
@@ -92,7 +96,42 @@ def event_published_notification(event, location):
 		"subject": subject,
 		"text": body_plain,
 	}
-	return mailgun_send(mailgun_data)
+	status = mailgun_send(mailgun_data)
+
+	# notify subscribed user accounts of this event
+	notify_published = EventNotifications.objects.filter(location_publish__in=[location,])
+	subscribed_users = [notify.user.email for notify in notify_published]
+
+	subject = '[' + location.email_subject_prefix + ']' + " New event: %s" % event_short_title
+	from_address = location.from_email()
+	plaintext = get_template('emails/new_event_announce.txt')
+	htmltext = get_template('emails/new_event_announce.html')
+	domain = Site.objects.get_current().domain
+
+
+	c_text = Context({
+		'event': event,
+		'domain' : Site.objects.get_current().domain,
+		'location': location,
+	})
+	text_content = plaintext.render(c_text)
+	c_html = Context({
+		'event': event,
+		'domain' : Site.objects.get_current().domain,
+		'location': location,
+	})
+	html_content = htmltext.render(c_html)
+
+
+	mailgun_data={"from": from_address,
+		"to": subscribed_users,
+		"subject": subject,
+		"text": text_content,
+		"html": html_content,
+	}
+	status = mailgun_send(mailgun_data)
+
+
 
 ###############################################
 ########### Email Route Create ################
@@ -210,7 +249,8 @@ def event_message(request, location_slug=None):
 	event_url = request.build_absolute_uri(urlresolvers.reverse('gather_view_event', args=(event.location.slug, event.id, event.slug)))
 	footer_msg = "You are receving this email because you are one of the organizers or an event admin at this location. Visit this event online at %s" % event_url
 	body_plain = body_plain + "\n\n-------------------------------------------\n" + footer_msg
-	body_html = body_html + "<br><br>-------------------------------------------<br>" + footer_msg
+	if body_html:
+		body_html = body_html + "<br><br>-------------------------------------------<br>" + footer_msg
 
 	# send the message 
 	mailgun_data={"from": from_address,

@@ -29,15 +29,10 @@
 				{% endif %}
 			{% endif %}
 		
-			<a href="mailto:{{ event_email }}" title="Send an email to the event organizers and local event admins" class="disabled">Discuss via email</a>
+			<a href="mailto:{{ event_email }}" title="Send an email to the event organizers and local event admins" class="disabled"><i class="fa fa-envelope-o"></i> Discuss via email</a>. Your email will reach event organizers and the admin team for this community. 
 		</div>
 
 	</div>
 
-	{% if event.private %}
-		<div class="event-status text-danger">
-			<span class="glyphicon glyphicon-star"></span> This event is private and will only be viewable to those with the link.
-		</div>
-	{% endif %}
 {% endif %}
 

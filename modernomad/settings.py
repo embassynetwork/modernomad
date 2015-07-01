@@ -136,6 +136,8 @@ INSTALLED_APPS = (
 	'django.contrib.admin',
 	'django.contrib.flatpages',
 	'django.contrib.admindocs',
+	'import_export',
+	'django.contrib.humanize',
 	#'debug_toolbar',
 )
 

@@ -47,10 +47,6 @@ def get_location(location_slug=None):
 			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
 	return location
 
-def event_guide(request, location_slug=None):
-	location = get_location(location_slug)
-	return render(request, 'gather_event_guide.html')
-
 def create_event(request, location_slug=None):
 	location = get_location(location_slug)
 	current_user = request.user
@@ -60,7 +56,8 @@ def create_event(request, location_slug=None):
 	print current_user.id
 	if current_user.id == None :
 		messages.add_message(request, messages.INFO, 'We want to know who you are! Please create a profile before submitting an event.')
-		return HttpResponseRedirect('/people/register/?next=/events/create/')
+		next_url = '/locations/%s/events/create/' % location.slug
+		return HttpResponseRedirect('/people/register/?next=%s' % next_url)
 	elif current_user.is_authenticated and ((not current_user.profile.bio) or (not current_user.profile.image)):
 		messages.add_message(request, messages.INFO, 'We want to know a bit more about you! Please complete your profile before submitting an event.')
 		return HttpResponseRedirect('/people/%s/edit/' % current_user.username)
@@ -113,7 +110,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
 	other_users = User.objects.exclude(id=current_user.id)
 	user_list = [u.username for u in other_users]
 	event = Event.objects.get(id=event_id)
-	if not (request.user.is_authenticated() and request.user in event.organizers.all()):
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
 		return HttpResponseRedirect("/")
 
 	if request.method == 'POST':
@@ -121,8 +118,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
 		if form.is_valid():
 			event = form.save(commit=False)
 			co_organizers = form.cleaned_data.get('co_organizers')
-			# always make sure current user is an organizer
-			event.organizers.add(current_user)
+			print co_organizers
 			event.organizers.add(*co_organizers)
 			event.save()
 			messages.add_message(request, messages.INFO, 'The event has been saved.')
@@ -186,7 +182,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 
 	# this is counter-intuitive - private events are viewable to those who have
 	# the link. so private events are indeed shown to anyone (once they are approved). 
-	if (event.status == 'live' and event.private) or event.is_viewable(current_user):
+	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user):
 		if current_user and current_user in event.organizers.get_queryset():
 			user_is_organizer = True
 		else:
@@ -196,13 +192,25 @@ def view_event(request, event_id, event_slug, location_slug=None):
 		spots_remaining = event.limit - num_attendees
 		event_email = 'event%d@%s.%s' % (event.id, event.location.slug, settings.LIST_DOMAIN)
 		domain = Site.objects.get_current().domain
-		return render(request, 'gather_event_view.html', {'event': event, 'current_user': current_user, 
+		formatted_title = event.title.replace(" ","+")
+		formatted_dates =  event.start.strftime("%Y%m%dT%H%M00Z") + "/" + event.end.strftime("%Y%m%dT%H%M00Z") # "20140127T224000Z/20140320T221500Z"
+		detail_url = "https://" +domain +  reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
+		formatted_location = event.where.replace(" ","+")
+		event_google_cal_link = '''https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s&details=For+details%%3a+%s&location=%s&sf=true&output=xml''' % (formatted_title, formatted_dates, detail_url, formatted_location)
+		return render(request, 'gather_event_view.html', {'event': event, 'current_user': current_user, 'event_google_cal_link': event_google_cal_link,
 			'user_is_organizer': user_is_organizer, 'new_user_form': new_user_form, "event_email": event_email, "domain": domain,
 			'login_form': login_form, "spots_remaining": spots_remaining, 'user_is_event_admin': user_is_event_admin, 
 			"num_attendees": num_attendees, 'in_the_past': past, 'endorsements': event.endorsements.all(), 'location': location})
 
+	elif not current_user:
+		# if the user is not logged in and this is not a public event, have them login and try again
+		messages.add_message(request, messages.INFO, 'Please log in to view this event.')
+		next_url = reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
+		return HttpResponseRedirect('/people/login/?next=%s' % next_url)
 	else:
-		return HttpResponseRedirect('/404')
+		# the user is logged in but the event is not viewable to them based on their status
+		messages.add_message(request, messages.INFO, 'Oops! You do not have permission to view this event.')
+		return HttpResponseRedirect('/locations/%s' % location.slug)
 
 
 def upcoming_events_all_locations(request):
@@ -335,11 +343,19 @@ def email_preferences(request, username, location_slug=None):
 		notifications.reminders = False
 
 	for location in Location.objects.all():
-		weekly_updates = request.POST.get(location.slug)
+		# update preferences on new receiving weekly updates
+		weekly_updates = request.POST.get("weekly_"+location.slug)
 		if weekly_updates == 'on' and location not in notifications.location_weekly.all():
 			notifications.location_weekly.add(location)
 		if weekly_updates == None and location in notifications.location_weekly.all():
 			notifications.location_weekly.remove(location)
+
+		# update preferences on new event notifications
+		publish_notify = request.POST.get("publish_"+location.slug)
+		if publish_notify == 'on' and location not in notifications.location_publish.all():
+			notifications.location_publish.add(location)
+		if publish_notify == None and location in notifications.location_publish.all():
+			notifications.location_publish.remove(location)
 
 	notifications.save()
 	print notifications.location_weekly.all()
@@ -410,13 +426,18 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 	print request.POST
 	# get email signup info and remove from form, since we tacked this field on
 	# but it's not part of the user model. 
-	weekly_updates = request.POST.get('email-notifications')
+	weekly_updates = request.POST.get('weekly-email-notifications')
+	notify_new = request.POST.get('new-event-notifications')
 	if weekly_updates == 'on':
 		weekly_updates = True
 	else:
 		weekly_updates = False
 	print 'weekly updates?'
 	print weekly_updates
+	if notify_new == 'on':
+		notify_new = True
+	else:
+		notify_new = False
 
 	# create new user
 	form = NewUserForm(request.POST)
@@ -428,6 +449,10 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 			# since the signup was related to a specific location we assume
 			# they wanted weekly emails about the same location
 			notifications.location_weekly.add(location)
+		if notify_new:
+			# since the signup was related to a specific location we assume
+			# they wanted weekly emails about the same location
+			notifications.location_publish.add(location)
 		notifications.save()
 
 		password = request.POST.get('password1')
