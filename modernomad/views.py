@@ -1,14 +1,21 @@
-from django.contrib.auth.decorators import login_required
+import json
 from django.utils import timezone
 from django.shortcuts import render
-from core.models import Location, UserProfile
 from gather.models import Event
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 from django.utils.safestring import SafeString
-from django.conf import settings
-import json
 from django.utils.html import strip_tags
+from django.conf import settings
+
+from core.models import Location, UserProfile, MaypiDoor, MaypiDoorCode
+from maypi import maypi_api
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 def index(request):
 	recent_events = Event.objects.order_by('-start')[:10]
@@ -42,6 +49,25 @@ def stay(request):
 
 def ErrorView(request):
 	return render(request, '404.html')
+
+@csrf_exempt
+def maypi(request):
+	response = "No Data"
+	if request.method == 'POST' and 'data' in request.POST:
+		try:
+			door_id = request.POST.get("door_id")
+			door = MaypiDoor.objects.get(pk=door_id)
+			data = request.POST.get("data")
+			posted_data = maypi_api.unwrap_data(data, api_key=door.api_key)
+			logger.info("Maypi sync from %s:%s" % (door.location, door.description))
+			logger.debug("Mayp sync data: %s" % posted_data)
+			response = posted_data
+		except Exception as e:
+			print e
+			response = "Invalid Data Provided"
+
+	return HttpResponse(response, content_type="text/plain")
+
 
 
 

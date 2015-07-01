@@ -1000,3 +1000,23 @@ class ReservationNote(models.Model):
 
 	def __str__(self): 
 		return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
+
+class MaypiDoor(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	location = models.ForeignKey(Location)
+	api_key = models.CharField(max_length=128)
+	description = models.CharField(max_length=128)
+	sync_ts = models.DateTimeField(blank=True, null=True)
+
+class MaypiDoorCode(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	door = models.ForeignKey(MaypiDoor)
+	user = models.ForeignKey(User)
+	code = models.CharField(max_length=16, unique=True, db_index=True)
+	start = models.DateTimeField(null=False)
+	end = models.DateTimeField(null=True, blank=True)
+	sync_ts = models.DateTimeField(blank=True, null=True)
+
+#@receiver(pre_save, sender=MaypiDoorCode)
+#def clear_sync_ts(sender, instance, **kwargs):
+#	instance.sync_ts = None

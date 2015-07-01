@@ -259,3 +259,6 @@ admin.site.register(User, UserProfileAdmin)
 
 admin.site.register(Fee)
 admin.site.register(LocationFee)
+admin.site.register(MaypiDoor)
+admin.site.register(MaypiDoorCode)
+
