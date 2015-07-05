@@ -685,10 +685,6 @@ div.ui-datepicker{
 .bg-muted {
     background-color: #eee;
 }
-.room-select {
-	font-size: 120%;
-	margin-top: 10px;
-}
 
 .room-subtle {
 	opacity: 0.75;
@@ -1057,19 +1053,30 @@ div#spinner
 	display: none;
 }
 
+.room-avail-descr {
+	margin: 15px 5px 15px 5px;
+	height: 40px;
+}
+
 .room-select .panel-body {
 	padding: 0px;
+	font-weight: normal;
 }
 
 .room-select .panel:hover {
 	cursor: pointer;
 }
 
-.room-select .panel {
+.room-select .panel-heading {
 	margin-bottom: 0px;
 	font-family: 'Clarendon Light', serif;
 	font-weight: normal;
 	text-align: center;
+}
+
+#the-reservation-form .panel-heading, .emphasize .panel-heading {
+	background-color: #666;
+	color: #FFF;
 }
 
 .room-list {

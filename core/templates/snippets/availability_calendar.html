@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load core_tag_extras %}
 
 <div class="row">
 
@@ -46,7 +47,7 @@ $(function(){
 	});
 
     $('[data-toggle="tooltip"]').tooltip();
-	//$("#the-reservation-form").waypoint('sticky');
+	$("#the-reservation-form").waypoint('sticky');
 
 	$(".room-select").click(function() {
 		$("#the-reservation-form").hide();
@@ -54,13 +55,17 @@ $(function(){
 		// for each room option.
 		$(this).next().prop("checked", true);
 		room_id = $(this).next().val();
-		console.log(room_id);
 		room_info_div_id = "#room-info-" + room_id;
-		console.log(room_info_div_id);
 
 		$(".room-info").hide();
-		$(".room-select").addClass("room-subtle")
+		
+		// update styling on the rooms that are not currently selected
+		$(".room-select").addClass("room-subtle");
+		$(".room-select").removeClass("emphasize");
+
+		// update styling for the room that is currently selected.
 		$(this).removeClass("room-subtle");
+		$(this).addClass("emphasize");
 		$("#the-reservation-form").show();
 		$(room_info_div_id).show();
 	});
@@ -79,6 +84,14 @@ $(function(){
         set_summary_width();
 	});
 
+	var img_w = $('.room-info-image').width();
+	$('.room-info-image').css({'height':0.75*img_w+'px'});
+
+	/*
+	This code was taken from http://jsfiddle.net/ryanmaxwell/25QaE/ but
+	modified to use $sidebar.offset() instead of $sidebar.position()
+	*/
+	/*
 	$(function() {
 
 		var $window = $(window);
@@ -89,9 +102,6 @@ $(function(){
 		if ($sidebar.length > 0) {
 
 			initialSidebarTop = $sidebar.offset().top;
-			//initialSidebarTop = $sidebar.position().top;
-			console.log('initial sidebar top');
-			console.log(initialSidebarTop);
 
 			$window.scroll(function(event) {
 
@@ -109,12 +119,6 @@ $(function(){
 				
 				var isScrollingDown = (scrollTop > lastScrollTop);
 				var isWindowLarger = (windowHeight > sidebarHeight);
-
-				console.log("scrolltop, initialsidebartop, heightdelta");
-				console.log(scrollTop);
-            	console.log(initialSidebarTop);
-            	console.log(heightDelta);
-            
 
 				if ((isWindowLarger && scrollTop > initialSidebarTop) || (!isWindowLarger && scrollTop > initialSidebarTop + heightDelta)) {
 					$sidebar.addClass('fixed');
@@ -150,6 +154,7 @@ $(function(){
 			});
 		}
 	});
+	*/
 
 })
 

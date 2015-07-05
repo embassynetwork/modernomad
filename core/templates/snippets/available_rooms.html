@@ -1,26 +1,27 @@
 <div class="row top-spacer-large">
 
-	<div class="col-md-4" id="availability-area">
-		<table id="rooms-available-calendar">
+	<div class="col-md-9" id="availability-area">
+		<div class="row" id="rooms-available-calendar">
 			{% for room in available_reservations.keys %}
-			<tr>
-				<td class="cell-breather"> 
+				<div class="col-lg-6">
 					<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-select">
 						<div class="panel panel-default">
+							<div class="panel-heading">
+    							<h3 class="panel-title">{{room.name}} ${{room.default_rate}}/night</h3>
+  							</div>
 							<div class="panel-body">
-								<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
+								<p class="room-avail-descr">{{ room.description|truncatechars:150 }}</p>
+								<img src="/media/{{room.image}}" class="room-info-image" />
 							</div>
-							<div class="panel-footer">{{room.name}} ${{room.default_rate}}/night</div>
 						</div>
 					</label>
 					<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
-				</td>
-			</tr>
+				</div>
 			{% endfor %}
-		</table>
+		</div>
 	</div>
 
-	<div class="col-md-6 col-md-offset-1" id="detail-sidebar">
+	<div class="col-md-3" id="detail-sidebar">
 
 		<div id="the-reservation-form">
 		<form method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
@@ -32,19 +33,9 @@
 
 			<div class="room-info" id="room-info-{{room.id}}">
 
-				<div class="row">
-					<div class="col-md-12">
-						<h3 class="alert alert-warning">{{room.name}} ${{ room.default_rate }}/night</h3>
-						<p>{{ room.description }}</p>
-					</div>
-					<div class="col-md-12">
-						<img src="/media/{{room.image}}" class="img-rounded room-info-image" />
-					</div>
-				</div>
-
 				<div class="panel panel-default top-spacer">
 					<div class="panel-heading">
-						<h3 class="panel-title">Reservation Summary {{dates.0|date:"F d"}} - {{dates|last|date:"F d"}}</h3>
+						<h3 class="panel-title">{{room.name|title}}<br>{{dates.0|date:"F d"}} - {{dates|last|date:"F d"}}</h3>
 					</div>
 					<table class="table">
 						<tbody id="reservation-items">
