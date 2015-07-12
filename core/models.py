@@ -15,7 +15,6 @@ from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from gather.forms import NewUserForm
 from django.contrib.flatpages.models import FlatPage
 from uuidfield import UUIDField
 

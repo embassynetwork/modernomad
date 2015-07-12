@@ -1,11 +1,10 @@
 from __future__ import absolute_import
+import json, requests, pytz, datetime
 from celery.task.schedules import crontab
-from django.core import urlresolvers
 from celery.task import periodic_task
 from celery import shared_task
-from gather.models import Event, EventNotifications
+from django.core import urlresolvers
 from django.contrib.auth.models import User
-import json
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -13,12 +12,12 @@ from django.template.loader import get_template
 from django.template import Context
 from django.core import urlresolvers
 from django.core.mail import EmailMultiAlternatives
-import requests, pytz, datetime
 from django.db.models import Q
 from itertools import chain
-from gather import emails
 
-from django.db.models.loading import get_model
+from gather import emails
+from gather.models import Event, EventNotifications
+from core.models import Location
 
 weekday_number_to_name = {
 	0: "Monday",
@@ -168,7 +167,6 @@ def published_events_today_local(location):
 @shared_task
 @periodic_task(run_every=crontab(hour=4, minute=35))
 def events_today_reminder():
-	Location = get_model(*settings.LOCATION_MODEL.split(".", 1))
 	locations = Location.objects.all()
 	for location in locations:
 		events_today_local = published_events_today_local(location)
@@ -192,7 +190,6 @@ def events_today_reminder():
 @shared_task
 @periodic_task(run_every=crontab(day_of_week='sun', hour=4, minute=30))
 def weekly_upcoming_events():
-	Location = get_model(*settings.LOCATION_MODEL.split(".", 1))
 	# gets a list of events to send reminders about *for all locations* one by one. 
 	locations = Location.objects.all()
 	for location in locations:
