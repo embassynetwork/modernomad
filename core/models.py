@@ -216,7 +216,7 @@ class LocationDoesNotExistException(Exception):
 def get_location(location_slug):
 	if location_slug:
 		try:
-			location = Location.objects.get(slug=location_slug)
+			location = Location.objects.filter(slug=location_slug).first()
 		except:
 			raise LocationDoesNotExistException("The requested location does not exist: %s" % location_slug)
 	else:
