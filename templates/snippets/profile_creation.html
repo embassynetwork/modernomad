@@ -15,7 +15,6 @@ accessible to other members of the Embassy Network community.</p>
 <form class="registration-form form-horizontal" id="newprofileform" enctype="multipart/form-data" method="post">{% csrf_token %}
 
 	<h3>Profile Image</h3>
-	<hr>
 
 	<div class="form-group">
 		<!-- image cropping -->
@@ -24,7 +23,7 @@ accessible to other members of the Embassy Network community.</p>
 				{% if has_image %}
 					Update your Profile image here (optional)
 				{% else %}
-					Profile Image <strong>(required)</strong>
+				<sup><small><span class="text-danger"><i class="fa fa-asterisk"></i></span></small></sup> Profile Image 
 				{% endif %}
 			</label>
 			<div class="form-field-body col-sm-8">

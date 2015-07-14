@@ -218,14 +218,16 @@ a:hover {
 	width: 166px;
 }
 
-.modal-dialog-med {
-	width: 400px;
-}
-
 #eventlist-signup-wrapper .btn {
 	background:#fff;
 	height:70px;
 	
+}
+
+@media (min-width: 768px) {
+	.modal-md {
+		width: 800px;
+	}
 }
 
 #content-container {
