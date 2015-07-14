@@ -19,102 +19,59 @@
 </div>
 {% endif %}
 
-<h2>New reservation request</h2>
-<p>We'll get back to you shortly - usually within a day or two. Not all
-locations are able to accept last minute or day-of requests so please
-submit your request with a few days' notice if possible. </p>
-<hr>
+<h2 class="center">Make a Reservation Request</h2>
 
-<form method="post" role="form" action="{% url 'reservation_create' location.slug %}">{% csrf_token %}
-    <div class="form-container row">
-        <div class="col-md-8">
-		    <p class="lead">Choose your preferred dates</p> 
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
 
-			<div class="reservation-dates row">
+			<div class="reservation-dates row lead center">
 				<div class="col-md-6 form-group">
-                    <label for="arrive">Arrive</label>
-                    {{ form.arrive }}
+                    <label for="arrive" class="reservation-label">Arrive</label>
+					<input class="form-control" id="arrive_date" name="arrive" type="text">
                 </div> 
 				<div class="col-md-6 form-group">
-                    <label for="depart">Depart</label>
-                    {{ form.depart }}
+                    <label for="depart" class="reservation-label">Depart</label>
+					<input class="form-control" id="depart_date" name="arrive" type="text">
                 </div>
 			</div>
+		</div>
+        <div class="col-md-4" id="res-detail">
+        </div>
+	</div>
+	<div class="row">
+        <div class="col-md-12">
 
 			<div id="show-room-availability"></div>
-			
-			<div id="reservation-additional-info">
-				<div class="field-wrapper">	
-					<label for="id_purpose">Tell us a little about the purpose of your trip</label>
-					<span class="form-help-text"></span>
-					<div class="form-field-body form-group">
-						<textarea class="form-control" id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
-					</div>
-				</div>
-
-				<p id="optional-fields-header">
-                    <i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i>
-                    Optional fields: arrival time and additional comments
-                </p>
-
-				<div id="optional-fields">
-					<div class="field-wrapper">	
-						<label for="id_arrival_time">Arrival time</label>
-						<div class="form-field-body form-group">
-							<input class="form-control" id="id_arrival_time" type="text" name="arrival_time" maxlength="200" />	
-						</div>
-					</div>
-					<div class="field-wrapper">	
-						<label for="id_comments">Additional comments</label>
-						<span class="form-help-text"></span>
-						<div class="form-field-body form-group">
-							<textarea class="form-control" id="id_comments" rows="3" cols="40" name="comments"></textarea>							
-						</div>
-					</div>
-				</div>
-			</div>
-        </div>
-        <div class="col-md-4">
-            <div id="reservation-amount-summary-box">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Reservation Summary</h3>
-                    </div>
-                    <table class="table">
-                        <tbody id="reservation-items">
-                        </tbody>
-                        <tbody>
-                            <tr>
-                                <td><strong>Total</strong></td>
-                                <td><strong>$<span id="reservation-total">0</span></strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
     </div>
-    <input id="submit-reservation" type="submit" class="btn btn-default disabled" value="Submit">
-</form>
 {% endblock %}
 
 {% block extrajs %}
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
+<script>
+	$("#id_city").keyup(function() {
+		autocomplete = new google.maps.places.Autocomplete(this);
+		google.maps.event.addListener(autocomplete, 'place_changed', function() {
+			var place = autocomplete.getPlace();
+			console.log(place);
+			console.log(place.address_components);
 
-<script src="{% static 'js/waypoints.js' %}"></script>
-<script src="{% static 'js/waypoints-sticky.js' %}"></script>
+		});
+	});
+</script>
 
 <script>
 
-	$("#id_arrive, #id_depart").datepicker({
+	$("#arrive_date, #depart_date").datepicker({
 		minDate: 0,
 		onSelect: function( selectedDate ) {
-			if(this.id == 'id_arrive') {
-				startDate = $('#id_arrive').datepicker("getDate");
+			if(this.id == 'arrive_date') {
+				startDate = $('#arrive_date').datepicker("getDate");
 	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
 	          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
 	          	console.log(rMax);
-	          	$('#id_depart').datepicker("option","minDate",rMin);
-	          	$('#id_depart').datepicker("option","maxDate",rMax);                    
+	          	$('#depart_date').datepicker("option","minDate",rMin);
+	          	$('#depart_date').datepicker("option","maxDate",rMax);                    
 			}
 			// we need to explicitly fire the change event on the underlying
 			// input or it won't fire on its own!
@@ -122,10 +79,10 @@ submit your request with a few days' notice if possible. </p>
         }
 	});
 
-	$("#id_arrive, #id_depart").change(function(event) {
+	$("#arrive_date, #depart_date").change(function(event) {
 		// Get arrive and depart dates, update value. 
-		$arrive = $("#id_arrive").val();
-		$depart = $("#id_depart").val();
+		$arrive = $("#arrive_date").val();
+		$depart = $("#depart_date").val();
 
 		// once the dates are selected, poll for a list of available rooms
 		if ($arrive && $depart) {
@@ -171,30 +128,6 @@ submit your request with a few days' notice if possible. </p>
 		});	
 	
 	});
-
-	// the purpose field is only visible when the other fields have been
-	// filled out, so if the purpose field has content then all required
-	// fields are present and the submit button should be enabled.
-	$("#id_purpose").keyup(function() {
-		if (! !$.trim($("#id_purpose").val())) {
-			console.log("form is ready to submit!")
-			$("#submit-reservation").prop("disabled", false);
-			$("#submit-reservation").removeClass("disabled")
-			$("#submit-reservation").addClass("btn-success")
-		} else {
-			$("#submit-reservation").prop("disabled", true);
-			$("#submit-reservation").addClass("disabled")
-			$("#submit-reservation").removeClass("btn-success")
-		}
-	});
-
-	$("#optional-fields-header").click(function() {
-		$("#optional-fields").slideToggle("slow");
-		$("#optional-fields-header-icon").toggleClass("icon-plus icon-minus")
-	});
-
-    $('[data-toggle="tooltip"]').tooltip();
-    $('#reservation-amount-summary-box').waypoint('sticky');
 
     function set_summary_width() {
         box_width = $('#reservation-amount-summary-box').parent().width();

@@ -261,6 +261,11 @@ a:hover {
 
 .cell-breather {
 	padding-right: 25px;
+	padding-bottom: 40px;
+}
+
+.cell-right-breather {
+	padding-right: 25px;
 }
 
 .event {
@@ -680,10 +685,11 @@ div.ui-datepicker{
 .bg-muted {
     background-color: #eee;
 }
-.room-select {
-    padding-left: .5em;
-    padding-right: .5em;
+
+.room-subtle {
+	opacity: 0.65;
 }
+
 .float-right {
 	float:right;
 }
@@ -802,12 +808,9 @@ ul.errorlist,u {
 }
 
 @media (min-width: 992px) {
-    #reservation-amount-summary-box.stuck {
+    #the-reservation-form.stuck {
         position: fixed;
         top: 0;
-    }
-    #reservation-amount-summary-box .panel {
-        margin-top: 10px;
     }
 }
 
@@ -1033,8 +1036,12 @@ div#spinner
 }
 
 #rooms-available-calendar th {
-	padding: 0 5px 0 5px;
 	font-size: 90%;
+	border-top: 0px;
+}
+
+.room-info .alert-warning {
+	color: inherit;
 }
 
 #rooms-available-calendar input[type=radio] {
@@ -1046,6 +1053,31 @@ div#spinner
 	display: none;
 }
 
+.room-avail-descr {
+	margin: 15px 5px 15px 5px;
+	height: 40px;
+}
+
+.room-select .panel-body {
+	padding: 0px;
+	font-weight: normal;
+}
+
+.room-select .panel:hover {
+	cursor: pointer;
+}
+
+.room-select .panel-heading {
+	margin-bottom: 0px;
+	font-family: 'Clarendon Light', serif;
+	font-weight: normal;
+	text-align: center;
+}
+
+#the-reservation-form .panel-heading, .emphasize .panel-heading {
+	background-color: #666;
+	color: #FFF;
+}
 
 .room-list {
 	margin-top: 60px;
@@ -1057,15 +1089,6 @@ div#spinner
 
 .room-info-area {
 	padding-top: 25px;
-}
-
-#rooms-available-calendar tr {
-	margin-bottom: 10px
-}
-
-#reservation-additional-info {
-	display: none;
-	padding-top: 50px;
 }
 
 #submit-reservation {
@@ -1086,6 +1109,10 @@ div#spinner
 
 #optional-fields {
 	display: none;
+}
+
+#optional-fields-header:hover {
+	color: #ea6f56;
 }
 
 #optional-fields-header {
@@ -1368,12 +1395,14 @@ table tr.row-even td { background: #eee; }
 }
 
 .affix {
-	top: 520px;
-	right: 85px;
 }
 
 .top-spacer {
 	margin-top: 30px;
+}
+
+.top-spacer-large {
+	margin-top: 60px;
 }
 
 .availability-cal .today {
@@ -1679,3 +1708,37 @@ p.lead strong {
 label.light {
 	font-weight: normal;
 }
+
+#availability-area {
+	overflow: scroll;
+}
+
+.reservation-label {
+	font-weight: normal;
+}
+
+.reservation-info-tab {
+	font-size: 120%;
+}
+
+#reservation-pills > li.active > a, #reservation-pills  > li.active > a:hover, #reservation-pills > li.active > a:focus {
+	background-color: #ea6f56;
+	color: #eee;
+}
+
+#reservation-pills {
+	background-color: #eee;
+}
+
+.fixed {
+	position: fixed;
+}
+
+#the-reservation-form form {
+	margin-bottom: 100px;
+}
+
+#rooms-available-calendar {
+	width: auto;
+}
+

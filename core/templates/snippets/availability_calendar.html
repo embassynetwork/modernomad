@@ -1,110 +1,246 @@
-<p class="lead">Choose an available room</p>
-<table id="rooms-available-calendar">
-	<tr>
-	<th>Room</th>
-	{% for date in dates %}
-	<th>{{ date|date:"M d" }}</th>
-	{% endfor %}
-	</tr>
+{% load staticfiles %}
+{% load core_tag_extras %}
 
-	{% for room, days_list in availability_table.items %}
-	<tr>
-		<td class="cell-breather"> 
-		{% if room in available_reservations %}
-			<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="btn btn-default btn-block room-select">{{room.name}}</label>
-			<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
-		{% else %}
-			<div data-toggle="tooltip"
-                 data-placement="top"
-                 title="This room is unavailable for your date range">
-                <div class="btn btn-block disabled">
-				    {{room.name}}
-                </div>
+<div class="row">
+
+	<ul class="nav nav-pills nav-justified" id="reservation-pills" role="tablist">
+		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms {{dates.0|date:"m/d"}} - {{dates|last|date:"m/d"}}</a></li>
+		<li class="reservation-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Details</a></li>
+	</ul>
+
+	<div class="tab-content">
+
+	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3 class="modal-title">Almost There...</h3>
 			</div>
-		{% endif %}
-		</td>
+			<div class="modal-body">
+				{% with new_profile_form as form %}
+					{% include 'snippets/profile_creation.html' %}
+				{% endwith %}
+			</div>
+		</div>
+	</div>
 
-		{% comment %} 
-			important! days_list is an ordered list of dicts in the form {'the_date': datetime obj, 'beds_free': x }, so should always be date ordered. 
-		{% endcomment %}
 
-		{% for day_info in days_list %}
-		<td>
-			{% if day_info.beds_free > 0 %}
-				<div class="yes-available bg-success"
-                     data-toggle="tooltip"
-                     data-placement="top"
-                     title="{{ day_info.beds_free }} bed{{ beds_free|pluralize }} available">
-                     {{ day_info.beds_free }}
-                 </div>
-			{% else %}
-				<div class="no-available bg-muted"
-                     data-toggle="tooltip"
-                     data-placement="top"
-                     title="No beds available">0</div>
-			{% endif %}
-		</td>
-		{% endfor %}
-	</tr>
-	{% endfor %}
-</table>
 
-<div class="room-info-area">
-{% for room, res_dict in available_reservations.items %}
-<div class="room-info" id="room-info-{{room.id}}">
-	{% if room.image %}
-        <div class="row">
-		    <div class="col-md-6">
-	{% endif %}
-                <h3>{{room.name}}</h3>
-                <p><strong>Rate:</strong> ${{ room.default_rate }}/night for {{ res_dict.nights }} night{% if res_dict.nights > 1 %}s{%endif %}</p>
-                <p>{{ room.description }}</p>
-    {% if room.image %}
-            </div>
-            <div class="col-md-6">
-                <img src="/media/{{room.image}}" class="img-rounded room-info-image" />
-            </div>
-        </div>
-    {% endif %}
-</div>
-{% endfor %}
-</div>
+		<div role="tabpanel" class="tab-pane active" id="chooseroom">
+			{% include 'snippets/available_rooms.html' %}
+		</div><!-- end tab chooseroom -->
 
+		<div role="tabpanel" class="tab-pane" id="showavailability">
+			{% include 'snippets/availability_details.html' %}
+		</div>
+	
+	</div>
+
+<script src="{% static 'js/waypoints.js' %}"></script>
+<script src="{% static 'js/waypoints-sticky.js' %}"></script>
+<script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 <script>
-$(".room-select").click(function() {
-	// relies on the fact that the input tag is directly after the label tag
-	// for each room option.
-	$(this).next().prop("checked", true);
-	room_id = $(this).next().val();
-	room_info_div_id = "#room-info-" + room_id;
+$(function(){
 
-	$(".room-info").hide();
-	$("#reservation-items").empty()
-	$(".room-select").removeClass("btn-success")
-	$(this).addClass("btn-success");
-	$(room_info_div_id).show();
-	$("#reservation-additional-info").show();
-	room_name = $(this).text();
-	//res_value = $("#res-value-" + room_id).text();
-	//$("#submit-reservation").val("Submit request for " + room_name + " at " );
+	reservation_submit = function(event) {
+		console.log('in reservation_submit');
+		if ( '{{current_user}}' == 'None' ) {
+			event.preventDefault();
+			$('#new-user-modal').modal();
+		} 
+	};
+	$("#submit-reservation").click(reservation_submit);
 
-	// inject the fees and subtotal info for this room when selected
-	// XXX JKS why is there a for loop here? this whole section should probably be re-written
-	{% for room, res_dict in available_reservations.items %}
-		if ('{{room.id}}' == room_id) {
-			{% for line_item in res_dict.bill_line_items %}
-			{% if not line_item.paid_by_house %}
-			$("#reservation-items").append('<tr class="a-room-fee"> \
-				<td>{{ line_item.description }}</td> \
-				<td>${{ line_item.amount|floatformat:2 }}</td> \
-			</tr>');
-			{% endif %}
-			{% endfor %}
-			$("#reservation-total").html("{{ res_dict.total|floatformat:2 }}")
-			$("#submit-reservation").val("Submit request for " + room_name + " at " + {{ res_dict.total|floatformat:2 }});
+	$("#newprofileform").submit(function(e) {
+		e.preventDefault();
+		// because the profile image doesn't really happen on the form
+		// proper, we validate the existence of the image field here instead.  
+		if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
+			$("#img-upload-error").html('<div class="error"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
+			$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
+		} else {
+			console.log("submitting new profile form")
+			form_data = $("#newprofileform").serialize();
+			console.log('profile form data:');
+			console.log(form_data);
+			request = $.ajax({ 
+				data: form_data,
+				type: "POST",
+				url: '{% url "registration_register" %}'
+			});
+
+			request.done(function(msg) { // on success..
+
+				function getCookie(name) {
+					var cookieValue = null;
+					if (document.cookie && document.cookie != '') {
+						var cookies = document.cookie.split(';');
+						for (var i = 0; i < cookies.length; i++) {
+							var cookie = jQuery.trim(cookies[i]);
+							// Does this cookie string begin with the name we want?
+				
+							if (cookie.substring(0, name.length + 1) == (name + '=')) {
+								cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+								break;
+							}
+						}
+					}
+					return cookieValue;
+				}
+
+				console.log('profile created');
+				/* CSRF token needs to be updated after the POST request (IIUC,
+				* this is *both* because the new user has been logged in, which
+				* will invalidate the session, and, because the profile POST
+				* will also update the session */
+				$("#the-reservation-form input[name='csrfmiddlewaretoken']").val(getCookie('csrftoken'))
+				form_data = $("#the-reservation-form").serialize();
+				console.log('reservation form data:');
+				console.log(form_data);
+				$("#the-reservation-form").submit();
+			});
+
+			request.fail(function(msg) {
+				$("#show-room-availability").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
+			});
 		}
-	{% endfor %}
-});
+	});
 
-$('[data-toggle="tooltip"]').tooltip();
+
+
+
+	$("#optional-fields-header").click(function() {
+		$("#optional-fields").slideToggle("slow");
+		$("#optional-fields-header-icon").toggleClass("icon-plus icon-minus")
+	});
+
+	// the purpose field is only visible when the other fields have been
+	// filled out, so if the purpose field has content then all required
+	// fields are present and the submit button should be enabled.
+	$("#id_purpose").keyup(function() {
+		if (! !$.trim($("#id_purpose").val())) {
+			console.log("form is ready to submit!")
+			$("#submit-reservation").prop("disabled", false);
+			$("#submit-reservation").removeClass("disabled")
+			$("#submit-reservation").addClass("btn-success")
+		} else {
+			$("#submit-reservation").prop("disabled", true);
+			$("#submit-reservation").addClass("disabled")
+			$("#submit-reservation").removeClass("btn-success")
+		}
+	});
+
+    $('[data-toggle="tooltip"]').tooltip();
+	$("#the-reservation-form").waypoint('sticky');
+
+	$(".room-select").click(function() {
+		$("#the-reservation-form").hide();
+		// relies on the fact that the input tag is directly after the label tag
+		// for each room option.
+		$(this).next().prop("checked", true);
+		room_id = $(this).next().val();
+		room_info_div_id = "#room-info-" + room_id;
+
+		$(".room-info").hide();
+		
+		// update styling on the rooms that are not currently selected
+		$(".room-select").addClass("room-subtle");
+		$(".room-select").removeClass("emphasize");
+
+		// update styling for the room that is currently selected.
+		$(this).removeClass("room-subtle");
+		$(this).addClass("emphasize");
+		$("#the-reservation-form").show();
+		$(room_info_div_id).show();
+	});
+
+	// display info about the first room
+	$(".room-select")[0].click();
+
+	function set_summary_width() {
+        box_width = $('#the-reservation-form').parent().width();
+        $('#the-reservation-form').width(box_width);
+    }
+    $(document).ready(function() {
+        set_summary_width();
+    });
+    $(window).resize(function() {
+        set_summary_width();
+	});
+
+	var img_w = $('.room-info-image').width();
+	$('.room-info-image').css({'height':0.75*img_w+'px'});
+
+	/*
+	This code was taken from http://jsfiddle.net/ryanmaxwell/25QaE/ but
+	modified to use $sidebar.offset() instead of $sidebar.position()
+	*/
+	/*
+	$(function() {
+
+		var $window = $(window);
+		var lastScrollTop = $window.scrollTop();
+		var wasScrollingDown = true;
+
+		$sidebar = $("#the-reservation-form");
+		if ($sidebar.length > 0) {
+
+			initialSidebarTop = $sidebar.offset().top;
+
+			$window.scroll(function(event) {
+
+				var windowHeight = $window.height();
+				var sidebarHeight = $sidebar.outerHeight();
+
+				var scrollTop = $window.scrollTop();
+				var scrollBottom = scrollTop + windowHeight;
+
+				var sidebarTop = $sidebar.position().top;
+				var sidebarBottom = sidebarTop + sidebarHeight;
+
+				var heightDelta = Math.abs(windowHeight - sidebarHeight);
+				var scrollDelta = lastScrollTop - scrollTop;
+				
+				var isScrollingDown = (scrollTop > lastScrollTop);
+				var isWindowLarger = (windowHeight > sidebarHeight);
+
+				if ((isWindowLarger && scrollTop > initialSidebarTop) || (!isWindowLarger && scrollTop > initialSidebarTop + heightDelta)) {
+					$sidebar.addClass('fixed');
+				} else if (!isScrollingDown && scrollTop <= initialSidebarTop) {
+					$sidebar.removeClass('fixed');
+				}
+
+				var dragBottomDown = (sidebarBottom <= scrollBottom && isScrollingDown);
+				var dragTopUp = (sidebarTop >= scrollTop && !isScrollingDown);
+
+				if (dragBottomDown) {
+					if (isWindowLarger) {
+						$sidebar.css('top', 0);
+					} else {
+						$sidebar.css('top', -heightDelta);
+					}
+				} else if (dragTopUp) {
+					$sidebar.css('top', 0);
+				} else if ($sidebar.hasClass('fixed')) {
+					var currentTop = parseInt($sidebar.css('top'), 10);
+					
+					var minTop = -heightDelta;
+					var scrolledTop = currentTop + scrollDelta;
+					
+					var isPageAtBottom = (scrollTop + windowHeight >= $(document).height());
+					var newTop = (isPageAtBottom) ? minTop : scrolledTop;
+					
+					$sidebar.css('top', newTop);
+				}
+
+				lastScrollTop = scrollTop;
+				wasScrollingDown = isScrollingDown;
+			});
+		}
+	});
+	*/
+
+})
+
 </script>

@@ -460,18 +460,6 @@ def room_cal_request(request, location_slug, room_id):
 			reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
 	return HttpResponse(cal_html+link_html)
 
-def stay(request, location_slug):
-	location = get_location(location_slug)
-
-	rooms = location.rooms_with_future_reservability()
-	today = timezone.localtime(timezone.now())
-	month = request.GET.get("month")
-	year = request.GET.get("year")
-	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, "next_month": next_month, 
-		"prev_month": prev_month, 'location': location})
-
-
 def thanks(request, location_slug):
 	# TODO generate receipt
 	return render(request, "thanks.html")
@@ -526,6 +514,7 @@ def CheckRoomAvailability(request, location_slug):
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
 	availability = location.availability(arrive, depart)
 	date_list = date_range_to_list(arrive, depart)
+	print date_list
 	available_reservations = {}
 	# Create some mock reservations for each available room so we can generate the bill
 	free_rooms = location.rooms_free(arrive, depart)
@@ -539,8 +528,15 @@ def CheckRoomAvailability(request, location_slug):
 		nights = reservation.total_nights()
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
-	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
-		'available_reservations': available_reservations, })
+	new_profile_form = UserProfileForm()
+	if request.user.is_authenticated():
+		current_user = request.user
+	else:
+		current_user = None
+
+	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
+		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
+		"new_profile_form": new_profile_form})
 
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
@@ -1643,6 +1639,7 @@ def process_unsaved_reservation(request):
 
 
 def user_login(request):
+	print 'in user_login'
 	next_page = None
 	if 'next' in request.GET:
 		next_page = request.GET['next']
@@ -1688,6 +1685,7 @@ class Registration(registration.views.RegistrationView):
 	@transaction.atomic
 	def register(self, request, **cleaned_data):
 		'''Register a new user, saving the User and UserProfile data.'''
+		print "in register()"
 		user = User()
 		for field in user._meta.fields:
 			if field.name in cleaned_data:
@@ -1696,6 +1694,8 @@ class Registration(registration.views.RegistrationView):
 
 		user.set_password(cleaned_data['password2'])
 		user.save()
+		print 'user created'
+		print user
 
 		profile = UserProfile(user=user)
 		for field in profile._meta.fields:
@@ -1726,6 +1726,7 @@ class Registration(registration.views.RegistrationView):
 		profile.image = full_file_name
 		profile.save()
 
+		print 'logging in user'
 		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
 		login(request, new_user)
 		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
