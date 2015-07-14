@@ -72,8 +72,7 @@ $(function(){
 
 			request.done(function(msg) { // on success..
 
-				function getCookie(name)
-				{
+				function getCookie(name) {
 					var cookieValue = null;
 					if (document.cookie && document.cookie != '') {
 						var cookies = document.cookie.split(';');
@@ -91,6 +90,10 @@ $(function(){
 				}
 
 				console.log('profile created');
+				/* CSRF token needs to be updated after the POST request (IIUC,
+				* this is *both* because the new user has been logged in, which
+				* will invalidate the session, and, because the profile POST
+				* will also update the session */
 				$("#the-reservation-form input[name='csrfmiddlewaretoken']").val(getCookie('csrftoken'))
 				form_data = $("#the-reservation-form").serialize();
 				console.log('reservation form data:');

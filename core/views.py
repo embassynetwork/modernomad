@@ -535,7 +535,8 @@ def CheckRoomAvailability(request, location_slug):
 		current_user = None
 
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
-		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, "new_profile_form": new_profile_form})
+		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
+		"new_profile_form": new_profile_form})
 
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
