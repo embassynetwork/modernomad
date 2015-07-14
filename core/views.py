@@ -43,9 +43,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 def location(request, location_slug):
-	location = my_object = get_object_or_404(Location, slug=location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	return render(request, "landing.html", {'location': location})
-
+	
 def guest_rooms(request, location_slug):
 	location = get_location(location_slug)
 	rooms = location.guest_rooms()
