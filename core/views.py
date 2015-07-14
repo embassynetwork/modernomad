@@ -528,8 +528,14 @@ def CheckRoomAvailability(request, location_slug):
 		nights = reservation.total_nights()
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
-	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
-		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str})
+	new_profile_form = UserProfileForm()
+	if request.user.is_authenticated():
+		current_user = request.user
+	else:
+		current_user = None
+
+	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
+		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, "new_profile_form": new_profile_form})
 
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
@@ -1632,6 +1638,7 @@ def process_unsaved_reservation(request):
 
 
 def user_login(request):
+	print 'in user_login'
 	next_page = None
 	if 'next' in request.GET:
 		next_page = request.GET['next']
@@ -1677,6 +1684,7 @@ class Registration(registration.views.RegistrationView):
 	@transaction.atomic
 	def register(self, request, **cleaned_data):
 		'''Register a new user, saving the User and UserProfile data.'''
+		print "in register()"
 		user = User()
 		for field in user._meta.fields:
 			if field.name in cleaned_data:
@@ -1685,6 +1693,8 @@ class Registration(registration.views.RegistrationView):
 
 		user.set_password(cleaned_data['password2'])
 		user.save()
+		print 'user created'
+		print user
 
 		profile = UserProfile(user=user)
 		for field in profile._meta.fields:
@@ -1715,6 +1725,7 @@ class Registration(registration.views.RegistrationView):
 		profile.image = full_file_name
 		profile.save()
 
+		print 'logging in user'
 		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
 		login(request, new_user)
 		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
