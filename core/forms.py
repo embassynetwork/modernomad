@@ -240,6 +240,11 @@ class ReservationForm(forms.ModelForm):
 	# XXX TODO
 	# make sure depart is at least one day after arrive. 
 
+class AdminReservationForm(forms.ModelForm):
+	class Meta:
+		model = Reservation
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
+
 
 class PaymentForm(forms.Form):
 	name = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))

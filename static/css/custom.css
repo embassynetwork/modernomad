@@ -1626,9 +1626,9 @@ p.lead strong {
 
 .error {
 	color: rgb(228, 73, 73);
-	font-size: 80%;
 	background-color: beige;
 	padding: 10px;
+	font-weight: normal;
 }
 
 #guestcalendar {

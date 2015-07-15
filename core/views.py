@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from registration import signals
 import registration
-from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
+from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
 from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
@@ -658,6 +658,18 @@ def UserEdit(request, username):
 	return HttpResponseRedirect("/")
 
 @login_required
+def UserAvatar(request, username):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	user = User.objects.get(username=username)
+	try:
+		url = user.profile.image.url
+	except:
+		url = '/static/img/default.jpg'
+	return HttpResponse(url)
+
+
+@login_required
 def UserAddCard(request, username):
 	''' Adds a card from either the reservation page or the user profile page.
 	Displays success or error message and returns user to originating page.'''
@@ -1108,6 +1120,43 @@ def ReservationManageList(request, location_slug):
 		canceled =  canceled.filter(depart__gt=today)
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved, 
 		"confirmed": confirmed, "canceled": canceled, 'location': location})
+
+@house_admin_required
+def ReservationManageCreate(request, location_slug):
+	if request.method == 'POST':
+		print request.POST
+		notify = request.POST.get('email_announce');
+		print 'notify was set to:'
+		print notify
+		location = get_location(location_slug)
+		try:
+			username = request.POST.get('username');
+			the_user = User.objects.get(username=username)
+		except:
+			messages.add_message(request, messages.INFO, "There is no user with the username %s" % username)
+			return HttpResponseRedirect(reverse('reservation_manage_create', args=(location.slug,)))
+
+		form = AdminReservationForm(request.POST)
+		if form.is_valid():
+			reservation = form.save(commit=False)
+			reservation.location = location
+			reservation.user = the_user
+			reservation.status = request.POST.get('status')
+			reservation.save()
+			# Make sure the rate is set and then generate a bill
+			reservation.reset_rate()
+			if notify:
+				new_reservation_notify(reservation)
+			messages.add_message(request, messages.INFO, "The reservation for %s %s was created." % (reservation.user.first_name, reservation.user.last_name))
+			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
+		else:
+			print 'the form had errors'
+			print form.errors
+	else:
+		form = AdminReservationForm()
+	all_users = User.objects.all().order_by('username')
+	return render(request, 'reservation_manage_create.html', {'all_users': all_users, "reservation_statuses": Reservation.RESERVATION_STATUSES })
+
 
 @house_admin_required
 def ReservationManage(request, location_slug, reservation_id):
