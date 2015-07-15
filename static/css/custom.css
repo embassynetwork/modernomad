@@ -1372,6 +1372,10 @@ table tr.row-even td { background: #eee; }
 	right: 85px;
 }
 
+.top-spacer-xl {
+	margin-top: 70px;
+}
+
 .top-spacer {
 	margin-top: 30px;
 }
@@ -1629,6 +1633,14 @@ p.lead strong {
 	background-color: beige;
 	padding: 10px;
 	font-weight: normal;
+}
+
+.align-right {
+	text-align: right;
+}
+
+.small-profile-pic {
+	width: 100px;
 }
 
 #guestcalendar {

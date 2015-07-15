@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load core_tag_extras %}
 
 {% block content %}
 
@@ -22,126 +23,161 @@
   </div>
 </div>
 
-<h3>Reservation for 
-	<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
-
-	{% if reservation.user == user or user in location.house_admins.all %}
-		<span class="res-value text-success">Total: ${{ reservation.bill.amount|floatformat:2 }}</span>
-	{% endif %}
-</h3>
-<h4>
-	{{reservation.arrive }} - {{reservation.depart}}.   
-</h4>
-
 <div class="row">
-	{% if user in location.house_admins.all %}
-		<div class="col-md-2 pull-right">
-			<a class="btn-inline btn btn-info" href="{% url 'reservation_manage' location.slug reservation.id %}">Manage Reservation</a>
+	{% if reservation.is_pending %}
+		<div class="col-md-12">
+			<div class="alert alert-warning">
+				<span class="fa fa-smile-o"></span> This reservation is pending approval and you will receive an email when it has been approved.
+			</div>
 		</div>
+	{% elif reservation.is_confirmed and reservation.is_paid %}
+		<div class="col-md-12">
+			<div class="alert alert-warning">
+				<span class="fa fa-check text-success"></span> Huzzah! Your reservation is confirmed. We look forward to having you!
+			</div>
+		</div>
+	{% elif reservation.is_approved or reservation.is_confirmed %}
+		{% if not reservation.is_paid %}
+		<div class="col-md-12">
+			<div class="alert alert-warning">
+				<span class="glyphicon glyphicon-exclamation-sign text-danger"></span> Action Required! Please pay for your reservation to confirm.
+			</div>
+		</div>
+		{% endif %}
 	{% endif %}
 
-<div class="res-statusline">
-<div class="col-md-10">
-{% ifequal reservation.user user %}
-	{% if reservation.is_pending %}
-
-		<div>
-			<span class="btn btn-large btn-default res-status-btn" disabled="disabled" type="button">Pending</span>
+	<div class="col-md-8">
+		<h3>Reservation for 
+			<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
+		</h3>
+		<h4>{{reservation.arrive }} - {{reservation.depart}}.</h4>
+		<div class="row">
+			<div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ reservation.room.name|title}}</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ reservation.purpose}}</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3"><b>Additional Comments</b></div><div class="col-md-9">{{  reservation.comments|default:"None" }}</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ reservation.arrival_time|default:"Not specified" }}</div>
 		</div>
 
-	{% elif reservation.is_approved and reservation.user.profile.customer_id %}
-		{% if reservation.is_paid %}
-			<div>
-				<span class="btn btn-large btn-default res-status-btn" disabled="disabled" type="button">Approved</span>
+	</div>
+
+	<div class="col-md-4">
+
+		{% if user in location.house_admins.all %}
+			<div class="row">
+			<div class="col-sm-12 align-right">
+				<a href="{% url 'reservation_manage' location.slug reservation.id %}">Manage Reservation <span class="fa fa-mail-forward"></span></a>
 			</div>
-			<div>Your reservation is paid but has not been confirmed. Contact {{ contact }} if you have any questions.</div>
-
-		{% else %}
-	
-			<div>
-				<p><span class="text-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-					Action Required! Please pay for your reservation to confirm. 
-				</p>
-
-				<form action="{% url 'reservation_confirm' reservation.location.slug reservation.id %}" method="POST" id="payform">
-					{% csrf_token %}
-					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-					value="Submit payment with card on file" >
-				</form>
-				<p>(Is someone else paying for your reservation? Grab the <a href="" data-toggle="modal" data-target="#myModal"> 3rd party payment link </a>)</p>
 			</div>
 		{% endif %}
-
-	{% elif reservation.is_approved or reservation.is_confirmed and not reservation.is_paid %}
-			<div>
-				<p><span class="text-danger"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-					Action Required! Please pay for your reservation to confirm. 
-				</p>
-
-					<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
-						{% csrf_token %}
-						<input type="hidden" value={{ reservation.id }} name="res-id">
-						<input type="hidden" value={{ location.slug }} name="loc-slug">
-						<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-						value="Click to enter Payment Details" >
-					</form>
-
-					<p>(Is someone else paying for your reservation? Grab the <a href="" data-toggle="modal" data-target="#myModal"> 3rd party payment link </a>)</p>
-
-				<div>
-					<p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
+		
+		<div id="reservation-amount-summary-box">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Reservation Summary</h3>
 				</div>
+				<table class="table">
+					<tbody id="reservation-items">
+					</tbody>
+					<tbody>
+						{% for line_item in reservation.bill.subtotal_items %}
+							<tr class="a-room-fee"> 
+								<td>{{ line_item.description }}</td> 
+								<td>${{ line_item.amount|floatformat:2 }}</td>
+							</tr>
+						{% endfor %}	
 
+						{% for line_item in reservation.bill.fees %}
+							{% if not line_item.paid_by_house %}
+							<tr class="a-room-fee"> 
+								<td>{{ line_item.description }}</td> 
+								<td>${{ line_item.amount|floatformat:2 }}</td>
+							</tr>
+							{% endif %}
+						{% endfor %}	
+						<td><strong>Total</strong></td>
+						<td><strong>$<span id="reservation-total">{{ reservation.bill.amount|floatformat:2 }}</span></strong></td>
+					</tbody>
+				</table>
+				<div class="panel-footer text-muted">
+					<em>Cancellation policy for the {{ reservation.room }} is {{reservation.room.cancellation_policy}}.</em>
+				</div>
 			</div>
+		</div>
 
-			{% elif reservation.is_confirmed and reservation.is_paid %}
+		<div class="row">
+		<div class="col-sm-12">
 
-				<div class="btn btn-lg btn-default res-status-btn" type="button">Reservation Confirmed</div>
-				<a class="btn btn-lg res-status-btn" type="button" href="{% url 'reservation_payment' location.slug reservation.uuid %}">View Receipt</a>
+			{% if reservation.is_approved or reservation.is_confirmed %}
+
+				{% if not reservation.is_paid and reservation.user.profile.customer_id %}
+
+					<div class="row-spacer">
+						<form action="{% url 'reservation_confirm' reservation.location.slug reservation.id %}" method="POST" id="payform">
+							{% csrf_token %}
+							<button type="submit" id="pay-button" class="btn btn-default res-status-btn"><span class="text-success">Submit payment with card on file</span></button>
+						</form>
+					</div>
+					<div>
+						<p>Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a></p>
+					</div>
+
+				{% elif not reservation.is_paid and not reservation.user.profile.customer_id %}
+
+					<div class="row-spacer">
+						<form action="{% url 'user_add_card' reservation.user.username %}" method="POST" id="payform">
+							{% csrf_token %}
+							<input type="hidden" value={{ reservation.id }} name="res-id">
+							<input type="hidden" value={{ location.slug }} name="loc-slug">
+							<button type="submit" id="pay-button" class="btn btn-default res-status-btn"><span class="text-success">Click to enter Payment Details</span></button>
+						</form>
+					</div>
+					<div>
+						<p>Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a></p>
+					</div>
+						<div>
+							<p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
+						</div>
+					</div>
+
+				{% elif reservation.is_paid %}
+					<a class="btn btn-default res-status-btn" type="button" href="{% url 'reservation_payment' location.slug reservation.uuid %}">View Receipt</a>
+				{% endif %}
 
 			{% elif reservation.is_canceled %}
-			<div class="btn btn-lg btn-danger res-status-btn" disabled="disabled" type="button">Reservation Canceled</div>
+
+				<div class="btn btn-lg btn-danger res-status-btn" disabled="disabled" type="button">Reservation Canceled</div>
 
 			{% endif %}
 
-{% else %}
-	<div class="btn btn-lg btn-default res-status-btn" disabled="disabled" type="button">{{ reservation.status|title }} </div>	
-{% endifequal %}
-</div>
-</div>
+		</div>
+		</div>
+	</div> <!-- end col-md-4 -->
 </div>
 
+<div class="row top-spacer-xl">
 
-<hr>
+	<div class="col-md-12">
+		<h3> Also here during your Stay</h3>
+		{% for subset in users_during_stay|subsets_size:12 %}
+			<div class="row row-spacer">	
+				{% for user in subset %}
+					<div class="col-lg-1 col-sm-3 col-xs-4">
+						<img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
+						<p> <a href="{% url 'user_detail' user.username %}">{{user.first_name}} {{user.last_name}}</a> </p>
+					</div>
+				{% endfor %}
+			</div>
+		{% endfor %}
+	</div>
 
-<h3>Reservation Details</h3>
+</div>
 
-<div class="row">
-	<div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ reservation.room.name|title}}</div>
-</div>
-<div class="row">
-	<div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ reservation.purpose}}</div>
-</div>
-{% ifequal reservation.user user %}
-<div class="row">
-	<div class="col-md-3"><b>Additional Comments</b></div><div class="col-md-9">{{  reservation.comments|default:"None" }}</div>
-</div>
-<div class="row">
-	<div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ reservation.arrival_time|default:"Not specified" }}</div>
-</div>
-<div class="row">
-	<div class="col-md-6 bg-warning para-padding"><em>Cancellation policy for the {{ reservation.room }} is {{reservation.room.cancellation_policy}}.</em></div>
-</div>
-{% endifequal %}
-
-
-{% with guest=reservation.user%}
-	<h3>About {{guest.first_name|title}} {{guest.last_name|title}}</h3>
-	<div class="res-detail"><b>Current Projects:</b> {{ guest.profile.projects }}</div>
-	<div class="res-detail"><b>Interested in learning or sharing:</b> {{ guest.profile.sharing }}</div>
-	<div class="res-detail"><b>Discussion topics:</b> {{ guest.profile.discussion }}</div>
-	<div class="res-detail"><b>Referral: </b> {{ guest.profile.referral }}</div>
-{% endwith %}
 
 {% ifequal reservation.user user %}
 	<div class="res-modify-btn">

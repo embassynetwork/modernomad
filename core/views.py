@@ -26,6 +26,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from gather.tasks import published_events_today_local, events_pending
 from gather.forms import NewUserForm
+from gather.models import Event
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
 from datetime import date, timedelta
@@ -601,7 +602,8 @@ def ReservationDetail(request, reservation_id, location_slug):
 		msg = 'The reservation you requested do not exist'
 		messages.add_message(request, messages.ERROR, msg)
 		return HttpResponseRedirect('/404')
-	else:
+	# make sure the user is either an admin or the reservation holder
+	if (request.user == reservation.user) or (request.user in location.house_admins.all() ):
 		if reservation.arrive >= datetime.date.today():
 			past = False
 		else:
@@ -612,8 +614,35 @@ def ReservationDetail(request, reservation_id, location_slug):
 			paid = False
 
 		domain = Site.objects.get_current().domain
+
+		# users that intersected your stay
+		users_during_stay = []
+		reservations = Reservation.objects.filter(status="confirmed").filter(location=location).exclude(depart__lt=reservation.arrive).exclude( arrive__gt=reservation.depart)
+		for reservation in reservations:
+			if reservation.user not in users_during_stay:
+				users_during_stay.append(reservation.user)
+		for member in location.residents.all():
+			if member not in users_during_stay:
+				users_during_stay.append(member)
+
+		# events that intersected your stay
+		#events_during_stay = []
+		#all_events = Event.objects.filter(location=location).exclude(end__lt=reservation.arrive).exclude( start__gt=reservation.depart)
+		#events_during_stay += list(all_events.filter(status="public"))
+		# if they are a member, include the community-only events
+		#if request.user in location.residents.all():
+		#	events_during_stay += list(all_events.filter(status="community"))
+		# if they RSVPed for any private events, include those
+		#private = all_events.filter(status="private").filter(attendees__in=[request.user,])
+		#if len(private) > 0:
+		#	events_during_stay += list(private)
+
 		return render(request, "reservation_detail.html", {"reservation": reservation, "past":past, 'location': location, "domain": domain,
-			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : location.from_email()})
+			"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, "paid": paid, "contact" : location.from_email(), 
+			'users_during_stay': users_during_stay })
+	else:
+		messages.add_message(request, messages.INFO, "You do not have permission to view that reservation")
+		return HttpResponseRedirect('/404')
 
 @login_required
 def UserEdit(request, username):
@@ -655,7 +684,7 @@ def UserEdit(request, username):
 		else:
 			has_image = False
 		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
-	return HttpResponseRedirect("/")
+	return HyyttpResponseRedirect("/")
 
 @login_required
 def UserAvatar(request, username):
