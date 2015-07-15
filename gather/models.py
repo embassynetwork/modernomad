@@ -6,10 +6,11 @@ from django.conf import settings
 from django.db.models.signals import post_save
 import requests
 from django.utils import timezone
+from core.models import Location
 
 class EventAdminGroup(models.Model):
 	''' Define admininstrative groups per location.'''
-	location = models.OneToOneField(settings.LOCATION_MODEL, related_name="event_admin_group")
+	location = models.OneToOneField(Location, related_name="event_admin_group")
 	users = models.ManyToManyField(User)
 
 	def __unicode__(self):
@@ -23,25 +24,6 @@ class EventSeries(models.Model):
 	desciption, and its own landing page which lists the associated events. '''
 	name = models.CharField(max_length=200)
 	description = models.TextField()
-
-	def __unicode__(self):
-		return self.name
-
-	class Meta:
-		app_label = 'gather'
-
-class Location(models.Model):
-	''' A stub location model to support basic location-based functionality.
-	Most people will write their own location model (either extending this one,
-	or using a model from another app). Django-gather is designed only to rely
-	on the 'slug' Location field, and the ability to associate events with a
-	location object (ie, a primary key).
-	django-gather requires settings.py to include a setting named
-	LOCATION_MODEL. The default is LOCATION_MODEL = gather.Location, which is
-	this model."
-	'''
-	name = models.CharField(max_length=200)
-	slug = models.CharField(max_length=60, unique=True)
 
 	def __unicode__(self):
 		return self.name
@@ -130,7 +112,7 @@ class Event(models.Model):
 	# the location field is optional but lets you associate an event with a
 	# specific location object that is also managed by this software. a single
 	# location or multiple locations can be defined.
-	location = models.ForeignKey(settings.LOCATION_MODEL)
+	location = models.ForeignKey(Location)
 	series = models.ForeignKey(EventSeries, related_name='events', blank=True, null=True)
 	admin = models.ForeignKey(EventAdminGroup, related_name='events')
 
@@ -196,8 +178,8 @@ class EventNotifications(models.Model):
 	# send reminders on day-of the event?
 	reminders = models.BooleanField(default=True)
 	# receive weekly announcements about upcoming events?
-	location_weekly = models.ManyToManyField(settings.LOCATION_MODEL, related_name="weekly_event_notifications")
-	location_publish = models.ManyToManyField(settings.LOCATION_MODEL, related_name="event_published")
+	location_weekly = models.ManyToManyField(Location, related_name="weekly_event_notifications")
+	location_publish = models.ManyToManyField(Location, related_name="event_published")
 
 	class Meta:
 		app_label = 'gather'

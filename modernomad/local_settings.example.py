@@ -42,9 +42,6 @@ MAX_RESERVATION_DAYS = 14
 # info.
 WELCOME_EMAIL_DAYS_AHEAD = 2
 
-# required for django-gather app
-LOCATION_MODEL = 'core.Location'
-
 # this should be a TEST or PRODUCTION key depending on whether this is a local
 # test/dev site or production!
 STRIPE_SECRET_KEY = "sk_XXXXX"
