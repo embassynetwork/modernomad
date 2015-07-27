@@ -619,7 +619,7 @@ def ReservationDetail(request, reservation_id, location_slug):
 		users_during_stay = []
 		reservations = Reservation.objects.filter(status="confirmed").filter(location=location).exclude(depart__lt=reservation.arrive).exclude( arrive__gt=reservation.depart)
 		for res in reservations:
-			if res not in users_during_stay:
+			if res.user not in users_during_stay:
 				users_during_stay.append(res.user)
 		for member in location.residents.all():
 			if member not in users_during_stay:
