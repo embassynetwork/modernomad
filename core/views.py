@@ -615,12 +615,12 @@ def ReservationDetail(request, reservation_id, location_slug):
 
 		domain = Site.objects.get_current().domain
 
-		# users that intersected your stay
+		# users that intersect this stay
 		users_during_stay = []
 		reservations = Reservation.objects.filter(status="confirmed").filter(location=location).exclude(depart__lt=reservation.arrive).exclude( arrive__gt=reservation.depart)
-		for reservation in reservations:
-			if reservation.user not in users_during_stay:
-				users_during_stay.append(reservation.user)
+		for res in reservations:
+			if res not in users_during_stay:
+				users_during_stay.append(res.user)
 		for member in location.residents.all():
 			if member not in users_during_stay:
 				users_during_stay.append(member)
