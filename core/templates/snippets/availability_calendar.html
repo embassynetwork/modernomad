@@ -74,7 +74,7 @@ $(function(){
 		if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
 			$("#img-upload-error").html('<div class="error"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
 			$('.modal-body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
-		} else {
+		} else if ($("#newprofileform").valid()) {
 			console.log("submitting new profile form")
 			form_data = $("#newprofileform").serialize();
 			console.log('profile form data:');
@@ -119,6 +119,8 @@ $(function(){
 			request.fail(function(msg) {
 				$("#show-room-availability").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
 			});
+		} else {
+			console.log('form is not valid. please correct errors.');
 		}
 	});
 
