@@ -4,7 +4,7 @@
 <div class="row">
 
 	<ul class="nav nav-pills nav-justified" id="reservation-pills" role="tablist">
-		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms {{dates.0|date:"m/d"}} - {{dates|last|date:"m/d"}}</a></li>
+		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms {{arrive|date:"m/d"}} - {{depart|date:"m/d"}}</a></li>
 		<li class="reservation-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Details</a></li>
 	</ul>
 
@@ -15,7 +15,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3 class="modal-title">Almost There...</h3>
+				<h3 class="modal-title">Create a Profile</h3>
 			</div>
 			<div class="modal-body registration-form">
 				{% with new_profile_form as form %}
@@ -35,12 +35,27 @@
 			{% include 'snippets/availability_details.html' %}
 		</div>
 	
-	</div>
+-	</div>
 
 <script src="{% static 'js/waypoints.js' %}"></script>
 <script src="{% static 'js/waypoints-sticky.js' %}"></script>
 <script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 <script>
+
+$("#new-user-modal").on('shown.bs.modal', function (e) {
+	console.log('modal shown');
+	$("#id_city").keyup(function() {
+		console.log('city field edited');
+		autocomplete = new google.maps.places.Autocomplete(this);
+		google.maps.event.addListener(autocomplete, 'place_changed', function() {
+			var place = autocomplete.getPlace();
+			console.log(place);
+			console.log(place.address_components);
+
+		});
+	});
+})
+
 $(function(){
 
 	reservation_submit = function(event) {
@@ -58,7 +73,7 @@ $(function(){
 		// proper, we validate the existence of the image field here instead.  
 		if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
 			$("#img-upload-error").html('<div class="error"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
-			$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
+			$('.modal-body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
 		} else {
 			console.log("submitting new profile form")
 			form_data = $("#newprofileform").serialize();
@@ -107,27 +122,28 @@ $(function(){
 		}
 	});
 
-
-
-
 	$("#optional-fields-header").click(function() {
 		$("#optional-fields").slideToggle("slow");
-		$("#optional-fields-header-icon").toggleClass("icon-plus icon-minus")
+		$("#optional-fields-header-icon").toggleClass("fa-chevron-circle-right fa-chevron-circle-down")
 	});
 
 	// the purpose field is only visible when the other fields have been
 	// filled out, so if the purpose field has content then all required
 	// fields are present and the submit button should be enabled.
 	$("#id_purpose").keyup(function() {
-		if (! !$.trim($("#id_purpose").val())) {
+		if ($.trim($("#id_purpose").val())) {
 			console.log("form is ready to submit!")
 			$("#submit-reservation").prop("disabled", false);
 			$("#submit-reservation").removeClass("disabled")
+			$("#submit-reservation").removeClass("btn-default")
 			$("#submit-reservation").addClass("btn-success")
+			$("#submit-reservation").val("Submit Request")
 		} else {
 			$("#submit-reservation").prop("disabled", true);
 			$("#submit-reservation").addClass("disabled")
 			$("#submit-reservation").removeClass("btn-success")
+			$("#submit-reservation").addClass("btn-default")
+			$("#submit-reservation").val("Please fill out the purpose field")
 		}
 	});
 
@@ -145,18 +161,26 @@ $(function(){
 		$(".room-info").hide();
 		
 		// update styling on the rooms that are not currently selected
-		$(".room-select").addClass("room-subtle");
 		$(".room-select").removeClass("emphasize");
+		$(".room-select").addClass("room-subtle");
+		$(".room-select .billing-message").hide();
 
 		// update styling for the room that is currently selected.
 		$(this).removeClass("room-subtle");
 		$(this).addClass("emphasize");
+		if ($(window).width() <= 992 ) {
+			$(".emphasize .billing-message").slideDown( "slow");
+			$(".emphasize .billing-message").delay(1200);
+			$(".emphasize .billing-message").slideUp( "slow");
+		}
 		$("#the-reservation-form").show();
 		$(room_info_div_id).show();
 	});
 
-	// display info about the first room
-	$(".room-select")[0].click();
+	if ({{available_reservations.keys|length}}) {
+		// display info about the first room
+		$(".room-select")[0].click();
+	}
 
 	function set_summary_width() {
         box_width = $('#the-reservation-form').parent().width();
@@ -172,74 +196,10 @@ $(function(){
 	var img_w = $('.room-info-image').width();
 	$('.room-info-image').css({'height':0.75*img_w+'px'});
 
-	/*
-	This code was taken from http://jsfiddle.net/ryanmaxwell/25QaE/ but
-	modified to use $sidebar.offset() instead of $sidebar.position()
-	*/
-	/*
-	$(function() {
 
-		var $window = $(window);
-		var lastScrollTop = $window.scrollTop();
-		var wasScrollingDown = true;
-
-		$sidebar = $("#the-reservation-form");
-		if ($sidebar.length > 0) {
-
-			initialSidebarTop = $sidebar.offset().top;
-
-			$window.scroll(function(event) {
-
-				var windowHeight = $window.height();
-				var sidebarHeight = $sidebar.outerHeight();
-
-				var scrollTop = $window.scrollTop();
-				var scrollBottom = scrollTop + windowHeight;
-
-				var sidebarTop = $sidebar.position().top;
-				var sidebarBottom = sidebarTop + sidebarHeight;
-
-				var heightDelta = Math.abs(windowHeight - sidebarHeight);
-				var scrollDelta = lastScrollTop - scrollTop;
-				
-				var isScrollingDown = (scrollTop > lastScrollTop);
-				var isWindowLarger = (windowHeight > sidebarHeight);
-
-				if ((isWindowLarger && scrollTop > initialSidebarTop) || (!isWindowLarger && scrollTop > initialSidebarTop + heightDelta)) {
-					$sidebar.addClass('fixed');
-				} else if (!isScrollingDown && scrollTop <= initialSidebarTop) {
-					$sidebar.removeClass('fixed');
-				}
-
-				var dragBottomDown = (sidebarBottom <= scrollBottom && isScrollingDown);
-				var dragTopUp = (sidebarTop >= scrollTop && !isScrollingDown);
-
-				if (dragBottomDown) {
-					if (isWindowLarger) {
-						$sidebar.css('top', 0);
-					} else {
-						$sidebar.css('top', -heightDelta);
-					}
-				} else if (dragTopUp) {
-					$sidebar.css('top', 0);
-				} else if ($sidebar.hasClass('fixed')) {
-					var currentTop = parseInt($sidebar.css('top'), 10);
-					
-					var minTop = -heightDelta;
-					var scrolledTop = currentTop + scrollDelta;
-					
-					var isPageAtBottom = (scrollTop + windowHeight >= $(document).height());
-					var newTop = (isPageAtBottom) ? minTop : scrolledTop;
-					
-					$sidebar.css('top', newTop);
-				}
-
-				lastScrollTop = scrollTop;
-				wasScrollingDown = isScrollingDown;
-			});
-		}
+	$("#click-availability-tab").click(function() {
+		$('#reservation-pills a[href="#showavailability"]').tab('show')
 	});
-	*/
 
 })
 

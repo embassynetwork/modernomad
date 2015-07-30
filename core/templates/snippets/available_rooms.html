@@ -1,15 +1,18 @@
 <div class="row top-spacer-large">
 
-	<div class="col-md-9" id="availability-area">
+	{% if available_reservations %}
+
+	<div class="col-md-9 col-sm-12" id="availability-area">
 		<div class="row" id="rooms-available-calendar">
 			{% for room in available_reservations.keys %}
 				<div class="col-lg-6">
 					<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-select">
 						<div class="panel panel-default">
 							<div class="panel-heading">
-    							<h3 class="panel-title">{{room.name}} ${{room.default_rate}}/night</h3>
+    							<h3 class="panel-title">{{room.name}} ${{room.default_rate|floatformat:0}}/night</h3>
   							</div>
 							<div class="panel-body">
+								<div class="billing-message center">Scroll down to submit</div>
 								<p class="room-avail-descr">{{ room.description|truncatechars:150 }}</p>
 								<img src="/media/{{room.image}}" class="room-info-image" />
 							</div>
@@ -21,7 +24,7 @@
 		</div>
 	</div>
 
-	<div class="col-md-3" id="detail-sidebar">
+	<div class="col-md-3 col-sm-12" id="detail-sidebar">
 
 		<div>
 		<form id="the-reservation-form" method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
@@ -51,7 +54,7 @@
 						<tbody>
 							<tr>
 								<td><strong>Total</strong></td>
-								<td><strong>$<span id="reservation-total">{{ res_dict.total|floatformat:2 }}</span></strong></td>
+								<td><strong>$<span id="room-{{room.id}}-reservation-total">{{ res_dict.total|floatformat:2 }}</span></strong></td>
 							</tr>
 						</tbody>
 					</table>
@@ -65,14 +68,13 @@
 
 				<div class="field-wrapper">	
 					<label for="id_purpose"><sup><i class="fa fa-asterisk text-danger"></i></sup> Tell us a little about the purpose of your trip</label>
-					<span class="form-help-text"></span>
 					<div class="form-field-body form-group">
 						<textarea class="form-control" id="id_purpose" rows="10" cols="40" name="purpose"></textarea>
 					</div>
 				</div>
 
 				<p id="optional-fields-header">
-				<i id="optional-fields-header-icon" class="glyphicon glyphicon-plus"></i>
+				<i id="optional-fields-header-icon" class="fa fa-chevron-circle-right"></i>
 				Optional fields: arrival time and additional comments
 				</p>
 
@@ -93,11 +95,18 @@
 				</div>
 			</div><!-- end reservation-additional-info -->
 
-			<input id="submit-reservation" type="submit" class="btn btn-success disabled" value='Submit Request'>
+			<input id="submit-reservation" type="submit" class="btn btn-default disabled" value='Please fill out the purpose field'>
 		</form>
 		</div>
 
 	</div><!-- end col-md-6 -->
 
+	{% else %}
+
+	<div class="col-md-9 col-sm-12" id="availability-area">
+		<p class="lead">There is no availability for these dates in a single room. You may wish to check the <a href="#showavailability" id="click-availability-tab">availability details tab</a> to see if your dates can be accommodated across multiple rooms</p>
+	</div>
+
+	{% endif %}
 </div>
 

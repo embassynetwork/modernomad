@@ -1,32 +1,25 @@
 {% load staticfiles %}
 
+<p class="">Introduce yourself! This information will shared with other members of the community (and theirs with you).</p>
 {% if not user.is_authenticated %}
-	<h2>Register a new account</h2>
 	<p>If you already have an account, you can <a href="/people/login/">log in</a> instead. </p>
-{% else %}
-	<h2>Tell us about yourself</h2>
 {% endif %}
-
-<p class="lead"> This information will be
-accessible to other members of the Embassy Network community.</p>
 
 <hr>
 
 <form class="registration-form form-horizontal" id="newprofileform" enctype="multipart/form-data" method="post">{% csrf_token %}
 
-	<h3>Profile Image</h3>
-
 	<div class="form-group">
 		<!-- image cropping -->
 			<p id="img-upload-error"></p>
-			<label class="light col-sm-4">
+			<label class="light col-sm-2 control-label">
 				{% if has_image %}
-					Update your Profile image here (optional)
+					Update image (optional)
 				{% else %}
-				<sup><small><span class="text-danger"><i class="fa fa-asterisk"></i></span></small></sup> Profile Image 
+					<sup><small><span class="text-danger"><i class="fa fa-asterisk"></i></span></small></sup> Image 
 				{% endif %}
 			</label>
-			<div class="form-field-body col-sm-8">
+			<div class="form-field-body col-sm-10">
 				<input type="file" id="image_file"/>
 			</div>
 			<div class="form-field-body col-sm-12">
@@ -46,15 +39,11 @@ accessible to other members of the Embassy Network community.</p>
 	</div>
 	<div class="clear"></div>
 
-	<h3>Profile Information</h3>
-	<hr>
-
 	<div class="form-group">
 		{{ form.bio.errors|safe }}
 		<label class="light col-sm-2 control-label" for="{{form.bio.label.id_for_label}}">{{ form.bio.label }}</label>
 		<div class="form-field-body col-sm-10">
 			{{ form.bio }}
-			<span class="form-help-text">{{ form.bio.help_text }}</span>
 		</div>
 	</div>
 
@@ -157,6 +146,32 @@ accessible to other members of the Embassy Network community.</p>
 <!-- client side form validation -->
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script>
+		$.validator.addMethod("uniqueUsername", function(value, element) {
+			var existingUsers = [
+				{% for user in all_users %}
+				"{{user.username}}",
+				{% endfor %}
+			];
+			if (existingUsers.indexOf(value) < 0) {
+				return true;
+			} else { 
+				return false;
+			}
+		}, "That username is taken");
+
+		$.validator.addMethod("uniqueEmail", function(value, element) {
+			var existingEmails = [
+				{% for user in all_users %}
+				"{{user.email}}",
+				{% endfor %}
+			];
+			if (existingEmails.indexOf(value) < 0) {
+				return true;
+			} else { 
+				return false;
+			}
+		}, "That email address is already associated with an account");
+
 		$.validator.addMethod("strictEmail", function(value, element) {
 			console.log('validating email field');
 			return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
@@ -185,16 +200,45 @@ accessible to other members of the Embassy Network community.</p>
 		);
 
 		$("#newprofileform").validate({
+			debug: true,
 			ignore: [],
 			rules: {
-				email: {
-					required: true,
-					strictEmail: true
-				}, 
+				bio: {
+					required: true
+				},
+				projects: {
+					required: true
+				},
+				sharing: {
+					required: true
+				},
+				discussion: {
+					required: true
+				},
 				links: {
 					listOfUrls: true
+				},
+				first_name: {
+					required: true
+				},
+				last_name: {
+					required: true
+				},
+				email: {
+					required: true,
+					strictEmail: true,
+					uniqueEmail: true
+				}, 
+				referral: {
+					required: true
+				},
+				city: {
+					required: true
+				},
+				username: {
+					required: true,
+					uniqueUsername: true
 				}
-
 			}	
 		});
 </script>
@@ -259,17 +303,6 @@ accessible to other members of the Embassy Network community.</p>
 		})(file);
 		reader.readAsDataURL(file);
 	}
-
-
-	/*
-	$("#newprofileform").submit(function (e) {
-		if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
-			$("#img-upload-error").html('<div class="error"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
-			$('html,body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
-			return false;
-		}
-	})
-	*/
 
 </script>
 

@@ -226,7 +226,7 @@ a:hover {
 
 @media (min-width: 768px) {
 	.modal-md {
-		width: 800px;
+		width: 600px;
 	}
 }
 
@@ -812,8 +812,12 @@ ul.errorlist,u {
 @media (min-width: 992px) {
     #the-reservation-form.stuck {
         position: fixed;
-        top: 0;
+        top: -30px;
     }
+}
+
+.billing-message {
+	background-color: #d2bc37;
 }
 
 #reservation-sticky-info {
@@ -1058,6 +1062,7 @@ div#spinner
 .room-avail-descr {
 	margin: 15px 5px 15px 5px;
 	height: 40px;
+	overflow: hidden;
 }
 
 .room-select .panel-body {
@@ -1119,7 +1124,6 @@ div#spinner
 
 #optional-fields-header {
 	font-style: italic;
-	padding-top: 30px;
 	cursor: pointer;
 }
 
@@ -1129,6 +1133,7 @@ div#spinner
 
 .room-info-image {
 	width: 100%;
+	height: 75%;
 }
 
 .room-info-image-wrapper {
@@ -1648,18 +1653,16 @@ p.lead strong {
 	
 }
 
-/* Registration Form */
 .registration-form {
-    max-width: 70rem;
-    margin: 0 auto;
-    font-size: 1.2em;
+    max-width: 75rem;
+    font-size: 1.1em;
 }
 
 .error {
 	color: rgb(228, 73, 73);
 	font-size: 80%;
-	background-color: beige;
 	padding: 10px;
+	font-weight: normal;
 }
 
 #guestcalendar {
@@ -1736,11 +1739,15 @@ label.light {
 	position: fixed;
 }
 
-#the-reservation-form form {
-	margin-bottom: 100px;
+#the-reservation-form {
+	margin-bottom: 4px;
 }
 
 #rooms-available-calendar {
 	width: auto;
 }
 
+.room-select {
+	margin-right: 40px;
+	margin-bottom: 40px;
+}

@@ -49,15 +49,6 @@
 {% block extrajs %}
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
 <script>
-	$("#id_city").keyup(function() {
-		autocomplete = new google.maps.places.Autocomplete(this);
-		google.maps.event.addListener(autocomplete, 'place_changed', function() {
-			var place = autocomplete.getPlace();
-			console.log(place);
-			console.log(place.address_components);
-
-		});
-	});
 </script>
 
 <script>
@@ -107,7 +98,7 @@
 				});
 			
 				request.done(function(msg) { // on success..
-					$("#show-room-availability").html(msg)
+					$("#show-room-availability").html(msg);
 				});
 
 				request.fail(function(msg) {

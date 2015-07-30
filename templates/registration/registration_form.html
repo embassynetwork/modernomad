@@ -1,22 +1,25 @@
-{% extends "root.html" %}
+{% extends "base.html" %}
 {% load staticfiles %}
 
 {% block body %}
 
-<div class="container">
-
-{% if messages %}
-<div class="messages">
-	{% for message in messages %}
-	<div class="alert alert-info">
-		<button type="button" class="close" data-dismiss="alert">×</button>
-		<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+<div class="row">
+<div class="col-sm-10 col-sm-offset-1">
+	{% if messages %}
+	<div class="messages top-spacer">
+		{% for message in messages %}
+		<div class="alert alert-info">
+			<button type="button" class="close" data-dismiss="alert">×</button>
+			<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+		</div>
+		{% endfor %}
 	</div>
-	{% endfor %}
-</div>
-{% endif %}
+	{% endif %}
 
-{% include 'snippets/profile_creation.html' %}
+	<h3>Register for an Account</h3>
+	{% include 'snippets/profile_creation.html' %}
+</div>
+</div>
 
 {% endblock %}
 

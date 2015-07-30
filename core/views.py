@@ -534,9 +534,10 @@ def CheckRoomAvailability(request, location_slug):
 	else:
 		current_user = None
 
+	all_users = User.objects.all().order_by('username')
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
 		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
-		"new_profile_form": new_profile_form})
+		"new_profile_form": new_profile_form, 'all_users': all_users})
 
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
