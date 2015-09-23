@@ -259,9 +259,9 @@ class RoomCalendar(calendar.HTMLCalendar):
 				cssclasses = self.cssclasses[weekday]
 			the_day = datetime.date(self.year, self.month, day)
 			if self.room.available_on(the_day):
-				return '<td class="%s"><span class="text-success glyphicon glyphicon-ok"></span> %d</td>' % (cssclasses, day)
+				return '<td class="a_day available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 			else:
-				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (cssclasses, day)
+				return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 
 class Room(models.Model):
 	name = models.CharField(max_length=200)

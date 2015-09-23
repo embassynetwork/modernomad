@@ -19,39 +19,193 @@
 </div>
 {% endif %}
 
-<h2 class="center">Make a Reservation Request</h2>
-
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-
-			<div class="reservation-dates row lead center">
-				<div class="col-md-6 form-group">
-                    <label for="arrive" class="reservation-label">Arrive</label>
-					<input class="form-control" id="arrive_date" name="arrive" type="text">
-                </div> 
-				<div class="col-md-6 form-group">
-                    <label for="depart" class="reservation-label">Depart</label>
-					<input class="form-control" id="depart_date" name="arrive" type="text">
-                </div>
+	<div class="row top-spacer">
+		<div class="col-md-12">
+			<h3>Filter by dates and preferences</h3>
+			<div class="reservation-dates row top-spacer">
+				<div class="col-md-3 form-group">
+					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive">
+				</div> 
+				<div class="col-md-3 form-group">
+					<input class="form-control" id="depart_date" name="arrive" type="text" placeholder="Depart">
+				</div>
+				<div class="col-md-2 form-inline">
+					<div class="checkbox">
+						<label>
+							<input class="form-control" type="checkbox"> Private
+						</label>
+					</div>
+					<div class="checkbox">
+						<label>
+							<input class="form-control" type="checkbox"> Shared Room
+						</label>
+					</div>
+				</div>
+				<div class="col-md-2 form-inline">
+					<div class="checkbox">
+						<label>
+							<input class="form-control" type="checkbox"> En-suite
+						</label>
+					</div>
+					<div class="checkbox">
+						<label>
+							<input class="form-control" type="checkbox"> Shared bathroom
+						</label>
+					</div>
+				</div>
 			</div>
 		</div>
-        <div class="col-md-4" id="res-detail">
-        </div>
+		<div class="col-md-4" id="res-detail">
+		</div>
 	</div>
-	<div class="row">
-        <div class="col-md-12">
 
-			<div id="show-room-availability"></div>
-        </div>
+	<div class="row">
+
+			<div id="show-room-availability">
+
+				<div class="top-spacer"></div>
+
+				<div class="col-md-9 col-sm-12" id="availability-area">
+					<div class="row" id="rooms-available-calendar">
+						{% for room in rooms %}
+							<div class="col-lg-6 col-sm-12">
+								<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-select">
+									<div class="panel panel-default">
+										<div class="panel-heading">
+											<p class="panel-title lead">{{room.name}}</p>
+										</div>
+										<div class="panel-body">
+											<p class="room-avail-descr">{{ room.description|truncatechars:150 }}</p>
+											<img src="/media/{{room.image}}" class="room-info-image" />
+										</div>
+									</div>
+								</label>
+								<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+
+				<div class="col-md-3 col-sm-12" id="detail-sidebar">
+					<div id="sticky-sidebar">
+
+					{% for room in rooms %}
+
+					<div class="room-info" id="room-info-{{room.id}}">
+						<div class="panel panel-default" id="panel-room-calendar">
+							<div class="panel-heading" id="room-cal-panel-heading">
+								<h3 class="panel-title">{{room.name|title}}</h3>
+							</div>
+							<div class="panel-body">
+								<div class="availability-cal" id="availability-cal-{{room.id}}">
+									{{ room.availability_calendar_html|safe }}
+									<div class="clear"></div>
+										<div class="center">
+										<a id="room-cal-{{room.id}}-prev" href="{% url 'room_cal_request' location.slug room.id %}?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
+										<a id="room-cal-{{room.id}}-next" href="{% url 'room_cal_request' location.slug room.id %}?month={{next_month.month}}&year={{next_month.year}}">Next</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{% endfor %}
+
+					</div>
+				</div>
+			
+			</div>
     </div>
 {% endblock %}
 
 {% block extrajs %}
+<script src="{% static 'js/waypoints.js' %}"></script>
+<script src="{% static 'js/waypoints-sticky.js' %}"></script>
+<script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
 <script>
 </script>
 
 <script>
+
+	$("#sticky-sidebar").waypoint('sticky');
+	function set_summary_width(elem) {
+		console.log('setting summary width for ' + elem);
+        box_width = $(elem).parent().width();
+        $(elem).width(box_width);
+    }
+    $(document).ready(function() {
+        set_summary_width('#sticky-sidebar');
+    });
+    $(window).resize(function() {
+        set_summary_width('#sticky-sidebar');
+	});
+
+	// this is a hack to force images to be the right dimensions, but should
+	// primarily be enforced by the model.
+	var img_w = $('.room-info-image').width();
+	$('.room-info-image').css({'height':0.65*img_w+'px'});
+
+	$(".room-info").hide();
+
+	$(".room-select").click(function() {
+		console.log('in room select');
+		room_id = $(this).attr('id').split('-')[2];
+		console.log(room_id);
+		room_info_div_id = "#room-info-" + room_id;
+
+		$(".room-info").hide();
+		
+		// update styling on the rooms that are not currently selected
+		$(".room-select").removeClass("emphasize");
+		$(".room-select").addClass("room-subtle");
+		$(".room-select .billing-message").hide();
+
+		// update styling for the room that is currently selected.
+		$(this).removeClass("room-subtle");
+		$(this).addClass("emphasize");
+		if ($(window).width() <= 992 ) {
+			$(".emphasize .billing-message").slideDown( "slow");
+			$(".emphasize .billing-message").delay(1200);
+			$(".emphasize .billing-message").slideUp( "slow");
+		}
+		$("#the-reservation-form").show();
+		$(room_info_div_id).show();
+	});
+	$(".room-select")[0].click();
+
+
+
+	//show the selected arrival and departure dates on the room calendar if it's in view
+	highlight_arrive = function() {
+		arrive_split = $("#arrive_date").val().split("/");
+		arrive_month = arrive_split[0];
+		arrive_day = arrive_split[1];
+		arrive_year = arrive_split[2];
+		// js uses 0-based indexing for the month
+		arrive_date = new Date(arrive_year, arrive_month-1, arrive_day);
+		arrive_month = arrive_date.getMonth()+1;
+		arrive_search_date_str = arrive_date.getFullYear() + "_" + arrive_month + "_" + arrive_date.getDate() 
+		if ($("."+arrive_search_date_str)) {
+			$(".a_day").removeClass("cal_arrive_date");
+			$("."+arrive_search_date_str).addClass("cal_arrive_date");
+		}
+	}
+
+	highlight_depart = function() {
+		depart_split = $("#depart_date").val().split("/");
+		depart_month = depart_split[0];
+		depart_day = depart_split[1];
+		depart_year = depart_split[2];
+		// js uses 0-based indexing for the month
+		depart_date = new Date(depart_year, depart_month-1, depart_day);
+		depart_month = depart_date.getMonth()+1;
+		depart_search_date_str = depart_date.getFullYear() + "_" + depart_month + "_" + depart_date.getDate() 
+		if ($("."+depart_search_date_str)) {
+			$(".a_day").removeClass("cal_depart_date");
+			$("."+depart_search_date_str).addClass("cal_depart_date");
+		}
+	}
 
 	$("#arrive_date, #depart_date").datepicker({
 		minDate: 0,
@@ -99,6 +253,8 @@
 			
 				request.done(function(msg) { // on success..
 					$("#show-room-availability").html(msg);
+					highlight_arrive();
+					highlight_depart();
 				});
 
 				request.fail(function(msg) {
@@ -119,17 +275,6 @@
 		});	
 	
 	});
-
-    function set_summary_width() {
-        box_width = $('#reservation-amount-summary-box').parent().width();
-        $('#reservation-amount-summary-box').width(box_width);
-    }
-    $(document).ready(function() {
-        set_summary_width();
-    });
-    $(window).resize(function() {
-        set_summary_width();
-    });
 
 </script>
 

@@ -3,10 +3,12 @@
 
 <div class="row">
 
-	<ul class="nav nav-pills nav-justified" id="reservation-pills" role="tablist">
-		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms {{arrive|date:"m/d"}} - {{depart|date:"m/d"}}</a></li>
-		<li class="reservation-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Details</a></li>
+	<div class="col-md-4">
+	<ul class="nav nav-tabs nav-justified" id="reservation-tabs" role="tablist">
+		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms</a></li>
+		<li class="reservation-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Matrix</a></li>
 	</ul>
+	</div>
 
 	<div class="tab-content">
 
@@ -37,9 +39,6 @@
 	
 -	</div>
 
-<script src="{% static 'js/waypoints.js' %}"></script>
-<script src="{% static 'js/waypoints-sticky.js' %}"></script>
-<script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 <script>
 
 $("#new-user-modal").on('shown.bs.modal', function (e) {
@@ -58,14 +57,18 @@ $("#new-user-modal").on('shown.bs.modal', function (e) {
 
 $(function(){
 
-	reservation_submit = function(event) {
+	reservation_submit = function(form) {
 		console.log('in reservation_submit');
 		if ( '{{current_user}}' == 'None' ) {
-			event.preventDefault();
 			$('#new-user-modal').modal();
+			return false;
 		} 
 	};
-	$("#submit-reservation").click(reservation_submit);
+	
+	$("#the-reservation-form").validate({
+		submitHandler: reservation_submit
+	});
+
 
 	$("#newprofileform").submit(function(e) {
 		e.preventDefault();
@@ -129,30 +132,13 @@ $(function(){
 		$("#optional-fields-header-icon").toggleClass("fa-chevron-circle-right fa-chevron-circle-down")
 	});
 
-	// the purpose field is only visible when the other fields have been
-	// filled out, so if the purpose field has content then all required
-	// fields are present and the submit button should be enabled.
-	$("#id_purpose").keyup(function() {
-		if ($.trim($("#id_purpose").val())) {
-			console.log("form is ready to submit!")
-			$("#submit-reservation").prop("disabled", false);
-			$("#submit-reservation").removeClass("disabled")
-			$("#submit-reservation").removeClass("btn-default")
-			$("#submit-reservation").addClass("btn-success")
-			$("#submit-reservation").val("Submit Request")
-		} else {
-			$("#submit-reservation").prop("disabled", true);
-			$("#submit-reservation").addClass("disabled")
-			$("#submit-reservation").removeClass("btn-success")
-			$("#submit-reservation").addClass("btn-default")
-			$("#submit-reservation").val("Please fill out the purpose field")
-		}
-	});
-
     $('[data-toggle="tooltip"]').tooltip();
 	$("#the-reservation-form").waypoint('sticky');
 
+	$(".room-select .billing-message").hide();
+
 	$(".room-select").click(function() {
+		console.log('in room select');
 		$("#the-reservation-form").hide();
 		// relies on the fact that the input tag is directly after the label tag
 		// for each room option.
@@ -179,24 +165,21 @@ $(function(){
 		$(room_info_div_id).show();
 	});
 
+
 	if ({{available_reservations.keys|length}}) {
 		// display info about the first room
 		$(".room-select")[0].click();
 	}
 
-	function set_summary_width() {
-        box_width = $('#the-reservation-form').parent().width();
-        $('#the-reservation-form').width(box_width);
-    }
     $(document).ready(function() {
-        set_summary_width();
+        set_summary_width('#the-reservation-form');
     });
     $(window).resize(function() {
-        set_summary_width();
+        set_summary_width('#the-reservation-form');
 	});
 
 	var img_w = $('.room-info-image').width();
-	$('.room-info-image').css({'height':0.75*img_w+'px'});
+	$('.room-info-image').css({'height':0.65*img_w+'px'});
 
 
 	$("#click-availability-tab").click(function() {

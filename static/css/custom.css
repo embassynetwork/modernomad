@@ -689,7 +689,7 @@ div.ui-datepicker{
 }
 
 .room-subtle {
-	opacity: 0.65;
+	opacity: 1;
 }
 
 .float-right {
@@ -810,9 +810,9 @@ ul.errorlist,u {
 }
 
 @media (min-width: 992px) {
-    #the-reservation-form.stuck {
+    #the-reservation-form.stuck, #sticky-sidebar.stuck {
         position: fixed;
-        top: -30px;
+        top: 0px;
     }
 }
 
@@ -1057,7 +1057,7 @@ div#spinner
 
 .room-info {
 	display: none;
-}
+} 
 
 .room-avail-descr {
 	margin: 15px 5px 15px 5px;
@@ -1065,7 +1065,7 @@ div#spinner
 	overflow: hidden;
 }
 
-.room-select .panel-body {
+.room-select .panel-body, .room-preview .panel-body {
 	padding: 0px;
 	font-weight: normal;
 }
@@ -1074,15 +1074,18 @@ div#spinner
 	cursor: pointer;
 }
 
-.room-select .panel-heading {
+.room-select .panel-heading, .room-preview .panel-heading {
 	margin-bottom: 0px;
-	font-family: 'Clarendon Light', serif;
-	font-weight: normal;
 	text-align: center;
 }
 
-#the-reservation-form .panel-heading, .emphasize .panel-heading {
-	background-color: #666;
+#mock-invoice-panel-heading, .emphasize .panel-heading {
+	background-color: #ea6f56;
+	color: #FFF;
+}
+
+#room-cal-panel-heading {
+	background-color: #ea6f56;
 	color: #FFF;
 }
 
@@ -1404,6 +1407,10 @@ table tr.row-even td { background: #eee; }
 .affix {
 }
 
+.bottom-spacer {
+	margin-bottom: 30px;
+}
+
 .top-spacer {
 	margin-top: 30px;
 }
@@ -1412,13 +1419,16 @@ table tr.row-even td { background: #eee; }
 	margin-top: 60px;
 }
 
-.availability-cal .today {
-	background-color: #CCC !important;
-	font-weight: bold;
+.cal_arrive_date {
+	border-left: 1px solid green;
+	border-top: 1px solid green;
+	border-bottom: 1px solid green;
 }
 
-.availability-cal td.sat, .availability-cal td.sun {
-	background-color: #EEE;
+.cal_depart_date {
+	border-right: 1px solid green;
+	border-top: 1px solid green;
+	border-bottom: 1px solid green;
 }
 
 .recent-events-row {
@@ -1726,13 +1736,30 @@ label.light {
 	font-size: 120%;
 }
 
-#reservation-pills > li.active > a, #reservation-pills  > li.active > a:hover, #reservation-pills > li.active > a:focus {
-	background-color: #ea6f56;
-	color: #eee;
+#reservation-tabs > li.active > a, #reservation-tabs  > li.active > a:hover, #reservation-tabs > li.active > a:focus {
 }
 
-#reservation-pills {
-	background-color: #eee;
+.available-today, .not-available-today {
+	text-align: center;
+}
+
+.available-today {
+	color: #3A7A93;
+	cursor: pointer;
+}
+
+.not-available-today {
+	color: #CCC;
+	background-color: #EEE;
+	cursor: default;
+}
+
+#panel-room-calendar table {
+	width: 100%;
+}
+
+#panel-room-calendar td {
+	padding: 5px;
 }
 
 .fixed {
@@ -1747,7 +1774,7 @@ label.light {
 	width: auto;
 }
 
-.room-select {
+.room-select, .room-preview {
 	margin-right: 40px;
 	margin-bottom: 40px;
 }

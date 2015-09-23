@@ -29,6 +29,7 @@ from gather.forms import NewUserForm
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
 from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
@@ -432,32 +433,28 @@ def calendar(request, location_slug):
 		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
 
 
-def room_cal_request(request, location_slug, room_id):
+def room_cal_request(request, location_slug, room_id, month=None, year=None):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
+	print request.POST
+	month = int(request.POST.get("month"))
+	year = int(request.POST.get("year"))
 	try:
 		location = get_location(location_slug)
 		room = Room.objects.get(id=room_id)
 	except:
 		return HttpResponseRedirect('/')
 
-	month = int(request.POST.get("month"))
-	year = int(request.POST.get("year"))
 	cal_html = room.availability_calendar_html(month=month, year=year)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	link_html = '''
-			<form id="room-cal-prev" action="%s" class="form-inline">
-				<input type="hidden" name="month" value=%s>
-				<input type="hidden" name="year" value=%s>
-				<input class="room-cal-req form-control" type="submit" value="Previous">
-			</form>
-			<form id="room-cal-next" action="%s" class="form-inline">
-				<input type="hidden" name="month" value=%s>
-				<input type="hidden" name="year" value=%s>
-				<input class="room-cal-req form-control" type="submit" value="Next">
-			</form>
-	''' % (reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
-			reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
+			<div class="clear"></div>
+			<div class="center">
+			<a id="room-cal-%s-prev" href="%s?month=%s&year=%s">Previous</a> | 
+			<a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
+			</div>
+	''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
+			room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
 	return HttpResponse(cal_html+link_html)
 
 def thanks(request, location_slug):
@@ -533,11 +530,16 @@ def CheckRoomAvailability(request, location_slug):
 		current_user = request.user
 	else:
 		current_user = None
+	
+	# base previous and next on the arrival date. note that these dates will
+	# also have a day associated with them but we don't use that. 
+	prev_month = arrive - relativedelta(months=1)
+	next_month = arrive + relativedelta(months=1)
 
 	all_users = User.objects.all().order_by('username')
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
 		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
-		"new_profile_form": new_profile_form, 'all_users': all_users})
+		"new_profile_form": new_profile_form, 'all_users': all_users, 'prev_month':prev_month, 'next_month': next_month})
 
 def ReservationSubmit(request, location_slug):
 	location=get_location(location_slug)
@@ -578,13 +580,8 @@ def ReservationSubmit(request, location_slug):
 		form = ReservationForm(location)
 	# pass the rate for each room to the template so we can update the cost of
 	# a reservation in real time. 
-	rooms = Room.objects.all()
-	room_list = {}
-	for room in rooms:
-		room_list[room.name] = round(room.default_rate)
-	room_list = json.dumps(room_list)
-	return render(request, 'reservation.html', {'form': form, "room_list": room_list, 
-		'max_days': location.max_reservation_days, 'location': location })
+	rooms = location.rooms_with_future_reservability()
+	return render(request, 'reservation.html', {'form': form, 'max_days': location.max_reservation_days, 'location': location, 'rooms': rooms })
 
 
 @login_required
