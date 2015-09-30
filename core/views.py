@@ -1654,7 +1654,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 @house_admin_required
 def payments(request, location_slug, year, month):
 	t0 = time.time()
-	print 'timing begun:'
+	logger.debug('timing begun:')
 	location = get_object_or_404(Location, slug=location_slug)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
@@ -1693,7 +1693,7 @@ def payments(request, location_slug, year, month):
 		totals['non_house_fees'] = totals['non_house_fees'] + p_non_house_fees
 		totals['house_fees'] = totals['house_fees'] + p_house_fees
 		totals['paid_amount'] = totals['paid_amount'] + p_paid_amount
-		print time.time()
+		logger.debug(time.time())
 
 	hotel_tax_percent = 0.0
 	not_paid_by_house = LocationFee.objects.filter(location=location).filter(fee__paid_by_house=False)
@@ -1702,8 +1702,8 @@ def payments(request, location_slug, year, month):
 
 	t1 = time.time()
 	dt = t1-t0
-	print 'timing ended. time taken:'
-	print dt
+	logger.debug('timing ended. time taken:')
+	logger.debug(dt)
 	return render(request, "payments.html", {'payments': payments_this_month, 'totals':totals, 'location': location, 
 		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, 'gross_rent': gross_rent, 
 		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 
