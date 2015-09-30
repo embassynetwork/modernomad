@@ -30,6 +30,7 @@ from gather.models import Event
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
 from datetime import date, timedelta
+import time
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
@@ -1652,6 +1653,8 @@ def submit_payment(request, reservation_uuid, location_slug):
 
 @house_admin_required
 def payments(request, location_slug, year, month):
+	t0 = time.time()
+	print 'timing begun:'
 	location = get_object_or_404(Location, slug=location_slug)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
@@ -1662,33 +1665,45 @@ def payments(request, location_slug, year, month):
 	gross_rent_transient = 0
 	net_rent_transient = 0
 	hotel_tax = 0
+	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'paid_amount':0}
 	# JKS if the reservation has bill line items that are not paid by the house
 	# (so-called non_house_fees), then the amount to_house counts as transient
 	# occupancy income. otherwise it counts as resident occupancy income. 
 	# TODO: we;re essentially equating non house fees with hotel taxes. we
 	# should max this explicit in some way. 
 	for p in payments_this_month:
-		gross_rent += p.to_house()
-		if p.bill.non_house_fees() > 0:
-			gross_rent_transient += (p.to_house() + p.house_fees())
-			net_rent_transient += p.to_house()
-			hotel_tax += p.non_house_fees()
+		# pull out the values we call multiple times to make this faster
+		p_to_house = p.to_house()
+		p_bill_non_house_fees = p.bill.non_house_fees()
+		p_house_fees = p.house_fees()
+		p_non_house_fees = p.non_house_fees()
+		p_paid_amount = p.paid_amount
+
+		gross_rent += p_to_house
+		if p_bill_non_house_fees > 0:
+			gross_rent_transient += (p_to_house + p_house_fees)
+			net_rent_transient += p_to_house
+			# XXX is p_non_house_fees == p_bill_non_house_fees??
+			hotel_tax += p_non_house_fees
 		else:
-			net_rent_resident += p.to_house()
+			net_rent_resident += p_to_house
+		# track totals
+		totals['count'] = totals['count'] + 1
+		totals['to_house'] = totals['to_house'] + p_to_house
+		totals['non_house_fees'] = totals['non_house_fees'] + p_non_house_fees
+		totals['house_fees'] = totals['house_fees'] + p_house_fees
+		totals['paid_amount'] = totals['paid_amount'] + p_paid_amount
+		print time.time()
 
 	hotel_tax_percent = 0.0
 	not_paid_by_house = LocationFee.objects.filter(location=location).filter(fee__paid_by_house=False)
 	for loc_fee in not_paid_by_house:
 		hotel_tax_percent += loc_fee.fee.percentage
 
-	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'paid_amount':0}
-	for p in payments_this_month:
-		totals['count'] = totals['count'] + 1
-		totals['to_house'] = totals['to_house'] + p.to_house()
-		totals['non_house_fees'] = totals['non_house_fees'] + p.non_house_fees()
-		totals['house_fees'] = totals['house_fees'] + p.house_fees()
-		totals['paid_amount'] = totals['paid_amount'] + p.paid_amount
-
+	t1 = time.time()
+	dt = t1-t0
+	print 'timing ended. time taken:'
+	print dt
 	return render(request, "payments.html", {'payments': payments_this_month, 'totals':totals, 'location': location, 
 		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, 'gross_rent': gross_rent, 
 		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 
