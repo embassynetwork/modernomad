@@ -878,10 +878,6 @@ b.dark-red-bold {
 	color: red;
 }
 
-.greyed-out {
-	color: #999999;
-}
-
 .sm-row-spacer {
 	padding-bottom: 10px;
 }
@@ -969,7 +965,11 @@ form.res-action {
 }
 
 .greyed-out {
-	font-color: grey;
+	color: #999999;
+}
+
+.faded {
+	opacity: 0.6;
 }
 
 div#spinner
@@ -1243,6 +1243,10 @@ h3.no-top-margin {
 }
 
 .thirtypx-spacer-left {
+	margin-left: 30px;
+}
+
+.thirtypx-spacer-right {
 	margin-left: 30px;
 }
 
@@ -1690,4 +1694,8 @@ p.lead strong {
 
 label.light {
 	font-weight: normal;
+}
+
+#reservation-list-table {
+	width: inherit;
 }

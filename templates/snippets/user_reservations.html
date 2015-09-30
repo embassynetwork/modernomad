@@ -2,25 +2,32 @@
 
 {% if past_reservations|length > 0 %}
 	<h4>Previous</h4>
-	{% for reservation in past_reservations %}
-		<div>
+	<table class="table" id="reservation-list-table">
+		{% for reservation in past_reservations %}
+		<tr {% if reservation.status == 'canceled' %} class="faded" {% endif %} >
+		<td>
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
-			- <em>{{reservation.status}}</em>
-		</div>
+		</td>
+		<td><em>{{reservation.status}}</em></td>
+		</tr>
 	{% endfor %}
+	</table>
 {% endif %}
 
 {% if upcoming_reservations|length > 0 %}
 	<h4>Upcoming</h4>
+	<table class="table" id="reservation-list-table">
 	{% for reservation in upcoming_reservations %}
-	<div {% if reservation.status == 'canceled' %} class="greyed-out" {% endif %} >
+		<tr {% if reservation.status == 'canceled' %} class="faded" {% endif %} >
+			<td>
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
-			- <em>{{reservation.status}}</em>
-			{% ifequal reservation.status 
-		</div>
+		</td>
+		<td><em>{{reservation.status}}</em></td>
+		</tr>
 	{% endfor %}
+	</table>
 {% endif %}
 
 {% if upcoming_reservations|length == 0 and past_reservations|length == 0 %}
