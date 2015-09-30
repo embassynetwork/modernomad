@@ -1,45 +1,26 @@
 {% load core_tag_extras %}
 
 {% if past_reservations|length > 0 %}
-<h4>Previous</h4>
-{% for reservation in past_reservations %}
-	<div>
-		{% ifusergroup house_admin %}
+	<h4>Previous</h4>
+	{% for reservation in past_reservations %}
+		<div>
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
 			- <em>{{reservation.status}}</em>
-		{% else %}
-			{% if user == u or reservation.is_confirmed %}
-				<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
-				at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
-			{% endif %}
-			{% if user == u %}
-				- <em>{{reservation.status}}</em>
-			{% endif %}
-		{% endifusergroup %}	
-	</div>
-{% endfor %}
+		</div>
+	{% endfor %}
 {% endif %}
 
 {% if upcoming_reservations|length > 0 %}
-<h4>Upcoming</h4>
-{% for reservation in upcoming_reservations %}
-	<div>
-		{% ifusergroup house_admin %}
+	<h4>Upcoming</h4>
+	{% for reservation in upcoming_reservations %}
+	<div {% if reservation.status == 'canceled' %} class="greyed-out" {% endif %} >
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
 			- <em>{{reservation.status}}</em>
-		{% else %}
-			{% if user == u or reservation.is_confirmed %}
-				<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
-				at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
-			{% endif %}
-			{% if user == u %}
-			- <em>{{reservation.status}}</em>
-			{% endif %}
-		{% endifusergroup %}	
-	</div>
-{% endfor %}
+			{% ifequal reservation.status 
+		</div>
+	{% endfor %}
 {% endif %}
 
 {% if upcoming_reservations|length == 0 and past_reservations|length == 0 %}

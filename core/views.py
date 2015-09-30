@@ -490,7 +490,7 @@ def GetUser(request, username):
 		messages.add_message(request, messages.INFO, 'There is no user with that username.')
 		return HttpResponseRedirect('/404')
 
-	reservations = Reservation.objects.filter(user=user).exclude(status='deleted')
+	reservations = Reservation.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
 	past_reservations = []
 	upcoming_reservations = []
 	for reservation in reservations:
@@ -498,7 +498,13 @@ def GetUser(request, username):
 			upcoming_reservations.append(reservation)
 		else:
 			past_reservations.append(reservation)
-	return render(request, "user_details.html", {"u": user, 
+	user_is_house_admin_somewhere = False
+	for location in Location.objects.filter(public=True):
+		if user in location.house_admins.all():
+			user_is_house_admin_somewhere = True
+			break
+
+	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 

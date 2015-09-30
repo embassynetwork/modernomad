@@ -132,8 +132,10 @@
 	</div>
 	{% endifequal %}
 
-	<h2>Reservations</h2>
-	{% include "snippets/user_reservations.html" %}
+	{% if u = user or user_is_house_admin_somewhere %}
+		<h2>Reservations</h2>
+		{% include "snippets/user_reservations.html" %}
+	{% endif %}
 
 </div>
 </div>
