@@ -48,12 +48,12 @@ def location(request, location_slug):
 	return render(request, "landing.html", {'location': location})
 	
 def guest_rooms(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	rooms = location.guest_rooms()
 	return render(request, "location_rooms.html", {'rooms': rooms, 'location': location})
 
 def view_room(request, location_slug, room_id):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	room = get_object_or_404(Room, id=room_id)
 	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
@@ -62,17 +62,17 @@ def view_room(request, location_slug, room_id):
 	return render(request, "room.html", {'room': room, 'location': location, "next_month": next_month, "prev_month": prev_month})
 
 def community(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	residents = location.residents.all()
 	return render(request, "location_community.html", {'residents': residents, 'location': location})
 
 def team(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	team = location.house_admins.all()
 	return render(request, "location_team.html", {'team': team, 'location': location})
 
 def guests(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	guests_today = location.guests_today()
 	return render(request, "location_guests.html", {'guests': guests_today, 'location': location})
 
@@ -113,7 +113,7 @@ def get_calendar_dates(month, year):
 	return start, end, next_month, prev_month, month, year
 
 def today(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	# get all the reservations that intersect today (including those departing
 	# and arriving today)
 	today = timezone.now()
@@ -129,7 +129,7 @@ def today(request, location_slug):
 
 @house_admin_required
 def occupancy(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	today = datetime.date.today()
 	month = request.GET.get("month")
 	year = request.GET.get("year")
@@ -356,7 +356,7 @@ def occupancy(request, location_slug):
 
 @login_required
 def manage_today(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	today = timezone.localtime(timezone.now())
 
 	departing_today = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
@@ -373,7 +373,7 @@ def manage_today(request, location_slug):
 
 @login_required
 def calendar(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
 	year = request.GET.get("year")
@@ -437,7 +437,7 @@ def room_cal_request(request, location_slug, room_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	try:
-		location = get_location(location_slug)
+		location = get_object_or_404(Location, slug=location_slug)
 		room = Room.objects.get(id=room_id)
 	except:
 		return HttpResponseRedirect('/')
@@ -462,7 +462,7 @@ def room_cal_request(request, location_slug, room_id):
 	return HttpResponse(cal_html+link_html)
 
 def stay(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 
 	rooms = location.rooms_with_future_reservability()
 	today = timezone.localtime(timezone.now())
@@ -524,7 +524,7 @@ def CheckRoomAvailability(request, location_slug):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
-	location=get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	arrive_str = request.POST.get('arrive')
 	depart_str = request.POST.get('depart')
 	a_month, a_day, a_year = arrive_str.split("/")
@@ -550,7 +550,7 @@ def CheckRoomAvailability(request, location_slug):
 		'available_reservations': available_reservations, })
 
 def ReservationSubmit(request, location_slug):
-	location=get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if request.method == 'POST':
 		form = ReservationForm(location, request.POST)
 		if form.is_valid():
@@ -599,7 +599,7 @@ def ReservationSubmit(request, location_slug):
 
 @login_required
 def ReservationDetail(request, reservation_id, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	try:
 		reservation = Reservation.objects.get(id=reservation_id)
 		if not reservation:
@@ -779,7 +779,7 @@ def UserDeleteCard(request, username):
 def ReservationEdit(request, reservation_id, location_slug):
 	logger.debug("Entering ReservationEdit")
 	
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	# need to pull these dates out before we pass the instance into
 	# the ReservationForm, since it (apparently) updates the instance 
@@ -864,7 +864,7 @@ def ReservationCancel(request, reservation_id, location_slug):
 	if not request.method == "POST":
 		return HttpResponseRedirect("/404")
 
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if (not (request.user.is_authenticated() and request.user == reservation.user) 
 			and not request.user in location.house_admins.all()): 
@@ -898,7 +898,7 @@ def ReservationDelete(request, reservation_id, location_slug):
 
 @house_admin_required
 def LocationEditSettings(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if request.method == 'POST':
 		form = LocationSettingsForm(request.POST, instance=location)
 		if form.is_valid():
@@ -910,7 +910,7 @@ def LocationEditSettings(request, location_slug):
 
 @house_admin_required
 def LocationEditUsers(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if request.method == 'POST':
 		admin_user = resident_user = event_admin_user = None
 		if 'admin_username' in request.POST:
@@ -968,7 +968,7 @@ def LocationEditUsers(request, location_slug):
 
 @house_admin_required
 def LocationEditPages(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	
 	if request.method == 'POST':
 		action = request.POST['action']
@@ -1036,7 +1036,7 @@ def LocationEditPages(request, location_slug):
 
 @house_admin_required
 def LocationEditRooms(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 
 	location_rooms = location.rooms.all().order_by('name')
 
@@ -1112,7 +1112,7 @@ def LocationEditRooms(request, location_slug):
 
 @house_admin_required
 def LocationEditContent(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if request.method == 'POST':
 		form = LocationContentForm(request.POST, request.FILES, instance=location)
 		if form.is_valid():
@@ -1124,7 +1124,7 @@ def LocationEditContent(request, location_slug):
 
 @house_admin_required
 def LocationEditEmails(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	form = LocationSettingsForm(instance=location)
 	return render(request, 'location_edit_settings.html', {'page':'emails', 'location': location, 'form':form})
 
@@ -1139,7 +1139,7 @@ def ReservationManageList(request, location_slug):
 		reservation = get_object_or_404(Reservation, id=reservation_id)
 		return HttpResponseRedirect(reverse('reservation_manage', args=(reservation.location.slug, reservation.id)))
 
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 
 	show_all = False
 	if 'show_all' in request.GET and request.GET.get('show_all') == "True":
@@ -1163,7 +1163,7 @@ def ReservationManageCreate(request, location_slug):
 		notify = request.POST.get('email_announce');
 		print 'notify was set to:'
 		print notify
-		location = get_location(location_slug)
+		location = get_object_or_404(Location, slug=location_slug)
 		try:
 			username = request.POST.get('username');
 			the_user = User.objects.get(username=username)
@@ -1195,7 +1195,7 @@ def ReservationManageCreate(request, location_slug):
 
 @house_admin_required
 def ReservationManage(request, location_slug, reservation_id):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = get_object_or_404(Reservation, id=reservation_id)
 	user = User.objects.get(username=reservation.user.username)
 	other_reservations = Reservation.objects.filter(user=user).exclude(status='deleted').exclude(id=reservation_id)
@@ -1263,7 +1263,7 @@ def ReservationManageAction(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation_action = request.POST.get('reservation-action')
 	try:
@@ -1300,7 +1300,7 @@ def ReservationManageAction(request, location_slug, reservation_id):
 @house_admin_required
 def ReservationManageEdit(request, location_slug, reservation_id):
 	logger.debug("ReservationManageEdit")
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	logger.debug(request.POST)
 	if 'username' in request.POST:
@@ -1360,7 +1360,7 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 def ReservationManagePayment(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = get_object_or_404(Reservation, id=reservation_id)
 	
 	action = request.POST.get("action")
@@ -1388,7 +1388,7 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 def ReservationSendWelcomeEmail(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.is_confirmed():
 		guest_welcome(reservation)
@@ -1401,7 +1401,7 @@ def ReservationSendWelcomeEmail(request, location_slug, reservation_id):
 def ReservationSendReceipt(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.is_paid():
 		send_receipt(reservation)
@@ -1414,7 +1414,7 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 def ReservationRecalculateBill(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	reset_suppressed = request.POST.get('reset_suppressed')
 	if reset_suppressed == "true":
@@ -1428,7 +1428,7 @@ def ReservationRecalculateBill(request, location_slug, reservation_id):
 def ReservationToggleComp(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(pk=reservation_id)
 	if not reservation.is_comped():
 		# Let these nice people stay here for free
@@ -1445,7 +1445,7 @@ def ReservationToggleComp(request, location_slug, reservation_id):
 def ReservationDeleteBillLineItem(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(pk=reservation_id)
 	print "in delete bill line item"
 	print request.POST
@@ -1465,7 +1465,7 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 	# cleaning fee.
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(pk=reservation_id)
 
 	reason = request.POST.get("reason")
@@ -1512,7 +1512,7 @@ def ReservationSendMail(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	subject = request.POST.get("subject")
 	recipient = [request.POST.get("recipient"),]
 	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
@@ -1532,7 +1532,7 @@ def payments_today(request, location_slug):
 
 @login_required
 def PeopleDaterangeQuery(request, location_slug):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	start_str = request.POST.get('start_date')
 	end_str = request.POST.get('end_date')
 	s_month, s_day, s_year = start_str.split("/")
@@ -1554,7 +1554,7 @@ def PeopleDaterangeQuery(request, location_slug):
 
 @login_required
 def ReservationReceipt(request, location_slug, reservation_id):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	reservation = get_object_or_404(Reservation, id=reservation_id)
 	if request.user != reservation.user or location != reservation.location:
 		if not request.user.is_staff:
@@ -1575,7 +1575,7 @@ def ReservationReceipt(request, location_slug, reservation_id):
 
 def submit_payment(request, reservation_uuid, location_slug):
 	reservation = Reservation.objects.get(uuid = reservation_uuid)
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	print "submit payment"
 	if request.method == 'POST':
 		form = PaymentForm(request.POST, default_amount=None)
@@ -1652,7 +1652,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 
 @house_admin_required
 def payments(request, location_slug, year, month):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
 

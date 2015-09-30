@@ -43,5 +43,12 @@ def stay(request):
 def ErrorView(request):
 	return render(request, '404.html')
 
-
+def robots(request):
+	content = "User-agent: *\n"
+	for l in Location.objects.all():
+		content += "Disallow: /locations/%s/team/\n" % l.slug
+		content += "Disallow: /locations/%s/community/\n" % l.slug
+		content += "Disallow: /locations/%s/reservation/create/\n" % l.slug
+		content += "Disallow: /locations/%s/events/create/\n" % l.slug
+	return HttpResponse(content, content_type="text/plain")
 

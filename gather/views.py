@@ -20,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import get_template
 from django.template import Context
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 
 from gather.forms import EventForm, NewUserForm
 from gather.emails import new_event_notification, event_approved_notification, event_published_notification
@@ -27,25 +28,8 @@ from core.models import Location
 
 logger = logging.getLogger(__name__)
 
-class LocationNotUniqueException(Exception):
-	pass
-
-def get_location(location_slug=None):
-	if location_slug:
-		location = Location.objects.get(slug=location_slug)
-	else:
-		if Location.objects.count() == 1:
-			# the single object might not have pk=1 if a locationw as
-			# previously created and then deleted, so by using the all() (after
-			# checking there is only one location object) we aren't assuming
-			# any particular id. 
-			location = Location.objects.all()[0]
-		else:
-			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
-	return location
-
 def create_event(request, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	current_user = request.user
 	logger.debug("create_event: location:%s, user:%s" % (location, current_user))
 
@@ -102,7 +86,7 @@ def create_event(request, location_slug=None):
 
 @login_required
 def edit_event(request, event_id, event_slug, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	current_user = request.user
 	other_users = User.objects.exclude(id=current_user.id)
 	user_list = [u.username for u in other_users]
@@ -143,7 +127,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 		print 'event not found'
 		return HttpResponseRedirect('/404')
 
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	# if the slug has changed, redirect the viewer to the correct url (one
 	# where the url matches the current slug)
 	if event.slug != event_slug:
@@ -248,7 +232,7 @@ def upcoming_events(request, location_slug=None):
 	else:
 		current_user = None
 	today = datetime.datetime.today()
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	all_upcoming = Event.objects.upcoming(current_user = request.user, location=location)
 	culled_upcoming = []
 	for event in all_upcoming:
@@ -288,7 +272,7 @@ def user_events(request, username):
 
 @login_required
 def needs_review(request, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	# if user is not an event admin at this location, redirect
 	location_admin_group = EventAdminGroup.objects.get(location=location)
 	if not request.user.is_authenticated() or (request.user not in location_admin_group.users.all()):
@@ -301,7 +285,7 @@ def needs_review(request, location_slug=None):
 	return render(request, 'gather_events_admin_needing_review.html', {'events_pending': events_pending, 'events_under_discussion': events_under_discussion, 'location': location })
 
 def past_events(request, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if request.user.is_authenticated():
 		current_user = request.user
 	else:
@@ -365,7 +349,7 @@ def email_preferences(request, username, location_slug=None):
 
 @login_required
 def rsvp_event(request, event_id, event_slug, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -389,7 +373,7 @@ def rsvp_event(request, event_id, event_slug, location_slug=None):
 
 @login_required
 def rsvp_cancel(request, event_id, event_slug, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -415,7 +399,7 @@ def rsvp_cancel(request, event_id, event_slug, location_slug=None):
 	return HttpResponse(status=500); 
 
 def rsvp_new_user(request, event_id, event_slug, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -469,7 +453,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 	return HttpResponse(status=500); 
 
 def endorse(request, event_id, event_slug, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -483,7 +467,7 @@ def endorse(request, event_id, event_slug, location_slug=None):
 	return render(request, "snippets/endorsements.html", {"endorsements": endorsements, "current_user": request.user, 'location': location, 'event': event});
 
 def event_approve(request, event_id, event_slug, location_slug=None):
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location_event_admin = EventAdminGroup.objects.get(location=location)
@@ -512,7 +496,7 @@ def event_approve(request, event_id, event_slug, location_slug=None):
 def event_publish(request, event_id, event_slug, location_slug=None):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	location_event_admin = EventAdminGroup.objects.get(location=location)
 	if request.user not in location_event_admin.users.all():
 		return HttpResponseRedirect('/404')
@@ -542,7 +526,7 @@ def new_user_email_signup(request, location_slug=None):
 		return HttpResponseRedirect('/404')
 	print request.POST
 
-	location = get_location(location_slug)
+	location = get_object_or_404(Location, slug=location_slug)
 	# create new user
 	form = NewUserForm(request.POST)
 	if form.is_valid():
