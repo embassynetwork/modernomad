@@ -501,7 +501,7 @@ def GetUser(request, username):
 			past_reservations.append(reservation)
 	user_is_house_admin_somewhere = False
 	for location in Location.objects.filter(public=True):
-		if user in location.house_admins.all():
+		if request.user in location.house_admins.all():
 			user_is_house_admin_somewhere = True
 			break
 
