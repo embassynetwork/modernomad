@@ -1704,3 +1704,7 @@ input.disabled {
 	color: grey; 
 	background-color: #F0F0F0;
 }
+
+.word-wrap {
+	word-wrap: break-word;
+}

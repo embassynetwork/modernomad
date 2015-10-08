@@ -30,6 +30,9 @@
 	{% if u.profile.image %}
 	<div class="img-polaroid">
 		<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
+		{% if u == user or user_is_house_admin_somewhere %}
+			<a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a>
+		{% endif %}
 	</div>
 	{% endif %}
 
