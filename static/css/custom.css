@@ -1708,3 +1708,7 @@ input.disabled {
 .word-wrap {
 	word-wrap: break-word;
 }
+
+#repeat-guest-icon {
+	color: grey;
+}
