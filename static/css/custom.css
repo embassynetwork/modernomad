@@ -1699,3 +1699,8 @@ label.light {
 #reservation-list-table {
 	width: inherit;
 }
+
+input.disabled {
+	color: grey; 
+	background-color: #F0F0F0;
+}

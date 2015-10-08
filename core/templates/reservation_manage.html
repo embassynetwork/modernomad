@@ -134,8 +134,16 @@
 {% block extrajs %}
 <script language="JavaScript">
 
-function UpdateRefundValue(id, val) { 
-	$("#refund-amount-"+id).val(val)
+function UpdateRefundValue(id, val, field_status) { 
+	$("#refund-amount-"+id).val(val);
+	if (field_status == "readonly") {
+		$("#refund-amount-"+id).attr("readonly", "readonly");
+		$("#refund-amount-"+id).addClass("disabled");
+
+	} else {
+		$("#refund-amount-"+id).removeAttr("readonly");
+		$("#refund-amount-"+id).removeClass("disabled");
+	}
 } 
 
 function toggleRefundDetails(id){

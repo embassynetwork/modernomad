@@ -1608,7 +1608,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 
 				charge = payment_gateway.stripe_charge_card_third_party(reservation, amount, token, charge_descr)
 				print 'charge result'
-				print charge
+				print charge.card.last4
 
 				# associate payment information with reservation
 				Payment.objects.create(bill=reservation.bill,
@@ -1616,7 +1616,8 @@ def submit_payment(request, reservation_uuid, location_slug):
 					payment_service = "Stripe",
 					payment_method = charge.card.brand,
 					paid_amount = (charge.amount/100.00),
-					transaction_id = charge.id
+					transaction_id = charge.id,
+					last4 = charge.card.last4
 				)
 
 				if reservation.bill.total_owed() <= 0.0:
