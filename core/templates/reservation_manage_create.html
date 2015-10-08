@@ -62,7 +62,7 @@
 					<label class="col-sm-2 control-label">Room</label> 
 					<div class="col-sm-4">
 						<select class="form-control" name="room" required>
-							{% for room in location.rooms_with_future_reservability %}
+							{% for room in location.get_rooms %}
 								<option value="{{room.id}}">{{ room.name }}</option>
 							{% endfor %}
 						</select>
