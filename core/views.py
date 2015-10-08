@@ -691,7 +691,7 @@ def UserEdit(request, username):
 		else:
 			has_image = False
 		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
-	return HyyttpResponseRedirect("/")
+	return HttpResponseRedirect("/")
 
 @login_required
 def UserAvatar(request, username):
