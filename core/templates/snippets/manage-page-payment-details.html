@@ -25,7 +25,7 @@
 				<input name="payment_id" type="hidden" value="{{p.id}}">
 				<tr {% if p.is_fully_refunded %} class="greyed-out" {% endif %}>
 					<td>{{ p.payment_date }}
-					<td>{{ p.payment_method }}{% if p.last4 %} (*-{{p.last4}}){% endif %}</td>
+					<td>{{ p.payment_method }}{% if p.last4 %} (***{{p.last4}}){% endif %}</td>
 					<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
 					<td class="money">
 						{% if p.is_fully_refunded %} 
