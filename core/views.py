@@ -1568,6 +1568,7 @@ def ReservationReceipt(request, location_slug, reservation_id):
 		'user': reservation.user, 
 		'location': reservation.location,
 		'reservation': reservation,
+		'reservation_url': "https://" + Site.objects.get_current().domain + reservation.get_absolute_url() 
 		}) 
 	receipt_html = htmltext.render(c)
 

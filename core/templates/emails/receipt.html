@@ -4,19 +4,20 @@
 		<tr><td width="600px">
 
 		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-			<tr><td width="600px" align="center" style="font-size:140%;"><strong>RECEIPT</strong></td></tr> 
-			<tr><td width="600px" align="center" style="font-size:140%;"><strong>The Embassy Network</strong></td></tr>
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>
+				{% if reservation.bill.total_owed == 0 %}
+					RECEIPT
+					{% else %}
+					UNPAID
+					{% endif %}
+			</strong></td></tr> 
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>{{reservation.location.name|title}}</strong></td></tr>
 			<tr><td width="600px" align="center" style="font-size:140%;"><strong>Be at Home Across the Globe</strong></td></tr>
 		</table>
 
-		<p margin="0 0 1.6em 0" style="font-size:120%;"> Reservation for {{ user.first_name }} {{ user.last_name }} </p>
-		
-		
-		{% if reservation.bill.payment_date %}
-			 <p margin="0 0 1.6em 0">Paid on: {{ reservation.bill.payment_date }}</p>
-		{% else %}
-			<p style="width:100%; text-align:center;"><em>*** UNPAID ***</em></p>
-		{% endif %}
+		<tr><td width="600px"><p margin="1.6em 0 1.6em 0"><hr></p></td></tr>
+
+		<tr><td margin="0 0 1.6em 0" style="font-size:120%;"> Reservation for {{ user.first_name }} {{ user.last_name }} </td></tr>	
 		
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 			<tr><td width="150px"><strong>Location:</strong></td><td width="150px"> {{ location }}</td></tr>
@@ -42,14 +43,22 @@
 		{% endfor %}
 		<tr>
 			<td colspan="2" align="right" width="600px">
-				<strong>Total Paid:</strong> ${{ reservation.bill.total_paid|floatformat:2 }}
+				{% if reservation.bill.total_owed == 0 %}
+					<strong>Total Paid:</strong> ${{ reservation.bill.total_paid|floatformat:2 }}
+				{% else %}
+					<strong>Total Owed:</strong> ${{ reservation.bill.total_owed|floatformat:2 }}
+				{% endif %}
 			</td>
+			<tr><td width="150px">Details: <a href="{{reservation_url}}">{{reservation_url}}</a></td></tr>
 		</table>
 
+		
+
+
 		<p style="margin: 1em 0 0 0;">
-			Have fun on your onward adventures!<br/>
-			The Embassy Team<br/>
-			support@embassynetwork.com
+			Thank you for staying with us!<br/>
+			The {{reservation.location.name|title}} Team<br/>
+			<em>{{ reservation.location.from_email }}</em>
 		</p>
 
 	</td></tr>

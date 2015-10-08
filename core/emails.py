@@ -115,6 +115,7 @@ def send_receipt(reservation, send_to=None):
 		'user': reservation.user, 
 		'location': location,
 		'reservation': reservation,
+		'reservation_url': "https://" + Site.objects.get_current().domain + reservation.get_absolute_url() 
 		})
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
 	return send_from_location_address(subject, text_content, html_content, recipient, location)
