@@ -1666,6 +1666,9 @@ def payments(request, location_slug, year, month):
 	gross_rent_transient = 0
 	net_rent_transient = 0
 	hotel_tax = 0
+	external_txs_paid = 0
+	external_txs_fees = 0
+	external_txs_to_house = 0
 	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'paid_amount':0}
 	# JKS if the reservation has bill line items that are not paid by the house
 	# (so-called non_house_fees), then the amount to_house counts as transient
@@ -1688,12 +1691,15 @@ def payments(request, location_slug, year, month):
 			hotel_tax += p_non_house_fees
 		else:
 			net_rent_resident += p_to_house
-		# track totals
+		# track totals column
 		totals['count'] = totals['count'] + 1
 		totals['to_house'] = totals['to_house'] + p_to_house
 		totals['non_house_fees'] = totals['non_house_fees'] + p_non_house_fees
 		totals['house_fees'] = totals['house_fees'] + p_house_fees
 		totals['paid_amount'] = totals['paid_amount'] + p_paid_amount
+		if p.transaction_id == 'Manual':
+			external_txs_paid += p_paid_amount
+			external_txs_fees += p_house_fees
 
 	hotel_tax_percent = 0.0
 	not_paid_by_house = LocationFee.objects.filter(location=location).filter(fee__paid_by_house=False)
@@ -1707,7 +1713,8 @@ def payments(request, location_slug, year, month):
 	return render(request, "payments.html", {'payments': payments_this_month, 'totals':totals, 'location': location, 
 		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, 'gross_rent': gross_rent, 
 		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 
-		'hotel_tax': hotel_tax, 'hotel_tax_percent': hotel_tax_percent*100, 'total_transfer': gross_rent+hotel_tax })
+		'hotel_tax': hotel_tax, 'hotel_tax_percent': hotel_tax_percent*100, 'total_transfer': gross_rent+hotel_tax-external_txs_paid-external_txs_fees, 
+		'external_txs_paid': external_txs_paid, 'external_txs_fees': external_txs_fees })
 
 # ******************************************************
 #           registration and login callbacks and views
