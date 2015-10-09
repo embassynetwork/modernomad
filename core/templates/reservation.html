@@ -27,9 +27,9 @@
 					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive">
 				</div> 
 				<div class="col-md-3 form-group">
-					<input class="form-control" id="depart_date" name="arrive" type="text" placeholder="Depart">
+					<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart">
 				</div>
-				<div class="col-md-2 form-inline">
+				<div class="col-md-6 form-inline">
 					<div class="checkbox">
 						<label>
 							<input class="form-control" type="checkbox"> Private
@@ -40,8 +40,6 @@
 							<input class="form-control" type="checkbox"> Shared Room
 						</label>
 					</div>
-				</div>
-				<div class="col-md-2 form-inline">
 					<div class="checkbox">
 						<label>
 							<input class="form-control" type="checkbox"> En-suite
@@ -72,7 +70,7 @@
 								<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-select">
 									<div class="panel panel-default">
 										<div class="panel-heading">
-											<p class="panel-title lead">{{room.name}}</p>
+											<h3 class="panel-title">{{room.name}} <span class="pull-right">${{room.default_rate|floatformat:0}}</span></h3>
 										</div>
 										<div class="panel-body">
 											<p class="room-avail-descr">{{ room.description|truncatechars:150 }}</p>
@@ -101,7 +99,7 @@
 									{{ room.availability_calendar_html|safe }}
 									<div class="clear"></div>
 										<div class="center">
-										<a id="room-cal-{{room.id}}-prev" href="{% url 'room_cal_request' location.slug room.id %}?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
+											<span class="greyed-out">Previous</span> |
 										<a id="room-cal-{{room.id}}-next" href="{% url 'room_cal_request' location.slug room.id %}?month={{next_month.month}}&year={{next_month.year}}">Next</a>
 									</div>
 								</div>
@@ -127,6 +125,49 @@
 </script>
 
 <script>
+
+	function register() {
+		$("a[id*='room-cal'").click(function(e) {
+			console.log('room-cal clicked');
+			console.log($(this).attr('id'));
+			e.preventDefault();
+			// "this" will pick up the parameters from whichever link was clicked
+			room_id = $(this).attr('id').split('-')[2];
+			path = this.href.split('?')[1]
+			month = path.split('&')[0].split('=')[1];
+			year = path.split('&')[1].split('=')[1];
+			form_data = {'year': year, 'month': month, 'browse_past': 'false'};
+			console.log(form_data);
+			// the csrf token is here because when the ajax request returns the
+			// new html for the current calendar, the template processor won't
+			// have a chance to interpret the variable
+			form_data = $.param(form_data) + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
+
+			request = $.ajax({ 
+				data: form_data, 
+				type: "POST",
+				url: "/locations/{{location.slug}}/room/"+room_id+"/htmlcal/"
+			});
+
+			request.done(function(msg) { // on success..
+				div_id = "#availability-cal-" + room_id
+				$(div_id).html(msg)
+				register();
+				highlight_arrive();
+				highlight_depart();
+				// if the month displayed is the current month, then disable
+				// the link for the previous month (no browsing in the past)
+			});
+
+			request.fail(function(msg) {
+				div_id = "#availability-cal-" + room_id
+				console.log(div_id)
+				$(div_id).html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
+			});
+		})
+	};
+
+	register();
 
 	$("#sticky-sidebar").waypoint('sticky');
 	function set_summary_width(elem) {
@@ -198,7 +239,10 @@
 		depart_day = depart_split[1];
 		depart_year = depart_split[2];
 		// js uses 0-based indexing for the month
-		depart_date = new Date(depart_year, depart_month-1, depart_day);
+		// depart_date = new Date(depart_year, depart_month-1, depart_day);
+		// now subtract one day because you don't actually *stay* the night of your departure
+		depart_date = new Date(new Date().setDate(new Date(depart_year, depart_month-1, depart_day).getDate()-1))
+		console.log(depart_date)
 		depart_month = depart_date.getMonth()+1;
 		depart_search_date_str = depart_date.getFullYear() + "_" + depart_month + "_" + depart_date.getDate() 
 		if ($("."+depart_search_date_str)) {
@@ -223,6 +267,24 @@
 			$(this).change();
         }
 	});
+
+	/******************** unlikely to use this but just in case... 
+	$(".a_day").click(function(event) {
+		console.log(event.target);
+		// should we make this the arrive or depart date?
+		e = event;
+		new_date = event.target.val();
+		arrive = Date($("#arrive_date").val());
+		depart = Date($("#depart_date").val());
+		console.log(arrive);
+		console.log(depart);
+		console.log(new_date);
+
+		if ( (!arrive && !depart) || (new_date < depart) ) {
+			console.log("meh");
+		}
+	})
+	***************************** */
 
 	$("#arrive_date, #depart_date").change(function(event) {
 		// Get arrive and depart dates, update value. 

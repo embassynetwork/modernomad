@@ -433,12 +433,19 @@ def calendar(request, location_slug):
 		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
 
 
-def room_cal_request(request, location_slug, room_id, month=None, year=None):
+def room_cal_request(request, location_slug, room_id, month=None, year=None, browse_past=True):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	print request.POST
 	month = int(request.POST.get("month"))
 	year = int(request.POST.get("year"))
+	browse_past_str = request.POST.get("browse_past")
+	if browse_past_str == 'false':
+		browse_past = False
+	else:
+		brose_past = True
+	print browse_past
+
 	try:
 		location = get_location(location_slug)
 		room = Room.objects.get(id=room_id)
@@ -447,14 +454,25 @@ def room_cal_request(request, location_slug, room_id, month=None, year=None):
 
 	cal_html = room.availability_calendar_html(month=month, year=year)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	link_html = '''
-			<div class="clear"></div>
-			<div class="center">
-			<a id="room-cal-%s-prev" href="%s?month=%s&year=%s">Previous</a> | 
-			<a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
-			</div>
-	''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
-			room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
+
+	today = timezone.localtime(timezone.now())
+	if browse_past == False and prev_month < datetime.date(today.year, today.month, 1):
+		link_html = '''
+				<div class="clear"></div>
+				<div class="center">
+				<span class="greyed-out">Previous</span> | 
+				<a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
+				</div>
+		''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
+	else: 
+		link_html = '''
+				<div class="clear"></div>
+				<div class="center">
+				<a id="room-cal-%s-prev" href="%s?month=%s&year=%s">Previous</a> | 
+				<a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
+				</div>
+		''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
+				room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
 	return HttpResponse(cal_html+link_html)
 
 def thanks(request, location_slug):
@@ -580,8 +598,13 @@ def ReservationSubmit(request, location_slug):
 		form = ReservationForm(location)
 	# pass the rate for each room to the template so we can update the cost of
 	# a reservation in real time. 
+	today = timezone.localtime(timezone.now())
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 	rooms = location.rooms_with_future_reservability()
-	return render(request, 'reservation.html', {'form': form, 'max_days': location.max_reservation_days, 'location': location, 'rooms': rooms })
+	return render(request, 'reservation.html', {'form': form, 'max_days': location.max_reservation_days, 'location': location, 'rooms': rooms, 
+		'prev_month': prev_month, 'next_month': next_month, 'month': month })
 
 
 @login_required

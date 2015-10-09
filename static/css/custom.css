@@ -1744,13 +1744,12 @@ label.light {
 }
 
 .available-today {
-	color: #3A7A93;
+	background-color: #dff0d8;
 	cursor: pointer;
 }
 
 .not-available-today {
-	color: #CCC;
-	background-color: #EEE;
+	background-color: #f5f5f5;
 	cursor: default;
 }
 
