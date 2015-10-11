@@ -11,6 +11,13 @@
 
 <div class="room-list">
 	<h2>Explore the Rooms</h2>
+  <div class="filters">
+    <form class="filters-form" method="POST" action="{% url 'location_stay' location.slug %}">
+      {% csrf_token %}
+      {{private_only_input}}
+      <label>Private rooms only</label>
+    </form>
+  </div>
 	{% for room in rooms %}
 		<div class="row room-row">
 			<div class="col-md-3">

@@ -329,4 +329,9 @@ class EmailTemplateForm(forms.Form):
 		self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables))
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
+class PrivateOnlyForm(forms.Form):
+	private_only = forms.BooleanField(widget=forms.CheckboxInput(attrs={'onclick':'this.form.submit();'}), initial=False, label=False, required=False)
 
+	def __init__(self, private):		
+		super(PrivateOnlyForm, self).__init__()
+		self.fields['private_only'].initial = private
