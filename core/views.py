@@ -8,8 +8,6 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from registration import signals
-import registration
 from core.forms import ReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
 from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
@@ -1697,31 +1695,11 @@ def user_login(request):
 	return render(request, 'registration/login.html', context_instance=RequestContext(request))
 
 
-'''A registration backend that supports capturing user profile
-information during registration.'''
-
-	
-class Registration(registration.views.RegistrationView):
-	
-	@transaction.atomic
-	def register(self, request, **cleaned_data):
-		'''Register a new user, saving the User and UserProfile data.'''
-		print "in register()"
-		user = User()
-		for field in user._meta.fields:
-			if field.name in cleaned_data:
-				setattr(user, field.name, cleaned_data[field.name])
-		# the password has been validated by the form
-
-		user.set_password(cleaned_data['password2'])
-		user.save()
-		print 'user created'
-		print user
-
-		profile = UserProfile(user=user)
-		for field in profile._meta.fields:
-			if field.name in cleaned_data:
-				setattr(profile, field.name, cleaned_data[field.name])
+def register(request):
+	if request.method == "POST":
+		profile_form = UserProfileForm(request.POST, request.FILES)
+		user = profile_form.save()
+		profile = user.profile
 
 		img_data = request.POST.get("image")
 		# If none or len 0, means illegal image data
@@ -1748,43 +1726,10 @@ class Registration(registration.views.RegistrationView):
 		profile.save()
 
 		print 'logging in user'
-		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
+		new_user = authenticate(username=user.username, password=profile_form.clean_password2())
 		login(request, new_user)
-		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
-		process_unsaved_reservation(request)	
-		return new_user
-
-	def registration_allowed(self, request):
-		if request.user.is_authenticated():
-			return False
-		else: return True
-
-	def get_success_url(self, request, user):
-		"""
-		Return the name of the URL to redirect to after successful
-		account activation. 
-
-		We're not using the registration system's activation features ATM, so
-		interrupt the registration process here.
-		"""
-		url_path = request.get_full_path().split("next=")
-		if request.session.get('new_res_redirect'):
-			res_id = request.session['new_res_redirect']['res_id']
-			location_slug = request.session['new_res_redirect']['location_slug']
-			request.session.pop('new_res_redirect')
-			messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
-			return reverse('reservation_detail', args=(location_slug, res_id))
-		elif len(url_path) > 1 and url_path[1].endswith("events/create/"):
-			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to propose your event!')
-			return (url_path[1], (), {'username' : user.username})
-		else:
-			return ('user_detail', (), {'username': user.username})
-
-class Activation(registration.views.ActivationView):
-	def activate(self, request, user):
-		# we're not using the registration system's activation features ATM.
-		return True
-
-
-
-
+		process_unsaved_reservation(request)
+	else:
+		profile_form = UserProfileForm()
+	all_users = User.objects.all().order_by('username')
+	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'all_users': all_users })
