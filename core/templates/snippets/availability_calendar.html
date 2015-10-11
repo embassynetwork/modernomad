@@ -12,23 +12,6 @@
 
 	<div class="tab-content">
 
-	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-md">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3 class="modal-title">Create a Profile</h3>
-			</div>
-			<div class="modal-body registration-form">
-				{% with new_profile_form as form %}
-					{% include 'snippets/profile_creation.html' %}
-				{% endwith %}
-			</div>
-		</div>
-	</div>
-
-
-
 		<div role="tabpanel" class="tab-pane active" id="chooseroom">
 			{% include 'snippets/available_rooms.html' %}
 		</div><!-- end tab chooseroom -->
@@ -41,92 +24,7 @@
 
 <script>
 
-$("#new-user-modal").on('shown.bs.modal', function (e) {
-	console.log('modal shown');
-	$("#id_city").keyup(function() {
-		console.log('city field edited');
-		autocomplete = new google.maps.places.Autocomplete(this);
-		google.maps.event.addListener(autocomplete, 'place_changed', function() {
-			var place = autocomplete.getPlace();
-			console.log(place);
-			console.log(place.address_components);
-
-		});
-	});
-})
-
 $(function(){
-
-	reservation_submit = function(form) {
-		console.log('in reservation_submit');
-		if ( '{{current_user}}' == 'None' ) {
-			$('#new-user-modal').modal();
-			return false;
-		} 
-		return true;
-	};
-	
-	$("#the-reservation-form").validate({
-		submitHandler: reservation_submit
-	});
-
-
-	$("#newprofileform").submit(function(e) {
-		e.preventDefault();
-		// because the profile image doesn't really happen on the form
-		// proper, we validate the existence of the image field here instead.  
-		if ('{{ has_image }}' != 'True' && ! $("#id_image").val() ) {
-			$("#img-upload-error").html('<div class="error"><span class="glyphicon glyphicon-exclamation-sign"></span> Image is required.</div>');
-			$('.modal-body').animate({ scrollTop: $("#img-upload-error").offset().top - 100})
-		} else if ($("#newprofileform").valid()) {
-			console.log("submitting new profile form")
-			form_data = $("#newprofileform").serialize();
-			console.log('profile form data:');
-			console.log(form_data);
-			request = $.ajax({ 
-				data: form_data,
-				type: "POST",
-				url: '{% url "registration_register" %}'
-			});
-
-			request.done(function(msg) { // on success..
-
-				function getCookie(name) {
-					var cookieValue = null;
-					if (document.cookie && document.cookie != '') {
-						var cookies = document.cookie.split(';');
-						for (var i = 0; i < cookies.length; i++) {
-							var cookie = jQuery.trim(cookies[i]);
-							// Does this cookie string begin with the name we want?
-				
-							if (cookie.substring(0, name.length + 1) == (name + '=')) {
-								cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-								break;
-							}
-						}
-					}
-					return cookieValue;
-				}
-
-				console.log('profile created');
-				/* CSRF token needs to be updated after the POST request (IIUC,
-				* this is *both* because the new user has been logged in, which
-				* will invalidate the session, and, because the profile POST
-				* will also update the session */
-				$("#the-reservation-form input[name='csrfmiddlewaretoken']").val(getCookie('csrftoken'))
-				form_data = $("#the-reservation-form").serialize();
-				console.log('reservation form data:');
-				console.log(form_data);
-				$("#the-reservation-form").submit();
-			});
-
-			request.fail(function(msg) {
-				$("#show-room-availability").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
-			});
-		} else {
-			console.log('form is not valid. please correct errors.');
-		}
-	});
 
 	$("#optional-fields-header").click(function() {
 		$("#optional-fields").slideToggle("slow");
