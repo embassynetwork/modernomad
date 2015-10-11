@@ -1103,6 +1103,7 @@ div#spinner
 
 #submit-reservation {
 	margin-top: 30px;
+	width: 100%;
 }
 
 #id_arrival_time, #id_comments {
