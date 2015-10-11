@@ -465,7 +465,7 @@ def room_cal_request(request, location_slug, room_id):
 def stay(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 
-	rooms = location.rooms_with_future_reservability()
+	rooms = location.rooms_with_future_reservability(private_only=request.GET.get('private_only', False))
 	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
 	year = request.GET.get("year")
