@@ -63,6 +63,7 @@ $(function(){
 			$('#new-user-modal').modal();
 			return false;
 		} 
+		return true;
 	};
 	
 	$("#the-reservation-form").validate({
@@ -165,11 +166,7 @@ $(function(){
 		$(room_info_div_id).show();
 	});
 
-
-	if ({{available_reservations.keys|length}}) {
-		// display info about the first room
-		$(".room-select")[0].click();
-	}
+	$("#the-reservation-form").hide();
 
     $(document).ready(function() {
         set_summary_width('#the-reservation-form');

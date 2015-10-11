@@ -1065,7 +1065,7 @@ div#spinner
 	overflow: hidden;
 }
 
-.room-select .panel-body, .room-preview .panel-body {
+.room-panel .panel-body, .room-preview .panel-body {
 	padding: 0px;
 	font-weight: normal;
 }
@@ -1074,7 +1074,7 @@ div#spinner
 	cursor: pointer;
 }
 
-.room-select .panel-heading, .room-preview .panel-heading {
+.room-panel .panel-heading, .room-preview .panel-heading {
 	margin-bottom: 0px;
 	text-align: center;
 }
@@ -1774,7 +1774,7 @@ label.light {
 	width: auto;
 }
 
-.room-select, .room-preview {
+.room-panel, .room-preview {
 	margin-right: 40px;
 	margin-bottom: 40px;
 }

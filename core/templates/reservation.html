@@ -45,7 +45,7 @@
 					<div class="row" id="rooms-available-calendar">
 						{% for room in rooms %}
 							<div class="col-lg-6 col-sm-12">
-								<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-select">
+								<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-panel">
 									<div class="panel panel-default">
 										<div class="panel-heading">
 											<h3 class="panel-title">{{room.name}} <span class="pull-right">${{room.default_rate|floatformat:0}}</span></h3>
@@ -64,29 +64,6 @@
 
 				<div class="col-md-3 col-sm-12" id="detail-sidebar">
 					<div id="sticky-sidebar">
-
-					{% for room in rooms %}
-
-					<div class="room-info" id="room-info-{{room.id}}">
-						<div class="panel panel-default" id="panel-room-calendar">
-							<div class="panel-heading" id="room-cal-panel-heading">
-								<h3 class="panel-title">{{room.name|title}}</h3>
-							</div>
-							<div class="panel-body">
-								<div class="availability-cal" id="availability-cal-{{room.id}}">
-									{{ room.availability_calendar_html|safe }}
-									<div class="clear"></div>
-										<div class="center">
-											<span class="greyed-out">Previous</span> |
-										<a id="room-cal-{{room.id}}-next" href="{% url 'room_cal_request' location.slug room.id %}?month={{next_month.month}}&year={{next_month.year}}">Next</a>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					{% endfor %}
-
 					</div>
 				</div>
 			
@@ -103,49 +80,6 @@
 </script>
 
 <script>
-
-	function register() {
-		$("a[id*='room-cal'").click(function(e) {
-			console.log('room-cal clicked');
-			console.log($(this).attr('id'));
-			e.preventDefault();
-			// "this" will pick up the parameters from whichever link was clicked
-			room_id = $(this).attr('id').split('-')[2];
-			path = this.href.split('?')[1]
-			month = path.split('&')[0].split('=')[1];
-			year = path.split('&')[1].split('=')[1];
-			form_data = {'year': year, 'month': month, 'browse_past': 'false'};
-			console.log(form_data);
-			// the csrf token is here because when the ajax request returns the
-			// new html for the current calendar, the template processor won't
-			// have a chance to interpret the variable
-			form_data = $.param(form_data) + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
-
-			request = $.ajax({ 
-				data: form_data, 
-				type: "POST",
-				url: "/locations/{{location.slug}}/room/"+room_id+"/htmlcal/"
-			});
-
-			request.done(function(msg) { // on success..
-				div_id = "#availability-cal-" + room_id
-				$(div_id).html(msg)
-				register();
-				highlight_arrive();
-				highlight_depart();
-				// if the month displayed is the current month, then disable
-				// the link for the previous month (no browsing in the past)
-			});
-
-			request.fail(function(msg) {
-				div_id = "#availability-cal-" + room_id
-				console.log(div_id)
-				$(div_id).html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
-			});
-		})
-	};
-
-	register();
 
 	$("#sticky-sidebar").waypoint('sticky');
 	function set_summary_width(elem) {
@@ -189,45 +123,10 @@
 			$(".emphasize .billing-message").slideUp( "slow");
 		}
 		$("#the-reservation-form").show();
+		$("#reservation-additional-info").show();
 		$(room_info_div_id).show();
 	});
-	$(".room-select")[0].click();
 
-
-
-	//show the selected arrival and departure dates on the room calendar if it's in view
-	highlight_arrive = function() {
-		arrive_split = $("#arrive_date").val().split("/");
-		arrive_month = arrive_split[0];
-		arrive_day = arrive_split[1];
-		arrive_year = arrive_split[2];
-		// js uses 0-based indexing for the month
-		arrive_date = new Date(arrive_year, arrive_month-1, arrive_day);
-		arrive_month = arrive_date.getMonth()+1;
-		arrive_search_date_str = arrive_date.getFullYear() + "_" + arrive_month + "_" + arrive_date.getDate() 
-		if ($("."+arrive_search_date_str)) {
-			$(".a_day").removeClass("cal_arrive_date");
-			$("."+arrive_search_date_str).addClass("cal_arrive_date");
-		}
-	}
-
-	highlight_depart = function() {
-		depart_split = $("#depart_date").val().split("/");
-		depart_month = depart_split[0];
-		depart_day = depart_split[1];
-		depart_year = depart_split[2];
-		// js uses 0-based indexing for the month
-		// depart_date = new Date(depart_year, depart_month-1, depart_day);
-		// now subtract one day because you don't actually *stay* the night of your departure
-		depart_date = new Date(new Date().setDate(new Date(depart_year, depart_month-1, depart_day).getDate()-1))
-		console.log(depart_date)
-		depart_month = depart_date.getMonth()+1;
-		depart_search_date_str = depart_date.getFullYear() + "_" + depart_month + "_" + depart_date.getDate() 
-		if ($("."+depart_search_date_str)) {
-			$(".a_day").removeClass("cal_depart_date");
-			$("."+depart_search_date_str).addClass("cal_depart_date");
-		}
-	}
 
 	$("#arrive_date, #depart_date").datepicker({
 		minDate: 0,
@@ -293,8 +192,6 @@
 			
 				request.done(function(msg) { // on success..
 					$("#show-room-availability").html(msg);
-					highlight_arrive();
-					highlight_depart();
 				});
 
 				request.fail(function(msg) {
