@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <div class="row top-spacer-large">
 
 	{% if available_reservations %}
@@ -110,3 +111,8 @@
 
 	{% endif %}
 </div>
+
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script>
+		$("#the-reservation-form").validate();
+</script>

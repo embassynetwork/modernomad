@@ -1682,7 +1682,6 @@ p.lead strong {
 	font-size: 80%;
 	padding: 10px;
 	font-weight: normal;
-	background-color: beige;
 	padding: 10px;
 	font-weight: normal;
 }
@@ -1814,3 +1813,4 @@ input.disabled {
 #repeat-guest-icon {
 	color: grey;
 }
+
