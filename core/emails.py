@@ -562,7 +562,7 @@ def test80085(request, location_slug):
 	logger.debug("subject: %s" % subject)
 
 	# add in footer
-	text_footer = '''\n\n-------------------------------------------\nYou are receiving this email because someone at Embassy Network wanted to use you as a guinea pig.'''
+	text_footer = '''\n\n-------------------------------------------\nYou are receiving this email because someone at Embassy Network wanted to use you as a guinea pig. %mailing_list_unsubscribe_url%'''
 	body_plain = body_plain + text_footer
 	if body_html:
 		html_footer = '''<br><br>-------------------------------------------<br>You are receiving this email because someone at Embassy Network wanted to use you as a guinea pig.''' 
