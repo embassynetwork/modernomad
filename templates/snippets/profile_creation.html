@@ -147,6 +147,7 @@
 	</div>
 	<div class="col-md-4" id="res-detail">
 		{% if reservation %}
+			<h4>Your Reservation</h4>
 			{% with reservation as r %}
 				{% include 'snippets/reservation_bill_line_items_and_payments.html' %}
 			{% endwith %}

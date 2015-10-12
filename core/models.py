@@ -571,6 +571,9 @@ class Reservation(models.Model):
 
 
 	def serialize(self, include_bill=True):
+		if not self.id:
+			self.id = -1
+
 		res_info = {
 				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
 				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
@@ -583,14 +586,24 @@ class Reservation(models.Model):
 
 		# Now serialize the bill
 		if include_bill:
-			if not self.bill:
-				self.generate_bill(delete_old_items=False, save=False)
+			if self.bill:
+				bill_line_items = self.bill.ordered_line_items()
+				amount = self.bill.amount()
+				total_owed = self.bill.total_owed()
+			else:
+				bill_line_items = self.generate_bill(delete_old_items=False, save=False)
+				amount = Decimal(0.0)
+				for item in bill_line_items:
+					if not item.paid_by_house:
+						amount = Decimal(amount) + Decimal(item.amount)
+				total_owed = amount
+			
 			bill_info = {
-				'amount': str(self.bill.amount()),
-				'total_owed': self.bill.total_owed(),
+				'amount': str(amount),
+				'total_owed': str(total_owed),
 				'ordered_line_items': [],
 			}
-			for item in self.bill.ordered_line_items():
+			for item in bill_line_items:
 				line_item = {
 					'paid_by_house': item.paid_by_house,
 					'description': item.description,
