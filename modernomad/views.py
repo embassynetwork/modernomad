@@ -64,15 +64,32 @@ def maypi(request):
 	response = "No Data"
 	if request.method == 'POST' and 'data' in request.POST:
 		try:
+			# Find the door they are talking about
 			door_id = request.POST.get("door_id")
 			door = MaypiDoor.objects.get(pk=door_id)
+
+			# Unpack the data they sent
 			data = request.POST.get("data")
 			posted_data = maypi_api.unwrap_data(data, api_key=door.api_key)
 			logger.info("Maypi sync from %s:%s" % (door.location, door.description))
+			#logger.debug("Mayp sync data raw: %s" % data)
 			logger.debug("Mayp sync data: %s" % posted_data)
+			
+			# TODO 
+			# - Check for the give-me-all-your-door-codes command
+			# - Build up a big json with all the door codes
+			# - Send it back
+			for code in MaypiDoorCode.objects.all():
+				pass
+			
+			# For now just return the shit we got
 			response = posted_data
+			
+			# Update the sync clock on success
+			door.sync_ts = timezone.now()
+			door.save()
 		except Exception as e:
 			print e
 			response = "Invalid Data Provided"
 
-	return HttpResponse(response, content_type="text/plain")
+	return HttpResponse(response, content_type="application/json")

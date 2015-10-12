@@ -1008,6 +1008,9 @@ class MaypiDoor(models.Model):
 	description = models.CharField(max_length=128)
 	sync_ts = models.DateTimeField(blank=True, null=True)
 
+	def __str__(self): 
+		return self.description
+
 class MaypiDoorCode(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	door = models.ForeignKey(MaypiDoor)
@@ -1016,6 +1019,9 @@ class MaypiDoorCode(models.Model):
 	start = models.DateTimeField(null=False)
 	end = models.DateTimeField(null=True, blank=True)
 	sync_ts = models.DateTimeField(blank=True, null=True)
+
+	def __str__(self): 
+		return '%s - %s: %s' % (self.user, self.door, self.code)
 
 #@receiver(pre_save, sender=MaypiDoorCode)
 #def clear_sync_ts(sender, instance, **kwargs):

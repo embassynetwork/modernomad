@@ -22,7 +22,7 @@ urlpatterns = patterns('',
 	url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', 'gather.views.email_preferences', name='gather_email_preferences'),
 
 	# various other useful things
-	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
+	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico', permanent=True)),
 	url(r'^robots\.txt$', 'modernomad.views.robots'),
 
 	# Discourse discussion group
