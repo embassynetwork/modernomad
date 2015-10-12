@@ -13,7 +13,6 @@ import core.forms
 
 urlpatterns = patterns('core.views',
 	url(r'^$', 'ListUsers', name='user_list'),
-	url(r'^login/$', 'user_login', name='user_login'),
 	url(r'^register/$', 'register', name='registration_register'),
 	url(r'^daterange/$', 'PeopleDaterangeQuery', name='people_daterange'),
 	url(r'^(?P<username>(?!logout)(?!login)(?!register)[\w\d\-\.@+_]+)/$', 'GetUser', name='user_detail'),
@@ -23,6 +22,7 @@ urlpatterns = patterns('core.views',
 )
 
 urlpatterns += patterns('',
+	url(r'^login/$', 'django.contrib.auth.views.login', name='user_login'),
 	url(r'^logout/$', 'django.contrib.auth.views.logout_then_login'),
 	url(r'^password/reset/$', 'django.contrib.auth.views.password_reset', name="password_reset"),
 	url(r'^password/done/$', 'django.contrib.auth.views.password_reset_done', name="password_reset_done"),
