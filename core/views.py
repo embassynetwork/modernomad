@@ -1657,43 +1657,49 @@ def process_unsaved_reservation(request):
 	return
 
 
-# JKS - i think this is no longer needed. just leaving it here in case. 
-#def user_login(request):
-#	print 'in user_login'
-#	next_page = None
-#	if 'next' in request.GET:
-#		next_page = request.GET['next']
-#		
-#	username = password = ''
-#	if request.POST:
-#		username = request.POST['username']
-#		password = request.POST['password']
-#		if 'next' in request.POST:
-#			next_page = request.POST['next']
-#
-#		user = authenticate(username=username, password=password)
-#		#print 'user authenticated'
-#		if user is not None:
-#			if user.is_active:
-#				login(request, user)
-#
-#			process_unsaved_reservation(request)
-#			#print request.session.keys()
-#			if request.session.get('new_res_redirect'):
-#				res_id = request.session['new_res_redirect']['res_id']
-#				location_slug = request.session['new_res_redirect']['location_slug']
-#				request.session.pop('new_res_redirect')
-#				messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
-#				# if there was a pending reservation redirect to the reservation page
-#				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
-#
-#			# this is where they go on successful login if there is not pending reservation
-#			if not next_page or len(next_page) == 0 or "logout" in next_page:
-#				next_page = "/"
-#			return HttpResponseRedirect(next_page)
-#
-#	# redirect to the login page if there was a problem
-#	return render(request, 'registration/login.html', context_instance=RequestContext(request))
+def user_login(request):
+	print 'in user_login'
+	next_page = None
+	if 'next' in request.GET:
+		next_page = request.GET['next']
+		
+	username = password = ''
+	if request.POST:
+		username = request.POST['username']
+		# JKS this is a bit janky. this is because we use this view both after
+		# the user registration or after the login view, which themselves use
+		# slightly different forms. 
+		print request.POST
+		if request.POST.get('password', False):
+			password = request.POST['password']
+		else:
+			password = request.POST['password1']
+		if 'next' in request.POST:
+			next_page = request.POST['next']
+
+		user = authenticate(username=username, password=password)
+		#print 'user authenticated'
+		if user is not None:
+			if user.is_active:
+				login(request, user)
+
+			process_unsaved_reservation(request)
+			#print request.session.keys()
+			if request.session.get('new_res_redirect'):
+				res_id = request.session['new_res_redirect']['res_id']
+				location_slug = request.session['new_res_redirect']['location_slug']
+				request.session.pop('new_res_redirect')
+				messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
+				# if there was a pending reservation redirect to the reservation page
+				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
+
+			# this is where they go on successful login if there is not pending reservation
+			if not next_page or len(next_page) == 0 or "logout" in next_page:
+				next_page = "/"
+			return HttpResponseRedirect(next_page)
+
+	# redirect to the login page if there was a problem
+	return render(request, 'registration/login.html', context_instance=RequestContext(request))
 
 
 def register(request):
@@ -1727,25 +1733,9 @@ def register(request):
 		profile.save()
 
 		print 'logging in user'
-		new_user = authenticate(username=user.username, password=profile_form.clean_password2())
-		user = login(request, new_user)
-		#user_login(request)
-		process_unsaved_reservation(request)
-		if request.session.get('new_res_redirect'):
-			res_id = request.session['new_res_redirect']['res_id']
-			location_slug = request.session['new_res_redirect']['location_slug']
-			request.session.pop('new_res_redirect')
-			messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
-			# if there was a pending reservation redirect to the reservation page
-			return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
-
-		# this is where they go on successful login if there is not pending reservation
-		if not next_page or len(next_page) == 0 or "logout" in next_page:
-			next_page = "/"
-		return HttpResponseRedirect(next_page)
-
-
 	else:
+		if request.user.is_authenticated():
+			messages.add_message(request, messages.INFO, 'You are already logged in. Please <a href="/people/logout">log out</a> to create a new account')
+			return HttpResponseRedirect(reverse('user_detail', args=(request.user.username,)))
 		profile_form = UserProfileForm()
-	all_users = User.objects.all().order_by('username')
 	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'all_users': all_users })

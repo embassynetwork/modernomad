@@ -144,7 +144,7 @@ class UserProfileForm(forms.ModelForm):
 		# save the UserProfile (if editing an existing instance, it will be updated)
 		profile = super(UserProfileForm, self).save(commit=False)
 		# then update the User model with the values provided
-		if profile.user and profile.user.pk:
+		try: 
 			# Editing 
 			user = User.objects.get(pk=profile.user.pk)
 			if self.cleaned_data.get('email'):
@@ -159,7 +159,7 @@ class UserProfileForm(forms.ModelForm):
 				# set_password hashes the selected password
 				user.set_password(self.cleaned_data['password2'])
 				user.save()
-		else:
+		except:
 			# Adding
 			user = self.create_user()
 			profile.user = user
