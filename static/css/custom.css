@@ -878,10 +878,6 @@ b.dark-red-bold {
 	color: red;
 }
 
-.greyed-out {
-	color: #999999;
-}
-
 .sm-row-spacer {
 	padding-bottom: 10px;
 }
@@ -969,7 +965,11 @@ form.res-action {
 }
 
 .greyed-out {
-	font-color: grey;
+	color: #999999;
+}
+
+.faded {
+	opacity: 0.6;
 }
 
 div#spinner
@@ -1246,6 +1246,10 @@ h3.no-top-margin {
 	margin-left: 30px;
 }
 
+.thirtypx-spacer-right {
+	margin-left: 30px;
+}
+
 .event-time {
 	color: #AAA;
 	margin-bottom: 30px;
@@ -1370,6 +1374,10 @@ table tr.row-even td { background: #eee; }
 .affix {
 	top: 520px;
 	right: 85px;
+}
+
+.top-spacer-xl {
+	margin-top: 70px;
 }
 
 .top-spacer {
@@ -1626,9 +1634,17 @@ p.lead strong {
 
 .error {
 	color: rgb(228, 73, 73);
-	font-size: 80%;
 	background-color: beige;
 	padding: 10px;
+	font-weight: normal;
+}
+
+.align-right {
+	text-align: right;
+}
+
+.small-profile-pic {
+	width: 100px;
 }
 
 #guestcalendar {
@@ -1678,4 +1694,21 @@ p.lead strong {
 
 label.light {
 	font-weight: normal;
+}
+
+#reservation-list-table {
+	width: inherit;
+}
+
+input.disabled {
+	color: grey; 
+	background-color: #F0F0F0;
+}
+
+.word-wrap {
+	word-wrap: break-word;
+}
+
+#repeat-guest-icon {
+	color: grey;
 }

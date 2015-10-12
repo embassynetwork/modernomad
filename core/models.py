@@ -15,7 +15,6 @@ from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
-from gather.forms import NewUserForm
 from django.contrib.flatpages.models import FlatPage
 from uuidfield import UUIDField
 
@@ -217,7 +216,7 @@ class LocationDoesNotExistException(Exception):
 def get_location(location_slug):
 	if location_slug:
 		try:
-			location = Location.objects.get(slug=location_slug)
+			location = Location.objects.filter(slug=location_slug).first()
 		except:
 			raise LocationDoesNotExistException("The requested location does not exist: %s" % location_slug)
 	else:
@@ -709,6 +708,7 @@ class Payment(models.Model):
 	payment_method = models.CharField(max_length=200, blank=True, null=True, help_text="e.g., Visa, cash, bank transfer")
 	paid_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	transaction_id = models.CharField(max_length=200, null=True, blank=True)
+	last4 = models.IntegerField(null=True, blank=True)
 	
 	objects = PaymentManager()
 

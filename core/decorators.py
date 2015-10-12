@@ -18,7 +18,7 @@ def house_admin_required(original_func):
 	def decorator(request, location_slug, *args, **kwargs):
 		location = get_location(location_slug)
 		user = request.user
-		if request.user.is_authenticated() and request.user in location.house_admins.all():
+		if user.is_authenticated() and location and user in location.house_admins.all():
 			#print 'user is an admin at this location'
 			return original_func(request, location_slug, *args, **kwargs)
 		elif request.user.is_authenticated():

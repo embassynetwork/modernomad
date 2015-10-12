@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
-import registration.backends.default.urls
 
 urlpatterns = patterns('',
 	url(r'^create/$', 'gather.views.create_event', name='gather_create_event'),

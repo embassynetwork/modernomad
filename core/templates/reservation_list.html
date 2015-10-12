@@ -3,13 +3,12 @@
 
 {% block content %}
 
-<div style="margin-bottom: 12px;">
-	<form method="POST">
-		<strong>Go To Reservation:</strong>
-		<input name="reservation_id" size="4" placeholder="ID"/>
-		<input type="submit" value="Go!"/>
-		{% csrf_token %}
-	</form>
+<div class="row pull-right">
+	<div class="col-md-12">
+		<a href="{% url 'reservation_manage_create' location.slug %}">
+			<i class="fa fa-plus-circle"></i>
+			New Reservation</a>
+	</div>
 </div>
 
 <ul class="nav nav-tabs">
@@ -49,6 +48,18 @@
 
 	<div id="reservation-manage-detail"> </div>
 </div>
+
+<div class="row row-spacer">
+	<div class="col-md-12">
+		<form method="POST">
+			<strong>Go To Reservation:</strong>
+			<input name="reservation_id" size="4" placeholder="ID"/>
+			<input type="submit" value="Go!"/>
+			{% csrf_token %}
+		</form>
+	</div>
+</div>
+
 
 {% endblock %}
 

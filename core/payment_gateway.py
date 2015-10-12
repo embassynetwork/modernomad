@@ -90,13 +90,19 @@ def stripe_charge_customer(reservation):
 			description=descr
 		)
 
+	print 'charge obj'
+	print charge
+	print '--- charge.card.last4'
+	print charge.card.last4
+
 	# Store the charge details in a Payment object
 	return Payment.objects.create(bill=reservation.bill,
 		user = reservation.user,
 		payment_service = "Stripe",
 		payment_method = charge.card.brand,
 		paid_amount = amt_owed,
-		transaction_id = charge.id
+		transaction_id = charge.id,
+		last4 = charge.card.last4
 	)
 
 def stripe_issue_refund(payment, refund_amount=None):

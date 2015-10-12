@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from import_export.admin import ImportExportModelAdmin
-from import_export import resources
 
 from core.models import *
 from gather.models import EventAdminGroup
@@ -228,17 +226,6 @@ class ReservationAdmin(admin.ModelAdmin):
 class UserProfileInline(admin.StackedInline):
 	model = UserProfile
  
-class UserResource(resources.ModelResource):
-	class Meta:
-		model = User
-		skip_unchanged = True
-		report_skipped = True
-		fields = ('username', 'first_name', 'last_name', 'email', 'password', 'id')
-
-class UserAdmin(ImportExportModelAdmin):
-	resource_class = UserResource
-	pass
-
 class UserProfileAdmin(UserAdmin):
 	inlines = [UserProfileInline]
 	list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')

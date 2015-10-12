@@ -6,6 +6,7 @@ from django.template import Context
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
+from django.contrib.auth.models import User
 import requests
 import logging
 import json
@@ -21,17 +22,20 @@ def mailgun_send(mailgun_data, files_dict=None):
 			# We will see this message in the mailgun logs but nothing will actually be delivered
 			logger.debug("mailgun_send: setting testmode=yes")
 			mailgun_data["o:testmode"] = "yes"
-	resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
-		auth=("api", settings.MAILGUN_API_KEY),
-		data=mailgun_data, 
-		files=files_dict
-	)
-	logger.debug("Mailgun response: %s" % resp.text)
+	try:
+		resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
+			auth=("api", settings.MAILGUN_API_KEY),
+			data=mailgun_data, 
+			files=files_dict
+		)
+		logger.debug("Mailgun response: %s" % resp.text)
+	except requests.ConnectionError, e:
+		logger.error('No network connection. Email "%s" aborted.' % mailgun_data['subject'])
 	return HttpResponse(status=200)
 
 
 def new_event_notification(event, location):
-	# notify the event admins
+	# notify the event admins that a new event has been proposed
 	admin_group = event.admin
 	recipients = [admin.email for admin in admin_group.users.all()]
 	event_short_title = event.title[0:50]
@@ -54,6 +58,7 @@ def new_event_notification(event, location):
 	return mailgun_send(mailgun_data)
 
 def event_approved_notification(event, location):
+	''' send an email to organizers letting them know their event has been approved.'''
 	logger.debug("event_approved_notification")
 	recipients = [organizer.email for organizer in event.organizers.all()]
 	subject = '[' + location.email_subject_prefix + ']' + " Your event is ready to be published"
@@ -80,7 +85,7 @@ def event_published_notification(event, location):
 	if len(event.title) > 50:
 		event_short_title = event_short_title + "..."
 
-	# notify organizers
+	# first notify organizers
 	recipients = [organizer.email for organizer in event.organizers.all()]
 	subject = '[' + location.email_subject_prefix + ']' + " Your event is now live: %s" % event_short_title
 	from_address = location.from_email()
@@ -98,7 +103,7 @@ def event_published_notification(event, location):
 	}
 	status = mailgun_send(mailgun_data)
 
-	# notify subscribed user accounts of this event
+	# then notify subscribed user accounts of this event
 	notify_published = EventNotifications.objects.filter(location_publish__in=[location,])
 	subscribed_users = [notify.user.email for notify in notify_published]
 
@@ -122,14 +127,24 @@ def event_published_notification(event, location):
 	})
 	html_content = htmltext.render(c_html)
 
-
-	mailgun_data={"from": from_address,
-		"to": subscribed_users,
-		"subject": subject,
-		"text": text_content,
-		"html": html_content,
-	}
-	status = mailgun_send(mailgun_data)
+	for subscriber in subscribed_users:
+		# if it's a public event, or subscriber is in the community and it's a
+		# community event, then let the subscriber know. private events are not
+		# announced to subscribers. 
+		print event.visibility
+		try:
+			u = User.objects.get(email=subscriber)
+		except:
+			logger.error('There was an error retrieving the user associated with email address %s, likely because the email is not unique. Skipping this notification.' % subscriber)
+			return
+		if (event.visibility == Event.PUBLIC) or (event.visibility == Event.COMMUNITY and u in location.residents.all()):
+			mailgun_data={"from": from_address,
+				"to": subscriber,
+				"subject": subject,
+				"text": text_content,
+				"html": html_content,
+			}
+			status = mailgun_send(mailgun_data)
 
 
 

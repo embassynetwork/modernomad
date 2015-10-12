@@ -57,21 +57,12 @@
 	function register() {
 		$(".room-cal-req").click(function(e) {
 			e.preventDefault();
-			//note: relies on the relative position of the clicked div and the
-			//wrapping div which contains the room id in its div id.
-			/*
-			room_div_id = $(this).closest("div").attr("id")
-			room_id = room_div_id.split("availability-cal-")[1]
-			href = $(this).attr('href');
-			href_parts = href.split('?')
-			url_part = href_parts[0]
-			params = href_parts[1].split('&');
-			location_slug = '{{ location.slug }}';
-			year = params[1].split("=")[1];
-			month = params[0].split("=")[1];
-			*/
+			if ($(this).val() == 'Next') {
+				form_data = $("#room-cal-next").serialize();
+			} else {
+				form_data = $("#room-cal-prev").serialize();
+			}
 
-			form_data = $("#room-cal-prev").serialize();
 			// the csrf token is here because when the ajax request returns the
 			// new html for the current calendar, the template processor won't
 			// have a chance to interpret the variable

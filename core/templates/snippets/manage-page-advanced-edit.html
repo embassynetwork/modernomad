@@ -84,7 +84,7 @@
 			<label class="col-sm-2 control-label">Room</label> 
 			<div class="col-sm-4">
 				<select class="form-control" name="room_id">
-					{% for room in location.rooms_with_future_reservability %}
+					{% for room in location.get_rooms %}
 					<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
 					{% endfor %}
 				</select>
