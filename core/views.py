@@ -1755,10 +1755,10 @@ def payments(request, location_slug, year, month):
 # ******************************************************
 
 def process_unsaved_reservation(request):
-	print "in process_unsaved_reservation"
+	logger.debug("in process_unsaved_reservation")
 	if request.session.get('reservation'):
-		print 'found reservation'
-		print request.session['reservation']
+		logger.debug('found reservation')
+		logger.debug(request.session['reservation'])
 		details = request.session.pop('reservation')
 		new_res = Reservation(
 				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
@@ -1773,17 +1773,18 @@ def process_unsaved_reservation(request):
 		new_res.save()
 		new_res.reset_rate()
 		new_res.generate_bill()
-		print 'new reservation %d saved.' % new_res.id
+		logger.debug('new reservation %d saved.' % new_res.id)
 		new_reservation_notify(new_res)
 		# we can't just redirect here because the user doesn't get logged
 		# in. so save the reservaton ID and redirect below. 
 		request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
-	print "no reservation found"
+	else:
+		logger.debug("no reservation found")
 	return
 
 
 def user_login(request):
-	print 'in user_login'
+	logger.debug('in user_login')
 	next_page = None
 	if 'next' in request.GET:
 		next_page = request.GET['next']
@@ -1794,7 +1795,6 @@ def user_login(request):
 		# JKS this is a bit janky. this is because we use this view both after
 		# the user registration or after the login view, which themselves use
 		# slightly different forms. 
-		print request.POST
 		if request.POST.get('password', False):
 			password = request.POST['password']
 		else:
@@ -1803,19 +1803,17 @@ def user_login(request):
 			next_page = request.POST['next']
 
 		user = authenticate(username=username, password=password)
-		#print 'user authenticated'
 		if user is not None:
 			if user.is_active:
 				login(request, user)
 
 			process_unsaved_reservation(request)
-			#print request.session.keys()
+			# if there was a pending reservation redirect to the reservation page
 			if request.session.get('new_res_redirect'):
 				res_id = request.session['new_res_redirect']['res_id']
 				location_slug = request.session['new_res_redirect']['location_slug']
 				request.session.pop('new_res_redirect')
 				messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
-				# if there was a pending reservation redirect to the reservation page
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
 
 			# this is where they go on successful login if there is not pending reservation
@@ -1828,6 +1826,10 @@ def user_login(request):
 
 
 def register(request):
+	if request.session.get('reservation'):
+		reservation = request.session.get('reservation')
+	else:
+		reservation = None
 	if request.method == "POST":
 		profile_form = UserProfileForm(request.POST, request.FILES)
 		user = profile_form.save()
@@ -1856,16 +1858,10 @@ def register(request):
 
 		profile.image = full_file_name
 		profile.save()
-
-		print 'logging in user'
-		user_login(request)
+		return user_login(request)
 	else:
 		if request.user.is_authenticated():
 			messages.add_message(request, messages.INFO, 'You are already logged in. Please <a href="/people/logout">log out</a> to create a new account')
 			return HttpResponseRedirect(reverse('user_detail', args=(request.user.username,)))
 		profile_form = UserProfileForm()
-		if request.session.get('reservation'):
-			reservation = request.session.get('reservation')
-		else:
-			reservation = None
 	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'reservation': reservation })
