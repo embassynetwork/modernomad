@@ -49,7 +49,9 @@
 
 	<div class="col-md-7">
 
-		<h1 class="res-field field">{{ r.user.first_name|title }} {{r.user.last_name|title }}
+		<h1 class="res-field field">
+			{% if past_reservations or upcoming_reservations %}<i class="fa fa-repeat" id="repeat-guest-icon"></i>{% endif %}
+			{{ r.user.first_name|title }} {{r.user.last_name|title }}
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
@@ -134,8 +136,16 @@
 {% block extrajs %}
 <script language="JavaScript">
 
-function UpdateRefundValue(id, val) { 
-	$("#refund-amount-"+id).val(val)
+function UpdateRefundValue(id, val, field_status) { 
+	$("#refund-amount-"+id).val(val);
+	if (field_status == "readonly") {
+		$("#refund-amount-"+id).attr("readonly", "readonly");
+		$("#refund-amount-"+id).addClass("disabled");
+
+	} else {
+		$("#refund-amount-"+id).removeAttr("readonly");
+		$("#refund-amount-"+id).removeClass("disabled");
+	}
 } 
 
 function toggleRefundDetails(id){

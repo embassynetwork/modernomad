@@ -65,12 +65,14 @@
 	<div class="col-sm-6">
 	<table class="table table-striped table-hover">
 		<tbody>
-		<tr><td>Net income to house this month (net transient + net resident)</td><td> ${{gross_rent|floatformat:2 }}</td></tr>
-		<tr><td>Gross income from transient occupants (<small>this is the amount we are paying hotel tax on. hotel tax is computed on entire bill to the customer. the EN fee is just an expense to the location)</small></td><td>${{ gross_rent_transient|floatformat:2 }}</td></tr>
-		<tr><td>Net Income from Transient Occupants (minus Embassy Network fee)</td><td>${{ net_rent_transient|floatformat:2 }}</td></tr>
-		<tr><td>Hotel Tax ({{ hotel_tax_percent }}% * Gross Transient Income)</td><td>  ${{ hotel_tax|floatformat:2 }}</td></tr>
+		<tr><td>Net Income from Transient Occupants</td><td>${{ net_rent_transient|floatformat:2 }}</td></tr>
 		<tr><td>Net Rent from Residents</td><td>  ${{ net_rent_resident|floatformat:2 }}</td></tr>
-		<tr><td>Total Transfer from EN (net income to house + hotel tax)</td><td>  ${{ total_transfer|floatformat:2 }}</td></tr>
+		<tr><td><strong>Total Net income to house (net transient + net resident)</strong></td><td><strong>${{gross_rent|floatformat:2 }}</strong></td></tr>
+		<tr><td>Gross income from transient occupants <small>(the amount that custom location taxes are calculated on.)</small></td><td>${{ gross_rent_transient|floatformat:2 }}</td></tr>
+		<tr><td>Location Taxes ({{ hotel_tax_percent }}% * Gross Transient Income)</td><td>  ${{ hotel_tax|floatformat:2 }}</td></tr>
+		<tr><td>External Payments</td><td>  ${{ external_txs_paid|floatformat:2 }}</td></tr>
+		<tr><td>Fees on External Payments</td><td>  ${{ external_txs_fees|floatformat:2 }}</td></tr>
+		<tr><td><strong>Total Transfer from EN</strong> <small>(net income to house + hotel tax - external payments already received - fees on external payments)</small></td><td><strong>${{ total_transfer|floatformat:2 }}</strong></td></tr>
 	</tbody>
 	</table>
 </div>

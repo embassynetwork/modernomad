@@ -21,8 +21,8 @@ urlpatterns = patterns('',
 	url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', 'gather.views.email_preferences', name='gather_email_preferences'),
 
 	# various other useful things
-	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico')),
-	url(r'^robots\.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: ", content_type="text/plain")),
+	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico', permanent=True)),
+	url(r'^robots\.txt$', 'modernomad.views.robots'),
 
 	# Discourse discussion group
 	#url(r'^discourse/sso$', 'modernomad.discourse.sso'),

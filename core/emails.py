@@ -115,6 +115,7 @@ def send_receipt(reservation, send_to=None):
 		'user': reservation.user, 
 		'location': location,
 		'reservation': reservation,
+		'reservation_url': "https://" + Site.objects.get_current().domain + reservation.get_absolute_url() 
 		})
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
 	return send_from_location_address(subject, text_content, html_content, recipient, location)
@@ -478,6 +479,20 @@ def current(request, location_slug):
 	return mailgun_send(mailgun_data, attachments)
 
 @csrf_exempt
+def unsubscribe(request, location_slug):
+	''' unsubscribe route '''
+	# fail gracefully if location does not exist
+	try:
+		location = get_location(location_slug)
+	except:
+		# XXX TODO reject and bounce back to sender?
+		return HttpResponse(status=200)
+	logger.debug('unsubscribe@ for location: %s' % location)
+	logger.debug(request.POST)
+	logger.debug(request.FILES)
+	return HttpResponse(status=200)
+
+@csrf_exempt
 def test80085(request, location_slug):
 	''' test route '''
 	# fail gracefully if location does not exist
@@ -561,7 +576,7 @@ def test80085(request, location_slug):
 	logger.debug("subject: %s" % subject)
 
 	# add in footer
-	text_footer = '''\n\n-------------------------------------------\nYou are receiving this email because someone at Embassy Network wanted to use you as a guinea pig.'''
+	text_footer = '''\n\n-------------------------------------------\nYou are receiving this email because someone at Embassy Network wanted to use you as a guinea pig. %mailing_list_unsubscribe_url%'''
 	body_plain = body_plain + text_footer
 	if body_html:
 		html_footer = '''<br><br>-------------------------------------------<br>You are receiving this email because someone at Embassy Network wanted to use you as a guinea pig.''' 
