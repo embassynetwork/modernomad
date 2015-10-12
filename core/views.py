@@ -600,15 +600,7 @@ def ReservationSubmit(request, location_slug):
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 			else:
 				date_encode = DateTimeAwareJSONEncoder()
-				res_info = {
-						'arrive': {'year': reservation.arrive.year, 'month': reservation.arrive.month, 'day': reservation.arrive.day},
-						'depart': {'year': reservation.depart.year, 'month': reservation.depart.month, 'day': reservation.depart.day},
-						'location_id': reservation.location.id,
-						'room_id': reservation.room.id,
-						'purpose': reservation.purpose,
-						'arrival_time': reservation.arrival_time,
-						'comments': reservation.comments,
-						}
+				res_info = reservation.serialize()
 				request.session['reservation'] = res_info
 				print 'session info'
 				print request.session.keys()
