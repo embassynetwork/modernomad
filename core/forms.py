@@ -237,6 +237,7 @@ class LocationRoomForm(BootstrapModelForm):
 		model = Room
 		exclude = ['location',]
 		widgets = { 
+			'description': forms.Textarea(attrs={'rows': '3'}),
 		}
 
 class LocationReservableForm(BootstrapModelForm):

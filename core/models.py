@@ -267,7 +267,7 @@ class Room(models.Model):
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
-	description = models.TextField(blank=True, null=True)
+	description = models.TextField(blank=True, null=True, max_length=140, help_text="Max length 140 chars")
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
