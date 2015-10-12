@@ -578,7 +578,7 @@ class Reservation(models.Model):
 				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
 				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
 				'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug':self.location.slug},
-				'room': {'id': self.room.id, 'description': self.room.description, 'cancellation_policy': self.room.cancellation_policy},
+				'room': {'id': self.room.id, 'name': self.room.name, 'description': self.room.description, 'cancellation_policy': self.room.cancellation_policy},
 				'purpose': self.purpose,
 				'arrival_time': self.arrival_time,
 				'comments': self.comments,
