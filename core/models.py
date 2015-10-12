@@ -553,8 +553,8 @@ class Reservation(models.Model):
 		if reset_suppressed:
 			self.suppressed_fees.clear()
 		for location_fee in LocationFee.objects.filter(location = self.location):
-			print location_fee.fee.description
-			print location_fee.fee not in self.suppressed_fees.all()
+			#print location_fee.fee.description
+			#print location_fee.fee not in self.suppressed_fees.all()
 			if location_fee.fee not in self.suppressed_fees.all():
 				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
 				amount = float(effective_room_charge) * location_fee.fee.percentage
@@ -569,6 +569,37 @@ class Reservation(models.Model):
 
 		return line_items
 
+
+	def serialize(self, include_bill=True):
+		res_info = {
+				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
+				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
+				'location_id': self.location.id,
+				'room_id': self.room.id,
+				'purpose': self.purpose,
+				'arrival_time': self.arrival_time,
+				'comments': self.comments,
+			}
+
+		# Now serialize the bill
+		if include_bill:
+			if not self.bill:
+				self.generate_bill(delete_old_items=False, save=False)
+			bill_info = {
+				'amount': str(self.bill.amount()),
+				'total_owed': self.bill.total_owed(),
+				'ordered_line_items': [],
+			}
+			for item in self.bill.ordered_line_items():
+				line_item = {
+					'paid_by_house': item.paid_by_house,
+					'description': item.description,
+					'amount': str(item.amount),
+				}
+				bill_info['ordered_line_items'].append(line_item)
+			res_info['bill'] = bill_info
+		
+		return res_info
 
 	def __unicode__(self):
 		return "reservation %d" % self.id
