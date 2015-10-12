@@ -1334,6 +1334,11 @@ h3.no-top-margin {
 	color: #98321C;
 }
 
+.page-spacer {
+	margin-bottom: 30px;
+	margin-top: 30px;
+}
+
 #page-spacer {
 	margin-bottom: 30px;
 	margin-top: 30px;
@@ -1812,5 +1817,15 @@ input.disabled {
 
 #repeat-guest-icon {
 	color: grey;
+}
+
+#profilesubmit {
+	width: 100%;
+	padding-left: 0px;
+}
+
+#profilesubmit-wrapper {
+	padding-left: 0px;
+	padding-right: 0px;
 }
 
