@@ -1858,9 +1858,14 @@ def register(request):
 		profile.save()
 
 		print 'logging in user'
+		user_login(request)
 	else:
 		if request.user.is_authenticated():
 			messages.add_message(request, messages.INFO, 'You are already logged in. Please <a href="/people/logout">log out</a> to create a new account')
 			return HttpResponseRedirect(reverse('user_detail', args=(request.user.username,)))
 		profile_form = UserProfileForm()
-	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'all_users': all_users })
+		if request.session.get('reservation'):
+			reservation = request.session.get('reservation')
+		else:
+			reservation = None
+	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'reservation': reservation })
