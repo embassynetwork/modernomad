@@ -18,7 +18,8 @@
 {% endif %}
 
 <div class="row">
-	<div class="col-xs-12">
+	<div class="col-md-1"></div>
+	<div class="col-md-6">
 		<h2>Log in to your account</h2>
 		<p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
 		<form enctype="multipart/form-data" method="post">{% csrf_token %}
@@ -47,6 +48,7 @@
 
 		<p><a href="{% url 'password_reset' %}">Forgot your username or password?</a></p>
 	</div>
+	<div class="col-md-5"></div>
 </div>
 
 {% endblock %}
