@@ -64,7 +64,7 @@ def weekly_reminder_email(user, event_list, location):
 	today_local = timezone.now().astimezone(current_tz).date()
 	tomorrow_local = today_local + datetime.timedelta(days=1)
 	week_name = tomorrow_local.strftime("%B %d, %Y")
-	footer = 'You are receiving this email because you requested weekly updates of upcoming events from %s. To turn them off, visit %s' % (location_name, profile_url)
+	footer = 'You are receiving this email because you requested weekly updates of upcoming events from %s. To unsubscribe click here %mailing_list_unsubscribe_url%' % (location_name)
 	sender = location.from_email()
 	subject = '[' + location.email_subject_prefix + ']' + ' Upcoming events for the week of %s' % week_name
 	current_tz = timezone.get_current_timezone()
