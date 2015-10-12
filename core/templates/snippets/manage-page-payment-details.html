@@ -25,7 +25,7 @@
 				<input name="payment_id" type="hidden" value="{{p.id}}">
 				<tr {% if p.is_fully_refunded %} class="greyed-out" {% endif %}>
 					<td>{{ p.payment_date }}
-					<td>{{ p.payment_method }}</td>
+					<td>{{ p.payment_method }}{% if p.last4 %} (***{{p.last4}}){% endif %}</td>
 					<td class="money">${{ p.paid_amount|floatformat:2 }}</td>
 					<td class="money">
 						{% if p.is_fully_refunded %} 
@@ -36,32 +36,32 @@
 					</td>
 				</tr>
 				{% for refund in p.refund_payments %}
-				{% if not refund.is_fully_refunded %}
-					<tr>
-						<td><small><em>{{ refund.payment_date }}</em></small></td>
-						<td><small><em>Partial refund</em></small></td>
-						<td class="money"><small><em>{{ refund.paid_amount }}</em></small></td>
-						<td> </td>
-					</tr>
-				{% endif %}
+					{% if not refund.is_fully_refunded %}
+						<tr>
+							<td><small><em>{{ refund.payment_date }}</em></small></td>
+							<td><small><em>Partial refund</em></small></td>
+							<td class="money"><small><em>{{ refund.paid_amount }}</em></small></td>
+							<td> </td>
+						</tr>
+					{% endif %}
 				{% endfor %}
 		
 				<tr id="refund-details-{{forloop.counter}}">
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{forloop.counter}}, {{p.net_paid}})" value="full-refund" checked> Full 
+							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{forloop.counter}}, {{p.net_paid}}, 'readonly')" value="full-refund" checked> Full 
 						</label>
 					</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{forloop.counter}}, '')" value="partial-refund"> Partial
+							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{forloop.counter}}, '', 'readwrite')" value="partial-refund"> Partial
 						</label>
 					</td>
 					<td>
-						<input type="text" name="refund-amount" id="refund-amount-{{forloop.counter}}" value="{{p.net_paid}}">
+						<input type="number" min="0" max="{{p.net_paid}}" name="refund-amount" id="refund-amount-{{forloop.counter}}" value="{{p.net_paid}}" class="disabled" readonly="readonly">
 					</td>
 					<td>
-						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?');">
+						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?'); $(this).removeAttr('readonly');">
 					</td>
 				</tr>
 			</form>
@@ -81,9 +81,9 @@
 	<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
 		<input name="payment_id" type="hidden" value="{{p.id}}">
 		<tr style="padding-top:24px;">
-			<th>Record Manual Payment</th>
-			<td><input name="payment_method" value="Cash"></td>
-			<td><input name="paid_amount" value="{{r.bill.total_owed}}"></td>
+			<th>Record External Payment</th>
+			<td><input name="payment_method" placeholder="Method" type="text" required></td>
+			<td><input name="paid_amount" value="{{r.bill.total_owed}}" type="number" min="0.01" step="0.01" required></td>
 			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>
 		</tr>
 	</form>

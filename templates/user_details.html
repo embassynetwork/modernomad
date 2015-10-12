@@ -30,6 +30,9 @@
 	{% if u.profile.image %}
 	<div class="img-polaroid">
 		<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image|default:'data/avatars/default.jpg' }}" />
+		{% if u == user or user_is_house_admin_somewhere %}
+			<a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a>
+		{% endif %}
 	</div>
 	{% endif %}
 
@@ -132,8 +135,10 @@
 	</div>
 	{% endifequal %}
 
-	<h2>Reservations</h2>
-	{% include "snippets/user_reservations.html" %}
+	{% if u == user or user_is_house_admin_somewhere %}
+		<h2>Reservations</h2>
+		{% include "snippets/user_reservations.html" %}
+	{% endif %}
 
 </div>
 </div>

@@ -58,6 +58,7 @@
 			console.log('room-cal clicked');
 			console.log($(this).attr('id'));
 			e.preventDefault();
+
 			// "this" will pick up the parameters from whichever link was clicked
 			room_id = $(this).attr('id').split('-')[2];
 			path = this.href.split('?')[1]
@@ -65,6 +66,13 @@
 			year = path.split('&')[1].split('=')[1];
 			form_data = {'year': year, 'month': month, 'browse_past': 'false'};
 			console.log(form_data);
+
+			if ($(this).val() == 'Next') {
+				form_data = $("#room-cal-next").serialize();
+			} else {
+				form_data = $("#room-cal-prev").serialize();
+			}
+
 			// the csrf token is here because when the ajax request returns the
 			// new html for the current calendar, the template processor won't
 			// have a chance to interpret the variable

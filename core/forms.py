@@ -259,6 +259,8 @@ class ReservationForm(forms.ModelForm):
 
 	def __init__(self, location, *args, **kwargs):
 		super(ReservationForm, self).__init__(*args, **kwargs)
+		if not location:
+			raise Exception("No location given!")
 		self.location = location
 		self.fields['room'].queryset = self.location._rooms_with_future_reservability_queryset()
 
@@ -272,6 +274,11 @@ class ReservationForm(forms.ModelForm):
 
 	# XXX TODO
 	# make sure depart is at least one day after arrive. 
+
+class AdminReservationForm(forms.ModelForm):
+	class Meta:
+		model = Reservation
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
 
 
 class PaymentForm(forms.Form):
