@@ -21,6 +21,8 @@ six==1.9.0
 stripe
 pip-tools
 
+# Maypi Door communication uses libraries from the Maypi repository
+git+https://github.com/jsayles/maypi.git
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
