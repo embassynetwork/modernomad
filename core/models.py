@@ -272,7 +272,7 @@ class Room(models.Model):
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
 	residents = models.ManyToManyField(User, related_name="residents", help_text="This field is optional.", blank=True) # a room may have many residents and a resident may have many rooms
-	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
+	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
 
 	def __unicode__(self):
 		return self.name
