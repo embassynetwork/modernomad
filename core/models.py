@@ -602,7 +602,9 @@ class Reservation(models.Model):
 		return res_info
 
 	def __unicode__(self):
-		return "reservation %d" % self.id
+		if self.id:
+			return "reservation (id = %d)" % self.id
+		return "reservation (unsaved)"
 
 	def suppress_fee(self, line_item):
 		print 'suppressing fee'
