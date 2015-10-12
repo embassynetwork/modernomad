@@ -1754,8 +1754,8 @@ def process_unsaved_reservation(request):
 		new_res = Reservation(
 				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
 				depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']), 
-				location = Location.objects.get(id=details['location_id']), 
-				room = Room.objects.get(id=details['room_id']), 
+				location = Location.objects.get(id=details['location']['id']), 
+				room = Room.objects.get(id=details['room']['id']), 
 				purpose = details['purpose'], 
 				arrival_time = details['arrival_time'], 
 				comments = details['comments'],
