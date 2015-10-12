@@ -599,15 +599,15 @@ class Reservation(models.Model):
 				total_owed = amount
 			
 			bill_info = {
-				'amount': str(amount),
-				'total_owed': str(total_owed),
+				'amount': format(amount, '.2f'),
+				'total_owed': format(total_owed, '.2f'),
 				'ordered_line_items': [],
 			}
 			for item in bill_line_items:
 				line_item = {
 					'paid_by_house': item.paid_by_house,
 					'description': item.description,
-					'amount': str(item.amount),
+					'amount': format(item.amount, '.2f'),
 				}
 				bill_info['ordered_line_items'].append(line_item)
 			res_info['bill'] = bill_info
