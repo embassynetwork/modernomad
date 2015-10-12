@@ -479,6 +479,20 @@ def current(request, location_slug):
 	return mailgun_send(mailgun_data, attachments)
 
 @csrf_exempt
+def unsubscribe(request, location_slug):
+	''' unsubscribe route '''
+	# fail gracefully if location does not exist
+	try:
+		location = get_location(location_slug)
+	except:
+		# XXX TODO reject and bounce back to sender?
+		return HttpResponse(status=200)
+	logger.debug('unsubscribe@ for location: %s' % location)
+	logger.debug(request.POST)
+	logger.debug(request.FILES)
+	return HttpResponse(status=200)
+
+@csrf_exempt
 def test80085(request, location_slug):
 	''' test route '''
 	# fail gracefully if location does not exist
