@@ -599,7 +599,6 @@ def ReservationSubmit(request, location_slug):
 				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 			else:
-				date_encode = DateTimeAwareJSONEncoder()
 				res_info = reservation.serialize()
 				request.session['reservation'] = res_info
 				print 'session info'
