@@ -812,7 +812,7 @@ ul.errorlist,u {
 @media (min-width: 992px) {
     #the-reservation-form.stuck, #sticky-sidebar.stuck {
         position: fixed;
-        top: 0px;
+        top: 10px;
     }
 }
 
