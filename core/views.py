@@ -776,7 +776,7 @@ def UserAddCard(request, username):
 			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 			return HttpResponseRedirect("/people/%s" % username)
 	except stripe.CardError, e:
-		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s. Often when a card is declined, it is because your card has a transaction limit. Please contact your credit card company and try again, or add a different card on your <a href="/people/%s/edit/">profile</a>.' % (reservation.user.username, e))
+		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card. Often when a card is declined, it is because your card has a transaction limit. Please contact your credit card company and try again, or add a different card. Error: %s' % e)
 		if reservation_id:
 			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 		else:
