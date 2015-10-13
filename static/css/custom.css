@@ -816,6 +816,13 @@ ul.errorlist,u {
     }
 }
 
+@media (min-width: 992px) {
+    #reservation-amount-summary-box.stuck {
+        position: fixed;
+        top: 10px;
+    }
+}
+
 .billing-message {
 	background-color: #d2bc37;
 }

@@ -171,6 +171,7 @@
 </div>
 
 <!-- client side form validation -->
+<script src="{% static 'js/waypoints.js' %}"></script>
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script src="{% static 'js/waypoints-sticky.js' %}"></script>
 <script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
@@ -179,7 +180,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/jquery.Jcrop.min.css' %}" />
 
 <script>
-		$("#res-detail").waypoint('sticky');
+		$("#reservation-amount-summary-box").waypoint('sticky');
 
 		$.validator.addMethod("uniqueUsername", function(value, element) {
 			var existingUsers = [
