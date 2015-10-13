@@ -42,6 +42,8 @@ from django.template import Context
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 import logging
 
+from .forms import PrivateOnlyForm
+
 logger = logging.getLogger(__name__)
 
 def location(request, location_slug):
@@ -464,14 +466,16 @@ def room_cal_request(request, location_slug, room_id):
 
 def stay(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
+	private_only = request.POST.get('private_only') == 'on'
+	private_only_input = PrivateOnlyForm(private_only)
 
-	rooms = location.rooms_with_future_reservability()
+	rooms = location.rooms_with_future_reservability(private_only=private_only)
 	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
 	year = request.GET.get("year")
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, "next_month": next_month, 
-		"prev_month": prev_month, 'location': location})
+	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, "next_month": next_month,
+		"prev_month": prev_month, 'location': location, 'private_only_input': private_only_input})
 
 
 def thanks(request, location_slug):

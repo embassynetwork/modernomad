@@ -94,10 +94,11 @@ class Location(models.Model):
 	def get_rooms(self):
 		return list(Room.objects.filter(location=self))
 
-	def rooms_with_future_reservability(self):
+	def rooms_with_future_reservability(self, **kwargs):
 		future_reservability = []
+		private_only = kwargs["private_only"] if "private_only" in kwargs else False
 		for room in Room.objects.filter(location=self):
-			if room.future_reservability():
+			if (not room.shared or not private_only) and room.future_reservability():
 				future_reservability.append(room)
 		return future_reservability
 
