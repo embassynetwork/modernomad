@@ -1161,10 +1161,30 @@ def ReservationManageList(request, location_slug):
 def ReservationManageCreate(request, location_slug):
 	if request.method == 'POST':
 		print request.POST
+		location = get_object_or_404(Location, slug=location_slug)
+		
+		# Check if the room is available for all dates in the reservation
+		room_reservable = True
+		arrival_date = datetime.datetime.strptime(request.POST.get('arrive'),'%m/%d/%Y').date()
+		departure_date = datetime.datetime.strptime(request.POST.get('depart'),'%m/%d/%Y').date()	
+		room = Room.objects.get(pk=request.POST.get('room'))
+		delta = datetime.timedelta(days=1)
+		while arrival_date < departure_date:
+			print room
+			print room.available_on(arrival_date.strftime('%m/%d/%Y'))
+			if room.available_on(arrival_date.strftime('%m/%d/%Y')) == False:
+				room_reservable = False
+			elif room.available_on(arrival_date.strftime('%m/%d/%Y')) == True:
+				room_reservable = True
+			arrival_date += delta
+		if room_reservable == False:
+			messages.add_message(request, messages.INFO, "This room is not available on those dates")
+			return HttpResponseRedirect(reverse('reservation_manage_create', args=(location.slug,)))
+
 		notify = request.POST.get('email_announce');
 		print 'notify was set to:'
 		print notify
-		location = get_object_or_404(Location, slug=location_slug)
+		
 		try:
 			username = request.POST.get('username');
 			the_user = User.objects.get(username=username)

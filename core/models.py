@@ -287,6 +287,7 @@ class Room(models.Model):
 
 	def is_reservable(self, this_day):
 		# should never be more than 1 reservable on a given day... 
+		print self.reservables
 		try:
 			reservable_today = self.reservables.filter(room=self).filter(start_date__lte=this_day).get(Q(end_date__gte=this_day) | Q(end_date=None))  
 		except:
@@ -294,6 +295,7 @@ class Room(models.Model):
 		return reservable_today 
 
 	def available_on(self, this_day):
+		print "this day %s " % this_day
 		# a room is available if it is reservable and if it has free beds. 
 		# JKS i added the filter(room=self) - need to test this. 
 		if not self.is_reservable(this_day):
@@ -303,8 +305,10 @@ class Room(models.Model):
 		for r in reservations_on_this_day:
 			beds_left -= 1
 		if beds_left > 0:
+			print "you can reserve this room"
 			return True
 		else:
+			print "you cannot reserve this room"
 			return False
 
 	def availability_calendar_html(self, month=None, year=None):
