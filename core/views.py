@@ -550,6 +550,24 @@ def CheckRoomAvailability(request, location_slug):
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
 		'available_reservations': available_reservations, })
 
+def CheckManageRoomAvailability(request, location_slug):
+	print "Got to here"
+	# Check the room on the admin reservation page to see if its available
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	location = get_object_or_404(Location, slug=location_slug)
+
+	# Check if the room is available for all dates in the reservation
+	arrive = datetime.datetime.strptime(request.POST.get('arrive'),'%m/%d/%Y').date()
+	depart = datetime.datetime.strptime(request.POST.get('depart'),'%m/%d/%Y').date()	
+	free_rooms = location.rooms_free(arrive, depart)
+	for room in free_rooms:
+		if int(request.POST.get('room')) == int(room.id):
+			return True
+		else:
+			return False
+
 def ReservationSubmit(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 	if request.method == 'POST':
@@ -1160,26 +1178,7 @@ def ReservationManageList(request, location_slug):
 @house_admin_required
 def ReservationManageCreate(request, location_slug):
 	if request.method == 'POST':
-		print request.POST
 		location = get_object_or_404(Location, slug=location_slug)
-		
-		# Check if the room is available for all dates in the reservation
-		room_reservable = True
-		arrival_date = datetime.datetime.strptime(request.POST.get('arrive'),'%m/%d/%Y').date()
-		departure_date = datetime.datetime.strptime(request.POST.get('depart'),'%m/%d/%Y').date()	
-		room = Room.objects.get(pk=request.POST.get('room'))
-		delta = datetime.timedelta(days=1)
-		while arrival_date < departure_date:
-			print room
-			print room.available_on(arrival_date.strftime('%m/%d/%Y'))
-			if room.available_on(arrival_date.strftime('%m/%d/%Y')) == False:
-				room_reservable = False
-			elif room.available_on(arrival_date.strftime('%m/%d/%Y')) == True:
-				room_reservable = True
-			arrival_date += delta
-		if room_reservable == False:
-			messages.add_message(request, messages.INFO, "This room is not available on those dates")
-			return HttpResponseRedirect(reverse('reservation_manage_create', args=(location.slug,)))
 
 		notify = request.POST.get('email_announce');
 		print 'notify was set to:'

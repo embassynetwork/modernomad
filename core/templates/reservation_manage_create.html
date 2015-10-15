@@ -47,11 +47,11 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Arrive</label> 
 					<div class="col-sm-2">
-						<input class="form-control" id="id_arrive" name="arrive" value="" size="8" required/>
+						<input class="form-control listening" id="id_arrive" name="arrive" value="" size="8" required/>
 					</div>
 					<label class="col-sm-1 control-label">Depart</label> 
 					<div class="col-sm-2">
-						<input class="form-control" id="id_depart" name="depart" value="" size="8" required/>
+						<input class="form-control listening" id="id_depart" name="depart" value="" size="8" required/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -61,12 +61,13 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Room</label> 
 					<div class="col-sm-4">
-						<select class="form-control" name="room" required>
+						<select class="form-control listening" id="room_select" name="room" required>
 							{% for room in location.get_rooms %}
 								<option value="{{room.id}}">{{ room.name }}</option>
 							{% endfor %}
 						</select>
 					</div>
+					<div id="room_warning" class="col-sm-4">This room is already reservered on those dates</div>
 				</div>
 
 				<div class="form-group">
@@ -137,9 +138,9 @@
 			});
 		}
 	};
+	
 
 	//$("#id_username").change(get_avatar);
-
 	$(function() {
 		var availableUsers = [
 			{% for user in all_users %}
@@ -166,6 +167,57 @@
         }
 	})
 	
+	$(".listening").change(function(event) {
+		// Get arrive and depart dates, update value. 
+		$arrive = $("#id_arrive").val();
+		$depart = $("#id_depart").val();
+		$room = $("#room_select").val();
+
+		console.log($arrive, $depart, $room)
+
+		// once the dates are selected, poll for a list of available rooms
+		if ($arrive && $depart && $room) {
+
+			$delta_ms = new Date($depart) - new Date($arrive)
+			$delta_days = $delta_ms/(1000*60*60*24)
+
+
+			console.log("checking availability...");
+			request = $.ajax({ 
+				data: {
+					'arrive' : $arrive,
+					'depart' : $depart,
+					'room' : $room,
+					'csrfmiddlewaretoken': '{{ csrf_token }}'
+				}, 
+				type: "POST",
+				url: '{% url "admin_room_availability" location.slug %}'
+			});
+		
+			request.done(function(msg) { // on success..
+				alert(msg)
+				$("#room_warning").html(msg)
+			});
+
+			request.fail(function(msg) {
+				$("#room_warning").html("<p class='bg-danger general-pad'>Hmm, there was a problem. Please try selecting your dates again.</p>")
+			});
+			$("#reservation-items").empty()
+			$("#reservation-total").html("0")
+		} 
+
+
+		// wire up the ajax-y spinning animated GIF to show when an ajax call
+		// is made. 	
+		$('#spinner').ajaxStart(function () {
+			$(this).fadeIn('fast');
+		}).ajaxStop(function () {
+			$(this).stop().fadeOut('fast');
+		});	
+	
+	});
+
+
 	$("#manage-reservation-form").validate();
 
 
