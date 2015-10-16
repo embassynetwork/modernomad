@@ -49,30 +49,31 @@
 					<div class="col-sm-2">
 						<input class="form-control listening" id="id_arrive" name="arrive" value="" size="8" required/>
 					</div>
-					<label class="col-sm-1 control-label">Depart</label> 
+					<label class="col-sm-2 control-label">Depart</label> 
 					<div class="col-sm-2">
 						<input class="form-control listening" id="id_depart" name="depart" value="" size="8" required/>
 					</div>
 				</div>
-				<div class="form-group">
-					<p class="col-sm-offset-2 col-sm-6 small text-danger"><i class="fa fa-exclamation-circle"></i> This does NOT check whether the dates are available and will NOT warn you if you are double-booking.</p>
-				</div>
 
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Room</label> 
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<select class="form-control listening" id="room_select" name="room" required>
+							<option value="">Select Room</option>
 							{% for room in location.get_rooms %}
 								<option value="{{room.id}}">{{ room.name }}</option>
 							{% endfor %}
 						</select>
 					</div>
-					<div id="room_warning" class="col-sm-4">This room is already reservered on those dates</div>
+				</div>
+
+				<div class="form-group">
+					<p class="col-sm-offset-2 col-sm-7 double-booked small text-danger" style="display: none"><i class="fa fa-exclamation-circle"></i>You are double booking this room for some of the dates you have selected</p>
 				</div>
 
 				<div class="form-group">
 					<label class="col-sm-2 control-label">Purpose</label> 
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<input class="form-control" id="id_purpose" name="purpose" value="" size="8" required/>
 					</div>
 				</div>
@@ -167,43 +168,24 @@
         }
 	})
 	
+	// Check reservation dates and room for avilability, warn admin if overbooking room.
 	$(".listening").change(function(event) {
 		// Get arrive and depart dates, update value. 
-		$arrive = $("#id_arrive").val();
-		$depart = $("#id_depart").val();
-		$room = $("#room_select").val();
-
-		console.log($arrive, $depart, $room)
+		var arrive = $("#id_arrive").val();
+	 	var depart = $("#id_depart").val();
+		var room = $("#room_select").val();
 
 		// once the dates are selected, poll for a list of available rooms
-		if ($arrive && $depart && $room) {
+		if (arrive && depart && room) {
 
-			$delta_ms = new Date($depart) - new Date($arrive)
-			$delta_days = $delta_ms/(1000*60*60*24)
+	     	$.get('availability_admin/', {arrive: arrive, depart: depart, room: room}, function(data){
+           		if (data == "False") {
+           			confirm("This room is aleady booked on those dates")
+           			$('.double-booked').show()
 
-
-			console.log("checking availability...");
-			request = $.ajax({ 
-				data: {
-					'arrive' : $arrive,
-					'depart' : $depart,
-					'room' : $room,
-					'csrfmiddlewaretoken': '{{ csrf_token }}'
-				}, 
-				type: "POST",
-				url: '{% url "admin_room_availability" location.slug %}'
-			});
-		
-			request.done(function(msg) { // on success..
-				alert(msg)
-				$("#room_warning").html(msg)
-			});
-
-			request.fail(function(msg) {
-				$("#room_warning").html("<p class='bg-danger general-pad'>Hmm, there was a problem. Please try selecting your dates again.</p>")
-			});
-			$("#reservation-items").empty()
-			$("#reservation-total").html("0")
+           		}	
+	       	});
+			
 		} 
 
 
