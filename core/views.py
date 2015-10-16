@@ -32,6 +32,7 @@ from django.utils.safestring import mark_safe
 from datetime import date, timedelta
 import time
 import json, datetime, stripe 
+from django.http import JsonResponse
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
 from django.core.urlresolvers import reverse
@@ -567,11 +568,14 @@ def CheckManageRoomAvailability(request, location_slug):
 	depart = datetime.datetime.strptime(request.GET['depart'],'%m/%d/%Y').date()
 	room_request = request.GET['room']
 	free_rooms = location.rooms_free(arrive, depart)
+	room_list = []
+	for room in free_rooms:
+		room_list.append(room.name)
 
 	for room in free_rooms:
 		if int(room_request) == int(room.id):
-			return HttpResponse(True)
-	return HttpResponse(False)
+			return JsonResponse({'available': True, 'rooms': room_list})
+	return JsonResponse({'available': False, 'rooms': room_list})
 
 def ReservationSubmit(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
