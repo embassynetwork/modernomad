@@ -551,22 +551,27 @@ def CheckRoomAvailability(request, location_slug):
 		'available_reservations': available_reservations, })
 
 def CheckManageRoomAvailability(request, location_slug):
-	print "Got to here"
+	'''
+		Args:
+			request (http request obj): Request object sent from ajax request, includes arrive, depart and room data
+			location_slug (string): name of location
+
+		Returns:
+			Boolean: True if room is available. False if not available.
+
+	'''
 	# Check the room on the admin reservation page to see if its available
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
-
 	location = get_object_or_404(Location, slug=location_slug)
-
 	# Check if the room is available for all dates in the reservation
-	arrive = datetime.datetime.strptime(request.POST.get('arrive'),'%m/%d/%Y').date()
-	depart = datetime.datetime.strptime(request.POST.get('depart'),'%m/%d/%Y').date()	
+	arrive = datetime.datetime.strptime(request.GET['arrive'],'%m/%d/%Y').date()
+	depart = datetime.datetime.strptime(request.GET['depart'],'%m/%d/%Y').date()
+	room_request = request.GET['room']
 	free_rooms = location.rooms_free(arrive, depart)
+
 	for room in free_rooms:
-		if int(request.POST.get('room')) == int(room.id):
-			return True
-		else:
-			return False
+		if int(room_request) == int(room.id):
+			return HttpResponse(True)
+	return HttpResponse(False)
 
 def ReservationSubmit(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
