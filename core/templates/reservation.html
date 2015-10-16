@@ -51,7 +51,7 @@
 											<h3 class="panel-title">{{room.name}} <span class="pull-right">${{room.default_rate|floatformat:0}}</span></h3>
 										</div>
 										<div class="panel-body">
-											<p class="room-avail-descr">{{ room.description|truncatechars:150 }}</p>
+											<p class="room-avail-descr">{{ room.summary|truncatechars:140 }}</p>
 											<img src="/media/{{room.image}}" class="room-info-image" />
 										</div>
 									</div>

@@ -596,7 +596,7 @@ def ReservationSubmit(request, location_slug):
 				# Make sure the rate is set and then generate a bill
 				reservation.reset_rate()
 				new_reservation_notify(reservation)
-				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.' % reservation.user.username)			
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 			else:
 				res_info = reservation.serialize()
