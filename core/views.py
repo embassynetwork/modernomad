@@ -8,8 +8,6 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from registration import signals
-import registration
 from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
 from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
@@ -30,6 +28,7 @@ from gather.models import Event
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
 from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 import time
 import json, datetime, stripe 
 from reservation_calendar import GuestCalendar
@@ -434,19 +433,28 @@ def calendar(request, location_slug):
 		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
 
 
-def room_cal_request(request, location_slug, room_id):
+def room_cal_request(request, location_slug, room_id, month=None, year=None, browse_past=True):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
+	print request.POST
+	month = int(request.POST.get("month"))
+	year = int(request.POST.get("year"))
+	browse_past_str = request.POST.get("browse_past")
+	if browse_past_str == 'false':
+		browse_past = False
+	else:
+		brose_past = True
+	print browse_past
+
 	try:
 		location = get_object_or_404(Location, slug=location_slug)
 		room = Room.objects.get(id=room_id)
 	except:
 		return HttpResponseRedirect('/')
 
-	month = int(request.POST.get("month"))
-	year = int(request.POST.get("year"))
 	cal_html = room.availability_calendar_html(month=month, year=year)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+
 	link_html = '''
 			<form id="room-cal-prev" action="%s" class="form-inline">
 				<input type="hidden" name="month" value=%s>
@@ -465,14 +473,25 @@ def room_cal_request(request, location_slug, room_id):
 def stay(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 
-	rooms = location.rooms_with_future_reservability()
 	today = timezone.localtime(timezone.now())
-	month = request.GET.get("month")
-	year = request.GET.get("year")
-	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	return render(request, "location_stay.html", {'location_stay_text': location.stay_page, 'rooms':rooms, "next_month": next_month, 
-		"prev_month": prev_month, 'location': location})
-
+	if browse_past == False and prev_month < datetime.date(today.year, today.month, 1):
+		link_html = '''
+				<div class="clear"></div>
+				<div class="center">
+				<span class="greyed-out">Previous</span> | 
+				<a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
+				</div>
+		''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
+	else: 
+		link_html = '''
+				<div class="clear"></div>
+				<div class="center">
+				<a id="room-cal-%s-prev" href="%s?month=%s&year=%s">Previous</a> | 
+				<a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
+				</div>
+		''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year, 
+				room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
+	return HttpResponse(cal_html+link_html)
 
 def thanks(request, location_slug):
 	# TODO generate receipt
@@ -534,6 +553,7 @@ def CheckRoomAvailability(request, location_slug):
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
 	availability = location.availability(arrive, depart)
 	date_list = date_range_to_list(arrive, depart)
+	print date_list
 	available_reservations = {}
 	# Create some mock reservations for each available room so we can generate the bill
 	free_rooms = location.rooms_free(arrive, depart)
@@ -547,8 +567,21 @@ def CheckRoomAvailability(request, location_slug):
 		nights = reservation.total_nights()
 		available_reservations[room] = {'reservation':reservation, 'bill_line_items':bill_line_items, 'nights':nights, 'total':total}
 
-	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, 
-		'available_reservations': available_reservations, })
+	new_profile_form = UserProfileForm()
+	if request.user.is_authenticated():
+		current_user = request.user
+	else:
+		current_user = None
+	
+	# base previous and next on the arrival date. note that these dates will
+	# also have a day associated with them but we don't use that. 
+	prev_month = arrive - relativedelta(months=1)
+	next_month = arrive + relativedelta(months=1)
+
+	all_users = User.objects.all().order_by('username')
+	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
+		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
+		"new_profile_form": new_profile_form, 'all_users': all_users, 'prev_month':prev_month, 'next_month': next_month})
 
 def CheckManageRoomAvailability(request, location_slug):
 	'''
@@ -586,19 +619,10 @@ def ReservationSubmit(request, location_slug):
 				# Make sure the rate is set and then generate a bill
 				reservation.reset_rate()
 				new_reservation_notify(reservation)
-				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. Please <a href="/people/%s/edit/">update your profile</a> if your projects or other big ideas have changed since your last visit.<br><br>You can still modify your reservation.' % reservation.user.username)			
+				messages.add_message(request, messages.INFO, 'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.' % reservation.user.username)			
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
 			else:
-				date_encode = DateTimeAwareJSONEncoder()
-				res_info = {
-						'arrive': {'year': reservation.arrive.year, 'month': reservation.arrive.month, 'day': reservation.arrive.day},
-						'depart': {'year': reservation.depart.year, 'month': reservation.depart.month, 'day': reservation.depart.day},
-						'location_id': reservation.location.id,
-						'room_id': reservation.room.id,
-						'purpose': reservation.purpose,
-						'arrival_time': reservation.arrival_time,
-						'comments': reservation.comments,
-						}
+				res_info = reservation.serialize()
 				request.session['reservation'] = res_info
 				print 'session info'
 				print request.session.keys()
@@ -612,13 +636,13 @@ def ReservationSubmit(request, location_slug):
 		form = ReservationForm(location)
 	# pass the rate for each room to the template so we can update the cost of
 	# a reservation in real time. 
-	rooms = Room.objects.all()
-	room_list = {}
-	for room in rooms:
-		room_list[room.name] = round(room.default_rate)
-	room_list = json.dumps(room_list)
-	return render(request, 'reservation.html', {'form': form, "room_list": room_list, 
-		'max_days': location.max_reservation_days, 'location': location })
+	today = timezone.localtime(timezone.now())
+	month = request.GET.get("month")
+	year = request.GET.get("year")
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	rooms = location.rooms_with_future_reservability()
+	return render(request, 'reservation.html', {'form': form, 'max_days': location.max_reservation_days, 'location': location, 'rooms': rooms, 
+		'prev_month': prev_month, 'next_month': next_month, 'month': month })
 
 
 @login_required
@@ -743,49 +767,28 @@ def UserAddCard(request, username):
 		messages.add_message(request, messages.INFO, "No credit card information was given.")
 		return HttpResponseRedirect("/people/%s" % username)
 
-	reservation_id = request.POST.get('res-id')
+	reservation_id = request.POST.get('res-id', False)
 	if reservation_id:
 		reservation = Reservation.objects.get(id=reservation_id)
 
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 
 	try:
-		customer = stripe.Customer.create(
-			card=token,
-			description=user.email
-		)
+		customer = stripe.Customer.create(card=token, description=user.email)
 		profile = user.profile
 		profile.customer_id = customer.id
+		print customer.sources.data
+		# assumes the user has only one card stored with their profile.
+		profile.last4 = customer.sources.data[0].last4
 		profile.save()
-
-		# if the card is being added from the reservation page, then charge the card
-		if reservation_id:
-			# charges card, saves payment details and emails a receipt to
-			# the user. if there is an error with charging the card, it will happen here. 
-			payment_gateway.charge_customer(reservation)
-			send_receipt(reservation)
-			reservation.confirm()
-			days_until_arrival = (reservation.arrive - datetime.date.today()).days
-			if days_until_arrival <= reservation.location.welcome_email_days_ahead:
-				guest_welcome(reservation)
-			messages.add_message(request, messages.INFO, 'Thank you! Your payment has been processed and a receipt emailed to you at %s. You will receive an email with house access information and other details %d days before your arrival.' % (user.email, reservation.location.welcome_email_days_ahead))
-			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
-		# if the card is being added from the user profile page, just save it. 
-		else:
-			messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
-			return HttpResponseRedirect("/people/%s" % username)
+		if reservation_id and reservation.status == Reservation.APPROVED:
+			updated_reservation_notify(reservation)
+		messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 	except stripe.CardError, e:
-		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card: %s. Often when a card is declined, it is because your card has a transaction limit. Please contact your credit card company and try again, or add a different card on your <a href="/people/%s/edit/">profile</a>.' % (reservation.user.username, e))
-		if reservation_id:
-			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
-		else:
-			return HttpResponseRedirect("/people/%s" % username)
-	except Exception, e:
-		messages.add_message(request, messages.ERROR, 'Drat, there was a problem processing your transaction: %s. Please try again or report this error to support@embassynetwork.com.' % (e))
-		if reservation_id:
-			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
-		else:
-			return HttpResponseRedirect("/people/%s" % username)
+		messages.add_message(request, messages.INFO, '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>' % e)
+	if reservation_id:
+		return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
+	return HttpResponseRedirect("/people/%s" % username)
 
 
 def UserDeleteCard(request, username):
@@ -794,6 +797,7 @@ def UserDeleteCard(request, username):
 
 	profile = UserProfile.objects.get(user__username=username)
 	profile.customer_id = None
+	profile.last4 = None
 	profile.save()
 	
 	messages.add_message(request, messages.INFO, "Card deleted.")
@@ -1746,16 +1750,16 @@ def payments(request, location_slug, year, month):
 # ******************************************************
 
 def process_unsaved_reservation(request):
-	print "in process_unsaved_reservation"
+	logger.debug("in process_unsaved_reservation")
 	if request.session.get('reservation'):
-		print 'found reservation'
-		print request.session['reservation']
+		logger.debug('found reservation')
+		logger.debug(request.session['reservation'])
 		details = request.session.pop('reservation')
 		new_res = Reservation(
 				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
 				depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']), 
-				location = Location.objects.get(id=details['location_id']), 
-				room = Room.objects.get(id=details['room_id']), 
+				location = Location.objects.get(id=details['location']['id']), 
+				room = Room.objects.get(id=details['room']['id']), 
 				purpose = details['purpose'], 
 				arrival_time = details['arrival_time'], 
 				comments = details['comments'],
@@ -1764,16 +1768,18 @@ def process_unsaved_reservation(request):
 		new_res.save()
 		new_res.reset_rate()
 		new_res.generate_bill()
-		print 'new reservation %d saved.' % new_res.id
+		logger.debug('new reservation %d saved.' % new_res.id)
 		new_reservation_notify(new_res)
 		# we can't just redirect here because the user doesn't get logged
 		# in. so save the reservaton ID and redirect below. 
 		request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
-	print "no reservation found"
+	else:
+		logger.debug("no reservation found")
 	return
 
 
 def user_login(request):
+	logger.debug('in user_login')
 	next_page = None
 	if 'next' in request.GET:
 		next_page = request.GET['next']
@@ -1781,24 +1787,28 @@ def user_login(request):
 	username = password = ''
 	if request.POST:
 		username = request.POST['username']
-		password = request.POST['password']
+		# JKS this is a bit janky. this is because we use this view both after
+		# the user registration or after the login view, which themselves use
+		# slightly different forms. 
+		if request.POST.get('password', False):
+			password = request.POST['password']
+		else:
+			password = request.POST['password1']
 		if 'next' in request.POST:
 			next_page = request.POST['next']
 
 		user = authenticate(username=username, password=password)
-		#print 'user authenticated'
 		if user is not None:
 			if user.is_active:
 				login(request, user)
 
 			process_unsaved_reservation(request)
-			#print request.session.keys()
+			# if there was a pending reservation redirect to the reservation page
 			if request.session.get('new_res_redirect'):
 				res_id = request.session['new_res_redirect']['res_id']
 				location_slug = request.session['new_res_redirect']['location_slug']
 				request.session.pop('new_res_redirect')
 				messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
-				# if there was a pending reservation redirect to the reservation page
 				return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, res_id)))
 
 			# this is where they go on successful login if there is not pending reservation
@@ -1810,28 +1820,15 @@ def user_login(request):
 	return render(request, 'registration/login.html', context_instance=RequestContext(request))
 
 
-'''A registration backend that supports capturing user profile
-information during registration.'''
-
-	
-class Registration(registration.views.RegistrationView):
-	
-	@transaction.atomic
-	def register(self, request, **cleaned_data):
-		'''Register a new user, saving the User and UserProfile data.'''
-		user = User()
-		for field in user._meta.fields:
-			if field.name in cleaned_data:
-				setattr(user, field.name, cleaned_data[field.name])
-		# the password has been validated by the form
-
-		user.set_password(cleaned_data['password2'])
-		user.save()
-
-		profile = UserProfile(user=user)
-		for field in profile._meta.fields:
-			if field.name in cleaned_data:
-				setattr(profile, field.name, cleaned_data[field.name])
+def register(request):
+	if request.session.get('reservation'):
+		reservation = request.session.get('reservation')
+	else:
+		reservation = None
+	if request.method == "POST":
+		profile_form = UserProfileForm(request.POST, request.FILES)
+		user = profile_form.save()
+		profile = user.profile
 
 		img_data = request.POST.get("image")
 		# If none or len 0, means illegal image data
@@ -1856,44 +1853,10 @@ class Registration(registration.views.RegistrationView):
 
 		profile.image = full_file_name
 		profile.save()
-
-		new_user = authenticate(username=user.username, password=cleaned_data['password2'])
-		login(request, new_user)
-		signals.user_activated.send(sender=self.__class__, user=new_user, request=request)
-		process_unsaved_reservation(request)	
-		return new_user
-
-	def registration_allowed(self, request):
+		return user_login(request)
+	else:
 		if request.user.is_authenticated():
-			return False
-		else: return True
-
-	def get_success_url(self, request, user):
-		"""
-		Return the name of the URL to redirect to after successful
-		account activation. 
-
-		We're not using the registration system's activation features ATM, so
-		interrupt the registration process here.
-		"""
-		url_path = request.get_full_path().split("next=")
-		if request.session.get('new_res_redirect'):
-			res_id = request.session['new_res_redirect']['res_id']
-			location_slug = request.session['new_res_redirect']['location_slug']
-			request.session.pop('new_res_redirect')
-			messages.add_message(request, messages.INFO, 'Thank you! Your reservation has been submitted. Please allow us up to 24 hours to respond.')
-			return reverse('reservation_detail', args=(location_slug, res_id))
-		elif len(url_path) > 1 and url_path[1].endswith("events/create/"):
-			messages.add_message(request, messages.INFO, 'Your account has been created. Now it is time to propose your event!')
-			return (url_path[1], (), {'username' : user.username})
-		else:
-			return ('user_detail', (), {'username': user.username})
-
-class Activation(registration.views.ActivationView):
-	def activate(self, request, user):
-		# we're not using the registration system's activation features ATM.
-		return True
-
-
-
-
+			messages.add_message(request, messages.INFO, 'You are already logged in. Please <a href="/people/logout">log out</a> to create a new account')
+			return HttpResponseRedirect(reverse('user_detail', args=(request.user.username,)))
+		profile_form = UserProfileForm()
+	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'reservation': reservation })

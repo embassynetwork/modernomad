@@ -259,20 +259,21 @@ class RoomCalendar(calendar.HTMLCalendar):
 				cssclasses = self.cssclasses[weekday]
 			the_day = datetime.date(self.year, self.month, day)
 			if self.room.available_on(the_day):
-				return '<td class="%s"><span class="text-success glyphicon glyphicon-ok"></span> %d</td>' % (cssclasses, day)
+				return '<td class="a_day available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 			else:
-				return '<td class="%s"><span class="text-danger glyphicon glyphicon-remove"></span> %d</td>' % (cssclasses, day)
+				return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 
 class Room(models.Model):
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
-	description = models.TextField(blank=True, null=True)
+	description = models.TextField()
+	summary = models.CharField(max_length=140, help_text="Max length 140 chars", default='')
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
 	residents = models.ManyToManyField(User, related_name="residents", help_text="This field is optional.", blank=True) # a room may have many residents and a resident may have many rooms
-	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
+	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
 
 	def __unicode__(self):
 		return self.name
@@ -553,8 +554,8 @@ class Reservation(models.Model):
 		if reset_suppressed:
 			self.suppressed_fees.clear()
 		for location_fee in LocationFee.objects.filter(location = self.location):
-			print location_fee.fee.description
-			print location_fee.fee not in self.suppressed_fees.all()
+			#print location_fee.fee.description
+			#print location_fee.fee not in self.suppressed_fees.all()
 			if location_fee.fee not in self.suppressed_fees.all():
 				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
 				amount = float(effective_room_charge) * location_fee.fee.percentage
@@ -570,8 +571,54 @@ class Reservation(models.Model):
 		return line_items
 
 
+	def serialize(self, include_bill=True):
+		if not self.id:
+			self.id = -1
+
+		res_info = {
+				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
+				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
+				'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug':self.location.slug},
+				'room': {'id': self.room.id, 'name': self.room.name, 'description': self.room.description, 'cancellation_policy': self.room.cancellation_policy},
+				'purpose': self.purpose,
+				'arrival_time': self.arrival_time,
+				'comments': self.comments,
+			}
+
+		# Now serialize the bill
+		if include_bill:
+			if self.bill:
+				bill_line_items = self.bill.ordered_line_items()
+				amount = self.bill.amount()
+				total_owed = self.bill.total_owed()
+			else:
+				bill_line_items = self.generate_bill(delete_old_items=False, save=False)
+				amount = Decimal(0.0)
+				for item in bill_line_items:
+					if not item.paid_by_house:
+						amount = Decimal(amount) + Decimal(item.amount)
+				total_owed = amount
+			
+			bill_info = {
+				'amount': format(amount, '.2f'),
+				'total_owed': format(total_owed, '.2f'),
+				'ordered_line_items': [],
+			}
+			for item in bill_line_items:
+				line_item = {
+					'paid_by_house': item.paid_by_house,
+					'description': item.description,
+					'amount': format(item.amount, '.2f'),
+				}
+				bill_info['ordered_line_items'].append(line_item)
+			res_info['bill'] = bill_info
+		
+		return res_info
+
 	def __unicode__(self):
-		return "reservation %d" % self.id
+		if self.id:
+			return "reservation (id = %d)" % self.id
+		return "reservation (unsaved)"
 
 	def suppress_fee(self, line_item):
 		print 'suppressing fee'
@@ -830,6 +877,9 @@ class UserProfile(models.Model):
 	# currently used to store the stripe customer id but could be used for
 	# other payment platforms in the future
 	customer_id = models.CharField(max_length=200, blank=True, null=True)
+	# JKS TODO between last4 and the customer_id, payment methods should really be their own model. 
+	last4 = models.IntegerField(null=True, blank=True, help_text="Last 4 digits of the user's card on file, if any")
+
 
 	def __unicode__(self):
 		return (self.user.__unicode__())
