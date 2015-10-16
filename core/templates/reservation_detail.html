@@ -26,8 +26,10 @@
 <div class="row {% if reservation.status == 'canceled' %}greyed-out{% endif %}">
 
 	{% if reservation.status == 'canceled' %}
-		<div class="alert alert-danger">
-			<span class="fa fa-ban"></span> This reservation is canceled
+		<div class="col-md-12">
+			<div class="alert alert-danger">
+				<span class="fa fa-ban"></span> This reservation is canceled
+			</div>
 		</div>
 
 	{% elif reservation.is_paid %}
@@ -57,30 +59,30 @@
 							<div id="payment-errors text-danger"></div>
 
 							<div class="row sm-row-spacer">
-								<div class="col-md-2">
+								<div class="col-sm-2">
 									<label>
 										<span>Card</span>
 									</label>
 								</div>
-								<div class="col-md-10">
+								<div class="col-sm-10">
 									<input class="form-control" type="text" data-stripe="number"/>
 								</div>
 							</div>
 
 							<div class="row sm-row-spacer">
-								<div class="col-md-2">
+								<div class="col-sm-2">
 									<label> CVC </label>
 								</div>
-								<div class="col-md-3">
+								<div class="col-sm-3">
 									<input class="form-control" type="text" size="4" data-stripe="cvc"/>
 								</div>
 
-								<div class="col-md-1">
+								<div class="col-sm-1">
 									<label>
 										<span>Exp</span>
 									</label>
 								</div>
-								<div class="col-md-6 form-inline">
+								<div class="col-sm-6 form-inline">
 									<input class="form-control" type="text" size="4" data-stripe="exp-month" placeholder="MM"/> /
 									<input class="form-control" type="text" size="6" data-stripe="exp-year" placeholder="YYYY"/>
 								</div>
@@ -103,8 +105,39 @@
 			</div>
 		</div>
 	{% endif %}
+</div>
 
-	<div class="col-md-8">
+<div class="row">
+	<div class="col-md-4 col-md-push-8">
+		{% if user in location.house_admins.all %}
+			<div class="row">
+			<div class="col-sm-12 align-right">
+				<a href="{% url 'reservation_manage' location.slug reservation.id %}">Manage Reservation <span class="fa fa-mail-forward"></span></a>
+			</div>
+			</div>
+		{% endif %}
+		<div id="reservation-amount-summary-box">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Reservation Summary</h3>
+				</div>
+				{% with reservation as r %}
+					{% include 'snippets/reservation_bill_line_items_and_payments.html' %}
+				{% endwith %}
+				<div class="panel-footer text-muted">
+					<em>Cancellation policy for the {{ reservation.room }} is {{reservation.room.cancellation_policy}}.</em>
+				</div>
+			</div>
+		</div>
+		{% if reservation.is_paid %}
+		<div class="row">
+			<div class="col-sm-12">
+				<a class="btn btn-default res-status-btn" type="button" href="{% url 'reservation_payment' location.slug reservation.uuid %}">View Receipt</a>
+			</div>
+		</div>
+		{% endif %}
+	</div> <!-- end col-md-4 -->
+	<div class="col-md-8 col-md-pull-4">
 		<h3>Reservation for 
 			<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
 		</h3>
@@ -124,38 +157,6 @@
 
 	</div>
 
-	<div class="col-md-4">
-
-		{% if user in location.house_admins.all %}
-			<div class="row">
-			<div class="col-sm-12 align-right">
-				<a href="{% url 'reservation_manage' location.slug reservation.id %}">Manage Reservation <span class="fa fa-mail-forward"></span></a>
-			</div>
-			</div>
-		{% endif %}
-		
-		<div id="reservation-amount-summary-box">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h3 class="panel-title">Reservation Summary</h3>
-				</div>
-				{% with reservation as r %}
-					{% include 'snippets/reservation_bill_line_items_and_payments.html' %}
-				{% endwith %}
-				<div class="panel-footer text-muted">
-					<em>Cancellation policy for the {{ reservation.room }} is {{reservation.room.cancellation_policy}}.</em>
-				</div>
-			</div>
-		</div>
-
-		{% if reservation.is_paid %}
-		<div class="row">
-			<div class="col-sm-12">
-				<a class="btn btn-default res-status-btn" type="button" href="{% url 'reservation_payment' location.slug reservation.uuid %}">View Receipt</a>
-			</div>
-		</div>
-		{% endif %}
-	</div> <!-- end col-md-4 -->
 </div>
 
 <div class="row top-spacer-xl {% if reservation.status == 'canceled' %}greyed-images greyed-out {% endif %}">
