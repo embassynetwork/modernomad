@@ -180,7 +180,7 @@ def new_reservation_notify(reservation):
 def updated_reservation_notify(reservation):
 	domain = Site.objects.get_current().domain
 	admin_path = urlresolvers.reverse('reservation_manage', args=(reservation.location.slug, reservation.id,))
-	text_content = '''Howdy,\n\nA reservation has been updated and requires your review.\n\nYou can view, approve or deny this request at %s%s.''' % (domain, admin_path)
+	text_content = '''Howdy,\n\nA reservation has been updated and requires your review.\n\nManage this reservation at %s%s.''' % (domain, admin_path)
 	recipients = []
 	for admin in reservation.location.house_admins.all():
 		if not admin.email in recipients:

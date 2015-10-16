@@ -40,7 +40,7 @@ class UserProfileForm(forms.ModelForm):
 
 	class Meta:
 		model = UserProfile
-		exclude = ['user', 'status', 'image_thumb', 'customer_id', ]
+		exclude = ['user', 'status', 'image_thumb', 'customer_id', 'last4']
 		# fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
 		widgets = {
 			'bio': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
@@ -115,23 +115,56 @@ class UserProfileForm(forms.ModelForm):
 			links = ", ".join(cleaned_links)
 		return links
 
+	def create_user(self):
+		"Creates the User object"
+		if not self.is_valid():
+			raise Exception('The form must be valid in order to save')
+
+		first = self.cleaned_data['first_name'].strip().title()
+		if len(first) == 0:
+			raise forms.ValidationError("First Name Required.")
+		last = self.cleaned_data['last_name'].strip().title()
+		if len(last) == 0:
+			raise forms.ValidationError("Last Name Required.")
+		email = self.cleaned_data['email'].strip().lower()
+		if len(email) == 0:
+			raise forms.ValidationError("Email Required.")
+		if User.objects.filter(email=email).count() > 0:
+			raise forms.ValidationError("Email address '%s' already in use." % email)
+		username = self.cleaned_data['username'].strip()
+		if User.objects.filter(username=username).count() > 0:
+			raise forms.ValidationError('There is already a user with this username. If this is your account and you need to recover your password, you can do so from the login page.')
+		user = User(username=username, first_name=first, last_name=last, email=email)
+		password = self.clean_password2()
+		user.set_password(password)
+		user.save()
+		return user
+
 	def save(self, commit=True):
 		# save the UserProfile (if editing an existing instance, it will be updated)
-		profile = super(UserProfileForm, self).save()
+		profile = super(UserProfileForm, self).save(commit=False)
 		# then update the User model with the values provided
-		user = User.objects.get(pk=profile.user.pk)
-		if self.cleaned_data.get('email'):
-			user.email = self.cleaned_data.get('email')
-		if self.cleaned_data.get('username'):
-			user.username = self.cleaned_data.get('username')
-		if self.cleaned_data['first_name']:
-			user.first_name = self.cleaned_data.get('first_name')
-		if self.cleaned_data['last_name']:
-			user.last_name = self.cleaned_data.get('last_name')
-		if self.cleaned_data.get('password2'):
-			# set_password hashes the selected password
-			user.set_password(self.cleaned_data['password2'])
-		user.save()
+		try: 
+			# Editing 
+			user = User.objects.get(pk=profile.user.pk)
+			if self.cleaned_data.get('email'):
+				user.email = self.cleaned_data.get('email')
+			if self.cleaned_data.get('username'):
+				user.username = self.cleaned_data.get('username')
+			if self.cleaned_data['first_name']:
+				user.first_name = self.cleaned_data.get('first_name')
+			if self.cleaned_data['last_name']:
+				user.last_name = self.cleaned_data.get('last_name')
+			if self.cleaned_data.get('password2'):
+				# set_password hashes the selected password
+				user.set_password(self.cleaned_data['password2'])
+				user.save()
+		except:
+			# Adding
+			user = self.create_user()
+			profile.user = user
+
+		profile.save()
 		return user
 
 class LocationSettingsForm(forms.ModelForm):
@@ -204,6 +237,7 @@ class LocationRoomForm(BootstrapModelForm):
 		model = Room
 		exclude = ['location',]
 		widgets = { 
+			'description': forms.Textarea(attrs={'rows': '3'}),
 		}
 
 class LocationReservableForm(BootstrapModelForm):

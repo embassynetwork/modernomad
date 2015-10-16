@@ -7,7 +7,7 @@
 
 	<div class="button-spacer">
 		<div class="col-md-4 col-md-offset-4">
-			<a class="btn btn-lg btn-rouge" type="button" href="{% url 'reservation_create' location.slug %}">Make a Reservation</a>
+			<a class="btn btn-lg btn-rouge" type="button" href="{% url 'location_stay' location.slug %}">Make a Reservation</a>
 		</div>
 	</div>
 
@@ -22,22 +22,22 @@
 		<div><p><strong>Rate:</strong> ${{ room.default_rate }}/night</p></div>
 		<div><p>{{ room.description }}</p></div>
 
-		<h3>Availability Preview</h3>
-		<div class="availability-cal" id="availability-cal-{{room.id}}">
-			<div class="sm-row-spacer">
-				{{ room.availability_calendar_html|safe }}
+		<div id="room-info-{{room.id}}">
+			<div class="panel panel-default" id="panel-room-calendar">
+				<div class="panel-heading">
+					<h3 class="panel-title">Availability Preview</h3>
+				</div>
+				<div class="panel-body">
+					<div class="availability-cal" id="availability-cal-{{room.id}}">
+						{{ room.availability_calendar_html|safe }}
+						<div class="clear"></div>
+							<div class="center">
+								<span class="greyed-out">Previous</span> |
+							<a id="room-cal-{{room.id}}-next" href="{% url 'room_cal_request' location.slug room.id %}?month={{next_month.month}}&year={{next_month.year}}">Next</a>
+						</div>
+					</div>
+				</div>
 			</div>
-
-			<form id="room-cal-prev" action="{% url 'room_cal_request' location.slug room.id %}" class="form-inline">
-				<input type="hidden" name="month" value={{prev_month.month}}>
-				<input type="hidden" name="year" value={{prev_month.year}}>
-				<input class="room-cal-req form-control" type="submit" value="Previous">
-			</form>
-			<form id="room-cal-next" action="{% url 'room_cal_request' location.slug room.id %}" class="form-inline">
-				<input type="hidden" name="month" value={{next_month.month}}>
-				<input type="hidden" name="year" value={{next_month.year}}>
-				<input class="room-cal-req form-control" type="submit" value="Next">
-			</form>
 		</div>
 	</div>
 	
@@ -53,10 +53,20 @@
 {% block extrajs %}
 <script>
 
-	// for each room, get the availability calendar and inject it into the appropriate div. 
 	function register() {
-		$(".room-cal-req").click(function(e) {
+		$("a[id*='room-cal'").click(function(e) {
+			console.log('room-cal clicked');
+			console.log($(this).attr('id'));
 			e.preventDefault();
+
+			// "this" will pick up the parameters from whichever link was clicked
+			room_id = $(this).attr('id').split('-')[2];
+			path = this.href.split('?')[1]
+			month = path.split('&')[0].split('=')[1];
+			year = path.split('&')[1].split('=')[1];
+			form_data = {'year': year, 'month': month, 'browse_past': 'false'};
+			console.log(form_data);
+
 			if ($(this).val() == 'Next') {
 				form_data = $("#room-cal-next").serialize();
 			} else {
@@ -66,27 +76,30 @@
 			// the csrf token is here because when the ajax request returns the
 			// new html for the current calendar, the template processor won't
 			// have a chance to interpret the variable
-			form_data = form_data + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
+			form_data = $.param(form_data) + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
+
 			request = $.ajax({ 
 				data: form_data, 
 				type: "POST",
-				url: "{% url 'room_cal_request' location.slug room.id %}"
+				url: "/locations/{{location.slug}}/room/"+room_id+"/htmlcal/"
 			});
 
 			request.done(function(msg) { // on success..
-				div_id = "#availability-cal-" + {{room.id}}
+				div_id = "#availability-cal-" + room_id
 				$(div_id).html(msg)
 				register();
 			});
 
 			request.fail(function(msg) {
-				div_id = "#availability-cal-" + {{room.id}}
+				div_id = "#availability-cal-" + room_id
+				console.log(div_id)
 				$(div_id).html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
 			});
 		})
 	};
+
 	register();
-	
+
 
 
 

@@ -17,6 +17,13 @@
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,600,300,700' rel='stylesheet' type='text/css'>
 		<link rel="shortcut icon" href="/favicon.ico">
 
+		<!-- Le javascript -->
+		<link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}" />
+		<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+		<script src="{% static 'js/jquery-ui-1.9.1.custom.js' %}"></script>
+		<script src="{% static 'js/bootstrap.js' %}"></script>
+		<script src="{% static 'js/leaflet.js' %}"></script>
+	
 		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
 		<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -81,14 +88,6 @@
 		</div>
 		{% block footer %}
 		{% endblock %}
-
-
-	<!-- Le javascript -->
-	<link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}" />
-	<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
-	<script src="{% static 'js/jquery-ui-1.9.1.custom.js' %}"></script>
-	<script src="{% static 'js/bootstrap.js' %}"></script>
-	<script src="{% static 'js/leaflet.js' %}"></script>
 
 	<!-- javascript for every page -->
 	<script type="text/javascript">
