@@ -177,21 +177,13 @@
 
 
 {% ifequal reservation.user user %}
-	<div class="res-modify-btn">
+	<div class="res-modify-btn row-spacer">
 		{% if past %}
-
 			<p class="notice">This reservation is in the past and cannot be modified</p>
-			
-
 		{% elif paid %}
-		
-			<p class="notice">This reservation has already been paid for. Please
-			contact {{ contact }} if you need to make changes. </p>
-
+			<p class="notice">This reservation has already been paid for. </p>
 		{% elif reservation.status == 'canceled' %}
-
 		{% else %}
-
 			<div>
 				<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>
 				<form id="res-delete" class="btn-inline" method="post" action="{% url 'reservation_delete' location.slug reservation.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
@@ -203,12 +195,11 @@
 				This reservation will be permanently deleted and cannot be recovered. Are you sure?
 				</p>
 			</div>
-
 		{% endif %}
 	</div>
-
-	<div class="row {% if reservation.status == 'canceled' %}greyed-images greyed-out {% endif %}">
-		<p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
+	<div class="row row-spacer greyed-out">
+		<span>Questions? Contact <a href="mailto:{{contact}}">{{ contact }}</a>.</span>
+		<span class="pull-right"><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></span>
 	</div>
 
 {% endifequal %}
