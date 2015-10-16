@@ -735,23 +735,38 @@ def UserAddCard(request, username):
 	Displays success or error message and returns user to originating page.'''
 
 	print "in user add card"
+	# get the user object associated with the reservation
 	user = User.objects.get(username=username)
-	if not request.method == 'POST' or request.user != user:
+	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-
-	token = request.POST.get('stripeToken')
-	if not token:
-		messages.add_message(request, messages.INFO, "No credit card information was given.")
-		return HttpResponseRedirect("/people/%s" % username)
 
 	reservation_id = request.POST.get('res-id', False)
 	if reservation_id:
 		reservation = Reservation.objects.get(id=reservation_id)
+		# double checks that the authenticated user (the one trying to add the
+		# card) is the user associated with this reservation, or an admin (i am
+		# not sure this is necessary since you need to be the reservation user
+		# or a house admin to view the reservation in the first place!). 
+		if (request.user != user) and (request.user not in reservation.location.house_admins.all() ):
+			print 'there was an error adding the user\'s card: authenticated user is not the reservation user'
+			print request.POST
+			print request.user
+			messages.add_message(request, messages.INFO, "You are not authorized to add a credit card to this page. Please log in or use the 3rd party")
+			return HttpResponseRedirect('/404')
+
+	token = request.POST.get('stripeToken')
+	if not token:
+		messages.add_message(request, messages.INFO, "No credit card information was given.")
+		if reservation_id:
+			return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
+		return HttpResponseRedirect("/people/%s" % username)
 
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 
 	try:
 		customer = stripe.Customer.create(card=token, description=user.email)
+		print 'customer'
+		print customer
 		profile = user.profile
 		profile.customer_id = customer.id
 		print customer.sources.data
@@ -761,11 +776,12 @@ def UserAddCard(request, username):
 		if reservation_id and reservation.status == Reservation.APPROVED:
 			updated_reservation_notify(reservation)
 		messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
-	except stripe.CardError, e:
+	except Exception, e:
 		messages.add_message(request, messages.INFO, '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>' % e)
 	if reservation_id:
 		return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 	return HttpResponseRedirect("/people/%s" % username)
+
 
 
 def UserDeleteCard(request, username):
