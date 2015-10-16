@@ -43,7 +43,7 @@
 			<div class="alert alert-warning">
 				{% if reservation.user.profile.customer_id %}
 					<span class="fa fa-exclamation-circle"></span> 
-					This reservation is awaiting confirmation and you will receive an email when your card has been charged.
+					This reservation is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
 				{% else %}
 
 					<p class="row-spacer">

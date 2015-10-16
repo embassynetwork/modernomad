@@ -876,6 +876,9 @@ class UserProfile(models.Model):
 	# currently used to store the stripe customer id but could be used for
 	# other payment platforms in the future
 	customer_id = models.CharField(max_length=200, blank=True, null=True)
+	# JKS TODO between last4 and the customer_id, payment methods should really be their own model. 
+	last4 = models.IntegerField(null=True, blank=True, help_text="Last 4 digits of the user's card on file, if any")
+
 
 	def __unicode__(self):
 		return (self.user.__unicode__())

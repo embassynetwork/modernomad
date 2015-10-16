@@ -40,7 +40,7 @@ class UserProfileForm(forms.ModelForm):
 
 	class Meta:
 		model = UserProfile
-		exclude = ['user', 'status', 'image_thumb', 'customer_id', ]
+		exclude = ['user', 'status', 'image_thumb', 'customer_id', 'last4']
 		# fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
 		widgets = {
 			'bio': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),

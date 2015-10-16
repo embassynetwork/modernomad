@@ -745,25 +745,24 @@ def UserAddCard(request, username):
 		return HttpResponseRedirect("/people/%s" % username)
 
 	reservation_id = request.POST.get('res-id', False)
-	print request.POST
-	print reservation_id
 	if reservation_id:
 		reservation = Reservation.objects.get(id=reservation_id)
 
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 
 	try:
-		customer = stripe.Customer.create(
-			card=token,
-			description=user.email
-		)
+		customer = stripe.Customer.create(card=token, description=user.email)
 		profile = user.profile
 		profile.customer_id = customer.id
+		print customer.sources.data
+		# assumes the user has only one card stored with their profile.
+		profile.last4 = customer.sources.data[0].last4
 		profile.save()
-
+		if reservation_id and reservation.status == Reservation.APPROVED:
+			updated_reservation_notify(reservation)
 		messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
 	except stripe.CardError, e:
-		messages.add_message(request, messages.ERROR, 'Drat, it looks like there was a problem with your card. Often when a card is declined, it is because your card has a transaction limit. Please contact your credit card company and try again, or add a different card. Error: %s' % e)
+		messages.add_message(request, messages.INFO, '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>' % e)
 	if reservation_id:
 		return HttpResponseRedirect(reverse('reservation_detail', args=(reservation.location.slug, reservation.id)))
 	return HttpResponseRedirect("/people/%s" % username)
@@ -775,6 +774,7 @@ def UserDeleteCard(request, username):
 
 	profile = UserProfile.objects.get(user__username=username)
 	profile.customer_id = None
+	profile.last4 = None
 	profile.save()
 	
 	messages.add_message(request, messages.INFO, "Card deleted.")
