@@ -984,6 +984,10 @@ form.res-action {
 	color: #999999;
 }
 
+.greyed-images {
+	opacity: 0.6;
+}
+
 .faded {
 	opacity: 0.6;
 }

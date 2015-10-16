@@ -16,67 +16,86 @@
 			Share this link with a 3rd party if they are submitting payment for you. 
 		</p>
 		<p class="bg-warning para-padding">
-			https://{{domain}}{% url 'reservation_payment' location.slug reservation.uuid %}
+		<a target="_blank" href="https://{{domain}}{% url 'reservation_payment' location.slug reservation.uuid %}">https://{{domain}}{% url 'reservation_payment' location.slug reservation.uuid %}</a>
 		</p>
       </div>
     </div>
   </div>
 </div>
 
-<div class="row">
-	{% if reservation.is_pending %}
+<div class="row {% if reservation.status == 'canceled' %}greyed-out{% endif %}">
+
+	{% if reservation.status == 'canceled' %}
+		<div class="alert alert-danger">
+			<span class="fa fa-ban"></span> This reservation is canceled
+		</div>
+
+	{% elif reservation.is_paid %}
 		<div class="col-md-12">
-			<div class="alert alert-warning">
-				<span class="fa fa-smile-o"></span> 
-				This reservation is pending approval and you will receive an email when it has been approved.
+			<div class="alert alert-success">
+				<span class="fa fa-check text-success"></span> Huzzah! Your reservation is confirmed. We look forward to having you!
 			</div>
 		</div>
-	{% endif %}
-	
-	{% if not reservation.is_paid %}
+	{% else %}
 		<div class="col-md-12">
 			<div class="alert alert-warning">
 				{% if reservation.user.profile.customer_id %}
-					We have a card on file and will charge your card soon.  Thank you!
+					<span class="fa fa-exclamation-circle"></span> 
+					This reservation is awaiting confirmation and you will receive an email when your card has been charged.
 				{% else %}
-					<p>
-						You are almost there!  We need you to enter a credit card we can use to pay for this reservation.
+
+					<p class="row-spacer">
+						<span class="fa fa-credit-card"> </span> 
+						Please enter a credit card so that we can confirm this reservation.
 					</p>
 					
-					<form action="{% url 'user_add_card' reservation.user.username %}" 
-						method="POST" id="payment-form">{% csrf_token %}
+					<div class="col-md-4">
+						<form action="{% url 'user_add_card' reservation.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
 
-					  <span class="payment-errors"></span>
+							<input type="hidden" name="res-id" value="{{reservation.id}}">
 
-					  <div class="form-row">
-					    <label>
-					      <span>Card Number</span>
-					      <input type="text" size="20" data-stripe="number"/>
-					    </label>
-					  </div>
+							<div id="payment-errors text-danger"></div>
 
-					  <div class="form-row">
-					    <label>
-					      <span>CVC</span>
-					      <input type="text" size="4" data-stripe="cvc"/>
-					    </label>
-					  </div>
+							<div class="row sm-row-spacer">
+								<div class="col-md-2">
+									<label>
+										<span>Card</span>
+									</label>
+								</div>
+								<div class="col-md-10">
+									<input class="form-control" type="text" data-stripe="number"/>
+								</div>
+							</div>
 
-					  <div class="form-row">
-					    <label>
-					      <span>Expiration (MM/YYYY)</span>
-					      <input type="text" size="2" data-stripe="exp-month"/>
-					    </label>
-					    <span> / </span>
-					    <input type="text" size="4" data-stripe="exp-year"/>
-					  </div>
+							<div class="row sm-row-spacer">
+								<div class="col-md-2">
+									<label> CVC </label>
+								</div>
+								<div class="col-md-3">
+									<input class="form-control" type="text" size="4" data-stripe="cvc"/>
+								</div>
 
-					  <button type="submit">Add Card</button>
-					</form>
+								<div class="col-md-1">
+									<label>
+										<span>Exp</span>
+									</label>
+								</div>
+								<div class="col-md-6 form-inline">
+									<input class="form-control" type="text" size="4" data-stripe="exp-month" placeholder="MM"/> /
+									<input class="form-control" type="text" size="6" data-stripe="exp-year" placeholder="YYYY"/>
+								</div>
+							</div>
+							<div class="row sm-row-spacer">
+								<div class="col-md-4 col-md-offset-2">
+									<button type="submit" class="btn btn-default">Add Card</button>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="clear"></div>
 					
 					<p>
-						Someone else paying? Send them the 
-						<a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a>.
+						Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a> (they will not have to log in).
 					</p>
 					
 					<p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
@@ -129,61 +148,65 @@
 			</div>
 		</div>
 
+		{% if reservation.is_paid %}
 		<div class="row">
 			<div class="col-sm-12">
-				{% if reservation.is_canceled %}
-					<div class="btn btn-lg btn-danger res-status-btn" disabled="disabled" type="button">Reservation Canceled</div>
-				{% elif reservation.is_paid %}
-					<a class="btn btn-default res-status-btn" type="button" href="{% url 'reservation_payment' location.slug reservation.uuid %}">View Receipt</a>
-				{% endif %}
+				<a class="btn btn-default res-status-btn" type="button" href="{% url 'reservation_payment' location.slug reservation.uuid %}">View Receipt</a>
 			</div>
 		</div>
+		{% endif %}
 	</div> <!-- end col-md-4 -->
 </div>
 
-<div class="row top-spacer-xl">
-
-	<div class="col-md-12">
-		<h3> Also here during your Stay</h3>
-		{% for subset in users_during_stay|subsets_size:12 %}
-			<div class="row row-spacer">	
-				{% for user in subset %}
-					<div class="col-lg-1 col-sm-3 col-xs-4">
-						<img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
-						<p> <a href="{% url 'user_detail' user.username %}">{{user.first_name}} {{user.last_name}}</a> </p>
-					</div>
-				{% endfor %}
-			</div>
-		{% endfor %}
+<div class="row top-spacer-xl {% if reservation.status == 'canceled' %}greyed-images greyed-out {% endif %}">
+		<div class="col-md-12">
+			<h3> Also here during your stay</h3>
+			{% for subset in users_during_stay|subsets_size:12 %}
+				<div class="row row-spacer">	
+					{% for user in subset %}
+						<div class="col-lg-1 col-sm-3 col-xs-4">
+							<img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
+							<p> <a href="{% url 'user_detail' user.username %}">{{user.first_name}} {{user.last_name}}</a> </p>
+						</div>
+					{% endfor %}
+				</div>
+			{% endfor %}
+		</div>
 	</div>
-
-</div>
 
 
 {% ifequal reservation.user user %}
 	<div class="res-modify-btn">
-	{% if past %}
-		<p class="notice">This reservation is in the past and cannot be modified</p>
-	{% elif paid %}
-		<p class="notice">This reservation has already been paid for. Please
-		contact {{ contact }} if you need to make changes. </p>
-	{% else %}
-		<div>
-			<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>
-			<form id="res-delete" class="btn-inline" method="post" action="{% url 'reservation_delete' location.slug reservation.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
-		</div> 
+		{% if past %}
 
-		<div id="dialog-confirm" title="Delete this Reservation?">
-		    <p>
-		        <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-		        This reservation will be permanently deleted and cannot be recovered. Are you sure?
-		    </p>
-		</div>
+			<p class="notice">This reservation is in the past and cannot be modified</p>
+			
 
-	{% endif %}
+		{% elif paid %}
+		
+			<p class="notice">This reservation has already been paid for. Please
+			contact {{ contact }} if you need to make changes. </p>
+
+		{% elif reservation.status == 'canceled' %}
+
+		{% else %}
+
+			<div>
+				<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>
+				<form id="res-delete" class="btn-inline" method="post" action="{% url 'reservation_delete' location.slug reservation.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
+			</div> 
+
+			<div id="dialog-confirm" title="Delete this Reservation?">
+				<p>
+				<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+				This reservation will be permanently deleted and cannot be recovered. Are you sure?
+				</p>
+			</div>
+
+		{% endif %}
 	</div>
 
-	<div class="row">
+	<div class="row {% if reservation.status == 'canceled' %}greyed-images greyed-out {% endif %}">
 		<p><em>Created {{reservation.created}}. Last updated {{reservation.updated}}.</em></p>
 	</div>
 
@@ -197,35 +220,37 @@
 {% block extrajs %}
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
 <script type="text/javascript">
-  // This identifies your website in the createToken call below
-  Stripe.setPublishableKey('{{ stripe_publishable_key }}');
-  
-  var stripeResponseHandler = function(status, response) {
-    var $form = $('#payment-form');
-    if (response.error) {
-      // Show the errors on the form
-      $form.find('.payment-errors').text(response.error.message);
-      $form.find('button').prop('disabled', false);
-    } else {
-      // token contains id, last4, and card type
-      var token = response.id;
-      // Insert the token into the form so it gets submitted to the server
-      $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-      // and re-submit
-      $form.get(0).submit();
-    }
-  };
-  jQuery(function($) {
-    $('#payment-form').submit(function(e) {
-      var $form = $(this);
-      // Disable the submit button to prevent repeated clicks
-      $form.find('button').prop('disabled', true);
-      Stripe.card.createToken($form, stripeResponseHandler);
-      // Prevent the form from submitting with the default action
-      return false;
-    });
-  });
-</script>
+
+// This identifies your website in the createToken call below
+Stripe.setPublishableKey('{{ stripe_publishable_key }}');
+
+var stripeResponseHandler = function(status, response) {
+	var $form = $('#payment-form');
+	if (response.error) {
+		// Show the errors on the form
+		$form.find('.payment-errors').text(response.error.message);
+		$form.find('button').prop('disabled', false);
+	} else {
+		// token contains id, last4, and card type
+		var token = response.id;
+		// Insert the token into the form so it gets submitted to the server
+		$form.append($('<input type="hidden" name="stripeToken" />').val(token));
+		// and re-submit
+		$form.get(0).submit();
+	}
+};
+
+jQuery(function($) {
+		$('#payment-form').submit(function(e) {
+			var $form = $(this);
+			// Disable the submit button to prevent repeated clicks
+			$form.find('button').prop('disabled', true);
+			Stripe.card.createToken($form, stripeResponseHandler);
+			// Prevent the form from submitting with the default action
+			return false;
+			});
+		});
+	</script>
 
 <script>
 $("#dialog-confirm").dialog({
