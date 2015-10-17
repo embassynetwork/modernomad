@@ -31,6 +31,7 @@ from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 import time
 import json, datetime, stripe 
+from django.http import JsonResponse
 from reservation_calendar import GuestCalendar
 from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
 from django.core.urlresolvers import reverse
@@ -582,6 +583,32 @@ def CheckRoomAvailability(request, location_slug):
 	return render(request, "snippets/availability_calendar.html", {"availability_table": availability, "dates": date_list, "current_user": current_user,
 		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
 		"new_profile_form": new_profile_form, 'all_users': all_users, 'prev_month':prev_month, 'next_month': next_month})
+
+def CheckManageRoomAvailability(request, location_slug):
+	'''
+		Args:
+			request (http request obj): Request object sent from ajax request, includes arrive, depart and room data
+			location_slug (string): name of location
+
+		Returns:
+			Boolean: True if room is available. False if not available.
+
+	'''
+	# Check the room on the admin reservation page to see if its available
+	location = get_object_or_404(Location, slug=location_slug)
+	# Check if the room is available for all dates in the reservation
+	arrive = datetime.datetime.strptime(request.GET['arrive'],'%m/%d/%Y').date()
+	depart = datetime.datetime.strptime(request.GET['depart'],'%m/%d/%Y').date()
+	room_request = request.GET['room']
+	free_rooms = location.rooms_free(arrive, depart)
+	room_list = []
+	for room in free_rooms:
+		room_list.append(room.name)
+
+	for room in free_rooms:
+		if int(room_request) == int(room.id):
+			return JsonResponse({'available': True, 'rooms': room_list})
+	return JsonResponse({'available': False, 'rooms': room_list})
 
 def ReservationSubmit(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
@@ -1180,11 +1207,12 @@ def ReservationManageList(request, location_slug):
 @house_admin_required
 def ReservationManageCreate(request, location_slug):
 	if request.method == 'POST':
-		print request.POST
+		location = get_object_or_404(Location, slug=location_slug)
+
 		notify = request.POST.get('email_announce');
 		print 'notify was set to:'
 		print notify
-		location = get_object_or_404(Location, slug=location_slug)
+		
 		try:
 			username = request.POST.get('username');
 			the_user = User.objects.get(username=username)

@@ -7,5 +7,6 @@ urlpatterns = patterns('core.views',
 	url(r'(?P<room_id>\d+)/htmlcal/?year=(?P<year>\d+)&month=(?P<month>\d+)$$', 'room_cal_request', name='room_cal_request'),	
 	url(r'(?P<room_id>\d+)/htmlcal/$', 'room_cal_request', name='room_cal_request'),	
 	url(r'availability/$', 'CheckRoomAvailability', name='room_availability'),
+  
 )
 
