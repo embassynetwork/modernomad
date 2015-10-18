@@ -7,6 +7,9 @@ from django.conf import settings
 from django.template import Template, Context
 from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable
 from django.contrib.sites.models import Site
+import re
+import base64
+import uuid
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
@@ -37,6 +40,7 @@ class UserProfileForm(forms.ModelForm):
 	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'email'}))
 	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password'}), label=_("New Password"))
 	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password (again)'}), label=_("New Password (again)"))
+	cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 
 	class Meta:
 		model = UserProfile
@@ -54,16 +58,6 @@ class UserProfileForm(forms.ModelForm):
 
 	def __init__(self, *args, **kwargs):
 		super(UserProfileForm, self).__init__(*args, **kwargs)
-
-		# JKS I think because the image is being submitted as the value
-		# attribute of the image field and not a file upload, the form submit
-		# fails if this field is required. 
-		# JKS TODO presumably there is a btter way to do this, like by changing
-		# the field type of the form?
-		self.fields['image'].required = False
-		self.label_suffix = ''
-		self.fields['bio'].required = True
-
 
 		# self.instance will always be an instance of UserProfile. if this
 		# is an existing object, then populate the initial values. 
@@ -96,6 +90,31 @@ class UserProfileForm(forms.ModelForm):
 				raise forms.ValidationError('There is already a user with this username. If this is your account and you need to recover your password, you can do so from the login page.')
 		return username
 
+	def clean(self):
+		img_data = self.cleaned_data.get('cropped_image_data')
+
+		# If none or len 0, means illegal image data
+		if (img_data == False or len(img_data) == 0):
+			raise Exception('There was no image provided')
+
+		# Decode the image data
+		img_data = base64.b64decode(img_data)
+		filename = "%s.png" % uuid.uuid4()
+
+		# XXX make the upload path a fixed setting in models, since it's
+		# reference in three places
+		upload_path = "data/avatars/%s/" % self.cleaned_data['username']
+		upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+		if not os.path.exists(upload_abs_path):
+			os.makedirs(upload_abs_path)
+		full_file_name = os.path.join(upload_abs_path, filename)
+
+		with open(full_file_name, 'wb') as f:
+			f.write(img_data)
+			f.close()
+		self.cleaned_data['image'] = full_file_name
+		return 
+
 	def clean_links(self):
 		# validates and formats the urls, returning a string of comma-separated urls
 		links = self.cleaned_data['links']
@@ -107,7 +126,6 @@ class UserProfileForm(forms.ModelForm):
 			for l in raw_link_list:
 				try:
 					cleaned = url.clean(l.strip())
-					#print cleaned 
 					cleaned_links.append(cleaned)
 				except forms.ValidationError:
 					# customize the error raised by UrlField.

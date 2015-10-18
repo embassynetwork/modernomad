@@ -703,48 +703,6 @@ def ReservationDetail(request, reservation_id, location_slug):
 		return HttpResponseRedirect('/404')
 
 @login_required
-def UserEdit(request, username):
-	profile = UserProfile.objects.get(user__username=username)
-	user = User.objects.get(username=username)
-	if request.user.is_authenticated() and request.user.id == user.id:
-		if request.method == "POST":
-			profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
-			if profile_form.is_valid(): 
-				updated_user = profile_form.save()
-				profile = updated_user.profile
-
-				img_data = request.POST.get("image")
-				if img_data:
-					img_data = base64.b64decode(img_data)
-					filename = "%s.png" % uuid.uuid4()
-					# XXX make the upload path a fixed setting in models, since it's
-					# referenced in three places
-					upload_path = "data/avatars/%s/" % user.username
-					upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-					if not os.path.exists(upload_abs_path):
-						os.makedirs(upload_abs_path)
-					full_file_name = os.path.join(upload_abs_path, filename)
-					with open(full_file_name, 'wb') as f:
-						f.write(img_data)
-						f.close()
-					profile.image = full_file_name
-
-				profile.save()
-				client_msg = "Your profile has been updated."
-				messages.add_message(request, messages.INFO, client_msg)
-				return HttpResponseRedirect("/people/%s" % updated_user.username)
-			else:
-				print profile_form.errors
-		else:
-			profile_form = UserProfileForm(instance=profile)		
-		if profile.image:
-			has_image = True
-		else:
-			has_image = False
-		return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
-	return HttpResponseRedirect("/")
-
-@login_required
 def UserAvatar(request, username):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
@@ -1847,36 +1805,43 @@ def register(request):
 		reservation = None
 	if request.method == "POST":
 		profile_form = UserProfileForm(request.POST, request.FILES)
-		user = profile_form.save()
-		profile = user.profile
-
-		img_data = request.POST.get("image")
-		# If none or len 0, means illegal image data
-		if img_data == None or len(img_data) == 0:
-			pass
-
-		# Decode the image data
-		img_data = base64.b64decode(img_data)
-		filename = "%s.png" % uuid.uuid4()
-
-		# XXX make the upload path a fixed setting in models, since it's
-		# reference in three places
-		upload_path = "data/avatars/%s/" % user.username
-		upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-		if not os.path.exists(upload_abs_path):
-			os.makedirs(upload_abs_path)
-		full_file_name = os.path.join(upload_abs_path, filename)
-
-		with open(full_file_name, 'wb') as f:
-			f.write(img_data)
-			f.close()
-
-		profile.image = full_file_name
-		profile.save()
-		return user_login(request)
+		if profile_form.is_valid():
+			user = profile_form.save()
+			return user_login(request)
+		else:
+			print 'profile form contained errors:'
+			print profile_form.errors
 	else:
 		if request.user.is_authenticated():
 			messages.add_message(request, messages.INFO, 'You are already logged in. Please <a href="/people/logout">log out</a> to create a new account')
 			return HttpResponseRedirect(reverse('user_detail', args=(request.user.username,)))
 		profile_form = UserProfileForm()
 	return render(request, 'registration/registration_form.html', { 'form': profile_form, 'reservation': reservation })
+
+@login_required
+def UserEdit(request, username):
+	profile = UserProfile.objects.get(user__username=username)
+	user = User.objects.get(username=username)
+	if not (request.user.is_authenticated() and request.user.id == user.id):
+		messages.add_message(request, messages.INFO, "You cannot edit this profile")
+		return HttpResponseRedirect('/404')
+
+	if request.method == "POST":
+		profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+		if profile_form.is_valid(): 
+			user = profile_form.save()	
+			messages.add_message(request, messages.INFO, "Your profile has been updated.")
+			return HttpResponseRedirect("/people/%s" % user.username)
+		else:
+			print 'profile form contained errors:'
+			print profile_form.errors
+	else:
+		profile_form = UserProfileForm(instance=profile)	
+	if profile.image:
+		has_image = True
+	else:
+		has_image = False
+	return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
+
+
+
