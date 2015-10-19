@@ -1617,11 +1617,8 @@ def ReservationReceipt(request, location_slug, reservation_id):
 def submit_payment(request, reservation_uuid, location_slug):
 	reservation = Reservation.objects.get(uuid = reservation_uuid)
 	location = get_object_or_404(Location, slug=location_slug)
-	print "submit payment"
 	if request.method == 'POST':
 		form = PaymentForm(request.POST, default_amount=None)
-		print "got payment form"
-		print form
 		if form.is_valid():
 			# account secret key 
 			stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -1641,14 +1638,11 @@ def submit_payment(request, reservation_uuid, location_slug):
 				
 			# create the charge on Stripe's servers - this will charge the user's card
 			charge_descr = "payment from %s (%s)." % (pay_name, pay_email)
-			print charge_descr
 			if comment:
 				charge_descr += " Comment added: %s" % comment
 			try:
 
 				charge = payment_gateway.stripe_charge_card_third_party(reservation, amount, token, charge_descr)
-				print 'charge result'
-				print charge.card.last4
 
 				# associate payment information with reservation
 				Payment.objects.create(bill=reservation.bill,
