@@ -111,15 +111,15 @@
 			<hr>
 
 			<div class="form-group">
-				{{ form.username.errors|safe }}
 				<div class="form-field-body col-sm-5 col-sm-offset-2">
 					{{ form.username }}
 					<span class="form-help-text">{{ form.username.help_text }}</span>
+					{{ form.username.errors|safe }}
 				</div>
-				{{ form.email.errors|safe }}
 				<div class="form-field-body col-sm-5">
 					{{ form.email }}
 					<span class="form-help-text">{{ form.email.help_text }}</span>
+					{{ form.email.errors|safe }}
 				</div>
 			</div>
 

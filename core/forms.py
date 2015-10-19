@@ -83,6 +83,13 @@ class UserProfileForm(forms.ModelForm):
 					self.error_messages['password_mismatch'])
 		return password2
 
+	def clean_email(self):
+		email = self.cleaned_data['email']
+		if not self.instance.id:
+			if email and User.objects.filter(email=email):
+				raise forms.ValidationError('There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page.')
+		return email
+
 	def clean_username(self):
 		username = self.cleaned_data['username']
 		if not self.instance.id:
