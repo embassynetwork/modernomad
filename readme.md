@@ -20,9 +20,9 @@ improving the software makes those improvements available to others.
 
 ## Running and Contributing
 
-Interested in contributing? We use
+Interested in contributing? We use [Trello](https://trello.com/b/FPDnTkqj/modernomad) to coordinate day to day. We also have
 [Github issues](https://github.com/jessykate/modernomad/issues?state=open)
-associated with this repository for new problems, bug reports and suggestions.
+associated with this repository if you are not on trello and want to report problems, bugs or make suggestions.
 [Read more about contributing](docs/contributing.md).
 
 ### Pre-requisites, system dependencies and environment setup intructions:
