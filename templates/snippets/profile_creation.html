@@ -198,27 +198,12 @@ $.validator.addMethod("uniqueUsername", function(value, element) {
 	}
 }, "That username is taken");
 
-$.validator.addMethod("uniqueEmail", function(value, element) {
-	var existingEmails = [
-		{% for user in all_users %}
-		"{{user.email}}",
-		{% endfor %}
-	];
-	if (existingEmails.indexOf(value) < 0) {
-		return true;
-	} else { 
-		return false;
-	}
-}, "That email address is already associated with an account");
-
 $.validator.addMethod("strictEmail", function(value, element) {
-	console.log('validating email field');
 	return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
 	}, "Please provide a valid email address."
 );
 
 $.validator.addMethod("listOfUrls", function(value, element) {
-	console.log('validating urls field');
 	items = value.split(",");
 	for (var i=0; i< items.length; i++) {
 		var val_to_test = $.trim(items[i]);
@@ -241,7 +226,14 @@ $.validator.addMethod("listOfUrls", function(value, element) {
 $("#newprofileform").validate({
 	ignore: [],
 	messages: {
-		password2: "The passwords do not match."
+		password2: "The passwords do not match.",
+		email: {
+			strictEmail: "Please provide a valid email address.",
+			remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}'>login</a> page."
+		},
+		username: {
+			remote: "This username is already taken. Please choose another."
+		}
 	},
 	rules: {
 		image: {
@@ -271,7 +263,11 @@ $("#newprofileform").validate({
 		email: {
 			required: true,
 			strictEmail: true,
-			uniqueEmail: true
+			remote: {
+				url: '{% url 'email_available' %}',
+				type: "post",
+				data: {'email': function() {return $( "#id_email" ).val()}}
+			}
 		}, 
 		referral: {
 			required: true
@@ -281,7 +277,12 @@ $("#newprofileform").validate({
 		},
 		username: {
 			required: true,
-			uniqueUsername: true
+			uniqueUsername: true,
+			remote: {
+				url: '{% url 'username_available' %}',
+				type: "post",
+				data: {'username': function() {return $( "#id_username" ).val()}}
+			}
 		},
 		password1: {
 			required: true,

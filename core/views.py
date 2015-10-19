@@ -41,6 +41,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 import logging
+from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 
@@ -701,6 +702,38 @@ def ReservationDetail(request, reservation_id, location_slug):
 	else:
 		messages.add_message(request, messages.INFO, "You do not have permission to view that reservation")
 		return HttpResponseRedirect('/404')
+
+@csrf_exempt
+def username_available(request):
+	'''AJAX request to check for existing user with the submitted username'''
+	print 'in username_available'
+	if not request.is_ajax():
+		return HttpResponseRedirect('/404')
+	username = request.POST.get('username')
+	users_with_username = len(User.objects.filter(username=username))
+	if users_with_username:
+		print 'username %s is already in use' % username
+		is_available = 'false'
+	else:
+		print 'username %s is available' % username
+		is_available = 'true'
+	return HttpResponse(is_available)
+
+@csrf_exempt
+def email_available(request):
+	'''AJAX request to check for existing user with the submitted email'''
+	print 'in email_available'
+	if not request.is_ajax():
+		return HttpResponseRedirect('/404')
+	email = request.POST.get('email')
+	users_with_email = len(User.objects.filter(email=email))
+	if users_with_email:
+		print 'email address %s is already in use' % email
+		is_available = 'false'
+	else:
+		print 'email address %s is available' % email
+		is_available = 'true'
+	return HttpResponse(is_available)
 
 @login_required
 def UserAvatar(request, username):
