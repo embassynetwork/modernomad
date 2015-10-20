@@ -98,11 +98,13 @@ class UserProfileForm(forms.ModelForm):
 		return username
 
 	def clean(self):
-		img_data = self.cleaned_data.get('cropped_image_data')
-
-		# If none or len 0, means illegal image data
-		if (img_data == False or len(img_data) == 0):
-			raise Exception('There was no image provided')
+		try:
+			img_data = self.cleaned_data['cropped_image_data']
+			# If none or len 0, means illegal image data
+			if (img_data == False or img_data == None or len(img_data) == 0):
+				raise Exception('There was no image provided')
+		except:
+			raise forms.ValidationError('No valid image was provided.')
 
 		# Decode the image data
 		img_data = base64.b64decode(img_data)
