@@ -31,10 +31,9 @@
 		<form id="the-reservation-form" method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
 			<input id="id_arrive" type="hidden" name="arrive" value="{{arrive_date}}">
 			<input id="id_depart" type="hidden" name="depart" value="{{depart_date}}">
+			<input type="hidden" name="room" id="res-selected-room" value="">
 
 			{% for room, res_dict in available_reservations.items %}
-
-			<input type="hidden" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
 
 			<div class="room-info" id="room-info-{{room.id}}">
 
