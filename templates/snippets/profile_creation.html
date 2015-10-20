@@ -264,7 +264,6 @@ $("#newprofileform").validate({
 		},
 		username: {
 			required: true,
-			uniqueUsername: true,
 			remote: {
 				url: '{% url 'username_available' %}',
 				type: "post",
