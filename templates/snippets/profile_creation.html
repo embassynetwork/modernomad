@@ -185,19 +185,6 @@ $("#id_city").keyup(function() {
 	});
 });
 
-$.validator.addMethod("uniqueUsername", function(value, element) {
-	var existingUsers = [
-		{% for user in all_users %}
-		"{{user.username}}",
-		{% endfor %}
-	];
-	if (existingUsers.indexOf(value) < 0) {
-		return true;
-	} else { 
-		return false;
-	}
-}, "That username is taken");
-
 $.validator.addMethod("strictEmail", function(value, element) {
 	return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
 	}, "Please provide a valid email address."
@@ -330,7 +317,6 @@ $("#id_image").change(function() {
 $("#newprofileform").submit(function(){
 	// add the cropped image data to the form, then submit.
 	$("#id_cropped_image_data").val($("#image-preview").cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
-	//$("#id_image").val('');
 	return true;
 })
 

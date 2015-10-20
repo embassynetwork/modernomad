@@ -204,9 +204,10 @@
 {% endblock %}
 
 {% block extrajs %}
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script>
 
-	$("#new-user-form").submit(function(event) {
+	newUserSubmit = function(form) {
 		form_data = $("#new-user-form").serialize();
 		form_data = form_data + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
 		request = $.ajax({ 
@@ -240,8 +241,8 @@
 			$("#attendance-message").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
 		});
 
-		event.preventDefault();
-	});
+		return false;
+	};
 
 	$("#approve-for-publication").click(function() {
 		request = $.ajax({ 
@@ -272,6 +273,59 @@
 		});
 
 	});
+
+	$.validator.addMethod("strictEmail", function(value, element) {
+		return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
+		}, "Please provide a valid email address."
+	);
+
+	$("#new-user-form").validate({
+		submitHandler: newUserSubmit,
+		messages: {
+			password2: "The passwords do not match.",
+			email: {
+				strictEmail: "Please provide a valid email address.",
+				remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}'>login</a> page."
+			},
+			username: {
+				remote: "This username is already taken. Please choose another."
+			}
+		},
+		rules: {
+			first_name: {
+				required: true
+			},
+			last_name: {
+				required: true
+			},
+			email: {
+				required: true,
+				strictEmail: true,
+				remote: {
+					url: '{% url 'email_available' %}',
+					type: "post",
+					data: {'email': function() {return $( "#id_email" ).val()}}
+				}
+			}, 
+			username: {
+				required: true,
+				remote: {
+					url: '{% url 'username_available' %}',
+					type: "post",
+					data: {'username': function() {return $( "#id_username" ).val()}}
+				}
+			},
+			password1: {
+				required: true,
+			},
+			password2: {
+				required: true,
+				equalTo: "#id_password1"
+			}
+		}	
+	});
+
+
 
 </script>
 {% endblock %}
