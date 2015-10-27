@@ -11,7 +11,7 @@ from modernomad.backup import BackupManager
 class Command(BaseCommand):
 	help = "Creates a backup containing an SQL dump and the media files."
 	args = ""
-	requires_model_validation = False
+	requires_system_checks = False
 
 	def handle(self, *labels, **options):
 		manager = BackupManager()

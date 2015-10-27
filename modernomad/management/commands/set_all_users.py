@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 class Command(BaseCommand):
 	help = "Set all users to given email, password and customer ID"
 	args = "[email_address] [password] [customer_id]"
-	requires_model_validation = True
+	requires_system_checks = True
 
 	def handle(self, *labels, **options):
 		if not labels or len(labels) < 1: raise CommandError('Args: <email_address> <password> <customer_id>')
