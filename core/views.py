@@ -1795,12 +1795,13 @@ def user_login(request):
 		# JKS this is a bit janky. this is because we use this view both after
 		# the user registration or after the login view, which themselves use
 		# slightly different forms. 
-		if request.POST.get('password', False):
+		if 'password' in request.POST:
 			password = request.POST['password']
-		else:
-			password = request.POST['password1']
+		elif 'password2' in request.POST:
+			password = request.POST['password2']
 		if 'next' in request.POST:
 			next_page = request.POST['next']
+		print password
 
 		user = authenticate(username=username, password=password)
 		if user is not None:
