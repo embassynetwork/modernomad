@@ -110,9 +110,13 @@ class UserProfileForm(forms.ModelForm):
 		img_data = base64.b64decode(img_data)
 		filename = "%s.png" % uuid.uuid4()
 
+		if not 'username' in self.cleaned_data:
+			raise forms.ValidationError('No username was provided.')
+		username = self.cleaned_data['username']
+
 		# XXX make the upload path a fixed setting in models, since it's
 		# reference in three places
-		upload_path = "data/avatars/%s/" % self.cleaned_data['username']
+		upload_path = "data/avatars/%s/" % username
 		upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
 		if not os.path.exists(upload_abs_path):
 			os.makedirs(upload_abs_path)
