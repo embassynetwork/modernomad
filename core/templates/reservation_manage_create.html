@@ -70,7 +70,6 @@
 
 				<div class="form-group room_display" style="display: none;">
 					<div class="col-sm-offset-2 col-sm-6 ">
-						<strong>Rooms avilable on these dates</strong>
 					</div>
 					<div class="rooms_available"></div>
 				</div>
@@ -182,17 +181,19 @@
 		// once the dates are selected, poll for a list of available rooms
 		if (arrive && depart && room) {
 
+			$('.room_display').hide()
 	     	$.get('availability_admin/', {arrive: arrive, depart: depart, room: room}, function(data){
            		if (data.available == false) {
-           			alert("This room is aleady booked on those dates")
+					var container = $('<div class="col-sm-offset-2 col-sm-6 "> </div>');
+					container.append("<div class='text-danger'>This room is aleady booked on those dates</div>");
+					container.append("<div><strong>Rooms Available:</strong></div>");
+					$.each(data.rooms, function(key, value) {
+						container.append('<div>' + value + '</div>');
+					})
+					$('.rooms_available').html(container);  
+					$('.room_display').show()
+					$("#room_select").val("");
            		} 
-           		var container = $('<div class="col-sm-offset-2 col-sm-6 "> </div>');
-           		$.each(data.rooms, function(key, value) {
-           			container.append('<div>' + value + '</div>');
-           		})
-       		   	
-       		   	$('.rooms_available').html(container);  
-       		   	$('.room_display').show()
 	       	});
 			
 		} 
