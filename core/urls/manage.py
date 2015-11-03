@@ -17,7 +17,7 @@ urlpatterns = patterns('core.views',
 	url(r'reservation/(?P<reservation_id>\d+)/sendwelcome/$', 'ReservationSendWelcomeEmail', name='reservation_send_welcome'), 
 	url(r'reservation/(?P<reservation_id>\d+)/sendmail/$', 'ReservationSendMail', name='reservation_send_mail'), 
 	url(r'reservation/(?P<reservation_id>\d+)/recalculate/$', 'ReservationRecalculateBill', name='reservation_recalculate_bill'), 
-	url(r'reservation/(?P<reservation_id>\d+)/edit/$', 'ReservationManageEdit', name='reservation_edit'), 
+	url(r'reservation/(?P<reservation_id>\d+)/edit/$', 'ReservationManageEdit', name='reservation_manage_edit'), 
 	# Admin routes
 	url(r'^reservation/create/availability_admin/$', 'CheckManageRoomAvailability', name='admin_room_availability'),
 )
