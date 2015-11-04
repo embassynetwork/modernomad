@@ -1801,7 +1801,6 @@ def user_login(request):
 			password = request.POST['password2']
 		if 'next' in request.POST:
 			next_page = request.POST['next']
-		print password
 
 		user = authenticate(username=username, password=password)
 		if user is not None:
