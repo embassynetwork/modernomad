@@ -585,7 +585,8 @@ def CheckRoomAvailability(request, location_slug):
 		'available_reservations': available_reservations, 'arrive_date': arrive_str, 'depart_date': depart_str, 'arrive': arrive, 'depart': depart, 
 		"new_profile_form": new_profile_form, 'all_users': all_users, 'prev_month':prev_month, 'next_month': next_month})
 
-def CheckManageRoomAvailability(request, location_slug):
+@csrf_exempt
+def RoomsAvailableOnDates(request, location_slug):
 	'''
 		Args:
 			request (http request obj): Request object sent from ajax request, includes arrive, depart and room data
@@ -598,18 +599,16 @@ def CheckManageRoomAvailability(request, location_slug):
 	# Check the room on the admin reservation page to see if its available
 	location = get_object_or_404(Location, slug=location_slug)
 	# Check if the room is available for all dates in the reservation
-	arrive = datetime.datetime.strptime(request.GET['arrive'],'%m/%d/%Y').date()
-	depart = datetime.datetime.strptime(request.GET['depart'],'%m/%d/%Y').date()
-	room_request = request.GET['room']
+	arrive = datetime.datetime.strptime(request.POST['arrive'],'%m/%d/%Y').date()
+	depart = datetime.datetime.strptime(request.POST['depart'],'%m/%d/%Y').date()
 	free_rooms = location.rooms_free(arrive, depart)
-	room_list = []
-	for room in free_rooms:
-		room_list.append(room.name)
-
-	for room in free_rooms:
-		if int(room_request) == int(room.id):
-			return JsonResponse({'available': True, 'rooms': room_list})
-	return JsonResponse({'available': False, 'rooms': room_list})
+	rooms_availability = {}
+	for room in location.rooms_with_future_reservability():
+		if room in free_rooms:
+			rooms_availability[room.name] = {'available': True, 'id': room.id}
+		else:
+			rooms_availability[room.name] = {'available': False, 'id': room.id}
+	return JsonResponse({'rooms_availability': rooms_availability})
 
 def ReservationSubmit(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
