@@ -27,7 +27,7 @@ class Command(BaseCommand):
 				print "    Last Login: %s" % u.last_login
 		
 			if u.email not in dup_emails:
-				others_with_email = User.objects.filter(email=u.email)
+				others_with_email = User.objects.filter(email=u.email, is_active=True)
 				if others_with_email.count() > 1:
 					dup_emails.append(u.email)
 					print "%s: Duplicate email" % u.email
