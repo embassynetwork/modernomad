@@ -4,7 +4,7 @@
 		Be very careful when you edit these details!
 	</div>
 
-	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_manage_edit' location.slug r.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label">User</label> 
 			<div class="col-sm-7">
@@ -14,7 +14,7 @@
 		</div>
 	</form>
 
-	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_manage_edit' location.slug r.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label">Rate</label> 
 			<div class="col-sm-7">
@@ -64,7 +64,7 @@
 		</div>
 	</form>
 
-	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_manage_edit' location.slug r.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label">Dates</label> 
 			<label class="col-sm-2 control-label">Arrive</label> 
@@ -79,7 +79,7 @@
 		</div>
 	</form>
 
-	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_manage_edit' location.slug r.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label">Room</label> 
 			<div class="col-sm-4">
@@ -93,7 +93,7 @@
 		</div>
 	</form>
 	
-	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_edit' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_manage_edit' location.slug r.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label">Status</label> 
 			<div class="col-sm-4">

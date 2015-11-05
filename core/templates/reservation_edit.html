@@ -13,46 +13,105 @@
 	{% endif %}
 
 
-	<div class="page-text">
-	<p>Editing your existing reservation for {{arrive}} to {{depart}}.</p>
-	<p><em>Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</em></p>
+	<div class="row">
+		<div class="col-xs-12 page-text">
+			<p>Editing your existing reservation for {{arrive}} to {{depart}}.</p>
+			<p class="text-warning">Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</p>
+		</div>
 	</div>
 	
-	<form class="well form-inline" method="post" action="{% url 'reservation_edit' location.slug reservation_id %}">{% csrf_token %}
-		{% for field in form %}
-
-			{% if field.name == 'status' %}
-				{% if is_house_admin %}
-					<div class="field-wrapper">
-						{{ field.errors }}
-						{{ field.label_tag }}
-						<span class="form-help-text">{{ field.help_text}}</span>
-						<div class="form-field-body">
-							{{ field }}
-						</div>
-					</div>
-				{% else %}
-
-				{% endif %}
-			{% else %} 
-				{% comment %} if it's not one of the fields related to hosting, always show it {% endcomment %} 
-
-				<div class="field-wrapper">
+	<div class="row">
+		<div class="col-xs-6">
+			<form role="form" method="post" action="{% url 'reservation_edit' location.slug reservation_id %}">{% csrf_token %}
+				{% for field in form %}
 					{{ field.errors }}
+					{% if field.name == 'arrive' or field.name == 'depart' %} <span class="fa fa-calendar"></span> {% endif %}
 					{{ field.label_tag }}
 					<span class="form-help-text">{{ field.help_text}}</span>
-					<div class="form-field-body">
-						{{ field }}
-						{% if field.name == 'arrive' or field.name == 'depart' %}
-							<i class="icon-calendar"></i>
-						{% endif %}
-					</div>
-				</div>
-			{% endif %}
+					{{ field }}
+				{% endfor %}
 
-		{% endfor %}
+				<input type="submit" value="Submit Changes">
+			</form>
+		</div>
+	</div>
 
-		<input type="submit" value="Submit Changes">
-	</form>
+{% endblock %}
 
+{% block extrajs %}
+<script>
+
+$(document).ready(function() {
+
+	// wire up the ajax-y spinning animated GIF to show when an ajax call
+	// is made. 	
+	$('#spinner').ajaxStart(function () {
+		$(this).fadeIn('fast');
+	}).ajaxStop(function () {
+		$(this).stop().fadeOut('fast');
+	});	
+
+
+	// Update room availability based on dates
+	update_room_list = function(event) {
+		console.log('updating room list');
+		// Get arrive and depart dates, update value. 
+		var arrive = $("#id_arrive").val();
+	 	var depart = $("#id_depart").val();
+
+		// once the dates are selected, poll for a list of available rooms
+		if (arrive && depart) {
+			console.log('checking...');
+
+			$.post("{% url 'rooms_available_on_dates' location.slug %}", {arrive: arrive, depart: depart}, function(data){
+				room_select = $("#id_room");
+				selected_room_id = room_select.val();
+				room_select.children().remove();
+				room_select.append('<option value="">Select Room</option>');
+				$.each(data.rooms_availability, function(k, v) {
+					// warn the user if their previously selected room is no
+					// longer available, otherwise don't display unavailable
+					// rooms. 
+					if (v.available == false && v.id == selected_room_id) {
+							avail = ' (This room is no longer available)';
+							room_select.append('<option value="'+ v.id +'">' + k + avail + '</option>');
+					} else if (v.available == true) {
+						room_select.append('<option value="'+ v.id +'">' + k + '</option>');
+					}
+					// reset the selection to the previous room
+					room_select.val(selected_room_id);
+				});
+	       	});	
+		} 
+	}
+
+	$("#id_arrive, #id_depart").datepicker({
+		dateFormat: 'yy-mm-dd',
+		minDate: 0,
+		onSelect: function( selectedDate ) {
+			if(this.id == 'id_arrive') {
+				startDate = $('#id_arrive').datepicker("getDate");
+				console.log('found start date to update end date');
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+	          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
+				console.log(rMin);
+				console.log(rMax);
+	          	$('#id_depart').datepicker("option","minDate",rMin);
+	          	$('#id_depart').datepicker("option","maxDate",rMax);                    
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	});
+
+	// update the room list once when the page loads, and then any time the
+	// dates are changed. 
+	update_room_list();
+	$("#id_arrive, #id_depart").change(update_room_list);
+
+
+
+});
+</script>
 {% endblock %}

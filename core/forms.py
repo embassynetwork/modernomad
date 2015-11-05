@@ -281,8 +281,12 @@ class ReservationForm(forms.ModelForm):
 		model = Reservation
 		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
 		widgets = { 
-			'arrive': forms.DateInput(attrs={'class':'datepicker form-control'}),
-			'depart': forms.DateInput(attrs={'class':'datepicker form-control'}),
+			'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
+			'depart': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
+			'arrival_time': forms.TextInput(attrs={'class':'form-control form-group'}),
+			'room': forms.Select(attrs={'class':'form-control form-group'}),
+			'purpose': forms.TextInput(attrs={'class':'form-control form-group'}),
+			'comments': forms.Textarea(attrs={'class':'form-control form-group'}),
 		}
 
 	def __init__(self, location, *args, **kwargs):

@@ -599,8 +599,12 @@ def RoomsAvailableOnDates(request, location_slug):
 	# Check the room on the admin reservation page to see if its available
 	location = get_object_or_404(Location, slug=location_slug)
 	# Check if the room is available for all dates in the reservation
-	arrive = datetime.datetime.strptime(request.POST['arrive'],'%m/%d/%Y').date()
-	depart = datetime.datetime.strptime(request.POST['depart'],'%m/%d/%Y').date()
+	try:
+		arrive = datetime.datetime.strptime(request.POST['arrive'],'%m/%d/%Y').date()
+		depart = datetime.datetime.strptime(request.POST['depart'],'%m/%d/%Y').date()
+	except:
+		arrive = datetime.datetime.strptime(request.POST['arrive'],'%Y-%m-%d').date()
+		depart = datetime.datetime.strptime(request.POST['depart'],'%Y-%m-%d').date()
 	free_rooms = location.rooms_free(arrive, depart)
 	rooms_availability = {}
 	for room in location.rooms_with_future_reservability():
@@ -853,7 +857,10 @@ def ReservationEdit(request, reservation_id, location_slug):
 					logger.debug("reservation room or date was changed. updating status.")
 					reservation.pending()
 					# notify house_admins by email
-					updated_reservation_notify(reservation)
+					try:
+						updated_reservation_notify(reservation)
+					except:
+						logger.debug("Reservation %d was updated but admin notification failed to send" % reservation.id)
 					client_msg = 'The reservation was updated and the new information will be reviewed for availability.'
 				else:
 					client_msg = 'The reservation was updated.'
@@ -867,7 +874,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 			
 		return render(request, 'reservation_edit.html', {'form': form, 'reservation_id': reservation_id, 
 			'arrive': reservation.arrive, 'depart': reservation.depart, 'is_house_admin' : is_house_admin,
-			'location': location })
+			'max_days': location.max_reservation_days, 'location': location })
 
 	else:
 		return HttpResponseRedirect("/")
