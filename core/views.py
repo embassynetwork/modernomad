@@ -1834,6 +1834,7 @@ def register(request):
 		profile_form = UserProfileForm(request.POST, request.FILES)
 		if profile_form.is_valid():
 			user = profile_form.save()
+			request.POST['username'] = user.username
 			return user_login(request)
 		else:
 			print 'profile form contained errors:'
