@@ -82,16 +82,25 @@ class UserProfileForm(forms.ModelForm):
 				raise forms.ValidationError('There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page.')
 		return email
 
+	def create_username(self, suffix=""):
+		clean_first = self.cleaned_data['first_name'].strip().lower()
+		clean_last = self.cleaned_data['last_name'].strip().lower()
+		username = "%s_%s%s" % (clean_first, clean_last, suffix)
+		clean_username = username.replace(" ", "_")
+		clean_username = clean_username.replace(".", "_")
+		clean_username = clean_username.replace("@", "")
+		clean_username = clean_username.replace("+", "")
+		clean_username = clean_username.replace("-", "")
+		return clean_username
+
 	def clean(self):
 		if not 'username' in self.cleaned_data:
 			# Generate a unique username
 			tries = 1
-			first = self.cleaned_data['first_name'].strip().lower()
-			last = self.cleaned_data['last_name'].strip().lower()
-			username = "%s_%s" % (first, last)
+			username = self.create_username()
 			while User.objects.filter(username=username).count() > 0:
 				tries = tries + 1
-				username = "%s_%s%d" % (first, last, tries)
+				username = self.create_username(suffix=tries)
 			self.cleaned_data['username'] = username
 			
 		try:
