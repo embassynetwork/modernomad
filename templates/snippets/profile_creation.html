@@ -201,7 +201,7 @@ $.validator.addMethod("strictEmail", function(value, element) {
 );
 
 $.validator.addMethod("strictPassword", function(value, element) {
-	return value.length > 6;
+	return value.length >= 6;
 	}, "Password is too short."
 );
 
