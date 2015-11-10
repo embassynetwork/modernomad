@@ -739,7 +739,7 @@ def email_available(request):
 def UserAvatar(request, username):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	user = User.objects.get(username=username)
+	user = get_object_or_404(User, username=username)
 	try:
 		url = user.profile.image.url
 	except:
@@ -754,7 +754,7 @@ def UserAddCard(request, username):
 
 	print "in user add card"
 	# get the user object associated with the reservation
-	user = User.objects.get(username=username)
+	user = get_object_or_404(User, username=username)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
