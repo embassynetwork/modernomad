@@ -23,20 +23,9 @@ class UserProfileForm(forms.ModelForm):
 		'password_mismatch': _("The two password fields didn't match."),
 	}
 
-	# the regex field type automatically validates the value entered against
-	# the supplied regex.
-	username = forms.RegexField(
-		label=_("Username"), max_length=30, regex=r"^[\w.@+-]+$",
-		help_text = _("30 characters or fewer. Letters, digits and "
-					  "@/./+/-/_ only."),
-		error_messages = {
-			'invalid': _("This value may contain only letters, numbers and "
-						 "@/./+/-/_ characters.")}, 
-			widget=forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'username'})
-	)
+	#username = forms.CharField(widget=forms.HiddenInput(attrs={'required': 'false'}))
 	first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'first name'}))
 	last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'last name'}))
-
 	email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'email'}))
 	password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password'}), label=_("New Password"))
 	password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password (again)'}), label=_("New Password (again)"))
@@ -65,14 +54,17 @@ class UserProfileForm(forms.ModelForm):
 			# initialize the form fields with the existing values from the model.  	
 			self.fields['first_name'].initial = self.instance.user.first_name
 			self.fields['last_name'].initial = self.instance.user.last_name
-			self.fields['username'].initial = self.instance.user.username
+			
+			#self.fields['username'].initial = self.instance.user.username
+			# Since validation isn't working, make this readonly for now -JLS
+			#self.fields['email'] = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control', 'readonly':True}))
 			self.fields['email'].initial = self.instance.user.email	
-
-			self.fields['password1'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password"))
+			self.fields['cropped_image_data'].required = False
+			
+			self.fields['password1'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'placeholder':'password'}), label=_("New Password"))
 			self.fields['password1'].required = False
-			self.fields['password2'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control'}), label=_("New Password (again)"))
+			self.fields['password2'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'placeholder':'password'}), label=_("New Password (again)"))
 			self.fields['password2'].required = False
-
 
 	def clean_password2(self):
 		password1 = self.cleaned_data.get('password1')
@@ -90,19 +82,36 @@ class UserProfileForm(forms.ModelForm):
 				raise forms.ValidationError('There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page.')
 		return email
 
-	def clean_username(self):
-		username = self.cleaned_data['username']
-		if not self.instance.id:
-			if username and User.objects.filter(username=username):
-				raise forms.ValidationError('There is already a user with this username. If this is your account and you need to recover your password, you can do so from the login page.')
-		return username
+	def create_username(self, suffix=""):
+		clean_first = self.cleaned_data['first_name'].strip().lower()
+		clean_last = self.cleaned_data['last_name'].strip().lower()
+		username = "%s_%s%s" % (clean_first, clean_last, suffix)
+		clean_username = username.replace(" ", "_")
+		clean_username = clean_username.replace(".", "_")
+		clean_username = clean_username.replace("@", "")
+		clean_username = clean_username.replace("+", "")
+		clean_username = clean_username.replace("-", "")
+		return clean_username
 
 	def clean(self):
+		if not 'username' in self.cleaned_data:
+			# Generate a unique username
+			tries = 1
+			username = self.create_username()
+			while User.objects.filter(username=username).count() > 0:
+				tries = tries + 1
+				username = self.create_username(suffix=tries)
+			self.cleaned_data['username'] = username
+			
 		try:
 			img_data = self.cleaned_data['cropped_image_data']
 			# If none or len 0, means illegal image data
 			if (img_data == False or img_data == None or len(img_data) == 0):
-				raise Exception('There was no image provided')
+				#raise Exception('There was no image provided')
+				# Image data on creation is insured by the javascript validator.
+				# If we don't have image data here it's because we don't need to 
+				# update the image.  Doing nothing -- JLS
+				return
 		except:
 			raise forms.ValidationError('No valid image was provided.')
 
@@ -158,9 +167,10 @@ class UserProfileForm(forms.ModelForm):
 			raise forms.ValidationError("Email Required.")
 		if User.objects.filter(email=email).count() > 0:
 			raise forms.ValidationError("Email address '%s' already in use." % email)
-		username = self.cleaned_data['username'].strip()
-		if User.objects.filter(username=username).count() > 0:
-			raise forms.ValidationError('There is already a user with this username. If this is your account and you need to recover your password, you can do so from the login page.')
+		
+		# Username generated in clean method
+		username = self.cleaned_data['username']
+	
 		user = User(username=username, first_name=first, last_name=last, email=email)
 		password = self.clean_password2()
 		user.set_password(password)
@@ -176,8 +186,6 @@ class UserProfileForm(forms.ModelForm):
 			user = User.objects.get(pk=profile.user.pk)
 			if self.cleaned_data.get('email'):
 				user.email = self.cleaned_data.get('email')
-			if self.cleaned_data.get('username'):
-				user.username = self.cleaned_data.get('username')
 			if self.cleaned_data['first_name']:
 				user.first_name = self.cleaned_data.get('first_name')
 			if self.cleaned_data['last_name']:
@@ -185,7 +193,7 @@ class UserProfileForm(forms.ModelForm):
 			if self.cleaned_data.get('password2'):
 				# set_password hashes the selected password
 				user.set_password(self.cleaned_data['password2'])
-				user.save()
+			user.save()
 		except:
 			# Adding
 			user = self.create_user()

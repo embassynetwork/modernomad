@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.message import sanitize_address
+from django.core.exceptions import MultipleObjectsReturned
+
 from io import StringIO
 import requests
 import logging
@@ -99,14 +101,16 @@ class MailgunBackend(BaseEmailBackend):
 class EmailOrUsernameModelBackend(object):
 	def authenticate(self, username=None, password=None):
 		if '@' in username:
-			kwargs = {'email': username}
+			kwargs = {'email': username, 'is_active':True}
 		else:
-			kwargs = {'username': username}
+			kwargs = {'username': username, 'is_active':True}
 		try:
 			user = User.objects.get(**kwargs)
 			if user.check_password(password):
 				return user
 		except User.DoesNotExist:
+			return None
+		except MultipleObjectsReturned:
 			return None
 
 	def get_user(self, user_id):

@@ -742,7 +742,7 @@ def email_available(request):
 def UserAvatar(request, username):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	user = User.objects.get(username=username)
+	user = get_object_or_404(User, username=username)
 	try:
 		url = user.profile.image.url
 	except:
@@ -757,7 +757,7 @@ def UserAddCard(request, username):
 
 	print "in user add card"
 	# get the user object associated with the reservation
-	user = User.objects.get(username=username)
+	user = get_object_or_404(User, username=username)
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
@@ -1801,10 +1801,10 @@ def user_login(request):
 		# JKS this is a bit janky. this is because we use this view both after
 		# the user registration or after the login view, which themselves use
 		# slightly different forms. 
-		if request.POST.get('password', False):
+		if 'password' in request.POST:
 			password = request.POST['password']
-		else:
-			password = request.POST['password1']
+		elif 'password2' in request.POST:
+			password = request.POST['password2']
 		if 'next' in request.POST:
 			next_page = request.POST['next']
 
@@ -1840,6 +1840,7 @@ def register(request):
 		profile_form = UserProfileForm(request.POST, request.FILES)
 		if profile_form.is_valid():
 			user = profile_form.save()
+			request.POST['username'] = user.username
 			return user_login(request)
 		else:
 			print 'profile form contained errors:'
