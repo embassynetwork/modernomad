@@ -22,7 +22,8 @@ from django.template import Context
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
-from gather.forms import EventForm, NewUserForm
+from gather.forms import EventForm
+from core.forms import UserProfileForm
 from gather.emails import new_event_notification, event_approved_notification, event_published_notification
 from core.models import Location
 
@@ -157,7 +158,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 			user_is_event_admin = False
 	else:
 		current_user = None
-		new_user_form = NewUserForm()
+		new_user_form = UserProfileForm()
 		login_form = AuthenticationForm()
 		user_is_event_admin = False
 
@@ -420,8 +421,16 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 	else:
 		notify_new = False
 
-	# create new user
-	form = NewUserForm(request.POST)
+	# Create new user but simplify the process
+	form = UserProfileForm(request.POST)
+	form.fields['city'].required = False
+	form.fields['referral'].required = False
+	form.fields['image'].required = False
+	form.fields['cropped_image_data'].required = False
+	form.fields['discussion'].required = False
+	form.fields['sharing'].required = False
+	form.fields['projects'].required = False
+	print form
 	if form.is_valid():
 		new_user = form.save()
 		new_user.save()
@@ -521,28 +530,3 @@ def event_publish(request, event_id, event_slug, location_slug=None):
 
 	return render(request, "snippets/event_status_area.html", {'location':location, 'event': event, 'user_is_organizer': user_is_organizer, 'user_is_event_admin': user_is_event_admin})
 
-def new_user_email_signup(request, location_slug=None):
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
-	print request.POST
-
-	location = get_object_or_404(Location, slug=location_slug)
-	# create new user
-	form = NewUserForm(request.POST)
-	if form.is_valid():
-		new_user = form.save()
-		new_user.save()
-		notifications = new_user.event_notifications
-		notifications.location_weekly.add(location)
-		notifications.save()
-
-		password = request.POST.get('password1')
-		new_user = authenticate(username=new_user.username, password=password)
-		login(request, new_user)
-		messages.add_message(request, messages.INFO, 'Thanks! We\'ll send you weekly event updates for this location. You can update your preferences at any time on your <a href="/people/%s">profile</a> page' % new_user.username)
-		return HttpResponse(status=200)
-	else:
-		errors = json.dumps({"errors": form.errors})
-		return HttpResponse(json.dumps(errors))
-
-	return HttpResponse(status=500); 

@@ -23,7 +23,6 @@ from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from gather.tasks import published_events_today_local, events_pending
-from gather.forms import NewUserForm
 from gather.models import Event
 from django.utils.safestring import SafeString
 from django.utils.safestring import mark_safe
@@ -725,7 +724,7 @@ def email_available(request):
 	print 'in email_available'
 	if not request.is_ajax():
 		return HttpResponseRedirect('/404')
-	email = request.POST.get('email')
+	email = request.POST.get('email').lower()
 	users_with_email = len(User.objects.filter(email=email))
 	if users_with_email:
 		print 'email address %s is already in use' % email

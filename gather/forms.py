@@ -52,31 +52,4 @@ class EventForm(forms.ModelForm):
 		# remove the wrapping div tags. 
 		cleaned = re.sub('^<div>', '', cleaned)
 		cleaned = re.sub('</div>', '', cleaned)
-		return cleaned 
-
-class NewUserForm(UserCreationForm):
-	''' a new user creation form which uses the basic django user model, but requires the email to be provided. '''
-	email = forms.EmailField(required=True, widget = forms.TextInput(attrs={'class':'form-control'}))
-	first_name = forms.CharField(required=True,  widget = forms.TextInput(attrs={'class':'form-control'}))
-	last_name = forms.CharField(required=True, widget = forms.TextInput(attrs={'class':'form-control'}))
-	username = forms.RegexField(
-			required=True, max_length=30, regex=r"^[\w.@+-]+$",	
-			error_messages = {'invalid': "This value may contain only letters, numbers and @/./+/-/_ characters."},
-			widget = forms.TextInput(attrs={'class':'form-control'}), 
-			help_text="30 characters or fewer. Letters, digits and @/./+/-/_ only")
-	password1 = forms.CharField(label="Password", required=True, widget = forms.PasswordInput(attrs={'class':'form-control'}))
-	password2 = forms.CharField(label="Confirm Password", required=True, widget = forms.PasswordInput(attrs={'class':'form-control'}))
-
-	class Meta:
-		model = User
-		fields = ("first_name", "last_name", "username", "email", "password1", "password2")
-
-	def save(self, commit=True):
-		user = super(NewUserForm, self).save(commit=False)
-		user.email = self.cleaned_data["email"]
-		user.first_name = self.cleaned_data["first_name"]
-		user.last_name = self.cleaned_data["last_name"]
-		if commit:
-			user.save()
-		return user
-
+		return cleaned

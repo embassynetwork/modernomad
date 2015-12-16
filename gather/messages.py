@@ -8,7 +8,7 @@ from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
-from gather.forms import EventForm, NewUserForm
+from gather.forms import EventForm
 import datetime
 from django.contrib import messages
 from django.conf import settings
