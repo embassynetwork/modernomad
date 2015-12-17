@@ -90,7 +90,7 @@
 						</li>
 						{% endif %}
 						{% if not user.is_authenticated %}
-						<li><a href="/people/login/">Login</a></li>
+						<li><a href="/people/login/?next={{request.path}}">Login</a></li>
 						{% endif %}
 					</ul>
 				</div>
