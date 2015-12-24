@@ -85,20 +85,24 @@ class BackupManager(object):
 		if not os.path.exists(settings.BACKUP_ROOT): raise BackupError('Backup root "%s" does not exist' % settings.BACKUP_ROOT)
 		if not os.path.isdir(settings.BACKUP_ROOT): raise BackupError('Backup root "%s" is not a directory' % settings.BACKUP_ROOT)
 	
-	def remove_old_files(self):
+	def remove_old_files(self, backup_count):
+		logger.debug("remove_old_files, backup_count=%s" % backup_count)
 		file_count = 0
 		files = os.listdir(settings.BACKUP_ROOT)
 		files.sort()
 		files.reverse()
 		for f in files:
 			if f == "latest-backup.tar":
+				logger.debug("%s: %s" % (f, "skipped"))
 				continue
 			if f.endswith("-backup.tar"):
-				if file_count < settings.BACKUP_COUNT:
+				if file_count < backup_count:
 					file_count = file_count + 1
+					logger.debug("%s: %s" % (f, file_count))
 				else:
 					logger.warn("Removing old log file: %s" % f)
 					os.remove(settings.BACKUP_ROOT + f)
+				
 
 	def make_backup(self):
 		self.check_dirs()
@@ -139,6 +143,6 @@ class BackupManager(object):
 		if not self.call_system(command): print 'Could not erase temp backup files'
 
 		if settings.BACKUP_COUNT and settings.BACKUP_COUNT > 0:
-			self.remove_old_files()
+			self.remove_old_files(settings.BACKUP_COUNT)
 
 		return os.path.join(settings.BACKUP_ROOT, backup_path)
