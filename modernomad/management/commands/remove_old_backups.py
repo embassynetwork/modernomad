@@ -20,4 +20,4 @@ class Command(BaseCommand):
 			backup_count = labels[0]
 		
 		manager = BackupManager()
-		print manager.remove_old_files(backup_count)
+		manager.remove_old_files(backup_count)
