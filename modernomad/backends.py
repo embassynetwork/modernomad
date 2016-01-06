@@ -101,7 +101,8 @@ class MailgunBackend(BaseEmailBackend):
 class EmailOrUsernameModelBackend(object):
 	def authenticate(self, username=None, password=None):
 		if '@' in username:
-			kwargs = {'email': username, 'is_active':True}
+			email_username = username.lower()
+			kwargs = {'email': email_username, 'is_active':True}
 		else:
 			kwargs = {'username': username, 'is_active':True}
 		try:
