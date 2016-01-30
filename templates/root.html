@@ -48,33 +48,22 @@
 					</div>
 					<div class="collapse navbar-collapse" id="main-navbar">
 						<ul class="nav navbar-nav navbar-left">
-							<li><a class="navbar-brand" href="/">E<span class="highlight">N</span></a></li>
-							<li><a href="{% url 'location_list' %}">Locations</a></li>
-							<!--
-							<li><a href="/resources">Resources</a></li>
-							<li><a href="/faq">FAQ</a></li>
-							-->
+							<li style="padding-top: 15px; padding-bottom:15px; color: #777; "></li>
+							<li><a href="/" class="navbar-brand"><span class="highlight">Embassy Network</span></a></li>
+							<li style="padding-top: 15px; padding-bottom:15px; color: #777; ">:: <em>Communities experimenting with culture and commoning.</em></li>
 						</ul>
-
 						<ul class="nav navbar-nav navbar-right">		
-							{% if user.is_authenticated %}
 							<li class="dropdown">
 							<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-								<i class="glyphicon glyphicon-user"></i> {{ user.get_full_name }} <b class="caret"></b>
+								<span class="highlight"> Learn More <b class="caret"></b></span>
 							</a>
 							<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-								<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
-								{% if user.is_superuser %}
-								<li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
-								{% endif %}
-								<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
+								<li><a href="">About Our Network</a></li>
+								<li><a href="">Member Locations</a></li>
+								<li><a href="">Projects & Experiments</a></li>
+								<li><a href="">Resources</a></li>
 							</ul>
 							</li>
-							{% endif %}
-							{% if not user.is_authenticated %}
-							<li><a href="/people/login/?next={{request.path}}">Login</a></li>
-							{% endif %}
 						</ul>
 					</div> <!-- end navbar-collapse -->
 					</nav>
