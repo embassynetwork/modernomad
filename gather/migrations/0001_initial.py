@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='eventnotifications',
             name='location_weekly',
-            field=models.ManyToManyField(related_name=b'', to='core.Location'),
+            field=models.ManyToManyField(to='core.Location'),
             preserve_default=True,
         ),
         migrations.AddField(

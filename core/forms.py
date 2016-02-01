@@ -91,6 +91,7 @@ class UserProfileForm(forms.ModelForm):
 		clean_username = clean_username.replace("@", "")
 		clean_username = clean_username.replace("+", "")
 		clean_username = clean_username.replace("-", "")
+		clean_username = clean_username.replace("'", "")
 		return clean_username
 
 	def clean(self):
