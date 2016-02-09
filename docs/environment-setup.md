@@ -93,6 +93,10 @@ apt-get on debian/ubuntu (and other ways on other systems).
 - os x: `brew update; brew install rabbitmq`
 - debian/ubuntu: `sudo apt-get install rabbitmq-server`
 
+### PostgreSQL
+
+- os x: `brew update; brew install postgresql`
+- debian/ubuntu: `sudo apt-get install postgresql libpq-dev`
 
 ## Hooray!
 
