@@ -52,6 +52,7 @@ don't forget to source the bashrc file now:
 
 ## Dependencies
 
+### PIL
 PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. 
 
 **On OS X**
@@ -85,13 +86,17 @@ you may need to symlink these libraries for PIL to find them during the install:
 
 then either install PIL using `brew`, or from the dmg's available on the PIL website. for example, see the process outlined [here](http://stackoverflow.com/questions/9070074/how-to-install-pil-on-mac-os-x-10-7-2-lion)
 
-# RabbitMQ
+### RabbitMQ
 celery depends on rabbit-mq, which can be installed using brew on OS X or
 apt-get on debian/ubuntu (and other ways on other systems). 
 
 - os x: `brew update; brew install rabbitmq`
 - debian/ubuntu: `sudo apt-get install rabbitmq-server`
 
+### PostgreSQL
+
+- os x: `brew update; brew install postgresql`
+- debian/ubuntu: `sudo apt-get install postgresql libpq-dev`
 
 ## Hooray!
 
