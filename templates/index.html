@@ -3,42 +3,17 @@
 
 {% block body %}
 
-<div class="jumbotron" id="index-header">
+<div class="jumbotron" id="center">
 	<div class="container">
 		<h1>The Embassy Network</h1>
-		<h1><span class="text-muted"><em>Be at Home Across the Globe</em></span></h1>
-		<p class="lead index-intro-text">The Embassy Network is an community, a set of resources, and a software
-		platform to connect modern shared living spaces. Embassy locations
-		provide residence and accommodations for creatives, professionals and modern
-		nomads traveling the globe for projects and collaborations. We facilitate
-		<strong>affordable stays in vibrant communities</strong> where members can plug into a lively
-		culture and work together to create a dynamic environment of events, activities
-		and intentional pursuits.</p>
+		<h2 class="text-muted">
+		People and spaces experimenting with culture and commoning. 
+		</h2>
+		<h2 class="text-muted">
+		The Embassy Network is designing new ways to manage resources and govern space together. Our member spaces are embassies of the future we want to inhabit. 
+		</h2>
 	</div>
 </div>
-
-<div class="container" id="index-locations-list">
-	{% for location in locations %}
-	<div class="float-left homepage-user-wrapper">			
-		<img class="index-loc-img" src="{{location.image.url}}" />
-		<a href="{% url 'location_home' location.slug %}">
-		<div class="index-loc-info" id="location-prev-{{location.id}}">
-			<span>{{ location.name }}</span>
-		</div>
-		</a>
-	</div>
-	{% endfor %}
-</div>
-	
-
-<div class="container" id="location-availability-block">
-	<div id="index-check-availability">
-		<h3><span class="highlight">Where are you going?</span></h3>
-	</div>
-	<div id="location-availability-map"></div>
-	<a href="{% url 'location_list' %}" class="small-spacer btn btn-lg btn-default">Browse All Locations</a>
-</div>
-
 
 <div class="container">
 
@@ -99,20 +74,11 @@
 	<hr class="featurette-divider">
 
 	<div class="row center" id="index-get-involved">
-		<div class="col-md-4">
-			<a href="{% url 'location_list' %}">
-			<h2>Stay<br>with Us</h2>
+		<div class="col-md-12">
+			<h2>Get in Touch</h2>
+			<a href="mailto:hello@embassynetwork.com">
 			<img src="{% static 'img/line-divider.jpg' %}">
-		</div>
-		<div class="col-md-4">
-			<a href="{% url 'host' %}">
-			<h2>Add your<br>Community</h2>
-			<img src="{% static 'img/line-divider.jpg' %}">
-		</div>
-		<div class="col-md-4">
-			<a href="{% url 'membership' %}">
-			<h2>Learn about<br>membership</h2>
-			<img src="{% static 'img/line-divider.jpg' %}">
+			<h2>hello@embassynetwork.com</h2>
 			</a>
 		</div>
 	</div>
@@ -147,35 +113,4 @@
 {% endblock %}
 
 {% block extrajs %}
-	<script>
-		$(document).ready(function() {
-			map = L.map('location-availability-map').setView([27.5504444,9.046775], 2);
-			L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
-				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
-			}).addTo(map);
-			map.scrollWheelZoom.disable();
-			var LocIcon = L.Icon.extend({
-				options: {
-					iconUrl: '{% static "img/marker-icon.png" %}',
-				}
-			});
-			locations = {{ location_list|safe}};
-			markers = [];
-			for (var i = 0; i < locations.length; i++) {
-				console.log(locations[i].longitude, locations[i].latitude);
-				var locIcon = new LocIcon();
-				var mark = L.marker([locations[i].latitude, locations[i].longitude], {icon: locIcon}).addTo(map);
-				var popup = L.popup();
-				if (locations[i].has_availability) {
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-success">Availability today</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
-				} else if (!locations[i].has_availability && locations[i].num_rooms == 0) { 
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">No Availability Info</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
-				} else {
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">Full today</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
-				}
-				mark.bindPopup(popup);
-			}
-		});
-
-	</script>
 {% endblock %}
