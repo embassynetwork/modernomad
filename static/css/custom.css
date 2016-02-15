@@ -19,7 +19,6 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
-	font-family: 'Clarendon Light', serif;
 	-webkit-font-smoothing: antialiased;
 }
 
@@ -1501,12 +1500,6 @@ table tr.row-even td { background: #eee; }
 @media (min-width: 768px) {
 	.featurette-heading {
 		font-size: 50px;
-  }
-}
-
-@media (min-width: 992px) {
-	.featurette-heading {
-		margin-top: 120px;
   }
 }
 

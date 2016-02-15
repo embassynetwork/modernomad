@@ -3,79 +3,30 @@
 
 {% block body %}
 
-<div class="jumbotron" id="index-header">
+<div class="jumbotron" id="center">
 	<div class="container">
 		<h1>The Embassy Network</h1>
-		<h1><span class="text-muted"><em>Be at Home Across the Globe</em></span></h1>
-		<p class="lead index-intro-text">The Embassy Network is an community, a set of resources, and a software
-		platform to connect modern shared living spaces. Embassy locations
-		provide residence and accommodations for creatives, professionals and modern
-		nomads traveling the globe for projects and collaborations. We facilitate
-		<strong>affordable stays in vibrant communities</strong> where members can plug into a lively
-		culture and work together to create a dynamic environment of events, activities
-		and intentional pursuits.</p>
+		<h2 class="text-muted">
+			<em>People and spaces experimenting with culture and commoning. </em>
+		</h2>
+		<h2 class="text-muted">
+		The Embassy Network is designing new ways to manage resources and govern space together. Our member spaces are embassies of a future that is abundant, collaborative, and transparent. 
+		</h2>
 	</div>
 </div>
-
-<div class="container" id="index-locations-list">
-	{% for location in locations %}
-	<div class="float-left homepage-user-wrapper">			
-		<img class="index-loc-img" src="{{location.image.url}}" />
-		<a href="{% url 'location_home' location.slug %}">
-		<div class="index-loc-info" id="location-prev-{{location.id}}">
-			<span>{{ location.name }}</span>
-		</div>
-		</a>
-	</div>
-	{% endfor %}
-</div>
-	
-
-<div class="container" id="location-availability-block">
-	<div id="index-check-availability">
-		<h3><span class="highlight">Where are you going?</span></h3>
-	</div>
-	<div id="location-availability-map"></div>
-	<a href="{% url 'location_list' %}" class="small-spacer btn btn-lg btn-default">Browse All Locations</a>
-</div>
-
 
 <div class="container">
 
 	<hr class="featurette-divider">
 
 	<div class="row featurette">
-		<div class="col-md-7">
-			<h2 class="featurette-heading">Vibrant Communities.</h2>
-			<p class="lead">
-			Like other travel networks, Embassy locations are <strong>independently owned and
-				operated</strong>, set their own prices, and have full say over guest stays at their
-				locations; but, the Embassy Network specifically seeks to <strong>connect shared living
-				spaces</strong> characterized by an emphasis on <strong>openness, collaboration and community</strong>.
-				Members may travel freely and live amongst all locations, and travelers from
-				far and wide can seek reprieve in a place that feels like home.
-			</p>
-		</div>
-		<div class="col-md-5 col-xs-12">
-			<img class="featurette-image img-responsive" src="{% static 'img/EmbassyNetworkFaces.jpg' %}">
-		</div>
-	</div>
-
-	<hr class="featurette-divider">
-
-	<div class="row featurette">
 		<div class="col-md-5">
-			<img class="featurette-image img-responsive" src="/static/img/dining-perspective-crop.jpg">
+			<img class="featurette-image img-responsive" src="/static/img/network-map-icon.png">
 		</div>
 		<div class="col-md-7">
-			<h2 class="featurette-heading">Affordable Stays.</h2>
+			<h2 class="featurette-heading">An Open Collaborative Ecosystem.</h2>
 			<p class="lead">
-				Affordability is a major goal of the Embassy Network. Affordability supports
-				travel and exposure to new experiences, but also exploration and creativity.
-				Emergent from the collection of participating locations is a <strong>collaboratively
-					managed commons</strong> that seeks to make increasingly efficient use of resources,
-				support the development of community ties, and recycle profits back into the
-				communities that generate them.
+			Independent houses come together to share resources and best practices, to work on projects, and create a social network of opportunities and services. 
 			</p>
 		</div>
 	</div>
@@ -84,39 +35,32 @@
 
 	<div class="row featurette">
 		<div class="col-md-7">
-			<h2 class="featurette-heading">Working Together.</h2>
-			<p class="lead">
-			Together, these locations create a global fabric of <strong>intelligent, creative, and
-				passionate</strong> people leading lives of intention, supported and inspired by their
-				community, and exploring modern notions of Home in the 21st century.
-			</p>
+			<h2 class="featurette-heading">Create a Commons and Share with Others</h2>
+			<p class="lead">A global multitude of commons, from libraries to housing. We develop tools and systems for managing and sharing resources internally, publically, and to trusted collaborators.</p>
 		</div>
 		<div class="col-md-5">
-			<img class="featurette-image img-responsive" src="/static/img/collab.jpg">
+			<img class="featurette-image img-responsive" src="/static/img/share-icon.svg">
 		</div>
 	</div>
 
 	<hr class="featurette-divider">
 
-	<div class="row center" id="index-get-involved">
-		<div class="col-md-4">
-			<a href="{% url 'location_list' %}">
-			<h2>Stay<br>with Us</h2>
-			<img src="{% static 'img/line-divider.jpg' %}">
-		</div>
-		<div class="col-md-4">
-			<a href="{% url 'host' %}">
-			<h2>Add your<br>Community</h2>
-			<img src="{% static 'img/line-divider.jpg' %}">
-		</div>
-		<div class="col-md-4">
-			<a href="{% url 'membership' %}">
-			<h2>Learn about<br>membership</h2>
-			<img src="{% static 'img/line-divider.jpg' %}">
+	<div class="row featurette">
+		<div class="col-md-10 col-md-offset-1">
+			<h2 class="featurette-heading">Join a Community of Practitioners and Prototypers.</h2>
+			<p class="lead">
+			Together, we organize events, exchanges, discussions and projects. We start spaces, support new ones, and collaborate with existing ones. Between us, we use these spaces to prototype new approaches to open, collaborative and <em>supra</em>-market resource management, decision making, and financial systems. 
+			</p>
+			<h2>Get in Touch</h2>
+			<a href="mailto:hello@embassynetwork.com">
+			<h2>hello@embassynetwork.com</h2>
 			</a>
 		</div>
 	</div>
-	
+
+
+	<hr class="featurette-divider">
+
 </div>
 
 {%endblock %}
@@ -147,35 +91,4 @@
 {% endblock %}
 
 {% block extrajs %}
-	<script>
-		$(document).ready(function() {
-			map = L.map('location-availability-map').setView([27.5504444,9.046775], 2);
-			L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
-				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
-			}).addTo(map);
-			map.scrollWheelZoom.disable();
-			var LocIcon = L.Icon.extend({
-				options: {
-					iconUrl: '{% static "img/marker-icon.png" %}',
-				}
-			});
-			locations = {{ location_list|safe}};
-			markers = [];
-			for (var i = 0; i < locations.length; i++) {
-				console.log(locations[i].longitude, locations[i].latitude);
-				var locIcon = new LocIcon();
-				var mark = L.marker([locations[i].latitude, locations[i].longitude], {icon: locIcon}).addTo(map);
-				var popup = L.popup();
-				if (locations[i].has_availability) {
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-success">Availability today</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
-				} else if (!locations[i].has_availability && locations[i].num_rooms == 0) { 
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">No Availability Info</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
-				} else {
-					popup.setContent('<h3>'+locations[i].name+' <span class="small room-avail-text-danger">Full today</span></h3><h5><a href="'+ locations[i].url +'"><span class="glyphicon glyphicon-calendar"></span> View this location</a></h5><p>'+locations[i].short_description+'</p>')
-				}
-				mark.bindPopup(popup);
-			}
-		});
-
-	</script>
 {% endblock %}
