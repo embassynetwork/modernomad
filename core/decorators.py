@@ -19,7 +19,22 @@ def house_admin_required(original_func):
 		location = get_location(location_slug)
 		user = request.user
 		if user.is_authenticated() and location and user in location.house_admins.all():
-			#print 'user is an admin at this location'
+			return original_func(request, location_slug, *args, **kwargs)
+		elif request.user.is_authenticated():
+			return HttpResponseRedirect("/")
+		else: 
+			from django.contrib.auth.views import redirect_to_login
+			path = request.get_full_path()
+			login_url = settings.LOGIN_URL
+			return redirect_to_login(path, login_url)
+	return decorator 
+
+def resident_or_admin_required(original_func):
+	@wraps(original_func)
+	def decorator(request, location_slug, *args, **kwargs):
+		location = get_location(location_slug)
+		user = request.user
+		if user.is_authenticated() and location and (user in location.residents.all() or user in location.house_admins.all()):
 			return original_func(request, location_slug, *args, **kwargs)
 		elif request.user.is_authenticated():
 			return HttpResponseRedirect("/")

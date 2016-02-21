@@ -13,7 +13,7 @@ from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentF
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
-from core.decorators import house_admin_required
+from core.decorators import house_admin_required, resident_or_admin_required
 from django.db.models import Q
 from core.models import *
 from core.tasks import guest_welcome
@@ -262,8 +262,7 @@ def room_occupancy(request, location_slug, room_id, year):
 
 	return response
 
-
-@house_admin_required
+@resident_or_admin_required
 def occupancy(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 	today = datetime.date.today()
@@ -1826,7 +1825,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 		'form': form, 'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY})
 
 
-@house_admin_required
+@resident_or_admin_required
 def payments(request, location_slug, year, month):
 	t0 = time.time()
 	logger.debug('payments: timing begun:')

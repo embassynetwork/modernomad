@@ -68,24 +68,30 @@
 					</li>
 				{% endif %}
 
-				{% if user in location.house_admins.all %}
+				{% if user in location.house_admins.all or user in location.residents.all %}
 				<li class="dropdown">
 				<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
 					Manage <b class="caret"></b>
 				</a>
 				<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
 					{% if location.rooms.count > 0 %}
-						<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">Occupancy</a></li>
-						<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
-						<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>
-						<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
-						<li><a href="{% url 'manage_today' location.slug %}">Today</a></li>
-						<li><a href="{% url 'reservation_manage_create' location.slug %}">New Reservation</a></li>
+						{% if user in location.house_admins.all or user in location.residents.all %}
+							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">Occupancy</a></li>
+							<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>
+							<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
+							<li><a href="{% url 'manage_today' location.slug %}">Arrive & Depart Today</a></li>
+						{% endif %}
+						{% if user in location.house_admins.all %}
+							<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
+							<li><a href="{% url 'reservation_manage_create' location.slug %}">New Reservation</a></li>
+						{% endif %}
 					{% endif %}
-					{% ifappexists gather %}
-						<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
-					{% endifappexists %}
-					<li><a tabindex="-1" href="{% url 'location_edit_settings' location.slug %}">Edit Location</a></li>
+					{% if user in location.house_admins.all %}
+						{% ifappexists gather %}
+							<li><a tabindex="-1" href="{% url 'gather_needs_review' location.slug %}">Pending Events</a></li>
+						{% endifappexists %}
+						<li><a tabindex="-1" href="{% url 'location_edit_settings' location.slug %}">Edit Location</a></li>
+					{% endif %}
 				</ul>
 				</li>
 				{% endif %}
