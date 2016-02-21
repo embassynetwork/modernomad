@@ -747,6 +747,10 @@ class PaymentManager(models.Manager):
 		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__location=location))
 		return reservation_payments
 
+	def reservation_payments_by_room(self, room):
+		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__room=room))
+		return reservation_payments
+
 class Payment(models.Model):
 	bill = models.ForeignKey(Bill, related_name="payments", null=True)
 	user = models.ForeignKey(User, related_name="payments", null=True)

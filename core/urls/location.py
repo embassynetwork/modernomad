@@ -7,6 +7,7 @@ per_location_patterns = [
 	url(r'^team/$', 'core.views.team', name='location_team'),
 	url(r'^guests/$', 'core.views.guests', name='location_guests'),
 	url(r'^occupancy/$', 'core.views.occupancy', name='location_occupancy'),
+	url(r'^occupancy/room/(?P<room_id>\d+)/(?P<year>\d+)/$', 'core.views.room_occupancy', name='room_occupancy'),
 	url(r'^calendar/$', 'core.views.calendar', name='location_calendar'),
 	url(r'^thanks/$', 'core.views.thanks', name='location_thanks'),
 	url(r'^today/$', 'core.views.today', name='location_today'),

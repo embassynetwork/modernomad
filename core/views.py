@@ -41,6 +41,7 @@ from django.template import Context
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 import logging
 from django.views.decorators.csrf import csrf_exempt
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,140 @@ def today(request, location_slug):
 
 	events_today = published_events_today_local(location)
 	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
+
+def room_occupancy_month(room, month, year):
+	print room, month, year
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+
+	# note the day parameter is meaningless
+	report_date = datetime.date(year, month, 1) 
+	reservations = Reservation.objects.filter(room=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+
+	# payments *received* this month for this room
+	payments_for_room = Payment.objects.reservation_payments_by_room(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
+	payments_cash = 0
+	for p in payments_for_room:
+		payments_cash += p.paid_amount
+
+	nights_available = 0
+	nights_occupied = 0
+	payments_accrual = 0
+	outstanding_value = 0
+	partial_paid_reservations = []
+	total_comped_nights = 0
+	total_comped_value = 0
+
+
+	# not calculating:
+	# payments this month for previous months
+	# payments for this month FROM past months (except inasmuch as its captured in the payments_accrual)
+
+	# iterate over the reservables to calculate how many nights the room was
+	# actually available. 
+	room_reservables = room.reservables.all()
+	for reservable in room_reservables:
+		if not reservable.end_date:
+			# XXX account for reservables without end date by temporarily
+			# setting the end date to be the end of the month.  IMPT: do
+			# NOT save this. it's a temporary hack so that we can work with
+			# end dates. 	
+			reservable.end_date = end 
+
+		if reservable.end_date < start or reservable.start_date > end:
+			# no reservable dates in this month
+			continue
+		if reservable.start_date < start:
+			start_reservable = start
+		else:
+			start_reservable = reservable.start_date
+		if reservable.end_date > end:
+			end_reservable = end
+		else:
+			end_reservable = reservable.end_date
+		nights_available += (end_reservable - start_reservable).days
+	if room.shared:
+		nights_available *= room.beds
+
+	# cash for room this month
+
+	# occupancy for room this month
+	for r in reservations:
+		comp = False
+		partial_payment = False
+		total_owed = 0.0
+
+		# in case this reservation crossed a month boundary, first calculate
+		# nights of this reservation that took place this month 
+		if r.arrive >=start and r.depart <= end:
+			nights_this_month = (r.depart - r.arrive).days
+		elif r.arrive <=start and r.depart >= end:
+			nights_this_month = (end - start).days
+		elif r.arrive < start:
+			nights_this_month = (r.depart - start).days
+		elif r.depart > end:
+			nights_this_month = (end - r.arrive).days
+
+		# if it's the first of the month and the person left on the 1st, then
+		# that's actually 0 days this month which we don't need to include.
+		if nights_this_month == 0:
+			continue
+
+		nights_occupied += nights_this_month
+
+		# XXX Note! get_rate() returns the base rate, but does not incorporate
+		# any discounts. so we use subtotal_amount here. 
+		rate = r.bill.subtotal_amount()/r.total_nights()
+
+		if r.is_comped():
+			print 'comped'
+			print r.id
+			total_comped_nights += nights_this_month
+			total_comped_value += nights_this_month*r.default_rate()
+			comp = True
+			unpaid = False
+		else:
+			# XXX todo do we want to check if a res is fully paid vs.just
+			# existence of payments? if it's partially paid what is the desired
+			# behavior.
+			if r.payments():
+				paid_rate = r.bill.to_house() / r.total_nights()
+				payments_accrual += nights_this_month*paid_rate
+
+			# if a reservation rate is set to 0 is automatically gets counted as a comp
+			if r.bill.total_owed() > 0:
+				outstanding_value += r.bill.total_owed()
+				partial_paid_reservations.append(r.id)
+
+	params = [month, year, round(payments_cash, 2), round(payments_accrual, 2), nights_occupied, nights_available, partial_paid_reservations, total_comped_nights, round(total_comped_value, 2)]
+	print params
+	return params
+	
+@house_admin_required
+def room_occupancy(request, location_slug, room_id, year):
+	room = get_object_or_404(Room, id=room_id)
+	year = int(year)
+	response = HttpResponse(content_type='text/csv')
+	output_filename = "%s Occupancy Report %d.csv" % (room.name, year)
+	print output_filename
+	response['Content-Disposition'] = 'attachment; filename=%s' % output_filename
+	writer = csv.writer(response)
+	if room.location.slug != location_slug:
+		writer.writerow(["invalid room",])
+		return response
+
+	writer.writerow([str(year) + " Report for " + room.name,])
+	writer.writerow(['Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied', 'Nights Available', 'Partial Paid Reservations', 'Comped Nights', 'Comped Value'])
+	# we don't have data before 2012 or in the future
+	if (year < 2012) or (year > datetime.date.today().year):
+		return response
+	
+	for month in range(1,13):
+		print month
+		params = room_occupancy_month(room, month, year)
+		writer.writerow(params)
+
+	return response
+
 
 @house_admin_required
 def occupancy(request, location_slug):
