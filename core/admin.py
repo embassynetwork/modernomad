@@ -238,9 +238,18 @@ class UserNoteAdmin(admin.ModelAdmin):
 	model = UserNote
 
 class CommunitySubscriptionAdmin(admin.ModelAdmin):
+	def bill_count(self):
+		return self.bills.count()
+		
+	def generate_bill(self, request, queryset):
+		for res in queryset:
+			res.generate_bill()
+		self.message_user(request, "bill generation triggered")
+	
 	model = CommunitySubscription
-	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price')
+	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price', bill_count)
 	list_filter = ('location', )
+	actions= ['generate_bill', ]
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
