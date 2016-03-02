@@ -82,11 +82,7 @@ class PaymentInline(admin.TabularInline):
 	extra = 0
 
 class BillLineItemAdmin(admin.ModelAdmin):
-	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
-	user.allow_tags = True
-
-	list_display = ('id', user, 'description', 'amount', 'paid_by_house')
+	list_display = ('id', 'description', 'amount', 'paid_by_house')
 	list_filter = ('fee', 'paid_by_house')
 
 class BillLineItemInline(admin.TabularInline):
@@ -241,6 +237,10 @@ class LocationMenuAdmin(admin.ModelAdmin):
 class UserNoteAdmin(admin.ModelAdmin):
 	model = UserNote
 
+class CommunitySubscriptionAdmin(admin.ModelAdmin):
+	model = CommunitySubscription
+	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price')
+	list_filter = ('location', )
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
@@ -249,7 +249,7 @@ admin.site.register(Location, LocationAdmin)
 admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(RoomSubscription)
-admin.site.register(CommunitySubscription)
+admin.site.register(CommunitySubscription, CommunitySubscriptionAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)

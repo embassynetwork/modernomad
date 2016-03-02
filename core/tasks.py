@@ -1,6 +1,6 @@
 from celery.task.schedules import crontab
 from celery.task import periodic_task
-from core.models import Reservation, Location
+from core.models import Reservation, Location, CommunitySubscription
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from modernomad.backup import BackupManager
 import datetime
@@ -44,10 +44,17 @@ def send_departure_email():
 			print 'sending goodbye email to %s' % reservation.user.email
 			goodbye_email(reservation)
 
-@periodic_task(run_every=crontab(hour=1, minute=0))
+@periodic_task(run_every=crontab(hour=2, minute=0))
 def make_backup():
 	manager = BackupManager()
 	manager.make_backup()
+
+
+@periodic_task(run_every=crontab(hour=1, minute=0))
+def generate_subscription_bills():
+	# TODO
+	pass
+	#CommunitySubscription.objects.active_subscriptions():
 
 
 
