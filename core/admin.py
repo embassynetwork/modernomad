@@ -250,6 +250,7 @@ class CommunitySubscriptionAdmin(admin.ModelAdmin):
 	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price', bill_count)
 	list_filter = ('location', )
 	actions= ['generate_bill', ]
+	exclude = ('bills',)
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
