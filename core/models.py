@@ -441,10 +441,23 @@ class Bill(models.Model):
 		fees = self.line_items.filter(fee__isnull=False)
 		return list(room_item) + list(custom_items) + list(fees)
 
+
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
 	period_end = models.DateField()
+
+
+class SubscriptionManager(models.Manager):
 	
+	def active_subscriptions(self, target_date=None):
+		if not target_date:
+			target_date = timezone.now().date()
+		current = Q(start_date__lte=target_date)
+		unending = Q(end_date__isnull=True)
+		future_ending = Q(end_date__gte=target_date)
+		return self.filter(current & (unending | future_ending)).distinct()
+
+
 class Subscription(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
@@ -458,17 +471,28 @@ class Subscription(models.Model):
 	recurring_charge_date = models.IntegerField(default=1, help_text="The day of the month that the subscription will be charged. This is an integer value.")
 	bills = models.ManyToManyField(SubscriptionBill)
 
+	objects = SubscriptionManager()
+
+	def is_active(self, target_date=None):
+		if not target_date:
+			target_date = timezone.now().date()
+		return self.start_date <= target_date and (self.end_date == None or self.end_date >= target_date)
+
 	class Meta:
 		abstract = True
+
 
 class RoomSubscription(Subscription):
 	nights = models.IntegerField(help_text="How many nights does this subscription entitle the member to?")
 
+
 class CommunitySubscription(Subscription):
 	pass
 
+
 class ReservationBill(Bill):
 	pass
+
 
 class Reservation(models.Model):
 
