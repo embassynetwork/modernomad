@@ -457,7 +457,8 @@ class SubscriptionManager(models.Manager):
 			target_date = timezone.now().date()
 		end_date_exists = Q(end_date__isnull=False)
 		end_date_in_past = Q(end_date__lt=target_date)
-		return self.filter(end_date_exists & end_date_in_past).distinct()
+		future_start = Q(start_date__gt=target_date)
+		return self.filter(future_start | (end_date_exists & end_date_in_past)).distinct()
 
 	def active_subscriptions(self, target_date=None):
 		if not target_date:
