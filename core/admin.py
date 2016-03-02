@@ -82,11 +82,7 @@ class PaymentInline(admin.TabularInline):
 	extra = 0
 
 class BillLineItemAdmin(admin.ModelAdmin):
-	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
-	user.allow_tags = True
-
-	list_display = ('id', user, 'description', 'amount', 'paid_by_house')
+	list_display = ('id', 'description', 'amount', 'paid_by_house')
 	list_filter = ('fee', 'paid_by_house')
 
 class BillLineItemInline(admin.TabularInline):

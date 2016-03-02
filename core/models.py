@@ -1,3 +1,4 @@
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.models import User
@@ -508,14 +509,14 @@ class Subscription(models.Model):
 		
 		line_items = []
 		desc = "%s (%s to %s)" % (self.description, period_start, period_end)
-		line_item = BillLineItem(bill=subscription_bill, description=desc, amount=self.pric, paid_by_house=False)
+		line_item = BillLineItem(bill=subscription_bill, description=desc, amount=self.price, paid_by_house=False)
 		line_items.append(line_item)
 
 		# For now we are going to assume that all fees (of any kind) that are marked as "paid by house"
 		# will be applied to subscriptions as well -- JLS
 		for location_fee in LocationFee.objects.filter(location = self.location, fee__paid_by_house=True):
 			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-			amount = float(effective_room_charge) * location_fee.fee.percentage
+			amount = float(self.price) * location_fee.fee.percentage
 			fee_line_item = BillLineItem(bill=subscription_bill, description=desc, amount=amount, paid_by_house=True, fee=location_fee.fee)
 			line_items.append(fee_line_item)
 

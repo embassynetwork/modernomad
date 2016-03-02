@@ -82,4 +82,8 @@ class SubscriptionTestCase(TestCase):
 		self.assertFalse(self.sub3.is_active())
 		self.assertTrue(self.sub4.is_active())
 		self.assertFalse(self.sub5.is_active())
-		
+	
+
+	def test_generate_bill(self):
+		self.sub1.generate_bill()
+		self.assertTrue(self.sub1.bills != None)
