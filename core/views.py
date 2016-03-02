@@ -2063,12 +2063,10 @@ def SubscriptionsManageList(request, location_slug):
 
 	location = get_object_or_404(Location, slug=location_slug)
 
-	show_all = False
-	if 'show_all' in request.GET and request.GET.get('show_all') == "True":
-		show_all = True
+	active = CommunitySubscription.objects.active_subscriptions().filter(location=location).order_by('-start_date')
+	inactive = CommunitySubscription.objects.inactive_subscriptions().filter(location=location).order_by('-end_date')
+	return render(request, 'subscriptions_list.html', {"active": active, "inactive": inactive, 'location': location})
 
-	community_subscriptions = CommunitySubscription.objects.filter(location=location).order_by('-start_date')
-	if not show_all:
-		community_subscriptions = community_subscriptions.active_subscriptions()
-	return render(request, 'subscriptions_list.html', {"community_subscriptions": community_subscriptions, 'location': location})
-
+@house_admin_required
+def CommunitySubscriptionManageDetail(request, location_slug, subscription_id):
+	pass

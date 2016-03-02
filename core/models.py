@@ -449,6 +449,14 @@ class SubscriptionBill(Bill):
 
 class SubscriptionManager(models.Manager):
 	
+	def inactive_subscriptions(self, target_date=None):
+		''' inactive subscriptions all have an end date and those end dates are in the past.'''
+		if not target_date:
+			target_date = timezone.now().date()
+		end_date_exists = Q(end_date__isnull=False)
+		end_date_in_past = Q(end_date__lt=target_date)
+		return self.filter(end_date_exists & end_date_in_past).distinct()
+
 	def active_subscriptions(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
@@ -468,7 +476,6 @@ class Subscription(models.Model):
 	description = models.CharField(max_length=256, blank=True, null=True)
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
-	recurring_charge_date = models.IntegerField(default=1, help_text="The day of the month that the subscription will be charged. This is an integer value.")
 	bills = models.ManyToManyField(SubscriptionBill)
 
 	objects = SubscriptionManager()
