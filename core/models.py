@@ -267,7 +267,7 @@ class Room(models.Model):
 	name = models.CharField(max_length=200)
 	location = models.ForeignKey(Location, related_name='rooms', null=True)
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
-	description = models.TextField()
+	description = models.TextField(blank=True, null=True)
 	summary = models.CharField(max_length=140, help_text="Max length 140 chars", default='')
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
@@ -446,9 +446,13 @@ class SubscriptionBill(Bill):
 	period_end = models.DateField()
 	
 class Subscription(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+	created_by = models.ForeignKey(User, related_name="+", default=User.objects.all().first().pk)
 	location = models.ForeignKey(Location)
 	user = models.ForeignKey(User)
 	price = models.DecimalField(decimal_places=2, max_digits=9)
+	description = models.CharField(max_length=256, blank=True, null=True)
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
 	recurring_charge_date = models.IntegerField(default=1, help_text="The day of the month that the subscription will be charged. This is an integer value.")
