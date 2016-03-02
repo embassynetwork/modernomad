@@ -2016,24 +2016,16 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 	if request.method == 'POST':
 		location = get_object_or_404(Location, slug=location_slug)
 		notify = request.POST.get('email_announce');
-		
 		try:
 			username = request.POST.get('username');
 			subscription_user = User.objects.get(username=username)
-
 		except:
 			messages.add_message(request, messages.INFO, "There is no user with the username %s" % username)
 			return HttpResponseRedirect(reverse('reservation_manage_create', args=(location.slug,)))
 
 		form = AdminCommunitySubscriptionForm(request.POST)
 		if form.is_valid():
-			#community_subscription = CommunitySubscription()
 			community_subscription = form.save(commit=False)
-			#community_subscription.start_date = request.POST.get("start_date")
-			#community_subscription.end_date = request.POST.get("end_date")
-			#community_subscription.price = request.POST.get("price")
-			#community_subscription.description = request.POST.get("description")
-			#community_subscription.recurring_charge_date = request.POST.get("recurring_charge_date")
 			community_subscription.location = location
 			community_subscription.user = subscription_user
 			community_subscription.created_by = request.user
