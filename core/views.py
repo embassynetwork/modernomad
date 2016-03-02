@@ -8,7 +8,7 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm
+from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm, AdminCommunitySubscriptionForm
 from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
@@ -2011,4 +2011,62 @@ def UserEdit(request, username):
 	return render(request, 'registration/registration_form.html', {'form': profile_form, 'has_image': has_image, 'existing_user': True})
 
 
+@house_admin_required
+def CommunitySubscriptionManageCreate(request, location_slug):
+	if request.method == 'POST':
+		location = get_object_or_404(Location, slug=location_slug)
 
+		notify = request.POST.get('email_announce');
+		
+		try:
+			username = request.POST.get('username');
+			subscription_user = User.objects.get(username=username)
+
+		except:
+			messages.add_message(request, messages.INFO, "There is no user with the username %s" % username)
+			return HttpResponseRedirect(reverse('reservation_manage_create', args=(location.slug,)))
+
+		form = AdminCommunitySubscriptionForm(request.POST)
+		if form.is_valid():
+			#community_subscription = CommunitySubscription()
+			community_subscription = form.save(commit=False)
+			#community_subscription.start_date = request.POST.get("start_date")
+			#community_subscription.end_date = request.POST.get("end_date")
+			#community_subscription.price = request.POST.get("price")
+			#community_subscription.description = request.POST.get("description")
+			#community_subscription.recurring_charge_date = request.POST.get("recurring_charge_date")
+			community_subscription.location = location
+			community_subscription.user = subscription_user
+			community_subscription.created_by = request.user
+			community_subscription.save()
+			if notify:
+				new_subscription_notify(community_subscription)
+			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (community_subscription.user.first_name, community_subscription.user.last_name))
+			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location.slug, community_subscription.id)))
+		else:
+			print 'the form had errors'
+			print form.errors
+			print request.POST
+			
+	else:
+		form = AdminCommunitySubscriptionForm()
+	all_users = User.objects.all().order_by('username')
+	return render(request, 'community_subscription_manage_create.html', {'form': form, 'all_users': all_users})
+
+
+@house_admin_required
+def SubscriptionsManageList(request, location_slug):
+	if request.method == "POST":
+		subscription_id = request.POST.get('subscription_id')
+		subscription = get_object_or_404(Subscription, id=subscription_id)
+		return HttpResponseRedirect(reverse('subscription_manage', args=(subscription.location.slug, subscription.id)))
+
+	location = get_object_or_404(Location, slug=location_slug)
+
+	active = CommunitySubscription.objects.active_subscriptions().filter(location=location).order_by('-start_date')
+	inactive = CommunitySubscription.objects.inactive_subscriptions().filter(location=location).order_by('-end_date')
+	return render(request, 'subscriptions_list.html', {"active": active, "inactive": inactive, 'location': location})
+
+@house_admin_required
+def CommunitySubscriptionManageDetail(request, location_slug, subscription_id):
+	pass

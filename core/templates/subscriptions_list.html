@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#active" data-toggle="tab">Active ({{active.count}})</a></li>
+	<li><a href="#inactive" data-toggle="tab">Inactive ({{inactive.count}})</a></li>
+</ul>
+
+<div class="tab-content" id="reservation-list-tab-content">
+	
+	<div class="tab-pane active" id="active">
+		{% with subscriptions=active %}
+			{% include "snippets/subscription_list_table.html" %}
+		{% endwith %}
+	</div>
+
+	<div class="tab-pane" id="inactive">
+		{% with subscriptions=inactive %}
+			{% include "snippets/subscription_list_table.html" %}
+		{% endwith %}
+	</div>
+
+</div>
+
+<div class="row row-spacer">
+	<div class="col-md-12">
+		<form method="POST">
+			<strong>Go To Reservation:</strong>
+			<input name="reservation_id" size="4" placeholder="ID"/>
+			<input type="submit" value="Go!"/>
+			{% csrf_token %}
+		</form>
+	</div>
+</div>
+
+
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
+<link href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css" rel="stylesheet">
+<script>
+
+jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+    "currency-pre": function ( a ) {
+        a = (a==="-") ? 0 : a.replace( /[^\d\-\.]/g, "" );
+        return parseFloat( a );
+    },
+ 
+    "currency-asc": function ( a, b ) {
+        return a - b;
+    },
+ 
+    "currency-desc": function ( a, b ) {
+        return b - a;
+    }
+} );
+
+$(document).ready(function() {
+	var hash = window.location.hash;
+	hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+	$('.nav-tabs a').click(function (e) {
+		$(this).tab('show');
+		var scrollmem = $('body').scrollTop();
+		window.location.hash = this.hash;
+		$('html,body').scrollTop(scrollmem);
+	});
+
+	$('.reservation-list').dataTable({
+	"iDisplayLength": 50,
+	"order": [[ 2, "asc"]],
+	"aoColumns": [
+                { "sType": "string" },
+                { "sType": "string" },
+                { "sType": "date" },
+                { "sType": "date" },
+                { "sType": "numeric" },
+                { "sType": "numeric" },
+                { "sType": "html" }
+            ]
+	});
+} );
+</script>
+{% endblock %}
