@@ -14,13 +14,24 @@
 		<link href="{% static 'css/custom.css' %}" rel="stylesheet">
 		<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
 		<link rel="stylesheet" href="{% static 'fonts/font-awesome-4.3.0/css/font-awesome.min.css' %}">
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,600,300,700' rel='stylesheet' type='text/css'>
 		<link rel="shortcut icon" href="/favicon.ico">
 
-		<!-- Le javascript -->
+		<!-- Asyncronous Font Loading -->
+		<script src="{% static 'js/webfont.js' %}"></script>
+		<script>
+			WebFont.load({
+				google: {
+					families: ['Open Sans:400italic,400,600,300,700']
+				}
+			});
+		</script>
+		
+		<!-- JQuery -->
 		<link rel="stylesheet" href="{% static 'css/flick/jquery-ui-1.9.1.custom.css' %}" />
 		<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
 		<script src="{% static 'js/jquery-ui-1.9.1.custom.js' %}"></script>
+		
+		<!-- Le javascript -->
 		<script src="{% static 'js/bootstrap.js' %}"></script>
 		<script src="{% static 'js/leaflet.js' %}"></script>
 	
