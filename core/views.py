@@ -2069,4 +2069,47 @@ def SubscriptionsManageList(request, location_slug):
 
 @house_admin_required
 def CommunitySubscriptionManageDetail(request, location_slug, subscription_id):
+	location = get_object_or_404(Location, slug=location_slug)
+	subscription = get_object_or_404(Subscription, id=subscription_id)
+	user = User.objects.get(username=reservation.user.username)
+	domain = Site.objects.get_current().domain
+	emails = EmailTemplate.objects.filter(Q(shared=True) | Q(creator=request.user))
+	email_forms = []
+	email_templates_by_name = []
+	for email_template in emails:
+		form = EmailTemplateForm(email_template, reservation, location)
+		email_forms.append(form)
+		email_templates_by_name.append(email_template.name)
+	
+	# Pull all the reservation notes for this person
+	if 'subscription_note' in request.POST:
+		note = request.POST['subscription_note']
+		if note:
+			SubscriptionNote.objects.create(subscription=subscription, created_by=request.user, note=note)
+			# The Right Thing is to do an HttpResponseRedirect after a form
+			# submission, which clears the POST request data (even though we
+			# are redirecting to the same view)
+			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location_slug, subscription_id)))
+	subscription_notes = SubscriptionNote.objects.filter(subscription=subscription)
+
+	# Pull all the user notes for this person
+	if 'user_note' in request.POST:
+		note = request.POST['user_note']
+		if note:
+			UserNote.objects.create(user=user, created_by=request.user, note=note)
+			# The Right Thing is to do an HttpResponseRedirect after a form submission
+			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location_slug, reservation_id)))
+	user_notes = UserNote.objects.filter(user=user)
+
+	return render(request, 'community_subscription_manage.html', {
+		"s": subscription, 
+		"user_notes": user_notes,
+		"subscription_notes": reservation_notes,
+		"email_forms" : email_forms,
+		"email_templates_by_name" : email_templates_by_name,
+		"domain": domain, 'location': location,
+	})
+
+@house_admin_required
+def CommunitySubscriptionManageEdit(request, location_slug, subscription_id):
 	pass

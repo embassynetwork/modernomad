@@ -20,6 +20,7 @@ urlpatterns = patterns('core.views',
 	url(r'reservation/(?P<reservation_id>\d+)/edit/$', 'ReservationManageEdit', name='reservation_manage_edit'), 
 	url(r'^subscriptions/community/create$', 'CommunitySubscriptionManageCreate', name='community_subscription_manage_create'),
 	url(r'^subscriptions/community/(?P<subscription_id>\d+)/$', 'CommunitySubscriptionManageDetail', name='community_subscription_manage_detail'),
+	url(r'^subscriptions/community/(?P<subscription_id>\d+)/edit/$', 'CommunitySubscriptionManageEdit', name='community_subscription_manage_edit'),
 	url(r'^subscriptions/$', 'SubscriptionsManageList', name='subscriptions_manage_list'),
 )
 
