@@ -484,7 +484,7 @@ class Subscription(models.Model):
 	description = models.CharField(max_length=256, blank=True, null=True)
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
-	bills = models.ManyToManyField(SubscriptionBill)
+	bills = models.ManyToManyField(SubscriptionBill, blank=True, null=True)
 
 	objects = SubscriptionManager()
 
