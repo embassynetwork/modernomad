@@ -1,3 +1,5 @@
+from dateutil.relativedelta import relativedelta
+
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.db import models
@@ -477,6 +479,44 @@ class Subscription(models.Model):
 		if not target_date:
 			target_date = timezone.now().date()
 		return self.start_date <= target_date and (self.end_date == None or self.end_date >= target_date)
+
+	def generate_bill(self, target_date=None):
+		if not target_date:
+			target_date = timezone.now().date()
+		
+		period_start = target_date
+		if target_date.day != self.start_date.day:
+			month = target_date.month
+			year = target_date.year
+			if target_date.day < self.start_date.day:
+				if target_date.day == 1:
+					month = 12
+					year = target_date.year - 1
+				else:
+					month = target_date.month - 1
+			period_start = date (year, month, self.start_date.day)
+		period_end =  period_start + relativedelta(months=1) - timedelta(days=1)
+		subscription_bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
+		
+		line_items = []
+		desc = "%s (%s to %s)" % (self.description, period_start, period_end)
+		line_item = BillLineItem(bill=subscription_bill, description=desc, amount=self.pric, paid_by_house=False)
+		line_items.append(line_item)
+
+		# For now we are going to assume that all fees (of any kind) that are marked as "paid by house"
+		# will be applied to subscriptions as well -- JLS
+		for location_fee in LocationFee.objects.filter(location = self.location, fee__paid_by_house=True):
+			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
+			amount = float(effective_room_charge) * location_fee.fee.percentage
+			fee_line_item = BillLineItem(bill=subscription_bill, description=desc, amount=amount, paid_by_house=True, fee=location_fee.fee)
+			line_items.append(fee_line_item)
+
+		# Save this beautiful bill
+		subscription_bill.save()
+		for item in line_items:
+			item.save()
+
+		return line_items
 
 	class Meta:
 		abstract = True
