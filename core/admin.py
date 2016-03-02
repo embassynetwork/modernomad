@@ -241,6 +241,10 @@ class LocationMenuAdmin(admin.ModelAdmin):
 class UserNoteAdmin(admin.ModelAdmin):
 	model = UserNote
 
+class CommunitySubscriptionAdmin(admin.ModelAdmin):
+	model = CommunitySubscription
+	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price')
+	list_filter = ('location', )
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
@@ -249,7 +253,7 @@ admin.site.register(Location, LocationAdmin)
 admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(RoomSubscription)
-admin.site.register(CommunitySubscription)
+admin.site.register(CommunitySubscription, CommunitySubscriptionAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)
