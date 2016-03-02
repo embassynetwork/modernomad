@@ -1,11 +1,11 @@
 <div class="panel panel-warning">
-		<div class="panel-heading" id="reservation-notes-link" onclick="toggleReservationNotes(); return false;">
+		<div class="panel-heading" id="reservation-notes-link" onclick="toggleSubscriptionNotes(); return false;">
 			<h4>
-				<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close reservation notes 
+				<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close {{obj_type}} notes 
 			</h4>
 		</div>
 	<div id="reservation-notes-area" class="panel-body">
-		{% for note in reservation_notes %}
+		{% for note in subscription_notes %}
 			<div class="user-field field">
 				<small>{{ note.created }} from {{note.created_by.first_name}}:</small> 
 				<p>{{ note.note }}</p>

@@ -1135,3 +1135,12 @@ class ReservationNote(models.Model):
 
 	def __str__(self): 
 		return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
+
+class CommunitySubscriptionNote(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	created_by = models.ForeignKey(User, null=True)
+	subscription = models.ForeignKey(CommunitySubscription, blank=False, null=False, related_name="communitysubscription_notes")
+	note = models.TextField(blank=True, null=True)
+
+	def __str__(self): 
+		return '%s - %d: %s' % (self.created.date(), self.community_subscription.id, self.note)
