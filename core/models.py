@@ -469,6 +469,10 @@ class SubscriptionManager(models.Manager):
 		future_ending = Q(end_date__gte=target_date)
 		return self.filter(current & (unending | future_ending)).distinct()
 
+	def to_be_billed(self):
+		today = timezone.now().date()
+		
+
 
 class Subscription(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
@@ -519,11 +523,14 @@ class Subscription(models.Model):
 			amount = float(self.price) * location_fee.fee.percentage
 			fee_line_item = BillLineItem(bill=subscription_bill, description=desc, amount=amount, paid_by_house=True, fee=location_fee.fee)
 			line_items.append(fee_line_item)
+			
 
 		# Save this beautiful bill
 		subscription_bill.save()
 		for item in line_items:
 			item.save()
+		self.bills.add(subscription_bill)
+		self.save()
 
 		return line_items
 
