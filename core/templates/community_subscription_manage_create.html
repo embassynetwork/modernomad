@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div id="spinner">
+    <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
+</div>	
+
+<div class="row" id="reservation-nav">
+	<a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
+</div>
+
+{% include 'snippets/messages.html' %}
+
+<div class="row">
+	<div class="col-md-7">
+		<h2 class="res-field field">Create a New Subscription </h2>
+	</div>
+</div>
+
+<!-- new row -->
+<hr>
+
+
+<div class="row" class="bottom-pad-thirty">
+
+	<div class="col-md-3">
+		<div class="img-polaroid">
+			<img id="avatar-placeholder" class="profile-page-img" src="{{ STATIC_URL }}img/default.jpg" />
+		</div>
+	</div>
+
+	<div class="col-md-7">	
+
+
+		<div id="reservation-details-form">
+			<form method="POST" role="form" class="form-horizontal" id="manage-reservation-form" action="{% url 'community_subscription_manage_create' location.slug %}">{% csrf_token %}
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">User</label> 
+					<div class="col-sm-7">
+						<input class="form-control" name="username" id="id_username" value="" required/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Start Date</label> 
+					<div class="col-sm-2">
+						<input class="form-control listening" id="id_start_date" name="start_date" value="" size="8" required/>
+					</div>
+					<label class="col-sm-2 control-label">End Date</label> 
+					<div class="col-sm-2">
+						<input class="form-control listening" id="id_end_date" name="end_date" value="" size="8" placeholder="optional"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Price</label> 
+					<div class="col-sm-2">
+						<div class="input-group">
+							<div class="input-group-addon">$</div>
+							<input type="text" class="form-control" id="id_price" name="price" value="" size="8" required>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Recurring Charge Date</label> 
+					<div class="col-sm-2">
+						<input class="form-control listening" id="id_recurring_charge_date" name="recurring_charge_date" value="1" size="8" required/>
+					</div>
+					<p class="col-sm-6 small">{{ form.recurring_charge_date.help_text }}</p>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-2 control-label">Description</label> 
+					<div class="col-sm-6">
+						<input class="form-control" id="id_description" name="description" value="" size="8" required/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-sm-6 col-md-offset-2">
+						<input type="checkbox" name="email_announce" id="email_announce" > Announce this subscription by email?
+					</div>
+				</div>
+
+				<input type="submit" value="Create Subscription" class="btn btn-default">
+			</form>
+
+		</div>
+
+
+	</div> <!-- end col-md-7 -->
+</div> 
+
+
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script>
+
+	get_avatar = function(event) {
+		console.log('username changed');
+		username = $("#id_username").val();
+		console.log(username);
+		if (username) {
+			request = $.ajax({ 
+				data: {
+					'csrfmiddlewaretoken': '{{ csrf_token }}'
+				}, 
+				type: "POST",
+				url: '/people/'+username+'/avatar/'
+			});
+		
+			request.done(function(url) { // on success..
+				console.log(url);
+				$("#avatar-placeholder").fadeOut(function() {
+					$(this).attr('src', url).fadeIn();
+				});
+			});
+
+			request.fail(function(msg) {
+				console.log("could not find avatar for username " + username);
+			});
+		}
+	};
+	
+
+	//$("#id_username").change(get_avatar);
+	$(function() {
+		var availableUsers = [
+			{% for user in all_users %}
+			"{{user.username}}",
+			{% endfor %}
+		];
+
+		$( "#id_username" ).autocomplete({
+			source: availableUsers,
+			change: get_avatar
+		});
+	});
+
+	$("#id_start_date, #id_end_date").datepicker({
+		onSelect: function( selectedDate ) {
+			if(this.id == 'id_start_date') {
+				startDate = $('#id_start_date').datepicker("getDate");
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+	          	$('#id_end_date').datepicker("option","minDate",rMin);
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	})
+	
+	// Check reservation dates and room for avilability, warn admin if overbooking room.
+	$(".listening").change(function(event) {
+		// Get start and end dates, update value. 
+		var start_date = $("#id_start_date").val();
+	 	var end_date = $("#id_end_date").val();
+
+		// once the dates are selected, poll for a list of available rooms
+		if (start_date && end_date) {
+
+			$.post("{% url 'rooms_available_on_dates' location.slug %}", {start_date: start_date, end_date: end_date}, function(data){
+				console.log(data);
+				room_select = $("#room_select");
+				room_select.children().remove();
+				room_select.append('<option value="">Select Room</option>');
+				$.each(data.rooms_availability, function(k, v) {
+					console.log(v);
+					avail = "";
+					if (v.available == false) {
+						console.log('room not available');
+						avail = ' (***Not Available)';
+					}
+					room_select.append('<option value="'+ v.id +'">' + k + avail + '</option>');
+				});
+	       	});	
+		} 
+
+		// wire up the ajax-y spinning animated GIF to show when an ajax call
+		// is made. 	
+		$('#spinner').ajaxStart(function () {
+			$(this).fadeIn('fast');
+		}).ajaxStop(function () {
+			$(this).stop().fadeOut('fast');
+		});	
+	
+	});
+
+	$("#room_select").change(function(event) {
+		e = event;
+		if (e.target.selectedOptions[0].text.indexOf("Not Available") > -1) {
+			$("#room_select").attr("style", "border-color: #cc0000");
+		} else {
+			$("#room_select").attr("style", "border-color: #ccc");
+		}
+	});
+
+	$("#manage-reservation-form").validate();
+
+
+</script>
+{% endblock %}
