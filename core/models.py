@@ -578,10 +578,6 @@ class Subscription(models.Model):
 
 		return line_items
 
-	def __unicode__(self):
-		if self.description:
-			return self.description
-		return ""
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
