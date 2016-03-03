@@ -57,6 +57,15 @@ class SubscriptionTestCase(TestCase):
 			start_date = today - timedelta(days=31),
 			end_date = today - timedelta(days=1)
 		)
+
+		# All last year
+		self.sub6 = Subscription.objects.create(
+			location = self.location, 
+			user = self.user1, 
+			price = 600.00, 
+			start_date = date(year=today.year-1, month=1, day=1),
+			end_date =  date(year=today.year-1, month=12, day=31)
+		)
 	
 	def test_get_period(self):
 		today = timezone.now().date()
@@ -66,18 +75,13 @@ class SubscriptionTestCase(TestCase):
 		self.assertEqual(ps.day, self.sub1.start_date.day)
 		
 		# Today is outside the date range for this subscription
-		raised_exception = None
-		try:
-			self.sub3.get_period(target_date=today)
-		except Exception as e:
-			raised_exception = e
-		if not raised_exception:
-			self.fail("Exception should have been raised!")
+		self.assertEquals(None, self.sub3.get_period(target_date=today))
 	
 	def test_total_periods(self):
 		self.assertEquals(0, self.sub1.total_periods())
 		self.assertEquals(0, self.sub3.total_periods())
 		self.assertEquals(1, self.sub5.total_periods())
+		#self.assertEquals(12, self.sub6.total_periods())
 	
 	def test_inactive_subscriptions(self):
 		inactive_subscriptions = Subscription.objects.inactive_subscriptions()
@@ -86,6 +90,7 @@ class SubscriptionTestCase(TestCase):
 		self.assertTrue(self.sub3 in inactive_subscriptions)
 		self.assertFalse(self.sub4 in inactive_subscriptions)
 		self.assertTrue(self.sub5 in inactive_subscriptions)
+		self.assertTrue(self.sub6 in inactive_subscriptions)
 	
 	def test_active_subscriptions(self):
 		active_subscriptions = Subscription.objects.active_subscriptions()
@@ -94,6 +99,7 @@ class SubscriptionTestCase(TestCase):
 		self.assertFalse(self.sub3 in active_subscriptions)
 		self.assertTrue(self.sub4 in active_subscriptions)
 		self.assertFalse(self.sub5 in active_subscriptions)
+		self.assertFalse(self.sub6 in active_subscriptions)
 	
 	def test_is_active(self):
 		self.assertTrue(self.sub1.is_active())
@@ -117,12 +123,7 @@ class SubscriptionTestCase(TestCase):
 		self.assertEquals(ps, bill.period_start)
 		self.assertEquals(pe, bill.period_end)
 	
-	def test_generate_next_bill(self):
-		# Since this bill is in the future, generating a bill shouldn't produce anything
-		self.assertEquals(0, self.sub3.bills.count())
-		self.sub3.generate_bill()
-		self.assertEquals(0, self.sub3.bills.count())
-		
-		# Explicitly generate the future bill by calling generate_next_bill
-		self.sub3.generate_next_bill()
-		self.assertEquals(1, self.sub3.bills.count())
+	def test_generate_all_bills(self):
+		self.assertEquals(0, self.sub6.bills.count())
+		self.sub6.generate_all_bills()
+		self.assertEquals(12, self.sub6.bills.count())
