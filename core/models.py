@@ -469,8 +469,13 @@ class SubscriptionManager(models.Manager):
 		future_ending = Q(end_date__gte=target_date)
 		return self.filter(current & (unending | future_ending)).distinct()
 
-	def to_be_billed(self):
-		today = timezone.now().date()
+	def to_be_billed(self, date_window=90):
+		subscriptions = []
+		starting_point = timezone.now() - timedelta(days=date_window)
+		for s in self.filter(updated__gte = starting_point):
+			if s.total_periods() < self.bills.count():
+				subscriptions.append(s)
+		return subscriptions
 		
 
 
@@ -488,8 +493,14 @@ class Subscription(models.Model):
 
 	objects = SubscriptionManager()
 
-	def total_periods(self):
-		rd = relativedelta(timezone.now().date(), self.start_date)
+	def total_periods(self, target_date=None):
+		if not target_date:
+			target_date = timezone.now().date()
+		
+		if self.start_date > target_date:
+			return 0
+			
+		rd = relativedelta(target_date, self.start_date)
 		return rd.months + (12 * rd.years)
 		
 	def is_active(self, target_date=None):
