@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.models import User
@@ -522,7 +522,7 @@ class Subscription(models.Model):
 					year = target_date.year - 1
 				else:
 					month = target_date.month - 1
-			period_start = date (year, month, self.start_date.day)
+			period_start = date(year, month, self.start_date.day)
 		period_end =  period_start + relativedelta(months=1) - timedelta(days=1)
 		subscription_bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
 		
