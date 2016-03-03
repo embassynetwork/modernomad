@@ -59,6 +59,10 @@ class SubscriptionTestCase(TestCase):
 		)
 
 
+	def test_total_periods(self):
+		self.assertEquals(0, self.sub1.total_periods())
+		self.assertEquals(1, self.sub5.total_periods())
+
 	def test_inactive_subscriptions(self):
 		inactive_subscriptions = CommunitySubscription.objects.inactive_subscriptions()
 		self.assertFalse(self.sub1 in inactive_subscriptions)
@@ -66,6 +70,7 @@ class SubscriptionTestCase(TestCase):
 		self.assertTrue(self.sub3 in inactive_subscriptions)
 		self.assertFalse(self.sub4 in inactive_subscriptions)
 		self.assertTrue(self.sub5 in inactive_subscriptions)
+
 
 	def test_active_subscriptions(self):
 		active_subscriptions = CommunitySubscription.objects.active_subscriptions()

@@ -488,6 +488,10 @@ class Subscription(models.Model):
 
 	objects = SubscriptionManager()
 
+	def total_periods(self):
+		rd = relativedelta(timezone.now().date(), self.start_date)
+		return rd.months + (12 * rd.years)
+		
 	def is_active(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
