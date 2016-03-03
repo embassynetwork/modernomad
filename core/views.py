@@ -32,7 +32,7 @@ import time
 import json, datetime, stripe 
 from django.http import JsonResponse
 from reservation_calendar import GuestCalendar
-from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address
+from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
@@ -2031,7 +2031,7 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 			community_subscription.created_by = request.user
 			community_subscription.save()
 			if notify:
-				new_subscription_notify(community_subscription)
+				admin_new_subscription_notify(community_subscription)
 			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (community_subscription.user.first_name, community_subscription.user.last_name))
 			return HttpResponseRedirect(reverse('community_subscription_manage_detail', args=(location.slug, community_subscription.id)))
 		else:
@@ -2047,13 +2047,7 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 
 @house_admin_required
 def SubscriptionsManageList(request, location_slug):
-	if request.method == "POST":
-		subscription_id = request.POST.get('subscription_id')
-		subscription = get_object_or_404(Subscription, id=subscription_id)
-		return HttpResponseRedirect(reverse('subscription_manage', args=(subscription.location.slug, subscription.id)))
-
 	location = get_object_or_404(Location, slug=location_slug)
-
 	active = CommunitySubscription.objects.active_subscriptions().filter(location=location).order_by('-start_date')
 	inactive = CommunitySubscription.objects.inactive_subscriptions().filter(location=location).order_by('-end_date')
 	return render(request, 'subscriptions_list.html', {"active": active, "inactive": inactive, 'location': location})

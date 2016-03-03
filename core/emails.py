@@ -177,6 +177,27 @@ def new_reservation_notify(reservation):
 
 	return send_from_location_address(subject, text_content, html_content, recipients, reservation.location)
 
+def admin_new_subscription_notify(subscription):
+	domain = Site.objects.get_current().domain
+	admin_path = urlresolvers.reverse('community_subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
+	text_content = '''Howdy,\n\nA new subscription for %s %s has been added for %d/mo starting %s.\n\nManage this subscription at %s%s.''' % (
+			subscription.user.first_name , subscription.user.last_name, subscription.price, str(subscription.start_date), domain, admin_path
+		)
+	recipients = []
+	for admin in subscription.location.house_admins.all():
+		if not admin.email in recipients:
+			recipients.append(admin.email)
+	subject = "[%s] Subscription Added for %s %s" % (subscription.location.email_subject_prefix, subscription.user.first_name, 
+		subscription.user.last_name)
+	mailgun_data={"from": subscription.location.from_email(),
+		"to": recipients,
+		"subject": subject,
+		"text": text_content,
+	}
+	return mailgun_send(mailgun_data)
+
+
+
 def updated_reservation_notify(reservation):
 	domain = Site.objects.get_current().domain
 	admin_path = urlresolvers.reverse('reservation_manage', args=(reservation.location.slug, reservation.id,))
