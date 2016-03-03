@@ -1,7 +1,7 @@
 <div id="reservation-details-form">
 	<h3>Edit Reservation Details</h3>
 	<div class="form-help-text" style="margin-bottom: 12px;">
-		Be very careful when you edit these details!
+		Be very careful when you edit these details! 
 	</div>
 
 	<form method="POST" role="form" class="form-horizontal" action="{% url 'subscription_manage_edit' location.slug s.id %}">{% csrf_token %}
@@ -39,8 +39,8 @@
 		</div>
 	</form>
 
-	<a href="{% url 'subscription_manage_next_bill' location.id s.id %}" class="btn-default btn">Generate Next Bill</a>
-	<a href="{% url 'subscription_manage_all_bills' location.id s.id %}" class="btn-default btn">Generate All Bills</a>
+	<a href="{% url 'subscription_manage_next_bill' location.slug s.id %}" class="btn-default btn">Generate Next Bill</a>
+	<a href="{% url 'subscription_manage_all_bills' location.slug s.id %}" class="btn-default btn">Generate All Bills</a>
 
 </div>
 
