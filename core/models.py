@@ -532,8 +532,11 @@ class Subscription(models.Model):
 		
 		if self.start_date > target_date:
 			return 0
-			
-		rd = relativedelta(target_date, self.start_date)
+		if self.end_date and self.end_date < target_date:
+			target_date = self.end_date
+		
+		rd = relativedelta(target_date + timedelta(days=1), self.start_date)
+		print "%s - %s = %s" % (target_date, self.start_date, rd)
 		return rd.months + (12 * rd.years)
 		
 	def is_active(self, target_date=None):
