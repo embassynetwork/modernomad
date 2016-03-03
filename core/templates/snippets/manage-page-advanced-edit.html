@@ -24,7 +24,7 @@
 		</div>
 	</form>
 	
-	<form method="POST" role="form" class="form-horizontal" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" role="form" class="form-horizontal" action="{% url 'add_bill_item' location.slug r.bill.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label"> Discount </label> 
 			<div class="col-sm-2">
@@ -44,7 +44,7 @@
 		</div>
 	</form>
 
-	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_add_bill_item' location.slug r.id %}">{% csrf_token %}
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'add_bill_item' location.slug r.bill.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 control-label"> Additional Fee </label> 
 			<div class="col-sm-2">
