@@ -19,7 +19,7 @@ class SubscriptionTestCase(TestCase):
 		self.sub1 = CommunitySubscription.objects.create(
 			location = self.location, 
 			user = self.user1, 
-			price = "1", 
+			price = 100.00, 
 			start_date = today
 		)
 
@@ -27,7 +27,7 @@ class SubscriptionTestCase(TestCase):
 		self.sub2 = CommunitySubscription.objects.create(
 			location = self.location, 
 			user = self.user1, 
-			price = "1", 
+			price = 200.00, 
 			start_date = today,
 			end_date = today + timedelta(days=30)
 		)
@@ -36,7 +36,7 @@ class SubscriptionTestCase(TestCase):
 		self.sub3 = CommunitySubscription.objects.create(
 			location = self.location, 
 			user = self.user1, 
-			price = "1", 
+			price = 300.00, 
 			start_date = today + timedelta(days=30)
 		)
 
@@ -44,7 +44,7 @@ class SubscriptionTestCase(TestCase):
 		self.sub4 = CommunitySubscription.objects.create(
 			location = self.location, 
 			user = self.user1, 
-			price = "1", 
+			price = 400.00, 
 			start_date = today - timedelta(days=30),
 			end_date = today
 		)
@@ -53,10 +53,27 @@ class SubscriptionTestCase(TestCase):
 		self.sub5 = CommunitySubscription.objects.create(
 			location = self.location, 
 			user = self.user1, 
-			price = "1", 
+			price = 500.00, 
 			start_date = today - timedelta(days=31),
 			end_date = today - timedelta(days=1)
 		)
+
+
+	def test_get_period(self):
+		today = timezone.now().date()
+		
+		ps, pe = self.sub1.get_period(target_date=today)
+		# The period start day should be the same day as our start date
+		self.assertEqual(ps.day, self.sub1.start_date.day)
+		
+		# Today is outside the date range for this subscription
+		raised_exception = None
+		try:
+			self.sub3.get_period(target_date=today)
+		except Exception as e:
+			raised_exception = e
+		if not raised_exception:
+			self.fail("Exception should have been raised!")
 
 
 	def test_total_periods(self):
@@ -92,5 +109,15 @@ class SubscriptionTestCase(TestCase):
 	
 
 	def test_generate_bill(self):
-		self.sub1.generate_bill()
-		self.assertTrue(self.sub1.bills != None)
+		today = timezone.now().date()
+		
+		self.assertEquals(0, self.sub1.bills.count())
+		self.sub1.generate_bill(target_date=today)
+		self.assertEquals(1, self.sub1.bills.count())
+
+		bill = self.sub1.bills.first()
+		self.assertEquals(self.sub1.price, bill.amount())
+
+		ps, pe = self.sub1.get_period(target_date=today)
+		self.assertEquals(ps, bill.period_start)
+		self.assertEquals(pe, bill.period_end)
