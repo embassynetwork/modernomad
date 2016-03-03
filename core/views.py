@@ -1650,7 +1650,7 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 		reservation.generate_bill()
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 	elif bill.is_subscription_bill():
-
+		pass
 	else:
 		raise Exception('Unrecognized bill object')
 

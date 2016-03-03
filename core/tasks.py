@@ -1,6 +1,6 @@
 from celery.task.schedules import crontab
 from celery.task import periodic_task
-from core.models import Reservation, Location, CommunitySubscription
+from core.models import Reservation, Location, Subscription
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from modernomad.backup import BackupManager
 import datetime
@@ -54,7 +54,7 @@ def make_backup():
 def generate_subscription_bills():
 	# TODO
 	pass
-	#CommunitySubscription.objects.active_subscriptions():
+	#Subscription.objects.active_subscriptions():
 
 
 
