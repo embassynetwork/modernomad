@@ -488,7 +488,6 @@ class Subscription(models.Model):
 	description = models.CharField(max_length=256, blank=True, null=True)
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
-	#bills = models.ManyToManyField(SubscriptionBill, blank=True, null=True)
 
 	objects = SubscriptionManager()
 
@@ -578,6 +577,8 @@ class Subscription(models.Model):
 
 		return line_items
 
+	def generate_all_bills(self):
+		pass
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
