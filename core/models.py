@@ -614,6 +614,8 @@ class SubscriptionBill(Bill):
 	period_start = models.DateField()
 	period_end = models.DateField()
 	subscription = models.ForeignKey(Subscription, related_name="bills", null=True)
+	class Meta:
+		ordering = ["-period_start"]
 
 
 # TBD

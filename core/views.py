@@ -2148,5 +2148,5 @@ def SubscriptionManageGenerateAllBills(request, location_slug, subscription_id):
 	subscription = get_object_or_404(Subscription, pk=subscription_id)
 	subscription.generate_all_bills()
 	messages.add_message(request, messages.INFO, "The bills were generated.")
-	return render(request, 'subscription_manage.html', {})
+	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription.id)))
 
