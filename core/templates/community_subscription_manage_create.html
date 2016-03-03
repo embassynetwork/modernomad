@@ -34,8 +34,8 @@
 	<div class="col-md-7">	
 
 
-		<div id="reservation-details-form">
-			<form method="POST" role="form" class="form-horizontal" id="manage-reservation-form" action="{% url 'community_subscription_manage_create' location.slug %}">{% csrf_token %}
+		<div id="subscription-details-form">
+			<form method="POST" role="form" class="form-horizontal" id="manage-subscription-form" action="{% url 'community_subscription_manage_create' location.slug %}">{% csrf_token %}
 
 				<div class="form-group">
 					<label class="col-sm-2 control-label">User</label> 
@@ -60,7 +60,7 @@
 					<div class="col-sm-2">
 						<div class="input-group">
 							<div class="input-group-addon">$</div>
-							<input type="text" class="form-control" id="id_price" name="price" value="" size="8" required>
+							<input type="text" class="form-control" id="id_price" name="price" value="" required>
 						</div>
 					</div>
 				</div>
@@ -120,15 +120,14 @@
 		}
 	};
 	
+	var availableUsers = [
+		{% for user in all_users %}
+		"{{user.username}}",
+		{% endfor %}
+	];
 
-	//$("#id_username").change(get_avatar);
+
 	$(function() {
-		var availableUsers = [
-			{% for user in all_users %}
-			"{{user.username}}",
-			{% endfor %}
-		];
-
 		$( "#id_username" ).autocomplete({
 			source: availableUsers,
 			change: get_avatar
@@ -184,16 +183,29 @@
 	
 	});
 
-	$("#room_select").change(function(event) {
-		e = event;
-		if (e.target.selectedOptions[0].text.indexOf("Not Available") > -1) {
-			$("#room_select").attr("style", "border-color: #cc0000");
-		} else {
-			$("#room_select").attr("style", "border-color: #ccc");
+	$.validator.addMethod('positiveNumber',
+    function (value) { 
+        return Number(value) > 0;
+    }, 'Enter a positive number.');
+	
+	$.validator.addMethod('usernameExists',
+    function (value) { 
+        return availableUsers.indexOf(value) >= 0;
+    }, 'That username does not exist.');
+	
+	$("#manage-subscription-form").validate({
+		rules: {
+			username: {
+				required: true,
+				usernameExists: true
+			},
+			price: {
+				required: true,
+				number: true,
+				positiveNumber: true
+			}
 		}
 	});
-
-	$("#manage-reservation-form").validate();
 
 
 </script>

@@ -3,6 +3,14 @@
 
 {% block content %}
 
+<div class="row pull-right">
+	<div class="col-md-12">
+		<a href="{% url 'community_subscription_manage_create' location.slug %}">
+			<i class="fa fa-plus-circle"></i>
+			New Subscription</a>
+	</div>
+</div>
+
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#active" data-toggle="tab">Active ({{active.count}})</a></li>
 	<li><a href="#inactive" data-toggle="tab">Inactive ({{inactive.count}})</a></li>

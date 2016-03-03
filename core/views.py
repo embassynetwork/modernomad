@@ -2033,7 +2033,7 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 			if notify:
 				new_subscription_notify(community_subscription)
 			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (community_subscription.user.first_name, community_subscription.user.last_name))
-			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location.slug, community_subscription.id)))
+			return HttpResponseRedirect(reverse('community_subscription_manage_detail', args=(location.slug, community_subscription.id)))
 		else:
 			print 'the form had errors'
 			print form.errors

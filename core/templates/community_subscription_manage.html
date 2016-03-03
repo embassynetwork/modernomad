@@ -30,6 +30,8 @@
 
 	<div class="col-md-7">
 
+		{% include "snippets/messages.html" %}
+
 		<h1 class="res-field field">
 			{{ r.user.first_name|title }} {{r.user.last_name|title }}
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
