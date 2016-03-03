@@ -67,7 +67,8 @@
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			<li><h3>Details</h3></li>
-			<li class="active"><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+			<li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h4>Summary</h4></a></li>
+			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
 			<li><h3>Bills</h3></li>
 			{% for bill in s.bills.all %}
 				<li><a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h4>Bill {{ bill.period_start}}</h4></a></li>
@@ -79,14 +80,22 @@
 
 		<div class="tab-content">
 
-			<div role="tabpanel" class="tab-pane active" id="subscription-manage-bills">
-				{% comment %} {% include "snippets/manage-comm-subscription-advanced-edit.html" %} {% endcomment %}
+			<div role="tabpanel" class="tab-pane active" id="subscription-manage-summary">
+				{% include "snippets/manage-subscription-summary.html" %}
+			</div>
+
+			<div role="tabpanel" class="tab-pane" id="subscription-manage-edit">
+				coming soon
+				{% include "snippets/subscription-manage-edit.html" %}
 			</div>
 
 			{% for bill in s.bills.all %}
 			<div role="tabpanel" class="tab-pane" id="subscription-bill-details-{{ bill.id}}">
+				<h3>{{ bill.period_start }} Bill Details</h3>
 				{% with r=s %}
 					{% include "snippets/manage-page-bill-details.html" %}
+					<h4>Customize this bill</h4>
+					{% include "snippets/add-bill-line-items.html" %}
 				{% endwith %}
 			</div>
 			{% endfor %}

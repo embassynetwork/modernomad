@@ -1605,13 +1605,12 @@ def RecalculateBill(request, location_slug, bill_id):
 		else:
 			reservation.generate_bill()
 		messages.add_message(request, messages.INFO, "The bill has been recalculated.")
-		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
 	elif bill.is_subscription_bill():
-
-		subscription = bill.subscriptionbill.communitysubscription
+		subscription = bill.subscriptionbill.subscription
 		subscription.generate_bill()
 		messages.add_message(request, messages.INFO, "The bill has been recalculated.")
-		return HttpResponseRedirect(reverse('subscription_manage', args=(location.slug, subscription_id)))
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
 		raise Exception('Unrecognized bill object')
 
@@ -1637,9 +1636,10 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
+	bill = get_object_or_404(Bill, pk=bill_id)
 
 	if bill.is_reservation_bill():
-		reservation = Reservation.objects.get(pk=reservation_id)
+		reservation = bill.reservationbill.reservation
 		print "in delete bill line item"
 		print request.POST
 		item_id = int(request.POST.get("payment_id"))
@@ -1648,21 +1648,32 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 		if line_item.fee:
 			reservation.suppress_fee(line_item)
 		reservation.generate_bill()
-		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
 	elif bill.is_subscription_bill():
-		pass
+		subscription = bill.subscriptionbill.subscription
+		print "in delete bill line item"
+		print request.POST
+		item_id = int(request.POST.get("payment_id"))
+		line_item = BillLineItem.objects.get(id=item_id)
+		line_item.delete()
+		# subscriptions don't support external fees yet but if we add this,
+		# then we should include the ability to suppress a fee. until then this won't work. 
+		#if line_item.fee:
+		#	subscription.suppress_fee(line_item)
+		subscription.generate_bill()
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
 		raise Exception('Unrecognized bill object')
 
 
 @house_admin_required
-def ReservationAddBillLineItem(request, location_slug, reservation_id):
+def AddBillLineItem(request, location_slug, bill_id):
 	# can be used to apply a discount or a one time charge for, for example, a
 	# cleaning fee.
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
-	reservation = Reservation.objects.get(pk=reservation_id)
+	bill = get_object_or_404(Bill, pk=bill_id)
 
 	reason = request.POST.get("reason")
 	calculation_type = request.POST.get("calculation_type")
@@ -1676,7 +1687,7 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 			if percent < 0.0 or percent > 100.0:
 				messages.add_message(request, messages.INFO, "Invalid percent value given.")
 				return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
-			amount = -(reservation.bill.subtotal_amount() * percent)
+			amount = -(bill.subtotal_amount() * percent)
 		else:
 			messages.add_message(request, messages.INFO, "Invalid discount type.")
 			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
@@ -1691,17 +1702,25 @@ def ReservationAddBillLineItem(request, location_slug, reservation_id):
 			if percent < 0.0 or percent > 100.0:
 				messages.add_message(request, messages.INFO, "Invalid percent value given.")
 				return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
-			amount = (reservation.bill.subtotal_amount() * percent)
+			amount = (bill.subtotal_amount() * percent)
 		else:
 			messages.add_message(request, messages.INFO, "Invalid fee type.")
 			return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 	new_line_item = BillLineItem(description=reason, amount=amount, paid_by_house=False, custom=True)
-	new_line_item.bill = reservation.bill
+	new_line_item.bill = bill
 	new_line_item.save()
 	# regenerate the bill now that we've applied some new fees
-	reservation.generate_bill()
-	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+	if bill.is_reservation_bill():
+		reservation = bill.reservationbill.reservation
+		reservation.generate_bill()
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
+	elif bill.is_subscription_bill():
+		subscription = bill.subscriptionbill.subscription
+		subscription.generate_bill()
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
+	else:
+		raise Exception('Unrecognized bill object')
 
 @house_admin_required
 def ReservationSendMail(request, location_slug, reservation_id):
@@ -2047,6 +2066,7 @@ def SubscriptionManageCreate(request, location_slug):
 			subscription.user = subscription_user
 			subscription.created_by = request.user
 			subscription.save()
+			subscription.generate_all_bills()
 			if notify:
 				admin_new_subscription_notify(subscription)
 			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (subscription.user.first_name, subscription.user.last_name))
@@ -2091,7 +2111,7 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 			# The Right Thing is to do an HttpResponseRedirect after a form
 			# submission, which clears the POST request data (even though we
 			# are redirecting to the same view)
-			return HttpResponseRedirect(reverse('subscription_manage', args=(location_slug, subscription_id)))
+			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 	subscription_notes = SubscriptionNote.objects.filter(subscription=subscription)
 
 	# Pull all the user notes for this person
@@ -2100,7 +2120,7 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 		if note:
 			UserNote.objects.create(user=user, created_by=request.user, note=note)
 			# The Right Thing is to do an HttpResponseRedirect after a form submission
-			return HttpResponseRedirect(reverse('subscription_manage', args=(location_slug, reservation_id)))
+			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, reservation_id)))
 	user_notes = UserNote.objects.filter(user=user)
 
 	return render(request, 'subscription_manage.html', {
@@ -2115,3 +2135,18 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 @house_admin_required
 def SubscriptionManageEdit(request, location_slug, subscription_id):
 	pass
+
+@house_admin_required
+def SubscriptionManageGenerateNextBill(request, location_slug, subscription_id):
+	subscription = get_object_or_404(Subscription, pk=subscription_id)
+	subscription.generate_next_bill()
+	messages.add_message(request, messages.INFO, "The bill was generated.")
+	return render(request, 'subscription_manage.html', {})
+
+@house_admin_required
+def SubscriptionManageGenerateAllBills(request, location_slug, subscription_id):
+	subscription = get_object_or_404(Subscription, pk=subscription_id)
+	subscription.generate_all_bills()
+	messages.add_message(request, messages.INFO, "The bills were generated.")
+	return render(request, 'subscription_manage.html', {})
+

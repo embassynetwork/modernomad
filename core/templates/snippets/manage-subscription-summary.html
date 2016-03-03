@@ -1,0 +1,32 @@
+<table class="dataTable table table-striped reservation-list">
+	<thead>
+		<tr>
+			<th>Period Start</th>
+			<th>Period End</th>
+			<th>Rate</th>
+			<th>Paid</th>
+		</tr>
+	</thead>
+	<tbody>
+			{% for bill in s.bills.all %}
+				<tr class="{% cycle 'row-even' 'row-odd' %}">
+					<td>
+						{{bill.period_start }}
+					</td>
+					<td>
+						{{bill.period_end }}
+					</td>
+					<td>{{bill.amount }}</td>
+					<td>
+						{% if bill.is_paid %}
+							<span class="text-success glyphicon glyphicon-ok"></span>
+						{% else %}
+							<span class="text-danger glyphicon glyphicon-exclamation-sign"></span>
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+	</tbody>
+</table>
+
+
