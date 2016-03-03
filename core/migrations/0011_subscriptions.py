@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 from django.conf import settings
 
 
@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0014_auto_20160302_1513'),
+        ('core', '0010_auto_20151015_2140'),
     ]
 
     operations = [
@@ -44,23 +44,11 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='communitysubscription',
-            name='created_by',
-        ),
-        migrations.RemoveField(
-            model_name='communitysubscription',
             name='location',
         ),
         migrations.RemoveField(
             model_name='communitysubscription',
             name='user',
-        ),
-        migrations.RemoveField(
-            model_name='communitysubscriptionnote',
-            name='created_by',
-        ),
-        migrations.RemoveField(
-            model_name='communitysubscriptionnote',
-            name='subscription',
         ),
         migrations.RemoveField(
             model_name='roomsubscription',
@@ -68,21 +56,19 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name='roomsubscription',
-            name='created_by',
-        ),
-        migrations.RemoveField(
-            model_name='roomsubscription',
             name='location',
         ),
         migrations.RemoveField(
             model_name='roomsubscription',
             name='user',
         ),
-        migrations.DeleteModel(
-            name='CommunitySubscription',
+        migrations.AlterField(
+            model_name='room',
+            name='description',
+            field=models.TextField(null=True, blank=True),
         ),
         migrations.DeleteModel(
-            name='CommunitySubscriptionNote',
+            name='CommunitySubscription',
         ),
         migrations.DeleteModel(
             name='RoomSubscription',
