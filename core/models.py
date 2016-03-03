@@ -512,6 +512,15 @@ class Subscription(models.Model):
 		period_end =  period_start + relativedelta(months=1) - timedelta(days=1)
 		
 		return (period_start, period_end)
+	
+	def get_next_period_start(self, target_date=None):
+		if not target_date:
+			target_date = timezone.now().date()
+		this_period_start, this_period_end = get_period(target_date=target_date)
+		next_period_start = this_period_end + timedelta(days=1)
+		if self.end_date and next_period_start > self.end_date):
+			return None
+		return next_period_start
 		
 	def total_periods(self, target_date=None):
 		if not target_date:
@@ -576,9 +585,26 @@ class Subscription(models.Model):
 		self.save()
 
 		return line_items
+	
+	def generate_next_bill(self, target_date=None):
+		if not target_date:
+			target_date = timezone.now().date()
+		nps = get_next_period_start(target_date=target_date)
+		if period_start:
+			self.generate_bill(target_date=nps)
+	
+	def generate_all_bills(self, include_future=False):
+		period = self.start_date
+		today = timezone.now().date()
+		end = today
+		if self.end_date:
+			if self.end_date < today or include_future
+				end = self.end_date
+		
+		while period < end:
+			self.generate_bill(target_date=period)
+			period = self.get_next_period_start(period)
 
-	def generate_all_bills(self):
-		pass
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
