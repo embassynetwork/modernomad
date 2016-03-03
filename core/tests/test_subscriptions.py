@@ -105,6 +105,7 @@ class SubscriptionTestCase(TestCase):
 	def test_generate_bill(self):
 		today = timezone.now().date()
 		
+		# Assume that if we generate a bill we will have a bill
 		self.assertEquals(0, self.sub1.bills.count())
 		self.sub1.generate_bill(target_date=today)
 		self.assertEquals(1, self.sub1.bills.count())
@@ -115,3 +116,13 @@ class SubscriptionTestCase(TestCase):
 		ps, pe = self.sub1.get_period(target_date=today)
 		self.assertEquals(ps, bill.period_start)
 		self.assertEquals(pe, bill.period_end)
+	
+	def test_generate_next_bill(self):
+		# Since this bill is in the future, generating a bill shouldn't produce anything
+		self.assertEquals(0, self.sub3.bills.count())
+		self.sub3.generate_bill()
+		self.assertEquals(0, self.sub3.bills.count())
+		
+		# Explicitly generate the future bill by calling generate_next_bill
+		self.sub3.generate_next_bill()
+		self.assertEquals(1, self.sub3.bills.count())

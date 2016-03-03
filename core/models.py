@@ -491,12 +491,13 @@ class Subscription(models.Model):
 
 	objects = SubscriptionManager()
 
-	def get_period(self, target_date=None):
+	def get_period(self, target_date=None, include_future=False):
 		if not target_date:
 			target_date = timezone.now().date()
 		
 		if target_date < self.start_date or (self.end_date and target_date > self.end_date):
-			raise Exception("Target date (%s) outside subscription range")
+			if not include_future:
+				raise Exception("Target date (%s) outside subscription range")
 		
 		period_start = target_date
 		if target_date.day != self.start_date.day:
@@ -516,9 +517,9 @@ class Subscription(models.Model):
 	def get_next_period_start(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
-		this_period_start, this_period_end = get_period(target_date=target_date)
+		this_period_start, this_period_end = get_period(target_date=target_date, include_future=True)
 		next_period_start = this_period_end + timedelta(days=1)
-		if self.end_date and next_period_start > self.end_date):
+		if self.end_date and next_period_start > self.end_date:
 			return None
 		return next_period_start
 		
@@ -598,7 +599,7 @@ class Subscription(models.Model):
 		today = timezone.now().date()
 		end = today
 		if self.end_date:
-			if self.end_date < today or include_future
+			if self.end_date < today or include_future:
 				end = self.end_date
 		
 		while period < end:
