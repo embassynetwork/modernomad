@@ -491,13 +491,12 @@ class Subscription(models.Model):
 
 	objects = SubscriptionManager()
 
-	def get_period(self, target_date=None, include_future=False):
+	def get_period(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
 		
 		if target_date < self.start_date or (self.end_date and target_date > self.end_date):
-			if not include_future:
-				raise Exception("Target date (%s) outside subscription range")
+			return None
 		
 		period_start = target_date
 		if target_date.day != self.start_date.day:
@@ -517,10 +516,14 @@ class Subscription(models.Model):
 	def get_next_period_start(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
-		this_period_start, this_period_end = get_period(target_date=target_date, include_future=True)
+		this_period_start, this_period_end = self.get_period(target_date=target_date)
+		if not this_period_start:
+			return None
+		
 		next_period_start = this_period_end + timedelta(days=1)
 		if self.end_date and next_period_start > self.end_date:
 			return None
+		
 		return next_period_start
 		
 	def total_periods(self, target_date=None):
@@ -543,6 +546,10 @@ class Subscription(models.Model):
 			target_date = timezone.now().date()
 		
 		period_start, period_end = self.get_period(target_date)
+		if not period_start:
+			return None
+		
+		# Look to see if we have an existing bill for this period
 		try:
 			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
 
@@ -587,24 +594,17 @@ class Subscription(models.Model):
 
 		return line_items
 	
-	def generate_next_bill(self, target_date=None):
-		if not target_date:
-			target_date = timezone.now().date()
-		nps = get_next_period_start(target_date=target_date)
-		if period_start:
-			self.generate_bill(target_date=nps)
-	
-	def generate_all_bills(self, include_future=False):
-		period = self.start_date
+	def generate_all_bills(self):
 		today = timezone.now().date()
-		end = today
-		if self.end_date:
-			if self.end_date < today or include_future:
-				end = self.end_date
+		if self.end_date and self.end_date < today:
+			end_date = self.end_date
+		else:
+			end_date = today
 		
-		while period < end:
-			self.generate_bill(target_date=period)
-			period = self.get_next_period_start(period)
+		period_start = self.start_date
+		while period_start and period_start < end_date:
+			self.generate_bill(target_date=period_start)
+			period_start = self.get_next_period_start(period_start)
 
 
 class SubscriptionBill(Bill):

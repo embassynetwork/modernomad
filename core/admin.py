@@ -243,13 +243,24 @@ class SubscriptionAdmin(admin.ModelAdmin):
 		
 	def generate_bill(self, request, queryset):
 		for res in queryset:
-			res.generate_bill()
-		self.message_user(request, "bill generation triggered")
+			try:
+				res.generate_bill()
+				self.message_user(request, "bill generation complete")
+			except Exception as e:
+				self.message_user(request, e)
+
+	def generate_all_bills(self, request, queryset):
+		for res in queryset:
+			try:
+				res.generate_all_bills()
+				self.message_user(request, "bill generation complete")
+			except Exception as e:
+				self.message_user(request, e)
 	
 	model = Subscription
 	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price', bill_count)
 	list_filter = ('location', )
-	actions= ['generate_bill', ]
+	actions= ['generate_bill', 'generate_all_bills']
 	exclude = ('bills',)
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
