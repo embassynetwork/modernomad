@@ -537,8 +537,9 @@ class Subscription(models.Model):
 		try:
 			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
 
-			if bill and not delete_old_items:
-				# We already have a bill so let's go with these line items
+			# If we already have a bill and we don't want to clear out the old data
+			# we can stop right here and go with the existing line items.
+			if not delete_old_items:
 				return list(bill.line_items)
 		except:
 			bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
