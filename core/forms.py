@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable, Subscription, CommunitySubscription
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
@@ -404,9 +404,9 @@ class EmailTemplateForm(forms.Form):
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 
-class AdminCommunitySubscriptionForm(forms.ModelForm):
+class AdminSubscriptionForm(forms.ModelForm):
 	class Meta:
-		model = CommunitySubscription
+		model = Subscription
 		exclude = ['created', 'updated', 'created_by', 'location', 'bills', 'user']
 
 

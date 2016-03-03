@@ -237,7 +237,7 @@ class LocationMenuAdmin(admin.ModelAdmin):
 class UserNoteAdmin(admin.ModelAdmin):
 	model = UserNote
 
-class CommunitySubscriptionAdmin(admin.ModelAdmin):
+class SubscriptionAdmin(admin.ModelAdmin):
 	def bill_count(self):
 		return self.bills.count()
 		
@@ -246,7 +246,7 @@ class CommunitySubscriptionAdmin(admin.ModelAdmin):
 			res.generate_bill()
 		self.message_user(request, "bill generation triggered")
 	
-	model = CommunitySubscription
+	model = Subscription
 	list_display = ('description', 'user', 'location', 'start_date', 'end_date', 'price', bill_count)
 	list_filter = ('location', )
 	actions= ['generate_bill', ]
@@ -258,8 +258,7 @@ admin.site.register(Room, RoomAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)
-admin.site.register(RoomSubscription)
-admin.site.register(CommunitySubscription, CommunitySubscriptionAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)

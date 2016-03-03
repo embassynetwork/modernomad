@@ -444,14 +444,14 @@ class Bill(models.Model):
 		fees = self.line_items.filter(fee__isnull=False)
 		return list(room_item) + list(custom_items) + list(fees)
 
+	def is_reservation_bill(self):
+		return hasattr(self, 'reservationbill')
 
-class SubscriptionBill(Bill):
-	period_start = models.DateField()
-	period_end = models.DateField()
-
-
+	def is_subscription_bill(self):
+		return hasattr(self, 'subscriptionbill')
+			
 class SubscriptionManager(models.Manager):
-	
+		
 	def inactive_subscriptions(self, target_date=None):
 		''' inactive subscriptions all have an end date and those end dates are in the past.'''
 		if not target_date:
@@ -476,7 +476,6 @@ class SubscriptionManager(models.Manager):
 			if s.total_periods() < self.bills.count():
 				subscriptions.append(s)
 		return subscriptions
-		
 
 
 class Subscription(models.Model):
@@ -489,7 +488,7 @@ class Subscription(models.Model):
 	description = models.CharField(max_length=256, blank=True, null=True)
 	start_date = models.DateField()
 	end_date = models.DateField(blank=True, null=True)
-	bills = models.ManyToManyField(SubscriptionBill, blank=True, null=True)
+	#bills = models.ManyToManyField(SubscriptionBill, blank=True, null=True)
 
 	objects = SubscriptionManager()
 
@@ -554,16 +553,15 @@ class Subscription(models.Model):
 			return self.description
 		return ""
 
-	class Meta:
-		abstract = True
+class SubscriptionBill(Bill):
+	period_start = models.DateField()
+	period_end = models.DateField()
+	subscription = models.ForeignKey(Subscription, related_name="bills", null=True)
 
 
-class RoomSubscription(Subscription):
-	nights = models.IntegerField(help_text="How many nights does this subscription entitle the member to?")
-
-
-class CommunitySubscription(Subscription):
-	pass
+# TBD
+#class RoomSubscription(Subscription):
+#	nights = models.IntegerField(help_text="How many nights does this subscription entitle the member to?")
 
 
 class ReservationBill(Bill):
@@ -1159,10 +1157,10 @@ class ReservationNote(models.Model):
 	def __str__(self): 
 		return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
 
-class CommunitySubscriptionNote(models.Model):
+class SubscriptionNote(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	created_by = models.ForeignKey(User, null=True)
-	subscription = models.ForeignKey(CommunitySubscription, blank=False, null=False, related_name="communitysubscription_notes")
+	subscription = models.ForeignKey(Subscription, blank=False, null=False, related_name="communitysubscription_notes")
 	note = models.TextField(blank=True, null=True)
 
 	def __str__(self): 

@@ -33,7 +33,7 @@
 		{% include "snippets/messages.html" %}
 
 		<h1 class="res-field field">
-			{{ r.user.first_name|title }} {{r.user.last_name|title }}
+			{{ s.user.first_name|title }} {{s.user.last_name|title }}
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
@@ -44,7 +44,7 @@
 
 		<div id="reservation-details">
 			<h3>
-				{{ s.start_date }} - {{ s.end_date|default:"ongoing" }} 
+				Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }} 
 				<span class="pull-right">Value: ${{ s.price }}</span>
 			</h3>
 			{% if s.description %}
@@ -70,7 +70,7 @@
 			<li class="active"><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
 			<li><h3>Bills</h3></li>
 			{% for bill in s.bills.all %}
-				<li><a role="tab" href="#subscription-bill-details" data-toggle="pill"><h4>Bill {{ bill.period_start}}</h4></a></li>
+				<li><a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h4>Bill {{ bill.period_start}}</h4></a></li>
 			{% endfor %}
 		</ul>
 	</div>
@@ -84,8 +84,10 @@
 			</div>
 
 			{% for bill in s.bills.all %}
-			<div role="tabpanel" class="tab-pane" id="reservation-manage-edit-bill-{{ bill.id}}">
-				{% include "snippets/manage-page-bill-details.html" %}
+			<div role="tabpanel" class="tab-pane" id="subscription-bill-details-{{ bill.id}}">
+				{% with r=s %}
+					{% include "snippets/manage-page-bill-details.html" %}
+				{% endwith %}
 			</div>
 			{% endfor %}
 

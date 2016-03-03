@@ -8,7 +8,7 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm, AdminCommunitySubscriptionForm
+from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm, AdminSubscriptionForm
 from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
@@ -1590,18 +1590,30 @@ def ReservationSendReceipt(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required
-def ReservationRecalculateBill(request, location_slug, reservation_id):
+def RecalculateBill(request, location_slug, bill_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
-	reservation = Reservation.objects.get(id=reservation_id)
-	reset_suppressed = request.POST.get('reset_suppressed')
-	if reset_suppressed == "true":
-		reservation.generate_bill(reset_suppressed=True)
+	bill = get_object_or_404(Bill, id=bill_id)
+	
+	# what kind of bill is this?
+	if bill.is_reservation_bill():
+		reservation = bill.reservationbill.reservation
+		reset_suppressed = request.POST.get('reset_suppressed')
+		if reset_suppressed == "true":
+			reservation.generate_bill(reset_suppressed=True)
+		else:
+			reservation.generate_bill()
+		messages.add_message(request, messages.INFO, "The bill has been recalculated.")
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+	elif bill.is_subscription_bill():
+
+		subscription = bill.subscriptionbill.communitysubscription
+		subscription.generate_bill()
+		messages.add_message(request, messages.INFO, "The bill has been recalculated.")
+		return HttpResponseRedirect(reverse('community_subscription_manage', args=(location.slug, subscription_id)))
 	else:
-		reservation.generate_bill()
-	messages.add_message(request, messages.INFO, "The bill has been recalculated.")
-	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+		raise Exception('Unrecognized bill object')
 
 @house_admin_required
 def ReservationToggleComp(request, location_slug, reservation_id):
@@ -1621,21 +1633,26 @@ def ReservationToggleComp(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required
-def ReservationDeleteBillLineItem(request, location_slug, reservation_id):
+def DeleteBillLineItem(request, location_slug, bill_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
-	reservation = Reservation.objects.get(pk=reservation_id)
-	print "in delete bill line item"
-	print request.POST
-	item_id = int(request.POST.get("payment_id"))
-	line_item = BillLineItem.objects.get(id=item_id)
-	line_item.delete()
-	if line_item.fee:
-		reservation.suppress_fee(line_item)
-	reservation.generate_bill()
-	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
-	
+
+	if bill.is_reservation_bill():
+		reservation = Reservation.objects.get(pk=reservation_id)
+		print "in delete bill line item"
+		print request.POST
+		item_id = int(request.POST.get("payment_id"))
+		line_item = BillLineItem.objects.get(id=item_id)
+		line_item.delete()
+		if line_item.fee:
+			reservation.suppress_fee(line_item)
+		reservation.generate_bill()
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+	elif bill.is_subscription_bill():
+
+	else:
+		raise Exception('Unrecognized bill object')
 
 
 @house_admin_required
@@ -2012,7 +2029,7 @@ def UserEdit(request, username):
 
 
 @house_admin_required
-def CommunitySubscriptionManageCreate(request, location_slug):
+def SubscriptionManageCreate(request, location_slug):
 	if request.method == 'POST':
 		location = get_object_or_404(Location, slug=location_slug)
 		notify = request.POST.get('email_announce');
@@ -2023,7 +2040,7 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 			messages.add_message(request, messages.INFO, "There is no user with the username %s" % username)
 			return HttpResponseRedirect(reverse('reservation_manage_create', args=(location.slug,)))
 
-		form = AdminCommunitySubscriptionForm(request.POST)
+		form = AdminSubscriptionForm(request.POST)
 		if form.is_valid():
 			community_subscription = form.save(commit=False)
 			community_subscription.location = location
@@ -2040,7 +2057,7 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 			print request.POST
 			
 	else:
-		form = AdminCommunitySubscriptionForm()
+		form = AdminSubscriptionForm()
 	all_users = User.objects.all().order_by('username')
 	return render(request, 'community_subscription_manage_create.html', {'form': form, 'all_users': all_users})
 
@@ -2048,14 +2065,14 @@ def CommunitySubscriptionManageCreate(request, location_slug):
 @house_admin_required
 def SubscriptionsManageList(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
-	active = CommunitySubscription.objects.active_subscriptions().filter(location=location).order_by('-start_date')
-	inactive = CommunitySubscription.objects.inactive_subscriptions().filter(location=location).order_by('-end_date')
+	active = Subscription.objects.active_subscriptions().filter(location=location).order_by('-start_date')
+	inactive = Subscription.objects.inactive_subscriptions().filter(location=location).order_by('-end_date')
 	return render(request, 'subscriptions_list.html', {"active": active, "inactive": inactive, 'location': location})
 
 @house_admin_required
-def CommunitySubscriptionManageDetail(request, location_slug, subscription_id):
+def SubscriptionManageDetail(request, location_slug, subscription_id):
 	location = get_object_or_404(Location, slug=location_slug)
-	subscription = get_object_or_404(CommunitySubscription, id=subscription_id)
+	subscription = get_object_or_404(Subscription, id=subscription_id)
 	user = User.objects.get(username=subscription.user.username)
 	domain = Site.objects.get_current().domain
 	emails = EmailTemplate.objects.filter(Q(shared=True) | Q(creator=request.user))
@@ -2070,12 +2087,12 @@ def CommunitySubscriptionManageDetail(request, location_slug, subscription_id):
 	if 'subscription_note' in request.POST:
 		note = request.POST['subscription_note']
 		if note:
-			CommunitySubscriptionNote.objects.create(subscription=subscription, created_by=request.user, note=note)
+			SubscriptionNote.objects.create(subscription=subscription, created_by=request.user, note=note)
 			# The Right Thing is to do an HttpResponseRedirect after a form
 			# submission, which clears the POST request data (even though we
 			# are redirecting to the same view)
 			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location_slug, subscription_id)))
-	subscription_notes = CommunitySubscriptionNote.objects.filter(subscription=subscription)
+	subscription_notes = SubscriptionNote.objects.filter(subscription=subscription)
 
 	# Pull all the user notes for this person
 	if 'user_note' in request.POST:
@@ -2096,5 +2113,5 @@ def CommunitySubscriptionManageDetail(request, location_slug, subscription_id):
 	})
 
 @house_admin_required
-def CommunitySubscriptionManageEdit(request, location_slug, subscription_id):
+def SubscriptionManageEdit(request, location_slug, subscription_id):
 	pass
