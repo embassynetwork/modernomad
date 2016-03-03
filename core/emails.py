@@ -179,7 +179,7 @@ def new_reservation_notify(reservation):
 
 def admin_new_subscription_notify(subscription):
 	domain = Site.objects.get_current().domain
-	admin_path = urlresolvers.reverse('community_subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
+	admin_path = urlresolvers.reverse('subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
 	text_content = '''Howdy,\n\nA new subscription for %s %s has been added for %d/mo starting %s.\n\nManage this subscription at %s%s.''' % (
 			subscription.user.first_name , subscription.user.last_name, subscription.price, str(subscription.start_date), domain, admin_path
 		)

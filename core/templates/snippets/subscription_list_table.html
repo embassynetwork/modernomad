@@ -14,7 +14,7 @@
 			{% for s in subscriptions %}
 				<tr class="{% cycle 'row-even' 'row-odd' %}">
 					<td>
-						<a href="{% url 'community_subscription_manage_detail' location.slug s.id %}">Detail</a>
+						<a href="{% url 'subscription_manage_detail' location.slug s.id %}">Detail</a>
 					</td>
 					<td>
 						<a href="{% url 'user_detail' s.user.username %}">{{ s.user.get_full_name|truncatechars:16 }}</a> 

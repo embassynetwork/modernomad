@@ -35,7 +35,7 @@
 
 
 		<div id="subscription-details-form">
-			<form method="POST" role="form" class="form-horizontal" id="manage-subscription-form" action="{% url 'community_subscription_manage_create' location.slug %}">{% csrf_token %}
+			<form method="POST" role="form" class="form-horizontal" id="manage-subscription-form" action="{% url 'subscription_manage_create' location.slug %}">{% csrf_token %}
 
 				<div class="form-group">
 					<label class="col-sm-2 control-label">User</label> 

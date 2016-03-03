@@ -534,11 +534,13 @@ class Subscription(models.Model):
 			target_date = timezone.now().date()
 		
 		period_start, period_end = self.get_period(target_date)
-		bill = SubscriptionBill.objects.filter(period_start=period_start)
-		if bill and not delete_old_items:
-			# We already have a bill so let's go with these line items
-			return list(bill.line_items)
-		if not bill:
+		try:
+			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
+
+			if bill and not delete_old_items:
+				# We already have a bill so let's go with these line items
+				return list(bill.line_items)
+		except:
 			bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
 		
 		# Save any custom line items before clearing out the old items

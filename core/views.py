@@ -1611,7 +1611,7 @@ def RecalculateBill(request, location_slug, bill_id):
 		subscription = bill.subscriptionbill.communitysubscription
 		subscription.generate_bill()
 		messages.add_message(request, messages.INFO, "The bill has been recalculated.")
-		return HttpResponseRedirect(reverse('community_subscription_manage', args=(location.slug, subscription_id)))
+		return HttpResponseRedirect(reverse('subscription_manage', args=(location.slug, subscription_id)))
 	else:
 		raise Exception('Unrecognized bill object')
 
@@ -2042,15 +2042,15 @@ def SubscriptionManageCreate(request, location_slug):
 
 		form = AdminSubscriptionForm(request.POST)
 		if form.is_valid():
-			community_subscription = form.save(commit=False)
-			community_subscription.location = location
-			community_subscription.user = subscription_user
-			community_subscription.created_by = request.user
-			community_subscription.save()
+			subscription = form.save(commit=False)
+			subscription.location = location
+			subscription.user = subscription_user
+			subscription.created_by = request.user
+			subscription.save()
 			if notify:
-				admin_new_subscription_notify(community_subscription)
-			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (community_subscription.user.first_name, community_subscription.user.last_name))
-			return HttpResponseRedirect(reverse('community_subscription_manage_detail', args=(location.slug, community_subscription.id)))
+				admin_new_subscription_notify(subscription)
+			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (subscription.user.first_name, subscription.user.last_name))
+			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 		else:
 			print 'the form had errors'
 			print form.errors
@@ -2059,7 +2059,7 @@ def SubscriptionManageCreate(request, location_slug):
 	else:
 		form = AdminSubscriptionForm()
 	all_users = User.objects.all().order_by('username')
-	return render(request, 'community_subscription_manage_create.html', {'form': form, 'all_users': all_users})
+	return render(request, 'subscription_manage_create.html', {'form': form, 'all_users': all_users})
 
 
 @house_admin_required
@@ -2091,7 +2091,7 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 			# The Right Thing is to do an HttpResponseRedirect after a form
 			# submission, which clears the POST request data (even though we
 			# are redirecting to the same view)
-			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location_slug, subscription_id)))
+			return HttpResponseRedirect(reverse('subscription_manage', args=(location_slug, subscription_id)))
 	subscription_notes = SubscriptionNote.objects.filter(subscription=subscription)
 
 	# Pull all the user notes for this person
@@ -2100,10 +2100,10 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 		if note:
 			UserNote.objects.create(user=user, created_by=request.user, note=note)
 			# The Right Thing is to do an HttpResponseRedirect after a form submission
-			return HttpResponseRedirect(reverse('community_subscription_manage', args=(location_slug, reservation_id)))
+			return HttpResponseRedirect(reverse('subscription_manage', args=(location_slug, reservation_id)))
 	user_notes = UserNote.objects.filter(user=user)
 
-	return render(request, 'community_subscription_manage.html', {
+	return render(request, 'subscription_manage.html', {
 		"s": subscription, 
 		"user_notes": user_notes,
 		"subscription_notes": subscription_notes,
