@@ -633,7 +633,7 @@ class Subscription(models.Model):
 	
 	def generate_all_bills(self, target_date=None):
 		if not target_date:
-			target_date = self.start_date
+			target_date = self.paid_until(include_partial=True) + timedelta(days=1)
 			
 		today = timezone.now().date()
 		if self.end_date and self.end_date < today:
