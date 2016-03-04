@@ -100,8 +100,17 @@ class SubscriptionTestCase(TestCase):
 		self.period_boundery_test(date(2015, 1, 30), date(2015, 2, 28))
 		self.period_boundery_test(date(2015, 1, 31), date(2015, 2, 28))
 	
-	def test_is_period_boundery(self):
-		pass
+	def test_is_period_boundary(self):
+		s = Subscription(location=self.location, user=self.user1, start_date=date(2016,1,1), end_date=date(2016,5,31))
+		
+		self.assertFalse(s.is_period_boundary(target_date=date(2016, 2, 15)))
+		self.assertTrue(s.is_period_boundary(target_date=date(2016, 2, 29)))
+		self.assertFalse(s.is_period_boundary(target_date=date(2016, 3, 15)))
+		self.assertTrue(s.is_period_boundary(target_date=date(2016, 3, 31)))
+		
+		self.assertTrue(s.is_period_boundary())
+		s.end_date = date(6,1,1)
+		self.assertFalse(s.is_period_boundary())
 		
 	def test_get_period(self):
 		today = timezone.now().date()

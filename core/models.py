@@ -526,7 +526,7 @@ class Subscription(models.Model):
 		
 		return next_period_start
 	
-	def is_period_boundary(target_date=None):
+	def is_period_boundary(self, target_date=None):
 		if not target_date:
 			if not self.end_date:
 				return False
