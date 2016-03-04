@@ -672,12 +672,9 @@ class Subscription(models.Model):
 		return b.period_start
 	
 	def delete_unpaid_bills(self):
-		end_date = self.end_date or timezone.now().date()
-		period_start = self.paid_until()
-		while period_start and period_start < end_date:
-			bill = SubscriptionBill.objects.filter(period_start=period_start, subscription=self).first()
-			bill.delete()
-			period_start = self.get_next_period_start(period_start)
+		for bill in self.bills.all():
+			if not bill.is_paid():
+				bill.delete()
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
