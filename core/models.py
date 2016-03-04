@@ -525,6 +525,15 @@ class Subscription(models.Model):
 			return None
 		
 		return next_period_start
+	
+	def is_period_boundary(target_date=None):
+		if not target_date:
+			if not self.end_date:
+				return False
+			target_date = self.end_date
+		
+		period = self.get_period(target_date=target_date)
+		return period and period[1] == target_date
 		
 	def total_periods(self, target_date=None):
 		if not target_date:
@@ -618,22 +627,28 @@ class Subscription(models.Model):
 
 		return line_items
 	
-	def generate_all_bills(self):
+	def generate_all_bills(self, target_date=None):
+		if not target_date:
+			target_date = self.start_date
+			
 		today = timezone.now().date()
 		if self.end_date and self.end_date < today:
 			end_date = self.end_date
 		else:
 			end_date = today
 		
-		period_start = self.start_date
+		period_start = target_date
 		while period_start and period_start < end_date:
 			self.generate_bill(target_date=period_start)
 			period_start = self.get_next_period_start(period_start)
 
-	def paid_until(self):
+	def paid_until(self, include_partial=False):
 		''' what date is this subscription paid until. returns the end date of
 		the last paid period, unless no bills have been paid in which case it
-		returns the start date of the first period.'''
+		returns the start date of the first period. 
+		
+		If include_partial=True we will count partially paid bills as "paid"
+		'''
 		bills = self.bills.order_by('period_start').reverse()
 		# go backwards in time through the bills
 		for b in bills:
@@ -642,10 +657,13 @@ class Subscription(models.Model):
 			except:
 				print "didn't like date"
 				print b.period_end
-			if b.is_paid():
+			if b.is_paid() or (include_partial and b.total_paid() > 0):
 				return paid_until_end
 		return b.period_start
-			
+	
+	def delete_unpaid_bills():
+		# TODO
+		pass
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()

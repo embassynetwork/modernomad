@@ -67,6 +67,42 @@ class SubscriptionTestCase(TestCase):
 			end_date =  date(year=today.year-1, month=12, day=31)
 		)
 	
+	def period_boundery_test(self, period_start, period_end):
+		# For a given period start, test the period_end is equal to the given period_end
+		s = Subscription(location=self.location, user=self.user1, start_date=period_start)
+		ps, pe = s.get_period(target_date=period_start)
+		self.assertEquals(pe, period_end)
+		
+	def test_period_ends(self):
+		# Test month bounderies
+		self.period_boundery_test(date(2015, 1, 1), date(2015, 1, 31))
+		self.period_boundery_test(date(2015, 2, 1), date(2015, 2, 28))
+		self.period_boundery_test(date(2015, 3, 1), date(2015, 3, 31))
+		self.period_boundery_test(date(2015, 4, 1), date(2015, 4, 30))
+		self.period_boundery_test(date(2015, 5, 1), date(2015, 5, 31))
+		self.period_boundery_test(date(2015, 6, 1), date(2015, 6, 30))
+		self.period_boundery_test(date(2015, 7, 1), date(2015, 7, 31))
+		self.period_boundery_test(date(2015, 8, 1), date(2015, 8, 31))
+		self.period_boundery_test(date(2015, 9, 1), date(2015, 9, 30))
+		self.period_boundery_test(date(2015, 10, 1), date(2015, 10, 31))
+		self.period_boundery_test(date(2015, 11, 1), date(2015, 11, 30))
+		self.period_boundery_test(date(2015, 12, 1), date(2015, 12, 31))
+
+		# Leap year!
+		self.period_boundery_test(date(2016, 2, 1), date(2016, 2, 29))
+
+		# Test Day bounderies
+		for i in range(2, 31):
+			self.period_boundery_test(date(2015, 7, i), date(2015, 8, i-1))
+		
+		# Test when the next following month has fewer days
+		self.period_boundery_test(date(2015, 1, 29), date(2015, 2, 28))
+		self.period_boundery_test(date(2015, 1, 30), date(2015, 2, 28))
+		self.period_boundery_test(date(2015, 1, 31), date(2015, 2, 28))
+	
+	def test_is_period_boundery(self):
+		pass
+		
 	def test_get_period(self):
 		today = timezone.now().date()
 		
