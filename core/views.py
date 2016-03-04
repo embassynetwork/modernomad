@@ -32,7 +32,7 @@ import time
 import json, datetime, stripe 
 from django.http import JsonResponse
 from reservation_calendar import GuestCalendar
-from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify
+from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify, subscription_note_notify
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
@@ -1403,8 +1403,8 @@ def ReservationManage(request, location_slug, reservation_id):
 		room_has_availability = False
 
 	# Pull all the reservation notes for this person
-	if 'reservation_note' in request.POST:
-		note = request.POST['reservation_note']
+	if 'note' in request.POST:
+		note = request.POST['note']
 		if note:
 			ReservationNote.objects.create(reservation=reservation, created_by=request.user, note=note)
 			# The Right Thing is to do an HttpResponseRedirect after a form
@@ -2104,13 +2104,14 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 	#	email_templates_by_name.append(email_template.name)
 	
 	# Pull all the reservation notes for this person
-	if 'subscription_note' in request.POST:
-		note = request.POST['subscription_note']
+	if 'note' in request.POST:
+		note = request.POST['note']
 		if note:
 			SubscriptionNote.objects.create(subscription=subscription, created_by=request.user, note=note)
 			# The Right Thing is to do an HttpResponseRedirect after a form
 			# submission, which clears the POST request data (even though we
 			# are redirecting to the same view)
+			subscription_note_notify(subscription)
 			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 	subscription_notes = SubscriptionNote.objects.filter(subscription=subscription)
 

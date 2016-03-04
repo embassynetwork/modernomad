@@ -55,7 +55,9 @@
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
-		{% include "snippets/reservation-notes.html" %}
+		{% with notes=reservation_notes %}
+			{% include "snippets/notes.html" %}
+		{% endwith %}
 
 		<div id="reservation-details">
 			<h3>
@@ -160,18 +162,18 @@ function toggleRefundDetails(id){
 }
 toggleRefundDetails();
 
-function toggleReservationNotes(){
-	if($('#reservation-notes-area').is(':hidden')) {
-		$('#reservation-notes-area').show();
-		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes</h4>');
+function toggleNotes(){
+	if($('#notes-area').is(':hidden')) {
+		$('#notes-area').show();
+		$('#notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes</h4>');
 	} else {
-		$('#reservation-notes-area').hide();
-		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}</h4>');
+		$('#notes-area').hide();
+		$('#notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}</h4>');
 	}
 }
 
 if ({{reservation_notes|length}} == 0) {
-	toggleReservationNotes();
+	toggleNotes();
 }
 
 // don't have a default email selected when the modal pops up

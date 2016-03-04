@@ -591,9 +591,6 @@ class Subscription(models.Model):
 			period_days = Decimal((period_end - period_start).days)
 			original_period_days = (original_period_end - period_start).days
 			price = (period_days/original_period_days)*self.price
-			print period_days
-			print original_period_days
-			print price
 		else:
 			price = self.price
 
@@ -640,8 +637,11 @@ class Subscription(models.Model):
 		bills = self.bills.order_by('period_start').reverse()
 		# go backwards in time through the bills
 		for b in bills:
-			print b.period_end
-			(paid_until_start, paid_until_end) = self.get_period(target_date = b.period_end)
+			try:
+				(paid_until_start, paid_until_end) = self.get_period(target_date = b.period_end)
+			except:
+				print "didn't like date"
+				print b.period_end
 			if b.is_paid():
 				return paid_until_end
 		return b.period_start

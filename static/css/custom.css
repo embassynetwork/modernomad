@@ -1733,9 +1733,14 @@ p.lead strong {
 	border-top: 0px !important;
 }
 
-#reservation-notes-link:hover {
+#notes-link:hover {
 	cursor: pointer;
 	color: #ea6f56; 
+}
+
+.note-pre {
+	background-color: inherit;
+	border: none;
 }
 
 [id^="refund-details-"] {

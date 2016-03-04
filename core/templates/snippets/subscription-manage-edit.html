@@ -1,5 +1,4 @@
 <div id="reservation-details-form">
-	<h3>Edit Subscription Details</h3>
 
 	<form method="POST" class="form-horizontal" role="form" action="{% url 'subscription_manage_edit' location.slug s.id %}">{% csrf_token %}
 		<div class="form-group">

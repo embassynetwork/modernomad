@@ -38,7 +38,9 @@
 		</h1>
 
 		{% with obj_type="subscription" %}
-			{% include "snippets/reservation-notes.html" %}
+			{% with notes=subscription_notes %}
+				{% include "snippets/notes.html" %}
+			{% endwith %}
 		{% endwith %}
 
 
@@ -67,7 +69,7 @@
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			<li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h4>Summary</h4></a></li>
-			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Manage</h4></a></li>
 
 		</ul>
 	</div>
@@ -134,12 +136,12 @@ function toggleRefundDetails(id){
 toggleRefundDetails();
 
 function toggleNotes(){
-	if($('#reservation-notes-area').is(':hidden')) {
-		$('#reservation-notes-area').show();
-		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Subscription notes</h4>');
+	if($('#notes-area').is(':hidden')) {
+		$('#notes-area').show();
+		$('#notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Subscription notes</h4>');
 	} else {
-		$('#reservation-notes-area').hide();
-		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} subscription note{{reservation_notes|length|pluralize}}</h4>');
+		$('#notes-area').hide();
+		$('#notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{subscription_notes|length}} subscription note{{subscription_notes|length|pluralize}}</h4>');
 	}
 }
 
