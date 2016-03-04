@@ -1536,14 +1536,15 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required
-def ReservationManagePayment(request, location_slug, reservation_id):
+def ManagePayment(request, location_slug, bill_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
-	reservation = get_object_or_404(Reservation, id=reservation_id)
+	bill = get_object_or_404(Bill, id=bill_id)
 	
 	action = request.POST.get("action")
 	if action == "Submit":
+		# process a refund
 		payment_id = request.POST.get("payment_id")
 		payment = get_object_or_404(Payment, id=payment_id)
 		refund_amount = request.POST.get("refund-amount")
@@ -1554,14 +1555,24 @@ def ReservationManagePayment(request, location_slug, reservation_id):
 		else:
 			payment_gateway.issue_refund(payment, refund_amount)
 	elif action == "Add":
+		# record a manual payment
 		payment_method = request.POST.get("payment_method").strip().title()
 		paid_amount = request.POST.get("paid_amount").strip()
+		# JKS we store user = None for cash payments since we don't know for
+		# certain *who* it was that made the payment. in the future, we could
+		# allow admins to enter who made the payment, if desired. 
 		pmt = Payment.objects.create(payment_method = payment_method,
-			paid_amount = paid_amount, bill = reservation.bill, user = reservation.user,
+			paid_amount = paid_amount, bill = bill, user = None,
 			transaction_id = "Manual"
 		)
 
-	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
+	# JKS this is a little inelegant as it assumes that this page will always
+	# a) want to redirect to a manage page and b) that there are only two types
+	# of bills. this should be abstracted at some point. 
+	if bill.is_reservation_bill():
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
+	else:
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
 
 @house_admin_required
 def ReservationSendWelcomeEmail(request, location_slug, reservation_id):

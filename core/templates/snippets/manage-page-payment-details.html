@@ -2,7 +2,7 @@
 	<h3>Payments</h3>
 
 	<button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
-	{% if r.is_paid %}
+	{% if bill.is_paid %}
 	<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
 		{% csrf_token %}
 		<input class="btn-default btn" type="submit" value="Send Receipt">
@@ -10,7 +10,7 @@
 	{% endif %}
 
 
-	{% if r.payments %}
+	{% if bill.payments %}
 	<table id="payment-details" class="table">
 		<thead>
 			<th>Date</th>
@@ -18,9 +18,9 @@
 			<th class="money">Amount</th>
 			<th></th>
 		</thead>
-		{% for p in r.non_refund_payments %}
+		{% for p in bill.non_refund_payments %}
 			<form class="res-refund" id="res-refund-{{payment_id}}" 
-				method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">
+				method="POST" action="{% url 'manage_payment' location.slug bill.id%}">
 				{% csrf_token %}
 				<input name="payment_id" type="hidden" value="{{p.id}}">
 				<tr {% if p.is_fully_refunded %} class="greyed-out" {% endif %}>
@@ -69,7 +69,7 @@
 
 		<tr class="total-row">
 			<td colspan="3"></td>
-			<td class="money">${{ r.bill.total_paid|floatformat:2 }}</td>
+			<td class="money">${{ bill.total_paid|floatformat:2 }}</td>
 			<td></td>
 		</tr>
 	{% else %}
@@ -78,12 +78,12 @@
 	</div>
 
 	{% endif %}
-	<form method="POST" action="{% url 'reservation_manage_payment' location.slug r.id%}">{% csrf_token %}
+	<form method="POST" action="{% url 'manage_payment' location.slug bill.id%}">{% csrf_token %}
 		<input name="payment_id" type="hidden" value="{{p.id}}">
 		<tr style="padding-top:24px;">
 			<th>Record External Payment</th>
 			<td><input name="payment_method" placeholder="Method" type="text" required></td>
-			<td><input name="paid_amount" value="{{r.bill.total_owed}}" type="number" min="0.01" step="0.01" required></td>
+			<td><input name="paid_amount" value="{{bill.total_owed}}" type="number" min="0.01" step="0.01" required></td>
 			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>
 		</tr>
 	</form>

@@ -119,7 +119,9 @@
 			</div>
 
 			<div role="tabpanel" class="tab-pane" id="reservation-manage-payment">
-				{% include "snippets/manage-page-payment-details.html" %}
+				{% with bill=r.bill %}
+					{% include "snippets/manage-page-payment-details.html" %}
+				{% endwith %}
 			</div>
 
 			<div role="tabpanel" class="tab-pane" id="reservation-manage-user-info">

@@ -360,6 +360,12 @@ class Bill(models.Model):
 	generated_on = models.DateTimeField(auto_now=True)
 	comment = models.TextField(blank=True, null=True)
 
+	def __unicode__(self):
+		return "Bill %d" % self.id
+
+	def non_refund_payments(self):
+		return self.payments.filter(paid_amount__gt=0)
+
 	def total_paid(self):
 		payments = self.payments.all()
 		if not payments:

@@ -88,11 +88,20 @@
 
 			{% for bill in s.bills.all %}
 			<div role="tabpanel" class="tab-pane" id="subscription-bill-details-{{ bill.id}}">
-				<h3>{{ bill.period_start }} Bill Details</h3>
+				<h3>
+					{{ bill.period_start }} Bill Details
+					{% if bill.is_paid %} 
+						<span class="text-success glyphicon glyphicon-ok"></span>
+					{% else %}
+						<span class="text-danger glyphicon glyphicon-exclamation-sign"></span> 
+					{% endif %}
+				</h3>
 				{% with r=s %}
 					{% include "snippets/manage-page-bill-details.html" %}
 					<h4>Customize this bill</h4>
 					{% include "snippets/add-bill-line-items.html" %}
+					<h4>Bill Payments</h4>
+					{% include "snippets/manage-page-payment-details.html" %}
 				{% endwith %}
 			</div>
 			{% endfor %}
