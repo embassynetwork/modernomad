@@ -1,6 +1,6 @@
 <div id="reservation-details-form">
 
-	<form method="POST" class="form-horizontal" role="form" action="{% url 'subscription_manage_edit' location.slug s.id %}">{% csrf_token %}
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'subscription_manage_update_end_date' location.slug s.id %}">{% csrf_token %}
 		<div class="form-group">
 			<label class="col-sm-2 pull-left control-label">End Date</label> 
 			<div class="col-sm-2">

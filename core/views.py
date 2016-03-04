@@ -2134,7 +2134,7 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 	})
 
 @house_admin_required
-def SubscriptionManageEdit(request, location_slug, subscription_id):
+def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 	location = get_object_or_404(Location, slug=location_slug)
 	subscription = Subscription.objects.get(id=subscription_id)
 	logger.debug(request.POST)
