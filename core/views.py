@@ -2139,16 +2139,37 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 	subscription = Subscription.objects.get(id=subscription_id)
 	logger.debug(request.POST)
 	if request.POST.get("end_date"):
-		#try:
 		new_end_date = datetime.datetime.strptime(request.POST['end_date'],'%m/%d/%Y').date()
+		# disable setting the end date earlier than any recorded payments for associated bills (even partial payments)
+		paid_until = subscription.paid_until(include_partial=True)
+		if new_end_date < paid_until:
+			messages.add_message(request, messages.INFO, "Error! This subscription already has payments past the requested end date. Please choose an end date after %s." % str(paid_until))
+			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
+
+		old_end_date = subscription.end_date
 		subscription.end_date = new_end_date
 		subscription.save()
-		# check to see if a bill needs to be re-generated, and pro-rate it if needed
-		# a bill needs to be re-generated only if it's for the current or a past billing cycle.  
-		subscription.generate_all_bills()
+		
+		# if the new end date is not on a period boundary, the final bill needs
+		# to be pro-rated, so we need to regenerate it. 
+		if not subscription.period_boundary():
+			subscription.generate_bill(target_date=subscription.end_date)
+
+		# if new end date is in future, no new bills need to be generated
+		# (regardless of whether the date was moved up or back). 
+		
+		if new_end_date < datetime.today():
+			# (not that if there are any bill with payments beteen old and new
+			# end date, we should already have thrown an error above.) 
+
+			# if the new end date is before the old end date, we may need to
+			# delete some unused bills. else we may need to 
+			if new_end_date < old_end_date:
+				subscription.delete_unpaid_bills()
+			elif :
+				subscription.generate_all_bills(target_date = subscription.paid_until(include_partial=True))
+
 		messages.add_message(request, messages.INFO, "Subscription end date updated.")
-		#except:
-		#	messages.add_message(request, messages.INFO, "Ooops, something went wrong.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
 @house_admin_required
