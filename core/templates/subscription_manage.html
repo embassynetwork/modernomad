@@ -66,13 +66,9 @@
 
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
-			<li><h3>Details</h3></li>
 			<li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h4>Summary</h4></a></li>
 			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
-			<li><h3>Bills</h3></li>
-			{% for bill in s.bills.all %}
-				<li><a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h4>Bill {{ bill.period_start}}</h4></a></li>
-			{% endfor %}
+
 		</ul>
 	</div>
 
@@ -114,6 +110,8 @@
 {% block extrajs %}
 <script language="JavaScript">
 
+
+
 function UpdateRefundValue(id, val, field_status) { 
 	$("#refund-amount-"+id).val(val);
 	if (field_status == "readonly") {
@@ -135,7 +133,7 @@ function toggleRefundDetails(id){
 }
 toggleRefundDetails();
 
-function toggleSubscriptionNotes(){
+function toggleNotes(){
 	if($('#reservation-notes-area').is(':hidden')) {
 		$('#reservation-notes-area').show();
 		$('#reservation-notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Subscription notes</h4>');
@@ -146,7 +144,7 @@ function toggleSubscriptionNotes(){
 }
 
 if ({{subscription_notes|length}} == 0) {
-	toggleSubscriptionNotes();
+	toggleNotes();
 }
 
 // don't have a default email selected when the modal pops up

@@ -1,46 +1,30 @@
 <div id="reservation-details-form">
-	<h3>Edit Reservation Details</h3>
-	<div class="form-help-text" style="margin-bottom: 12px;">
-		Be very careful when you edit these details! 
-	</div>
+	<h3>Edit Subscription Details</h3>
 
-	<form method="POST" role="form" class="form-horizontal" action="{% url 'subscription_manage_edit' location.slug s.id %}">{% csrf_token %}
-		<div class="form-group">
-			<label class="col-sm-2 control-label">User</label> 
-			<div class="col-sm-7">
-				<input class="form-control" name="username" value="{{ s.user.username }}"/>
-			</div>
-			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change User"/>
-		</div>
-	</form>
-
-	<form method="POST" role="form" class="form-horizontal" action="{% url 'subscription_manage_edit' location.slug s.id %}">{% csrf_token %}
-		<div class="form-group">
-			<label class="col-sm-2 control-label">Price</label> 
-			<div class="col-sm-7">
-				<input class="form-control" name="rate" value="{{ s.price }}"/>
-			</div>
-			<input type="submit" class="btn btn-default pull-right col-sm-3" style="width:120px;" value="Change Price"/>
-		</div>
-	</form>
-	
 	<form method="POST" class="form-horizontal" role="form" action="{% url 'subscription_manage_edit' location.slug s.id %}">{% csrf_token %}
 		<div class="form-group">
-			<label class="col-sm-2 control-label">Start Date</label> 
-			<label class="col-sm-2 control-label">End Date</label> 
+			<label class="col-sm-2 pull-left control-label">End Date</label> 
 			<div class="col-sm-2">
-				<input class="form-control" name="start_date" value="{{ s.start_date|date:'Y-m-d' }}" size="8"/>
-			</div>
-			<label class="col-sm-1 control-label">Depart</label> 
-			<div class="col-sm-2">
-				<input class="form-control" name="end_date" value="{{ s.end_date|date:'Y-m-d' }}" size="8"/>
+				<input class="form-control" id="id_end_date" name="end_date" value="{{ s.end_date|date:'Y-m-d' }}" size="8"/>
 			</div>
 			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change Dates"/>
+			<div class="form-help-text" style="margin-bottom: 12px;">
+				End dates should <em>usually</em> be in the future and cannot be in the middle of an already paid billing cycle. If the end date is not on a billing boundary, the final bill will be pro-rated. 
+			</div>
 		</div>
 	</form>
 
 	<a href="{% url 'subscription_manage_next_bill' location.slug s.id %}" class="btn-default btn">Generate Next Bill</a>
 	<a href="{% url 'subscription_manage_all_bills' location.slug s.id %}" class="btn-default btn">Generate All Bills</a>
+
+	<script>
+		paid_until = new Date({{s.paid_until.year}}, {{s.paid_until.month}}-1, {{s.paid_until.day}});
+		// minDate only takes a date, number or string, not a function, so we
+		// call it first and then use the return value here. 
+		// i CANNOT get formatDate to work reliably. i can format the initial value, but any newly selected date is formatted with slashes. WTF. 
+		//$.datepicker.formatDate("yy-mm-dd", new Date()); 
+		$("#id_end_date").datepicker({minDate: paid_until});
+	</script>
 
 </div>
 

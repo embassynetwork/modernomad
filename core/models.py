@@ -552,9 +552,23 @@ class Subscription(models.Model):
 		if not period_start:
 			return None
 		
+		# a subscription's last cycle could be a pro rated one. check to see if
+		# the subscription end date is before the period end; if so, change the
+		# period end to be the subscription end date. 
+		prorated = False
+		if self.end_date < period_end:
+			prorated = True
+			original_period_end = period_end
+			period_end = self.end_date
+		
 		# Look to see if we have an existing bill for this period
 		try:
 			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
+			# if the bill already exists but we're updating it to be prorated,
+			# we need to change the period end also. 
+			if prorated and bill.period_end != period_end:
+				bill.period_end = period_end
+				bill.save()
 
 			# If we already have a bill and we don't want to clear out the old data
 			# we can stop right here and go with the existing line items.
@@ -571,9 +585,19 @@ class Subscription(models.Model):
 		
 		line_items = []
 		
-		# First line item is the subscription description
+		# First line item is the subscription itself. 
 		desc = "%s (%s to %s)" % (self.description, period_start, period_end)
-		line_item = BillLineItem(bill=bill, description=desc, amount=self.price, paid_by_house=False)
+		if prorated:
+			period_days = Decimal((period_end - period_start).days)
+			original_period_days = (original_period_end - period_start).days
+			price = (period_days/original_period_days)*self.price
+			print period_days
+			print original_period_days
+			print price
+		else:
+			price = self.price
+
+		line_item = BillLineItem(bill=bill, description=desc, amount=price, paid_by_house=False)
 		line_items.append(line_item)
 		
 		# Add back the custom fees
@@ -609,6 +633,19 @@ class Subscription(models.Model):
 			self.generate_bill(target_date=period_start)
 			period_start = self.get_next_period_start(period_start)
 
+	def paid_until(self):
+		''' what date is this subscription paid until. returns the end date of
+		the last paid period, unless no bills have been paid in which case it
+		returns the start date of the first period.'''
+		bills = self.bills.order_by('period_start').reverse()
+		# go backwards in time through the bills
+		for b in bills:
+			print b.period_end
+			(paid_until_start, paid_until_end) = self.get_period(target_date = b.period_end)
+			if b.is_paid():
+				return paid_until_end
+		return b.period_start
+			
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()

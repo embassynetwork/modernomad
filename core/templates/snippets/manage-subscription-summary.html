@@ -1,20 +1,17 @@
 <table class="dataTable table table-striped reservation-list">
 	<thead>
 		<tr>
-			<th>Period Start</th>
-			<th>Period End</th>
+			<th>Period</th>
 			<th>Rate</th>
 			<th>Paid</th>
 		</tr>
 	</thead>
 	<tbody>
+			<ul class="nav nav-pills nav-stacked" role="tablist">
 			{% for bill in s.bills.all %}
 				<tr class="{% cycle 'row-even' 'row-odd' %}">
 					<td>
-						{{bill.period_start }}
-					</td>
-					<td>
-						{{bill.period_end }}
+						<a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h5>Bill {{ bill.period_start}}</h5></a>
 					</td>
 					<td>{{bill.amount }}</td>
 					<td>
@@ -26,6 +23,7 @@
 					</td>
 				</tr>
 			{% endfor %}
+			</ul>
 	</tbody>
 </table>
 

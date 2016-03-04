@@ -2134,7 +2134,21 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 
 @house_admin_required
 def SubscriptionManageEdit(request, location_slug, subscription_id):
-	pass
+	location = get_object_or_404(Location, slug=location_slug)
+	subscription = Subscription.objects.get(id=subscription_id)
+	logger.debug(request.POST)
+	if request.POST.get("end_date"):
+		#try:
+		new_end_date = datetime.datetime.strptime(request.POST['end_date'],'%m/%d/%Y').date()
+		subscription.end_date = new_end_date
+		subscription.save()
+		# check to see if a bill needs to be re-generated, and pro-rate it if needed
+		# a bill needs to be re-generated only if it's for the current or a past billing cycle.  
+		subscription.generate_all_bills()
+		messages.add_message(request, messages.INFO, "Subscription end date updated.")
+		#except:
+		#	messages.add_message(request, messages.INFO, "Ooops, something went wrong.")
+	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
 @house_admin_required
 def SubscriptionManageGenerateNextBill(request, location_slug, subscription_id):
@@ -2147,6 +2161,6 @@ def SubscriptionManageGenerateNextBill(request, location_slug, subscription_id):
 def SubscriptionManageGenerateAllBills(request, location_slug, subscription_id):
 	subscription = get_object_or_404(Subscription, pk=subscription_id)
 	subscription.generate_all_bills()
-	messages.add_message(request, messages.INFO, "The bills were generated.")
+	messages.add_message(request, messages.INFO, "Bills up to the current period were generated.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription.id)))
 
