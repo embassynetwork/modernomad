@@ -490,7 +490,7 @@ class Subscription(models.Model):
 	end_date = models.DateField(blank=True, null=True)
 
 	objects = SubscriptionManager()
-
+		
 	def get_period(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
@@ -565,7 +565,7 @@ class Subscription(models.Model):
 		# the subscription end date is before the period end; if so, change the
 		# period end to be the subscription end date. 
 		prorated = False
-		if self.end_date < period_end:
+		if self.end_date and self.end_date < period_end:
 			prorated = True
 			original_period_end = period_end
 			period_end = self.end_date
@@ -661,9 +661,13 @@ class Subscription(models.Model):
 				return paid_until_end
 		return b.period_start
 	
-	def delete_unpaid_bills():
-		# TODO
-		pass
+	def delete_unpaid_bills(self):
+		end_date = self.end_date or timezone.now().date()
+		period_start = self.paid_until()
+		while period_start and period_start < end_date:
+			bill = SubscriptionBill.objects.filter(period_start=period_start, subscription=self).first()
+			bill.delete()
+			period_start = self.get_next_period_start(period_start)
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()

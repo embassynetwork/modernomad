@@ -172,3 +172,9 @@ class SubscriptionTestCase(TestCase):
 		self.assertEquals(0, self.sub6.bills.count())
 		self.sub6.generate_all_bills()
 		self.assertEquals(12, self.sub6.bills.count())
+	
+	def test_delete_unpaid_bills(self):
+		self.sub6.generate_all_bills()
+		self.assertEquals(12, self.sub6.bills.count())
+		self.sub6.delete_unpaid_bills()
+		self.assertEquals(0, self.sub6.bills.count())
