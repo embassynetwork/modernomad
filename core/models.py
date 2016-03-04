@@ -496,7 +496,7 @@ class Subscription(models.Model):
 	end_date = models.DateField(blank=True, null=True)
 
 	objects = SubscriptionManager()
-
+		
 	def get_period(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
@@ -515,7 +515,9 @@ class Subscription(models.Model):
 				else:
 					month = target_date.month - 1
 			period_start = date(year, month, self.start_date.day)
-		period_end =  period_start + relativedelta(months=1) - timedelta(days=1)
+		period_end =  period_start + relativedelta(months=1)
+		if period_end.day == period_start.day:
+			period_end = period_end - timedelta(days=1)
 		
 		return (period_start, period_end)
 	
@@ -551,7 +553,7 @@ class Subscription(models.Model):
 			target_date = self.end_date
 		
 		rd = relativedelta(target_date + timedelta(days=1), self.start_date)
-		print "%s - %s = %s" % (target_date, self.start_date, rd)
+		#print "%s - %s = %s" % (target_date, self.start_date, rd)
 		return rd.months + (12 * rd.years)
 		
 	def is_active(self, target_date=None):
@@ -571,7 +573,7 @@ class Subscription(models.Model):
 		# the subscription end date is before the period end; if so, change the
 		# period end to be the subscription end date. 
 		prorated = False
-		if self.end_date < period_end:
+		if self.end_date and self.end_date < period_end:
 			prorated = True
 			original_period_end = period_end
 			period_end = self.end_date
@@ -595,6 +597,8 @@ class Subscription(models.Model):
 		# Save any custom line items before clearing out the old items
 		custom_items = list(bill.line_items.filter(custom=True))
 		if delete_old_items:
+			if bill.total_paid() > 0:
+				raise Exception("Can not delete a bill with payments on it!")
 			for item in bill.line_items.all():
 				item.delete()
 		
@@ -667,9 +671,13 @@ class Subscription(models.Model):
 				return paid_until_end
 		return b.period_start
 	
-	def delete_unpaid_bills():
-		# TODO
-		pass
+	def delete_unpaid_bills(self):
+		end_date = self.end_date or timezone.now().date()
+		period_start = self.paid_until()
+		while period_start and period_start < end_date:
+			bill = SubscriptionBill.objects.filter(period_start=period_start, subscription=self).first()
+			bill.delete()
+			period_start = self.get_next_period_start(period_start)
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
