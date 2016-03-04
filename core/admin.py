@@ -64,7 +64,10 @@ class BillAdmin(admin.ModelAdmin):
 
 class PaymentAdmin(admin.ModelAdmin):
 	def user(self):
-		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.last_name, self.user.username)
+		if self.user:
+			return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
+		else:
+			return '''None'''
 	user.allow_tags = True
 
 	def reservation(self):
