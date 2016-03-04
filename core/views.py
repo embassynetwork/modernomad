@@ -2161,24 +2161,28 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 		subscription.end_date = new_end_date
 		subscription.save()
 		
+		# prorated is only if in past
+		# will generate_all_bill prorate?
+
+
 		# if the new end date is not on a period boundary, the final bill needs
 		# to be pro-rated, so we need to regenerate it. 
 		if not subscription.is_period_boundary():
 			subscription.generate_bill(target_date=subscription.end_date)
 
-		# if new end date is in future, no new bills need to be generated
-		# (regardless of whether the date was moved up or back). 
-		
-		if new_end_date < datetime.today():
+		if new_end_date < old_end_date:
 			# (not that if there are any bill with payments beteen old and new
 			# end date, we should already have thrown an error above.) 
 
 			# if the new end date is before the old end date, we may need to
-			# delete some unused bills. else we may need to 
-			if new_end_date < old_end_date:
-				subscription.delete_unpaid_bills()
-			elif new_end_date > old_end_date:
-				subscription.generate_all_bills(target_date = subscription.paid_until(include_partial=True))
+			# delete some unused bills. 
+			subscription.delete_unpaid_bills()
+
+		# if new end date is in future, no new bills need to be generated
+		# unless the old end date was in the past and the new one is in the
+		# future, then there might be a gap where new ones are needed. 
+		if new_end_date > old_end_date:
+			subscription.generate_all_bills()
 
 		messages.add_message(request, messages.INFO, "Subscription end date updated.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
