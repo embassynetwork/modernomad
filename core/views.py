@@ -2166,7 +2166,7 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 			# delete some unused bills. else we may need to 
 			if new_end_date < old_end_date:
 				subscription.delete_unpaid_bills()
-			elif :
+			elif new_end_date > old_end_date:
 				subscription.generate_all_bills(target_date = subscription.paid_until(include_partial=True))
 
 		messages.add_message(request, messages.INFO, "Subscription end date updated.")
