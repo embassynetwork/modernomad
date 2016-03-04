@@ -509,7 +509,9 @@ class Subscription(models.Model):
 				else:
 					month = target_date.month - 1
 			period_start = date(year, month, self.start_date.day)
-		period_end =  period_start + relativedelta(months=1) - timedelta(days=1)
+		period_end =  period_start + relativedelta(months=1)
+		if period_end.day == period_start.day:
+			period_end = period_end - timedelta(days=1)
 		
 		return (period_start, period_end)
 	
@@ -545,7 +547,7 @@ class Subscription(models.Model):
 			target_date = self.end_date
 		
 		rd = relativedelta(target_date + timedelta(days=1), self.start_date)
-		print "%s - %s = %s" % (target_date, self.start_date, rd)
+		#print "%s - %s = %s" % (target_date, self.start_date, rd)
 		return rd.months + (12 * rd.years)
 		
 	def is_active(self, target_date=None):
@@ -589,6 +591,8 @@ class Subscription(models.Model):
 		# Save any custom line items before clearing out the old items
 		custom_items = list(bill.line_items.filter(custom=True))
 		if delete_old_items:
+			if bill.total_paid() > 0:
+				raise Exception("Can not delete a bill with payments on it!")
 			for item in bill.line_items.all():
 				item.delete()
 		
