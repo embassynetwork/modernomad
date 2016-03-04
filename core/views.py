@@ -2152,7 +2152,7 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 		
 		# if the new end date is not on a period boundary, the final bill needs
 		# to be pro-rated, so we need to regenerate it. 
-		if not subscription.period_boundary():
+		if not subscription.is_period_boundary():
 			subscription.generate_bill(target_date=subscription.end_date)
 
 		# if new end date is in future, no new bills need to be generated
