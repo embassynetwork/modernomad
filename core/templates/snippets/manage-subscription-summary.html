@@ -1,3 +1,4 @@
+{% if s.bills.all %}
 <table class="dataTable table table-striped reservation-list">
 	<thead>
 		<tr>
@@ -11,7 +12,7 @@
 			{% for bill in s.bills.all %}
 				<tr class="{% cycle 'row-even' 'row-odd' %}">
 					<td>
-						<a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h5>Bill {{ bill.period_start}}</h5></a>
+						<a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h5>Bill {{ bill.period_start}} - {{bill.period_end}} </h5></a>
 					</td>
 					<td>{{bill.amount }}</td>
 					<td>
@@ -26,5 +27,7 @@
 			</ul>
 	</tbody>
 </table>
-
+{% else %}
+No bills yet. The next bill will be generated on {{s.get_next_period_start}}
+{% endif %}
 

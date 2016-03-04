@@ -2170,13 +2170,15 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 		if not subscription.is_period_boundary():
 			subscription.generate_bill(target_date=subscription.end_date)
 
-		if new_end_date < old_end_date:
+		if (new_end_date < timezone.now().date()) and (new_end_date < old_end_date):
 			# (not that if there are any bill with payments beteen old and new
 			# end date, we should already have thrown an error above.) 
 
 			# if the new end date is before the old end date, we may need to
 			# delete some unused bills. 
 			subscription.delete_unpaid_bills()
+			# but then we also need to RE generate bills between, say, the unapid date and the the end date, if there are still unpaid bills there. 
+			subscription.generate_all_bills()
 
 		# if new end date is in future, no new bills need to be generated
 		# unless the old end date was in the past and the new one is in the
@@ -2186,13 +2188,6 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 
 		messages.add_message(request, messages.INFO, "Subscription end date updated.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
-
-@house_admin_required
-def SubscriptionManageGenerateNextBill(request, location_slug, subscription_id):
-	subscription = get_object_or_404(Subscription, pk=subscription_id)
-	subscription.generate_next_bill()
-	messages.add_message(request, messages.INFO, "The bill was generated.")
-	return render(request, 'subscription_manage.html', {})
 
 @house_admin_required
 def SubscriptionManageGenerateAllBills(request, location_slug, subscription_id):

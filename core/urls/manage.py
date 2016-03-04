@@ -21,7 +21,6 @@ urlpatterns = patterns('core.views',
 	url(r'^subscriptions/create$', 'SubscriptionManageCreate', name='subscription_manage_create'),
 	url(r'^subscriptions/(?P<subscription_id>\d+)/$', 'SubscriptionManageDetail', name='subscription_manage_detail'),
 	url(r'^subscriptions/(?P<subscription_id>\d+)/update_end_date/$', 'SubscriptionManageUpdateEndDate', name='subscription_manage_update_end_date'),
-	url(r'^subscriptions/(?P<subscription_id>\d+)/generatenextbill/$', 'SubscriptionManageGenerateNextBill', name='subscription_manage_next_bill'),
 	url(r'^subscriptions/(?P<subscription_id>\d+)/generateallbills/$', 'SubscriptionManageGenerateAllBills', name='subscription_manage_all_bills'),
 	url(r'^subscriptions/$', 'SubscriptionsManageList', name='subscriptions_manage_list'),
 )

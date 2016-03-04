@@ -502,7 +502,7 @@ class Subscription(models.Model):
 			target_date = timezone.now().date()
 		
 		if target_date < self.start_date or (self.end_date and target_date > self.end_date):
-			return None
+			return (None, None)
 		
 		period_start = target_date
 		if target_date.day != self.start_date.day:
@@ -661,6 +661,8 @@ class Subscription(models.Model):
 		'''
 		bills = self.bills.order_by('period_start').reverse()
 		# go backwards in time through the bills
+		if not bills:
+			return None
 		for b in bills:
 			try:
 				(paid_until_start, paid_until_end) = self.get_period(target_date = b.period_end)
@@ -675,6 +677,12 @@ class Subscription(models.Model):
 		for bill in self.bills.all():
 			if not bill.is_paid():
 				bill.delete()
+	
+	def has_unpaid_bills(self):
+		for bill in self.bills.all():
+			if not bill.is_paid():
+				return True
+		return False
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
