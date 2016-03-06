@@ -13,10 +13,6 @@
 	<a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
 </div>
 
-{% if not s.is_active %}
-<div class="greyed-out">
-{% endif %}
-
 <div class="row">
 
 	<div class="col-md-3">
@@ -47,7 +43,7 @@
 		<div id="reservation-details">
 			<h3>
 				Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }} 
-				<span class="pull-right">Value: ${{ s.price }}</span>
+				<span class="pull-right">Base Value: ${{ s.price }}</span>
 			</h3>
 			{% if s.description %}
 			<div class="row">
@@ -69,12 +65,43 @@
 	<div class="col-md-3">
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			<li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h4>Summary</h4></a></li>
-			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Manage</h4></a></li>
+			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+			{% if s.bills.all %}
+			<table class="dataTable table table-striped reservation-list">
+				<thead>
+					<tr>
+						<th>Period</th>
+						<th>Rate</th>
+						<th>Paid</th>
+					</tr>
+				</thead>
+				<tbody>
+						<ul class="nav nav-pills nav-stacked" role="tablist">
+						{% for bill in s.bills.all %}
+							<tr class="{% cycle 'row-even' 'row-odd' %}">
+								<td>
+									<a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h5>Bill {{ bill.period_start}} - {{bill.period_end}} </h5></a>
+								</td>
+								<td>{{bill.amount }}</td>
+								<td>
+									{% if bill.is_paid %}
+										<span class="text-success glyphicon glyphicon-ok"></span>
+									{% else %}
+										<span class="text-danger glyphicon glyphicon-exclamation-sign"></span>
+									{% endif %}
+								</td>
+							</tr>
+						{% endfor %}
+						</ul>
+				</tbody>
+			</table>
+			{% endif %}
+
 
 		</ul>
 	</div>
 
-	<div class="col-md-7">	
+	<div class="col-md-6">	
 
 		<div class="tab-content">
 
@@ -95,12 +122,42 @@
 					{% else %}
 						<span class="text-danger glyphicon glyphicon-exclamation-sign"></span> 
 					{% endif %}
+
 				</h3>
+				{% if not bill.is_paid %}
+				<form id="bill-charge" method="POST" action="{% url 'bill_charge' location.slug bill.id">
+					{% csrf_token %}
+					<table>
+					<tr>
+						<td>Charge user for bill: </td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="charge-options" id="bill-{{bill.id}}-full-charge" onclick="UpdateChargeValue({{bill.id}}, {{bill.total_owed}}, 'readonly')" value="charge-full-amount" checked> Full 
+						</label>
+					</td>
+					<td>
+						<label class="radio-inline">
+							<input type="radio" name="charge-options" id="bill-{{bill.id}}-partial-charge" onclick="UpdateChargeValue({{bill.id}}, '', 'readwrite')" value="partial-charge"> Partial
+						</label>
+					</td>
+					<td>
+						<input type="number" min="0" max="{{bill.total_owed}}" min="0" name="charge-amount" id="bill-{{bill.id}}-charge-amount" value="{{bill.total_owed}}" class="disabled" readonly="readonly">
+					</td>
+					<td>
+						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?'); $(this).removeAttr('readonly');">
+					</td>
+					</tr>
+					</table>
+					</form>
+				{% endif %}
 				{% with r=s %}
 					{% include "snippets/manage-page-bill-details.html" %}
 					<h4>Customize this bill</h4>
-					{% include "snippets/add-bill-line-items.html" %}
-					<h4>Bill Payments</h4>
+					{% if bill.is_paid %}
+						<p>This bill has been paid and cannot be modified</p>
+					{% else %}
+						{% include "snippets/add-bill-line-items.html" %}
+					{% endif %}
 					{% include "snippets/manage-page-payment-details.html" %}
 				{% endwith %}
 			</div>
@@ -111,17 +168,25 @@
 	</div> <!-- end col-md-7 -->
 </div> 
 
-{% if r.is_canceled %}
-</div>
-{% endif %}
-
-
 {% endblock %}
 
 {% block extrajs %}
 <script language="JavaScript">
 
 
+
+function UpdateChargeValue(id, val, field_status) { 
+	elem = "#bill-"+id+"-charge-amount"
+	$(elem).val(val);
+	if (field_status == "readonly") {
+		$(elem).attr("readonly", "readonly");
+		$(elem).addClass("disabled");
+
+	} else {
+		$(elem).removeAttr("readonly");
+		$(elem).removeClass("disabled");
+	}
+} 
 
 function UpdateRefundValue(id, val, field_status) { 
 	$("#refund-amount-"+id).val(val);

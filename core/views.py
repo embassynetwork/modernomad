@@ -1023,7 +1023,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your reservation.')
 	else:
 		try:
-			payment_gateway.charge_customer(reservation)
+			payment_gateway.charge_reservation(reservation)
 			reservation.confirm()
 			send_receipt(reservation)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
@@ -1457,7 +1457,7 @@ def ReservationManageAction(request, location_slug, reservation_id):
 			reservation.comp()
 		elif reservation_action == 'res-charge-card':
 			try:
-				payment_gateway.charge_customer(reservation)
+				payment_gateway.charge_reservation(reservation)
 				reservation.confirm()
 				send_receipt(reservation)
 				days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -1659,6 +1659,7 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 		if line_item.fee:
 			reservation.suppress_fee(line_item)
 		reservation.generate_bill()
+		messages.add_message(request, messages.INFO, "The line item was deleted.")
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
 	elif bill.is_subscription_bill():
 		subscription = bill.subscriptionbill.subscription
@@ -1672,10 +1673,43 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 		#if line_item.fee:
 		#	subscription.suppress_fee(line_item)
 		subscription.generate_bill()
+		messages.add_message(request, messages.INFO, "The line item was deleted from the bill for %s." % (bill.subscriptionbill.period_start.strftime("%B %Y")))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
 		raise Exception('Unrecognized bill object')
 
+
+@house_admin_required
+def BillCharge(request, location_slug, bill_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_object_or_404(Location, slug=location_slug)
+	bill = get_object_or_404(Bill, pk=bill_id)
+
+	#how much to charge?
+	charge_amount_dollars = request.POST.get("bill-%d-charge-amount", bill.id)
+	print 'request to charge user %d' % charge_amount
+	if charge_amount > bill.amount_owed():
+		messages.add_message(request, messages.INFO, "Cannot charge more than remaining amount owed($%d)" % bill.amount_owed())
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
+
+	if bill.is_reservation_bill():
+		user = bill.reservationbill.reservation.user
+		reference = "%d reservation ref#%d" % (location.name, bill.reservationbill.reservation.id)
+	elif bill.is_subscription_bill():
+		user = bill.subscriptionbill.subscription.user
+		reference = "%d subscription ref#%d.%d monthly" % (location.name, bill.subscriptionbill.subscription.id, bill.id)
+	else:
+		raise Exception('Unknown bill type. Cannot determine user.')
+
+	try:
+		payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
+	except Stripe.CardError, e:
+		messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
+
+	messages.add_message(request, messages.INFO, "The card was charged.")
+	#send_receipt(reservation)
+	
 
 @house_admin_required
 def AddBillLineItem(request, location_slug, bill_id):
@@ -1689,6 +1723,10 @@ def AddBillLineItem(request, location_slug, bill_id):
 	reason = request.POST.get("reason")
 	calculation_type = request.POST.get("calculation_type")
 	if request.POST.get("discount"):
+		line_item_type = "discount"
+	else:
+		line_item_type = "fee"
+	if line_item_type == "discount":
 		if calculation_type == "absolute":
 			reason = "Discount: " + reason
 			amount = -Decimal(request.POST.get("discount"))
@@ -1725,10 +1763,12 @@ def AddBillLineItem(request, location_slug, bill_id):
 	if bill.is_reservation_bill():
 		reservation = bill.reservationbill.reservation
 		reservation.generate_bill()
+		messages.add_message(request, messages.INFO, "The %s was added." % line_item_type)
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
 	elif bill.is_subscription_bill():
 		subscription = bill.subscriptionbill.subscription
 		subscription.generate_bill()
+		messages.add_message(request, messages.INFO, "The %s was added to the bill for %s." % (line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
 		raise Exception('Unrecognized bill object')

@@ -1,14 +1,4 @@
-	<!-- Payment Details -->
 	<h3>Payments</h3>
-
-	<button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
-	{% if bill.is_paid %}
-	<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
-		{% csrf_token %}
-		<input class="btn-default btn" type="submit" value="Send Receipt">
-	</form>
-	{% endif %}
-
 
 	{% if bill.payments %}
 	<table id="payment-details" class="table">

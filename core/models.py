@@ -498,6 +498,8 @@ class Subscription(models.Model):
 	objects = SubscriptionManager()
 		
 	def get_period(self, target_date=None):
+		''' get period associated with a certain date. returns None if the
+		subscription is not active.'''
 		if not target_date:
 			target_date = timezone.now().date()
 		
@@ -524,10 +526,12 @@ class Subscription(models.Model):
 	def get_next_period_start(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
+			# if the subscrition starts in the future then the next
+			# period is when the subscription starts. 
+			if self.start_date > target_date:
+				return self.start_date
 		this_period_start, this_period_end = self.get_period(target_date=target_date)
-		if not this_period_start:
-			return None
-		
+
 		next_period_start = this_period_end + timedelta(days=1)
 		if self.end_date and next_period_start > self.end_date:
 			return None
