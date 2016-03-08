@@ -1,17 +1,36 @@
 import traceback
 from datetime import datetime, timedelta, date
+from django.core.urlresolvers import reverse
 
-from django.test import TestCase
+from django.test import TestCase, RequestFactory, Client
 from django.utils import timezone
 from django.contrib.auth.models import User
 
 from core.models import Location, Subscription
+
+'''
+documentation on running python unit tests:
+https://docs.python.org/3/library/unittest.html#module-unittest
+
+* The setUp() and tearDown() methods allow you to define instructions that will
+  be executed before and after each test method. 
+
+* Individual tests are defined with methods whose names start with the letters
+  test. This naming convention informs the test runner about which methods
+  represent tests. (So, if you need a helper method just create one that
+  doesn't start with test_). 
+'''
 
 class SubscriptionTestCase(TestCase):
 	
 	def setUp(self):
 		self.location = Location.objects.create(latitude="0", longitude="0", name="Test Location", slug="test")
 		self.user1 = User.objects.create(username='member_one', first_name='Member', last_name='One')
+		self.admin = User.objects.create_superuser(username='admin', email="blah@blah.com", password="secret")
+		self.location.house_admins.add(self.admin)
+		self.location.save()
+		#self.client = Client()
+		success = self.client.login(username=self.admin.username, password="secret")
 		
 		today = timezone.now().date()
 		
@@ -67,7 +86,43 @@ class SubscriptionTestCase(TestCase):
 			end_date =  date(year=today.year-1, month=12, day=31)
 		)
 	
-	def period_boundery_test(self, period_start, period_end):
+		# Start and end on the same day of the month, last year for 8 months
+		self.sub7 = Subscription.objects.create(
+			location = self.location, 
+			user = self.user1, 
+			price = 600.00, 
+			start_date = date(year=today.year-1, month=2, day=1),
+			end_date =  date(year=today.year-1, month=10, day=1)
+		)
+
+		# Pro rated end 
+		self.sub8 = Subscription.objects.create(
+			location = self.location, 
+			user = self.user1, 
+			price = 100.00, 
+			start_date = date(year=today.year-1, month=2, day=1),
+			end_date =  date(year=today.year-1, month=10, day=18)
+		)
+
+		# One period in the past
+		self.sub9 = Subscription.objects.create(
+			location = self.location, 
+			user = self.user1, 
+			price = 100.00, 
+			start_date = date(year=today.year-1, month=2, day=1),
+			end_date =  date(year=today.year-1, month=3, day=1)
+		)
+
+		# One period in the future
+		self.sub10 = Subscription.objects.create(
+			location = self.location, 
+			user = self.user1, 
+			price = 100.00, 
+			start_date = date(year=today.year+1, month=2, day=1),
+			end_date =  date(year=today.year+1, month=3, day=1)
+		)
+	
+	def period_boundary_test(self, period_start, period_end):
 		# For a given period start, test the period_end is equal to the given period_end
 		s = Subscription(location=self.location, user=self.user1, start_date=period_start)
 		ps, pe = s.get_period(target_date=period_start)
@@ -75,30 +130,30 @@ class SubscriptionTestCase(TestCase):
 		
 	def test_period_ends(self):
 		# Test month bounderies
-		self.period_boundery_test(date(2015, 1, 1), date(2015, 1, 31))
-		self.period_boundery_test(date(2015, 2, 1), date(2015, 2, 28))
-		self.period_boundery_test(date(2015, 3, 1), date(2015, 3, 31))
-		self.period_boundery_test(date(2015, 4, 1), date(2015, 4, 30))
-		self.period_boundery_test(date(2015, 5, 1), date(2015, 5, 31))
-		self.period_boundery_test(date(2015, 6, 1), date(2015, 6, 30))
-		self.period_boundery_test(date(2015, 7, 1), date(2015, 7, 31))
-		self.period_boundery_test(date(2015, 8, 1), date(2015, 8, 31))
-		self.period_boundery_test(date(2015, 9, 1), date(2015, 9, 30))
-		self.period_boundery_test(date(2015, 10, 1), date(2015, 10, 31))
-		self.period_boundery_test(date(2015, 11, 1), date(2015, 11, 30))
-		self.period_boundery_test(date(2015, 12, 1), date(2015, 12, 31))
+		self.period_boundary_test(date(2015, 1, 1), date(2015, 1, 31))
+		self.period_boundary_test(date(2015, 2, 1), date(2015, 2, 28))
+		self.period_boundary_test(date(2015, 3, 1), date(2015, 3, 31))
+		self.period_boundary_test(date(2015, 4, 1), date(2015, 4, 30))
+		self.period_boundary_test(date(2015, 5, 1), date(2015, 5, 31))
+		self.period_boundary_test(date(2015, 6, 1), date(2015, 6, 30))
+		self.period_boundary_test(date(2015, 7, 1), date(2015, 7, 31))
+		self.period_boundary_test(date(2015, 8, 1), date(2015, 8, 31))
+		self.period_boundary_test(date(2015, 9, 1), date(2015, 9, 30))
+		self.period_boundary_test(date(2015, 10, 1), date(2015, 10, 31))
+		self.period_boundary_test(date(2015, 11, 1), date(2015, 11, 30))
+		self.period_boundary_test(date(2015, 12, 1), date(2015, 12, 31))
 
 		# Leap year!
-		self.period_boundery_test(date(2016, 2, 1), date(2016, 2, 29))
+		self.period_boundary_test(date(2016, 2, 1), date(2016, 2, 29))
 
 		# Test Day bounderies
 		for i in range(2, 31):
-			self.period_boundery_test(date(2015, 7, i), date(2015, 8, i-1))
+			self.period_boundary_test(date(2015, 7, i), date(2015, 8, i-1))
 		
 		# Test when the next following month has fewer days
-		self.period_boundery_test(date(2015, 1, 29), date(2015, 2, 28))
-		self.period_boundery_test(date(2015, 1, 30), date(2015, 2, 28))
-		self.period_boundery_test(date(2015, 1, 31), date(2015, 2, 28))
+		self.period_boundary_test(date(2015, 1, 29), date(2015, 2, 28))
+		self.period_boundary_test(date(2015, 1, 30), date(2015, 2, 28))
+		self.period_boundary_test(date(2015, 1, 31), date(2015, 2, 28))
 	
 	def test_is_period_boundary(self):
 		s = Subscription(location=self.location, user=self.user1, start_date=date(2016,1,1), end_date=date(2016,5,31))
@@ -120,7 +175,7 @@ class SubscriptionTestCase(TestCase):
 		self.assertEqual(ps.day, self.sub1.start_date.day)
 		
 		# Today is outside the date range for this subscription
-		self.assertEquals(None, self.sub3.get_period(target_date=today))
+		self.assertEquals((None, None), self.sub3.get_period(target_date=today))
 	
 	def test_total_periods(self):
 		self.assertEquals(0, self.sub1.total_periods())
@@ -178,3 +233,70 @@ class SubscriptionTestCase(TestCase):
 		self.assertEquals(12, self.sub6.bills.count())
 		self.sub6.delete_unpaid_bills()
 		self.assertEquals(0, self.sub6.bills.count())
+
+	def test_subscription_listing_works(self):
+		resp = self.client.get(reverse('subscriptions_manage_list', kwargs={'location_slug': self.location.slug}), follow=True)
+		self.assertEquals(resp.status_code, 200)
+
+
+	def test_edit_end_date_period_boundary(self):
+		# we want a subscription that will result in the final bill being
+		# recalculated when the end date is updated. and the new end date needs
+		# to be on a period boundary. 
+		today = timezone.now().date()
+		start = today - timedelta(days=60)
+		end = today + timedelta(days=60)
+		s = Subscription.objects.create( location = self.location, user = self.user1, price = 500.00, start_date = start, end_date = end)
+
+		# first we set the new end date to be on a period boundary in the future
+		new_end = today - timedelta(days=35)
+		new_end_date = datetime(new_end.year, new_end.month, start.day).date()
+		print s.start_date
+		print s.end_date
+		print new_end_date
+		s.update_for_end_date(new_end_date)
+		self.assertEqual(s.end_date, new_end_date)
+		self.assertEqual(s.bills.count(), s.expected_num_bills())
+		self.assertEqual(self.assess_no_empty_bills(s), True)
+
+	def test_no_future_bills(self):
+		pass
+
+	def test_prorate_current_unpaid_month(self):
+		# when moving ahead in the current month
+		# when moving back in the current month
+		pass
+
+	def test_period_boundary(self):
+		self.assertEqual(self.sub3.is_period_boundary(), False)
+		self.assertEqual(self.sub6.is_period_boundary(), False)
+		self.assertEqual(self.sub7.is_period_boundary(), True)
+
+	def test_correct_num_bills(self):
+		pass
+		
+	def test_expected_num_bills(self):
+		self.assertEqual(self.sub1.expected_num_bills(), None)
+		self.assertEqual(self.sub6.expected_num_bills(), 12)
+		self.assertEqual(self.sub7.expected_num_bills(), 8)
+		self.assertEqual(self.sub8.expected_num_bills(), 9)
+		self.assertEqual(self.sub9.expected_num_bills(), 1)
+		self.assertEqual(self.sub10.expected_num_bills(), 0)
+
+	def assess_no_empty_bills(self, s):
+		for bill in s.bills.all():
+			if bill.period_start == bill.period_end:
+				return False
+		return True
+
+	def assess_no_bill_gaps(self):
+		pass
+
+	def test_end_before_start(self):
+		pass
+
+	def test_bill_start_end_same(self):
+		pass
+
+	def test_reject_zero_length_subscription(self):
+		pass

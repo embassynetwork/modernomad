@@ -506,8 +506,12 @@ class Subscription(models.Model):
 		if target_date < self.start_date or (self.end_date and target_date > self.end_date):
 			return (None, None)
 		
-		period_start = target_date
-		if target_date.day != self.start_date.day:
+		if target_date.day == self.start_date.day:
+			# then the period start is one month BEFORE
+			# WAIT i think this might be fundamentall ambiguous! 
+			#period_start = target_date - relativedelta(months=1)
+			period_start = target_date
+		else:
 			month = target_date.month
 			year = target_date.year
 			if target_date.day < self.start_date.day:
@@ -516,7 +520,10 @@ class Subscription(models.Model):
 					year = target_date.year - 1
 				else:
 					month = target_date.month - 1
+			# the period starts on the start_date.day of whatever month we're
+			# operating in. 
 			period_start = date(year, month, self.start_date.day)
+
 		period_end =  period_start + relativedelta(months=1)
 		if period_end.day == period_start.day:
 			period_end = period_end - timedelta(days=1)
@@ -532,6 +539,9 @@ class Subscription(models.Model):
 				return self.start_date
 		this_period_start, this_period_end = self.get_period(target_date=target_date)
 
+		if this_period_end == None:
+			return None
+
 		next_period_start = this_period_end + timedelta(days=1)
 		if self.end_date and next_period_start > self.end_date:
 			return None
@@ -542,7 +552,9 @@ class Subscription(models.Model):
 		if not target_date:
 			if not self.end_date:
 				return False
-			target_date = self.end_date
+			# we need to subtract one day from the end date since otherwise it
+			# will be treated as the start of the *next* period. ugh dates. 
+			target_date = self.end_date - timedelta(days=1)
 		
 		period = self.get_period(target_date=target_date)
 		return period and period[1] == target_date
@@ -642,17 +654,21 @@ class Subscription(models.Model):
 		return line_items
 	
 	def generate_all_bills(self, target_date=None):
+		today = timezone.now().date()
+
+		if not self.bills.all():
+			target_date = self.start_date
+
 		if not target_date:
 			target_date = self.paid_until(include_partial=True) + timedelta(days=1)
 			
-		today = timezone.now().date()
 		if self.end_date and self.end_date < today:
 			end_date = self.end_date
 		else:
 			end_date = today
 		
 		period_start = target_date
-		while period_start and period_start < end_date:
+		while period_start and (period_start < today) and (period_start < end_date):
 			self.generate_bill(target_date=period_start)
 			period_start = self.get_next_period_start(period_start)
 
@@ -687,6 +703,59 @@ class Subscription(models.Model):
 			if not bill.is_paid():
 				return True
 		return False
+
+	def update_for_end_date(self, new_end_date):
+		old_end_date = self.end_date
+		self.end_date = new_end_date
+		self.save()
+
+		''' determines if bills need to be deleted and/or regenerated after a
+		change in end date'''
+		# if the new end date is not on a period boundary, the final bill needs
+		# to be pro-rated, so we need to regenerate it. 
+		today = timezone.localtime(timezone.now()).date()
+		period_start, period_end = self.get_period(today)
+		if not self.is_period_boundary() and new_end_date < period_end: # OR the new end date WOULD be in the current period if it wasn't already prorated
+			# if the subsciption ends on a period boundary, then we want to
+			# regenerate the last bill - so we need to subtract a day to ensure
+			# we're inside the last period, else the target_date will be seen
+			# as the start of a new period. 
+			# JKS: should we have a generate_last_bill() method to obfusate
+			# this awkwardness?
+			last_full_day = self.end_date - datetime.timedelta(days=1)
+			self.generate_bill(target_date=last_full_day)
+
+		if (new_end_date < timezone.now().date()) and ((new_end_date < old_end_date) or old_end_date == None):
+			# if there are any bill with payments beteen old and new
+			# end date, we should already have thrown an error. 
+
+			# if the new end date is before the old end date, we may need to
+			# delete some unused bills. 
+			self.delete_unpaid_bills()
+			# but then we also need to RE generate bills between, say, the
+			# unapid date and the end date, if there are still unpaid bills
+			# there. 
+
+		# if new end date is in future, no new bills need to be generated
+		# unless the old end date was in the past and the new one is in the
+		# future, then there might be a gap where new ones are needed. 
+		#if old_end_date and (new_end_date > old_end_date) or not old_end_date:
+		#	self.generate_all_bills()
+
+		self.generate_all_bills()
+
+
+	def expected_num_bills(self):
+		if not self.end_date:
+			return None
+		today = timezone.localtime(timezone.now()).date()
+		period_start = self.start_date
+		num_expected = 0
+		while period_start and (period_start < today) and (period_start < self.end_date):
+			num_expected += 1
+			period_start = self.get_next_period_start(period_start)
+		return num_expected
+
 
 class SubscriptionBill(Bill):
 	period_start = models.DateField()
@@ -1301,4 +1370,4 @@ class SubscriptionNote(models.Model):
 	note = models.TextField(blank=True, null=True)
 
 	def __str__(self): 
-		return '%s - %d: %s' % (self.created.date(), self.community_subscription.id, self.note)
+		return '%s - %d: %s' % (self.created.date(), self.subscription.id, self.note)

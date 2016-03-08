@@ -173,3 +173,6 @@ try:
 except ImportError:
 	pass
 
+
+NOSE_ARGS = ['--nocapture',
+			'--nologcapture',]

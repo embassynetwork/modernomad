@@ -125,7 +125,7 @@
 
 				</h3>
 				{% if not bill.is_paid %}
-				<form id="bill-charge" method="POST" action="{% url 'bill_charge' location.slug bill.id">
+				<form id="bill-charge" method="POST" action="{% url 'bill_charge' location.slug bill.id %}">
 					{% csrf_token %}
 					<table>
 					<tr>

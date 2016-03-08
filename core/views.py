@@ -1686,28 +1686,33 @@ def BillCharge(request, location_slug, bill_id):
 	location = get_object_or_404(Location, slug=location_slug)
 	bill = get_object_or_404(Bill, pk=bill_id)
 
+	print request.POST
 	#how much to charge?
-	charge_amount_dollars = request.POST.get("bill-%d-charge-amount", bill.id)
-	print 'request to charge user %d' % charge_amount
-	if charge_amount > bill.amount_owed():
-		messages.add_message(request, messages.INFO, "Cannot charge more than remaining amount owed($%d)" % bill.amount_owed())
-		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
+	charge_amount_dollars = Decimal(request.POST.get('charge-amount'))
+	print 'request to charge user $%d' % charge_amount_dollars
+	if charge_amount_dollars > bill.total_owed():
+		messages.add_message(request, messages.INFO, "Cannot charge more than remaining amount owed ($%d was requested on $%d owed)" % (charge_amount_dollars, bill.total_owed()))
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, bill.subscriptionbill.subscription.id)))
 
 	if bill.is_reservation_bill():
 		user = bill.reservationbill.reservation.user
 		reference = "%d reservation ref#%d" % (location.name, bill.reservationbill.reservation.id)
 	elif bill.is_subscription_bill():
 		user = bill.subscriptionbill.subscription.user
-		reference = "%d subscription ref#%d.%d monthly" % (location.name, bill.subscriptionbill.subscription.id, bill.id)
+		reference = "%s subscription ref#%d.%d monthly" % (location.name, bill.subscriptionbill.subscription.id, bill.id)
 	else:
 		raise Exception('Unknown bill type. Cannot determine user.')
 
 	try:
 		payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
-	except Stripe.CardError, e:
+	except stripe.CardError, e:
 		messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
 
 	messages.add_message(request, messages.INFO, "The card was charged.")
+	if bill.is_reservation_bill():
+		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
+	else:
+		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
 	#send_receipt(reservation)
 	
 
@@ -2189,43 +2194,29 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 	location = get_object_or_404(Location, slug=location_slug)
 	subscription = Subscription.objects.get(id=subscription_id)
 	logger.debug(request.POST)
+	print 'request.POST = '
+	print request.POST
+	print '----'
+
 	if request.POST.get("end_date"):
 		new_end_date = datetime.datetime.strptime(request.POST['end_date'],'%m/%d/%Y').date()
 		# disable setting the end date earlier than any recorded payments for associated bills (even partial payments)
 		paid_until = subscription.paid_until(include_partial=True)
-		if new_end_date < paid_until:
+
+		# we need to make sure paid until is not None! since a future
+		# subscription which has not had any bills generated yet, will indeed
+		# have a paid_until value of None. 
+		if paid_until and new_end_date < paid_until:
 			messages.add_message(request, messages.INFO, "Error! This subscription already has payments past the requested end date. Please choose an end date after %s." % str(paid_until))
 			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
 		old_end_date = subscription.end_date
-		subscription.end_date = new_end_date
-		subscription.save()
+		if old_end_date and new_end_date == old_end_date:
+			messages.add_message(request, messages.INFO, "The new end date was the same.")
+			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
+	
+		subscription.update_for_end_date(new_end_date)
 		
-		# prorated is only if in past
-		# will generate_all_bill prorate?
-
-
-		# if the new end date is not on a period boundary, the final bill needs
-		# to be pro-rated, so we need to regenerate it. 
-		if not subscription.is_period_boundary():
-			subscription.generate_bill(target_date=subscription.end_date)
-
-		if (new_end_date < timezone.now().date()) and (new_end_date < old_end_date):
-			# (not that if there are any bill with payments beteen old and new
-			# end date, we should already have thrown an error above.) 
-
-			# if the new end date is before the old end date, we may need to
-			# delete some unused bills. 
-			subscription.delete_unpaid_bills()
-			# but then we also need to RE generate bills between, say, the unapid date and the the end date, if there are still unpaid bills there. 
-			subscription.generate_all_bills()
-
-		# if new end date is in future, no new bills need to be generated
-		# unless the old end date was in the past and the new one is in the
-		# future, then there might be a gap where new ones are needed. 
-		if new_end_date > old_end_date:
-			subscription.generate_all_bills()
-
 		messages.add_message(request, messages.INFO, "Subscription end date updated.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 

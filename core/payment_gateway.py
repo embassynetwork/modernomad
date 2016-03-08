@@ -24,7 +24,7 @@ def charge_reservation(reservation):
 
 def charge_user(user, bill, amount, reference):
 	if settings.STRIPE_SECRET_KEY:
-		return stripe_charge_user(user, bill, amount_reference)
+		return stripe_charge_user(user, bill, amount, reference)
 	else:
 		raise PaymentException("Payment system not configured")
 
@@ -78,13 +78,13 @@ def stripe_charge_card_third_party(reservation, amount, token, charge_descr):
 	return charge
 
 def stripe_charge_user(user, bill, amount_dollars, reference):
-	logger.debug("stripe_charge_user(%s, %s, %d, %s)" % (user, bill, amount, reference))
+	logger.debug("stripe_charge_user(%s, %s, %d, %s)" % (user, bill, amount_dollars, reference))
 	
 	# stripe will raise a stripe.CardError if the charge fails. this
 	# function purposefully does not handle that error so the calling
 	# function can decide what to do.
 
-	amt_cents = int(amt_dollars * 100)
+	amt_cents = int(amount_dollars * 100)
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	charge = stripe.Charge.create(
 			amount=amt_cents,
