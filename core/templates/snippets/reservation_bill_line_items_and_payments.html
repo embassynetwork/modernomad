@@ -2,7 +2,7 @@
 	<tbody id="reservation-items">
 	</tbody>
 	<tbody>
-		{% for line_item in r.bill.ordered_line_items %}
+		{% for line_item in bill.ordered_line_items %}
 			{% if not line_item.paid_by_house %}
 				<tr class="a-room-fee">
 					<td>{{ line_item.description }}</td> 
@@ -12,10 +12,10 @@
 		{% endfor %}
 		<tr class="a-room-fee">
 			<td><strong>Total Bill</strong></td>
-			<td><strong><span id="reservation-total" class="pull-right">${{r.bill.amount}} </span></strong></td>
+			<td><strong><span id="reservation-total" class="pull-right">${{bill.amount}} </span></strong></td>
 		</tr>
 
-		{% for payment in r.payments %}
+		{% for payment in bill.payments.all %}
 		<tr class="a-room-fee">
 			<td><em>Payment: {{ payment.payment_date }} {% if payment.last4 %}(***{{payment.last4}}){% endif %}</em></td>
 			<td><span class="pull-right" id="payment-id-{{payment.id}}"><em>-${{ payment.paid_amount|floatformat:2 }}</em></span></td> 
@@ -24,7 +24,7 @@
 		
 		<tr class="a-room-fee">
 			<td><strong>Total Owed</strong></td>
-			<td><strong><span id="reservation-total" class="{{total_owed_color}} pull-right">${{r.bill.total_owed}} </span></strong></td>
+			<td><strong><span id="reservation-total" class="{{total_owed_color}} pull-right">${{bill.total_owed}} </span></strong></td>
 		</tr>
 	</tbody>
 </table>
