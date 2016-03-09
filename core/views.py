@@ -1672,7 +1672,7 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 		# then we should include the ability to suppress a fee. until then this won't work. 
 		#if line_item.fee:
 		#	subscription.suppress_fee(line_item)
-		subscription.generate_bill()
+		subscription.generate_bill(bill.subscriptionbill.period_start)
 		messages.add_message(request, messages.INFO, "The line item was deleted from the bill for %s." % (bill.subscriptionbill.period_start.strftime("%B %Y")))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
@@ -1764,7 +1764,9 @@ def AddBillLineItem(request, location_slug, bill_id):
 	new_line_item = BillLineItem(description=reason, amount=amount, paid_by_house=False, custom=True)
 	new_line_item.bill = bill
 	new_line_item.save()
-	# regenerate the bill now that we've applied some new fees
+	# regenerate the bill now that we've applied some new fees (even if the
+	# rate has not changed, other percentage-based fees may be affected by this
+	# new line item)
 	if bill.is_reservation_bill():
 		reservation = bill.reservationbill.reservation
 		reservation.generate_bill()
@@ -1772,7 +1774,7 @@ def AddBillLineItem(request, location_slug, bill_id):
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
 	elif bill.is_subscription_bill():
 		subscription = bill.subscriptionbill.subscription
-		subscription.generate_bill()
+		subscription.generate_bill(bill.subscriptionbill.period_start)
 		messages.add_message(request, messages.INFO, "The %s was added to the bill for %s." % (line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:

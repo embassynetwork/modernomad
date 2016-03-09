@@ -33,13 +33,6 @@
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
-		{% with obj_type="subscription" %}
-			{% with notes=subscription_notes %}
-				{% include "snippets/notes.html" %}
-			{% endwith %}
-		{% endwith %}
-
-
 		<div id="reservation-details">
 			<h3>
 				Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }} 
@@ -66,43 +59,26 @@
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			<li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h4>Summary</h4></a></li>
 			<li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+			<hr>
 			{% if s.bills.all %}
-			<table class="dataTable table table-striped reservation-list">
-				<thead>
-					<tr>
-						<th>Period</th>
-						<th>Rate</th>
-						<th>Paid</th>
-					</tr>
-				</thead>
-				<tbody>
-						<ul class="nav nav-pills nav-stacked" role="tablist">
-						{% for bill in s.bills.all %}
-							<tr class="{% cycle 'row-even' 'row-odd' %}">
-								<td>
-									<a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill"><h5>Bill {{ bill.period_start}} - {{bill.period_end}} </h5></a>
-								</td>
-								<td>{{bill.amount }}</td>
-								<td>
-									{% if bill.is_paid %}
-										<span class="text-success glyphicon glyphicon-ok"></span>
-									{% else %}
-										<span class="text-danger glyphicon glyphicon-exclamation-sign"></span>
-									{% endif %}
-								</td>
-							</tr>
-						{% endfor %}
-						</ul>
-				</tbody>
-			</table>
+				{% for bill in s.bills.all %}
+				<li> <a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill">
+					<h4>
+						{% if bill.is_paid %}
+							<span class="glyphicon glyphicon-ok"></span>
+						{% else %}
+							<span class="glyphicon glyphicon-time"></span>
+						{% endif %}
+						Bill {{ bill.period_start}}
+					</h4>
+				</a>
+				{% endfor %}
 			{% endif %}
-
 
 		</ul>
 	</div>
 
-	<div class="col-md-6">	
-
+	<div class="col-md-7">	
 		<div class="tab-content">
 
 			<div role="tabpanel" class="tab-pane active" id="subscription-manage-summary">
@@ -115,52 +91,28 @@
 
 			{% for bill in s.bills.all %}
 			<div role="tabpanel" class="tab-pane" id="subscription-bill-details-{{ bill.id}}">
-				<h3>
-					{{ bill.period_start }} Bill Details
-					{% if bill.is_paid %} 
-						<span class="text-success glyphicon glyphicon-ok"></span>
-					{% else %}
-						<span class="text-danger glyphicon glyphicon-exclamation-sign"></span> 
-					{% endif %}
 
-				</h3>
-				{% if not bill.is_paid %}
-				<form id="bill-charge" method="POST" action="{% url 'bill_charge' location.slug bill.id %}">
-					{% csrf_token %}
-					<table>
-					<tr>
-						<td>Charge user for bill: </td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="charge-options" id="bill-{{bill.id}}-full-charge" onclick="UpdateChargeValue({{bill.id}}, {{bill.total_owed}}, 'readonly')" value="charge-full-amount" checked> Full 
-						</label>
-					</td>
-					<td>
-						<label class="radio-inline">
-							<input type="radio" name="charge-options" id="bill-{{bill.id}}-partial-charge" onclick="UpdateChargeValue({{bill.id}}, '', 'readwrite')" value="partial-charge"> Partial
-						</label>
-					</td>
-					<td>
-						<input type="number" min="0" max="{{bill.total_owed}}" min="0" name="charge-amount" id="bill-{{bill.id}}-charge-amount" value="{{bill.total_owed}}" class="disabled" readonly="readonly">
-					</td>
-					<td>
-						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?'); $(this).removeAttr('readonly');">
-					</td>
-					</tr>
-					</table>
-					</form>
-				{% endif %}
-				{% with r=s %}
-					{% include "snippets/manage-page-bill-details.html" %}
-					<h4>Customize this bill</h4>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details </h3>
+						{% include "snippets/manage-charge-bill.html" %}
+					</div>
+					<div class="panel-body">
+						{% include "snippets/manage-page-bill-details.html" %}
+					</div>
+				</div>
+
+				<div class="clickable text-info" onclick="toggleBillCustomize({{bill.id}}); return false;" id="bill-customize-link-{{bill.id}}"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"> Payments and Custom Fees</div>
+				<div id="bill-customize-area-{{bill.id}}" class="hidden">
+					{% include "snippets/manage-page-payment-details.html" %}
 					{% if bill.is_paid %}
 						<p>This bill has been paid and cannot be modified</p>
 					{% else %}
 						{% include "snippets/add-bill-line-items.html" %}
 					{% endif %}
-					{% include "snippets/manage-page-payment-details.html" %}
-				{% endwith %}
+				</div>
 			</div>
+
 			{% endfor %}
 
 		</div>
@@ -209,13 +161,25 @@ function toggleRefundDetails(id){
 }
 toggleRefundDetails();
 
+function toggleBillCustomize(e){
+	if($('#bill-customize-area-'+e).is(':hidden')) {
+		console.log('hidden, unhiding')
+		$('#bill-customize-area-'+e).removeClass('hidden')
+		$('#bill-customize-link-'+e).html('<span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span> Payments and Custom Fees');
+	} else {
+		console.log('not hidden, hiding')
+		$('#bill-customize-area-'+e).addClass('hidden')
+		$('#bill-customize-link-'+e).html('<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Payments and Custom Fees');
+	}
+}
+
 function toggleNotes(){
 	if($('#notes-area').is(':hidden')) {
 		$('#notes-area').show();
-		$('#notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Subscription notes</h4>');
+		$('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Subscription notes');
 	} else {
 		$('#notes-area').hide();
-		$('#notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{subscription_notes|length}} subscription note{{subscription_notes|length|pluralize}}</h4>');
+		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{subscription_notes|length}} subscription note{{subscription_notes|length|pluralize}}');
 	}
 }
 

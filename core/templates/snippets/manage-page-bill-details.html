@@ -1,9 +1,3 @@
-	<form class="manage-button-spacer res-action" method=POST action="{% url 'recalculate_bill' location.slug bill.id %}">
-		{% csrf_token %}
-		<input class="btn-default btn" type="submit" value="Reset Bill Fees">
-		<input type="hidden" name="reset_suppressed" value="true">
-	</form>
-
 	<table id="bill-details" class="table">
 		<thead>
 			<th>Description</th>

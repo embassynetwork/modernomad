@@ -174,10 +174,10 @@ toggleRefundDetails();
 function toggleNotes(){
 	if($('#notes-area').is(':hidden')) {
 		$('#notes-area').show();
-		$('#notes-link').html('<h4><span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes</h4>');
+		$('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes');
 	} else {
 		$('#notes-area').hide();
-		$('#notes-link').html('<h4><span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}</h4>');
+		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}');
 	}
 }
 

@@ -1845,3 +1845,13 @@ input.disabled {
 	width: 100%;
 	height: 100%;
 }
+
+.hidden { 
+	display: none; 
+}
+
+.clickable:hover {
+	cursor: pointer;
+	cursor: hand;
+}
+

@@ -1,8 +1,6 @@
 <div class="panel panel-warning">
 		<div class="panel-heading" id="notes-link" onclick="toggleNotes(); return false;">
-			<h4>
-				<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close {{obj_type}} notes 
-			</h4>
+			<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close {{obj_type}} notes 
 		</div>
 	<div id="notes-area" class="panel-body">
 		{% for note in notes %}

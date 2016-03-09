@@ -1,10 +1,31 @@
-<ul>
-	<li>Subscription is {% if not s.is_active %} not {%endif %} active. 
-	{% if s.get_next_period_start %} <li>The next billing cycle will occur on {{ s.get_next_period_start }} </li>{% endif %} 
-	{% if s.user.profile.customer_id %}
-		<li>The user has a card on file.
-	{% else %}
-		<li>The user has no card on file. Send them an email to request it. 
-	{% endif %}
-	<li>{% if s.has_unpaid_bills %}Subscription has unpaid bills{% else %} Subscription is current {% endif %}
-</ul>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title">Summary</h3>
+	</div>
+	<table class="table">
+		<tr><td>Subscription is {% if not s.is_active %} not {%endif %} active. </td></tr>
+		<tr><td>
+			{% if s.get_next_period_start %} 
+				The next billing cycle will occur on {{ s.get_next_period_start }}
+			{% elif s.is_active %}
+				This is the last billing cycle
+			{% endif %} 
+		</tr></td>
+		<tr><td>
+		{% if s.user.profile.customer_id %}
+			The user has a card on file.
+		{% else %}
+			The user has no card on file. Send them an email to request it. 
+		{% endif %}
+		</tr></td>
+		<tr><td>
+		{% if s.has_unpaid_bills %}Subscription has unpaid bills{% else %} Subscription is current {% endif %}
+		</tr></td>
+	</table>
+</div>
+{% with obj_type="subscription" %}
+	{% with notes=subscription_notes %}
+		{% include "snippets/notes.html" %}
+	{% endwith %}
+{% endwith %}
+
