@@ -575,11 +575,12 @@ class Subscription(models.Model):
 		return self.start_date <= target_date and (self.end_date == None or self.end_date >= target_date)
 
 	def generate_bill(self, delete_old_items=True, target_date=None):
-		''' used to generate or regenerate a bill.  the reason old line items
-		are generally deleted is that we want to make sure that a) the line
-		item descriptions are correct, since they are simply strings generated
-		from the line items themselves, and b) because if any fees have
-		changed, then percentage based derivative fees will also change. '''
+		''' used to generate or regenerate a bill for the given target date, or
+		today.  the reason old line items are generally deleted is that we want
+		to make sure that a) the line item descriptions are correct, since they
+		are simply strings generated from the line items themselves, and b)
+		because if any fees have changed, then percentage based derivative fees
+		will also change. '''
 
 		if not target_date:
 			target_date = timezone.now().date()
@@ -617,15 +618,13 @@ class Subscription(models.Model):
 		# Save any custom line items before clearing out the old items
 		custom_items = list(bill.line_items.filter(custom=True))
 		if delete_old_items:
-			print "working with bill %s" % str(bill.period_start)
+			logger.debug("working with bill %d (%s)" % (bill.id, str(bill.period_start)))
 			if bill.total_paid() > 0:
-				print "Warning: modifying a bill with payments on it!"
-
+				logger.debug("Warning: modifying a bill with payments on it.")
 			for item in bill.line_items.all():
 				item.delete()
 		
 		line_items = []
-		
 		# First line item is the subscription itself. 
 		desc = "%s (%s to %s)" % (self.description, period_start, period_end)
 		if prorated:
@@ -662,11 +661,8 @@ class Subscription(models.Model):
 	def generate_all_bills(self, target_date=None):
 		today = timezone.now().date()
 
-		if not self.bills.all():
-			target_date = self.start_date
-
 		if not target_date:
-			target_date = self.paid_until(include_partial=True) + timedelta(days=1)
+			target_date = self.start_date
 			
 		if self.end_date and self.end_date < today:
 			end_date = self.end_date
@@ -678,10 +674,10 @@ class Subscription(models.Model):
 			self.generate_bill(target_date=period_start)
 			period_start = self.get_next_period_start(period_start)
 
-	def paid_until(self, include_partial=False):
-		''' what date is this subscription paid until. returns the end date of
-		the last paid period, unless no bills have been paid in which case it
-		returns the start date of the first period. 
+	def last_paid(self, include_partial=False):
+		''' returns the end date of the last period with payments, unless no
+		bills have been paid in which case it returns the start date of the
+		first period. 
 		
 		If include_partial=True we will count partially paid bills as "paid"
 		'''
@@ -701,7 +697,7 @@ class Subscription(models.Model):
 	
 	def delete_unpaid_bills(self):
 		for bill in self.bills.all():
-			if not bill.is_paid():
+			if bill.total_paid() == 0:
 				bill.delete()
 	
 	def has_unpaid_bills(self):
@@ -711,59 +707,24 @@ class Subscription(models.Model):
 		return False
 
 	def update_for_end_date(self, new_end_date):
-		old_end_date = self.end_date
+		''' deletes and regenerates bills after a change in end date'''
 		self.end_date = new_end_date
 		self.save()
 
-		''' determines if bills need to be deleted and/or regenerated after a
-		change in end date'''
 		# if the new end date is not on a period boundary, the final bill needs
 		# to be pro-rated, so we need to regenerate it. 
 		today = timezone.localtime(timezone.now()).date()
 		period_start, period_end = self.get_period(today)
-		if not self.is_period_boundary():
-			# Funny edge case here: we need to recalculate the last bill if the
-			# new end date before OR within the current period (otherwise it's
-			# in the future and, well, the future will handle that). but if the
-			# current bill was already prorated, then we need to cnsider the
-			# case where the new end day WOULD be in the current period, if it
-			# wasn't already prorated. 
-			full_period_end = period_start + relativedelta(months=1) 
-			print new_end_date
-			print full_period_end
-			if new_end_date < full_period_end: 
-				print 'new_end_date < full period_end'
-				# to regenerate the last bill we need to subtract a day to ensure
-				# we're inside the last period, else the target_date will be seen
-				# as the start of a new period. 
-				# JKS: should we have a generate_last_bill() method to obfusate
-				# this awkwardness?
-				last_full_day = self.end_date - datetime.timedelta(days=1)
-				self.generate_bill(target_date=last_full_day)
 
-		if (new_end_date < timezone.now().date()) and ((new_end_date < old_end_date) or old_end_date == None):
-			# if there are any bill with payments beteen old and new
-			# end date, we should already have thrown an error. 
+		# delete unpaid bills will skip any bills with payments on them.
+		self.delete_unpaid_bills()
 
-			# if the new end date is before the old end date, we may need to
-			# delete some unused bills. 
-			self.delete_unpaid_bills()
-			# but then we also need to RE generate bills between, say, the
-			# unapid date and the end date, if there are still unpaid bills
-			# there. 
-
-		# if new end date is in future, no new bills need to be generated
-		# unless the old end date was in the past and the new one is in the
-		# future, then there might be a gap where new ones are needed. 
-		#if old_end_date and (new_end_date > old_end_date) or not old_end_date:
-		#	self.generate_all_bills()
-
+		# in general there are SO MANY edge cases about when to regenerate
+		# bills, that we just regenerate them in all cases. 
 		self.generate_all_bills()
 
 
 	def expected_num_bills(self):
-		if not self.end_date:
-			return None
 		today = timezone.localtime(timezone.now()).date()
 		period_start = self.start_date
 		num_expected = 0

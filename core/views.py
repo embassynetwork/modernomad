@@ -213,8 +213,6 @@ def room_occupancy_month(room, month, year):
 		rate = r.bill.subtotal_amount()/r.total_nights()
 
 		if r.is_comped():
-			print 'comped'
-			print r.id
 			total_comped_nights += nights_this_month
 			total_comped_value += nights_this_month*r.default_rate()
 			comp = True
@@ -233,7 +231,6 @@ def room_occupancy_month(room, month, year):
 				partial_paid_reservations.append(r.id)
 
 	params = [month, year, round(payments_cash, 2), round(payments_accrual, 2), nights_occupied, nights_available, partial_paid_reservations, total_comped_nights, round(total_comped_value, 2)]
-	print params
 	return params
 	
 @house_admin_required
@@ -242,7 +239,6 @@ def room_occupancy(request, location_slug, room_id, year):
 	year = int(year)
 	response = HttpResponse(content_type='text/csv')
 	output_filename = "%s Occupancy Report %d.csv" % (room.name, year)
-	print output_filename
 	response['Content-Disposition'] = 'attachment; filename=%s' % output_filename
 	writer = csv.writer(response)
 	if room.location.slug != location_slug:
@@ -256,7 +252,6 @@ def room_occupancy(request, location_slug, room_id, year):
 		return response
 	
 	for month in range(1,13):
-		print month
 		params = room_occupancy_month(room, month, year)
 		writer.writerow(params)
 
@@ -381,7 +376,7 @@ def occupancy(request, location_slug):
 			if r.payments():
 				paid_rate = (r.bill.total_paid() - r.bill.non_house_fees()) / r.total_nights()
 				if paid_rate != rate:
-					print "reservation %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate)
+					logger.debug("reservation %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate))
 					paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
 					payment_discrepancies.append(r.id)
 
@@ -401,8 +396,6 @@ def occupancy(request, location_slug):
 				unpaid_total += (to_house_per_night*nights_this_month)
 				unpaid = True
 				if r.bill.total_owed() < r.bill.amount():
-					print 'bill amount'
-					print r.bill.amount()
 					partial_payment = True
 					total_owed = r.bill.total_owed()
 
@@ -463,8 +456,6 @@ def occupancy(request, location_slug):
 		# TODO *should* we add create reservables here? 
 		if reservable_days_per_room[room] < room_occupancy[room]: 
 			reservable_days_per_room[room] = room_occupancy[room]
-			print 'updated %s' % room.name
-			print room_occupancy[room]
 		if reservable_days_per_room[room] > 0:
 			room_occupancy_rate = 100*float(room_occupancy[room])/reservable_days_per_room[room]
 		else:
@@ -571,7 +562,6 @@ def calendar(request, location_slug):
 def room_cal_request(request, location_slug, room_id, month=None, year=None, browse_past=True):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	print request.POST
 	month = int(request.POST.get("month"))
 	year = int(request.POST.get("year"))
 	browse_past_str = request.POST.get("browse_past")
@@ -579,7 +569,6 @@ def room_cal_request(request, location_slug, room_id, month=None, year=None, bro
 		browse_past = False
 	else:
 		brose_past = True
-	print browse_past
 
 	try:
 		location = get_object_or_404(Location, slug=location_slug)
@@ -688,7 +677,8 @@ def CheckRoomAvailability(request, location_slug):
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
 	availability = location.availability(arrive, depart)
 	date_list = date_range_to_list(arrive, depart)
-	print date_list
+	logger.debug("Checking room availability for date list")
+	logger.debug(date_list)
 	available_reservations = {}
 	# Create some mock reservations for each available room so we can generate the bill
 	free_rooms = location.rooms_free(arrive, depart)
@@ -765,13 +755,10 @@ def ReservationSubmit(request, location_slug):
 			else:
 				res_info = reservation.serialize()
 				request.session['reservation'] = res_info
-				print 'session info'
-				print request.session.keys()
-				print request.session.items()
 				messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your reservation request.')			
 				return HttpResponseRedirect(reverse('registration_register'))
 		else:
-			print form.errors
+			logger.debug(form.errors)
 	# GET request
 	else: 
 		form = ReservationForm(location)
@@ -842,32 +829,32 @@ def ReservationDetail(request, reservation_id, location_slug):
 @csrf_exempt
 def username_available(request):
 	'''AJAX request to check for existing user with the submitted username'''
-	print 'in username_available'
+	logger.debug('in username_available')
 	if not request.is_ajax():
 		return HttpResponseRedirect('/404')
 	username = request.POST.get('username')
 	users_with_username = len(User.objects.filter(username=username))
 	if users_with_username:
-		print 'username %s is already in use' % username
+		logger.debug('username %s is already in use' % username)
 		is_available = 'false'
 	else:
-		print 'username %s is available' % username
+		logger.debug('username %s is available' % username)
 		is_available = 'true'
 	return HttpResponse(is_available)
 
 @csrf_exempt
 def email_available(request):
 	'''AJAX request to check for existing user with the submitted email'''
-	print 'in email_available'
+	logger.debug('in email_available')
 	if not request.is_ajax():
 		return HttpResponseRedirect('/404')
 	email = request.POST.get('email').lower()
 	users_with_email = len(User.objects.filter(email=email))
 	if users_with_email:
-		print 'email address %s is already in use' % email
+		logger.debug('email address %s is already in use' % email)
 		is_available = 'false'
 	else:
-		print 'email address %s is available' % email
+		logger.debug('email address %s is available' % email)
 		is_available = 'true'
 	return HttpResponse(is_available)
 
@@ -2130,9 +2117,9 @@ def SubscriptionManageCreate(request, location_slug):
 			messages.add_message(request, messages.INFO, "The subscription for %s %s was created." % (subscription.user.first_name, subscription.user.last_name))
 			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 		else:
-			print 'the form had errors'
-			print form.errors
-			print request.POST
+			logger.debug('the form had errors')
+			logger.debug(form.errors)
+			logger.debug(request.POST)
 			
 	else:
 		form = AdminSubscriptionForm()
@@ -2196,30 +2183,27 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 	location = get_object_or_404(Location, slug=location_slug)
 	subscription = Subscription.objects.get(id=subscription_id)
 	logger.debug(request.POST)
-	print 'request.POST = '
-	print request.POST
-	print '----'
 
+	new_end_date = None # an empty end date is an ongoing subscription. 
+	old_end_date = subscription.end_date
 	if request.POST.get("end_date"):
 		new_end_date = datetime.datetime.strptime(request.POST['end_date'],'%m/%d/%Y').date()
 		# disable setting the end date earlier than any recorded payments for associated bills (even partial payments)
-		paid_until = subscription.paid_until(include_partial=True)
+		most_recent_paid = subscription.last_paid(include_partial=True)
 
-		# we need to make sure paid until is not None! since a future
-		# subscription which has not had any bills generated yet, will indeed
-		# have a paid_until value of None. 
-		if paid_until and new_end_date < paid_until:
-			messages.add_message(request, messages.INFO, "Error! This subscription already has payments past the requested end date. Please choose an end date after %s." % str(paid_until))
+		# careful, a subscription which has not had any bills generated yet
+		# will have a paid_until value of None but is not problematic to change
+		# the date. 
+		if most_recent_paid and new_end_date < most_recent_paid:
+			messages.add_message(request, messages.INFO, "Error! This subscription already has payments past the requested end date. Please choose an end date after %s." % paid_until.strftime("%B %d, %Y"))
 			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
-		old_end_date = subscription.end_date
 		if old_end_date and new_end_date == old_end_date:
 			messages.add_message(request, messages.INFO, "The new end date was the same.")
 			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 	
-		subscription.update_for_end_date(new_end_date)
-		
-		messages.add_message(request, messages.INFO, "Subscription end date updated.")
+	subscription.update_for_end_date(new_end_date)
+	messages.add_message(request, messages.INFO, "Subscription end date updated.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
 @house_admin_required
