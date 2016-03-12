@@ -84,7 +84,7 @@
 						{% if user in location.house_admins.all %}
 							<li><a tabindex="-1" href="{% url 'reservation_manage_list' location.slug %}">Reservations</a></li>
 							<li><a href="{% url 'reservation_manage_create' location.slug %}">New Reservation</a></li>
-							<li><a href="{% url 'subscriptions_manage_list' location.slug %}">Subscriptions List</a></li>
+							<li><a href="{% url 'subscriptions_manage_list' location.slug %}">Subscriptions</a></li>
 						{% endif %}
 					{% endif %}
 					{% if user in location.house_admins.all %}
