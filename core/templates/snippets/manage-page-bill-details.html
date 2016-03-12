@@ -23,7 +23,7 @@
 		{% endfor %}
 		<tr class="total-row">
 			<td></td>
-			<td>Subtotal</td>
+			<td class="money">Subtotal</td>
 			<td class="money">${{ bill.subtotal_amount|floatformat:2 }}</td>
 		</tr>
 		{% for item in bill.fees %}
@@ -43,18 +43,32 @@
 		{% endfor %}
 		<tr class="total-row">
 			<td></td>
-			<td>Total</td>
+			<td class="money">Total</td>
 			<td class="money">${{ bill.amount|floatformat:2 }}</td>
 		</tr>
 		{% for item in bill.fees %}
 			{% if item.paid_by_house %}
 				<tr class="bill-line-item">
-					<td class="money"></td>
 					<td class="paid-by-house text-danger"><em>{{ item.description }} Fee</em></td>
-					<td class="money"><span class="text-danger">${{ item.amount|floatformat:2 }}</span></td>
+					<td class="money"><span class="text-danger"><em>${{ item.amount|floatformat:2 }}</em></span></td>
 				</tr>
 			{% endif %}
 		{% endfor %}
+
+		{% for payment in bill.payments.all %}
+		<tr class="a-room-fee">
+			<td>Payment: {{ payment.payment_date }} {% if payment.last4 %}(***{{payment.last4}}){% endif %}</td>
+			<td></td>
+			<td class="money">-${{ payment.paid_amount|floatformat:2 }}</td> 
+		</tr>
+		{% endfor %}
+		
+		<tr class="a-room-fee">
+			<td><strong>Total Owed</strong></td>
+			<td></td>
+			<td><strong><span id="reservation-total" class="{{total_owed_color}} pull-right">${{bill.total_owed}} </span></strong></td>
+		</tr>
+
 	</table>
 
 

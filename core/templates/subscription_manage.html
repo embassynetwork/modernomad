@@ -65,9 +65,11 @@
 				<li> <a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill">
 					<h4>
 						{% if bill.is_paid %}
-							<span class="glyphicon glyphicon-ok"></span>
+							<i class="text-success fa fa-check-circle-o"></i>
+						{% elif bill.total_paid > 0 %}
+							<i class="text-warning fa fa-exclamation-circle"></i>
 						{% else %}
-							<span class="glyphicon glyphicon-time"></span>
+							<i class="text-danger fa fa-exclamation-circle"></i>
 						{% endif %}
 						Bill {{ bill.period_start}}
 					</h4>
@@ -102,7 +104,7 @@
 					</div>
 				</div>
 
-				<div class="clickable text-info" onclick="toggleBillCustomize({{bill.id}}); return false;" id="bill-customize-link-{{bill.id}}"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"> Payments and Custom Fees</div>
+				<div class="clickable text-info" onclick="toggleBillCustomize({{bill.id}}); return false;" id="bill-customize-link-{{bill.id}}"><i class="fa fa-caret-right" aria-hidden="true"></i> Manage Payments and Custom Fees</div>
 				<div id="bill-customize-area-{{bill.id}}" class="hidden">
 					{% include "snippets/manage-page-payment-details.html" %}
 					{% if bill.is_paid %}
@@ -165,11 +167,11 @@ function toggleBillCustomize(e){
 	if($('#bill-customize-area-'+e).is(':hidden')) {
 		console.log('hidden, unhiding')
 		$('#bill-customize-area-'+e).removeClass('hidden')
-		$('#bill-customize-link-'+e).html('<span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span> Payments and Custom Fees');
+		$('#bill-customize-link-'+e).html('<i class="fa fa-caret-down" aria-hidden="true"></i> Payments and Custom Fees');
 	} else {
 		console.log('not hidden, hiding')
 		$('#bill-customize-area-'+e).addClass('hidden')
-		$('#bill-customize-link-'+e).html('<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Payments and Custom Fees');
+		$('#bill-customize-link-'+e).html('<i class="fa fa-caret-right" aria-hidden="true"></i> Payments and Custom Fees');
 	}
 }
 
