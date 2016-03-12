@@ -55,9 +55,17 @@
 			{% endif %}
 		{% endfor %}
 
-		{% for payment in bill.payments.all %}
+		{% for payment in bill.time_ordered_payments %}
 		<tr class="a-room-fee">
-			<td>Payment: {{ payment.payment_date }} {% if payment.last4 %}(***{{payment.last4}}){% endif %}</td>
+			<td>
+				{% if payment.paid_amount > 0 %}
+					Payment: 
+				{% else %}
+					Refund: 
+				{% endif %}
+				{{ payment.payment_date }} 
+				{% if payment.last4 %}(***{{payment.last4}}){% elif payment.payment_method %}({{payment.payment_method}}){% endif %}
+			</td>
 			<td></td>
 			<td class="money">-${{ payment.paid_amount|floatformat:2 }}</td> 
 		</tr>

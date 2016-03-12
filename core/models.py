@@ -434,6 +434,10 @@ class Bill(models.Model):
 	def is_paid(self):
 		return self.total_owed() <= 0
 
+	def time_ordered_payments(self):
+		return self.payments.order_by('payment_date')
+
+
 	def payment_date(self):
 		# Date of the last payment
 		last_payment = self.payments.order_by('payment_date').reverse().first()
@@ -588,7 +592,8 @@ class Subscription(models.Model):
 		period_start, period_end = self.get_period(target_date)
 		if not period_start:
 			return None
-		print 'in generate_bill for period %s - %s' % (period_start, period_end)
+		logger.debug(' ')
+		logger.debug('in generate_bill for target_date = %s and get_period = (%s, %s)' % (target_date, period_start, period_end))
 		
 		# a subscription's last cycle could be a pro rated one. check to see if
 		# the subscription end date is before the period end; if so, change the
@@ -599,26 +604,27 @@ class Subscription(models.Model):
 			original_period_end = period_end
 			period_end = self.end_date
 		
-		# Look to see if we have an existing bill for this period
 		try:
 			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
+			logger.debug('found existing bill #%d for period start %s' % (bill.id, period_start.strftime("%B %d %Y")))
 			# if the bill already exists but we're updating it to be prorated,
 			# we need to change the period end also. 
 			if prorated and bill.period_end != period_end:
 				bill.period_end = period_end
 				bill.save()
-
 			# If we already have a bill and we don't want to clear out the old data
 			# we can stop right here and go with the existing line items.
 			if not delete_old_items:
 				return list(bill.line_items)
-		except:
+		except Exception, e:
+			logger.debug("** Error: %s" % e)
+			logger.debug("Generating new bill item")
 			bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
 		
 		# Save any custom line items before clearing out the old items
+		logger.debug("working with bill %d (%s)" % (bill.id, bill.period_start.strftime("%B %d %Y")))
 		custom_items = list(bill.line_items.filter(custom=True))
 		if delete_old_items:
-			logger.debug("working with bill %d (%s)" % (bill.id, str(bill.period_start)))
 			if bill.total_paid() > 0:
 				logger.debug("Warning: modifying a bill with payments on it.")
 			for item in bill.line_items.all():
@@ -637,15 +643,22 @@ class Subscription(models.Model):
 		line_item = BillLineItem(bill=bill, description=desc, amount=price, paid_by_house=False)
 		line_items.append(line_item)
 		
-		# Add back the custom fees
+		# Incorporate any custom fees or discounts. As well, track the
+		# effective room charge to be used in calculation of percentage-based
+		# fees
+		effective_bill_charge = price
 		for item in custom_items:
 			line_items.append(item)
+			effective_bill_charge += item.amount #may be negative
+			logger.debug(item.amount)
+		logger.debug('effective room charge after discounts: %d' % effective_bill_charge)
 		
 		# For now we are going to assume that all fees (of any kind) that are marked as "paid by house"
 		# will be applied to subscriptions as well -- JLS
 		for location_fee in LocationFee.objects.filter(location = self.location, fee__paid_by_house=True):
 			desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-			amount = float(self.price) * location_fee.fee.percentage
+			amount = float(effective_bill_charge) * location_fee.fee.percentage
+			logger.debug('Fee %s for %d' % (desc, amount))
 			fee_line_item = BillLineItem(bill=bill, description=desc, amount=amount, paid_by_house=True, fee=location_fee.fee)
 			line_items.append(fee_line_item)
 			

@@ -155,10 +155,12 @@ function UpdateRefundValue(id, val, field_status) {
 } 
 
 function toggleRefundDetails(id){
+	$('#refund-details-'+id).show()
+	
 	if($('#refund-details-'+id).is(':hidden')) {
-		$('#refund-details-'+id).show('slow')
+		$('#refund-details-'+id).show()
 	} else {
-		$('#refund-details-'+id).hide('slow')
+		$('#refund-details-'+id).hide()
 	}
 }
 toggleRefundDetails();

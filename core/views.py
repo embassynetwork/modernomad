@@ -1529,6 +1529,7 @@ def ManagePayment(request, location_slug, bill_id):
 	location = get_object_or_404(Location, slug=location_slug)
 	bill = get_object_or_404(Bill, id=bill_id)
 	
+	logger.debug(request.POST)
 	action = request.POST.get("action")
 	if action == "Submit":
 		# process a refund
@@ -1541,7 +1542,8 @@ def ManagePayment(request, location_slug, bill_id):
 			messages.add_message(request, messages.INFO, "Cannot refund more than payment balance")
 		else:
 			payment_gateway.issue_refund(payment, refund_amount)
-	elif action == "Add":
+	elif action == "Save":
+		logger.debug("saving record of external payment")
 		# record a manual payment
 		payment_method = request.POST.get("payment_method").strip().title()
 		paid_amount = request.POST.get("paid_amount").strip()
@@ -1557,8 +1559,10 @@ def ManagePayment(request, location_slug, bill_id):
 	# a) want to redirect to a manage page and b) that there are only two types
 	# of bills. this should be abstracted at some point. 
 	if bill.is_reservation_bill():
+		messages.add_message(request, messages.INFO, "Manual payment recorded")
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
 	else:
+		messages.add_message(request, messages.INFO, "Manual payment recorded on bill dated %s" % bill.subscriptionbill.period_start.strftime("%B %D, %Y"))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
 
 @house_admin_required
@@ -1659,7 +1663,7 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 		# then we should include the ability to suppress a fee. until then this won't work. 
 		#if line_item.fee:
 		#	subscription.suppress_fee(line_item)
-		subscription.generate_bill(bill.subscriptionbill.period_start)
+		subscription.generate_bill(target_date=bill.subscriptionbill.period_start)
 		messages.add_message(request, messages.INFO, "The line item was deleted from the bill for %s." % (bill.subscriptionbill.period_start.strftime("%B %Y")))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
@@ -1692,10 +1696,10 @@ def BillCharge(request, location_slug, bill_id):
 
 	try:
 		payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
+		messages.add_message(request, messages.INFO, "The card was charged.")
 	except stripe.CardError, e:
 		messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
 
-	messages.add_message(request, messages.INFO, "The card was charged.")
 	if bill.is_reservation_bill():
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
 	else:
@@ -1761,7 +1765,7 @@ def AddBillLineItem(request, location_slug, bill_id):
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation.id)))
 	elif bill.is_subscription_bill():
 		subscription = bill.subscriptionbill.subscription
-		subscription.generate_bill(bill.subscriptionbill.period_start)
+		subscription.generate_bill(target_date=bill.subscriptionbill.period_start)
 		messages.add_message(request, messages.INFO, "The %s was added to the bill for %s." % (line_item_type, bill.subscriptionbill.period_start.strftime("%B %Y")))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location.slug, subscription.id)))
 	else:
@@ -2195,7 +2199,7 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
 		# will have a paid_until value of None but is not problematic to change
 		# the date. 
 		if most_recent_paid and new_end_date < most_recent_paid:
-			messages.add_message(request, messages.INFO, "Error! This subscription already has payments past the requested end date. Please choose an end date after %s." % paid_until.strftime("%B %d, %Y"))
+			messages.add_message(request, messages.INFO, "Error! This subscription already has payments past the requested end date. Please choose an end date after %s." % most_recent_paid.strftime("%B %d, %Y"))
 			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
 		if old_end_date and new_end_date == old_end_date:

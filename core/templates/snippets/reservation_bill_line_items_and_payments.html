@@ -15,9 +15,17 @@
 			<td><strong><span id="reservation-total" class="pull-right">${{bill.amount}} </span></strong></td>
 		</tr>
 
-		{% for payment in bill.payments.all %}
+		{% for payment in bill.time_ordered_payments %}
 		<tr class="a-room-fee">
-			<td><em>Payment: {{ payment.payment_date }} {% if payment.last4 %}(***{{payment.last4}}){% endif %}</em></td>
+			<td><em>
+					{% if payment.paid_amount < 0 %}
+					Payment: 
+					{% else %}
+					Refund: 
+					{% endif %}
+					{{ payment.payment_date }} 
+					{% if payment.last4 %}(***{{payment.last4}}){% elif payment.method %}({{payment.method}}){% endif %}
+			</em></td>
 			<td><span class="pull-right" id="payment-id-{{payment.id}}"><em>-${{ payment.paid_amount|floatformat:2 }}</em></span></td> 
 		</tr>
 		{% endfor %}

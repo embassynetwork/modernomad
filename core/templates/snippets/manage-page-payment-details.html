@@ -1,6 +1,5 @@
-	<h3>Payments</h3>
+	<h4 class="row-spacer">Payments</h4>
 
-	{% if bill.payments %}
 	<table id="payment-details" class="table">
 		<thead>
 			<th>Date</th>
@@ -20,7 +19,7 @@
 						{% if p.is_fully_refunded %} 
 							<em>Refunded</em>
 						{% elif not p.transaction_id == "Manual" %}
-							<a class="btn btn-danger pull-right" id="show-refund-details-{{p.id}}" onclick="toggleRefundDetails({{p.id}}); return false;">Refund?</a>
+						<a class="btn btn-danger pull-right" id="show-refund-details-{{p.id}}" onclick="toggleRefundDetails({{p.id}}); return false;">Refund... <i class="fa fa-expand"></i></a>
 						{% endif %}
 					</td>
 				</tr>
@@ -39,20 +38,24 @@
 						<label class="radio-inline">
 							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{p.id}}, {{p.net_paid}}, 'readonly')" value="full-refund" checked> Full 
 						</label>
-					</td>
-					<td>
 						<label class="radio-inline">
 							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{p.id}}, '', 'readwrite')" value="partial-refund"> Partial
 						</label>
 					</td>
 					<td>
-						<input type="number" min="0" max="{{p.net_paid}}" name="refund-amount" id="refund-amount-{{p.id}}" value="{{p.net_paid}}" class="disabled" readonly="readonly">
+						<input type="number" min="0" max="{{p.net_paid}}" name="refund-amount" id="refund-amount-{{p.id}}" value="{{p.net_paid}}" class="disabled form-control" readonly="readonly">
 					</td>
 					<td>
 						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?'); $(this).removeAttr('readonly');">
 					</td>
+					<td>
+					</td>
 				</tr>
 			</form>
+			{% empty %}
+			<tr class="greyed-out">
+				<td>No payments</td>
+				</tr>
 		{% endfor %}
 
 		<tr class="total-row">
@@ -60,20 +63,29 @@
 			<td class="money">${{ bill.total_paid|floatformat:2 }}</td>
 			<td></td>
 		</tr>
-	{% else %}
-	<div>
-		No payments
-	</div>
 
-	{% endif %}
-	<form method="POST" action="{% url 'manage_payment' location.slug bill.id%}">{% csrf_token %}
-		<input name="payment_id" type="hidden" value="{{p.id}}">
-		<tr style="padding-top:24px;">
-			<th>Record External Payment</th>
-			<td><input name="payment_method" placeholder="Method" type="text" required></td>
-			<td><input name="paid_amount" value="{{bill.total_owed}}" type="number" min="0.01" step="0.01" required></td>
-			<td><input class="btn btn-red pull-right" style="width:80px;" name="action" type="submit" value="Add"></td>
-		</tr>
-	</form>
 	</table>
+	
+	<form method="POST" class="form-horizontal" role="form" action="{% url 'manage_payment' location.slug bill.id%}">{% csrf_token %}
+	<div class="form-group ext-pmt-record">
+		<div class="col-sm-4">
+			<label class="control-label">Record External Payment</label>
+		</div>
+		<div class="col-sm-2">
+			<input class="form-control" name="payment_method" placeholder="Reference" type="text" required>
+		</div>
+		<div class="col-sm-2">
+			<input class="form-control" name="paid_amount" value="{{bill.total_owed}}" type="number" min="0.01" step="0.01" required>
+		</div>
+		<div class="col-sm-2">
+			<input type="submit" class="btn btn-default" name="action" style="width:100%;" value="Save">
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-12">
+			<small>Include a payment method or reference, eg. check or transaction id</small>
+		</div>
+	</div>
+	</form>
+
 

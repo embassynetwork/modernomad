@@ -1858,3 +1858,15 @@ input.disabled {
 .sub-summary-panel td {
 	border: 0px;
 }
+
+#sub-manage-page-wrapper {
+	min-height: 1000px;
+}
+
+.ext-pmt-record {
+	margin-bottom: 10px !important;
+}
+
+.bill-customize-area {
+	margin-left: 20px;
+}
