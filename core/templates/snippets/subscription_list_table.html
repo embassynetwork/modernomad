@@ -6,7 +6,7 @@
 			<th>Start Date</th>
 			<th>End Date</th>
 			<th>Rate</th>
-			<th>Charge Date</th>
+			<th>Next Billing Cycle</th>
 			<th>Current</th>
 		</tr>
 	</thead>
@@ -22,7 +22,7 @@
 					<td>{{s.start_date}}</td>
 					<td>{{s.end_date}}</td>
 					<td>{{s.price}}</td>
-					<td>{{s.start_date.day}}</td>
+					<td>{{s.get_next_period_start}}</td>
 					<td>
 						{% if s.has_unpaid_bills %}
 							<span class="text-danger glyphicon glyphicon-exclamation-sign"></span>

@@ -9,8 +9,7 @@
 			<th></th>
 		</thead>
 		{% for p in bill.non_refund_payments %}
-			<form class="res-refund" id="res-refund-{{payment_id}}" 
-				method="POST" action="{% url 'manage_payment' location.slug bill.id%}">
+			<form class="res-refund" id="res-refund-{{payment_id}}" method="POST" action="{% url 'manage_payment' location.slug bill.id%}">
 				{% csrf_token %}
 				<input name="payment_id" type="hidden" value="{{p.id}}">
 				<tr {% if p.is_fully_refunded %} class="greyed-out" {% endif %}>
@@ -21,7 +20,7 @@
 						{% if p.is_fully_refunded %} 
 							<em>Refunded</em>
 						{% elif not p.transaction_id == "Manual" %}
-							<a class="btn btn-danger pull-right" id="show-refund-details-{{forloop.counter}}" onclick="toggleRefundDetails({{forloop.counter}}); return false;">Refund?</a>
+							<a class="btn btn-danger pull-right" id="show-refund-details-{{p.id}}" onclick="toggleRefundDetails({{p.id}}); return false;">Refund?</a>
 						{% endif %}
 					</td>
 				</tr>
@@ -35,19 +34,19 @@
 					{% endif %}
 				{% endfor %}
 		
-				<tr id="refund-details-{{forloop.counter}}">
+				<tr id="refund-details-{{p.id}}">
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{forloop.counter}}, {{p.net_paid}}, 'readonly')" value="full-refund" checked> Full 
+							<input type="radio" name="refund-options" id="full" onclick="UpdateRefundValue({{p.id}}, {{p.net_paid}}, 'readonly')" value="full-refund" checked> Full 
 						</label>
 					</td>
 					<td>
 						<label class="radio-inline">
-							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{forloop.counter}}, '', 'readwrite')" value="partial-refund"> Partial
+							<input type="radio" name="refund-options" id="partial" onclick="UpdateRefundValue({{p.id}}, '', 'readwrite')" value="partial-refund"> Partial
 						</label>
 					</td>
 					<td>
-						<input type="number" min="0" max="{{p.net_paid}}" name="refund-amount" id="refund-amount-{{forloop.counter}}" value="{{p.net_paid}}" class="disabled" readonly="readonly">
+						<input type="number" min="0" max="{{p.net_paid}}" name="refund-amount" id="refund-amount-{{p.id}}" value="{{p.net_paid}}" class="disabled" readonly="readonly">
 					</td>
 					<td>
 						<input class="btn btn-sm btn-default pull-right" style="width:80px;" name="action" type="submit" value="Submit" onclick="return confirm('Are you sure?'); $(this).removeAttr('readonly');">

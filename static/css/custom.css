@@ -1855,3 +1855,6 @@ input.disabled {
 	cursor: hand;
 }
 
+.sub-summary-panel td {
+	border: 0px;
+}
