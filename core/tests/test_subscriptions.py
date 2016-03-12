@@ -159,13 +159,9 @@ class SubscriptionTestCase(TestCase):
 		s = Subscription(location=self.location, user=self.user1, start_date=date(2016,1,1), end_date=date(2016,5,31))
 		
 		self.assertFalse(s.is_period_boundary(target_date=date(2016, 2, 15)))
-		self.assertTrue(s.is_period_boundary(target_date=date(2016, 2, 29)))
+		self.assertFalse(s.is_period_boundary(target_date=date(2016, 2, 29)))
 		self.assertFalse(s.is_period_boundary(target_date=date(2016, 3, 15)))
-		self.assertTrue(s.is_period_boundary(target_date=date(2016, 3, 31)))
-		
-		self.assertTrue(s.is_period_boundary())
-		s.end_date = date(6,1,1)
-		self.assertFalse(s.is_period_boundary())
+		self.assertFalse(s.is_period_boundary(target_date=date(2016, 3, 31)))
 		
 	def test_get_period(self):
 		today = timezone.now().date()
@@ -234,46 +230,10 @@ class SubscriptionTestCase(TestCase):
 		self.sub6.delete_unpaid_bills()
 		self.assertEquals(0, self.sub6.bills.count())
 
-	def test_subscription_listing_works(self):
-		resp = self.client.get(reverse('subscriptions_manage_list', kwargs={'location_slug': self.location.slug}), follow=True)
-		self.assertEquals(resp.status_code, 200)
-
-
-	def test_edit_end_date_period_boundary(self):
-		# we want a subscription that will result in the final bill being
-		# recalculated when the end date is updated. and the new end date needs
-		# to be on a period boundary. 
-		today = timezone.now().date()
-		start = today - timedelta(days=60)
-		end = today + timedelta(days=60)
-		s = Subscription.objects.create( location = self.location, user = self.user1, price = 500.00, start_date = start, end_date = end)
-
-		# first we set the new end date to be on a period boundary in the future
-		new_end = today - timedelta(days=35)
-		new_end_date = datetime(new_end.year, new_end.month, start.day).date()
-		print s.start_date
-		print s.end_date
-		print new_end_date
-		s.update_for_end_date(new_end_date)
-		self.assertEqual(s.end_date, new_end_date)
-		self.assertEqual(s.bills.count(), s.expected_num_bills())
-		self.assertEqual(self.assess_no_empty_bills(s), True)
-
-	def test_no_future_bills(self):
-		pass
-
-	def test_prorate_current_unpaid_month(self):
-		# when moving ahead in the current month
-		# when moving back in the current month
-		pass
-
 	def test_period_boundary(self):
 		self.assertEqual(self.sub3.is_period_boundary(), False)
 		self.assertEqual(self.sub6.is_period_boundary(), False)
 		self.assertEqual(self.sub7.is_period_boundary(), True)
-
-	def test_correct_num_bills(self):
-		pass
 		
 	def test_expected_num_bills(self):
 		self.assertEqual(self.sub1.expected_num_bills(), None)
@@ -283,13 +243,29 @@ class SubscriptionTestCase(TestCase):
 		self.assertEqual(self.sub9.expected_num_bills(), 1)
 		self.assertEqual(self.sub10.expected_num_bills(), 0)
 
-	def assess_no_empty_bills(self, s):
-		for bill in s.bills.all():
-			if bill.period_start == bill.period_end:
-				return False
-		return True
+	def test_no_future_bills(self):
+		pass
 
-	def assess_no_bill_gaps(self):
+	def test_prorated(self):
+		# go forward a year from start date will definitely be on a month
+		# boundary; minus 5 days will then defo be prorated; 
+		on_boundary_end = self.sub8.start_date + timedelta(days=360)
+		self.sub8.update_for_end_date(on_boundary_end.date())
+		self.assertEqual(self.bills.last().value < self.bills.first().value(), True)
+
+	def test_correct_num_bills(self):
+		self.assertEqual(self.sub1.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub2.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub3.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub4.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub5.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub6.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub7.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub8.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub9.expected_num_bills(), self.sub1.bills.count())
+		self.assertEqual(self.sub10.expected_num_bills(), self.sub1.bills.count())
+
+	def test_no_bill_gaps(self):
 		pass
 
 	def test_end_before_start(self):
@@ -298,5 +274,14 @@ class SubscriptionTestCase(TestCase):
 	def test_bill_start_end_same(self):
 		pass
 
+
 	def test_reject_zero_length_subscription(self):
-		pass
+		today = timezone.now().date()
+		start = today - timedelta(days=100)
+		s = Subscription.objects.create(location = self.location, 
+				user = self.user1, 
+				price = 500.00, 
+				start_date = start, 
+				end_date = start
+			)
+		
