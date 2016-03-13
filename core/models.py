@@ -1236,17 +1236,23 @@ def size_images(sender, instance, **kwargs):
 
 class EmailTemplate(models.Model):
 	''' Templates for the typical emails sent by administrators of the system. 
-	The from-address is usually set by DEFAULT_FROM_ADDRESS in settings, 
+	The from-address is usually set from the location settings, 
 	and the recipients are determined by the action and reservation in question. '''
 
 	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
 	FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
+
+	context_options = (
+		('reservation','Reservation'), 
+		('subscription', 'Subscription' )
+	)
 
 	body = models.TextField(verbose_name="The body of the email")
 	subject = models.CharField(max_length=200, verbose_name="Default Subject Line")
 	name = models.CharField(max_length=200, verbose_name="Template Name")
 	creator = models.ForeignKey(User)
 	shared = models.BooleanField(default=False)
+	context = models.CharField(max_length=32, choices=context_options, blank=False, null=False)
 
 	def __unicode__(self):
 		return self.name
@@ -1258,6 +1264,7 @@ class LocationEmailTemplate(models.Model):
 	GUEST_DAILY = 'guest_daily_update'
 	INVOICE = 'invoice'
 	RECEIPT = 'receipt'
+	SUBSCRIPTION_RECEIPT = 'subscription_receipt'
 	NEW_RESERVATION = 'newreservation'
 	WELCOME = 'pre_arrival_welcome'
 	DEPARTURE = 'departure'
@@ -1266,7 +1273,8 @@ class LocationEmailTemplate(models.Model):
 			(ADMIN_DAILY, 'Admin Daily Update'),
 			(GUEST_DAILY, 'Guest Daily Update'),
 			(INVOICE, 'Invoice'),
-			(RECEIPT, 'Receipt'),
+			(RECEIPT, 'Reservation Receipt'),
+			(SUBSCRIPTION_RECEIPT, 'Subscription Receipt'),
 			(NEW_RESERVATION, 'New Reservation'),
 			(WELCOME, 'Pre-Arrival Welcome'),
 			(DEPARTURE, 'Departure'),

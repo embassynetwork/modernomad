@@ -1870,3 +1870,7 @@ input.disabled {
 .bill-customize-area {
 	margin-left: 20px;
 }
+
+.subscription-send-receipt {
+	display: inline;
+}

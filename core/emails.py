@@ -79,7 +79,8 @@ def get_templates(location, email_key):
 			text_template = get_template("emails/%s.txt" % email_key)
 			html_template = get_template("emails/%s.html" % email_key)
 		except TemplateDoesNotExist:
-			pass
+			logger.debug('There is no template for email key "%s"' % email_key)
+			logger.debug('Exiting quietly')
 
 	return (text_template, html_template)
 
@@ -90,6 +91,8 @@ def render_templates(context, location, email_key, language='en-us'):
 	html_content = None
 	
 	text_template, html_template = get_templates(location, email_key)
+	logger.debug('got templates:')
+	logger.debug(text_template, html_template)
 
 	if text_template:
 		text_content = text_template.render(context)
@@ -103,7 +106,7 @@ def render_templates(context, location, email_key, language='en-us'):
 #            RESERVATION EMAILS            #
 ############################################
 
-def send_receipt(reservation, send_to=None):
+def send_reservation_receipt(reservation, send_to=None):
 	location = reservation.location
 	subject = "[%s] Receipt for Reservation %s - %s" % (location.email_subject_prefix, str(reservation.arrive), str(reservation.depart))
 	if send_to:
@@ -118,7 +121,28 @@ def send_receipt(reservation, send_to=None):
 		'reservation_url': "https://" + Site.objects.get_current().domain + reservation.get_absolute_url() 
 		})
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
-	return send_from_location_address(subject, text_content, html_content, recipient, location)
+	if text_content or html_content:
+		return send_from_location_address(subject, text_content, html_content, recipient, location)
+	else:
+		return False
+
+def send_subscription_receipt(subscription, bill):
+	location = subscription.location
+	subject = "[%s] Membership #%d Receipt for %s" % (location.email_subject_prefix, subscription.id, bill.subscriptionbill.period_start.strftime("%B %d, %Y"))
+	recipient = [subscription.user.email,]
+	c = Context({
+		'today': timezone.localtime(timezone.now()), 
+		'user': subscription.user, 
+		'location': location,
+		's': subscription,
+		'bill': bill,
+		'profile_url': ("https://" + Site.objects.get_current().domain + '/people/' + subscription.user.username)
+		})
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.SUBSCRIPTION_RECEIPT)
+	if text_content or html_content:
+		return send_from_location_address(subject, text_content, html_content, recipient, location)
+	else:
+		return False
 
 def send_invoice(reservation):
 	''' trigger a reminder email to the guest about payment.''' 

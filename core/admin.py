@@ -136,7 +136,7 @@ class ReservationAdmin(admin.ModelAdmin):
 		success_list = []
 		failure_list = []
 		for res in queryset:
-			if send_receipt(res):
+			if send_reservation_receipt(res):
 				success_list.append(str(res.id))
 			else:
 				failure_list.append(str(res.id))

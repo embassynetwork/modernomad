@@ -7,7 +7,7 @@
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
 </div>	
 
-{% include "snippets/manage-page-confirm-dialogs.html" %}
+{% include "snippets/manage-email-modal.html" %}
 
 <div class="row" id="reservation-nav">
 	<a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
@@ -96,8 +96,20 @@
 
 				<div class="panel panel-default">
 					<div class="panel-heading row-spacer">
-						<h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details </h3>
-						{% include "snippets/manage-charge-bill.html" %}
+						<h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details (#{{bill.id}}) 
+						{% if bill.is_paid %}
+							<form class="subscription-send-receipt manage-button-spacer res-action" method=POST action="{% url 'subscription_send_receipt' location.slug s.id bill.id %}" >
+								{% csrf_token %}
+								<input class="btn-default btn" type="submit" value="Email Receipt">
+							</form>
+						{% endif %}
+						</h3>
+						<div>
+							{% if not bill.is_paid %}
+								{% include "snippets/manage-charge-bill.html" %}
+							{% endif %}
+						</div>
+
 					</div>
 					<div class="panel-body">
 						{% include "snippets/manage-page-bill-details.html" %}
@@ -121,6 +133,8 @@
 
 	</div> <!-- end col-md-7 -->
 </div> 
+
+{% include "snippets/manage-page-confirm-dialogs.html" %}
 
 {% endblock %}
 
@@ -261,7 +275,7 @@ $(document).ready(function() {
 	$email_templates = {};
 	{% for f in email_forms %}
 		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
-			'<form id="res-action-email-user" method=POST action="{% url 'reservation_send_mail' location.slug r.id %}" >' +
+			'<form id="res-action-email-user" method=POST action="{% url 'subscription_send_mail' location.slug s.id %}" >' +
 			"{% csrf_token %}" +
 			'<div class="form-group">' +
 			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
@@ -279,31 +293,6 @@ $(document).ready(function() {
 	{% endfor %}
 	console.log($email_templates);
 
-	$('#res-action-charge').submit(function() { 
-		submitdata = {
-			'csrfmiddlewaretoken': '{{ csrf_token }}'
-		};
-		console.log(submitdata);
-		request = $.ajax({ 
-			data: submitdata, 
-			type: $("#res-action-charge").attr('method'), // GET or POST
-			url: $("#res-action-charge").attr('action'), // the file to call
-		});
-		request.done(function(msg) { // on success..
-			console.log("Success!");
-			$("#res-action-charge-submit").val("PAID");
-			$("#res-action-charge-submit").addClass("disabled");
-			$("#res-status-area").addClass("paid-bg-img");
-		});
-		request.fail(function(msg) {
-			console.log("Error in reservation update:");
-			console.log(msg);
-		});
-
-		return false;
-	});
-
-
 	// wire up the ajax-y spinning animated GIF when an ajax call is made. 	
 	$('#spinner').ajaxStart(function () {
         $(this).fadeIn('fast');
@@ -312,117 +301,6 @@ $(document).ready(function() {
     });	
 });
 
-$("#dialog-confirm-send-welcome").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Send": function () {
-            $("#res-action-send-welcome").submit();
-         },
-        "Do Not Send": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$("#res-action-send-welcome").click(function (e) {
-    $("#dialog-confirm-send-welcome").dialog("open");
-    e.preventDefault();
-});
-
-
-$("#dialog-confirm-fee-remove").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Remove": function () {
-            $(this).data('form-link').parentElement.submit();
-         },
-        "Do Not Remove": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$(".remove-fee").click(function (e) {
-    $("#dialog-confirm-fee-remove").data('form-link', this).dialog("open");
-    e.preventDefault();
-});
-
-
-$("#dialog-confirm-line-item-remove").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Remove": function () {
-            $(this).data('form-link').parentElement.submit();
-         },
-        "Do Not Remove": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$(".remove-line-item").click(function (e) {
-    $("#dialog-confirm-line-item-remove").data('form-link', this).dialog("open");
-    e.preventDefault();
-});
-
-
-
-
-$("#dialog-confirm-cancel").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Cancel": function () {
-            $("#res-cancel").submit();
-         },
-        "Do Not Cancel": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$("#res-cancel").click(function (e) {
-    $("#dialog-confirm-cancel").dialog("open");
-    e.preventDefault();
-});
-
-$("#dialog-confirm-refund").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Refund": function () {
-            $("#res-refund").submit();
-         },
-        "Do Not Refund": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$(".res-refund").click(function (e) {
-	console.log(".res_refund.click")
-    $("#dialog-confirm-refund").dialog("open");
-    e.preventDefault();
-});
-
-
-$("#dialog-warn-full").dialog({
-	autoOpen: false,
-	modal: true,
-	width: 400,
-	buttons: {
-		"Yes, approve anyway": function () {
-			ajax_call(action_el);
-			$(this).dialog("close");
-		},
-		"Oops! Do not confirm": function () {
-			$(this).dialog("close");
-		}
-	}
-});
 
 </script>
 

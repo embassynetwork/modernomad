@@ -8,7 +8,7 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, EmailTemplateForm, PaymentForm, AdminSubscriptionForm
+from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, SubscriptionEmailTemplateForm, ReservationEmailTemplateForm, PaymentForm, AdminSubscriptionForm
 from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
@@ -32,7 +32,7 @@ import time
 import json, datetime, stripe 
 from django.http import JsonResponse
 from reservation_calendar import GuestCalendar
-from emails import send_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify, subscription_note_notify
+from emails import send_reservation_receipt, send_subscription_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify, subscription_note_notify
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
@@ -1012,7 +1012,7 @@ def ReservationConfirm(request, reservation_id, location_slug):
 		try:
 			payment_gateway.charge_reservation(reservation)
 			reservation.confirm()
-			send_receipt(reservation)
+			send_reservation_receipt(reservation)
 			# if reservation start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
 			# need to send them house info manually. 
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -1377,7 +1377,7 @@ def ReservationManage(request, location_slug, reservation_id):
 	email_forms = []
 	email_templates_by_name = []
 	for email_template in emails:
-		form = EmailTemplateForm(email_template, reservation, location)
+		form = ReservationEmailTemplateForm(email_template, reservation, location)
 		email_forms.append(form)
 		email_templates_by_name.append(email_template.name)
 	
@@ -1432,36 +1432,36 @@ def ReservationManageAction(request, location_slug, reservation_id):
 	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation_action = request.POST.get('reservation-action')
-	try:
-		if reservation_action == 'set-tentative':
-			reservation.approve()
-		elif reservation_action == 'set-confirm':
+
+	if reservation_action == 'set-tentative':
+		reservation.approve()
+	elif reservation_action == 'set-confirm':
+		reservation.confirm()
+		days_until_arrival = (reservation.arrive - datetime.date.today()).days
+		if days_until_arrival <= location.welcome_email_days_ahead:
+			guest_welcome(reservation)
+	elif reservation_action == 'set-comp':
+		reservation.comp()
+	elif reservation_action == 'res-charge-card':
+		try:
+			payment_gateway.charge_reservation(reservation)
 			reservation.confirm()
+			send_reservation_receipt(reservation)
 			days_until_arrival = (reservation.arrive - datetime.date.today()).days
 			if days_until_arrival <= location.welcome_email_days_ahead:
 				guest_welcome(reservation)
-		elif reservation_action == 'set-comp':
-			reservation.comp()
-		elif reservation_action == 'res-charge-card':
-			try:
-				payment_gateway.charge_reservation(reservation)
-				reservation.confirm()
-				send_receipt(reservation)
-				days_until_arrival = (reservation.arrive - datetime.date.today()).days
-				if days_until_arrival <= location.welcome_email_days_ahead:
-					guest_welcome(reservation)
-			except stripe.CardError, e:
-				raise Reservation.ResActionError(e)
-		else:
-			raise Reservation.ResActionError("Unrecognized action.")
+		except stripe.CardError, e:
+			#raise Reservation.ResActionError(e)
+			#messages.add_message(request, messages.INFO, "There was an error: %s" % e)
+			#status_area_html = render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location, 'error': True})
+			return HttpResponse(status=500)
+	else:
+		raise Reservation.ResActionError("Unrecognized action.")
 
-		messages.add_message(request, messages.INFO, 'Your action has been registered!')
-		status_area_html = render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
-		return status_area_html
+	messages.add_message(request, messages.INFO, 'Your action has been registered!')
+	status_area_html = render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location, 'error': False})
+	return status_area_html
 
-	except Reservation.ResActionError, e:
-		messages.add_message(request, messages.INFO, "Error: %s" % e)
-		return render(request, "snippets/res_status_area.html", {"r": reservation, 'location': location})
 
 @house_admin_required
 def ReservationManageEdit(request, location_slug, reservation_id):
@@ -1542,6 +1542,7 @@ def ManagePayment(request, location_slug, bill_id):
 			messages.add_message(request, messages.INFO, "Cannot refund more than payment balance")
 		else:
 			payment_gateway.issue_refund(payment, refund_amount)
+			messages.add_message(request, messages.INFO, "A refund for $%d was applied to the %s billing cycle." % (Decimal(refund_amount), bill.subscriptionbill.period_start.strftime("%B %d, %Y")))
 	elif action == "Save":
 		logger.debug("saving record of external payment")
 		# record a manual payment
@@ -1554,6 +1555,7 @@ def ManagePayment(request, location_slug, bill_id):
 			paid_amount = paid_amount, bill = bill, user = None,
 			transaction_id = "Manual"
 		)
+		messages.add_message(request, messages.INFO, "A manual payment for $%d was applied to the %s billing cycle" % (Decimal(paid_amount), bill.subscriptionbill.period_start.strftime("%B %d, %Y")))
 
 	# JKS this is a little inelegant as it assumes that this page will always
 	# a) want to redirect to a manage page and b) that there are only two types
@@ -1562,7 +1564,6 @@ def ManagePayment(request, location_slug, bill_id):
 		messages.add_message(request, messages.INFO, "Manual payment recorded")
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
 	else:
-		messages.add_message(request, messages.INFO, "Manual payment recorded on bill dated %s" % bill.subscriptionbill.period_start.strftime("%B %D, %Y"))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
 
 @house_admin_required
@@ -1579,14 +1580,34 @@ def ReservationSendWelcomeEmail(request, location_slug, reservation_id):
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
 
 @house_admin_required
+def SubscriptionSendReceipt(request, location_slug, subscription_id, bill_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+	location = get_object_or_404(Location, slug=location_slug)
+	subscription = Subscription.objects.get(id=subscription_id)
+	bill = Bill.objects.get(id=bill_id)
+	if bill.is_paid():
+		status = send_subscription_receipt(subscription, bill)
+		if status != False:
+			messages.add_message(request, messages.INFO, "A receipt was sent.")
+		else:
+			messages.add_message(request, messages.INFO, "Hmm, there was a problem and the receipt was not sent. Please contact an administrator.")
+	else:
+		messages.add_message(request, messages.INFO, "This reservation has not been paid, so the receipt was not sent.")
+	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
+
+@house_admin_required
 def ReservationSendReceipt(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
 	reservation = Reservation.objects.get(id=reservation_id)
 	if reservation.is_paid():
-		send_receipt(reservation)
-		messages.add_message(request, messages.INFO, "The receipt was sent.")
+		status = send_reservation_receipt(reservation)
+		if status != False:
+			messages.add_message(request, messages.INFO, "The receipt was sent.")
+		else:
+			messages.add_message(request, messages.INFO, "Hmm, there was a problem and the receipt was not sent. Please contact an administrator.")
 	else:
 		messages.add_message(request, messages.INFO, "This reservation has not been paid, so the receipt was not sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
@@ -1696,15 +1717,15 @@ def BillCharge(request, location_slug, bill_id):
 
 	try:
 		payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
-		messages.add_message(request, messages.INFO, "The card was charged.")
 	except stripe.CardError, e:
 		messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
 
 	if bill.is_reservation_bill():
+		messages.add_message(request, messages.INFO, "The card was charged.")
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
 	else:
+		messages.add_message(request, messages.INFO, "The card was charged. You must manually send the user their receipt. Please do so from the %s bill detail page." % bill.period_start.strftime("%B %d, %Y"))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
-	#send_receipt(reservation)
 	
 
 @house_admin_required
@@ -1771,23 +1792,33 @@ def AddBillLineItem(request, location_slug, bill_id):
 	else:
 		raise Exception('Unrecognized bill object')
 
+def _assemble_and_send_email(location_slug, post):
+	location = get_object_or_404(Location, slug=location_slug)
+	subject = post.get("subject")
+	recipient = [post.get("recipient"),]
+	body = post.get("body") + "\n\n" + post.get("footer")
+	# TODO - This isn't fully implemented yet -JLS
+	send_from_location_address(subject, body, None, recipient, location)
+
 @house_admin_required
 def ReservationSendMail(request, location_slug, reservation_id):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
-	location = get_object_or_404(Location, slug=location_slug)
-	subject = request.POST.get("subject")
-	recipient = [request.POST.get("recipient"),]
-	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
-	# TODO - This isn't fully implemented yet -JLS
-	send_from_location_address(subject, body, None, recipient, location)
-
+	_assemble_and_send_email(location_slug, request.POST)
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation.mark_last_msg() 
-
 	messages.add_message(request, messages.INFO, "Your message was sent.")
 	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+
+@house_admin_required
+def SubscriptionSendMail(request, location_slug, subscription_id):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	_assemble_and_send_email(location_slug, request.POST)
+	messages.add_message(request, messages.INFO, "Your message was sent.")
+	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
 @house_admin_required
 def payments_today(request, location_slug):
@@ -1881,7 +1912,7 @@ def submit_payment(request, reservation_uuid, location_slug):
 				if reservation.bill.total_owed() <= 0.0:
 					# if the reservation is all paid up, do All the Things to confirm.
 					reservation.confirm()
-					send_receipt(reservation, send_to=pay_email)
+					send_reservation_receipt(reservation, send_to=pay_email)
 
 					# XXX TODO need a way to check if this has already been sent :/
 					days_until_arrival = (reservation.arrive - datetime.date.today()).days
@@ -2144,13 +2175,16 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 	subscription = get_object_or_404(Subscription, id=subscription_id)
 	user = User.objects.get(username=subscription.user.username)
 	domain = Site.objects.get_current().domain
-	emails = EmailTemplate.objects.filter(Q(shared=True) | Q(creator=request.user))
-	#email_forms = []
-	#email_templates_by_name = []
-	#for email_template in emails:
-	#	form = EmailTemplateForm(email_template, reservation, location)
-	#	email_forms.append(form)
-	#	email_templates_by_name.append(email_template.name)
+	logger.debug("SubscriptionManageDetail:")
+	
+	email_forms = []
+	email_templates_by_name = []
+
+	emails = EmailTemplate.objects.filter(context='subscription')
+	for email_template in emails:
+		form = SubscriptionEmailTemplateForm(email_template, subscription, location)
+		email_forms.append(form)
+		email_templates_by_name.append(email_template.name)
 	
 	# Pull all the reservation notes for this person
 	if 'note' in request.POST:
@@ -2177,8 +2211,8 @@ def SubscriptionManageDetail(request, location_slug, subscription_id):
 		"s": subscription, 
 		"user_notes": user_notes,
 		"subscription_notes": subscription_notes,
-		#"email_forms" : email_forms,
-		#"email_templates_by_name" : email_templates_by_name,
+		"email_forms" : email_forms,
+		"email_templates_by_name" : email_templates_by_name,
 		"domain": domain, 'location': location,
 	})
 

@@ -7,8 +7,7 @@
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
 </div>	
 
-{% include "snippets/reservation-manage-email-modal.html" %}
-{% include "snippets/manage-page-confirm-dialogs.html" %}
+{% include "snippets/manage-email-modal.html" %}
 
 <!-- 3rd party payment link Modal -->
 <div class="modal fade" id="paymentlinkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -144,6 +143,7 @@
 </div>
 {% endif %}
 
+{% include "snippets/manage-page-confirm-dialogs.html" %}
 
 {% endblock %}
 
@@ -225,6 +225,8 @@ function ajax_call(el) {
 	request.fail(function(msg) {
 		console.log("Error in reservation update:");
 		console.log(msg);
+		error_alert = '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">×</button><div {% if message.tags %} class="{{ message.tags }}"{% endif %}>The card was declined</div></div>'
+		$("#res-status-area").before(error_alert);
 	});
 }
 
@@ -310,117 +312,6 @@ $(document).ready(function() {
     });	
 });
 
-$("#dialog-confirm-send-welcome").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Send": function () {
-            $("#res-action-send-welcome").submit();
-         },
-        "Do Not Send": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$("#res-action-send-welcome").click(function (e) {
-    $("#dialog-confirm-send-welcome").dialog("open");
-    e.preventDefault();
-});
-
-
-$("#dialog-confirm-fee-remove").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Remove": function () {
-            $(this).data('form-link').parentElement.submit();
-         },
-        "Do Not Remove": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$(".remove-fee").click(function (e) {
-    $("#dialog-confirm-fee-remove").data('form-link', this).dialog("open");
-    e.preventDefault();
-});
-
-
-$("#dialog-confirm-line-item-remove").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Remove": function () {
-            $(this).data('form-link').parentElement.submit();
-         },
-        "Do Not Remove": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$(".remove-line-item").click(function (e) {
-    $("#dialog-confirm-line-item-remove").data('form-link', this).dialog("open");
-    e.preventDefault();
-});
-
-
-
-
-$("#dialog-confirm-cancel").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Cancel": function () {
-            $("#res-cancel").submit();
-         },
-        "Do Not Cancel": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$("#res-cancel").click(function (e) {
-    $("#dialog-confirm-cancel").dialog("open");
-    e.preventDefault();
-});
-
-$("#dialog-confirm-refund").dialog({
-    autoOpen: false,
-    modal: true,
-    buttons: {
-        "Yes, Refund": function () {
-            $("#res-refund").submit();
-         },
-        "Do Not Refund": function () {
-            $(this).dialog("close");
-        }
-    }
-});
-
-$(".res-refund").click(function (e) {
-	console.log(".res_refund.click")
-    $("#dialog-confirm-refund").dialog("open");
-    e.preventDefault();
-});
-
-
-$("#dialog-warn-full").dialog({
-	autoOpen: false,
-	modal: true,
-	width: 400,
-	buttons: {
-		"Yes, approve anyway": function () {
-			ajax_call(action_el);
-			$(this).dialog("close");
-		},
-		"Oops! Do not confirm": function () {
-			$(this).dialog("close");
-		}
-	}
-});
 
 </script>
 

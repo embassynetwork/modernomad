@@ -1,9 +1,7 @@
-<div class="row">
-{% if not bill.is_paid %}
 <form id="bill-charge" method="POST" class="form-horizontal" action="{% url 'bill_charge' location.slug bill.id %}"> {% csrf_token %}
 	<div class="form-group">
 
-		<div class="col-md-2 col-md-offset-1">
+		<div class="col-md-2">
 			<label class="control-label">Charge User: </label>
 		</div>
 
@@ -24,12 +22,9 @@
 		</div>
 
 		<div class="col-md-2">
-		<input class="form-control btn btn-default" name="action" 
-		type="submit" value="Submit" onclick="return confirm('Are you sure?'); $(this).removeAttr('readonly');">
+			<input class="button-to-charge-card form-control btn btn-default" name="action" type="submit" value="Submit">
 		</div>
 
 	</div>
 </form>
-{% endif %}
-</div>
 

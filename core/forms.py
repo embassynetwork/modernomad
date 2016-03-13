@@ -352,7 +352,6 @@ class StripeCustomerCreationForm(forms.Form):
 	expiration_month = forms.IntegerField(label='(MM)')
 	expiration_year = forms.IntegerField(label='(YYYY)')
 
-
 class EmailTemplateForm(forms.Form):
 	''' We don't actually make this a model form because it's a derivative
 	function of a model but not directly constructed from the model fields
@@ -363,12 +362,15 @@ class EmailTemplateForm(forms.Form):
 	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
 	body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
 
+
+class ReservationEmailTemplateForm(EmailTemplateForm):
+
 	def __init__(self, tpl, reservation, location):
 		''' pass in an EmailTemplate instance, and a reservation object '''
 
 		domain = Site.objects.get_current().domain
 		# calling super will initialize the form fields 
-		super(EmailTemplateForm, self).__init__()
+		super(ReservationEmailTemplateForm, self).__init__()
 
 		# add in the extra fields
 		self.fields['sender'].initial = location.from_email()
@@ -401,6 +403,36 @@ class EmailTemplateForm(forms.Form):
 		}
 
 		self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables)) + ' (#' + str(reservation.id) + ')'
+		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
+
+class SubscriptionEmailTemplateForm(EmailTemplateForm):
+
+	def __init__(self, tpl, subscription, location):
+		''' pass in an EmailTemplate instance, and a subscription object '''
+
+		domain = Site.objects.get_current().domain
+		# calling super will initialize the form fields 
+		super(SubscriptionEmailTemplateForm, self).__init__()
+
+		# add in the extra fields
+		self.fields['sender'].initial = location.from_email()
+		self.fields['recipient'].initial = "%s, %s" % (subscription.user.email, location.from_email())
+		self.fields['footer'].initial = forms.CharField(
+				widget=forms.Textarea(attrs={'readonly':'readonly'})
+			)
+		self.fields['footer'].initial = '''--------------------------------\nYour membership id is %d. Manage your membership from your profile page https://%s/people/%s.''' % (subscription.id, domain, subscription.user.username)
+
+		# both the subject and body fields expect to have access to all fields
+		# associated with a reservation, so all reservation model fields are
+		# passed to the template renderer, even though we don't know (and so
+		# that we don't have to know) which specific fields a given template
+		# wants to use). 
+		
+		template_variables = {
+			'subscription': subscription,
+		}
+
+		self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables)) + ' (#' + str(subscription.id) + ')'
 		self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 
