@@ -525,6 +525,7 @@ class Subscription(models.Model):
 			# operating in. 
 			period_start = date(year, month, self.start_date.day)
 
+		logger.debug('in get_period and period_start=%s' % period_start)
 		period_end =  period_start + relativedelta(months=1)
 		if period_end.day == period_start.day:
 			period_end = period_end - timedelta(days=1)

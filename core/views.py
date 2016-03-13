@@ -257,6 +257,8 @@ def room_occupancy(request, location_slug, room_id, year):
 
 	return response
 
+
+
 @resident_or_admin_required
 def occupancy(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)

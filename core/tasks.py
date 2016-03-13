@@ -6,6 +6,9 @@ from modernomad.backup import BackupManager
 import datetime
 from django.utils import timezone
 
+import logging
+logger = logging.getLogger(__name__)
+
 #@periodic_task(run_every=crontab(hour=22, minute=53, day_of_week="*"))  
 #def test():      
 #    print "HELLO WORLD"                    
@@ -52,9 +55,29 @@ def make_backup():
 
 @periodic_task(run_every=crontab(hour=1, minute=0))
 def generate_subscription_bills():
-	# TODO
-	pass
-	#Subscription.objects.active_subscriptions():
-
+	today = timezone.localtime(timezone.now()).date()
+	# using the exclude is an easier way to filter for subscriptions with an
+	# end date of None *or* in the future.
+	locations = Location.objects.all()
+	subscriptions = Subscription.objects.active_subscriptions()
+	for l in locations:
+		subscriptions_this_loc = subscriptions.filter(location=l)
+		pret_a_manger = []
+		for s in subscriptions_this_loc:
+			(this_period_start, this_period_end) = s.get_period() 
+			logger.debug('')
+			logger.debug('Subscription %d' % s.id)
+			logger.debug("today = %s" % today)
+			logger.debug("this_period_start = %s" % this_period_start)
+			if this_period_start == today:
+				# JKS - we could double check to see whether there is already a
+				# bill for this date. i'm worried about edge cases, and the
+				# re-generation is non-destructive, so I just call
+				# generate_bill regardless. 
+				logger.debug('automatically generating bill for subscription %d' % s.id)
+				s.generate_bill(target_date=today)
+				pret_a_manger.append(s)
+		
+		# send email to admins of each location
 
 
