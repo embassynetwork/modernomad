@@ -257,7 +257,120 @@ def room_occupancy(request, location_slug, room_id, year):
 
 	return response
 
+def monthly_occupant_report(location_slug, year, month):
+	location = get_object_or_404(Location, slug=location_slug)
+	today = datetime.date.today()
+	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
+	
+	occupants = {}
+	occupants['residents'] = {}
+	occupants['guests'] = {}
+	occupants['members'] = {}
+	messages = []
 
+	# calculate datas for people this month (as relevant), including: name, email, total_nights, total_value, total_comped, owing, and reference ids
+	for user in location.residents.all():
+		if user in occupants['residents'].keys():
+			messages.append("user %d (%s %s) showed up in residents list twice. this shouldn't happen. the second instance was skipped." % (user.id, user.first_name, user.last_name))
+		else:
+			occupants['residents'][user] = {'name': user.get_full_name(), 'email': user.email, 'total_nights': (end - start).days}
+
+	reservations = Reservation.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+	for r in reservations:
+		nights_this_month = r.nights_between(start, end)
+		u = r.user
+		comped_nights_this_month = 0
+		owing = []
+		effective_rate = r.bill.subtotal_amount()/r.total_nights()
+		value_this_month = nights_this_month*effective_rate
+		if r.is_comped():
+			comped_nights_this_month = nights_this_month
+		if r.bill.total_owed() > 0:
+			owing.append(r.id)
+
+		# now assemble it all
+		if u not in occupants['guests'].keys():
+			occupants['guests'][u] = {
+				'name': u.get_full_name(), 
+				'email': u.email, 
+				'total_nights': nights_this_month, 
+				'total_value': value_this_month, 
+				'total_comped': comped_nights_this_month, 
+				'owing': owing, 
+				'ids': [r.id,]
+				}
+		else:
+			occupants['guests'][u]['total_nights'] += nights_this_month
+			occupants['guests'][u]['total_value'] += value_this_month
+			occupants['guests'][u]['total_comped'] += comped_nights_this_month
+			if owing:
+				occupants['guests'][u]['owing'].append(owing)
+			occupants['guests'][u]['ids'].append(r.id)
+	
+	# check for subscriptions that were active for any days this month. 
+	subscriptions = list(Subscription.objects.active_subscriptions_between(start, end).filter(location=location))
+	for s in subscriptions:
+		days_this_month = s.days_between(start, end)
+		u = s.user
+		comped_days_this_month = 0
+		owing = None
+		# for subscriptions, the 'value' is the sum of the effective daily rate
+		# associated with the days of the bill(s) that occurred this month.  
+		bills_between = s.bills_between(start, end)
+		value_this_month = 0
+		for b in bills_between:
+			effective_rate= b.subtotal_amount()/(b.period_end - b.period_start).days
+			value_this_bill_this_month = effective_rate*b.days_between(start, end)
+			value_this_month += value_this_bill_this_month
+
+			# also make a note if this subscription has any bills that have an
+			# outstanding balance. we store the subscription not the bill,
+			# since that's the way an admin would view it from the website, so
+			# check for duplicates since there could be multiple unpaid but we
+			# still are pointing people to the same subscription. 
+			if b.total_owed() > 0:
+				if not owing:
+					owing = b.subscription.id
+
+			if b.amount() == 0:
+				comped_days_this_month += b.days_between(start, end)
+
+		# ok now asssemble the dicts!
+		if u not in occupants['members'].keys():
+			occupants['members'][u] = {
+				'name': u.get_full_name(), 
+				'email': u.email, 
+				'total_nights': days_this_month, 
+				'total_value': value_this_month, 
+				'total_comped': comped_days_this_month, 
+				'owing': [owing,],
+				'ids': [s.id,]
+				}
+		else:
+			occupants['members'][u]['total_nights'] += nights_this_month
+			occupants['members'][u]['total_value'] += value_this_month
+			occupants['members'][u]['total_comped'] += comped_nights_this_month
+			if owing:
+				occupants['members'][u]['owing'].append(owing)
+			occupants['members'][u]['ids'].append(s.id)	
+
+	messages.append('If a membership has a weird total_value, it is likely because there was a discount or fee applied to an individual bill. Check the membership page.')
+	return occupants, messages
+
+
+def monthly_occupant_report_console(location_slug, year, month):
+	(occupants, messages) = monthly_occupant_report(location_slug, year, month)
+	print "occupancy report for %s %s" % (month, year)
+	print "name, email, total_nights, total_value, total_comped, owing, reference_ids"
+	for v in occupants['residents'].values():
+		print "%s, %s, %d" % (v['name'], v['email'], v['total_nights'])
+	for v in occupants['guests'].values():
+		print "%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids'])))
+	for v in occupants['members'].values():
+		print "%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids'])))
+
+	for message in messages:
+		print message
 
 @resident_or_admin_required
 def occupancy(request, location_slug):
@@ -342,18 +455,13 @@ def occupancy(request, location_slug):
 		comp = False
 		partial_payment = False
 		total_owed = 0.0
-		if r.arrive >=start and r.depart <= end:
-			nights_this_month = (r.depart - r.arrive).days
-		elif r.arrive <=start and r.depart >= end:
-			nights_this_month = (end - start).days
-		elif r.arrive < start:
-			nights_this_month = (r.depart - start).days
-		elif r.depart > end:
-			nights_this_month = (end - r.arrive).days
+		
+		nights_this_month = r.nights_between(start, end)
 		# if it's the first of the month and the person left on the 1st, then
 		# that's actually 0 days this month which we don't need to include.
 		if nights_this_month == 0:
 			continue
+
 		# XXX Note! get_rate() returns the base rate, but does not incorporate
 		# any discounts. so we use subtotal_amount here. 
 		rate = r.bill.subtotal_amount()/r.total_nights()

@@ -471,6 +471,14 @@ class SubscriptionManager(models.Manager):
 		future_start = Q(start_date__gt=target_date)
 		return self.filter(future_start | (end_date_exists & end_date_in_past)).distinct()
 
+	def active_subscriptions_between(self, start, end):
+		''' returns subscriptions that were active at any points between start
+		and end dates.'''
+		current = Q(start_date__lte=end)
+		unending = Q(end_date__isnull=True)
+		future_ending = Q(end_date__gte=start)
+		return self.filter(current & (unending | future_ending)).distinct()
+
 	def active_subscriptions(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
@@ -537,8 +545,8 @@ class Subscription(models.Model):
 			target_date = timezone.now().date()
 			# if the subscrition starts in the future then the next
 			# period is when the subscription starts. 
-			if self.start_date > target_date:
-				return self.start_date
+		if self.start_date > target_date:
+			return self.start_date
 		this_period_start, this_period_end = self.get_period(target_date=target_date)
 
 		if this_period_end == None:
@@ -562,6 +570,8 @@ class Subscription(models.Model):
 		return period and period[1] == target_date
 		
 	def total_periods(self, target_date=None):
+		''' returns total periods between subscription start date and target
+		date.'''
 		if not target_date:
 			target_date = timezone.now().date()
 		
@@ -571,9 +581,50 @@ class Subscription(models.Model):
 			target_date = self.end_date
 		
 		rd = relativedelta(target_date + timedelta(days=1), self.start_date)
-		#print "%s - %s = %s" % (target_date, self.start_date, rd)
 		return rd.months + (12 * rd.years)
 		
+	def bills_between(self, start, end):
+		d = start
+		bills = []
+		while d < end:
+			b = self.get_bill_for_date(d)
+			if b:
+				bills.append(b)
+			d = self.get_next_period_start(d)
+			if not d:
+				break
+		return bills
+	
+	def get_bill_for_date(self, date):
+		result = SubscriptionBill.objects.filter(subscription=self, period_start__lte=date, period_end__gte=date)
+		logger.debug('subscription %d: get_bill_for_date %s' % (self.id, date))
+		logger.debug('bill object(s):')
+		logger.debug(result)
+		if result.count():
+			if result.count() > 1:
+				logger.debug("Warning! Multiple bills found for one date. This shouldn't happen")
+				raise Exception('Error: multiple bills for one date:')
+			return result[0]
+		else:
+			return None
+
+	def days_between(self, start, end):
+		''' return the number of days of this subscription that occur between start and end dates'''
+		days = 0
+		if not self.end_date:
+			# set the end date to be the end date passed in so we can work with
+			# a date object, but do NOT save.
+			self.end_date = end
+		if self.start_date >=start and self.end_date <= end:
+			days = (self.end_date - self.start_date).days
+		elif self.start_date <=start and self.end_date >= end:
+			days = (end - start).days
+		elif self.start_date < start:
+			days = (self.end_date - start).days
+		elif self.end_date > end:
+			days = (end - self.start_date).days
+		return days
+
 	def is_active(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
@@ -754,6 +805,25 @@ class SubscriptionBill(Bill):
 	subscription = models.ForeignKey(Subscription, related_name="bills", null=True)
 	class Meta:
 		ordering = ["-period_start"]
+
+	def days_between(self, start, end):
+		''' return the number of days of this bill that occur between start and
+		end dates'''
+		days = 0
+		if not self.period_end:
+			# set the end date to be the end date passed in so we can work with
+			# a date object, but do NOT save.
+			self.period_end = end
+		if self.period_start >=start and self.period_end <= end:
+			days = (self.period_end - self.period_start).days
+		elif self.period_start <=start and self.period_end >= end:
+			days = (end - start).days
+		elif self.period_start < start:
+			days = (self.period_end - start).days
+		elif self.period_end > end:
+			days = (end - self.period_start).days
+		return days
+
 
 
 # TBD
@@ -1032,6 +1102,20 @@ class Reservation(models.Model):
 
 	def non_refund_payments(self):
 		return self.bill.payments.filter(paid_amount__gt=0)
+
+	def nights_between(self, start, end):
+		''' return the number of nights of this reservation that occur between start and end '''
+		nights = 0
+		if self.arrive >=start and self.depart <= end:
+			nights = (self.depart - self.arrive).days
+		elif self.arrive <=start and self.depart >= end:
+			nights = (end - start).days
+		elif self.arrive < start:
+			nights = (self.depart - start).days
+		elif self.depart > end:
+			nights = (end - self.arrive).days
+		return nights
+	
 
 @receiver(pre_save, sender=Reservation)
 def reservation_create_bill(sender, instance, **kwargs):
