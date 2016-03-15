@@ -1,5 +1,12 @@
 ---------- What's Going Down -----------
 
+{% if subscriptions_ready %}
+	Subscriptions ready for billing:
+	{% for s in subscriptions_ready %}
+        {{ s.user.get_full_name|title }}, ${{ s.price }}. https://{{ domain }}{% url 'subscription_manage_detail' location.slug s.id %}
+	{% endfor %}
+{% endif %}
+
 {% if events_today %}
 	Events happening today:
 	{% for event in events_today %}

@@ -14,6 +14,17 @@
 </table>
 {% endif %}
 
+{% if subscriptions_ready %}
+<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+    <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">Subscriptions with new bills</p></td></tr>
+    {% for s in subscriptions_ready %}
+         <tr><td width="600px"><p margin="0 0 1.6em 0">
+          {{ s.user.get_full_name|title }}, ${{ s.price }}. https://{{ domain }}{% url 'subscription_manage_detail' location.slug s.id %}
+           </p></td></tr>
+    {% endfor %}
+</table>
+{% endif %}
+
 {% if arriving %}
 
 <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">

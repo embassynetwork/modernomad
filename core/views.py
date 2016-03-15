@@ -2057,24 +2057,43 @@ def payments(request, location_slug, year, month):
 	logger.debug('payments: timing begun:')
 	location = get_object_or_404(Location, slug=location_slug)
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-	payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
 
-	# which payments were for transient guests versus residents?
-	gross_rent = 0
-	net_rent_resident = 0 
-	gross_rent_transient = 0
-	net_rent_transient = 0
-	hotel_tax = 0
-	external_txs_paid = 0
-	external_txs_fees = 0
-	external_txs_to_house = 0
-	totals = {'count':0, 'house_fees':0, 'to_house':0, 'non_house_fees':0, 'paid_amount':0}
+	summary_totals = {
+			'gross_rent': 0,
+			'net_rent_resident': 0,
+			'gross_rent_transient': 0,
+			'net_rent_transient': 0,
+			'hotel_tax': 0,
+			'hotel_tax_percent': 0.0,
+			'res_external_txs_paid': 0,
+			'res_external_txs_fees': 0,
+
+			'all_subscriptions_net': 0,
+			'taxed_subscription_gross': 0,
+			'untaxed_subscription_net': 0,
+			'taxed_subscription_user_fees': 0,
+			'sub_external_txs_paid': 0,
+			'sub_external_txs_fees': 0,
+		}
+
+	##############################
+
+	reservation_totals = {
+			'count':0, 
+			'house_fees':0, 
+			'to_house':0, 
+			'non_house_fees':0, 
+			'paid_amount':0
+		}
+
 	# JKS if the reservation has bill line items that are not paid by the house
 	# (so-called non_house_fees), then the amount to_house counts as transient
 	# occupancy income. otherwise it counts as resident occupancy income. 
-	# TODO: we;re essentially equating non house fees with hotel taxes. we
-	# should max this explicit in some way. 
-	for p in payments_this_month:
+	# TODO: we're essentially equating non house fees with hotel taxes. we
+	# should make this explicit in some way. 
+
+	reservation_payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
+	for p in reservation_payments_this_month:
 		# pull out the values we call multiple times to make this faster
 		p_to_house = p.to_house()
 		p_bill_non_house_fees = p.bill.non_house_fees()
@@ -2082,38 +2101,97 @@ def payments(request, location_slug, year, month):
 		p_non_house_fees = p.non_house_fees()
 		p_paid_amount = p.paid_amount
 
-		gross_rent += p_to_house
+		summary_totals['gross_rent'] += p_to_house
 		if p_bill_non_house_fees > 0:
-			gross_rent_transient += (p_to_house + p_house_fees)
-			net_rent_transient += p_to_house
+			summary_totals['gross_rent_transient'] += (p_to_house + p_house_fees)
+			summary_totals['net_rent_transient'] += p_to_house
 			# XXX is p_non_house_fees == p_bill_non_house_fees??
-			hotel_tax += p_non_house_fees
+			summary_totals['hotel_tax'] += p_non_house_fees
 		else:
-			net_rent_resident += p_to_house
-		# track totals column
-		totals['count'] = totals['count'] + 1
-		totals['to_house'] = totals['to_house'] + p_to_house
-		totals['non_house_fees'] = totals['non_house_fees'] + p_non_house_fees
-		totals['house_fees'] = totals['house_fees'] + p_house_fees
-		totals['paid_amount'] = totals['paid_amount'] + p_paid_amount
+			summary_totals['net_rent_resident'] += p_to_house
+		# track reservation totals 
+		reservation_totals['count'] = reservation_totals['count'] + 1
+		reservation_totals['to_house'] = reservation_totals['to_house'] + p_to_house
+		reservation_totals['non_house_fees'] = reservation_totals['non_house_fees'] + p_non_house_fees
+		reservation_totals['house_fees'] = reservation_totals['house_fees'] + p_house_fees
+		reservation_totals['paid_amount'] = reservation_totals['paid_amount'] + p_paid_amount
 		if p.transaction_id == 'Manual':
-			external_txs_paid += p_paid_amount
-			external_txs_fees += p_house_fees
+			summary_totals['res_external_txs_paid'] += p_paid_amount
+			summary_totals['res_external_txs_fees'] += p_house_fees
 
-	hotel_tax_percent = 0.0
 	not_paid_by_house = LocationFee.objects.filter(location=location).filter(fee__paid_by_house=False)
 	for loc_fee in not_paid_by_house:
-		hotel_tax_percent += loc_fee.fee.percentage
+		summary_totals['hotel_tax_percent'] += loc_fee.fee.percentage*100
+
+	##############################
+
+	subscription_totals = {
+			'count':0, 
+			'house_fees':0, 
+			'to_house':0, 
+			'user_fees':0, 
+			'total_paid':0 # the paid amount is to_house + user_fees + house_fees
+		}
+
+	subscription_payments_this_month = Payment.objects.subscription_payments_by_location(location).filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
+	# house fees are fees paid by the house
+	# non house fees are fees passed on to the user
+	for p in subscription_payments_this_month:
+		# pull out the values we call multiple times to make this faster
+		to_house = p.to_house()
+		user_fees = p.bill.non_house_fees() #p_bill_non_house_fees = p.bill.non_house_fees()
+		house_fees = p.house_fees() #p_house_fees = p.house_fees()
+		total_paid = p.paid_amount
+
+		summary_totals['all_subscriptions_net'] += to_house
+		if user_fees > 0:
+			# the gross value of subscriptions that were taxed/had user fees
+			# applied are tracked as a separate line item for assistance with
+			# later accounting
+			summary_totals['taxed_subscription_gross'] += to_house + user_fees
+			summary_totals['taxed_subscription_net'] += to_house
+			summary_totals['taxed_subscription_user_fees'] += user_fees
+		else:
+			summary_totals['untaxed_subscription_net'] += to_house
+
+		# track subscription totals 
+		subscription_totals['count'] = subscription_totals['count'] + 1
+		subscription_totals['to_house'] = subscription_totals['to_house'] + to_house
+		subscription_totals['user_fees'] = subscription_totals['user_fees'] + user_fees
+		subscription_totals['house_fees'] = subscription_totals['house_fees'] + house_fees
+		subscription_totals['total_paid'] = subscription_totals['total_paid'] + total_paid
+		if p.transaction_id == 'Manual':
+			summary_totals['sub_external_txs_paid'] += total_paid
+			summary_totals['sub_external_txs_fees'] += house_fees
+
+
+
+	##############################
+
+	summary_totals['res_total_transfer'] = (
+		summary_totals['gross_rent'] 
+		+ summary_totals['hotel_tax'] 
+		- summary_totals['res_external_txs_paid'] 
+		- summary_totals['res_external_txs_fees']
+	)
+
+	summary_totals['sub_total_transfer'] = (
+		summary_totals['all_subscriptions_net'] 
+		+ summary_totals['taxed_subscription_user_fees'] 
+		- summary_totals['sub_external_txs_paid'] 
+		- summary_totals['sub_external_txs_fees']
+	)
+
+	summary_totals['total_transfer'] = summary_totals['res_total_transfer'] + summary_totals['sub_total_transfer']
 
 	t1 = time.time()
 	dt = t1-t0
 	logger.debug('payments: timing ended. time taken:')
 	logger.debug(dt)
-	return render(request, "payments.html", {'payments': payments_this_month, 'totals':totals, 'location': location, 
-		'this_month':start, 'previous_date':prev_month, 'next_date':next_month, 'gross_rent': gross_rent, 
-		'net_rent_resident': net_rent_resident, 'net_rent_transient': net_rent_transient, 'gross_rent_transient': gross_rent_transient, 
-		'hotel_tax': hotel_tax, 'hotel_tax_percent': hotel_tax_percent*100, 'total_transfer': gross_rent+hotel_tax-external_txs_paid-external_txs_fees, 
-		'external_txs_paid': external_txs_paid, 'external_txs_fees': external_txs_fees })
+	return render(request, "payments.html", {'reservation_payments': reservation_payments_this_month, 
+		'summary_totals': summary_totals, 'subscription_payments': subscription_payments_this_month, 
+		'subscription_totals': subscription_totals, 'reservation_totals':reservation_totals, 
+		'location': location, 'this_month':start, 'previous_date':prev_month, 'next_date':next_month})
 
 # ******************************************************
 #           registration and login callbacks and views

@@ -421,7 +421,7 @@ class Bill(models.Model):
 		return amount
 
 	def non_house_fees(self):
-		# Pull the non-house fees from the generated bill line items
+		# Sum up the user paid (non-house) fees from the bill line items
 		amount = 0
 		for line_item in self.line_items.all():
 			if line_item.fee and not line_item.paid_by_house:
@@ -495,6 +495,25 @@ class SubscriptionManager(models.Manager):
 				subscriptions.append(s)
 		return subscriptions
 
+	def ready_for_billing(self, location, target_date=None):
+		if not target_date:
+			target_date = timezone.localtime(timezone.now()).date()
+		pret_a_manger = []
+		active = Subscription.objects.active_subscriptions().filter(location=location)
+		for s in active:
+			(this_period_start, this_period_end) = s.get_period() 
+			logger.debug('')
+			logger.debug('in ready_for_billing()')
+			logger.debug('Subscription %d' % s.id)
+			logger.debug("target_date = %s" % target_date)
+			logger.debug("this_period_start = %s" % this_period_start)
+			if this_period_start == target_date:
+				pret_a_manger.append(s)
+		logger.debug('pret a manger (ready to eat!)')
+		logger.debug(pret_a_manger)
+		return pret_a_manger
+
+
 
 class Subscription(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
@@ -533,7 +552,9 @@ class Subscription(models.Model):
 			# operating in. 
 			period_start = date(year, month, self.start_date.day)
 
-		logger.debug('in get_period and period_start=%s' % period_start)
+		logger.debug('')
+		logger.debug('in get_period(). period_start=%s' % period_start)
+		logger.debug('')
 		period_end =  period_start + relativedelta(months=1)
 		if period_end.day == period_start.day:
 			period_end = period_end - timedelta(days=1)
@@ -658,7 +679,7 @@ class Subscription(models.Model):
 		
 		try:
 			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
-			logger.debug('found existing bill #%d for period start %s' % (bill.id, period_start.strftime("%B %d %Y")))
+			logger.debug('Found existing bill #%d for period start %s' % (bill.id, period_start.strftime("%B %d %Y")))
 			# if the bill already exists but we're updating it to be prorated,
 			# we need to change the period end also. 
 			if prorated and bill.period_end != period_end:
@@ -669,7 +690,6 @@ class Subscription(models.Model):
 			if not delete_old_items:
 				return list(bill.line_items)
 		except Exception, e:
-			logger.debug("** Error: %s" % e)
 			logger.debug("Generating new bill item")
 			bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
 		
@@ -1126,9 +1146,12 @@ def reservation_create_bill(sender, instance, **kwargs):
 
 class PaymentManager(models.Manager):
 	def reservation_payments_by_location(self, location):
-		# Theoretically this can be extended to different kinds of payments when we have more then just payments on reservations
 		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__location=location))
 		return reservation_payments
+
+	def subscription_payments_by_location(self, location):
+		subscription_payments = Payment.objects.filter(bill__in=SubscriptionBill.objects.filter(subscription__location=location))
+		return subscription_payments
 
 	def reservation_payments_by_room(self, room):
 		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__room=room))
@@ -1182,6 +1205,7 @@ class Payment(models.Model):
 		return True
 
 	def non_house_fees(self):
+		''' returns the absolute amount of the user paid (non-house) fee(s) '''
 		# takes the appropriate bill line items and applies them proportionately to the payment. 
 		fee_line_items_not_paid_by_house = self.bill.line_items.filter(fee__isnull=False).filter(paid_by_house=False)
 		subtotal = self.bill.subtotal_amount()
