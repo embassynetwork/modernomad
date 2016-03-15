@@ -737,7 +737,7 @@ def ListUsers(request):
 	return render(request, "user_list.html", {"users": users})
 
 @login_required
-def GetUser(request, username):
+def UserDetail(request, username):
 	try:
 		user = User.objects.get(username=username)
 	except:
@@ -745,6 +745,7 @@ def GetUser(request, username):
 		return HttpResponseRedirect('/404')
 
 	reservations = Reservation.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
+	subscriptions = Subscription.objects.filter(user=user).order_by('start_date')
 	past_reservations = []
 	upcoming_reservations = []
 	for reservation in reservations:
@@ -759,7 +760,7 @@ def GetUser(request, username):
 			break
 
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 
+		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
@@ -1829,12 +1830,16 @@ def BillCharge(request, location_slug, bill_id):
 		payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
 	except stripe.CardError, e:
 		messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
+		if bill.is_reservation_bill():
+			return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
+		else:
+			return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
 
 	if bill.is_reservation_bill():
 		messages.add_message(request, messages.INFO, "The card was charged.")
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
 	else:
-		messages.add_message(request, messages.INFO, "The card was charged. You must manually send the user their receipt. Please do so from the %s bill detail page." % bill.period_start.strftime("%B %d, %Y"))
+		messages.add_message(request, messages.INFO, "The card was charged. You must manually send the user their receipt. Please do so from the %s bill detail page." % bill.subscriptionbill.period_start.strftime("%B %d, %Y"))
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
 	
 

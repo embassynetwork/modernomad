@@ -56,13 +56,13 @@ def make_backup():
 @periodic_task(run_every=crontab(hour=1, minute=0))
 def generate_subscription_bills():
 	today = timezone.localtime(timezone.now()).date()
-	logger.debug()
 	# using the exclude is an easier way to filter for subscriptions with an
 	# end date of None *or* in the future.
 	locations = Location.objects.all()
 	for l in locations:
 		subscriptions_ready = Subscription.objects.ready_for_billing(location=l, target_date=today)
 		for s in subscriptions_ready:
+			logger.debug('')
 			logger.debug('automatically generating bill for subscription %d' % s.id)
 			# JKS - we *could* double check to see whether there is already a
 			# bill for this date. but, i'm worried about edge cases, and the

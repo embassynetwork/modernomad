@@ -73,62 +73,83 @@
 		{% include "snippets/profile_links.html" %}
 	{% endif %}
 	
-	{% ifequal u user %} 
-	<div class="row">
-		<h2>Email Notifications</h2>
-		<div class="row">
-			<div class="col-md-12">
-				<form class="" method="post" action="{% url 'gather_email_preferences' u.username %}">{% csrf_token %}
-					<div class="checkbox">
-						<label> Receive automatic reminders of events you are attending
-							<input type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}>
-						</label>
-					</div>
-					<hr>
-					<div>Receive notifications when new events are published: 
-
-						{% for location in network_locations %}
-						{% if location.public or user in location.house_admins.all %}
-						<div class="checkbox">
-							<label>
-								<input 
-									type="checkbox" 
-									name="publish_{{ location.slug }}" 
-									id="publish_{{ location.slug }}" 
-									{% if location in u.event_notifications.location_publish.all %} checked {% endif %}
-									> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
-							</label>
-						</div>
-						{% endif %}
-						{% endfor %}
-					<hr>
-					<div>Receive weekly emails about upcoming events: 
-
-						{% for location in network_locations %}
-						{% if location.public or user in location.house_admins.all %}
-						<div class="checkbox">
-							<label>
-								<input 
-									type="checkbox" 
-									name="weekly_{{ location.slug }}" 
-									id="weekly_{{ location.slug }}" 
-									{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
-									> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
-							</label>
-						</div>
-						{% endif %}
-						{% endfor %}
-					<hr>
-					<input type="submit" value="Save" class="btn btn-default">
-				</form>
-			</div>
-		</div>
-	</div>
-	{% endifequal %}
 
 	{% if u == user or user_is_house_admin_somewhere %}
-		<h2>Reservations</h2>
+
+		<ul class="nav nav-tabs page-spacer">
+			<li role="presentation" class="active"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Email</a></li>
+			<li role="presentation"><a href="#reservations" aria-controls="reservations" role="tab" data-toggle="tab">Reservations</a></li>
+			<li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions</a></li>
+		</ul>
+
+		<div class="tab-content page-spacer">
+
+		<div role="tabpanel" class="tab-pane active" id="email">
+			<h3>Email Notifications</h3>
+			<div class="row">
+				<div class="col-md-12">
+					<form class="" method="post" action="{% url 'gather_email_preferences' u.username %}">{% csrf_token %}
+						<div class="checkbox">
+							<label> Receive automatic reminders of events you are attending
+								<input type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}>
+							</label>
+						</div>
+						<hr>
+						<div>Receive notifications when new events are published: 
+
+							{% for location in network_locations %}
+							{% if location.public or user in location.house_admins.all %}
+							<div class="checkbox">
+								<label>
+									<input 
+										type="checkbox" 
+										name="publish_{{ location.slug }}" 
+										id="publish_{{ location.slug }}" 
+										{% if location in u.event_notifications.location_publish.all %} checked {% endif %}
+										> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
+								</label>
+							</div>
+							{% endif %}
+							{% endfor %}
+						<hr>
+						<div>
+							Receive weekly emails about upcoming events: 
+
+							{% for location in network_locations %}
+							{% if location.public or user in location.house_admins.all %}
+							<div class="checkbox">
+								<label>
+									<input 
+										type="checkbox" 
+										name="weekly_{{ location.slug }}" 
+										id="weekly_{{ location.slug }}" 
+										{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
+										> {{ location.name }} {% if not location.public %} <em>(location is private)</em> {% endif %}
+								</label>
+						</div>
+							{% endif %}
+							{% endfor %}
+						<hr>
+						<input type="submit" value="Save" class="btn btn-default">
+					</form>
+				</div>
+			</div>
+		</div>
+	</div> 
+	</div> <!-- end email tab -->
+
+	<div role="tabpanel" class="tab-pane" id="reservations">
+		<h3>Reservations</h3>
 		{% include "snippets/user_reservations.html" %}
+	</div> <!-- end email tab -->
+
+	<div role="tabpanel" class="tab-pane" id="subscriptions">
+		<h3>Subscriptions</h3>
+		{% include "snippets/user_subscriptions.html" %}
+	</div> <!-- end email tab -->
+
+	</div><!-- end tab content -->
+
 	{% endif %}
 
 </div>
