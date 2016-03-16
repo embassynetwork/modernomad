@@ -1924,7 +1924,7 @@ def ReservationSendMail(request, location_slug, reservation_id):
 	reservation = Reservation.objects.get(id=reservation_id)
 	reservation.mark_last_msg() 
 	messages.add_message(request, messages.INFO, "Your message was sent.")
-	return HttpResponseRedirect(reverse('reservation_manage', args=(location.slug, reservation_id)))
+	return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, reservation_id)))
 
 @house_admin_required
 def SubscriptionSendMail(request, location_slug, subscription_id):
