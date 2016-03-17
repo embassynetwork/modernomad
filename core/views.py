@@ -1653,7 +1653,10 @@ def ManagePayment(request, location_slug, bill_id):
 			messages.add_message(request, messages.INFO, "Cannot refund more than payment balance")
 		else:
 			payment_gateway.issue_refund(payment, refund_amount)
-			messages.add_message(request, messages.INFO, "A refund for $%d was applied to the %s billing cycle." % (Decimal(refund_amount), bill.subscriptionbill.period_start.strftime("%B %d, %Y")))
+			if bill.is_reservation_bill():
+				messages.add_message(request, messages.INFO, "A refund for $%d was applied." % (Decimal(refund_amount)))
+			else:
+				messages.add_message(request, messages.INFO, "A refund for $%d was applied to the %s billing cycle." % (Decimal(refund_amount), bill.subscriptionbill.period_start.strftime("%B %d, %Y")))
 	elif action == "Save":
 		logger.debug("saving record of external payment")
 		# record a manual payment
@@ -1666,13 +1669,15 @@ def ManagePayment(request, location_slug, bill_id):
 			paid_amount = paid_amount, bill = bill, user = None,
 			transaction_id = "Manual"
 		)
-		messages.add_message(request, messages.INFO, "A manual payment for $%d was applied to the %s billing cycle" % (Decimal(paid_amount), bill.subscriptionbill.period_start.strftime("%B %d, %Y")))
+		if bill.is_reservation_bill():
+			messages.add_message(request, messages.INFO, "Manual payment recorded")
+		else:
+			messages.add_message(request, messages.INFO, "A manual payment for $%d was applied to the %s billing cycle" % (Decimal(paid_amount), bill.subscriptionbill.period_start.strftime("%B %d, %Y")))
 
 	# JKS this is a little inelegant as it assumes that this page will always
 	# a) want to redirect to a manage page and b) that there are only two types
 	# of bills. this should be abstracted at some point. 
 	if bill.is_reservation_bill():
-		messages.add_message(request, messages.INFO, "Manual payment recorded")
 		return HttpResponseRedirect(reverse('reservation_manage', args=(location_slug, bill.reservationbill.reservation.id)))
 	else:
 		return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, bill.subscriptionbill.subscription.id)))
