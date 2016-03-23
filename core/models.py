@@ -1263,10 +1263,6 @@ def profile_img_upload_to(instance, filename):
 		os.makedirs(upload_abs_path)
 	return os.path.join(upload_path, filename)
 
-def get_default_profile_img():
-	path = os.path.join(settings.MEDIA_ROOT, "avatars/default.jpg")
-	return file(path)
-
 class UserProfile(models.Model):
 	IMG_SIZE = (300,300)
 	IMG_THUMB_SIZE = (150,150)
