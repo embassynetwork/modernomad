@@ -502,15 +502,8 @@ class SubscriptionManager(models.Manager):
 		active = Subscription.objects.active_subscriptions().filter(location=location)
 		for s in active:
 			(this_period_start, this_period_end) = s.get_period() 
-			logger.debug('')
-			logger.debug('in ready_for_billing()')
-			logger.debug('Subscription %d' % s.id)
-			logger.debug("target_date = %s" % target_date)
-			logger.debug("this_period_start = %s" % this_period_start)
 			if this_period_start == target_date:
 				pret_a_manger.append(s)
-		logger.debug('pret a manger (ready to eat!)')
-		logger.debug(pret_a_manger)
 		return pret_a_manger
 
 

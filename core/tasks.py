@@ -61,6 +61,8 @@ def generate_subscription_bills():
 	locations = Location.objects.all()
 	for l in locations:
 		subscriptions_ready = Subscription.objects.ready_for_billing(location=l, target_date=today)
+		if len(subscriptions_ready) == 0:
+			logger.debug('no subscriptions are ready for billing at %s today.' % l.name)
 		for s in subscriptions_ready:
 			logger.debug('')
 			logger.debug('automatically generating bill for subscription %d' % s.id)
