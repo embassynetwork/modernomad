@@ -114,6 +114,12 @@ def slack_embassysf_daily():
 	for d in departing_today:
 		item = _format_attachment(d, "danger")
 		payload['attachments'].append(item)
+	if len(arriving_today) == 0 and len(departing_today) == 0:
+		payload['attachments'].append({
+			'fallback': 'No arrivals or departures today',
+			'text': 'No arrivals or departures today'
+			})
+
 	js = json.dumps(payload)
 	print js
 	resp = requests.post(webhook, data=js)
