@@ -163,8 +163,11 @@ def view_event(request, event_id, event_slug, location_slug=None):
 		user_is_event_admin = False
 
 	# this is counter-intuitive - private events are viewable to those who have
-	# the link. so private events are indeed shown to anyone (once they are approved). 
-	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user):
+	# the link. so private events are indeed shown to anyone (once they are
+	# approved). and we dont have a way of knowing what the previous status of
+	# canceled events was (!), so we also let this go through but then suppress
+	# the event details and a cancelation notice on the event page. 
+	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user) or event.status == 'canceled':
 		if current_user and current_user in event.organizers.get_queryset():
 			user_is_organizer = True
 		else:
@@ -477,13 +480,12 @@ def endorse(request, event_id, event_slug, location_slug=None):
 
 def event_approve(request, event_id, event_slug, location_slug=None):
 	location = get_object_or_404(Location, slug=location_slug)
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
 	location_event_admin = EventAdminGroup.objects.get(location=location)
 	if request.user not in location_event_admin.users.all():
 		return HttpResponseRedirect('/404')
-
 	event = Event.objects.get(id=event_id)
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
+		return HttpResponseRedirect("/")
 
 	event.status = Event.READY
 	event.save()
@@ -495,22 +497,23 @@ def event_approve(request, event_id, event_slug, location_slug=None):
 		user_is_organizer = True
 	else:
 		user_is_organizer = False
-	msg_success = "Success! The event has been approved."
 
-	# notify the event organizers
+	msg_success = "Success! The event has been approved."
+	messages.add_message(request, messages.INFO, msg_success)
+
+	# notify the event organizers and admins
 	event_approved_notification(event, location)
 
-	return render(request, "snippets/event_status_area.html", {'event': event, 'user_is_organizer': user_is_organizer, 'user_is_event_admin': user_is_event_admin})
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
 
 def event_publish(request, event_id, event_slug, location_slug=None):
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
 	location = get_object_or_404(Location, slug=location_slug)
 	location_event_admin = EventAdminGroup.objects.get(location=location)
 	if request.user not in location_event_admin.users.all():
 		return HttpResponseRedirect('/404')
-
 	event = Event.objects.get(id=event_id)
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
+		return HttpResponseRedirect("/")
 
 	print request.POST
 	event.status = Event.LIVE
@@ -524,9 +527,35 @@ def event_publish(request, event_id, event_slug, location_slug=None):
 	else:
 		user_is_organizer = False
 	msg_success = "Success! The event has been published."
+	messages.add_message(request, messages.INFO, msg_success)
 
 	# notify the event organizers and admins
 	event_published_notification(event, location)
 
-	return render(request, "snippets/event_status_area.html", {'location':location, 'event': event, 'user_is_organizer': user_is_organizer, 'user_is_event_admin': user_is_event_admin})
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
+
+
+def event_cancel(request, event_id, event_slug, location_slug=None):
+	location = get_object_or_404(Location, slug=location_slug)
+	location_event_admin = EventAdminGroup.objects.get(location=location)
+	if request.user not in location_event_admin.users.all():
+		return HttpResponseRedirect('/404')
+	event = Event.objects.get(id=event_id)
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
+		return HttpResponseRedirect("/")
+
+	event.status = Event.CANCELED
+	event.save()
+	if request.user in location_event_admin.users.all():
+		user_is_event_admin = True
+	else:
+		user_is_event_admin = False
+	if request.user in event.organizers.all():
+		user_is_organizer = True
+	else:
+		user_is_organizer = False
+	msg = "The event has been canceled."
+	messages.add_message(request, messages.INFO, msg)
+
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
 
