@@ -1487,7 +1487,7 @@ def ReservationManage(request, location_slug, reservation_id):
 		else:
 			past_reservations.append(res)
 	domain = Site.objects.get_current().domain
-	emails = EmailTemplate.objects.filter(Q(shared=True) | Q(creator=request.user))
+	emails = EmailTemplate.objects.filter(context='reservation').filter(Q(shared=True) | Q(creator=request.user))
 	email_forms = []
 	email_templates_by_name = []
 	for email_template in emails:
