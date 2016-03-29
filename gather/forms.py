@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
 from gather.models import Event
 from django import forms
 from lxml.html.clean import clean_html
@@ -53,3 +55,39 @@ class EventForm(forms.ModelForm):
 		cleaned = re.sub('^<div>', '', cleaned)
 		cleaned = re.sub('</div>', '', cleaned)
 		return cleaned
+
+
+class EmailTemplateForm(forms.Form):
+	''' We don't actually make this a model form because it's a derivative
+	function of a model but not directly constructed from the model fields
+	itself.''' 
+	sender = forms.EmailField(widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control", 'type': 'hidden'}))
+	recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'hidden'}))
+	footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
+	subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
+	body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
+
+
+class EventEmailTemplateForm(EmailTemplateForm):
+
+	def __init__(self, event, location):
+		''' pass in an event and a location to use in constructing the email. '''
+
+		domain = Site.objects.get_current().domain
+		# calling super will initialize the form fields 
+		super(EventEmailTemplateForm, self).__init__()
+
+		# add in the extra fields
+		self.fields['sender'].initial = location.from_email()
+		self.fields['footer'].initial = forms.CharField(
+				widget=forms.Textarea(attrs={'readonly':'readonly'})
+			)
+		path = reverse('gather_view_event', args=(location.slug, event.id, event.slug))
+		self.fields['footer'].initial = '''--------------------------------\nThis message was sent to attendees of the event '%s' at %s. You can view event details and update your RSVP status on the event page https://%s/%s.''' % (event.title, location.name, domain, path)
+
+		# the recipients will be *all* the event attendees
+		self.fields['recipient'].initial = ", ".join([attendee.email for attendee in list(event.attendees.all())])
+
+		self.fields['subject'].initial = '['+location.email_subject_prefix+'] Update for event "' + event.title + '"'
+
+
