@@ -1,5 +1,41 @@
 {% load staticfiles %}
 {% if user_is_organizer or user_is_event_admin %}
+
+	<!-- Email Modal -->
+	<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 class="modal-title" id="myModalLabel">Email Event Attendees</h3>
+				</div>
+				<div class="modal-body">
+
+					<form id="res-action-email-user" method=POST action="{% url 'gather_event_send_mail' location.slug event.id event.slug %}" >
+						{% csrf_token %}
+						<div class="form-group">
+							<!-- hide the recipient list and sender since we're not editing those -->
+							{{email_form.recipient}}
+							{{email_form.sender}} 
+							<div class="text-warning row-spacer"><i class="fa fa-info-circle"></i> This message will be sent from your email address {{request.user.email}} so that attendees can respond with any questions.</div>
+							<span class="email-form-label">Subject: </span> {{email_form.subject}} <br>
+							{{email_form.body}}
+							{{email_form.footer}}
+						</div>
+						<submit value="Send">
+						<div class="modal-footer">
+							<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+							<button type="submit" class="btn btn-primary">Send Email</button>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+
 	<div class="event-status bg-warning">
 		
 		{% if user_is_organizer %} 
@@ -40,7 +76,10 @@
 			</div>
 		
 			<div class="col-md-12">
-				<a href="mailto:{{ event_email }}" title="Send an email to the event organizers and local event admins" class="disabled"><i class="fa fa-envelope-o"></i> Discuss via email</a>. Your email will reach event organizers and the admin team for this community. 
+				<a href="" data-target="#emailModal" data-toggle="modal" title="Send an email to event attendees"><i class="fa fa-bullhorn"></i> Email event attendees</a>. 
+			</div>
+			<div class="col-md-12">
+				<a href="mailto:{{ event_email }}" title="Send an email to the event organizers and local event admins" class="disabled"><i class="fa fa-envelope-o"></i> Email event organizers & admins</a>. 
 			</div>
 
 			<div class="col-md-12">

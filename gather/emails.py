@@ -29,10 +29,10 @@ def mailgun_send(mailgun_data, files_dict=None):
 			files=files_dict
 		)
 		logger.debug("Mailgun response: %s" % resp.text)
+		return HttpResponse(status=200)
 	except requests.ConnectionError, e:
 		logger.error('No network connection. Email "%s" aborted.' % mailgun_data['subject'])
-	return HttpResponse(status=200)
-
+		return HttpResponse(status=500)
 
 def new_event_notification(event, location):
 	# notify the event admins that a new event has been proposed
@@ -190,7 +190,7 @@ def create_route(route_name, route_pattern, path):
 
 @csrf_exempt
 def event_message(request, location_slug=None):
-	''' new messages sent to event email addresses are posed to this view '''
+	''' Message event admins and organizers via an email alias.'''
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 

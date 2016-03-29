@@ -16,6 +16,7 @@ urlpatterns = patterns('',
 	url(r'^(?P<event_id>\d+)/(?P<event_slug>[\w\d\-\.@+_]+)/publish/$', 'gather.views.event_publish', name='gather_event_publish'),
 	url(r'^(?P<event_id>\d+)/(?P<event_slug>[\w\d\-\.@+_]+)/cancel/$', 'gather.views.event_cancel', name='gather_event_cancel'),
 	url(r'^(?P<event_id>\d+)/(?P<event_slug>[\w\d\-\.@+_]+)/approve/$', 'gather.views.event_approve', name='gather_event_approve'),
+	url(r'^(?P<event_id>\d+)/(?P<event_slug>[\w\d\-\.@+_]+)/email/$', 'gather.views.event_send_mail', name='gather_event_send_mail'),
 	url(r'^(?P<event_id>\d+)/(?P<event_slug>[\w\d\-\.@+_]+)/$', 'gather.views.view_event', name='gather_view_event'),
 )
 
