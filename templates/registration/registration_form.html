@@ -46,7 +46,7 @@
 			{% csrf_token %}
 			{{ form.username }}
 
-			{{ form.cropped_image_data }} 
+			{{ form.cropped_image_data }}
 			<div class="form-group">
 				{{ form.image.errors|safe }}
 				<div class="row">
@@ -67,7 +67,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="clear"></div>
 
 			<div class="form-group">
@@ -120,7 +120,7 @@
 				<div class="col-md-2">
 					<label>Account Information</label>
 				</div>
-	
+
 				{{ form.first_name.errors|safe }}
 				<div class="form-field-body col-sm-5">
 					{{ form.first_name }}
@@ -175,7 +175,7 @@
 
 		</form>
 	</div>
-	
+
 	<div class="col-md-4 col-md-offset-1" id="res-detail">
 		{% if reservation %}
 			<div id="reservation-amount-summary-box">
@@ -198,6 +198,16 @@
 
 {% block extrajs %}
 	<script>
+	$(function() {
+		var availableUsers = [
+			{% for user in all_users %}
+				 "{{user.username}}",
+			{% endfor %}
+		];
+		$( "#id_referral" ).autocomplete({
+			source: availableUsers
+		});
+	});
 
 	$("#reservation-amount-summary-box").waypoint('sticky');
 
@@ -233,7 +243,7 @@
 				return false;
 			}
 			// JKS second check to see if there's a space. not sure where
-			// the above regex IS allowing a space, but it is.  
+			// the above regex IS allowing a space, but it is.
 			if (/ +/.test(val_to_test)) {
 				return false;
 			}
@@ -291,7 +301,7 @@
 					data: {'email': function() {return $( "#id_email" ).val()}}
 				},
 				{% endif %}
-			}, 
+			},
 			referral: {
 				required: true
 			},
@@ -310,7 +320,7 @@
 				{% endif %}
 				equalTo: "#id_password1",
 			}
-		}	
+		}
 	});
 
 	function showCropper() {
@@ -328,7 +338,7 @@
 	function showImage(input) {
 		if (input.files && input.files[0]) {
 			var reader = new FileReader();
-		
+
 			reader.onload = function (e) {
 				$('#image-preview').fadeOut(300, function() {
 					$(this).attr('src',e.target.result);
@@ -336,7 +346,7 @@
 			}
 			reader.readAsDataURL(input.files[0]);
 		}
-	}	
+	}
 
 	$("#id_image").change(function() {
 		$("#image-preview").cropper('destroy');
@@ -354,4 +364,3 @@
 
 	</script>
 {% endblock %}
-
