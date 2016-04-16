@@ -42,11 +42,30 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import csv
+from django.http import Http404
 
 logger = logging.getLogger(__name__)
 
 def location(request, location_slug):
-	location = get_object_or_404(Location, slug=location_slug)
+	try:
+		location = Location.objects.get(slug=location_slug)
+		print location.get_members()
+		print '--'
+		print request.user
+
+		if location.visibility == 'public' or location.visibility == 'link':
+			has_permission = True
+		elif request.user in location.get_members():
+			has_permission = True
+		else:
+			has_permission = False
+
+		if not has_permission:
+			raise Location.DoesNotExist
+
+	except Location.DoesNotExist:
+		raise Http404("The location does not exist or you do not have permission to view it")
+
 	return render(request, "landing.html", {'location': location})
 
 def guest_rooms(request, location_slug):
@@ -757,7 +776,7 @@ def UserDetail(request, username):
 		else:
 			past_reservations.append(reservation)
 	user_is_house_admin_somewhere = False
-	for location in Location.objects.filter(public=True):
+	for location in Location.objects.filter(visibility='public'):
 		if request.user in location.house_admins.all():
 			user_is_house_admin_somewhere = True
 			break
@@ -767,7 +786,7 @@ def UserDetail(request, username):
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
-	locations = Location.objects.filter(public=True).order_by("name")
+	locations = Location.objects.filter(visibility='public').order_by("name")
 	return render(request, "location_list.html", {"locations": locations})
 
 def date_range_to_list(start, end):
