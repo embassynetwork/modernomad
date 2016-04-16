@@ -1468,13 +1468,19 @@ class SubscriptionNote(models.Model):
 	def __str__(self): 
 		return '%s - %d: %s' % (self.created.date(), self.subscription.id, self.note)
 
-class RoomImage(models.Model):
+class BaseImage(models.Model):
 	original = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 	large = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 	med = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 	thumb = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
 	caption = models.CharField(max_length=200, blank=True, null=True)
+
+class RoomImage(BaseImage):
 	room = models.ForeignKey(Room)
+
+class LocationImage(BaseImage):
+	location = models.ForeignKey(Location)
+
 
 
 
