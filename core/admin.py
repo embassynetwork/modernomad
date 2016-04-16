@@ -30,6 +30,7 @@ class ReservableAdminInline(admin.TabularInline):
 class RoomAdmin(admin.ModelAdmin):
 	model = Room
 	inlines = [ReservableAdminInline]
+	save_as = True
 
 class RoomAdminInline(admin.TabularInline):
 	model = Room
