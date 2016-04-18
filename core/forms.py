@@ -208,7 +208,7 @@ class LocationSettingsForm(forms.ModelForm):
 		model = Location
 		# Not sure about Timezones and Bank Information.  Not including for now - JLS
 		fields = ['name', 'slug', 'address', 'latitude', 'longitude',  'max_reservation_days', 'welcome_email_days_ahead', 'house_access_code',
-					'ssid', 'ssid_password', 'email_subject_prefix', 'check_out', 'check_in', 'public']
+					'ssid', 'ssid_password', 'email_subject_prefix', 'check_out', 'check_in', 'visibility']
 		widgets = {
 			'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
 			'slug': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),

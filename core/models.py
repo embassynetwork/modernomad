@@ -82,7 +82,13 @@ class Location(models.Model):
 	residents = models.ManyToManyField(User, related_name='residences', blank=True)
 	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
-	public = models.BooleanField(default=False, verbose_name="Is this location open to the public?")
+
+	visibility_options = (
+		('public','Public'), 
+		('members','Members Only'), 
+		('link', 'Those with the Link' )
+	)
+	visibility = models.CharField(max_length=32, choices=visibility_options, blank=False, null=False, default='link')
 
 	def __unicode__(self):
 		return self.name
@@ -96,6 +102,13 @@ class Location(models.Model):
 
 	def get_rooms(self):
 		return list(Room.objects.filter(location=self))
+
+	def get_members(self):
+		active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
+		subscribers = []
+		for s in active_subscriptions:
+			subscribers.append(s.user)
+		return list(list(self.residents.all()) + list(self.house_admins.all()) + list(self.event_admin_group.users.all()) + subscribers)
 
 	def rooms_with_future_reservability(self):
 		future_reservability = []

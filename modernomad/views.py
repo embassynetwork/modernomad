@@ -15,7 +15,7 @@ def index(request):
 	locations = Location.objects.all()
 	location_list = []
 	for location in locations:
-		if location.public:
+		if location.visibility == 'public':
 			location_list.append({
 					'name': location.name,
 					'latitude': location.latitude,

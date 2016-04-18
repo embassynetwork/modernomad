@@ -10,7 +10,14 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="{% url 'location_home' location.slug %}">{{ location.name }}</a>
+			<a class="navbar-brand" href="{% url 'location_home' location.slug %}">
+				{% if location.visibility == 'link' %}
+					<i class="text-warning fa fa-eye" title="Location is unlisted but visible to anyone with the link" ></i> 
+				{% elif location.visibility == 'members' %}
+					<i class="text-danger fa fa-eye" title="Location is visible to explicit members only" ></i> 
+				{% endif %}
+				{{ location.name }}
+			</a>
 		</div>
 		<div class="collapse navbar-collapse" id="house-navbar">
 			<ul class="nav navbar-nav">

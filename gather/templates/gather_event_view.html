@@ -112,13 +112,12 @@
 </div>
 	{% endif %}
 
-	{% comment %} this area has an if statement and only displays if the event is not live {% endcomment %}
 	<div id="event-status-area">
 		{% include 'snippets/event_status_area.html' %}
 	</div>
 
 	{% if event.visibility = 'private' %}
-		<div class="event-status bg-info">
+		<div class="event-status bg-warning">
 			<i class="fa fa-lock"></i> This event is private and is only viewable to those with the link.
 		</div>
 	{% elif event.visibility = 'community' %}
@@ -127,53 +126,66 @@
 		</div>
 	{% endif %}
 
+	{% if event.status == 'canceled' %}	
+	<div class="greyed-out">
+		<h2><i class="text-danger fa fa-warning" ></i> This event has been canceled</h2>
+	{% endif %}
 
 	<h1 class="event-detail-title">{{ event.title|title }}</h1> 
-	{% if user_is_organizer or user_is_event_admin %}
-		<a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
-	{% endif %}
-	<div class="event-time"> 
-	{% with event.start|date as start_date %}
-	{% with event.end|date as end_date %}
-		<span class="event-date-day pull-left"> {{ event.start|date:'D'}}</span>
-		<span class="event-date-month pull-left">{{ event.start|date:'b'|title}}</span>
-		<span class="event-date-day pull-left"> {{ event.start|date:'j'}}</span>
-		<span class="event-date-time pull-left">{{ event.start|date:'f A'}}</span>
-		<span class="event-date-separator pull-left"><em>until</em></span>
-		{% if start_date != end_date %}
-		<span class="event-date-day pull-left"> {{ event.end|date:'D'}}</span>
-		<span class="event-date-month pull-left">{{ event.end|date:'b'|title}}</span>
-		<span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
+
+	{% if event.status != 'canceled' or user_is_organizer or user_is_event_admin %}
+
+		{% if user_is_organizer or user_is_event_admin %}
+			<a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
 		{% endif %}
-		<span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
-		<span class="event-location">, {{event.where }}</span>
-	{% endwith %}
-	{% endwith %}
-	</div>
-
-	<div class="col-md-7">
-		<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
-
-		{% with event.organizers.get_queryset as organizers %}
-		<h3>Organized by 
-			{% for o in organizers %}
-			<a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}
-			{% endfor %}
-		</h3>
+		<div class="event-time"> 
+		{% with event.start|date as start_date %}
+		{% with event.end|date as end_date %}
+			<span class="event-date-day pull-left"> {{ event.start|date:'D'}}</span>
+			<span class="event-date-month pull-left">{{ event.start|date:'b'|title}}</span>
+			<span class="event-date-day pull-left"> {{ event.start|date:'j'}}</span>
+			<span class="event-date-time pull-left">{{ event.start|date:'f A'}}</span>
+			<span class="event-date-separator pull-left"><em>until</em></span>
+			{% if start_date != end_date %}
+			<span class="event-date-day pull-left"> {{ event.end|date:'D'}}</span>
+			<span class="event-date-month pull-left">{{ event.end|date:'b'|title}}</span>
+			<span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
+			{% endif %}
+			<span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
+			<span class="event-location">, {{event.where }}</span>
 		{% endwith %}
-		{{ event.description|safe|linebreaks }}
-	</div>
+		{% endwith %}
+		</div>
 
-	<div class="col-md-4 col-md-offset-1" id="rsvp-info">
-		{% include 'snippets/rsvp_info.html' %}
-	</div>
+		<div class="col-md-7">
+			<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
 
-	{% if user_is_organizer %}
-	<div class="col-md-12" id="organizer-notes">
-		<hr>
-		<h4>Organizer Notes</h4>
-		<p>{{event.organizer_notes|default:"No notes"}}</p>
-	</div>
+			{% with event.organizers.get_queryset as organizers %}
+			<h3>Organized by 
+				{% for o in organizers %}
+				<a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}
+				{% endfor %}
+			</h3>
+			{% endwith %}
+			{{ event.description|safe|linebreaks }}
+		</div>
+
+		<div class="col-md-4 col-md-offset-1" id="rsvp-info">
+			{% include 'snippets/rsvp_info.html' %}
+		</div>
+
+		{% if user_is_organizer %}
+		<div class="col-md-12" id="organizer-notes">
+			<hr>
+			<h4>Organizer Notes</h4>
+			<p>{{event.organizer_notes|default:"No notes"}}</p>
+		</div>
+		{% endif %}
+
+		{% endif %} {% comment %} end check for canceled event {% endcomment %}
+
+	{% if event.status == 'canceled' %}
+		</div>
 	{% endif %}
 
 </div>
@@ -235,36 +247,6 @@
 		return false;
 	};
 
-	$("#approve-for-publication").click(function() {
-		request = $.ajax({ 
-			data: {
-				'csrfmiddlewaretoken': '{{ csrf_token }}'
-			},	
-			type: "POST",
-			url: "{% url 'gather_event_approve' location.slug event.id event.slug %}"
-		});
-		request.done(function(msg) {
-			$("#event-status-area").html(msg);
-		});
-
-		request.fail(function(msg) {
-			$("#event-status-area").html('<span class="text-danger">Oops, there was a problem. Please try again.</span>')
-		});
-
-		event.preventDefault();
-	});
-
-	$("#publish-event").click(function() {
-		request = $.ajax({ 
-			data: {
-				'csrfmiddlewaretoken': '{{ csrf_token }}'
-			},	
-			type: "POST",
-			url: "{% url 'gather_event_publish' location.slug event.id event.slug %}",
-		});
-
-	});
-
 	$.validator.addMethod("strictEmail", function(value, element) {
 		return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
 		}, "Please provide a valid email address."
@@ -315,8 +297,6 @@
 			}
 		}	
 	});
-
-
 
 </script>
 {% endblock %}

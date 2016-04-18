@@ -1,35 +1,93 @@
 {% load staticfiles %}
 {% if user_is_organizer or user_is_event_admin %}
+
+	<!-- Email Modal -->
+	<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 class="modal-title" id="myModalLabel">Email Event Attendees</h3>
+				</div>
+				<div class="modal-body">
+
+					<form id="res-action-email-user" method=POST action="{% url 'gather_event_send_mail' location.slug event.id event.slug %}" >
+						{% csrf_token %}
+						<div class="form-group">
+							<!-- hide the recipient list and sender since we're not editing those -->
+							{{email_form.recipient}}
+							{{email_form.sender}} 
+							<div class="text-warning row-spacer"><i class="fa fa-info-circle"></i> This message will be sent from your email address {{request.user.email}} so that attendees can respond with any questions.</div>
+							<span class="email-form-label">Subject: </span> {{email_form.subject}} <br>
+							{{email_form.body}}
+							{{email_form.footer}}
+						</div>
+						<submit value="Send">
+						<div class="modal-footer">
+							<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+							<button type="submit" class="btn btn-primary">Send Email</button>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+
 	<div class="event-status bg-warning">
+		
 		{% if user_is_organizer %} 
 			You are an organizer of this event. 
 		{% else %} 
 			You are an event administrator at this location. 
 		{% endif %} 
-		This event is <span class="text-success">{{ event.status }}</span>. 
-			{% if event.status != 'live' %} 
-				It will be viewable by non-administrators when it is published.
-			{% endif %}
+		
+		{% if event.status != 'canceled' %}
+			This event is <span class="text-success">{{ event.status }}</span>. 
+		{% else %}
+			This event is <span class="text-danger">{{ event.status }}</span>. 
+		{% endif %}
+
+		{% if event.status != 'live' and event.status != 'canceled' %} 
+			It will be viewable by non-administrators when it is published.
+		{% endif %}
+
 		<span title="Event Endorsements" id="endorsement-area" class="endorsement-area pull-right">
 			{% include 'snippets/endorsements.html' %}
 		</span>
 
-		<div id="event-actions">
-			{% if user_is_event_admin %}
-				{% if event.status == 'seeking feedback' or event.status == 'ready to publish' %} 
-					<a id="publish-event" href="">Publish this Event</a> to make it live. 
-				{% elif event.status == 'waiting for approval'  %}
-					<a id="publish-event" href="">Publish this Event</a> to make it live immediately or <a id="approve-for-publication" href="">approve it</a> to notify the organizer and let them publish it.
+		<div class="row" id="event-actions">
+			<div class="col-md-12">
+				{% if user_is_event_admin %}
+					{% if event.status == 'seeking feedback' or event.status == 'ready to publish' %} 
+					<a id="publish-event" href="{% url 'gather_event_publish' location.slug event.id event.slug %}"><i class="fa fa-check"></i> Publish this Event</a> to make it live. 
+					{% elif event.status == 'waiting for approval'  %}
+						<a id="publish-event" href="{% url 'gather_event_publish' location.slug event.id event.slug %}"><i class="fa fa-check"></i> Publish this Event</a> to make it live immediately or <a id="approve-for-publication" href="{% url 'gather_event_approve' location.slug event.id event.slug %}">approve it</a> to notify the organizer and let them publish it.
+					{% endif %}
+				{% elif user_is_organizer %}
+					{% if event.status == 'ready to publish' %} 
+						<a id="publish-event" href="{% url 'gather_event_publish' location.slug event.id event.slug %}"><i class="fa fa-check"></i> Publish this Event</a> to make it live.
+					{% elif event.status == 'waiting for approval' %}
+						<i class="fa fa-info-circle"></i> You will be notified when this event has been approved.
+					{% endif %}
 				{% endif %}
-			{% elif user_is_organizer %}
-				{% if event.status == 'ready to publish' %} 
-					<a id="publish-event" href="">Publish this Event</a> to make it live.
-				{% elif event.status == 'waiting for approval' %}
-					You will be notified when this event has been approved.
-				{% endif %}
-			{% endif %}
+			</div>
 		
-			<a href="mailto:{{ event_email }}" title="Send an email to the event organizers and local event admins" class="disabled"><i class="fa fa-envelope-o"></i> Discuss via email</a>. Your email will reach event organizers and the admin team for this community. 
+			<div class="col-md-12">
+				<a href="" data-target="#emailModal" data-toggle="modal" title="Send an email to event attendees"><i class="fa fa-bullhorn"></i> Email event attendees</a>. 
+			</div>
+			<div class="col-md-12">
+				<a href="mailto:{{ event_email }}" title="Send an email to the event organizers and local event admins" class="disabled"><i class="fa fa-envelope-o"></i> Email event organizers & admins</a>. 
+			</div>
+
+			<div class="col-md-12">
+				{% if event.status != 'canceled' %} 
+					<a id="cancel-event" onclick="return confirm('Please confirm you wish to cancel this event.')" href="{% url 'gather_event_cancel' location.slug event.id event.slug %}"><i class="fa fa-close"></i> Cancel this Event</a>. 
+				{% endif %}
+			</div>
+
 		</div>
 
 	</div>

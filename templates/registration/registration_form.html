@@ -46,38 +46,28 @@
 			{% csrf_token %}
 			{{ form.username }}
 
-			{% if has_image %}
+			{{ form.cropped_image_data }}
+			<div class="form-group">
+				{{ form.image.errors|safe }}
 				<div class="row">
 					<label class="light col-sm-2 control-label">
-						Image
+						{% if has_image %} Update image {% else %} Image {% endif %}
 					</label>
-				<div id="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
-					<img id="image-preview" src="{{ form.instance.image.url }}">
-				</div>
-			{% else %}
-				{{ form.cropped_image_data }} 
-				<div class="form-group">
-					{{ form.image.errors|safe }}
-					<div class="row">
-						<label class="light col-sm-2 control-label">
-							{% if has_image %} Update image {% else %} Image {% endif %}
-						</label>
-						<div class="form-field-body col-sm-10" id="img-cropper-wrapper">
-							{{ form.image }}
-						</div>
-					</div>
-					<div class="row">
-						<div id="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
-							{% if has_image %}
-								<img id="image-preview" src="{{ form.instance.image.url }}">
-							{% else %}
-								<img id="image-preview" src="{{ STATIC_URL }}img/default.jpg">
-							{% endif %}
-						</div>
+					<div class="form-field-body col-sm-10" id="img-cropper-wrapper">
+						{{ form.image }}
 					</div>
 				</div>
-			{% endif %}
-			
+				<div class="row">
+					<div id="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
+						{% if has_image %}
+							<img id="image-preview" src="{{ form.instance.image.url }}">
+						{% else %}
+							<img id="image-preview" src="{{ STATIC_URL }}img/default.jpg">
+						{% endif %}
+					</div>
+				</div>
+			</div>
+
 			<div class="clear"></div>
 
 			<div class="form-group">
@@ -130,7 +120,7 @@
 				<div class="col-md-2">
 					<label>Account Information</label>
 				</div>
-	
+
 				{{ form.first_name.errors|safe }}
 				<div class="form-field-body col-sm-5">
 					{{ form.first_name }}
@@ -185,7 +175,7 @@
 
 		</form>
 	</div>
-	
+
 	<div class="col-md-4 col-md-offset-1" id="res-detail">
 		{% if reservation %}
 			<div id="reservation-amount-summary-box">
@@ -208,6 +198,16 @@
 
 {% block extrajs %}
 	<script>
+	$(function() {
+		var availableUsers = [
+			{% for user in all_users %}
+				 "{{user.username}}",
+			{% endfor %}
+		];
+		$( "#id_referral" ).autocomplete({
+			source: availableUsers
+		});
+	});
 
 	$("#reservation-amount-summary-box").waypoint('sticky');
 
@@ -243,7 +243,7 @@
 				return false;
 			}
 			// JKS second check to see if there's a space. not sure where
-			// the above regex IS allowing a space, but it is.  
+			// the above regex IS allowing a space, but it is.
 			if (/ +/.test(val_to_test)) {
 				return false;
 			}
@@ -301,7 +301,7 @@
 					data: {'email': function() {return $( "#id_email" ).val()}}
 				},
 				{% endif %}
-			}, 
+			},
 			referral: {
 				required: true
 			},
@@ -320,7 +320,7 @@
 				{% endif %}
 				equalTo: "#id_password1",
 			}
-		}	
+		}
 	});
 
 	function showCropper() {
@@ -338,7 +338,7 @@
 	function showImage(input) {
 		if (input.files && input.files[0]) {
 			var reader = new FileReader();
-		
+
 			reader.onload = function (e) {
 				$('#image-preview').fadeOut(300, function() {
 					$(this).attr('src',e.target.result);
@@ -346,7 +346,7 @@
 			}
 			reader.readAsDataURL(input.files[0]);
 		}
-	}	
+	}
 
 	$("#id_image").change(function() {
 		$("#image-preview").cropper('destroy');
@@ -364,4 +364,3 @@
 
 	</script>
 {% endblock %}
-

@@ -22,9 +22,9 @@ from django.template import Context
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
-from gather.forms import EventForm
+from gather.forms import EventForm, EventEmailTemplateForm
 from core.forms import UserProfileForm
-from gather.emails import new_event_notification, event_approved_notification, event_published_notification
+from gather.emails import new_event_notification, event_approved_notification, event_published_notification, mailgun_send
 from core.models import Location
 
 logger = logging.getLogger(__name__)
@@ -163,8 +163,11 @@ def view_event(request, event_id, event_slug, location_slug=None):
 		user_is_event_admin = False
 
 	# this is counter-intuitive - private events are viewable to those who have
-	# the link. so private events are indeed shown to anyone (once they are approved). 
-	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user):
+	# the link. so private events are indeed shown to anyone (once they are
+	# approved). and we dont have a way of knowing what the previous status of
+	# canceled events was (!), so we also let this go through but then suppress
+	# the event details and a cancelation notice on the event page. 
+	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user) or event.status == 'canceled':
 		if current_user and current_user in event.organizers.get_queryset():
 			user_is_organizer = True
 		else:
@@ -179,9 +182,13 @@ def view_event(request, event_id, event_slug, location_slug=None):
 		detail_url = "https://" +domain +  reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
 		formatted_location = event.where.replace(" ","+")
 		event_google_cal_link = '''https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s&details=For+details%%3a+%s&location=%s&sf=true&output=xml''' % (formatted_title, formatted_dates, detail_url, formatted_location)
+		if user_is_event_admin or user_is_organizer:
+			email_form = EventEmailTemplateForm(event, location)
+		else:
+			email_form = None
 		return render(request, 'gather_event_view.html', {'event': event, 'current_user': current_user, 'event_google_cal_link': event_google_cal_link,
 			'user_is_organizer': user_is_organizer, 'new_user_form': new_user_form, "event_email": event_email, "domain": domain,
-			'login_form': login_form, "spots_remaining": spots_remaining, 'user_is_event_admin': user_is_event_admin, 
+			'login_form': login_form, "spots_remaining": spots_remaining, 'user_is_event_admin': user_is_event_admin, 'email_form': email_form,
 			"num_attendees": num_attendees, 'in_the_past': past, 'endorsements': event.endorsements.all(), 'location': location})
 
 	elif not current_user:
@@ -344,6 +351,116 @@ def email_preferences(request, username, location_slug=None):
 	messages.add_message(request, messages.INFO, 'Your preferences have been updated.')
 	return HttpResponseRedirect('/people/%s/' % u.username)
 
+
+def event_approve(request, event_id, event_slug, location_slug=None):
+	location = get_object_or_404(Location, slug=location_slug)
+	location_event_admin = EventAdminGroup.objects.get(location=location)
+	if request.user not in location_event_admin.users.all():
+		return HttpResponseRedirect('/404')
+	event = Event.objects.get(id=event_id)
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
+		return HttpResponseRedirect("/")
+
+	event.status = Event.READY
+	event.save()
+	if request.user in location_event_admin.users.all():
+		user_is_event_admin = True
+	else:
+		user_is_event_admin = False
+	if request.user in event.organizers.all():
+		user_is_organizer = True
+	else:
+		user_is_organizer = False
+
+	msg_success = "Success! The event has been approved."
+	messages.add_message(request, messages.INFO, msg_success)
+
+	# notify the event organizers and admins
+	event_approved_notification(event, location)
+
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
+
+def event_publish(request, event_id, event_slug, location_slug=None):
+	location = get_object_or_404(Location, slug=location_slug)
+	location_event_admin = EventAdminGroup.objects.get(location=location)
+	if request.user not in location_event_admin.users.all():
+		return HttpResponseRedirect('/404')
+	event = Event.objects.get(id=event_id)
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
+		return HttpResponseRedirect("/")
+
+	print request.POST
+	event.status = Event.LIVE
+	event.save()
+	if request.user in location_event_admin.users.all():
+		user_is_event_admin = True
+	else:
+		user_is_event_admin = False
+	if request.user in event.organizers.all():
+		user_is_organizer = True
+	else:
+		user_is_organizer = False
+	msg_success = "Success! The event has been published."
+	messages.add_message(request, messages.INFO, msg_success)
+
+	# notify the event organizers and admins
+	event_published_notification(event, location)
+
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
+
+
+def event_cancel(request, event_id, event_slug, location_slug=None):
+	location = get_object_or_404(Location, slug=location_slug)
+	location_event_admin = EventAdminGroup.objects.get(location=location)
+	if request.user not in location_event_admin.users.all():
+		return HttpResponseRedirect('/404')
+	event = Event.objects.get(id=event_id)
+	if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
+		return HttpResponseRedirect("/")
+
+	event.status = Event.CANCELED
+	event.save()
+	if request.user in location_event_admin.users.all():
+		user_is_event_admin = True
+	else:
+		user_is_event_admin = False
+	if request.user in event.organizers.all():
+		user_is_organizer = True
+	else:
+		user_is_organizer = False
+	msg = "The event has been canceled."
+	messages.add_message(request, messages.INFO, msg)
+
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
+
+def event_send_mail(request, event_id, event_slug, location_slug=None):
+	if not request.method == 'POST':
+		return HttpResponseRedirect('/404')
+
+	location = get_object_or_404(Location, slug=location_slug)
+	subject = request.POST.get("subject")
+	recipients = [request.POST.get("recipient"),]
+	body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
+
+	# the from address is set to the organizer's email so people can respond
+	# directly with questions if needed.
+	mailgun_data={"from": request.user.email,
+		"to": request.user.email,
+		"bcc": recipients,
+		"subject": subject,
+		"text": body,
+	}
+
+	resp = mailgun_send(mailgun_data)
+
+	logger.debug(resp)
+	if resp.status_code == 200:
+		messages.add_message(request, messages.INFO, "Your message was sent.")
+	else:
+		messages.add_message(request, messages.INFO, "There was a connection problem and your message was not sent.")
+	return HttpResponseRedirect(reverse('gather_view_event', args=(location_slug, event_id, event_slug)))
+
+
 ############################################
 ########### AJAX REQUESTS ##################
 
@@ -474,59 +591,4 @@ def endorse(request, event_id, event_slug, location_slug=None):
 	event.save()
 	endorsements = event.endorsements.all()
 	return render(request, "snippets/endorsements.html", {"endorsements": endorsements, "current_user": request.user, 'location': location, 'event': event});
-
-def event_approve(request, event_id, event_slug, location_slug=None):
-	location = get_object_or_404(Location, slug=location_slug)
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
-	location_event_admin = EventAdminGroup.objects.get(location=location)
-	if request.user not in location_event_admin.users.all():
-		return HttpResponseRedirect('/404')
-
-	event = Event.objects.get(id=event_id)
-
-	event.status = Event.READY
-	event.save()
-	if request.user in location_event_admin.users.all():
-		user_is_event_admin = True
-	else:
-		user_is_event_admin = False
-	if request.user in event.organizers.all():
-		user_is_organizer = True
-	else:
-		user_is_organizer = False
-	msg_success = "Success! The event has been approved."
-
-	# notify the event organizers
-	event_approved_notification(event, location)
-
-	return render(request, "snippets/event_status_area.html", {'event': event, 'user_is_organizer': user_is_organizer, 'user_is_event_admin': user_is_event_admin})
-
-def event_publish(request, event_id, event_slug, location_slug=None):
-	if not request.method == 'POST':
-		return HttpResponseRedirect('/404')
-	location = get_object_or_404(Location, slug=location_slug)
-	location_event_admin = EventAdminGroup.objects.get(location=location)
-	if request.user not in location_event_admin.users.all():
-		return HttpResponseRedirect('/404')
-
-	event = Event.objects.get(id=event_id)
-
-	print request.POST
-	event.status = Event.LIVE
-	event.save()
-	if request.user in location_event_admin.users.all():
-		user_is_event_admin = True
-	else:
-		user_is_event_admin = False
-	if request.user in event.organizers.all():
-		user_is_organizer = True
-	else:
-		user_is_organizer = False
-	msg_success = "Success! The event has been published."
-
-	# notify the event organizers and admins
-	event_published_notification(event, location)
-
-	return render(request, "snippets/event_status_area.html", {'location':location, 'event': event, 'user_is_organizer': user_is_organizer, 'user_is_event_admin': user_is_event_admin})
 
