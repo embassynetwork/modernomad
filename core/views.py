@@ -1260,7 +1260,7 @@ def LocationEditUsers(request, location_slug):
 				event_admin_group.save()
 				messages.add_message(request, messages.INFO, "User '%s' added to event admin group." % event_admin_username)
 		else:
-			messages.add_message(request, messages.ERROR, "User '%s' Not Found!" % username)
+			messages.add_message(request, messages.ERROR, "Username Required!")
 	all_users = User.objects.all().order_by('username')
 	return render(request, 'location_edit_users.html', {'page':'users', 'location': location, 'all_users':all_users})
 
