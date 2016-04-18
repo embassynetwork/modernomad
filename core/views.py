@@ -1394,7 +1394,9 @@ def LocationEditRooms(request, location_slug):
 	room_forms = []
 	room_names = []
 	room_names.append("New Room")
-	room_forms.append((LocationRoomForm(), None, -1, "new room"))
+	# the empty form
+	room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room"))
+	# forms for the existing rooms
 	for room in location_rooms:
 		room_reservables = room.reservables.all().order_by('start_date')
 		reservables_forms = []
@@ -1404,7 +1406,11 @@ def LocationEditRooms(request, location_slug):
 			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
 		id_str = "room-%d-new-reservable-%%s" % room.id
 		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
-		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
+		if room.image:
+			has_image = True
+		else:
+			has_image = False
+		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, has_image))
 		room_names.append(room.name)
 	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 

@@ -269,12 +269,18 @@ class LocationPageForm(forms.Form):
 	content = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
 
 class LocationRoomForm(BootstrapModelForm):
+	cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 	class Meta:
 		model = Room
 		exclude = ['location',]
 		widgets = { 
 			'description': forms.Textarea(attrs={'rows': '3'}),
 		}
+
+	def __init__(self, *args, **kwargs):
+		super(LocationRoomForm, self).__init__(*args, **kwargs)
+		if self.instance.id is not None:
+			self.fields['cropped_image_data'].required = False
 
 class LocationReservableForm(BootstrapModelForm):
 	class Meta:
