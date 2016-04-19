@@ -13,6 +13,24 @@ import uuid
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
+def save_cropped_image(raw_img_data, upload_path):
+	# Decode the image data
+	img_data = base64.b64decode(raw_img_data)
+	filename = "%s.png" % uuid.uuid4()
+
+	# XXX make the upload path a fixed setting in models, since it's
+	# reference in three places
+	upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
+	if not os.path.exists(upload_abs_path):
+		os.makedirs(upload_abs_path)
+	full_file_name = os.path.join(upload_abs_path, filename)
+
+	with open(full_file_name, 'wb') as f:
+		f.write(img_data)
+		f.close()
+	return full_file_name
+
+
 class UserProfileForm(forms.ModelForm):     
 	# this is used in the profile edit page. 
 	''' This form manually incorporates the fields corresponding to the base 
@@ -95,8 +113,8 @@ class UserProfileForm(forms.ModelForm):
 		return clean_username
 
 	def clean(self):
+		# Generate a (unique) username, if one is needed (ie, if the user is new)
 		if not 'username' in self.cleaned_data:
-			# Generate a unique username
 			tries = 1
 			username = self.create_username()
 			while User.objects.filter(username=username).count() > 0:
@@ -104,35 +122,20 @@ class UserProfileForm(forms.ModelForm):
 				username = self.create_username(suffix=tries)
 			self.cleaned_data['username'] = username
 			
+		# save any cropped images
 		try:
 			img_data = self.cleaned_data['cropped_image_data']
 			# If none or len 0, means illegal image data
 			if (img_data == False or img_data == None or len(img_data) == 0):
-				#raise Exception('There was no image provided')
-				# Image data on creation is insured by the javascript validator.
+				# Image data on creation is ensured by the javascript validator.
 				# If we don't have image data here it's because we don't need to 
 				# update the image.  Doing nothing -- JLS
 				return
 		except:
 			raise forms.ValidationError('No valid image was provided.')
-
-		# Decode the image data
-		img_data = base64.b64decode(img_data)
-		filename = "%s.png" % uuid.uuid4()
-
-		# XXX make the upload path a fixed setting in models, since it's
-		# reference in three places
 		upload_path = "data/avatars/%s/" % self.cleaned_data['username']
-		upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-		if not os.path.exists(upload_abs_path):
-			os.makedirs(upload_abs_path)
-		full_file_name = os.path.join(upload_abs_path, filename)
-
-		with open(full_file_name, 'wb') as f:
-			f.write(img_data)
-			f.close()
+		full_file_name = save_cropped_image(img_data, upload_path)
 		self.cleaned_data['image'] = full_file_name
-		return 
 
 	def clean_links(self):
 		# validates and formats the urls, returning a string of comma-separated urls
@@ -281,6 +284,25 @@ class LocationRoomForm(BootstrapModelForm):
 		super(LocationRoomForm, self).__init__(*args, **kwargs)
 		if self.instance.id is not None:
 			self.fields['cropped_image_data'].required = False
+
+	def clean(self):
+		# save any cropped images
+		print 'in LocationRoomForm clean()'
+		print self.cleaned_data.keys()
+		try:
+			img_data = self.cleaned_data['cropped_image_data']
+			# If none or len 0, means illegal image data
+			if (img_data == False or img_data == None or len(img_data) == 0):
+				# Image data on creation is ensured by the javascript validator.
+				# If we don't have image data here it's because we don't need to 
+				# update the image.  Doing nothing -- JLS
+				print 'there was no image data'
+		except:
+			raise forms.ValidationError('No valid image was provided.')
+		upload_path = "rooms/"
+		full_file_name = save_cropped_image(img_data, upload_path)
+		self.cleaned_data['image'] = full_file_name
+
 
 class LocationReservableForm(BootstrapModelForm):
 	class Meta:

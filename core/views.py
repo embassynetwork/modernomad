@@ -1339,14 +1339,17 @@ def LocationEditRooms(request, location_slug):
 	location_rooms = location.rooms.all().order_by('name')
 
 	if request.method == 'POST':
-		print request.POST
+		print 'received new room or room data'
 		if request.POST.get("room_id"):
 			room_id = int(request.POST.get("room_id"))
 			if room_id > 0:
 				# editing an existing item
+				print 'updating an existing room'
 				action = "updated"
 				room = Room.objects.get(id=room_id)
-				form = LocationRoomForm(request.POST, request.FILES, instance=room)
+				# request.POST keys now have a prefix, so don't forget to pass that along here!
+				prefix = "room_%d" % room_id
+				form = LocationRoomForm(request.POST, request.FILES, instance=room, prefix=prefix)
 			else:
 				# new item
 				action = "created"
@@ -1402,7 +1405,6 @@ def LocationEditRooms(request, location_slug):
 		reservables_forms = []
 		for reservable in room_reservables:
 		 	id_str = "reservable-%d-%%s" % reservable.id
-			print id_str
 			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
 		id_str = "room-%d-new-reservable-%%s" % room.id
 		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))

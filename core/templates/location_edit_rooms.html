@@ -40,7 +40,7 @@
 			{% for room_form, reservables_forms, room_id, room_name, has_image in room_forms %}
 
 			<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
-				<form class="form-horizontal" method="post" enctype="multipart/form-data" action="."> {% csrf_token %}
+				<form id="form-room_{{room_id}}" class="room-form form-horizontal" method="post" enctype="multipart/form-data" action="."> {% csrf_token %}
 					{% for field in room_form %}
 						{% if not field.is_hidden %} 
 							<div class="form-group">
@@ -50,12 +50,12 @@
 							{{ field }}
 							</div>
 							{% if field.name == 'image' %}
-								<div>
-								{% if has_image %}
-									<img id="id_room_{{room_id}}-image-preview" src="{{ room_form.instance.image.url }}">
-								{% else %}
-									<img id="id_room_{{room_id}}-image-preview" src="{{ STATIC_URL }}img/default.jpg">
-								{% endif %}
+								<div class="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
+									{% if has_image %}
+										<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ room_form.instance.image.url }}">
+									{% else %}
+										<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ STATIC_URL }}img/default.jpg">
+									{% endif %}
 								</div>
 							{% endif %}
 						{% else %}
@@ -140,10 +140,8 @@
 
 	function showCropper(preview_id) {
 		// register a cropper on *all* the preview elements
-		console.log('inside showCropper');
-		console.log(preview_id);
 		$(preview_id).cropper({
-			aspectRatio: 1/1,
+			aspectRatio: 4/3,
 			zoomable: false,
 			rotatable: false,
 			scalable: false,
@@ -157,9 +155,18 @@
 			var reader = new FileReader();
 
 			reader.onload = function (e) {
+				$(preview_id).attr('src', e.target.result);
+				showCropper(preview_id);
+				/* i have NO IDEA why the above lines work but the below lines
+				* do not. it works great on the user profile page. the main
+				* difference here is that there are N room forms on this page,
+				* one for each existing room + a form for a new room. rrrrrg.
+				* */
+				/*
 				$(preview_id).fadeOut(300, function() {
 					$(this).attr('src', e.target.result);
 				}).fadeIn(800, showCropper(preview_id));
+				*/
 			}
 			reader.readAsDataURL(input.files[0]);
 		}
@@ -172,18 +179,25 @@
 		// get just the room_x part. 
 		room_x = this_image_id.match(/id_(.*)-image/)[1]
 		preview_id = "#id_"+room_x+"-image-preview"
-		console.log("#"+this_image_id);
 
+		// destroy the previous cropper if it existed
 		$(preview_id).cropper('destroy');
+		
 		if ($("#"+this_image_id).val()) {
-			console.log('found image. previewing.');
 			showImage(this, preview_id);
 		}
 	});
 
-	$("#newprofileform").submit(function(){
+	$(".room-form").submit(function(){
+		/* construct the unique ids for this form so we can store the cropped
+		* image data in the correct formp. then submit the form */
+		form_id = $(this).attr('id');
+		room_x = form_id.match(/form-(.*)/)[1]
+		preview_id = "#id_"+room_x+"-image-preview"
+		cropped_img_data = "#id_"+room_x+"-cropped_image_data";
+		
 		// add the cropped image data to the form, then submit.
-		$("#id_cropped_image_data").val($("#image-preview").cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
+		$(cropped_img_data).val($(preview_id).cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
 		return true;
 	})
 
