@@ -28,7 +28,8 @@ def save_cropped_image(raw_img_data, upload_path):
 	with open(full_file_name, 'wb') as f:
 		f.write(img_data)
 		f.close()
-	return full_file_name
+	relative_file_name = os.path.join(upload_path, filename)
+	return relative_file_name
 
 
 class UserProfileForm(forms.ModelForm):     
@@ -133,9 +134,9 @@ class UserProfileForm(forms.ModelForm):
 				return
 		except:
 			raise forms.ValidationError('No valid image was provided.')
-		upload_path = "data/avatars/%s/" % self.cleaned_data['username']
-		full_file_name = save_cropped_image(img_data, upload_path)
-		self.cleaned_data['image'] = full_file_name
+		upload_path = "avatars/%s/" % self.cleaned_data['username']
+		relative_file_name = save_cropped_image(img_data, upload_path)
+		self.cleaned_data['image'] = relative_file_name
 
 	def clean_links(self):
 		# validates and formats the urls, returning a string of comma-separated urls
@@ -287,8 +288,6 @@ class LocationRoomForm(BootstrapModelForm):
 
 	def clean(self):
 		# save any cropped images
-		print 'in LocationRoomForm clean()'
-		print self.cleaned_data.keys()
 		try:
 			img_data = self.cleaned_data['cropped_image_data']
 			# If none or len 0, means illegal image data
@@ -300,8 +299,8 @@ class LocationRoomForm(BootstrapModelForm):
 		except:
 			raise forms.ValidationError('No valid image was provided.')
 		upload_path = "rooms/"
-		full_file_name = save_cropped_image(img_data, upload_path)
-		self.cleaned_data['image'] = full_file_name
+		relative_file_name = save_cropped_image(img_data, upload_path)
+		self.cleaned_data['image'] = relative_file_name
 
 
 class LocationReservableForm(BootstrapModelForm):

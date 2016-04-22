@@ -1320,6 +1320,11 @@ def size_images(sender, instance, **kwargs):
 
 		img_upload_path_rel = profile_img_upload_to(instance, instance.image.name)
 		main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_path_rel)
+
+		# JKS even though we scaled the image on upload, we re *size* it here,
+		# as well as save the thumbnail. probably it would be better if we
+		# saved the original AND the resized versions...?
+
 		# resize returns a copy. resize() forces the dimensions of the image
 		# to match SIZE specified, squeezing the image if necessary along one
 		# dimension.
@@ -1327,6 +1332,8 @@ def size_images(sender, instance, **kwargs):
 		main_img.save(main_img_full_path)
 		# the image field is a link to the path where the image is stored
 		instance.image = img_upload_path_rel
+		print 'updating instance.image to be a relative path...'
+		print instance.image
 		# now resize this to generate the smaller thumbnail
 		thumb_img = im.resize(UserProfile.IMG_THUMB_SIZE, Image.ANTIALIAS)
 		thumb_full_path = os.path.splitext(main_img_full_path)[0] + ".thumb" + os.path.splitext(main_img_full_path)[1]
