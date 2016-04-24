@@ -94,11 +94,6 @@
         set_summary_width('#sticky-sidebar');
 	});
 
-	// this is a hack to force images to be the right dimensions, but should
-	// primarily be enforced by the model.
-	var img_w = $('.room-info-image').width();
-	$('.room-info-image').css({'height':0.75*img_w+'px'});
-
 	$(".room-info").hide();
 
 	$(".room-select").click(function() {
