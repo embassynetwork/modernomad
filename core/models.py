@@ -288,7 +288,7 @@ class Room(models.Model):
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
-	residents = models.ManyToManyField(User, related_name="residents", help_text="This field is optional.", blank=True) # a room may have many residents and a resident may have many rooms
+	residents = models.ManyToManyField(User, related_name="rooms", help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room.", blank=True) # a room may have many residents and a resident may have many rooms
 	image = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
 
 	def __unicode__(self):

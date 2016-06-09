@@ -36,52 +36,10 @@
 				</p>
 			</div>
 
-			{% for room_form, reservables_forms, room_id, room_name in room_forms %}
+			{% with page='location_edit_rooms' %}
+				{% include 'snippets/room_edit_forms.html' %}
+			{% endwith %}
 
-			<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
-				<form class="form-horizontal" method="post" enctype="multipart/form-data" action="."> {% csrf_token %}
-					{% for field in room_form %}
-					<div class="form-group">
-						{{ field.errors }}
-						{{ field.label_tag }}
-						<span class="form-help-text">{{ field.help_text}}</span>
-						{{ field }}
-					</div>
-					{% endfor %}
-					<input type="hidden" name="room_id" value="{{room_id}}">
-					<div class="form-group">
-						<button type="submit" class="btn btn-large btn-default">Submit Room Changes</button>
-					</div>
-				</form>
-
-				<hr>
-
-				{% if reservables_forms %}
-					<h4>Date Ranges that this room should be reservable</h4>
-					<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
-					<p>The end date entered <em>will</em> be reservable; i.e.,
-					if you enter an end date of April 15, then the room will be
-					reservable on the night of April 15, but not on April 16.
-					</p>
-					{% for reservable_form, reservable_id in reservables_forms %}
-						<form class="form-inline" method="post" enctype="multipart/form-data" action=".">
-							<div class="form-group">
-								{% for field in reservable_form %}
-									{{ field.errors }}
-									<label>{{ field.label }}</label>
-									{{ field }}
-								{% endfor %}
-								<input type="hidden" name="reservable_id" value="{{reservable_id}}">
-								<input type="hidden" name="room_fk" value="{{room_id}}">
-								<input class="form-control" type="submit" value="Submit">
-							</div>
-							{% csrf_token %}
-						</form>
-					{% endfor %}
-				{% endif %}
-
-			</div>		
-			{% endfor %}
 		</div>		
 	</div>		
 

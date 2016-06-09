@@ -785,9 +785,23 @@ def UserDetail(request, username):
 			user_is_house_admin_somewhere = True
 			break
 
+	# grab the rooms that this user is a backer/resident of
+	room_forms = []
+	rooms = user.rooms.all()
+	for room in rooms:
+		room_reservables = room.reservables.all().order_by('start_date')
+		reservables_forms = []
+		for reservable in room_reservables:
+		 	id_str = "reservable-%d-%%s" % reservable.id
+			print id_str
+			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
+		id_str = "room-%d-new-reservable-%%s" % room.id
+		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
+		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name, room.location.slug))
+
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
-		"events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+		"room_forms": room_forms, "events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
 	locations = Location.objects.filter(visibility='public').order_by("name")
@@ -1336,7 +1350,8 @@ def LocationEditPages(request, location_slug):
 	return render(request, 'location_edit_pages.html', {'page':'pages', 'location': location, 'menus':menus,
 		'page_forms':page_forms, 'new_page_form':new_page_form})
 
-@house_admin_required
+
+@resident_or_admin_required
 def LocationEditRooms(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 
@@ -1364,7 +1379,6 @@ def LocationEditRooms(request, location_slug):
 					new_room.location = location
 					new_room.save()
 					messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
-				return HttpResponseRedirect(reverse('location_edit_rooms', args=(location_slug, )))
 			else:
 				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
 		elif request.POST.get("reservable_id"):
@@ -1389,7 +1403,6 @@ def LocationEditRooms(request, location_slug):
 					new_reservable.room = room
 					new_reservable.save()
 				messages.add_message(request, messages.INFO, "Reservable date range %s." % action)
-				return HttpResponseRedirect(reverse('location_edit_rooms', args=(location_slug, )))
 			else:
 				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
 		else:
@@ -1408,9 +1421,14 @@ def LocationEditRooms(request, location_slug):
 			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
 		id_str = "room-%d-new-reservable-%%s" % room.id
 		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
-		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name))
+		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name, room.location.slug))
 		room_names.append(room.name)
-	return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
+	page = request.POST.get('page')
+	if page == 'user_detail':
+		print 'redirecting to user page'
+		return HttpResponseRedirect(reverse('user_detail', args=(request.POST.get('username'), )))
+	else:
+		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required
 def LocationEditContent(request, location_slug):

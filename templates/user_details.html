@@ -84,9 +84,21 @@
 			<li role="presentation"><a href="#reservations" aria-controls="reservations" role="tab" data-toggle="tab">Reservations</a></li>
 			<li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions</a></li>
 			<li role="presentation"><a href="#events" aria-controls="events" role="tab" data-toggle="tab">Events</a></li>
+			{% if u.rooms.count %}
+			<li role="presentation" class="dropdown">
+			    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+					Rooms <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					{% for r in u.rooms.all %}
+						<li><a href="#{{r.name|slugify}}" aria-controls="events" role="tab" data-toggle="tab">{{r.name}}</a></li>
+					{% endfor %}
+				</ul>
+			</li>
+			{% endif %}
 		</ul>
 
-		<div class="tab-content page-spacer">
+		<div class="tab-content col-md-10">
 
 		<div role="tabpanel" class="tab-pane active" id="email">
 			<h3>Email Notifications</h3>
@@ -145,23 +157,26 @@
 	<div role="tabpanel" class="tab-pane" id="reservations">
 		<h3>Reservations</h3>
 		{% include "snippets/user_reservations.html" %}
-	</div> <!-- end email tab -->
+	</div> <!-- end reservations tab -->
 
 	<div role="tabpanel" class="tab-pane" id="subscriptions">
 		<h3>Subscriptions</h3>
 		{% include "snippets/user_subscriptions.html" %}
-	</div> <!-- end email tab -->
+	</div> <!-- end subscriptions tab -->
 
 	<div role="tabpanel" class="tab-pane" id="events">
 		<h3>Events</h3>
 		{% include "snippets/user_events.html" %}
-	</div> <!-- end email tab -->
+	</div> <!-- end events tab -->
+
+	{% with page='user_detail' username=u.username %}
+		{% include 'snippets/room_edit_forms.html' %}
+	{% endwith %}
 
 	</div><!-- end tab content -->
 
 	{% endif %}
 
-</div>
 </div>
 
 {% endblock %}
