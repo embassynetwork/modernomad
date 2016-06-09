@@ -83,6 +83,7 @@
 			<li role="presentation" class="active"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Email</a></li>
 			<li role="presentation"><a href="#reservations" aria-controls="reservations" role="tab" data-toggle="tab">Reservations</a></li>
 			<li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions</a></li>
+			<li role="presentation"><a href="#events" aria-controls="events" role="tab" data-toggle="tab">Events</a></li>
 		</ul>
 
 		<div class="tab-content page-spacer">
@@ -149,6 +150,11 @@
 	<div role="tabpanel" class="tab-pane" id="subscriptions">
 		<h3>Subscriptions</h3>
 		{% include "snippets/user_subscriptions.html" %}
+	</div> <!-- end email tab -->
+
+	<div role="tabpanel" class="tab-pane" id="events">
+		<h3>Events</h3>
+		{% include "snippets/user_events.html" %}
 	</div> <!-- end email tab -->
 
 	</div><!-- end tab content -->

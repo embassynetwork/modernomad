@@ -766,6 +766,10 @@ def UserDetail(request, username):
 		messages.add_message(request, messages.INFO, 'There is no user with that username.')
 		return HttpResponseRedirect('/404')
 
+	events = list(user.events_attending.all())
+	events.reverse()
+	print type(events)
+
 	reservations = Reservation.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
 	subscriptions = Subscription.objects.filter(user=user).order_by('start_date')
 	past_reservations = []
@@ -783,7 +787,7 @@ def UserDetail(request, username):
 
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
-		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+		"events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
 	locations = Location.objects.filter(visibility='public').order_by("name")
