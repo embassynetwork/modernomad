@@ -68,7 +68,7 @@ def create_event(request, location_slug=None):
 			# always make sure current user is an organizer
 			event.organizers.add(current_user)
 			event.organizers.add(*co_organizers)
-			# organizers should be attendees by default, too. 
+			# organizers should be attendees by default, too.
 			event.attendees.add(current_user)
 			event.save()
 
@@ -121,7 +121,7 @@ def edit_event(request, event_id, event_slug, location_slug=None):
 def view_event(request, event_id, event_slug, location_slug=None):
 	# XXX should we double check the associated location here? currently the
 	# assumption is that if an event is being viewed under a specific location
-	# that that will be reflected in the URL path. 
+	# that that will be reflected in the URL path.
 	try:
 		event = Event.objects.get(id=event_id)
 	except:
@@ -166,7 +166,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 	# the link. so private events are indeed shown to anyone (once they are
 	# approved). and we dont have a way of knowing what the previous status of
 	# canceled events was (!), so we also let this go through but then suppress
-	# the event details and a cancelation notice on the event page. 
+	# the event details and a cancelation notice on the event page.
 	if (event.status == 'live' and event.visibility == Event.PRIVATE) or event.is_viewable(current_user) or event.status == 'canceled':
 		if current_user and current_user in event.organizers.get_queryset():
 			user_is_organizer = True
@@ -217,7 +217,7 @@ def upcoming_events_all_locations(request):
 			culled_upcoming.append(event)
 
 	# show 10 events per page
-	paged_upcoming = Paginator(culled_upcoming, 10) 
+	paged_upcoming = Paginator(culled_upcoming, 10)
 	page = request.GET.get('page')
 	try:
 		events = paged_upcoming.page(page)
@@ -248,7 +248,7 @@ def upcoming_events(request, location_slug=None):
 			culled_upcoming.append(event)
 
 	# show 10 events per page
-	paged_upcoming = Paginator(culled_upcoming, 10) 
+	paged_upcoming = Paginator(culled_upcoming, 10)
 	page = request.GET.get('page')
 	try:
 		events = paged_upcoming.page(page)
@@ -257,7 +257,7 @@ def upcoming_events(request, location_slug=None):
 		events = paged_upcoming.page(1)
 	except EmptyPage:
 		# If page is out of range (e.g. 9999), deliver last page of results.
-		events = paged_upcoming.page(paginator.num_pages)
+		events = paged_upcoming.page(paged_upcoming.num_pages)
 
 	return render(request, 'gather_events_list.html', {"events": events, 'current_user': current_user, 'page_title': 'Upcoming Events', 'location': location})
 
@@ -270,11 +270,11 @@ def user_events(request, username):
 	events_organized_past = user.events_organized.all().filter(end__lt = today).order_by('-start')
 	events_attended_past = user.events_attending.all().filter(end__lt = today).order_by('-start')
 	return render(request, 'gather_user_events_list.html', {
-		'events_organized_upcoming': events_organized_upcoming, 
-		'events_attended_upcoming': events_attended_upcoming, 
-		'events_organized_past': events_organized_past, 
-		'events_attended_past': events_attended_past, 
-		'current_user': user, 'page_title': 'Upcoming Events', 
+		'events_organized_upcoming': events_organized_upcoming,
+		'events_attended_upcoming': events_attended_upcoming,
+		'events_organized_past': events_organized_past,
+		'events_attended_past': events_attended_past,
+		'current_user': user, 'page_title': 'Upcoming Events',
 	})
 
 
@@ -285,7 +285,7 @@ def needs_review(request, location_slug=None):
 	location_admin_group = EventAdminGroup.objects.get(location=location)
 	if not request.user.is_authenticated() or (request.user not in location_admin_group.users.all()):
 		return HttpResponseRedirect('/')
-		
+
 	# upcoming events that are not yet live
 	today = timezone.now()
 	events_pending = Event.objects.filter(status=Event.PENDING).filter(end__gte = today).filter(location=location)
@@ -306,7 +306,7 @@ def past_events(request, location_slug=None):
 		if event.is_viewable(current_user):
 			culled_past.append(event)
 	# show 10 events per page
-	paged_past = Paginator(culled_past, 10) 
+	paged_past = Paginator(culled_past, 10)
 	page = request.GET.get('page')
 	try:
 		events = paged_past.page(page)
@@ -323,7 +323,7 @@ def past_events(request, location_slug=None):
 def email_preferences(request, username, location_slug=None):
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
-	
+
 	u = User.objects.get(username=username)
 	notifications = u.event_notifications
 	if request.POST.get('event_reminders') == 'on':
@@ -482,12 +482,12 @@ def rsvp_event(request, event_id, event_slug, location_slug=None):
 		event.attendees.add(user)
 		event.save()
 		num_attendees = event.attendees.count()
-		spots_remaining = event.limit - num_attendees 
+		spots_remaining = event.limit - num_attendees
 		return render(request, "snippets/rsvp_info.html", {"num_attendees": num_attendees, "spots_remaining": spots_remaining, "event": event, 'current_user': user, 'user_is_organizer': user_is_organizer, 'location': location });
-		
+
 	else:
 		print 'user was aready attending'
-	return HttpResponse(status=500); 
+	return HttpResponse(status=500);
 
 @login_required
 def rsvp_cancel(request, event_id, event_slug, location_slug=None):
@@ -510,11 +510,11 @@ def rsvp_cancel(request, event_id, event_slug, location_slug=None):
 		event.attendees.remove(user)
 		event.save()
 		num_attendees = event.attendees.count()
-		spots_remaining = event.limit - num_attendees 
+		spots_remaining = event.limit - num_attendees
 		return render(request, "snippets/rsvp_info.html", {"num_attendees": num_attendees, "spots_remaining": spots_remaining, "event": event, 'current_user': user, 'user_is_organizer': user_is_organizer, 'location': location });
 	else:
 		print 'user was not attending'
-	return HttpResponse(status=500); 
+	return HttpResponse(status=500);
 
 def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 	location = get_object_or_404(Location, slug=location_slug)
@@ -524,7 +524,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 	print 'in rsvp_new_user'
 	print request.POST
 	# get email signup info and remove from form, since we tacked this field on
-	# but it's not part of the user model. 
+	# but it's not part of the user model.
 	weekly_updates = request.POST.get('weekly-email-notifications')
 	notify_new = request.POST.get('new-event-notifications')
 	if weekly_updates == 'on':
@@ -576,7 +576,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
 		errors = json.dumps({"errors": form.errors})
 		return HttpResponse(json.dumps(errors))
 
-	return HttpResponse(status=500); 
+	return HttpResponse(status=500);
 
 def endorse(request, event_id, event_slug, location_slug=None):
 	location = get_object_or_404(Location, slug=location_slug)
@@ -591,4 +591,3 @@ def endorse(request, event_id, event_slug, location_slug=None):
 	event.save()
 	endorsements = event.endorsements.all()
 	return render(request, "snippets/endorsements.html", {"endorsements": endorsements, "current_user": request.user, 'location': location, 'event': event});
-
