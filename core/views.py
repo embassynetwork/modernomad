@@ -1479,6 +1479,7 @@ def ReservationManageList(request, location_slug):
 
 @house_admin_required
 def ReservationManageCreate(request, location_slug):
+	username=""
 	if request.method == 'POST':
 		location = get_object_or_404(Location, slug=location_slug)
 
@@ -1511,8 +1512,9 @@ def ReservationManageCreate(request, location_slug):
 			print form.errors
 	else:
 		form = AdminReservationForm()
+		username = request.GET.get("username", "")
 	all_users = User.objects.all().order_by('username')
-	return render(request, 'reservation_manage_create.html', {'all_users': all_users, "reservation_statuses": Reservation.RESERVATION_STATUSES })
+	return render(request, 'reservation_manage_create.html', {'all_users': all_users, "reservation_statuses": Reservation.RESERVATION_STATUSES, "username": username })
 
 
 @house_admin_required

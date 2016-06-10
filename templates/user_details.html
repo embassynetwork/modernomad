@@ -53,6 +53,22 @@
 			{% endif %}
 		</div>
 	{% endifequal %}
+	
+	{% if user_is_house_admin_somewhere %}
+
+		<div class="dropdown top-spacer-sm">
+			<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				New Reservation<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				{% for l in user.house_admin.all %}
+				<li><a href="{% url 'reservation_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	
+	{% endif %}
+
 </div>
 
 <div class="col-md-9">
