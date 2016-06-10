@@ -1,8 +1,9 @@
+{% load staticfiles %}
 {% for room_form, reservables_forms, room_id, room_name, location_slug in room_forms %}
 
 <div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
 	<h3>{{room_name}}</h3>
-	<form class="form-horizontal" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}"> {% csrf_token %}
+	<form class="form-horizontal room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}"> {% csrf_token %}
 		{% for field in room_form %}
 		<div class="form-group">
 			{{ field.errors }}
@@ -29,7 +30,7 @@
 		reservable on the night of April 15, but not on April 16.
 		</p>
 		{% for reservable_form, reservable_id in reservables_forms %}
-			<form class="form-inline" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}">
+			<form class="form-inline reservables-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}">
 				<div class="form-group">
 					{% for field in reservable_form %}
 						{{ field.errors }}
@@ -50,3 +51,56 @@
 </div>		
 {% endfor %}
 
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script>
+	// datepicker
+	$("[id$=start_date], [id$=end_date]").datepicker({
+		minDate: 0,
+		onSelect: function( selectedDate ) {
+			start_id = this.id
+			if(start_id.endsWith('start_date')) {
+				startDate = $('#'+ start_id).datepicker("getDate");
+				console.log(startDate);
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+				endDate = start_id.replace("start", "end")
+	          	$('#'+endDate).datepicker("option","minDate",rMin);
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	});
+
+	//form validation
+	$(".room-form").validate({
+		rules: {
+			name: {
+				required: true
+			},
+			default_rate: {
+				required: true
+			},
+			description: {
+				required: true
+			},
+			summary: {
+				required: true
+			},
+			cancellation_policy: {
+				required: true
+			},
+			beds: {
+				required: true
+			}
+		}
+	})
+	$(".reservables-form").validate({
+		rules: {
+			start_date: {
+				required: true
+			}
+		}
+	})
+
+
+</script>

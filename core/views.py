@@ -1402,7 +1402,8 @@ def LocationEditRooms(request, location_slug):
 					new_reservable = form.save(commit=False)
 					new_reservable.room = room
 					new_reservable.save()
-				messages.add_message(request, messages.INFO, "Reservable date range %s." % action)
+				room = Room.objects.get(id=request.POST.get('room_fk'))
+				messages.add_message(request, messages.INFO, "Reservable date range %s for %s." % (action, room.name))
 			else:
 				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
 		else:
