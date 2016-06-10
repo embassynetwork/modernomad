@@ -78,7 +78,12 @@
 				{% if user in location.house_admins.all or user in location.residents.all %}
 				<li class="dropdown">
 				<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
-					Manage <b class="caret"></b>
+					{% if user in location.house_admins.all %}
+						Manage 
+					{% else %}
+						House Info
+					{% endif %}
+					<b class="caret"></b>
 				</a>
 				<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
 					{% if location.rooms.count > 0 %}

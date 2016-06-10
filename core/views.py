@@ -1987,7 +1987,7 @@ def SubscriptionSendMail(request, location_slug, subscription_id):
 	messages.add_message(request, messages.INFO, "Your message was sent.")
 	return HttpResponseRedirect(reverse('subscription_manage_detail', args=(location_slug, subscription_id)))
 
-@house_admin_required
+@resident_or_admin_required
 def payments_today(request, location_slug):
 	today = timezone.localtime(timezone.now())
 	return HttpResponseRedirect(reverse('core.views.payments', args=[], kwargs={'location_slug':location_slug, 'year':today.year, 'month':today.month}))
