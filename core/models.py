@@ -79,6 +79,7 @@ class Location(models.Model):
 	name_on_account = models.CharField(max_length=200, blank=True, null=True, help_text="We use this to transfer money to you!")
 	email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
 	house_admins = models.ManyToManyField(User, related_name='house_admin')
+	readonly_admins = models.ManyToManyField(User, related_name='readonly_admin', help_text="Readonly admins do not show up as part of the community. Useful for eg. external bookkeepers, etc.")
 	residents = models.ManyToManyField(User, related_name='residences', blank=True)
 	check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")

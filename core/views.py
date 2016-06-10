@@ -252,7 +252,7 @@ def room_occupancy_month(room, month, year):
 	params = [month, year, round(payments_cash, 2), round(payments_accrual, 2), nights_occupied, nights_available, partial_paid_reservations, total_comped_nights, round(total_comped_value, 2)]
 	return params
 
-@house_admin_required
+@resident_or_admin_required
 def room_occupancy(request, location_slug, room_id, year):
 	room = get_object_or_404(Room, id=room_id)
 	year = int(year)
@@ -935,8 +935,13 @@ def ReservationDetail(request, reservation_id, location_slug):
 		msg = 'The reservation you requested do not exist'
 		messages.add_message(request, messages.ERROR, msg)
 		return HttpResponseRedirect('/404')
-	# make sure the user is either an admin or the reservation holder
-	if (request.user == reservation.user) or (request.user in location.house_admins.all() ):
+	# make sure the user is either an admin, resident or the reservation holder
+	# (we can't use the decorator here because the user themselves also has to
+	# be able to see the page).
+	if ((request.user == reservation.user) or 
+			(request.user in location.house_admins.all()) or 
+			(request.user in location.readonly_admins.all()) or 
+			(request.user in location.residents.all())):
 		if reservation.arrive >= datetime.date.today():
 			past = False
 		else:
@@ -1228,13 +1233,16 @@ def LocationEditSettings(request, location_slug):
 def LocationEditUsers(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 	if request.method == 'POST':
-		admin_user = resident_user = event_admin_user = None
+		admin_user = resident_user = event_admin_user = readonly_admin_user = None
 		if 'admin_username' in request.POST:
 			admin_username = request.POST.get('admin_username')
 			admin_user = User.objects.filter(username=admin_username).first()
 		elif 'resident_username' in request.POST:
 			resident_username = request.POST.get('resident_username')
 			resident_user = User.objects.filter(username=resident_username).first()
+		elif 'readonly_admin_username' in request.POST:
+			readonly_admin_username = request.POST.get('readonly_admin_username')
+			readonly_admin_user = User.objects.filter(username=readonly_admin_username).first()
 		elif 'event_admin_username' in request.POST:
 			event_admin_username = request.POST.get('event_admin_username')
 			event_admin_user = User.objects.filter(username=event_admin_username).first()
@@ -1263,6 +1271,18 @@ def LocationEditUsers(request, location_slug):
 				location.residents.add(resident_user)
 				location.save()
 				messages.add_message(request, messages.INFO, "User '%s' added to residents group." % resident_username)
+		elif readonly_admin_user:
+			action = request.POST.get('action')
+			if action == "Remove":
+				# Remove user
+				location.readonly_admins.remove(readonly_admin_user)
+				location.save()
+				messages.add_message(request, messages.INFO, "User '%s' removed from readonly admin group." % readonly_admin_username)
+			elif action == "Add":
+				# Add user
+				location.readonly_admins.add(readonly_admin_user)
+				location.save()
+				messages.add_message(request, messages.INFO, "User '%s' added to readonly admin group." % readonly_admin_username)
 		elif event_admin_user:
 			action = request.POST.get('action')
 			if action == "Remove":
