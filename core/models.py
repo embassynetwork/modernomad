@@ -1281,6 +1281,7 @@ class UserProfile(models.Model):
 	image_thumb = models.ImageField(upload_to="avatars/%Y/%m/%d/", blank=True, null=True)
 	bio = models.TextField("About you", blank=True, null=True)
 	links = models.TextField(help_text="Comma-separated", blank=True, null=True)
+	phone = models.CharField("Phone Number", max_length=20, blank=True, null=True, help_text="Optional. Most locations operate primarily by email, but a phone number can be helpful for last minute coordination and the unexpected.")
 
 	projects = models.TextField(verbose_name='Current Projects', help_text='Describe one or more projects you are currently working on')
 	sharing = models.TextField(help_text="Is there anything you'd be interested in learning or sharing during your stay?")

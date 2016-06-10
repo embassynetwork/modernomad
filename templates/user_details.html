@@ -26,7 +26,8 @@
 		{% endif %}
 
 		{% if u == user or user_is_house_admin_somewhere %}
-			<a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a>
+			<div><a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a></div>
+			<div>phone: {{u.profile.phone|default:'None provided'}}</div>
 		{% endif %}
 	</div>
 

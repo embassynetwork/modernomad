@@ -43,6 +43,7 @@ class UserProfileForm(forms.ModelForm):
 			'discussion': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
 			'referral': forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'referral'}),
 			'city': forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'city'}),
+			'phone': forms.TextInput(attrs={'class':'form-control', 'placeholder': 'phone'}),
 		}
 
 	def __init__(self, *args, **kwargs):
