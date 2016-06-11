@@ -40,7 +40,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label">User</label> 
 					<div class="col-sm-7">
-						<input class="form-control" name="username" id="id_username" value="" required/>
+						<input class="form-control" name="username" id="id_username" value="{{username}}" required/>
 					</div>
 				</div>
 
@@ -150,6 +150,12 @@
 			change: get_avatar
 		});
 	});
+
+	// if a user is pre-populated, get the avatar right away
+	if ('{{username}}' != "") {
+		console.log("getting avatar...")
+		get_avatar()
+	}
 
 	$("#id_arrive, #id_depart").datepicker({
 		onSelect: function( selectedDate ) {

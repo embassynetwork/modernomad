@@ -75,14 +75,19 @@
 					</li>
 				{% endif %}
 
-				{% if user in location.house_admins.all or user in location.residents.all %}
+				{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 				<li class="dropdown">
 				<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
-					Manage <b class="caret"></b>
+					{% if user in location.residents.all or user in location.readonly_admins.all %}
+						House Info
+					{% else %}
+						Manage
+					{% endif %}
+					<b class="caret"></b>
 				</a>
 				<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
 					{% if location.rooms.count > 0 %}
-						{% if user in location.house_admins.all or user in location.residents.all %}
+						{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">Occupancy</a></li>
 							<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>
 							<li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>

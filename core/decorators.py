@@ -34,7 +34,7 @@ def resident_or_admin_required(original_func):
 	def decorator(request, location_slug, *args, **kwargs):
 		location = get_location(location_slug)
 		user = request.user
-		if user.is_authenticated() and location and (user in location.residents.all() or user in location.house_admins.all()):
+		if user.is_authenticated() and location and (user in location.residents.all() or user in location.house_admins.all() or user in location.readonly_admins.all()):
 			return original_func(request, location_slug, *args, **kwargs)
 		elif request.user.is_authenticated():
 			return HttpResponseRedirect("/")

@@ -149,10 +149,15 @@
 			<hr>
 
 			<div class="form-group">
-				<div class="form-field-body col-sm-10 col-sm-offset-2">
+				<div class="form-field-body col-sm-5 col-sm-offset-2">
 					{{ form.email }}
 					<span class="form-help-text">{{ form.email.help_text }}</span>
 					{{ form.email.errors|safe }}
+				</div>
+				{{ form.city.errors|safe }}
+				<div class="form-field-body col-sm-5">
+					{{ form.phone }}
+					<span class="form-help-text">{{ form.phone.help_text }}</span>
 				</div>
 			</div>
 

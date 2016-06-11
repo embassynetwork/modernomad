@@ -1,0 +1,175 @@
+{% load staticfiles %}
+{% for room_form, reservables_forms, room_id, room_name, location_slug in room_forms %}
+
+<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
+	<h3>{{room_name}}</h3>
+	<form class="form-horizontal room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}"> {% csrf_token %}
+		{% for field in room_form %}
+		<div class="form-group">
+			{{ field.errors }}
+			{{ field.label_tag }}
+			<span class="form-help-text">{{ field.help_text}}</span>
+			{{ field }}
+		</div>
+		{% endfor %}
+		<input type="hidden" name="room_id" value="{{room_id}}">
+		<input type="hidden" name="page" value="{{page}}">
+		<input type="hidden" name="username" value="{{username}}">
+		<div class="form-group">
+			<button type="submit" class="btn btn-large btn-default">Submit Room Changes</button>
+		</div>
+	</form>
+
+	<hr>
+
+	{% if reservables_forms %}
+		<h4>Date Ranges that this room should be reservable</h4>
+		<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
+		<p>The end date entered <em>will</em> be reservable; i.e.,
+		if you enter an end date of April 15, then the room will be
+		reservable on the night of April 15, but not on April 16.
+		</p>
+		{% for reservable_form, reservable_id in reservables_forms %}
+			<form class="form-inline reservables-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}">
+				<div class="form-group">
+					{% for field in reservable_form %}
+						{{ field.errors }}
+						<label>{{ field.label }}</label>
+						{{ field }}
+					{% endfor %}
+					<input type="hidden" name="reservable_id" value="{{reservable_id}}">
+					<input type="hidden" name="room_fk" value="{{room_id}}">
+					<input type="hidden" name="page" value="{{page}}">
+					<input type="hidden" name="username" value="{{username}}">
+					<input class="form-control" type="submit" value="Submit">
+				</div>
+				{% csrf_token %}
+			</form>
+		{% endfor %}
+	{% endif %}
+
+</div>		
+{% endfor %}
+
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script>
+	// datepicker
+	$("[id$=start_date], [id$=end_date]").datepicker({
+		minDate: 0,
+		onSelect: function( selectedDate ) {
+			start_id = this.id
+			if(start_id.endsWith('start_date')) {
+				startDate = $('#'+ start_id).datepicker("getDate");
+				console.log(startDate);
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+				endDate = start_id.replace("start", "end")
+	          	$('#'+endDate).datepicker("option","minDate",rMin);
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	});
+
+	//form validation
+	$(".room-form").validate({
+		rules: {
+			name: {
+				required: true
+			},
+			default_rate: {
+				required: true
+			},
+			description: {
+				required: true
+			},
+			summary: {
+				required: true
+			},
+			cancellation_policy: {
+				required: true
+			},
+			beds: {
+				required: true
+			}
+		}
+	})
+	$(".reservables-form").validate({
+		rules: {
+			start_date: {
+				required: true
+			}
+		}
+	})
+
+	function showCropper(preview_id) {
+		// register a cropper on *all* the preview elements
+		$(preview_id).cropper({
+			aspectRatio: 4/3,
+			zoomable: false,
+			rotatable: false,
+			scalable: false,
+			guides: false,
+			dragCrop: false,
+		});
+	}
+
+	function showImage(input, preview_id) {
+		console.log('showImage');
+		if (input.files && input.files[0]) {
+			console.log('input files found');
+			var reader = new FileReader();
+
+			reader.onload = function (e) {
+				$(preview_id).attr('src', e.target.result);
+				showCropper(preview_id);
+				/* i have NO IDEA why the above lines work but the below lines
+				* do not. it works great on the user profile page. the main
+				* difference here is that there are N room forms on this page,
+				* one for each existing room + a form for a new room. rrrrrg.
+				* */
+				/*
+				$(preview_id).fadeOut(300, function() {
+					$(this).attr('src', e.target.result);
+				}).fadeIn(800, showCropper(preview_id));
+				*/
+			}
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+
+	$("[id^=id_][id$=-image").change(function() {
+		// we need to get the specific room so we can target the right image_preview element. this will be of the form 'id_room_x-image'. 
+		console.log('registered image change...');
+		the_this = this;
+		this_image_id = $(this).attr("id");
+	
+		// get just the room_x part. 
+		room_x = this_image_id.match(/id_(.*)-image/)[1]
+		preview_id = "#id_"+room_x+"-image-preview"
+		console.log('preview_id')
+		console.log(preview_id)
+
+		// destroy the previous cropper if it existed
+		$(preview_id).cropper('destroy');
+		
+		if ($("#"+this_image_id).val()) {
+			showImage(this, preview_id);
+		}
+	});
+
+	$(".room-form").submit(function(){
+		/* construct the unique ids for this form so we can store the cropped
+		* image data in the correct formp. then submit the form */
+		form_id = $(this).attr('id');
+		room_x = form_id.match(/form-(.*)/)[1]
+		preview_id = "#id_"+room_x+"-image-preview"
+		cropped_img_data = "#id_"+room_x+"-cropped_image_data";
+		
+		// add the cropped image data to the form, then submit.
+		$(cropped_img_data).val($(preview_id).cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
+		return true;
+	})
+
+
+</script>

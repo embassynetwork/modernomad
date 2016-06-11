@@ -1433,6 +1433,10 @@ table tr.row-even td { background: #eee; }
 	margin-top: 70px;
 }
 
+.top-spacer-sm {
+	margin-top: 20px;
+}
+
 .top-spacer {
 	margin-top: 30px;
 }
