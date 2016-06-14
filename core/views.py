@@ -793,11 +793,14 @@ def UserDetail(request, username):
 		reservables_forms = []
 		for reservable in room_reservables:
 		 	id_str = "reservable-%d-%%s" % reservable.id
-			print id_str
 			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
 		id_str = "room-%d-new-reservable-%%s" % room.id
 		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
-		room_forms.append((LocationRoomForm(instance=room), reservables_forms, room.id, room.name, room.location.slug))
+		if room.image:
+			has_image = True
+		else:
+			has_image = False
+		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, room.location.slug, has_image))
 
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
@@ -1432,31 +1435,32 @@ def LocationEditRooms(request, location_slug):
 		else:
 			messages.add_message(request, messages.INFO, "Error: no id was provided.")
 
-	room_forms = []
-	room_names = []
-	room_names.append("New Room")
-	# the empty form
-	room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room"))
-	# forms for the existing rooms
-	for room in location_rooms:
-		room_reservables = room.reservables.all().order_by('start_date')
-		reservables_forms = []
-		for reservable in room_reservables:
-		 	id_str = "reservable-%d-%%s" % reservable.id
-			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
-		id_str = "room-%d-new-reservable-%%s" % room.id
-		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
-		if room.image:
-			has_image = True
-		else:
-			has_image = False
-		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, has_image))
-		room_names.append(room.name)
 	page = request.POST.get('page')
 	if page == 'user_detail':
 		print 'redirecting to user page'
 		return HttpResponseRedirect(reverse('user_detail', args=(request.POST.get('username'), )))
 	else:
+		room_forms = []
+		room_names = []
+		room_names.append("New Room")
+		# the empty form
+		room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room", location.slug, False))
+		# forms for the existing rooms
+		for room in location_rooms:
+			room_reservables = room.reservables.all().order_by('start_date')
+			reservables_forms = []
+			for reservable in room_reservables:
+				id_str = "reservable-%d-%%s" % reservable.id
+				reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
+			id_str = "room-%d-new-reservable-%%s" % room.id
+			reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
+			if room.image:
+				has_image = True
+			else:
+				has_image = False
+			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, room.location.slug, has_image))
+			room_names.append(room.name)
+
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required

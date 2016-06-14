@@ -273,7 +273,7 @@ class LocationPageForm(forms.Form):
 	title = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
 	content = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
 
-class LocationRoomForm(BootstrapModelForm):
+class LocationRoomForm(forms.ModelForm):
 	cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 	class Meta:
 		model = Room
@@ -286,6 +286,11 @@ class LocationRoomForm(BootstrapModelForm):
 		super(LocationRoomForm, self).__init__(*args, **kwargs)
 		if self.instance.id is not None:
 			self.fields['cropped_image_data'].required = False
+		for field_name, field in self.fields.items():
+			if field_name == 'residents':
+				field.widget.attrs['class'] = 'chosen-select'
+			else:
+				field.widget.attrs['class'] = 'form-control'
 
 	def clean(self):
 		# save any cropped images

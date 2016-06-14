@@ -1,16 +1,29 @@
 {% load staticfiles %}
-{% for room_form, reservables_forms, room_id, room_name, location_slug in room_forms %}
+{% for room_form, reservables_forms, room_id, room_name, room_location_slug, has_image in room_forms %}
 
 <div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
-	<h3>{{room_name}}</h3>
-	<form class="form-horizontal room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}"> {% csrf_token %}
+	<form id="form-room_{{room_id}}" class="room-form form-horizontal" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}"> {% csrf_token %}
 		{% for field in room_form %}
-		<div class="form-group">
-			{{ field.errors }}
-			{{ field.label_tag }}
-			<span class="form-help-text">{{ field.help_text}}</span>
-			{{ field }}
-		</div>
+			{% if not field.is_hidden %} 
+				<div class="form-group">
+				{{ field.errors }}
+				{{ field.label_tag }} 
+				<span class="form-help-text">{{ field.help_text}}</span>
+				{{ field }}
+				</div>
+				{% if field.name == 'image' %}
+					<div class="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
+						{% if has_image %}
+							<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ room_form.instance.image.url }}">
+						{% else %}
+							<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ STATIC_URL }}img/default.jpg">
+						{% endif %}
+					</div>
+				{% endif %}
+			{% else %}
+				{{ field }}
+			{% endif %}
+
 		{% endfor %}
 		<input type="hidden" name="room_id" value="{{room_id}}">
 		<input type="hidden" name="page" value="{{page}}">
@@ -30,7 +43,7 @@
 		reservable on the night of April 15, but not on April 16.
 		</p>
 		{% for reservable_form, reservable_id in reservables_forms %}
-			<form class="form-inline reservables-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' location_slug %}">
+			<form class="form-inline" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}">
 				<div class="form-group">
 					{% for field in reservable_form %}
 						{{ field.errors }}
@@ -52,7 +65,10 @@
 {% endfor %}
 
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script src="{% static 'js/cropper.min.js' %}"></script>
+<script src="{% static 'js/chosen.jquery.min.js' %}"></script>
 <script>
+
 	// datepicker
 	$("[id$=start_date], [id$=end_date]").datepicker({
 		minDate: 0,
@@ -171,5 +187,11 @@
 		return true;
 	})
 
+	// multiple select using search and tags. 
+	$(".chosen-select").chosen({
+		no_results_text: "No user with that username. Make sure you are searching by username.",
+		width: "95%",
+		placeholder_text_multiple: "Search by username."
+	});
 
 </script>
