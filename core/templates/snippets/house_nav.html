@@ -78,10 +78,10 @@
 				{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 				<li class="dropdown">
 				<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">
-					{% if user in location.residents.all or user in location.readonly_admins.all %}
-						House Info
-					{% else %}
+					{% if user in location.house_admins.all %}
 						Manage
+					{% else %}
+						House Info
 					{% endif %}
 					<b class="caret"></b>
 				</a>
