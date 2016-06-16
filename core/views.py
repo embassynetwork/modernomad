@@ -1506,8 +1506,9 @@ def ReservationManageList(request, location_slug):
 		today = timezone.localtime(timezone.now())
 		confirmed = confirmed.filter(depart__gt=today)
 		canceled =  canceled.filter(depart__gt=today)
+	owing = Reservation.objects.confirmed_but_unpaid(location=location)
 	return render(request, 'reservation_list.html', {"pending": pending, "approved": approved,
-		"confirmed": confirmed, "canceled": canceled, 'location': location})
+		"confirmed": confirmed, "canceled": canceled, "owing": owing, 'location': location})
 
 @house_admin_required
 def ReservationManageCreate(request, location_slug):

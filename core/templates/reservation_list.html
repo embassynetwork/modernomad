@@ -15,6 +15,7 @@
 	<li class="active"><a href="#pending" data-toggle="tab">Pending ({{pending.count}})</a></li>
 	<li><a href="#approved" data-toggle="tab">Approved ({{approved.count}})</a></li>
 	<li><a href="#confirmed" data-toggle="tab">Confirmed ({{confirmed.count}})</a></li>
+	<li><a href="#owing" data-toggle="tab">Owing ({{owing|length}})</a></li>
 	<li><a href="#canceled" data-toggle="tab">Canceled ({{canceled.count}})</a></li>
 </ul>
 
@@ -37,6 +38,13 @@
 			{% include "snippets/reservation_list_table.html" %}
 		{% endwith %}
 		<em>Only reservations with departure date in the future shown by default.</em> [ <a href="?show_all=True">Show All</a> ]
+	</div>
+
+	<div class="tab-pane" id="owing">
+		{% with reservations=owing %}
+			<div class="bottom-spacer"><em>Only reservations confirmed but unpaid are shown.</em> </div>
+			{% include "snippets/reservation_list_table.html" %}
+		{% endwith %}
 	</div>
 
 	<div class="tab-pane" id="canceled">

@@ -365,6 +365,15 @@ class ReservationManager(models.Manager):
 			confirmed_reservations = confirmed_reservations.filter(room=room)
 		return list(confirmed_reservations)
 
+	def confirmed_but_unpaid(self, location):
+		confirmed_this_location = super(ReservationManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
+		unpaid_this_location = []
+		for res in confirmed_this_location:
+			if not res.bill.is_paid():
+				unpaid_this_location.append(res)
+		return unpaid_this_location
+		
+
 class Bill(models.Model):
 	''' there are foreign keys (many to one) pointing towards this Bill object
 	from Reservation, BillLineItem and Payment. Each bill can have many
