@@ -107,7 +107,9 @@
 					<h4>{{ r.room.name|title}}</h4>
 					<h4> {{r.arrive }} - {{r.depart}} </h4>
 				</div>
-				{% include 'snippets/reservation_bill_line_items_and_payments.html' %}
+				{% with bill=r.bill %}
+					{% include "snippets/manage-page-bill-details.html" %}
+				{% endwith %}
 			</div>
 		</div>
 
