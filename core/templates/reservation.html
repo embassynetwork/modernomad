@@ -19,6 +19,10 @@
 </div>
 {% endif %}
 
+{% if location.stay_page %}
+	{{ location.stay_page|safe }}
+{% endif %}
+
 	<div class="row top-spacer">
 		<div class="col-md-12">
 			<h3>Filter by dates and preferences</h3>
