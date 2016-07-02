@@ -98,6 +98,9 @@ def _format_attachment(r, color):
 
 @periodic_task(run_every=crontab(hour=5, minute=10))
 def slack_embassysf_daily():
+	''' post daily arrivals and departures to slack. to enable, add an incoming
+	web hook to the specific channel you want this to post to. grab the webhook
+	url and put it in the webhook variable below.'''
 	webhook = "https://hooks.slack.com/services/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"
 	today = timezone.localtime(timezone.now())
 	location = Location.objects.get(slug="embassysf")
@@ -126,6 +129,68 @@ def slack_embassysf_daily():
 	logger.debug("Slack response: %s" % resp.text)
 
 
+def slack_ams_daily():
+	''' post daily arrivals and departures to slack. to enable, add an incoming
+	web hook to the specific channel you want this to post to. grab the webhook
+	url and put it in the webhook variable below.'''
+	webhook = "https://hooks.slack.com/services/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"
+	today = timezone.localtime(timezone.now())
+	location = Location.objects.get(slug="ams")
+	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+
+	payload = {
+			'text': 'Arrivals and Departures for %s' % today.strftime("%B %d, %Y"),
+			'attachments': []
+	}
+	for a in arriving_today:
+		item = _format_attachment(a, "good")
+		payload['attachments'].append(item)
+	for d in departing_today:
+		item = _format_attachment(d, "danger")
+		payload['attachments'].append(item)
+	if len(arriving_today) == 0 and len(departing_today) == 0:
+		payload['attachments'].append({
+			'fallback': 'No arrivals or departures today',
+			'text': 'No arrivals or departures today'
+			})
+
+	js = json.dumps(payload)
+	print js
+	resp = requests.post(webhook, data=js)
+	logger.debug("Slack response: %s" % resp.text)
+
+
+def slack_redvic_daily():
+	''' post daily arrivals and departures to slack. to enable, add an incoming
+	web hook to the specific channel you want this to post to. grab the webhook
+	url and put it in the webhook variable below.'''
+	webhook = "https://hooks.slack.com/services/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"
+	today = timezone.localtime(timezone.now())
+	location = Location.objects.get(slug="redvic")
+	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+
+	payload = {
+			'text': 'Arrivals and Departures for %s' % today.strftime("%B %d, %Y"),
+			'attachments': []
+	}
+	for a in arriving_today:
+		item = _format_attachment(a, "good")
+		payload['attachments'].append(item)
+	for d in departing_today:
+		item = _format_attachment(d, "danger")
+		payload['attachments'].append(item)
+	if len(arriving_today) == 0 and len(departing_today) == 0:
+		payload['attachments'].append({
+			'fallback': 'No arrivals or departures today',
+			'text': 'No arrivals or departures today'
+			})
+
+	js = json.dumps(payload)
+	print js
+	resp = requests.post(webhook, data=js)
+	logger.debug("Slack response: %s" % resp.text)
 
 
 
