@@ -129,6 +129,7 @@ def slack_embassysf_daily():
 	logger.debug("Slack response: %s" % resp.text)
 
 
+@periodic_task(run_every=crontab(hour=5, minute=11))
 def slack_ams_daily():
 	''' post daily arrivals and departures to slack. to enable, add an incoming
 	web hook to the specific channel you want this to post to. grab the webhook
@@ -161,6 +162,7 @@ def slack_ams_daily():
 	logger.debug("Slack response: %s" % resp.text)
 
 
+@periodic_task(run_every=crontab(hour=5, minute=12))
 def slack_redvic_daily():
 	''' post daily arrivals and departures to slack. to enable, add an incoming
 	web hook to the specific channel you want this to post to. grab the webhook
