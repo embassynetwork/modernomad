@@ -81,15 +81,17 @@
 
 	<form method="POST" class="form-horizontal" role="form" action="{% url 'reservation_manage_edit' location.slug r.id %}">{% csrf_token %}
 		<div class="form-group">
-			<label class="col-sm-2 control-label">Room</label> 
+			<label class="col-sm-2 control-label">Bed</label> 
 			<div class="col-sm-4">
-				<select class="form-control" name="room_id">
+				<select class="form-control" name="bed_id">
 					{% for room in location.get_rooms %}
-					<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
+						{% for bed in room.beds.all %}
+						<option value="{{bed.id}}" {% if bed.id == r.bed.id %}SELECTED{% endif %}>{{bed}}</option>
+						{% endfor %}
 					{% endfor %}
 				</select>
 			</div>
-			<input type="submit" class="btn btn-default pull-right col-md-2" style="width:120px;" value="Change Room"/>
+			<input type="submit" class="btn btn-default pull-right col-md-2" style="width:120px;" value="Change Bed"/>
 		</div>
 	</form>
 	

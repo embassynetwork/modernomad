@@ -32,6 +32,11 @@ class RoomAdmin(admin.ModelAdmin):
 	inlines = [ReservableAdminInline]
 	save_as = True
 
+class BedAdmin(admin.ModelAdmin):
+	model = Bed
+	inlines = [ReservableAdminInline]
+	save_as = True
+
 class RoomAdminInline(admin.TabularInline):
 	model = Room
 	extra = 0
@@ -270,6 +275,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Room, RoomAdmin)
+admin.site.register(Bed, BedAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)

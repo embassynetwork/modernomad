@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable, Subscription, Subscription
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Bed, Location, LocationMenu, Reservable, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
@@ -326,7 +326,7 @@ class ReservationForm(forms.ModelForm):
 			'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
 			'arrival_time': forms.TextInput(attrs={'class':'form-control form-group'}),
-			'room': forms.Select(attrs={'class':'form-control form-group'}),
+			'bed': forms.Select(attrs={'class':'form-control form-group'}),
 			'purpose': forms.TextInput(attrs={'class':'form-control form-group'}),
 			'comments': forms.Textarea(attrs={'class':'form-control form-group'}),
 		}
@@ -336,7 +336,7 @@ class ReservationForm(forms.ModelForm):
 		if not location:
 			raise Exception("No location given!")
 		self.location = location
-		self.fields['room'].queryset = self.location._rooms_with_future_reservability_queryset()
+		self.fields['bed'].queryset = self.location._beds_with_future_reservability_queryset()
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
@@ -346,8 +346,6 @@ class ReservationForm(forms.ModelForm):
 			self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
 		return cleaned_data
 
-	# XXX TODO
-	# make sure depart is at least one day after arrive. 
 
 class AdminReservationForm(forms.ModelForm):
 	class Meta:

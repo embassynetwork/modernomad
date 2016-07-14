@@ -157,7 +157,7 @@ def room_occupancy_month(room, month, year):
 	reservations = Reservation.objects.filter(room=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
 	# payments *received* this month for this room
-	payments_for_room = Payment.objects.reservation_payments_by_room(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
+	payments_for_room = Payment.objects.reservation_payments_by_bed(bed).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	payments_cash = 0
 	for p in payments_for_room:
 		payments_cash += p.paid_amount
@@ -819,9 +819,12 @@ def date_range_to_list(start, end):
 	return date_list
 
 def CheckRoomAvailability(request, location_slug):
+	''' key view supporting availability search per location. called via ajax
+	in the template. pretty shit and unflexible.'''
 	if not request.method == 'POST':
 		return HttpResponseRedirect('/404')
 
+	# parse the date info
 	location = get_object_or_404(Location, slug=location_slug)
 	arrive_str = request.POST.get('arrive')
 	depart_str = request.POST.get('depart')
@@ -829,15 +832,21 @@ def CheckRoomAvailability(request, location_slug):
 	d_month, d_day, d_year = depart_str.split("/")
 	arrive = datetime.date(int(a_year), int(a_month), int(a_day))
 	depart = datetime.date(int(d_year), int(d_month), int(d_day))
+
+	# check availability
 	availability = location.availability(arrive, depart)
 	date_list = date_range_to_list(arrive, depart)
 	logger.debug("Checking room availability for date list")
 	logger.debug(date_list)
 	available_reservations = {}
-	# Create some mock reservations for each available room so we can generate the bill
+
+	# Create mock reservations for each available room so we can preview the
+	# bill to the user
 	free_rooms = location.rooms_free(arrive, depart)
 	for room in free_rooms:
-		reservation = Reservation(id=-1, room=room, arrive=arrive, depart=depart, location=location)
+		# get the first free bed for this room
+		bed=room.get_free_beds_on_dates_or_none(arrive, depart)[0]
+		reservation = Reservation(id=-1, bed=bed, arrive=arrive, depart=depart, location=location)
 		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
 		total = Decimal(0.0)
 		for item in bill_line_items:
@@ -1694,13 +1703,13 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 				messages.add_message(request, messages.INFO, "Status changed.")
 		except:
 			messages.add_message(request, messages.INFO, "Invalid room given!")
-	elif 'room_id' in request.POST:
+	elif 'bed_id' in request.POST:
 		try:
-			new_room = Room.objects.get(pk=request.POST.get("room_id"))
-			reservation.room = new_room
+			new_bed = Bed.objects.get(pk=request.POST.get("bed_id"))
+			reservation.bed = new_bed
 			reservation.save()
 			reservation.reset_rate()
-			messages.add_message(request, messages.INFO, "Room changed.")
+			messages.add_message(request, messages.INFO, "Bed changed.")
 		except:
 			messages.add_message(request, messages.INFO, "Invalid room given!")
 	elif 'rate' in request.POST:

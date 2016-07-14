@@ -63,7 +63,7 @@ class Location(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	image = models.ImageField(upload_to=location_img_upload_to, help_text="Requires an image with proportions 800px wide x 225px high")
-	stay_page = models.TextField(default="This is the page which has some descriptive text at the top (this text), and then lists the available rooms and beds. HTML is supported.")
+	stay_page = models.TextField(default="This is the page which has some descriptive text at the top (this text), and then lists the available rooms. HTML is supported.")
 	front_page_stay = models.TextField(default="This is the middle of three sections underneath the main landing page text to entice people to stay with you, and then links to the stay page (above). HTML is supported.")
 	front_page_participate = models.TextField(default="This is far right of three sections underneath the main landing page text to tell people how to get involved with your community. There is a link to the Events page underneath. HTML is supported. ")
 	announcement = models.TextField(blank=True, null=True, default="This is far left of three sections underneath the main landing page text to use for announcements and news. HTML is supported.")
@@ -114,33 +114,35 @@ class Location(models.Model):
 	def rooms_with_future_reservability(self):
 		future_reservability = []
 		for room in Room.objects.filter(location=self):
-			if room.has_future_reservability():
+			if room.future_reservability():
 				future_reservability.append(room)
 		return future_reservability
 
-	def _beds_with_future_reservability_queryset(self):
-		# used in forms.py
+	def _rooms_with_future_reservability_queryset(self):
 		today = timezone.localtime(timezone.now())
-		return Bed.objects.filter(reservables__isnull=False).filter(room__location=self).filter(Q(reservables__end_date__gte=today) | Q(reservables__end_date=None)).distinct()
+		return Room.objects.filter(reservables__isnull=False).filter(location=self).filter(Q(reservables__end_date__gte=today) | Q(reservables__end_date=None)).distinct()
+
+	def reservable_rooms_on_day(self, the_day):
+		rooms_at_location = self.filter(location=self)
+		return [room for room in rooms_at_location if room.is_reservable(the_day)]
 
 	def availability(self, start, end):
-		# show availability (num free beds), between start and end dates.
-		# create a structure available_beds[room] with an ordered list of
-		# date, beds free pairs {the_date: XX, beds_free: YY}. so it can be
-		# iterated over in order of date, in the template. 
+		# show availability (occupied and free beds), between start and end
+		# dates, per location. create a structure queryable by
+		# available_beds[room][date] = n, where n is the number of beds free. 
 		rooms_at_location = self.get_rooms()
 		available_beds = {}
 		for room in rooms_at_location:
 			the_day = start
 			available_beds[room] = []
 			while the_day < end:
-				if not room.is_reservable_this_day(the_day):
+				if not room.is_reservable(the_day):
 					available_beds[room].append({'the_date': the_day, 'beds_free' : 0})
 				else:
-					beds_this_room = 0
-					for bed in room.beds.all():
-						if bed.is_free_this_day(the_day):
-							beds_this_room += 1
+					beds_this_room = room.beds
+					bookings_today = Reservation.objects.confirmed_approved_on_date(the_day, self, room=room)
+					for booking in bookings_today:
+						beds_this_room = beds_this_room - 1
 					available_beds[room].append({'the_date': the_day, 'beds_free' : beds_this_room })
 				the_day = the_day + datetime.timedelta(1)
 		return available_beds
@@ -301,27 +303,27 @@ class Room(models.Model):
 				free.append(b)
 		return free
 
-	def has_future_reservability(self):
-		today = timezone.localtime(timezone.now())
-		beds = self.beds.all()
-		for bed in beds:
-			if bed.has_future_reservability():
-				return True
-		return False
 
-	def is_reservable_this_day(self, this_day):
-		# a room is reservable on a date if it has at least one bed is
-		# reservable on that date.
-		beds = self.beds.all()
-		for bed in beds:
-			if bed.is_reservable_this_day(this_day):
-				return True
-		return False
+	def future_reservability(self):
+		today = timezone.localtime(timezone.now())
+		reservables = self.reservables.filter(Q(end_date__gte=today) | Q(end_date=None))
+		if reservables:
+			return True
+		else:
+			return False
+
+	def is_reservable(self, this_day):
+		# should never be more than 1 reservable on a given day... 
+		try:
+			reservable_today = self.reservables.filter(room=self).filter(start_date__lte=this_day).get(Q(end_date__gte=this_day) | Q(end_date=None))  
+		except:
+			reservable_today = False
+		return reservable_today 
 
 	def available_on(self, this_day):
 		# a room is available if it is reservable and if it has free beds. 
 		# JKS i added the filter(room=self) - need to test this. 
-		if not self.is_reservable_this_day(this_day):
+		if not self.is_reservable(this_day):
 			return False
 		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, room=self)
 		beds_left = self.beds
@@ -364,35 +366,23 @@ class Bed(BookableResource):
 			reservable_today = False
 		return bool(reservable_today)
 
-	def is_free_this_day(self, this_day):
-		# must a. be reservable, and b. not have any other reservations. 
-		if not self.is_reservable_this_day(this_day):
+	def available_on(self, this_day):
+		# a room is available if it is reservable and if it has free beds. 
+		# JKS i added the filter(room=self) - need to test this. 
+		if not self.is_reservable(this_day):
 			return False
-		booked = self.reservations.filter(arrive__lte=this_day).filter(depart__gte=this_day)
-		if booked:
-			return False
-		else:
+		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, room=self)
+		beds_left = self.beds
+		for r in reservations_on_this_day:
+			beds_left -= 1
+		if beds_left > 0:
 			return True
+		else:
+			return False
 
 	def is_free_between(self, arrive, depart):
 		# must a. be reservable, and b. not have any other reservations. 
-		day = arrive
-		while day < depart:
-			if self.is_free_this_day(day):
-				day = day + timedelta(days=1)
-			else:
-				return False
-		return True
-
-	def has_future_reservability(self):
-		today = timezone.localtime(timezone.now())
-		reservables = self.reservables.filter(Q(end_date__gte=today) | Q(end_date=None))
-		if reservables:
-			return True
-		else:
-			return False
-
-
+		pass
 
 class Fee(models.Model):
 	description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -969,8 +959,8 @@ class Reservation(models.Model):
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-	room = models.ForeignKey(Room, null=True, blank=True, related_name="reservations")
-	bed = models.ForeignKey(Bed, null=True, blank=True, related_name="reservations")
+	room = models.ForeignKey(Room, null=True, blank=True)
+	bed = models.ForeignKey(Bed, null=True, blank=True)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
@@ -1011,7 +1001,7 @@ class Reservation(models.Model):
 		line_items = []
 
 		# The first line item is for the room charge
-		room_charge_desc = "%s (%d * $%s)" % (self.bed.room.name, self.total_nights(), self.get_rate())
+		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
 		room_charge = self.base_value()
 		room_line_item = BillLineItem(bill=reservation_bill, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
@@ -1051,8 +1041,7 @@ class Reservation(models.Model):
 				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
 				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
 				'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug':self.location.slug},
-				'room': {'id': self.room.id, 'name': self.room.name, 'description': self.room.description},
-				'bed': {'id': self.bed.id, 'description': self.bed.description, 'default_rate': self.bed.default_rate},
+				'room': {'id': self.room.id, 'name': self.room.name, 'description': self.room.description, 'cancellation_policy': self.room.cancellation_policy},
 				'purpose': self.purpose,
 				'arrival_time': self.arrival_time,
 				'comments': self.comments,
@@ -1106,7 +1095,7 @@ class Reservation(models.Model):
 	def default_rate(self):
 		# default_rate always returns the default rate regardless of comps or
 		# custom rates.
-		return self.bed.default_rate
+		return self.room.default_rate
 
 	def get_rate(self):
 		if self.rate == None:
@@ -1154,7 +1143,7 @@ class Reservation(models.Model):
 		self.generate_bill()
 
 	def reset_rate(self):
-		self.set_rate(self.bed.default_rate)
+		self.set_rate(self.room.default_rate)
 
 	def mark_last_msg(self):
 		self.last_msg = datetime.datetime.now()
@@ -1237,8 +1226,8 @@ class PaymentManager(models.Manager):
 		subscription_payments = Payment.objects.filter(bill__in=SubscriptionBill.objects.filter(subscription__location=location))
 		return subscription_payments
 
-	def reservation_payments_by_bed(self, bed):
-		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__bed=bed))
+	def reservation_payments_by_room(self, room):
+		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__room=room))
 		return reservation_payments
 
 class Payment(models.Model):

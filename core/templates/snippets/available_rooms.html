@@ -5,7 +5,7 @@
 
 	<div class="col-md-9 col-sm-12" id="availability-area">
 		<div id="rooms-available-calendar">
-			{% for room in available_reservations.keys %}
+			{% for room, res_dict in available_reservations.items %}
 				<div class="col-lg-6">
 					<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-panel room-select">
 						<div class="panel panel-default">
@@ -19,7 +19,7 @@
 							</div>
 						</div>
 					</label>
-					<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
+					<input type="radio" name="bed" id="select-bed-{{res_dict.reservation.bed.id}}" value="{{res_dict.reservation.bed.id}}">
 				</div>
 			{% endfor %}
 		</div>
@@ -31,11 +31,11 @@
 		<form id="the-reservation-form" method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
 			<input id="id_arrive" type="hidden" name="arrive" value="{{arrive_date}}">
 			<input id="id_depart" type="hidden" name="depart" value="{{depart_date}}">
-			<input type="hidden" name="room" id="res-selected-room" value="">
+			<input type="hidden" name="bed" id="res-selected-bed" value="">
 
 			{% for room, res_dict in available_reservations.items %}
 
-			<div class="room-info" id="room-info-{{room.id}}">
+			<div class="room-info" id="bed-info-{{res_dict.reservation.bed.id}}">
 
 				<div class="panel panel-default">
 					<div class="panel-heading" id="mock-invoice-panel-heading">

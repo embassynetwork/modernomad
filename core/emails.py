@@ -181,7 +181,7 @@ def new_reservation_notify(reservation):
 		'user_image' : "https://" + domain+"/media/"+ str(reservation.user.profile.image_thumb),
 		'first_name': reservation.user.first_name, 
 		'last_name' : reservation.user.last_name, 
-		'room_name' : reservation.room.name, 
+		'room_name' : reservation.bed.room.name, 
 		'arrive' : str(reservation.arrive), 
 		'depart' : str(reservation.depart), 
 		'purpose': reservation.purpose, 
