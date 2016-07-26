@@ -37,11 +37,7 @@
 
 	{% if reservables_forms %}
 		<h4>Date Ranges that this room should be reservable</h4>
-		<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
-		<p>The end date entered <em>will</em> be reservable; i.e.,
-		if you enter an end date of April 15, then the room will be
-		reservable on the night of April 15, but not on April 16.
-		</p>
+		<p>Leave the end date blank for a guest room or room with open ended bookability.</p>
 		{% for reservable_form, reservable_id in reservables_forms %}
 			<form class="form-inline" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}">
 				<div class="form-group">

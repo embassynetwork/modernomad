@@ -317,6 +317,15 @@ class LocationReservableForm(BootstrapModelForm):
 			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
 			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
 		}
+	
+	def clean(self):
+		''' don't allow overlapping reservables.'''
+		start = self.cleaned_data['start_date']
+		end = self.cleaned_data['end_date']
+		overlapping = Reservable.objects.filter(bed=self.cleaned_data['bed']).filter(end_date__lte=start, start_date__gt=end)
+		if overlapping:
+			raise forms.ValidationError("Reservable date ranges cannot overlap.")
+
 
 class ReservationForm(forms.ModelForm):
 	class Meta:
@@ -338,7 +347,7 @@ class ReservationForm(forms.ModelForm):
 			if free_beds_this_room:
 				bed_tuples = []
 				for bed in free_beds_this_room:
-					bed_tuples.append((bed.id, bed.name))
+					bed_tuples.append((bed.id, "%s: %s" % (room.name, bed.name)))
 
 				rooms.append([room.name, bed_tuples])
 		print rooms
@@ -357,7 +366,7 @@ class ReservationForm(forms.ModelForm):
 		arrive = cleaned_data.get('arrive')
 		depart = cleaned_data.get('depart')
 		if (depart - arrive).days > self.location.max_reservation_days:
-			self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
+			self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than this long in special circumstances. Please limit your request.'])
 		return cleaned_data
 
 

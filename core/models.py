@@ -363,7 +363,7 @@ class Bed(BookableResource):
 	def is_reservable_this_day(self, this_day):
 		# there *should* never be more than 1 reservable on a given day... 
 		try:
-			reservable_today = self.reservables.filter(bed=self).filter(start_date__lte=this_day).get(Q(end_date__gte=this_day) | Q(end_date=None))  
+			reservable_today = self.reservables.filter(bed=self).filter(start_date__lte=this_day).get(Q(end_date__gt=this_day) | Q(end_date=None))  
 		except:
 			reservable_today = False
 		return bool(reservable_today)
