@@ -61,7 +61,7 @@
 			<tbody>
 				{% for room, tup in room_income_occupancy.items %}
 				<tr class="{% cycle 'row-even' 'row-odd' %}">
-					<td>{{ room.name|title }}<a target="blank" href="{% url 'room_occupancy' location.slug room.id report_date.year %}"> <span class="glyphicon glyphicon-cloud-download"></span></a></td> 
+					<td>{{ room.name|title }}<a target="blank" href="{% url 'csv_bed_occupancy' location.slug room.id report_date.year %}"> <span class="glyphicon glyphicon-cloud-download"></span></a></td> 
 					<td>${{ tup.0|floatformat:2|intcomma  }}</td>
 					<td>{{tup.2|floatformat:2}}%</td> 
 					<td>{{tup.1}}</td>

@@ -1,3 +1,5 @@
+{% load staticfiles %}
+
 <div id="reservation-details-form">
 	<h3>Edit Reservation Details</h3>
 	<div class="form-help-text" style="margin-bottom: 12px;">
@@ -83,11 +85,13 @@
 		<div class="form-group">
 			<label class="col-sm-2 control-label">Bed</label> 
 			<div class="col-sm-4">
-				<select class="form-control" name="bed_id">
+				<select class="form-control" id="bed-select-chosen" name="bed_id">
 					{% for room in location.get_rooms %}
-						{% for bed in room.beds.all %}
-						<option value="{{bed.id}}" {% if bed.id == r.bed.id %}SELECTED{% endif %}>{{bed}}</option>
-						{% endfor %}
+						<optgroup label="{{room.name}}">
+							{% for bed in room.beds.all %}
+							<option value="{{bed.id}}" {% if bed.id == r.bed.id %}SELECTED{% endif %}>{{room.name}} {{bed.name}}</option>
+							{% endfor %}
+						</optgroup>
 					{% endfor %}
 				</select>
 			</div>
@@ -148,4 +152,7 @@
 
 </div>
 
-
+<script src="{% static 'js/chosen.jquery.min.js' %}"></script>
+<script>
+	$("#bed-select-chosen").chosen({width: "100%"});
+</script>

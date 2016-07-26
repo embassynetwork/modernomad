@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 {% block content %}
 
 	{% if messages %}
@@ -39,9 +40,12 @@
 {% endblock %}
 
 {% block extrajs %}
+<script src="{% static 'js/chosen.jquery.min.js' %}"></script>
 <script>
 
 $(document).ready(function() {
+
+	$(".chosen").chosen({width: "100%"});
 
 	// wire up the ajax-y spinning animated GIF to show when an ajax call
 	// is made. 	

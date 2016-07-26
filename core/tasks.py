@@ -84,7 +84,7 @@ def _format_attachment(r, color):
 		profile_img_url = domain+r.user.profile.image.url
 	else:
 		profile_img_url = domain+"/static/img/default.jpg"
-	reservation_url = '<%s%s|%s - %s in %s>\n%s' % (domain, r.get_absolute_url(), r.arrive.strftime("%B %d"), r.depart.strftime("%B %d"), r.room.name, r.user.profile.bio)
+	reservation_url = '<%s%s|%s - %s in %s>\n%s' % (domain, r.get_absolute_url(), r.arrive.strftime("%B %d"), r.depart.strftime("%B %d"), r.bed.room.name, r.user.profile.bio)
 	profile_url = domain + urlresolvers.reverse('user_detail', args=(r.user.username,)),
 	item = {
 			'color': color,

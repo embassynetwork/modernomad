@@ -310,7 +310,7 @@ class Room(models.Model):
 		return False
 
 	def is_reservable_this_day(self, this_day):
-		# a room is reservable on a date if it has at least one bed is
+		# a room is reservable on a date if it has at least one bed that is
 		# reservable on that date.
 		beds = self.beds.all()
 		for bed in beds:
@@ -319,12 +319,15 @@ class Room(models.Model):
 		return False
 
 	def available_on(self, this_day):
-		# a room is available if it is reservable and if it has free beds. 
-		# JKS i added the filter(room=self) - need to test this. 
-		if not self.is_reservable_this_day(this_day):
-			return False
-		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, room=self)
-		beds_left = self.beds
+		# a room is available if it is reservable and if it has any free beds. 
+		beds = self.beds.all()
+		for bed in beds:
+			if bed.is_free_this_day(this_day):
+				return True
+		return False
+
+		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, bed=self)
+		beds_left = self.beds.count()
 		for r in reservations_on_this_day:
 			beds_left -= 1
 		if beds_left > 0:
@@ -343,6 +346,7 @@ class Room(models.Model):
 		return month_html
 
 class BookableResource(models.Model):
+	name = models.CharField(max_length=200)
 	description = models.TextField(blank=True, null=True, help_text="Optional. Will override (or supplement?) the parent room's description")
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
 	archived = models.BooleanField(default=False, verbose_name="Is the resource out of service indefinitely?")
@@ -368,7 +372,7 @@ class Bed(BookableResource):
 		# must a. be reservable, and b. not have any other reservations. 
 		if not self.is_reservable_this_day(this_day):
 			return False
-		booked = self.reservations.filter(arrive__lte=this_day).filter(depart__gte=this_day)
+		booked = self.reservations.filter(arrive__lte=this_day).filter(depart__gte=this_day).filter(Q(status="confirmed") | Q(status="approved"))
 		if booked:
 			return False
 		else:
@@ -409,19 +413,19 @@ class ReservationManager(models.Manager):
 		all_on_date = super(ReservationManager, self).get_queryset().filter(location=location).filter(arrive__lte = the_day).filter(depart__gt = the_day)
 		return all_on_date.filter(status=status)
 
-	def confirmed_approved_on_date(self, the_day, location, room=None):
+	def confirmed_approved_on_date(self, the_day, location, bed=None):
 		# return the approved or confirmed reservations that intersect this day
 		approved_reservations = self.on_date(the_day, status= "approved", location=location)
 		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
-		if room:
-			approved_reservations = approved_reservations.filter(room=room)
-			confirmed_reservations = confirmed_reservations.filter(room=room)
+		if bed:
+			approved_reservations = approved_reservations.filter(bed=bed)
+			confirmed_reservations = confirmed_reservations.filter(bed=bed)
 		return (list(approved_reservations) + list(confirmed_reservations))
 
-	def confirmed_on_date(self, the_day, location, room=None):
+	def confirmed_on_date(self, the_day, location, bed=None):
 		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
-		if room:
-			confirmed_reservations = confirmed_reservations.filter(room=room)
+		if bed:
+			confirmed_reservations = confirmed_reservations.filter(bed=bed)
 		return list(confirmed_reservations)
 
 	def confirmed_but_unpaid(self, location):
@@ -435,9 +439,9 @@ class ReservationManager(models.Manager):
 	def get_overlapping_in_room(self, reservation):
 		overlapping = []
 		# get reservations of any status, but exclude the one being queried against. 
-		this_room = super(ReservationManager, self).get_queryset().filter(room=reservation.room) 
-		before_or_around = this_room.filter(arrive__lt=reservation.arrive, depart__gt=reservation.arrive).exclude(id=reservation.id) 
-		between_or_after = this_room.filter(arrive__gte=reservation.arrive).filter(arrive__lt=reservation.depart).exclude(id=reservation.id)
+		reservations_this_room = super(ReservationManager, self).get_queryset().filter(room=reservation.bed.room) 
+		before_or_around = reservations_this_room.filter(arrive__lt=reservation.arrive, depart__gt=reservation.arrive).exclude(id=reservation.id) 
+		between_or_after = reservations_this_room.filter(arrive__gte=reservation.arrive).filter(arrive__lt=reservation.depart).exclude(id=reservation.id)
 		return list(before_or_around) + list(between_or_after)
 
 class Bill(models.Model):
@@ -1051,8 +1055,7 @@ class Reservation(models.Model):
 				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
 				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
 				'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug':self.location.slug},
-				'room': {'id': self.room.id, 'name': self.room.name, 'description': self.room.description},
-				'bed': {'id': self.bed.id, 'description': self.bed.description, 'default_rate': self.bed.default_rate},
+				'bed': {'id': self.bed.id},
 				'purpose': self.purpose,
 				'arrival_time': self.arrival_time,
 				'comments': self.comments,

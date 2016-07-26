@@ -73,18 +73,18 @@
 				dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
 
 				dataTable.addRows([
-					{% for room, reservations_this_room in reservations_by_room %}
-						{% with last_room=forloop.last %}
+					{% for bed, reservations_this_bed in reservations_by_bed %}
+						{% with last_bed=forloop.last %}
 
 						// note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1. 
-						{% for res_info in reservations_this_room %}	
+						{% for res_info in reservations_this_bed %}	
 							[ 
-							"{{room.name|safe}}", "{{res_info.reservation.user.first_name|title}} ({{res_info.reservation.status}})", 
+							"{{bed.room.name|safe}} (bed {{bed.name|safe}}, id {{bed.id|safe}})", "{{res_info.reservation.user.first_name|title}} ({{res_info.reservation.status}})", 
 								new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}), 
 								new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}), 
 								"<div class='guestinfo-tooltip'><h3>{{res_info.reservation.user.first_name|title}}</h3><p><em>{{res_info.reservation.status}}</em></p><p>Arrive: {{ res_info.reservation.arrive}}</p><p>Depart: {{ res_info.reservation.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.reservation.user.profile.image_thumb}}'></div>"
 
-							{% if last_room and forloop.last %}
+							{% if last_bed and forloop.last %}
 								]
 							{% else %}
 								],

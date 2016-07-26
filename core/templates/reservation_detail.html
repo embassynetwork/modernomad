@@ -125,7 +125,7 @@
 					{% include 'snippets/reservation_bill_line_items_and_payments.html' %}
 				{% endwith %}
 				<div class="panel-footer text-muted">
-					<em>Cancellation policy for the {{ reservation.room }} is {{reservation.room.cancellation_policy}}.</em>
+					<em>Cancellation policy for the {{ reservation.bed.room }} is {{reservation.bed.room.cancellation_policy}}.</em>
 				</div>
 			</div>
 		</div>
@@ -143,7 +143,7 @@
 		</h3>
 		<h4>{{reservation.arrive }} - {{reservation.depart}}.</h4>
 		<div class="row">
-			<div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ reservation.room.name|title}}</div>
+			<div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ reservation.bed.room.name|title}}</div>
 		</div>
 		<div class="row">
 			<div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ reservation.purpose}}</div>

@@ -148,18 +148,19 @@ def today(request, location_slug):
 	events_today = published_events_today_local(location)
 	return render(request, "today.html", {'people_today': people_today, 'events_today': events_today})
 
-def room_occupancy_month(room, month, year):
-	print room, month, year
+def _bed_data_by_month(bed, month, year):
+	''' compute various statistics about this bed for the given month'''
+	print bed, month, year
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
 	# note the day parameter is meaningless
 	report_date = datetime.date(year, month, 1)
-	reservations = Reservation.objects.filter(room=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+	reservations = Reservation.objects.filter(bed=bed).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
-	# payments *received* this month for this room
-	payments_for_room = Payment.objects.reservation_payments_by_bed(bed).filter(payment_date__gte=start).filter(payment_date__lte=end)
+	# payments *received* this month for this bed
+	payments_for_bed = Payment.objects.reservation_payments_by_bed(bed).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	payments_cash = 0
-	for p in payments_for_room:
+	for p in payments_for_bed:
 		payments_cash += p.paid_amount
 
 	nights_available = 0
@@ -175,10 +176,10 @@ def room_occupancy_month(room, month, year):
 	# payments this month for previous months
 	# payments for this month FROM past months (except inasmuch as its captured in the payments_accrual)
 
-	# iterate over the reservables to calculate how many nights the room was
+	# iterate over the reservables to calculate how many nights the bed was
 	# actually available.
-	room_reservables = room.reservables.all()
-	for reservable in room_reservables:
+	bed_reservables = bed.reservables.all()
+	for reservable in bed_reservables:
 		if not reservable.end_date:
 			# XXX account for reservables without end date by temporarily
 			# setting the end date to be the end of the month.  IMPT: do
@@ -198,12 +199,8 @@ def room_occupancy_month(room, month, year):
 		else:
 			end_reservable = reservable.end_date
 		nights_available += (end_reservable - start_reservable).days
-	if room.shared:
-		nights_available *= room.beds
 
-	# cash for room this month
-
-	# occupancy for room this month
+	# occupancy for bed this month
 	for r in reservations:
 		comp = False
 		partial_payment = False
@@ -249,34 +246,40 @@ def room_occupancy_month(room, month, year):
 				outstanding_value += r.bill.total_owed()
 				partial_paid_reservations.append(r.id)
 
-	params = [month, year, round(payments_cash, 2), round(payments_accrual, 2), nights_occupied, nights_available, partial_paid_reservations, total_comped_nights, round(total_comped_value, 2)]
+	bed_name = "%s (id %d)" % (bed.name, bed.id)
+	params = [bed.room.name, bed_name, month, year, round(payments_cash, 2), round(payments_accrual, 2), nights_occupied, nights_available, partial_paid_reservations, total_comped_nights, round(total_comped_value, 2)]
 	return params
 
 @resident_or_admin_required
-def room_occupancy(request, location_slug, room_id, year):
+def csv_bed_occupancy(request, location_slug, room_id, year):
+	''' CSV export of bed occupancy'''
 	room = get_object_or_404(Room, id=room_id)
 	year = int(year)
 	response = HttpResponse(content_type='text/csv')
 	output_filename = "%s Occupancy Report %d.csv" % (room.name, year)
 	response['Content-Disposition'] = 'attachment; filename=%s' % output_filename
 	writer = csv.writer(response)
-	if room.location.slug != location_slug:
-		writer.writerow(["invalid room",])
-		return response
 
 	writer.writerow([str(year) + " Report for " + room.name,])
-	writer.writerow(['Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied', 'Nights Available', 'Partial Paid Reservations', 'Comped Nights', 'Comped Value'])
+	writer.writerow(['Room', 'Bed', 'Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied', 'Nights Available', 'Partial Paid Reservations', 'Comped Nights', 'Comped Value'])
 	# we don't have data before 2012 or in the future
 	if (year < 2012) or (year > datetime.date.today().year):
 		return response
 
-	for month in range(1,13):
-		params = room_occupancy_month(room, month, year)
-		writer.writerow(params)
+	for bed in room.beds.all():
+		bed = get_object_or_404(Bed, id=bed.id)
+		if bed.room.location.slug != location_slug:
+			writer.writerow(["invalid bed",])
+			return response
+
+		for month in range(1,13):
+			params = _bed_data_by_month(bed, month, year)
+			writer.writerow(params)
 
 	return response
 
 def monthly_occupant_report(location_slug, year, month):
+	''' a utility function to assemble a giant dictionary of occupancy data. returns information about person-nights/mo for guests, residents and members.'''
 	location = get_object_or_404(Location, slug=location_slug)
 	today = datetime.date.today()
 	start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
@@ -378,6 +381,7 @@ def monthly_occupant_report(location_slug, year, month):
 
 
 def monthly_occupant_report_console(location_slug, year, month):
+	''' a backend utility method to print out a report of all occupants for a given month.'''
 	(occupants, messages) = monthly_occupant_report(location_slug, year, month)
 	print "occupancy report for %s %s" % (month, year)
 	print "name, email, total_nights, total_value, total_comped, owing, reference_ids"
@@ -493,16 +497,16 @@ def occupancy(request, location_slug):
 			comp = True
 			unpaid = False
 		else:
-			this_room_occupancy = room_occupancy.get(r.room, 0)
+			this_room_occupancy = room_occupancy.get(r.bed.room, 0)
 			this_room_occupancy += nights_this_month
-			room_occupancy[r.room] = this_room_occupancy
+			room_occupancy[r.bed.room] = this_room_occupancy
 
 			# the bill has the amount that goes to the house after fees
 			to_house_per_night = r.bill.to_house()/r.total_nights()
 			total_income += nights_this_month*to_house_per_night
-			this_room_income = room_income.get(r.room, 0)
+			this_room_income = room_income.get(r.bed.room, 0)
 			this_room_income += nights_this_month*to_house_per_night
-			room_income[r.room] = this_room_income
+			room_income[r.bed.room] = this_room_income
 
 			# If there are payments, calculate the payment rate
 			if r.payments():
@@ -534,7 +538,7 @@ def occupancy(request, location_slug):
 		person_nights_data.append({
 			'reservation': r,
 			'nights_this_month': nights_this_month,
-			'room': r.room.name,
+			'room': r.bed.room.name,
 			'rate': rate,
 			'partial_payment': partial_payment,
 			'total_owed': total_owed,
@@ -549,32 +553,32 @@ def occupancy(request, location_slug):
 	total_reservable_days = 0
 	reservable_days_per_room = {}
 	for room in location_rooms:
-		room_reservables = room.reservables.all()
-		reservable_days_this_room = 0
-		for reservable in room_reservables:
-			if not reservable.end_date:
-				# XXX  account for reservables without end date by temporarily
-				# setting the end date to be the end of the month.  IMPT: do
-				# NOT save this. it's a temporary hack so that we can work with
-				# end dates.
-				reservable.end_date = end
+		reservable_days_per_room[room] = 0
+		for bed in room.beds.all():
+			bed_reservables = bed.reservables.all()
+			reservable_days_this_bed = 0
+			for reservable in bed_reservables:
+				if not reservable.end_date:
+					# XXX  account for reservables without end date by temporarily
+					# setting the end date to be the end of the month.  IMPT: do
+					# NOT save this. it's a temporary hack so that we can work with
+					# end dates.
+					reservable.end_date = end
 
-			if reservable.end_date < start or reservable.start_date > end:
-				# no reservable dates in this month
-				continue
-			if reservable.start_date < start:
-				start_reservable = start
-			else:
-				start_reservable = reservable.start_date
-			if reservable.end_date > end:
-				end_reservable = end
-			else:
-				end_reservable = reservable.end_date
-			reservable_days_this_room += (end_reservable - start_reservable).days
+				if reservable.end_date < start or reservable.start_date > end:
+					# no reservable dates in this month
+					continue
+				if reservable.start_date < start:
+					start_reservable = start
+				else:
+					start_reservable = reservable.start_date
+				if reservable.end_date > end:
+					end_reservable = end
+				else:
+					end_reservable = reservable.end_date
+				reservable_days_this_bed += (end_reservable - start_reservable).days
 
-		if room.shared:
-			reservable_days_this_room *= room.beds
-		reservable_days_per_room[room] = reservable_days_this_room
+			reservable_days_per_room[room] += reservable_days_this_bed
 
 	total_income_for_this_month = income_for_this_month + income_from_past_months
 	total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
@@ -643,50 +647,56 @@ def calendar(request, location_slug):
 		.filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
 
 	rooms = Room.objects.filter(location=location)
-	reservations_by_room = []
+	location_beds = []
+	for room in rooms:
+		for bed in room.beds.all():
+			location_beds.append(bed)
+
+	reservations_by_bed = []
 	empty_rooms = 0
 
 	# this is tracked here to help us determine what height the timeline div
 	# should be. it's kind of a hack.
 	num_rows_in_chart = 0
 	for room in rooms:
-		num_rows_in_chart += room.beds
+		num_rows_in_chart += room.beds.count()
 
 	if len(reservations) == 0:
 		any_reservations = False
 	else:
 		any_reservations = True
 
-	for room in rooms:
-		reservations_this_room = []
+	for bed in location_beds:
+		print bed
+		reservations_this_bed = []
 
-		reservation_list_this_room = list(reservations.filter(room=room))
+		reservation_list_this_bed = list(reservations.filter(bed=bed))
 
-		if len(reservation_list_this_room) == 0:
-			empty_rooms += 1
-			num_rows_in_chart -= room.beds
+		#if len(reservation_list_this_bed) == 0:
+		#	empty_rooms += 1
+		#	num_rows_in_chart -= room.beds.count()
 
-		else:
-			for r in reservation_list_this_room:
-				if r.arrive < start:
-					display_start = start
-				else:
-					display_start = r.arrive
-				if r.depart > end:
-					display_end = end
-				else:
-					display_end = r.depart
-				reservations_this_room.append({'reservation':r, 'display_start':display_start, 'display_end':display_end})
+		#else:
+		for r in reservation_list_this_bed:
+			if r.arrive < start:
+				display_start = start
+			else:
+				display_start = r.arrive
+			if r.depart > end:
+				display_end = end
+			else:
+				display_end = r.depart
+			reservations_this_bed.append({'reservation':r, 'display_start':display_start, 'display_end':display_end})
 
-			reservations_by_room.append((room, reservations_this_room))
+		reservations_by_bed.append((bed, reservations_this_bed))
 
-	logger.debug("Reservations by Room for calendar view:")
-	logger.debug(reservations_by_room)
+	print("Reservations by Bed for calendar view:")
+	print(reservations_by_bed)
 
 	# create the calendar object
 	guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
 
-	return render(request, "calendar.html", {'reservations': reservations, 'reservations_by_room': reservations_by_room,
+	return render(request, "calendar.html", {'reservations': reservations, 'reservations_by_bed': reservations_by_bed,
 		'month_start': start, 'month_end': end, "next_month": next_month, "prev_month": prev_month, 'rows_in_chart': num_rows_in_chart,
 		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
 
@@ -843,8 +853,12 @@ def CheckRoomAvailability(request, location_slug):
 	# Create mock reservations for each available room so we can preview the
 	# bill to the user
 	free_rooms = location.rooms_free(arrive, depart)
+	print 'free rooms'
+	print free_rooms
 	for room in free_rooms:
 		# get the first free bed for this room
+		print 'free beds for %s' % room
+		print room.get_free_beds_on_dates_or_none(arrive, depart)
 		bed=room.get_free_beds_on_dates_or_none(arrive, depart)[0]
 		reservation = Reservation(id=-1, bed=bed, arrive=arrive, depart=depart, location=location)
 		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
@@ -893,11 +907,15 @@ def RoomsAvailableOnDates(request, location_slug):
 		depart = datetime.datetime.strptime(request.POST['depart'],'%Y-%m-%d').date()
 	free_rooms = location.rooms_free(arrive, depart)
 	rooms_availability = {}
-	for room in location.rooms_with_future_reservability():
-		if room in free_rooms:
-			rooms_availability[room.name] = {'available': True, 'id': room.id}
-		else:
-			rooms_availability[room.name] = {'available': False, 'id': room.id}
+	#for room in location.rooms_with_future_reservability():
+	for room in location.get_rooms():
+		rooms_availability[room.name] = []
+		for bed in room.beds.all():
+			if bed.is_free_between(arrive, depart):
+				rooms_availability[room.name].append({'available': True, 'id': bed.id})
+			else:
+				rooms_availability[room.name].append({'available': False, 'id': bed.id})
+
 	return JsonResponse({'rooms_availability': rooms_availability})
 
 def ReservationSubmit(request, location_slug):
@@ -1117,9 +1135,8 @@ def ReservationEdit(request, reservation_id, location_slug):
 	# yet!)
 	original_arrive = reservation.arrive
 	original_depart = reservation.depart
-	original_room = reservation.room
+	original_bed = reservation.bed
 	if request.user.is_authenticated() and request.user == reservation.user:
-		logger.debug("ReservationEdit: Authenticated and same user")
 		if request.user in reservation.location.house_admins.all():
 			is_house_admin = True
 		else:
@@ -1127,8 +1144,6 @@ def ReservationEdit(request, reservation_id, location_slug):
 
 		if request.method == "POST":
 			logger.debug("ReservationEdit: POST")
-			# don't forget to specify the "instance" argument or a new object will get created!
-			#form = get_reservation_form_for_perms(request, post=True, instance=reservation)
 			form = ReservationForm(location, request.POST, instance=reservation)
 			if form.is_valid():
 				logger.debug("ReservationEdit: Valid Form")
@@ -1139,10 +1154,10 @@ def ReservationEdit(request, reservation_id, location_slug):
 				logger.debug("is_pending: %s" % reservation.is_pending())
 				logger.debug("arrive: %s, original: %s" % (reservation.arrive, original_arrive))
 				logger.debug("depart: %s, original: %s" % (reservation.depart, original_depart))
-				logger.debug("room: %s, original: %s" % (reservation.room, original_room))
+				logger.debug("bed: %s, original: %s" % (reservation.bed, original_bed))
 				if (not reservation.is_pending() and (reservation.arrive != original_arrive or
-					reservation.depart != original_depart or reservation.room != original_room )):
-					logger.debug("reservation room or date was changed. updating status.")
+					reservation.depart != original_depart or reservation.bed != original_bed )):
+					logger.debug("reservation bed or date was changed. updating status.")
 					reservation.pending()
 					# notify house_admins by email
 					try:
@@ -1153,11 +1168,11 @@ def ReservationEdit(request, reservation_id, location_slug):
 				else:
 					client_msg = 'The reservation was updated.'
 				# save the instance *after* the status has been updated as needed.
-				form.save()
+				r = form.save()
+				r.generate_bill()
 				messages.add_message(request, messages.INFO, client_msg)
 				return HttpResponseRedirect(reverse("reservation_detail", args=(location.slug, reservation_id)))
 		else:
-			#form = get_reservation_form_for_perms(request, post=False, instance=reservation)
 			form = ReservationForm(location, instance=reservation)
 
 		return render(request, 'reservation_edit.html', {'form': form, 'reservation_id': reservation_id,
@@ -1584,7 +1599,7 @@ def ReservationManage(request, location_slug, reservation_id):
 	availability = location.availability(reservation.arrive, reservation.depart)
 	free = location.rooms_free(reservation.arrive, reservation.depart)
 	date_list = date_range_to_list(reservation.arrive, reservation.depart)
-	if reservation.room in free:
+	if reservation.bed.room in free:
 		room_has_availability = True
 	else:
 		room_has_availability = False
@@ -2306,7 +2321,7 @@ def process_unsaved_reservation(request):
 				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
 				depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']),
 				location = Location.objects.get(id=details['location']['id']),
-				room = Room.objects.get(id=details['room']['id']),
+				bed = Bed.objects.get(id=details['bed']['id']),
 				purpose = details['purpose'],
 				arrival_time = details['arrival_time'],
 				comments = details['comments'],

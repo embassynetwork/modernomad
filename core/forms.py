@@ -321,22 +321,36 @@ class LocationReservableForm(BootstrapModelForm):
 class ReservationForm(forms.ModelForm):
 	class Meta:
 		model = Reservation
-		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
+		exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill', 'room']
 		widgets = { 
 			'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
 			'arrival_time': forms.TextInput(attrs={'class':'form-control form-group'}),
-			'bed': forms.Select(attrs={'class':'form-control form-group'}),
+			'bed': forms.Select(attrs={'class':'form-control chosen form-group'}),
 			'purpose': forms.TextInput(attrs={'class':'form-control form-group'}),
 			'comments': forms.Textarea(attrs={'class':'form-control form-group'}),
 		}
+
+	def beds_as_optgroups(self):
+		rooms = []
+		for room in self.instance.location.get_rooms():
+			free_beds_this_room = room.get_free_beds_on_dates_or_none(self.instance.arrive, self.instance.depart)
+			if free_beds_this_room:
+				bed_tuples = []
+				for bed in free_beds_this_room:
+					bed_tuples.append((bed.id, bed.name))
+
+				rooms.append([room.name, bed_tuples])
+		print rooms
+		return rooms
 
 	def __init__(self, location, *args, **kwargs):
 		super(ReservationForm, self).__init__(*args, **kwargs)
 		if not location:
 			raise Exception("No location given!")
 		self.location = location
-		self.fields['bed'].queryset = self.location._beds_with_future_reservability_queryset()
+		#self.fields['bed'].queryset = self.location._beds_with_future_reservability_queryset()
+		self.fields['bed'].choices = self.beds_as_optgroups()
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
@@ -425,7 +439,7 @@ class ReservationEmailTemplateForm(EmailTemplateForm):
 			'arrive': reservation.arrive, 
 			'depart': reservation.depart, 
 			'arrival_time': reservation.arrival_time,
-			'room': reservation.room, 
+			'room': reservation.bed.room, 
 			'num_nights': reservation.total_nights(), 
 			'purpose': reservation.purpose,
 			'comments': reservation.comments,
