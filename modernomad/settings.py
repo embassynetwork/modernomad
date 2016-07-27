@@ -1,5 +1,6 @@
 # Django settings for modernomad project.
 import os
+import datetime
 
 # Make filepaths relative to settings.
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -107,6 +108,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	"core.context_processors.location.network_locations",
 	"core.context_processors.analytics.google_analytics",
 )
+
+# other JWT options available at https://github.com/jpadilla/django-jwt-auth
+JWT_EXPIRATION_DELTA = datetime.timedelta(days=1000)
 
 ROOT_URLCONF = 'modernomad.urls.main'
 
