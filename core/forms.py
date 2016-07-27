@@ -294,19 +294,20 @@ class LocationRoomForm(forms.ModelForm):
 
 	def clean(self):
 		# save any cropped images
-		try:
-			img_data = self.cleaned_data['cropped_image_data']
-			# If none or len 0, means illegal image data
-			if (img_data == False or img_data == None or len(img_data) == 0):
-				# Image data on creation is ensured by the javascript validator.
-				# If we don't have image data here it's because we don't need to 
-				# update the image.  Doing nothing -- JLS
-				print 'there was no image data'
-		except:
-			raise forms.ValidationError('No valid image was provided.')
-		upload_path = "rooms/"
-		relative_file_name = save_cropped_image(img_data, upload_path)
-		self.cleaned_data['image'] = relative_file_name
+		if self.cleaned_data.get('cropped_image_data'):
+			try:
+				img_data = self.cleaned_data['cropped_image_data']
+				# If none or len 0, means illegal image data
+				if (img_data == False or img_data == None or len(img_data) == 0):
+					# Image data on creation is ensured by the javascript validator.
+					# If we don't have image data here it's because we don't need to 
+					# update the image.  Doing nothing -- JLS
+					print 'there was no image data'
+			except:
+				raise forms.ValidationError('No valid image was provided.')
+			upload_path = "rooms/"
+			relative_file_name = save_cropped_image(img_data, upload_path)
+			self.cleaned_data['image'] = relative_file_name
 
 
 class LocationReservableForm(BootstrapModelForm):

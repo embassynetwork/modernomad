@@ -154,9 +154,12 @@
 		}
 	}
 
+	image_has_changed = false;
+
 	$("[id^=id_][id$=-image").change(function() {
 		// we need to get the specific room so we can target the right image_preview element. this will be of the form 'id_room_x-image'. 
 		console.log('registered image change...');
+		image_has_changed = true;
 		the_this = this;
 		this_image_id = $(this).attr("id");
 	
@@ -175,15 +178,17 @@
 	});
 
 	$(".room-form").submit(function(){
-		/* construct the unique ids for this form so we can store the cropped
-		* image data in the correct formp. then submit the form */
-		form_id = $(this).attr('id');
-		room_x = form_id.match(/form-(.*)/)[1]
-		preview_id = "#id_"+room_x+"-image-preview"
-		cropped_img_data = "#id_"+room_x+"-cropped_image_data";
-		
-		// add the cropped image data to the form, then submit.
-		$(cropped_img_data).val($(preview_id).cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
+		if (image_has_changed) {
+			/* construct the unique ids for this form so we can store the cropped
+			* image data in the correct formp. then submit the form */
+			form_id = $(this).attr('id');
+			room_x = form_id.match(/form-(.*)/)[1]
+			preview_id = "#id_"+room_x+"-image-preview"
+			cropped_img_data = "#id_"+room_x+"-cropped_image_data";
+			
+			// add the cropped image data to the form, then submit.
+			$(cropped_img_data).val($(preview_id).cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
+		}
 		return true;
 	})
 
