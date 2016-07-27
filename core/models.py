@@ -285,10 +285,7 @@ class Room(models.Model):
 	description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
 	summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
-	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
-	num_beds = models.IntegerField()
-	residents = models.ManyToManyField(User, related_name="rooms", help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room.", blank=True) # a room may have many residents and a resident may have many rooms
-	image = models.ImageField(upload_to=room_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
+	image = models.ImageField(upload_to=room_img_upload_to)
 
 	def __unicode__(self):
 		return self.name
@@ -346,6 +343,8 @@ class Room(models.Model):
 		return month_html
 
 class BookableResource(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
 	name = models.CharField(max_length=200)
 	description = models.TextField(blank=True, null=True, help_text="Optional. Will override (or supplement?) the parent room's description")
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)

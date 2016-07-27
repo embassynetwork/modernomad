@@ -9,7 +9,11 @@
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			<li class="active"><a href="#help" data-toggle="pill"><h5>Help</h5></a></li>
 			{% for name in room_names %}
-				<li><a href="#{{name|slugify}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
+				<li role="presentation" class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+					<h5>{{name}}</h5> <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
 				{% if forloop.counter == 1 %}<hr>{% endif %}
 			{% endfor %}
 		</ul>

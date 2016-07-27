@@ -1399,65 +1399,89 @@ def LocationEditPages(request, location_slug):
 
 
 @resident_or_admin_required
-def LocationEditRooms(request, location_slug):
+def LocationEditRoom(request, location_slug, room_id=None):
+	'''Edit an existing room or create a new room.'''
+	print 'in location edit room'
 	location = get_object_or_404(Location, slug=location_slug)
-
-	location_rooms = location.rooms.all().order_by('name')
+	rooms = location.rooms.all().order_by('name')
 
 	if request.method == 'POST':
-		print 'received new room or room data'
-		if request.POST.get("room_id"):
-			room_id = int(request.POST.get("room_id"))
-			if room_id > 0:
-				# editing an existing item
-				print 'updating an existing room'
-				action = "updated"
-				room = Room.objects.get(id=room_id)
-				# request.POST keys now have a prefix, so don't forget to pass that along here!
-				prefix = "room_%d" % room_id
-				form = LocationRoomForm(request.POST, request.FILES, instance=room, prefix=prefix)
-			else:
-				# new item
-				action = "created"
-				form = LocationRoomForm(request.POST, request.FILES)
+		if room_id:
+			form = LocationRoomForm(request.POST, request.FILES, instance = Room.objects.get(id=room_id))
 			if form.is_valid():
-				if action == "updated":
-					form.save()
-					messages.add_message(request, messages.INFO, "%s %s." % (room.name, action))
-				else:
-					new_room = form.save(commit=False)
-					new_room.location = location
-					new_room.save()
-					messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
-			else:
-				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
-		elif request.POST.get("reservable_id"):
-			reservable_id = int(request.POST.get("reservable_id"))
-			if reservable_id > 0:
-				# editing an existing reservable
-				action = "updated"
-				reservable = Reservable.objects.get(id=reservable_id)
-				form = LocationReservableForm(request.POST, request.FILES, instance=reservable)
-			else:
-				# creating a new reservable
-				action = "created"
-				form = LocationReservableForm(request.POST, request.FILES)
-
-			if form.is_valid():
-				if action == "updated":
-					form.save()
-				else:
-					room_fk = request.POST.get('room_fk')
-					room = Room.objects.get(id=room_fk)
-					new_reservable = form.save(commit=False)
-					new_reservable.room = room
-					new_reservable.save()
-				room = Room.objects.get(id=request.POST.get('room_fk'))
-				messages.add_message(request, messages.INFO, "Reservable date range %s for %s." % (action, room.name))
-			else:
-				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
+				room = form.save()
+				messages.add_message(request, messages.INFO, "%s updated." % room.name)
 		else:
-			messages.add_message(request, messages.INFO, "Error: no id was provided.")
+			# new room
+			form = LocationRoomForm(request.POST, request.FILES)
+			if form.is_valid():
+				new_room = form.save(commit=False)
+				new_room.location = location
+				new_room.save()
+				messages.add_message(request, messages.INFO, "%s created." % new_room.name)
+	else:
+		if room_id:
+			# edit an existing room
+			form = LocationRoomForm(instance=Room.objects.get(id=room_id))
+		else:
+			# form for a new room
+			form = LocationRoomForm()
+	return render(request, 'location_edit_room.html', {'location': location, 'form':form, 'room_id': room_id, 'rooms': rooms})
+
+def ignore():
+###
+	if request.method == 'POST':
+		room_id = int(request.POST.get("room_id"))
+		if room_id > 0:
+			# editing an existing item
+			print 'updating an existing room'
+			action = "updated"
+			room = Room.objects.get(id=room_id)
+			# request.POST keys now have a prefix, so don't forget to pass that along here!
+			prefix = "room_%d" % room_id
+			form = LocationRoomForm(request.POST, request.FILES, instance=room, prefix=prefix)
+		else:
+			# new item
+			action = "created"
+			form = LocationRoomForm(request.POST, request.FILES)
+		if form.is_valid():
+			if action == "updated":
+				form.save()
+				messages.add_message(request, messages.INFO, "%s %s." % (room.name, action))
+			else:
+				new_room = form.save(commit=False)
+				new_room.location = location
+				new_room.save()
+				messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
+		else:
+			messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
+	elif request.POST.get("reservable_id"):
+		reservable_id = int(request.POST.get("reservable_id"))
+		if reservable_id > 0:
+			# editing an existing reservable
+			action = "updated"
+			reservable = Reservable.objects.get(id=reservable_id)
+			form = LocationReservableForm(request.POST, request.FILES, instance=reservable)
+		else:
+			# creating a new reservable
+			action = "created"
+			form = LocationReservableForm(request.POST, request.FILES)
+
+		if form.is_valid():
+			if action == "updated":
+				form.save()
+			else:
+				room_fk = request.POST.get('room_fk')
+				room = Room.objects.get(id=room_fk)
+				new_reservable = form.save(commit=False)
+				new_reservable.room = room
+				new_reservable.save()
+			room = Room.objects.get(id=request.POST.get('room_fk'))
+			messages.add_message(request, messages.INFO, "Reservable date range %s for %s." % (action, room.name))
+		else:
+			messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
+	else:
+		messages.add_message(request, messages.INFO, "Error: no id was provided.")
 
 	page = request.POST.get('page')
 	if page == 'user_detail':
@@ -1486,6 +1510,22 @@ def LocationEditRooms(request, location_slug):
 			room_names.append(room.name)
 
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
+
+@house_admin_required
+def LocationEditBed(request, location_slug, bed_id=None):
+	pass
+
+@house_admin_required
+def LocationEditReservable(request, location_slug, reservable_id=None):
+	pass
+
+@house_admin_required
+def LocationManageRooms(request, location_slug):
+	location = get_object_or_404(Location, slug=location_slug)
+	rooms = location.rooms.all().order_by('name')
+	return render(request, 'location_manage_rooms.html', {'rooms': rooms})
+
+
 
 @house_admin_required
 def LocationEditContent(request, location_slug):

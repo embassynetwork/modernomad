@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Bed, Location, LocationMenu, Reservable, Subscription, Subscription
+from core.models import UserProfile, Reservation, EmailTemplate, Room, Bed, Location, LocationMenu, Reservable, Subscription, Subscription, Bed
 from django.contrib.sites.models import Site
 import re
 import base64
@@ -273,6 +273,12 @@ class LocationPageForm(forms.Form):
 	title = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
 	content = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
 
+class LocationBedForm(forms.ModelForm):
+	class Meta:
+		model = Bed
+		exclude = ['archived',]
+
+
 class LocationRoomForm(forms.ModelForm):
 	cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 	class Meta:
@@ -286,27 +292,29 @@ class LocationRoomForm(forms.ModelForm):
 		super(LocationRoomForm, self).__init__(*args, **kwargs)
 		if self.instance.id is not None:
 			self.fields['cropped_image_data'].required = False
+			self.fields['image'].required = False
 		for field_name, field in self.fields.items():
-			if field_name == 'residents':
-				field.widget.attrs['class'] = 'chosen-select'
-			else:
-				field.widget.attrs['class'] = 'form-control'
+			field.widget.attrs['class'] = 'form-control'
 
 	def clean(self):
 		# save any cropped images
-		try:
-			img_data = self.cleaned_data['cropped_image_data']
-			# If none or len 0, means illegal image data
-			if (img_data == False or img_data == None or len(img_data) == 0):
-				# Image data on creation is ensured by the javascript validator.
-				# If we don't have image data here it's because we don't need to 
-				# update the image.  Doing nothing -- JLS
-				print 'there was no image data'
-		except:
-			raise forms.ValidationError('No valid image was provided.')
-		upload_path = "rooms/"
-		relative_file_name = save_cropped_image(img_data, upload_path)
-		self.cleaned_data['image'] = relative_file_name
+		if self.cleaned_data.get('cropped_image_data'):
+			print 'foung cropped image data'
+			try:
+				img_data = self.cleaned_data['cropped_image_data']
+				# If none or len 0, means illegal image data
+				if (img_data == False or img_data == None or len(img_data) == 0):
+					# Image data on creation is ensured by the javascript validator.
+					# If we don't have image data here it's because we don't need to 
+					# update the image.  Doing nothing -- JLS
+					print 'there was no image data'
+			except:
+				raise forms.ValidationError('No valid image was provided.')
+			upload_path = "rooms/"
+			relative_file_name = save_cropped_image(img_data, upload_path)
+			self.cleaned_data['image'] = relative_file_name
+
+
 
 
 class LocationReservableForm(BootstrapModelForm):
@@ -342,7 +350,7 @@ class ReservationForm(forms.ModelForm):
 
 	def beds_as_optgroups(self):
 		rooms = []
-		for room in self.instance.location.get_rooms():
+		for room in self.location.get_rooms():
 			free_beds_this_room = room.get_free_beds_on_dates_or_none(self.instance.arrive, self.instance.depart)
 			if free_beds_this_room:
 				bed_tuples = []

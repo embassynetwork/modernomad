@@ -1,0 +1,24 @@
+<ul class="nav nav-pills nav-stacked">
+	<li id="manage_rooms_help"><a href="{% url 'location_manage_rooms' location.slug %}"><h5>Help</h5></a></li>
+	<li id="manage_rooms_new_room"><a href="{% url 'location_new_room' location.slug %}"><h5>New Room</h5></a></li>
+	<li id="manage_rooms_new_bed"><a href="{% url 'location_new_bed' location.slug %}"><h5>New Bed in Existing Room</h5></a></li>
+	<hr>
+	{% for room in rooms %}
+		<li role="presentation">
+			<a role="button" id="manage_rooms_room_name_{{room.id}}" data-toggle="collapse" data-target="#room{{room.id}}_select" aria-expanded="false">
+				<h5>{{room.name}}</h5>
+			</a>
+		</li>
+
+		<div class="thirtypx-spacer-left room-sub-menu collapse{% if room_id == room.id %} in{% endif %}" id="room{{room.id}}_select">
+			<li id="manage_rooms_edit_room_{{room.id}}" role="presentation"><a href="{% url 'location_edit_room' location.slug room.id %}">Edit Room</a></li>
+			<hr>
+			{% for bed in room.beds.all %}
+				<li id="manage_rooms_edit_bed_{{bed.id}}" role="presentation"><a href="{% url 'location_edit_bed' location.slug bed.id %}">Edit {{ bed.name }}</a></li>
+			{% endfor %}
+		</div>
+
+	</li>
+	{% endfor %}
+</ul>
+
