@@ -19,6 +19,7 @@ urlpatterns = patterns('',
 	url(r'^locations/', include('core.urls.location')),
 	url(r'^events/$', 'gather.views.upcoming_events_all_locations'),
 	url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', 'gather.views.email_preferences', name='gather_email_preferences'),
+	url(r'^api-token-auth/', 'jwt_auth.views.obtain_jwt_token'),
 
 	# various other useful things
 	url(r'^favicon\.ico$', RedirectView.as_view(url='/static/img/favicon.ico', permanent=True)),
