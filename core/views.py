@@ -9,7 +9,7 @@ from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, SubscriptionEmailTemplateForm, ReservationEmailTemplateForm, PaymentForm, AdminSubscriptionForm
-from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm
+from core.forms import LocationSettingsForm, LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm, LocationReservableForm, LocationBedForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -1399,34 +1399,38 @@ def LocationEditPages(request, location_slug):
 
 
 @resident_or_admin_required
-def LocationEditRoom(request, location_slug, room_id=None):
-	'''Edit an existing room or create a new room.'''
-	print 'in location edit room'
+def LocationEditRoom(request, location_slug, room_id):
+	'''Edit an existing room.'''
 	location = get_object_or_404(Location, slug=location_slug)
 	rooms = location.rooms.all().order_by('name')
 
 	if request.method == 'POST':
-		if room_id:
-			form = LocationRoomForm(request.POST, request.FILES, instance = Room.objects.get(id=room_id))
-			if form.is_valid():
-				room = form.save()
-				messages.add_message(request, messages.INFO, "%s updated." % room.name)
-		else:
-			# new room
-			form = LocationRoomForm(request.POST, request.FILES)
-			if form.is_valid():
-				new_room = form.save(commit=False)
-				new_room.location = location
-				new_room.save()
-				messages.add_message(request, messages.INFO, "%s created." % new_room.name)
+		form = LocationRoomForm(request.POST, request.FILES, instance = Room.objects.get(id=room_id))
+		if form.is_valid():
+			room = form.save()
+			messages.add_message(request, messages.INFO, "%s updated." % room.name)
 	else:
-		if room_id:
-			# edit an existing room
-			form = LocationRoomForm(instance=Room.objects.get(id=room_id))
-		else:
-			# form for a new room
-			form = LocationRoomForm()
+		form = LocationRoomForm(instance=Room.objects.get(id=room_id))
 	return render(request, 'location_edit_room.html', {'location': location, 'form':form, 'room_id': room_id, 'rooms': rooms})
+
+@resident_or_admin_required
+def LocationNewRoom(request, location_slug):
+	'''Create a new room.'''
+	location = get_object_or_404(Location, slug=location_slug)
+	rooms = location.rooms.all().order_by('name')
+
+	if request.method == 'POST':
+		form = LocationRoomForm(request.POST, request.FILES)
+		if form.is_valid():
+			new_room = form.save(commit=False)
+			new_room.location = location
+			new_room.save()
+			messages.add_message(request, messages.INFO, "%s created." % new_room.name)
+			return HttpResponseRedirect(reverse('location_edit_room', args=(location.slug, new_room.id,)))
+	else:
+		form = LocationRoomForm()
+	return render(request, 'location_edit_room.html', {'location': location, 'form':form, 'rooms': rooms})
+
 
 def ignore():
 ###
@@ -1510,6 +1514,21 @@ def ignore():
 			room_names.append(room.name)
 
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
+
+@house_admin_required
+def LocationNewBed(request, location_slug, bed_id=None):
+	location = get_object_or_404(Location, slug=location_slug)
+	rooms = location.rooms.all().order_by('name')
+
+	if request.method == 'POST':
+		form = LocationBedForm(request.POST, request.FILES)
+		if form.is_valid():
+			new_bed = form.save()
+			messages.add_message(request, messages.INFO, "%s created." % new_bed.name)
+			return HttpResponseRedirect(reverse('location_edit_bed', args=(location.slug, new_bed.id,)))
+	else:
+		form = LocationBedForm()
+	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'rooms': rooms})
 
 @house_admin_required
 def LocationEditBed(request, location_slug, bed_id=None):

@@ -18,9 +18,9 @@ per_location_patterns = [
 	url(r'^edit/emails/$', 'core.views.LocationEditEmails', name='location_edit_emails'),
 	url(r'^edit/pages/$', 'core.views.LocationEditPages', name='location_edit_pages'),
 	url(r'^edit/rooms/(?P<room_id>\d+)/$', 'core.views.LocationEditRoom', name='location_edit_room'),
+	url(r'^edit/rooms/new$', 'core.views.LocationNewRoom', name='location_new_room'),
 	url(r'^edit/bed/(?P<bed_id>\d+)/$', 'core.views.LocationEditBed', name='location_edit_bed'),
-	url(r'^edit/rooms/new$', 'core.views.LocationEditRoom', name='location_new_room'),
-	url(r'^edit/bed/new$', 'core.views.LocationEditBed', name='location_new_bed'),
+	url(r'^edit/bed/new$', 'core.views.LocationNewBed', name='location_new_bed'),
 	url(r'^edit/rooms/$', 'core.views.LocationManageRooms', name='location_manage_rooms'),
 
 	url(r'^email/current$', 'core.emails.current', name='location_email_current'),
