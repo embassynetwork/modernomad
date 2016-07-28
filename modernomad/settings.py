@@ -130,6 +130,7 @@ INSTALLED_APPS = (
 	'djcelery',
 	'gather',
 	'modernomad',
+	'api',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',

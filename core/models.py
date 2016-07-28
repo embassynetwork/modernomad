@@ -186,6 +186,15 @@ class Location(models.Model):
 		today = timezone.localtime(timezone.now())
 		return Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).filter(location=self).exclude(depart__lt=today).exclude( arrive__gt=today+datetime.timedelta(days=days))
 
+	def people_today(self):
+		guests = self.guests_today()
+		residents = list(self.residents.all())
+		active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
+		members = []
+		for s in active_subscriptions:
+			members.append(s.user)
+		return (guests+residents+members)
+
 	def people_in_coming_month(self):
 		# pull out all reservations in the coming month
 		people = []
