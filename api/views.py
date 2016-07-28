@@ -48,7 +48,11 @@ class CurrentLocationOccupancies(JSONWebTokenAuthMixin, View):
 
 
 	def get(self, request, username):
-		user = User.objects.get(username=username)
+		try:
+			user = User.objects.get(username=username)
+		except:
+			return HttpResponse(status=404)
+
 		location = self.where(user)
 		print 'location'
 		print location
@@ -65,11 +69,16 @@ class CurrentLocationOccupancies(JSONWebTokenAuthMixin, View):
 			occupants = []
 			domain = "https://" + Site.objects.get_current().domain
 			for u in people_today:
+				try:
+					profile_img = domain + u.profile.image.url
+				except:
+					profile_img = None
+
 				user_data = {
 						'id': u.id,
 						'name': "%s %s" % (u.first_name, u.last_name),
 						'username': u.username, 
-						'avatar': domain + u.profile.image.url,
+						'avatar': profile_img,
 						'profile_url': domain + reverse('user_detail', args=(u.username,)),
 					}
 				occupants.append(user_data)
