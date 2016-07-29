@@ -1,0 +1,77 @@
+{% extends "location_edit.html" %}
+{% load staticfiles %}
+
+
+{% block sub-content %}
+
+<div class="row top-spacer">
+
+	<div class="col-md-3">
+		{% include 'snippets/location_manage_rooms_nav.html' %}
+	</div>
+
+	<div class="col-md-6">
+		<form role="form" method="post" class="form bed-form"
+			{% if bed_id %}
+				action="{% url 'location_edit_bed' location.slug bed_id %}"
+			{% else %}
+				action="{% url 'location_new_bed' location.slug %}"
+			{% endif %}
+		>{% csrf_token %}
+		
+
+		Room: {{form.instance.room.name}}
+		{% for hidden in form.hidden_fields %}
+			{{ hidden }}	
+		{% endfor %}
+
+		{% for field in form.visible_fields %}
+			<div class="form-group">
+			{{ field.errors }}
+			{{ field.label_tag }} 
+			<span class="form-help-text">{{ field.help_text}}</span>
+			{{ field }}
+			</div>
+		{% endfor %}
+
+		<button type="submit" class="top-spacer btn btn-default">Submit</button>
+		</form>
+	</div>		
+
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'js/jquery.validate.min.js' %}"></script>
+<script src="{% static 'js/cropper.min.js' %}"></script>
+<script>
+	if ('{{room_id}}' != "None") {
+		$("#manage_rooms_edit_room_{{room_id}}").addClass("active");
+		// relies on the DOM structure of bootstraps dropdown menus, fyi. 
+		$("#manage_rooms_room_name_{{room_id}}").parent().parent().addClass("active");
+	} else {
+		$("#manage_rooms_new_room").addClass("active");
+	}
+
+	jQuery.validator.addMethod("imageExists", function(value, element) {
+		// will be None if there is no instance
+		console.log ('{{form.instance.image}}')
+		return this.optional(element) || ('{{form.instance.image}}' != 'None')
+		}, "Image is required.");
+
+	//form validation
+	$(".bed-form").validate({
+		rules: {
+			name: {
+				required: true
+			},
+			default_rate: {
+				required: true
+			},
+		}
+	})
+
+</script>
+{% endblock %}
+

@@ -9,7 +9,10 @@ def get_overlapping_in_room(Reservation, reservation):
 	''' FYI, we don't care if canceled or pending reservations overlap.'''
 	overlapping = []
 	# get reservations of any status, but exclude the one being queried against. 
-	reservations_this_room = Reservation.objects.filter(room=reservation.bed.room) 
+	try:
+		reservations_this_room = Reservation.objects.filter(room=reservation.bed.room) 
+	except:
+		reservations_this_room = Reservation.objects.filter(room=reservation.room) 
 	before_or_around = reservations_this_room.filter(arrive__lt=reservation.arrive, depart__gt=reservation.arrive).exclude(id=reservation.id).filter(Q(status="confirmed") | Q(status="approved")) 
 	between_or_after = reservations_this_room.filter(arrive__gte=reservation.arrive).filter(arrive__lt=reservation.depart).exclude(id=reservation.id).filter(Q(status="confirmed") | Q(status="approved"))
 	return list(before_or_around) + list(between_or_after)

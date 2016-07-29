@@ -1521,18 +1521,35 @@ def LocationNewBed(request, location_slug, bed_id=None):
 	rooms = location.rooms.all().order_by('name')
 
 	if request.method == 'POST':
-		form = LocationBedForm(request.POST, request.FILES)
+		form = LocationBedForm(request.POST, request.FILES, location=location)
 		if form.is_valid():
 			new_bed = form.save()
 			messages.add_message(request, messages.INFO, "%s created." % new_bed.name)
 			return HttpResponseRedirect(reverse('location_edit_bed', args=(location.slug, new_bed.id,)))
 	else:
-		form = LocationBedForm()
+		form = LocationBedForm(location=location)
 	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'rooms': rooms})
 
-@house_admin_required
-def LocationEditBed(request, location_slug, bed_id=None):
-	pass
+@resident_or_admin_required
+def LocationEditBed(request, location_slug, bed_id):
+	'''Edit an existing bed.'''
+	location = get_object_or_404(Location, slug=location_slug)
+	rooms = location.rooms.all().order_by('name')
+
+	if request.method == 'POST':
+		print 'POST'
+		print request.POST
+		form = LocationBedForm(request.POST, instance = Bed.objects.get(id=bed_id))
+		if form.is_valid():
+			bed = form.save()
+			messages.add_message(request, messages.INFO, "%s in %s updated." % (bed.name, bed.room.name))
+		else:
+			print 'form was not valid'
+			print form.errors
+	else:
+		form = LocationBedForm(instance=Bed.objects.get(id=bed_id), location=location)
+		# don't let admins change the room on an existing bed
+	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'bed_id': bed_id, 'rooms': rooms})
 
 @house_admin_required
 def LocationEditReservable(request, location_slug, reservable_id=None):

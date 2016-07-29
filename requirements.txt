@@ -18,7 +18,7 @@ pytz==2015.7
 requests==2.9.1
 six==1.10.0
 stripe
-
+django-jwt-auth
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command

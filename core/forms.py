@@ -278,6 +278,19 @@ class LocationBedForm(forms.ModelForm):
 		model = Bed
 		exclude = ['archived',]
 
+	def __init__(self, location, *args, **kwargs):
+		super(LocationBedForm, self).__init__(*args, **kwargs)
+		if not location:
+			raise Exception("No location given!")
+		self.location = location
+		instance = getattr(self, 'instance', None)
+		if instance and instance.pk:
+			# editing existing
+			# self.fields['room'].widget.attrs['hidden'] = True
+			pass
+		else:
+			# limit roo
+			self.fields['room'].queryset = self.location.rooms.all()
 
 class LocationRoomForm(forms.ModelForm):
 	cropped_image_data = forms.CharField(widget=forms.HiddenInput())
@@ -299,7 +312,6 @@ class LocationRoomForm(forms.ModelForm):
 	def clean(self):
 		# save any cropped images
 		if self.cleaned_data.get('cropped_image_data'):
-			print 'foung cropped image data'
 			try:
 				img_data = self.cleaned_data['cropped_image_data']
 				# If none or len 0, means illegal image data
@@ -313,8 +325,6 @@ class LocationRoomForm(forms.ModelForm):
 			upload_path = "rooms/"
 			relative_file_name = save_cropped_image(img_data, upload_path)
 			self.cleaned_data['image'] = relative_file_name
-
-
 
 
 class LocationReservableForm(BootstrapModelForm):

@@ -85,8 +85,8 @@ class Location(models.Model):
 	check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
 
 	visibility_options = (
-		('public','Public'), 
-		('members','Members Only'), 
+		('public','Public'),
+		('members','Members Only'),
 		('link', 'Those with the Link' )
 	)
 	visibility = models.CharField(max_length=32, choices=visibility_options, blank=False, null=False, default='link')
@@ -151,7 +151,7 @@ class Location(models.Model):
 			the_day = arrive
 			while the_day < depart:
 				# if there is any day the room isn't available, then the room
-				# isn't free the whole time 
+				# isn't free the whole time
 				if not room.available_on(the_day):
 					available.remove(room)
 					break
@@ -183,7 +183,16 @@ class Location(models.Model):
 	def coming_month_reservations(self, days=30):
 		today = timezone.localtime(timezone.now())
 		return Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).filter(location=self).exclude(depart__lt=today).exclude( arrive__gt=today+datetime.timedelta(days=days))
-	
+
+	def people_today(self):
+		guests = self.guests_today()
+		residents = list(self.residents.all())
+		active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
+		members = []
+		for s in active_subscriptions:
+			members.append(s.user)
+		return (guests+residents+members)
+
 	def people_in_coming_month(self):
 		# pull out all reservations in the coming month
 		people = []
@@ -191,7 +200,7 @@ class Location(models.Model):
 			if r.user not in people:
 				people.append(r.user)
 
-		# add residents to the list of people in the house in the coming month. 
+		# add residents to the list of people in the house in the coming month.
 		for r in self.residents.all():
 			if r not in people:
 				people.append(r)
@@ -208,7 +217,7 @@ class Location(models.Model):
 					people.append(u)
 
 		return people
-	
+
 	def guests_today(self):
 		today = timezone.now()
 		reservations_today = Reservation.objects.filter(location=self).filter(Q(status="confirmed") | Q(status="approved")).exclude(depart__lt=today).exclude(arrive__gt=today)
@@ -322,15 +331,6 @@ class Room(models.Model):
 			if bed.is_free_this_day(this_day):
 				return True
 		return False
-
-		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, bed=self)
-		beds_left = self.beds.count()
-		for r in reservations_on_this_day:
-			beds_left -= 1
-		if beds_left > 0:
-			return True
-		else:
-			return False
 
 	def availability_calendar_html(self, month=None, year=None):
 		if not (month and year):
@@ -480,18 +480,18 @@ class Bill(models.Model):
 
 	def total_owed_in_cents(self):
 		# this is used to pass the information to stripe, which expects an
-		# integer. 
+		# integer.
 		return int(self.total_owed() * 100)
 
 	def subtotal_amount(self):
 		# incorporates any manual discounts or fees into the base amount.
-		# automatic fees are calculated on top of the total value here. 
+		# automatic fees are calculated on top of the total value here.
 		base_fees = self.subtotal_items()
 		return sum([item.amount for item in base_fees])
-		
+
 	def subtotal_items(self):
 		# items that go into the subtotal before calculating taxes and fees.
-		# NOTE: will return an *ordered* list with the base room fee first. 
+		# NOTE: will return an *ordered* list with the base room fee first.
 
 		# the base room fee is not derived from a standing fee, and is not a custom fee
 		base_room_fee = self.line_items.filter(fee__isnull=True).filter(custom=False)
@@ -551,9 +551,9 @@ class Bill(models.Model):
 
 	def is_subscription_bill(self):
 		return hasattr(self, 'subscriptionbill')
-			
+
 class SubscriptionManager(models.Manager):
-		
+
 	def inactive_subscriptions(self, target_date=None):
 		''' inactive subscriptions all have an end date and those end dates are in the past.'''
 		if not target_date:
@@ -593,7 +593,7 @@ class SubscriptionManager(models.Manager):
 		pret_a_manger = []
 		active = Subscription.objects.active_subscriptions().filter(location=location)
 		for s in active:
-			(this_period_start, this_period_end) = s.get_period() 
+			(this_period_start, this_period_end) = s.get_period()
 			if this_period_start == target_date:
 				pret_a_manger.append(s)
 		return pret_a_manger
@@ -603,7 +603,7 @@ class SubscriptionManager(models.Manager):
 class Subscription(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
-	created_by = models.ForeignKey(User, related_name="+", default=User.objects.all().first().pk)
+	created_by = models.ForeignKey(User, related_name="+")
 	location = models.ForeignKey(Location)
 	user = models.ForeignKey(User)
 	price = models.DecimalField(decimal_places=2, max_digits=9)
@@ -612,16 +612,16 @@ class Subscription(models.Model):
 	end_date = models.DateField(blank=True, null=True)
 
 	objects = SubscriptionManager()
-		
+
 	def get_period(self, target_date=None):
 		''' get period associated with a certain date. returns None if the
 		subscription is not active.'''
 		if not target_date:
 			target_date = timezone.now().date()
-		
+
 		if target_date < self.start_date or (self.end_date and target_date > self.end_date):
 			return (None, None)
-		
+
 		if target_date.day == self.start_date.day:
 			period_start = target_date
 		else:
@@ -634,7 +634,7 @@ class Subscription(models.Model):
 				else:
 					month = target_date.month - 1
 			# the period starts on the start_date.day of whatever month we're
-			# operating in. 
+			# operating in.
 			period_start = date(year, month, self.start_date.day)
 
 		logger.debug('')
@@ -643,14 +643,14 @@ class Subscription(models.Model):
 		period_end =  period_start + relativedelta(months=1)
 		if period_end.day == period_start.day:
 			period_end = period_end - timedelta(days=1)
-		
+
 		return (period_start, period_end)
-	
+
 	def get_next_period_start(self, target_date=None):
 		if not target_date:
 			target_date = timezone.now().date()
 			# if the subscrition starts in the future then the next
-			# period is when the subscription starts. 
+			# period is when the subscription starts.
 		if self.start_date > target_date:
 			return self.start_date
 		this_period_start, this_period_end = self.get_period(target_date=target_date)
@@ -661,34 +661,34 @@ class Subscription(models.Model):
 		next_period_start = this_period_end + timedelta(days=1)
 		if self.end_date and next_period_start > self.end_date:
 			return None
-		
+
 		return next_period_start
-	
+
 	def is_period_boundary(self, target_date=None):
 		if not target_date:
 			if not self.end_date:
 				return False
 			# we need to subtract one day from the end date since otherwise it
-			# will be treated as the start of the *next* period. ugh dates. 
+			# will be treated as the start of the *next* period. ugh dates.
 			target_date = self.end_date - timedelta(days=1)
-		
+
 		period = self.get_period(target_date=target_date)
 		return period and period[1] == target_date
-		
+
 	def total_periods(self, target_date=None):
 		''' returns total periods between subscription start date and target
 		date.'''
 		if not target_date:
 			target_date = timezone.now().date()
-		
+
 		if self.start_date > target_date:
 			return 0
 		if self.end_date and self.end_date < target_date:
 			target_date = self.end_date
-		
+
 		rd = relativedelta(target_date + timedelta(days=1), self.start_date)
 		return rd.months + (12 * rd.years)
-		
+
 	def bills_between(self, start, end):
 		d = start
 		bills = []
@@ -700,7 +700,7 @@ class Subscription(models.Model):
 			if not d:
 				break
 		return bills
-	
+
 	def get_bill_for_date(self, date):
 		result = SubscriptionBill.objects.filter(subscription=self, period_start__lte=date, period_end__gte=date)
 		logger.debug('subscription %d: get_bill_for_date %s' % (self.id, date))
@@ -746,27 +746,27 @@ class Subscription(models.Model):
 
 		if not target_date:
 			target_date = timezone.now().date()
-		
+
 		period_start, period_end = self.get_period(target_date)
 		if not period_start:
 			return None
 		logger.debug(' ')
 		logger.debug('in generate_bill for target_date = %s and get_period = (%s, %s)' % (target_date, period_start, period_end))
-		
+
 		# a subscription's last cycle could be a pro rated one. check to see if
 		# the subscription end date is before the period end; if so, change the
-		# period end to be the subscription end date. 
+		# period end to be the subscription end date.
 		prorated = False
 		if self.end_date and self.end_date < period_end:
 			prorated = True
 			original_period_end = period_end
 			period_end = self.end_date
-		
+
 		try:
 			bill = SubscriptionBill.objects.get(period_start=period_start, subscription=self)
 			logger.debug('Found existing bill #%d for period start %s' % (bill.id, period_start.strftime("%B %d %Y")))
 			# if the bill already exists but we're updating it to be prorated,
-			# we need to change the period end also. 
+			# we need to change the period end also.
 			if prorated and bill.period_end != period_end:
 				bill.period_end = period_end
 				bill.save()
@@ -777,7 +777,7 @@ class Subscription(models.Model):
 		except Exception, e:
 			logger.debug("Generating new bill item")
 			bill = SubscriptionBill.objects.create(period_start = period_start, period_end = period_end)
-		
+
 		# Save any custom line items before clearing out the old items
 		logger.debug("working with bill %d (%s)" % (bill.id, bill.period_start.strftime("%B %d %Y")))
 		custom_items = list(bill.line_items.filter(custom=True))
@@ -786,9 +786,9 @@ class Subscription(models.Model):
 				logger.debug("Warning: modifying a bill with payments on it.")
 			for item in bill.line_items.all():
 				item.delete()
-		
+
 		line_items = []
-		# First line item is the subscription itself. 
+		# First line item is the subscription itself.
 		desc = "%s (%s to %s)" % (self.description, period_start, period_end)
 		if prorated:
 			period_days = Decimal((period_end - period_start).days)
@@ -799,7 +799,7 @@ class Subscription(models.Model):
 
 		line_item = BillLineItem(bill=bill, description=desc, amount=price, paid_by_house=False)
 		line_items.append(line_item)
-		
+
 		# Incorporate any custom fees or discounts. As well, track the
 		# effective room charge to be used in calculation of percentage-based
 		# fees
@@ -809,7 +809,7 @@ class Subscription(models.Model):
 			effective_bill_charge += item.amount #may be negative
 			logger.debug(item.amount)
 		logger.debug('effective room charge after discounts: %d' % effective_bill_charge)
-		
+
 		# For now we are going to assume that all fees (of any kind) that are marked as "paid by house"
 		# will be applied to subscriptions as well -- JLS
 		for location_fee in LocationFee.objects.filter(location = self.location, fee__paid_by_house=True):
@@ -818,7 +818,7 @@ class Subscription(models.Model):
 			logger.debug('Fee %s for %d' % (desc, amount))
 			fee_line_item = BillLineItem(bill=bill, description=desc, amount=amount, paid_by_house=True, fee=location_fee.fee)
 			line_items.append(fee_line_item)
-			
+
 		# Save this beautiful bill
 		bill.save()
 		for item in line_items:
@@ -827,18 +827,18 @@ class Subscription(models.Model):
 		self.save()
 
 		return line_items
-	
+
 	def generate_all_bills(self, target_date=None):
 		today = timezone.now().date()
 
 		if not target_date:
 			target_date = self.start_date
-			
+
 		if self.end_date and self.end_date < today:
 			end_date = self.end_date
 		else:
 			end_date = today
-		
+
 		period_start = target_date
 		while period_start and (period_start < today) and (period_start < end_date):
 			self.generate_bill(target_date=period_start)
@@ -847,8 +847,8 @@ class Subscription(models.Model):
 	def last_paid(self, include_partial=False):
 		''' returns the end date of the last period with payments, unless no
 		bills have been paid in which case it returns the start date of the
-		first period. 
-		
+		first period.
+
 		If include_partial=True we will count partially paid bills as "paid"
 		'''
 		bills = self.bills.order_by('period_start').reverse()
@@ -864,12 +864,12 @@ class Subscription(models.Model):
 			if b.is_paid() or (include_partial and b.total_paid() > 0):
 				return paid_until_end
 		return b.period_start
-	
+
 	def delete_unpaid_bills(self):
 		for bill in self.bills.all():
 			if bill.total_paid() == 0:
 				bill.delete()
-	
+
 	def has_unpaid_bills(self):
 		for bill in self.bills.all():
 			if not bill.is_paid():
@@ -882,7 +882,7 @@ class Subscription(models.Model):
 		self.save()
 
 		# if the new end date is not on a period boundary, the final bill needs
-		# to be pro-rated, so we need to regenerate it. 
+		# to be pro-rated, so we need to regenerate it.
 		today = timezone.localtime(timezone.now()).date()
 		period_start, period_end = self.get_period(today)
 
@@ -890,7 +890,7 @@ class Subscription(models.Model):
 		self.delete_unpaid_bills()
 
 		# in general there are SO MANY edge cases about when to regenerate
-		# bills, that we just regenerate them in all cases. 
+		# bills, that we just regenerate them in all cases.
 		self.generate_all_bills()
 
 
@@ -979,7 +979,7 @@ class Reservation(models.Model):
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
 	last_msg = models.DateTimeField(blank=True, null=True)
 	rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
-	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS 
+	uuid = UUIDField(auto=True, blank=True, null=True) #the blank and null = True are artifacts of the migration JKS
 	bill = models.OneToOneField(ReservationBill, null=True, related_name="reservation")
 	suppressed_fees = models.ManyToManyField(Fee, blank=True)
 
@@ -1018,7 +1018,7 @@ class Reservation(models.Model):
 		room_charge = self.base_value()
 		room_line_item = BillLineItem(bill=reservation_bill, description=room_charge_desc, amount=room_charge, paid_by_house=False)
 		line_items.append(room_line_item)
-		
+
 		# Incorporate any custom fees or discounts
 		effective_room_charge = room_charge
 		for item in custom_items:
@@ -1073,7 +1073,7 @@ class Reservation(models.Model):
 					if not item.paid_by_house:
 						amount = Decimal(amount) + Decimal(item.amount)
 				total_owed = amount
-			
+
 			bill_info = {
 				'amount': format(amount, '.2f'),
 				'total_owed': format(total_owed, '.2f'),
@@ -1087,7 +1087,7 @@ class Reservation(models.Model):
 				}
 				bill_info['ordered_line_items'].append(line_item)
 			res_info['bill'] = bill_info
-		
+
 		return res_info
 
 	def __unicode__(self):
@@ -1178,7 +1178,7 @@ class Reservation(models.Model):
 		# cancel this reservation.
 		# JKS note: we *don't* delete the bill here, because if there was a
 		# refund, we want to keep it around to know how much to refund from the
-		# associated fees. 
+		# associated fees.
 		self.status = Reservation.CANCELED
 		self.save()
 
@@ -1221,11 +1221,11 @@ class Reservation(models.Model):
 		elif self.depart > end:
 			nights = (end - self.arrive).days
 		return nights
-	
+
 
 @receiver(pre_save, sender=Reservation)
 def reservation_create_bill(sender, instance, **kwargs):
-	# create a new bill object if the reservation does not already have one. 
+	# create a new bill object if the reservation does not already have one.
 	if not instance.bill:
 		bill = ReservationBill.objects.create()
 		instance.bill = bill
@@ -1252,7 +1252,7 @@ class Payment(models.Model):
 	paid_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
 	transaction_id = models.CharField(max_length=200, null=True, blank=True)
 	last4 = models.IntegerField(null=True, blank=True)
-	
+
 	objects = PaymentManager()
 
 	def __unicode__(self):
@@ -1292,14 +1292,14 @@ class Payment(models.Model):
 
 	def non_house_fees(self):
 		''' returns the absolute amount of the user paid (non-house) fee(s) '''
-		# takes the appropriate bill line items and applies them proportionately to the payment. 
+		# takes the appropriate bill line items and applies them proportionately to the payment.
 		fee_line_items_not_paid_by_house = self.bill.line_items.filter(fee__isnull=False).filter(paid_by_house=False)
 		subtotal = self.bill.subtotal_amount()
 		non_house_fee_on_payment = Decimal(0.0)
 		# this payment may or may not represent the entire bill amount. we need
 		# to know what fraction of the total bill amount it was so that we can
 		# apply the fees proportionately to the payment amount. note: in many
-		# cases, the fraction will be 1. 
+		# cases, the fraction will be 1.
 
 		if self.bill.amount() == 0:
 			fraction = 0
@@ -1317,14 +1317,14 @@ class Payment(models.Model):
 		return non_house_fee_on_payment
 
 	def house_fees(self):
-		# takes the appropriate bill line items and applies them proportionately to the payment. 
+		# takes the appropriate bill line items and applies them proportionately to the payment.
 		fee_line_items_paid_by_house = self.bill.line_items.filter(paid_by_house=True)
 		subtotal = self.bill.subtotal_amount()
 		house_fee_on_payment = Decimal(0.0)
 		# this payment may or may not represent the entire bill amount. we need
 		# to know what fraction of the total bill amount it was so that we can
 		# apply the fees proportionately to the payment amount. note: in many
-		# cases, the fraction will be 1. 
+		# cases, the fraction will be 1.
 		if self.bill.amount() == 0:
 			fraction = 0
 		else:
@@ -1371,7 +1371,7 @@ class UserProfile(models.Model):
 	# currently used to store the stripe customer id but could be used for
 	# other payment platforms in the future
 	customer_id = models.CharField(max_length=200, blank=True, null=True)
-	# JKS TODO between last4 and the customer_id, payment methods should really be their own model. 
+	# JKS TODO between last4 and the customer_id, payment methods should really be their own model.
 	last4 = models.IntegerField(null=True, blank=True, help_text="Last 4 digits of the user's card on file, if any")
 
 
@@ -1434,15 +1434,15 @@ def size_images(sender, instance, **kwargs):
 			default_storage.delete(obj.image_thumb.path)
 
 class EmailTemplate(models.Model):
-	''' Templates for the typical emails sent by administrators of the system. 
-	The from-address is usually set from the location settings, 
+	''' Templates for the typical emails sent by administrators of the system.
+	The from-address is usually set from the location settings,
 	and the recipients are determined by the action and reservation in question. '''
 
 	SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
 	FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
 
 	context_options = (
-		('reservation','Reservation'), 
+		('reservation','Reservation'),
 		('subscription', 'Subscription' )
 	)
 
@@ -1458,7 +1458,7 @@ class EmailTemplate(models.Model):
 
 class LocationEmailTemplate(models.Model):
 	''' Location Template overrides for system generated emails '''
-	
+
 	ADMIN_DAILY = 'admin_daily_update'
 	GUEST_DAILY = 'guest_daily_update'
 	INVOICE = 'invoice'
@@ -1483,7 +1483,7 @@ class LocationEmailTemplate(models.Model):
 	key = models.CharField(max_length=32, choices=KEYS)
 	text_body = models.TextField(verbose_name="The text body of the email")
 	html_body = models.TextField(blank=True, null=True, verbose_name="The html body of the email")
-	
+
 class LocationFee(models.Model):
 	location = models.ForeignKey(Location)
 	fee = models.ForeignKey(Fee)
@@ -1520,7 +1520,7 @@ class LocationMenu(models.Model):
 class LocationFlatPage(models.Model):
 	menu = models.ForeignKey(LocationMenu, related_name = "pages", help_text="Note: If there is only one page in the menu, it will be used as a top level nav item, and the menu name will not be used.")
 	flatpage = models.OneToOneField(FlatPage)
-	
+
 	def slug(self):
 		url = self.flatpage.url
 		u_split = url.split('/')
@@ -1549,7 +1549,7 @@ class UserNote(models.Model):
 	user = models.ForeignKey(User, blank=False, null=False, related_name="user_notes")
 	note = models.TextField(blank=True, null=True)
 
-	def __str__(self): 
+	def __str__(self):
 		return '%s - %s: %s' % (self.created.date(), self.user.username, self.note)
 
 class ReservationNote(models.Model):
@@ -1558,7 +1558,7 @@ class ReservationNote(models.Model):
 	reservation = models.ForeignKey(Reservation, blank=False, null=False, related_name="reservation_notes")
 	note = models.TextField(blank=True, null=True)
 
-	def __str__(self): 
+	def __str__(self):
 		return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
 
 class SubscriptionNote(models.Model):
@@ -1567,7 +1567,7 @@ class SubscriptionNote(models.Model):
 	subscription = models.ForeignKey(Subscription, blank=False, null=False, related_name="communitysubscription_notes")
 	note = models.TextField(blank=True, null=True)
 
-	def __str__(self): 
+	def __str__(self):
 		return '%s - %d: %s' % (self.created.date(), self.subscription.id, self.note)
 
 class BaseImage(models.Model):
@@ -1582,7 +1582,3 @@ class RoomImage(BaseImage):
 
 class LocationImage(BaseImage):
 	location = models.ForeignKey(Location)
-
-
-
-
