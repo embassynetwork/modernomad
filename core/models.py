@@ -187,6 +187,7 @@ class Location(models.Model):
 		today = timezone.localtime(timezone.now())
 		return Reservation.objects.filter(Q(status="confirmed") | Q(status="approved")).filter(location=self).exclude(depart__lt=today).exclude( arrive__gt=today+datetime.timedelta(days=days))
 
+<<<<<<< 8b63769e48e962b492dc1bb6bad2bce3d8a30347
 	def people_today(self):
 		guests = self.guests_today()
 		residents = list(self.residents.all())
@@ -196,6 +197,8 @@ class Location(models.Model):
 			members.append(s.user)
 		return (guests+residents+members)
 
+=======
+>>>>>>> updates to homepage
 	def people_in_coming_month(self):
 		# pull out all reservations in the coming month
 		people = []
