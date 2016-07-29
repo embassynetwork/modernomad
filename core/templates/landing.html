@@ -16,7 +16,7 @@
 
 <div class="row">
 		<div class="col-md-4" id="participate">
-			<p class="easy-reading">{{ location.announcement|safe }}</p> 
+			<p class="easy-reading">{{ location.announcement|safe }}</p>
 		</div>
 
 		<div class="col-md-4" id="participate">
@@ -24,7 +24,7 @@
 		</div>
 
 		<div class="col-md-4" id="participate">
-			<p class="easy-reading">{{ location.front_page_participate|safe }}</p> 
+			<p class="easy-reading">{{ location.front_page_participate|safe }}</p>
 			{% ifappexists gather %}
 			{% endifappexists %}
 		</div>
@@ -33,7 +33,7 @@
 <div class="row" id="community-section">
 	<div class="col-md-12" id="profiles">
 		{% for person in location.people_in_coming_month %}
-		<div class="float-left homepage-user-wrapper">			
+		<div class="float-left homepage-user-wrapper">
 			{% if person.profile.image %}
 				<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
 			{% else %}

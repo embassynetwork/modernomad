@@ -3,35 +3,69 @@
 
 {% block body %}
 
-<div class="jumbotron" id="center">
-	<div class="container">
-		<h1>The Embassy Network</h1>
-		<h2 class="text-muted">
-			<em>People and spaces experimenting with culture and commoning. </em>
+<div class="jumbotron home-page" id="center">
+	<div class="container text-center dept-of-housing">
+		<i class="fa fa-shield fa-5x" aria-hidden="true"></i>
+		<h3 class="light">Embassy Network</h3>
+		<h2>
+			<div class="light">a global</div>
+			<span class="bold">housing layer</span> <span class="script"><em>for</em></span></br>
+			<span class="bold">the new world</span>
 		</h2>
-		<h2 class="text-muted">
-		The Embassy Network is designing new ways to manage resources and govern space together. Our member spaces are embassies of a future that is abundant, collaborative, and transparent. 
-		</h2>
+		<a type="button" name="button" class="btn btn-primary btn-lg" href="/locations">LOCATIONS</a>
+		<h3 class="sub-text">We are building a cooperative movement for those leveraging housing towards greater aims, where those aims are strengthened by operating in community with others, and by connection to other networks.</h3>
 	</div>
 </div>
 
-<div class="container">
+<div class="text-center container">
 
-	<hr class="featurette-divider">
+	<h2 class="featurette-heading">Locations</h1>
 
-	<div class="row featurette">
+
+	{% for location in locations %}
+
+	<a href="{% url 'location_home' location.slug %}" class="col-lg-4 col-md-6">
+		<!-- <div class="row location-preview">
+			<div class="col-sm-4 col-sm-offset-2 location-name">
+				<h2>{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
+			</div> -->
+
+			<div class="location-preview">
+				<img class="location-img-preview" src="{% static 'img/amsterdam.jpeg' %}">
+				<div class="location-name">
+      		<h2 class="bold">{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
+    		</div>
+			</div>
+		<!-- </div> -->
+	</a>
+	<!-- <a href="{% url 'location_home' location.slug %}">
+			<div class="row location-preview">
+
+			<div class="col-sm-4 col-sm-offset-2">
+				<img class="location-img-preview" src="{{location.image.url}}">
+				<img class="location-img-preview" src="{% static 'img/amsterdam.jpeg' %}">
+			</div>
+			<div class="col-sm-4 location-name">
+				<h2>{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
+			</div>
+		</div>
+	</a> -->
+
+	{% endfor %}
+</div>
+
+	<!-- <div class="row featurette">
 		<div class="col-md-5">
 			<img class="featurette-image img-responsive" src="/static/img/network-map-icon.png">
 		</div>
 		<div class="col-md-7">
 			<h2 class="featurette-heading">An Open Collaborative Ecosystem.</h2>
 			<p class="lead">
-			Independent houses come together to share resources and best practices, to work on projects, and create a social network of opportunities and services. 
+			Independent houses come together to share resources and best practices, to work on projects, and create a social network of opportunities and services.
 			</p>
 		</div>
 	</div>
 
-	<hr class="featurette-divider">
 
 	<div class="row featurette">
 		<div class="col-md-7">
@@ -41,7 +75,7 @@
 		<div class="col-md-5">
 			<img class="featurette-image img-responsive" src="/static/img/share-icon.svg">
 		</div>
-	</div>
+	</div> -->
 
 	<hr class="featurette-divider">
 
@@ -49,7 +83,7 @@
 		<div class="col-md-10 col-md-offset-1">
 			<h2 class="featurette-heading">Join a Community of Practitioners and Prototypers.</h2>
 			<p class="lead">
-			Together, we organize events, exchanges, discussions and projects. We start spaces, support new ones, and collaborate with existing ones. Between us, we use these spaces to prototype new approaches to open, collaborative and <em>supra</em>-market resource management, decision making, and financial systems. 
+			Together, we organize events, exchanges, discussions and projects. We start spaces, support new ones, and collaborate with existing ones. Between us, we use these spaces to prototype new approaches to open, collaborative and <em>supra</em>-market resource management, decision making, and financial systems.
 			</p>
 			<h2>Get in Touch</h2>
 			<a href="mailto:hello@embassynetwork.com">
@@ -57,9 +91,6 @@
 			</a>
 		</div>
 	</div>
-
-
-	<hr class="featurette-divider">
 
 </div>
 

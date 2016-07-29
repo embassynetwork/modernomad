@@ -11,11 +11,32 @@
 	src: url(/static/fonts/Clarendon_LT_Light.ttf) format("truetype");
 }
 
+@font-face {font-family: "Pluto";
+    src: url("../fonts/eacab73a831fe74a0bed4696d0833f24.eot");
+    src: url("../fonts/eacab73a831fe74a0bed4696d0833f24.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/eacab73a831fe74a0bed4696d0833f24.woff2") format("woff2"),
+    url("../fonts/eacab73a831fe74a0bed4696d0833f24.woff") format("woff"),
+    url("../fonts/eacab73a831fe74a0bed4696d0833f24.ttf") format("truetype"),
+    url("../fonts/eacab73a831fe74a0bed4696d0833f24.svg#Pluto") format("svg");
+}
+
+@font-face {font-family: "PlutoW01-Light";
+    src: url("../fonts/67157954e595e8bcdbb7886c0047cb01.eot");
+    src: url("../fonts/67157954e595e8bcdbb7886c0047cb01.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/67157954e595e8bcdbb7886c0047cb01.woff2") format("woff2"),
+    url("../fonts/67157954e595e8bcdbb7886c0047cb01.woff") format("woff"),
+    url("../fonts/67157954e595e8bcdbb7886c0047cb01.ttf") format("truetype"),
+    url("../fonts/67157954e595e8bcdbb7886c0047cb01.svg#PlutoW01-Light") format("svg");
+}
+
 body {
-	font-family:'Open Sans', sans-serif;
+	/*font-family:'Open Sans', sans-serif;*/
+	font-family: "PlutoW01-Light", Georgia,serif;
 	-webkit-font-smoothing: antialiased;
-	margin-left: 1em;
-	margin-right: 1em;
+}
+
+body .bold {
+	font-family: "Pluto",Georgia,serif;
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
@@ -85,7 +106,7 @@ span.highlight {
 	color: #FFF;
 	text-decoration: none;
 	background: gray;
-	
+
 }
 .top-nav a:hover {
 	background: green;
@@ -93,6 +114,20 @@ span.highlight {
 
 
 /* ====================== Home Page ================= */
+
+.home-page.jumbotron {
+	/*background-image: url(../img/r1.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+	opacity: 0.5;*/
+	/*background-color: rgb(183, 68, 37);
+	color: white;*/
+}
+
+.home-page.jumbotron h3{
+		margin-top: 0;
+		margin-bottom: 40px;
+}
 
 a {
 	color: #ea6f56;
@@ -102,6 +137,38 @@ a {
 a:hover {
 	color: #ea6f56;
 	text-decoration: none;
+}
+
+.dept-of-housing {
+	font-family: "PlutoW01-Light";
+	font-size: 1em;
+}
+
+.dept-of-housing .light {
+	font-family: "PlutoW01-Light", Georgia,serif;
+	font-size: 1em;
+}
+
+.dept-of-housing .bold {
+	font-family: "Pluto",Georgia,serif;
+	font-size: 2em;
+}
+
+.dept-of-housing .script {
+	font-family: 'Dancing Script', cursive;
+	font-size: 1.5em;
+}
+
+.dept-of-housing .btn {
+	font-family: "Pluto",Georgia,serif;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	background-color: rgb(183, 68, 37);
+	border-color: rgb(183, 68, 37);
+}
+
+.dept-of-housing .sub-text {
+		margin: auto 100px;
 }
 
 #login {
@@ -135,7 +202,7 @@ a:hover {
 }
 
 #house-desc {
-	margin-bottom: 50px;	
+	margin-bottom: 50px;
 }
 
 #house-name-title {
@@ -178,7 +245,7 @@ a:hover {
 #list-signup-input:focus {
 	color:#fff;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
-	
+
 }
 
 #map-marker-h1-color, #map-marker-h1-dark {
@@ -210,7 +277,7 @@ a:hover {
 
 .placeholder {
 	color:rgba(255,255,255,0.3);
-	
+
 }
 
 #rsvp-status-yes, #rsvp-status-no {
@@ -220,7 +287,7 @@ a:hover {
 #eventlist-signup-wrapper .btn {
 	background:#fff;
 	height:70px;
-	
+
 }
 
 @media (min-width: 768px) {
@@ -288,7 +355,7 @@ a:hover {
 	padding: 0;
 	font-size: 24px;
 	color:rgba(0,0,0,0.3);
-	
+
 }
 
 .event .date span {
@@ -451,7 +518,7 @@ a:hover {
 ========================================================== */
 
 #img-name, #big-img-name, .reverse-emph {
-	background: #333;	
+	background: #333;
 }
 
 #img-name-back, #big-img-name-back {
@@ -1002,7 +1069,7 @@ div#spinner
     margin-top: -100px;
     z-index:2;
     overflow: auto;
-} 
+}
 
 .paid-bg-img {
 	background: url(/static/img/watermark-paid.jpg) 50% 50% no-repeat;
@@ -1059,13 +1126,13 @@ div#spinner
 }
 
 #rooms-available-calendar input[type=radio] {
-    display:none; 
+    display:none;
     margin:10px;
 }
 
 .room-info {
 	display: none;
-} 
+}
 
 .room-avail-descr {
 	margin: 15px 5px 15px 5px;
@@ -1236,7 +1303,7 @@ div#spinner
 
 .room-row {
 	margin-top: 0px;
-	margin-bottom: 40px;	
+	margin-bottom: 40px;
 }
 
 .user-event-row {
@@ -1375,7 +1442,8 @@ h3.no-top-margin {
 #nav-network {
 	padding-right: 20px;
 	margin-bottom: 1px;
-	font-family: 'Clarendon Light', serif;
+	/*font-family: 'Clarendon Light', serif;*/
+	font-family: "PlutoW01-Light", Georgia,serif;
 }
 
 #nav-location {
@@ -1383,7 +1451,8 @@ h3.no-top-margin {
 	border-color: transparent;
 	margin-bottom: 0px;
 	margin-top: 20px;
-	font-family: 'Clarendon Light', serif;
+	/*font-family: 'Clarendon Light', serif;*/
+	font-family: "PlutoW01-Light", Georgia,serif;
 }
 
 table tr.row-even td { background: #eee; }
@@ -1534,7 +1603,7 @@ table tr.row-even td { background: #eee; }
 .index-loc-info span {
 	display: inline-block;
 	vertical-align: middle;
-	line-height: normal;    
+	line-height: normal;
 }
 
 .index-intro-text strong, {
@@ -1562,7 +1631,7 @@ p.lead strong {
 #index-check-availability div {
 	display: inline-block;
 	vertical-align: middle;
-	line-height: normal;    
+	line-height: normal;
 }
 
 #index-check-availability form {
@@ -1584,7 +1653,7 @@ p.lead strong {
 }
 
 /* Small devices (tablets, 768px and up) */
-@media (max-width: @screen-sm-max) { 
+@media (max-width: @screen-sm-max) {
 	#member-collage {
 		width: 300px;
 		height: 300px;
@@ -1618,18 +1687,31 @@ p.lead strong {
 	color: #a94442 !important;
 }
 
-.location-img-preview {
-	width: 850px;
-	height: 225px;
+.location-preview h2, .location-preview h2 em {
+	/*width: 400px;
+	height: 225px;*/
+	color: white !important;
 }
 
-.location-preview { 
+.location-preview {
 	margin-top: 50px;
+	position: relative;
 }
-	
-.location-preview .col-md-3 {
+
+.location-preview .col-md-4 {
 	height: 225px;
 	overflow: hidden;
+	padding: 0;
+}
+
+.location-name {
+	position:absolute;
+	top:20px;
+	padding: 20px;
+}
+
+.location-name h2 {
+	padding: 20px;
 }
 
 .socialmedia-icon {
@@ -1662,25 +1744,25 @@ p.lead strong {
 /*Mobile Styles*/
 
 @media (max-width: 450px) {
-	
+
 	.navbar-brand {
 		float: none;
 		height: auto;
 		margin-bottom: 10px;
 		border-bottom: 1px solid #e2e2e2;
-		
-		
+
+
 	}
-	
+
 	#index-header {
 		padding-right: 0;
-		background-image: none; 
+		background-image: none;
 	}
-	
+
 	.featurette-divider {
 		margin: 30px 0;
 	}
-	
+
 }
 
 .registration-form {
@@ -1739,7 +1821,7 @@ p.lead strong {
 
 #notes-link:hover {
 	cursor: pointer;
-	color: #ea6f56; 
+	color: #ea6f56;
 }
 
 .note-pre {
@@ -1818,7 +1900,7 @@ label.light {
 }
 
 input.disabled {
-	color: grey; 
+	color: grey;
 	background-color: #F0F0F0;
 }
 
@@ -1850,8 +1932,8 @@ input.disabled {
 	height: 100%;
 }
 
-.hidden { 
-	display: none; 
+.hidden {
+	display: none;
 }
 
 .clickable:hover {

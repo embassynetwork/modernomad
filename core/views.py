@@ -941,9 +941,9 @@ def ReservationDetail(request, reservation_id, location_slug):
 	# make sure the user is either an admin, resident or the reservation holder
 	# (we can't use the decorator here because the user themselves also has to
 	# be able to see the page).
-	if ((request.user == reservation.user) or 
-			(request.user in location.house_admins.all()) or 
-			(request.user in location.readonly_admins.all()) or 
+	if ((request.user == reservation.user) or
+			(request.user in location.house_admins.all()) or
+			(request.user in location.readonly_admins.all()) or
 			(request.user in location.residents.all())):
 		if reservation.arrive >= datetime.date.today():
 			past = False
