@@ -63,6 +63,7 @@ class Location(models.Model):
 	latitude = models.FloatField()
 	longitude = models.FloatField()
 	image = models.ImageField(upload_to=location_img_upload_to, help_text="Requires an image with proportions 800px wide x 225px high")
+	profile_image = models.ImageField(upload_to=location_img_upload_to, help_text="A shiny high profile image for the location", null=True, blank=True)
 	stay_page = models.TextField(default="This is the page which has some descriptive text at the top (this text), and then lists the available rooms. HTML is supported.")
 	front_page_stay = models.TextField(default="This is the middle of three sections underneath the main landing page text to entice people to stay with you, and then links to the stay page (above). HTML is supported.")
 	front_page_participate = models.TextField(default="This is far right of three sections underneath the main landing page text to tell people how to get involved with your community. There is a link to the Events page underneath. HTML is supported. ")
