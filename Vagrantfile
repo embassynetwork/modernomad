@@ -57,11 +57,11 @@ $rootScript = <<SCRIPT
   fi
 
   cd /tmp
-  curl -LO https://raw.github.com/pypa/pip/master/contrib/get-pip.py
-  python get-pip.py
-  pip --version
-  pip install virtualenv
-  pip install virtualenvwrapper  
+  curl -LO https://bootstrap.pypa.io/get-pip.py
+  sudo python get-pip.py
+  sudo pip --version
+  sudo pip install virtualenv
+  sudo pip install virtualenvwrapper  
 SCRIPT
 
 $userScript = <<SCRIPT
