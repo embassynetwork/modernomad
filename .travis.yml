@@ -6,3 +6,11 @@ services:
 install: "pip install -r requirements.txt"
 before_script: "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
 script: ./manage.py test
+notifications:
+  slack: embassy-network:joFu5a311yAWnrF7DQGKtl02
+  email:
+    recipients:
+      - craig@enspiral.com
+      - jessy@jessykate.com
+    on_success: change
+    on_failure: always
