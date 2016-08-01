@@ -13,7 +13,7 @@ ALLOWED_HOSTS=['domain.com']
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'USER':'craig',
+        'USER':'postgres',
         'NAME':'modernomadb'
 }
 }
