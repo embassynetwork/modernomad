@@ -2273,6 +2273,8 @@ def payments(request, location_slug, year, month):
 	)
 
 	summary_totals['total_transfer'] = summary_totals['res_total_transfer'] + summary_totals['sub_total_transfer']
+	summary_totals['gross_reservations'] = summary_totals['gross_rent_transient'] + summary_totals['net_rent_resident']
+	summary_totals['gross_subscriptions'] = summary_totals['taxed_subscription_gross'] + summary_totals['untaxed_subscription_net']
 
 	t1 = time.time()
 	dt = t1-t0
