@@ -1,0 +1,18 @@
+language: python
+python:
+  - "2.7"
+services:
+  - postgresql
+install: "pip install -r requirements.txt"
+before_script: "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
+script: ./manage.py test
+notifications:
+  slack:
+    rooms:
+      - embassy-network:joFu5a311yAWnrF7DQGKtl02#modernomad-notify
+  email:
+    recipients:
+      - craig@enspiral.com
+      - jessy@jessykate.com
+    on_success: change
+    on_failure: always
