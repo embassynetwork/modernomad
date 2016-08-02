@@ -1,0 +1,1 @@
+./manage.py dumpdata --indent 4 --all -e contenttypes > modernomad/fixtures/initial_modernomad_data.json
