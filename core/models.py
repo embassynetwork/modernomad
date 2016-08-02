@@ -347,7 +347,7 @@ class BookableResource(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 	name = models.CharField(max_length=200)
-	description = models.TextField(blank=True, null=True, help_text="Optional. Will override (or supplement?) the parent room's description")
+	description = models.TextField(blank=True, null=True, help_text="Optional supplemental description.")
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
 	archived = models.BooleanField(default=False, verbose_name="Is the resource out of service indefinitely?")
 	

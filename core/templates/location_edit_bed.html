@@ -10,31 +10,38 @@
 		{% include 'snippets/location_manage_rooms_nav.html' %}
 	</div>
 
-	<div class="col-md-6">
-		<form role="form" method="post" class="form bed-form"
-			{% if bed_id %}
-				action="{% url 'location_edit_bed' location.slug bed_id %}"
-			{% else %}
-				action="{% url 'location_new_bed' location.slug %}"
+	<div class="col-md-4">
+		<form role="form" 
+			method="post" 
+			class="form bed-form" 
+			{% if bed_id %} 
+				action="{% url 'location_edit_bed' location.slug bed_id %}" 
+			{% else %} 
+				action="{% url 'location_new_bed' location.slug %}" 
 			{% endif %}
-		>{% csrf_token %}
-		
+		>
+			
+			{% csrf_token %}
 
-		Room: {{form.instance.room.name}}
-		{% for hidden in form.hidden_fields %}
-			{{ hidden }}	
-		{% endfor %}
+			{% if form.instance.pk %}
+				<h4 class="row-spacer">Editing {{ form.instance.name }} in {{ form.instance.room|title }} </h4>
+			{% else %}
+				<h4 class="row-spacer">New Bed</h4>
+			{% endif %}
 
-		{% for field in form.visible_fields %}
-			<div class="form-group">
-			{{ field.errors }}
-			{{ field.label_tag }} 
-			<span class="form-help-text">{{ field.help_text}}</span>
-			{{ field }}
-			</div>
-		{% endfor %}
+			{% for field in form.visible_fields %}
+				<div class="form-group">
+					{{ field.errors }}
+					{{ field.label_tag }} 
+					<span class="form-help-text">{{ field.help_text}}</span>
+					{{ field }}
+				</div>
+			{% endfor %}
 
-		<button type="submit" class="top-spacer btn btn-default">Submit</button>
+			{% for field in form.hidden_fields %}
+				{{ field }}
+			{% endfor %}
+			<button type="submit" class="top-spacer btn btn-default">Submit</button>
 		</form>
 	</div>		
 
@@ -54,12 +61,6 @@
 		$("#manage_rooms_new_room").addClass("active");
 	}
 
-	jQuery.validator.addMethod("imageExists", function(value, element) {
-		// will be None if there is no instance
-		console.log ('{{form.instance.image}}')
-		return this.optional(element) || ('{{form.instance.image}}' != 'None')
-		}, "Image is required.");
-
 	//form validation
 	$(".bed-form").validate({
 		rules: {
@@ -68,9 +69,19 @@
 			},
 			default_rate: {
 				required: true
-			},
+			}
 		}
 	})
+
+	$("#id_room").change(function(el) {
+		console.log("room was changed");
+		default_rates = {{ default_rates|safe }};
+		console.log(default_rates);
+		room_id = $(this).val();
+		rate = default_rates[room_id]
+		$("#id_default_rate").val(rate);
+
+	});
 
 </script>
 {% endblock %}

@@ -276,9 +276,10 @@ class LocationPageForm(forms.Form):
 class LocationBedForm(forms.ModelForm):
 	class Meta:
 		model = Bed
-		exclude = ['archived',]
+		exclude = ['archived', 'created', 'updated']
 
-	def __init__(self, location, *args, **kwargs):
+	def __init__(self, *args, **kwargs):
+		location = kwargs.pop('location', None)
 		super(LocationBedForm, self).__init__(*args, **kwargs)
 		if not location:
 			raise Exception("No location given!")
@@ -286,11 +287,12 @@ class LocationBedForm(forms.ModelForm):
 		instance = getattr(self, 'instance', None)
 		if instance and instance.pk:
 			# editing existing
-			# self.fields['room'].widget.attrs['hidden'] = True
-			pass
+			self.fields['room'].widget = forms.HiddenInput()
 		else:
-			# limit roo
+			# limit room selection to those at this location
 			self.fields['room'].queryset = self.location.rooms.all()
+		for field_name, field in self.fields.items():
+			field.widget.attrs['class'] = 'form-control'
 
 class LocationRoomForm(forms.ModelForm):
 	cropped_image_data = forms.CharField(widget=forms.HiddenInput())

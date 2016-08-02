@@ -1406,6 +1406,8 @@ def LocationEditRoom(request, location_slug, room_id):
 
 	if request.method == 'POST':
 		form = LocationRoomForm(request.POST, request.FILES, instance = Room.objects.get(id=room_id))
+		print 'form is bound?'
+		print form.is_bound
 		if form.is_valid():
 			room = form.save()
 			messages.add_message(request, messages.INFO, "%s updated." % room.name)
@@ -1516,7 +1518,7 @@ def ignore():
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
 
 @house_admin_required
-def LocationNewBed(request, location_slug, bed_id=None):
+def LocationNewBed(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 	rooms = location.rooms.all().order_by('name')
 
@@ -1528,7 +1530,11 @@ def LocationNewBed(request, location_slug, bed_id=None):
 			return HttpResponseRedirect(reverse('location_edit_bed', args=(location.slug, new_bed.id,)))
 	else:
 		form = LocationBedForm(location=location)
-	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'rooms': rooms})
+	default_rates = {}
+	for room in rooms:
+		default_rates[room.id] = float(room.default_rate)
+
+	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'rooms': rooms, 'default_rates': default_rates})
 
 @resident_or_admin_required
 def LocationEditBed(request, location_slug, bed_id):
@@ -1537,18 +1543,14 @@ def LocationEditBed(request, location_slug, bed_id):
 	rooms = location.rooms.all().order_by('name')
 
 	if request.method == 'POST':
-		print 'POST'
-		print request.POST
-		form = LocationBedForm(request.POST, instance = Bed.objects.get(id=bed_id))
+		form = LocationBedForm(request.POST, instance = Bed.objects.get(id=bed_id), location=location)
 		if form.is_valid():
 			bed = form.save()
 			messages.add_message(request, messages.INFO, "%s in %s updated." % (bed.name, bed.room.name))
 		else:
-			print 'form was not valid'
 			print form.errors
 	else:
 		form = LocationBedForm(instance=Bed.objects.get(id=bed_id), location=location)
-		# don't let admins change the room on an existing bed
 	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'bed_id': bed_id, 'rooms': rooms})
 
 @house_admin_required

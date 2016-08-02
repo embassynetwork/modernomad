@@ -19,6 +19,12 @@
 			{% endif %}
 		>{% csrf_token %}
 		
+		{% if form.instance.pk %}
+			<h4 class="row-spacer">Editing {{ form.instance.name|title }} </h4>
+		{% else %}
+			<h4 class="row-spacer">New Room</h4>
+		{% endif %}
+
 		{% for field in form %}
 
 			{% if not field.is_hidden %} 
