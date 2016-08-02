@@ -43,6 +43,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import csv
 from django.http import Http404
+from django.forms import inlineformset_factory, modelformset_factory
 
 logger = logging.getLogger(__name__)
 
@@ -1433,90 +1434,6 @@ def LocationNewRoom(request, location_slug):
 		form = LocationRoomForm()
 	return render(request, 'location_edit_room.html', {'location': location, 'form':form, 'rooms': rooms})
 
-
-def ignore():
-###
-	if request.method == 'POST':
-		room_id = int(request.POST.get("room_id"))
-		if room_id > 0:
-			# editing an existing item
-			print 'updating an existing room'
-			action = "updated"
-			room = Room.objects.get(id=room_id)
-			# request.POST keys now have a prefix, so don't forget to pass that along here!
-			prefix = "room_%d" % room_id
-			form = LocationRoomForm(request.POST, request.FILES, instance=room, prefix=prefix)
-		else:
-			# new item
-			action = "created"
-			form = LocationRoomForm(request.POST, request.FILES)
-		if form.is_valid():
-			if action == "updated":
-				form.save()
-				messages.add_message(request, messages.INFO, "%s %s." % (room.name, action))
-			else:
-				new_room = form.save(commit=False)
-				new_room.location = location
-				new_room.save()
-				messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
-		else:
-			messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
-	elif request.POST.get("reservable_id"):
-		reservable_id = int(request.POST.get("reservable_id"))
-		if reservable_id > 0:
-			# editing an existing reservable
-			action = "updated"
-			reservable = Reservable.objects.get(id=reservable_id)
-			form = LocationReservableForm(request.POST, request.FILES, instance=reservable)
-		else:
-			# creating a new reservable
-			action = "created"
-			form = LocationReservableForm(request.POST, request.FILES)
-
-		if form.is_valid():
-			if action == "updated":
-				form.save()
-			else:
-				room_fk = request.POST.get('room_fk')
-				room = Room.objects.get(id=room_fk)
-				new_reservable = form.save(commit=False)
-				new_reservable.room = room
-				new_reservable.save()
-			room = Room.objects.get(id=request.POST.get('room_fk'))
-			messages.add_message(request, messages.INFO, "Reservable date range %s for %s." % (action, room.name))
-		else:
-			messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
-	else:
-		messages.add_message(request, messages.INFO, "Error: no id was provided.")
-
-	page = request.POST.get('page')
-	if page == 'user_detail':
-		print 'redirecting to user page'
-		return HttpResponseRedirect(reverse('user_detail', args=(request.POST.get('username'), )))
-	else:
-		room_forms = []
-		room_names = []
-		room_names.append("New Room")
-		# the empty form
-		room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room", location.slug, False))
-		# forms for the existing rooms
-		for room in location_rooms:
-			room_reservables = room.reservables.all().order_by('start_date')
-			reservables_forms = []
-			for reservable in room_reservables:
-				id_str = "reservable-%d-%%s" % reservable.id
-				reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
-			id_str = "room-%d-new-reservable-%%s" % room.id
-			reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
-			if room.image:
-				has_image = True
-			else:
-				has_image = False
-			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, room.location.slug, has_image))
-			room_names.append(room.name)
-
-		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms})
-
 @house_admin_required
 def LocationNewBed(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
@@ -1526,7 +1443,7 @@ def LocationNewBed(request, location_slug):
 		form = LocationBedForm(request.POST, request.FILES, location=location)
 		if form.is_valid():
 			new_bed = form.save()
-			messages.add_message(request, messages.INFO, "%s created." % new_bed.name)
+			messages.add_message(request, messages.INFO, "%s in %s created. If you would like to make this room available for bookings, please add a reservable date range below." % (new_bed.name, new_bed.room.name))
 			return HttpResponseRedirect(reverse('location_edit_bed', args=(location.slug, new_bed.id,)))
 	else:
 		form = LocationBedForm(location=location)
@@ -1541,27 +1458,42 @@ def LocationEditBed(request, location_slug, bed_id):
 	'''Edit an existing bed.'''
 	location = get_object_or_404(Location, slug=location_slug)
 	rooms = location.rooms.all().order_by('name')
+	bed = Bed.objects.get(id=bed_id)
 
 	if request.method == 'POST':
-		form = LocationBedForm(request.POST, instance = Bed.objects.get(id=bed_id), location=location)
+		form = LocationBedForm(request.POST, instance=bed, location=location)
 		if form.is_valid():
 			bed = form.save()
 			messages.add_message(request, messages.INFO, "%s in %s updated." % (bed.name, bed.room.name))
 		else:
 			print form.errors
 	else:
-		form = LocationBedForm(instance=Bed.objects.get(id=bed_id), location=location)
-	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'bed_id': bed_id, 'rooms': rooms})
+		form = LocationBedForm(instance=bed, location=location)
+	ReservableFormSet = inlineformset_factory(Bed, Reservable, extra=1, form=LocationReservableForm, fields=('start_date', 'end_date'))
+	formset = ReservableFormSet(instance=bed)
+	print formset
+	return render(request, 'location_edit_bed.html', {'location': location, 'form':form, 'bed_id': bed_id, 'rooms': rooms, 'formset': formset})
 
 @house_admin_required
-def LocationEditReservable(request, location_slug, reservable_id=None):
-	pass
+def LocationEditReservable(request, location_slug, bed_id):
+	''' Processes the formset if changed were submitted, redirect to bed edit form'''
+	print 'in edit reservable'
+	bed = Bed.objects.get(pk=bed_id)
+	if request.method == "POST":
+		ReservableFormSet = inlineformset_factory(Bed, Reservable, fields=('start_date', 'end_date'))
+		formset = ReservableFormSet(request.POST, request.FILES, instance=bed)
+		if formset.is_valid():
+			formset.save()
+			messages.add_message(request, messages.INFO, "Availability for %s in %s was updated" % (bed.name, bed.room.name))
+		else: 
+			messages.add_message(request, messages.ERROR, formset.errors)
+	return HttpResponseRedirect(reverse('location_edit_bed', args=(location_slug, bed_id)))
 
 @house_admin_required
 def LocationManageRooms(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 	rooms = location.rooms.all().order_by('name')
-	return render(request, 'location_manage_rooms.html', {'rooms': rooms})
+	return render(request, 'location_manage_rooms.html', {'rooms': rooms, 'page':'rooms' })
 
 
 

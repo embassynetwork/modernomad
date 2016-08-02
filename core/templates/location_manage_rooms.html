@@ -5,28 +5,17 @@
 
 <div class="row top-spacer">
 
- {% include 'snippets/location_manage_rooms_nav.html' %}
+	<div class="col-md-3">
+		{% include 'snippets/location_manage_rooms_nav.html' %}
+	</div>
 
 	<div class="col-md-6">
 
 		{% block formarea %}
 
-			<h3>Editing Rooms</h3>
+			<h3>Editing Rooms and Beds</h3>
 			<p>
-			<ul>
-				<li>Room descriptions do not support HTML. 
-				<li>If you mark a room as a hostel/shared accommodation, then it will show up with a shared room flag on the stay page.
-				<li>If you mark a room as having multiple beds, reservations will be available per bed, rather than per-room. This is true <em>regardless</em> of whether the shared room flag is checked (this behaviour is slightly confusing and should be improved in the future).
-				<li>All rooms require a photo. 
-			</ul>
-			</p>
-			<h3>Editing Reservable Date Ranges</h3>
-			<p>
-			<ul>
-				<li>Date ranges mark when a room is reservable. For a permanent guest room, leave an open ended date range (no end date). 
-				<li>Be careful with dates! The start date that you enter is the <em>first</em> night that the room is reservable, and the end date entered is the <em>last </em> night that it is reservable. 
-				<li>A room can have any number of date ranges for which it is reservable. 
-			</ul>
+			Select a room or bed on the right to get started.
 			</p>
 
 		{% endblock %}

@@ -79,7 +79,6 @@
 <script src="{% static 'js/waypoints.js' %}"></script>
 <script src="{% static 'js/waypoints-sticky.js' %}"></script>
 <script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
 <script>
 </script>
 
@@ -143,24 +142,6 @@
 			$(this).change();
         }
 	});
-
-	/******************** unlikely to use this but just in case... 
-	$(".a_day").click(function(event) {
-		console.log(event.target);
-		// should we make this the arrive or depart date?
-		e = event;
-		new_date = event.target.val();
-		arrive = Date($("#arrive_date").val());
-		depart = Date($("#depart_date").val());
-		console.log(arrive);
-		console.log(depart);
-		console.log(new_date);
-
-		if ( (!arrive && !depart) || (new_date < depart) ) {
-			console.log("meh");
-		}
-	})
-	***************************** */
 
 	$("#arrive_date, #depart_date").change(function(event) {
 		// Get arrive and depart dates, update value. 

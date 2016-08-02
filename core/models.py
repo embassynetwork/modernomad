@@ -1542,7 +1542,7 @@ class Reservable(models.Model):
 	room = models.ForeignKey(Room, related_name="reservables", blank=True, null=True)
 	bed = models.ForeignKey(Bed, related_name="reservables", blank=True, null=True)
 	start_date = models.DateField()
-	end_date = models.DateField(null=True, blank=True, help_text="Leave this blank for a guest room or room with open ended reservability.")
+	end_date = models.DateField(null=True, blank=True, help_text="Leave this blank for a room with open ended availability.")
 
 class UserNote(models.Model):
 	created = models.DateTimeField(auto_now_add=True)

@@ -19,9 +19,7 @@
 			{% else %} 
 				action="{% url 'location_new_bed' location.slug %}" 
 			{% endif %}
-		>
-			
-			{% csrf_token %}
+		> {% csrf_token %}
 
 			{% if form.instance.pk %}
 				<h4 class="row-spacer">Editing {{ form.instance.name }} in {{ form.instance.room|title }} </h4>
@@ -34,15 +32,38 @@
 					{{ field.errors }}
 					{{ field.label_tag }} 
 					<span class="form-help-text">{{ field.help_text}}</span>
+					{% if field.name == 'default_rate' %}
+						<div class="input-group">
+						<div class="input-group-addon">$</div>
+					{% endif %}
 					{{ field }}
+					{% if field.name == 'default_rate' %}
+						</div>
+					{% endif %}
 				</div>
 			{% endfor %}
+			{% if form.instance.pk %}
+				<div><em>Default rate for {{form.instance.room.name}} is ${{form.instance.room.default_rate}}</em></div>
+			{% endif %}
 
 			{% for field in form.hidden_fields %}
 				{{ field }}
 			{% endfor %}
 			<button type="submit" class="top-spacer btn btn-default">Submit</button>
 		</form>
+		<hr>
+
+		<h4>Availability Ranges</h4>
+		<form role="form" id="reservables-formset" method="post" class="form form-inline" action="{% url 'location_edit_reservable' location.slug bed_id %}" > {% csrf_token %}
+			{{ formset.management_form }}
+			{% for reservable_form in formset %}
+				{% for field in reservable_form %}
+					{{ field }}
+				{% endfor %}
+			{% endfor %}
+			<button type="submit" class="btn btn-default top-spacer">Update Availability <i class="fa fa-check fa-2x" aria-hidden="true"></i></button>
+		</form>
+
 	</div>		
 
 </div>
@@ -67,21 +88,45 @@
 			name: {
 				required: true
 			},
+			room: {
+				required: true
+			},
 			default_rate: {
 				required: true
 			}
 		}
-	})
-
-	$("#id_room").change(function(el) {
-		console.log("room was changed");
-		default_rates = {{ default_rates|safe }};
-		console.log(default_rates);
-		room_id = $(this).val();
-		rate = default_rates[room_id]
-		$("#id_default_rate").val(rate);
-
 	});
+
+	{% if not form.instance.pk %}
+		$("#id_room").change(function(el) {
+			console.log("room was changed");
+			default_rates = {{ default_rates|safe }};
+			console.log(default_rates);
+			room_id = $(this).val();
+			rate = default_rates[room_id]
+			$("#id_default_rate").val(rate);
+		});
+	{% endif %}
+
+	// datepicker
+	$("[id$=start_date], [id$=end_date]").datepicker({
+		minDate: 0,
+		onSelect: function( selectedDate ) {
+			start_id = this.id
+			if(start_id.endsWith('start_date')) {
+				startDate = $('#'+ start_id).datepicker("getDate");
+				console.log(startDate);
+	          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+				endDate = start_id.replace("start", "end")
+	          	$('#'+endDate).datepicker("option","minDate",rMin);
+			}
+			// we need to explicitly fire the change event on the underlying
+			// input or it won't fire on its own!
+			$(this).change();
+        }
+	});
+
+
 
 </script>
 {% endblock %}

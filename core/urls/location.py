@@ -22,6 +22,7 @@ per_location_patterns = [
 	url(r'^edit/bed/(?P<bed_id>\d+)/$', 'core.views.LocationEditBed', name='location_edit_bed'),
 	url(r'^edit/bed/new$', 'core.views.LocationNewBed', name='location_new_bed'),
 	url(r'^edit/rooms/$', 'core.views.LocationManageRooms', name='location_manage_rooms'),
+	url(r'^edit/reservable/bed/(?P<bed_id>\d+)/$', 'core.views.LocationEditReservable', name='location_edit_reservable'),
 
 	url(r'^email/current$', 'core.emails.current', name='location_email_current'),
 	url(r'^email/stay$', 'core.emails.stay', name='location_email_stay'),

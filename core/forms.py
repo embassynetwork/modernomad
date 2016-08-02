@@ -334,8 +334,8 @@ class LocationReservableForm(BootstrapModelForm):
 		model = Reservable
 		exclude = ['room',]
 		widgets = { 
-			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
-			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
+			'start_date': forms.DateInput(attrs={'class':'datepicker', 'placeholder': 'start date'}),
+			'end_date': forms.DateInput(attrs={'class':'datepicker', 'placeholder': 'end date'}),
 		}
 	
 	def clean(self):

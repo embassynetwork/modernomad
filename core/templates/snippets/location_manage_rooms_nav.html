@@ -4,6 +4,7 @@
 	<li id="manage_rooms_new_bed"><a href="{% url 'location_new_bed' location.slug %}"><h5>New Bed in Existing Room</h5></a></li>
 	<hr>
 	{% for room in rooms %}
+	<div class="col-md-8 bottom-spacer">
 		<li role="presentation">
 			<a role="button" id="manage_rooms_room_name_{{room.id}}" data-toggle="collapse" data-target="#room{{room.id}}_select" aria-expanded="false">
 				<h5>{{room.name}}</h5>
@@ -19,6 +20,6 @@
 		</div>
 
 	</li>
+	</div>
 	{% endfor %}
 </ul>
-
