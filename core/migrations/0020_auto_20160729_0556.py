@@ -13,17 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='BaseImage',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('original', models.ImageField(null=True, upload_to=core.models.room_img_upload_to, blank=True)),
-                ('large', models.ImageField(null=True, upload_to=core.models.room_img_upload_to, blank=True)),
-                ('med', models.ImageField(null=True, upload_to=core.models.room_img_upload_to, blank=True)),
-                ('thumb', models.ImageField(null=True, upload_to=core.models.room_img_upload_to, blank=True)),
-                ('caption', models.CharField(max_length=200, null=True, blank=True)),
-            ],
-        ),
         migrations.AddField(
             model_name='location',
             name='profile_image',
@@ -33,21 +22,5 @@ class Migration(migrations.Migration):
             model_name='subscription',
             name='created_by',
             field=models.ForeignKey(related_name='+', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.CreateModel(
-            name='LocationImage',
-            fields=[
-                ('baseimage_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='core.BaseImage')),
-                ('location', models.ForeignKey(to='core.Location')),
-            ],
-            bases=('core.baseimage',),
-        ),
-        migrations.CreateModel(
-            name='RoomImage',
-            fields=[
-                ('baseimage_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='core.BaseImage')),
-                ('room', models.ForeignKey(to='core.Room')),
-            ],
-            bases=('core.baseimage',),
         ),
     ]

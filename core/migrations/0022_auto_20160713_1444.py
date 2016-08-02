@@ -62,25 +62,18 @@ def migrate_reservations(apps, schema_editor):
 	all_reservations = Reservation.objects.all()
 	possible_conflicts = []
 	for res in all_reservations:
-		print '\nmigration reservation %d' % res.id
+		print '\nmigrating reservation %d' % res.id
 		overlapping = get_overlapping_in_room(Reservation, res)
 		if not res.bed or len(overlapping)>0:
 			''' in case there is a reservation that already has a bed, there is nothing to migrate.'''
-			print 'there were %d overlapping reservations:' % len(overlapping)
-			print [r.id for r in overlapping]
 			free_beds = get_free_beds_on_dates_or_none(Reservation, res.room, res.arrive, res.depart)
-			print 'there are %d free beds in %s' % (len(free_beds), res.room.name)
 			if free_beds:
 				b = free_beds[0]
-				print 'moving res %d to free bed %s' % (res.id, b.id)
 			else:
 				b = res.room.beds.first()
-				print 'moving res %d to overbooked bed %s' % (res.id, b.id)
 				possible_conflicts.append(res)
 			res.bed = b
 			res.save()
-		else:
-			print "res %d has a bed and had no conflicts." % res.id
 
 	for res in all_reservations:
 		if not res.room == res.bed.room:
