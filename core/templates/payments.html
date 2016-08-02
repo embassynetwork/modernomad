@@ -28,22 +28,26 @@
 			<table class="table table-striped table-hover">
 				<tbody>
 				<tr><td colspan="2" class="info"><h4>Reservations</h4></td></tr>
-				<tr><td>Net Income from Transient Occupants</td><td>${{ summary_totals.net_rent_transient|floatformat:2 }}</td></tr>
-				<tr><td>Net Rent from Residents</td><td>  ${{ summary_totals.net_rent_resident|floatformat:2 }}</td></tr>
-				<tr><td><strong>Total Net income to house (net transient + net resident)</strong></td><td><strong>${{summary_totals.gross_rent|floatformat:2 }}</strong></td></tr>
-				<tr><td>Gross income from transient occupants <small>(the amount that custom location taxes are calculated on.)</small></td><td>${{ summary_totals.gross_rent_transient|floatformat:2 }}</td></tr>
-				<tr><td>Location Taxes ({{ summary_totals.hotel_tax_percent }}% * Gross Transient Income)</td><td>  ${{ summary_totals.hotel_tax|floatformat:2 }}</td></tr>
-				<tr><td>External Payments</td><td>  ${{ summary_totals.res_external_txs_paid|floatformat:2 }}</td></tr>
-				<tr><td>Fees on External Payments</td><td>  ${{ summary_totals.res_external_txs_fees|floatformat:2 }}</td></tr>
-				<tr><td><strong>Total Transfer for Reservations</strong> <small>(net res income to house + hotel tax - external res payments already received - fees on external res payments)</small></td><td><strong>${{ summary_totals.res_total_transfer|floatformat:2 }}</strong></td></tr>
+
+				<tr><td><strong>Gross reservation income</strong></td><td><strong>${{ summary_totals.gross_reservations|floatformat:2 }}</strong></td></tr>
+				<tr><td> <small>- with fees </small></td><td><small>${{ summary_totals.gross_rent_transient|floatformat:2 }}</small></td></tr>
+				<tr><td> <small>- without fees </small></td><td><small>${{ summary_totals.net_rent_resident|floatformat:2 }}</small></td></tr>
+				<tr><td><strong>Net reservation income</strong></td><td><strong>${{summary_totals.gross_rent|floatformat:2 }}</strong></td></tr>
+				<tr><td> <strong>Fees charged </strong></td><td><strong>${{ summary_totals.hotel_tax|floatformat:2 }}</strong></td></tr>
+				<tr><td>Cash payments received</td><td>  ${{ summary_totals.res_external_txs_paid|floatformat:2 }}</td></tr>
+				<tr><td>Fees on cash payments</td><td>  ${{ summary_totals.res_external_txs_fees|floatformat:2 }}</td></tr>
+				<tr><td><strong>Total transfer reservations</strong></td><td><strong>${{ summary_totals.res_total_transfer|floatformat:2 }}</strong></td></tr>
+
 				<tr><td colspan="2" class="info"><h4>Subscriptions</h4></td></tr>
-				<tr><td>Untaxed Subscriptions net</td><td>${{ summary_totals.untaxed_subscription_net|floatformat:2 }}</td></tr>
-				<tr><td>Taxed Subscriptions Gross</td><td>${{ summary_totals.taxed_subscription_gross|floatformat:2 }}</td></tr>
-				<tr><td>Taxed Subscriptions Total User Fees</td><td>${{ summary_totals.taxed_subscription_user_fees|floatformat:2 }}</td></tr>
-				<tr><td>Total House Income All Subscriptions</td><td>${{ summary_totals.all_subscriptions_net|floatformat:2 }}</td></tr>
-				<tr><td>External subscription payments</td><td>${{ summary_totals.sub_external_txs_paid|floatformat:2 }}</td></tr>
-				<tr><td>Fees on external subscription payments</td><td>${{ summary_totals.sub_external_txs_fees|floatformat:2 }}</td></tr>
-				<tr><td><strong>Total Transfer for Subscriptions</strong> <small>(net income to house + user fees - external subscr payments already received - fees on external subscr payments)</small></td><td><strong>${{ summary_totals.sub_total_transfer|floatformat:2 }}</strong></td></tr>
+
+				<tr><td><strong>Gross subscription income</strong></td><td><strong>${{ summary_totals.gross_subscriptions|floatformat:2 }}</strong></td></tr>
+				<tr><td>- with fees</td><td>${{ summary_totals.taxed_subscription_gross|floatformat:2 }}</td></tr>
+				<tr><td>- without fees</td><td>${{ summary_totals.untaxed_subscription_net|floatformat:2 }}</td></tr>
+				<tr><td><strong>Net subscription income</strong></td><td><strong>${{ summary_totals.all_subscriptions_net|floatformat:2 }}</strong></td></tr>
+				<tr><td><strong>Fees charged</strong></td><td><strong>${{ summary_totals.taxed_subscription_user_fees|floatformat:2 }}</strong></td></tr>
+				<tr><td>Cash payments received</td><td>${{ summary_totals.sub_external_txs_paid|floatformat:2 }}</td></tr>
+				<tr><td>Fees on cash payments</td><td>${{ summary_totals.sub_external_txs_fees|floatformat:2 }}</td></tr>
+				<tr><td><strong>Total Transfer subscriptions</strong> <small>(net income to house + user fees - external subscr payments already received - fees on external subscr payments)</small></td><td><strong>${{ summary_totals.sub_total_transfer|floatformat:2 }}</strong></td></tr>
 				<tr><td colspan="2" class="info"><h4>Total</h4></td></tr>
 				<tr><td><strong>Total Transfer</strong></td><td><strong>${{ summary_totals.total_transfer|floatformat:2 }}</strong></td></tr>
 			</tbody>
