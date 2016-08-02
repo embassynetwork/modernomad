@@ -973,7 +973,6 @@ class Reservation(models.Model):
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-	room = models.ForeignKey(Room, null=True, blank=True, related_name="reservations")
 	bed = models.ForeignKey(Bed, null=True, blank=True, related_name="reservations")
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
@@ -1539,7 +1538,6 @@ class LocationFlatPage(models.Model):
 		return self.flatpage.title
 
 class Reservable(models.Model):
-	room = models.ForeignKey(Room, related_name="reservables", blank=True, null=True)
 	bed = models.ForeignKey(Bed, related_name="reservables", blank=True, null=True)
 	start_date = models.DateField()
 	end_date = models.DateField(null=True, blank=True, help_text="Leave this blank for a room with open ended availability.")

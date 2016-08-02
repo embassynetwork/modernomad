@@ -29,7 +29,6 @@ class ReservableAdminInline(admin.TabularInline):
 
 class RoomAdmin(admin.ModelAdmin):
 	model = Room
-	inlines = [ReservableAdminInline]
 	save_as = True
 
 class BedAdmin(admin.ModelAdmin):
@@ -138,6 +137,9 @@ class ReservationAdmin(admin.ModelAdmin):
 		return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
 	user_profile.allow_tags = True
 
+	def bed_room(self):
+		return "%s in %s" % (self.bed.name, self.bed.room.name)
+
 	def send_receipt(self, request, queryset):
 		success_list = []
 		failure_list = []
@@ -221,7 +223,7 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	model = Reservation
 	list_filter = ('status', 'location')
-	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', bed_room, 'total_nights', rate, fees, bill, to_house, paid )
 	#list_editable = ('status',) # Depricated in favor of drop down actions
 	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
 	ordering = ['-arrive', 'id']
