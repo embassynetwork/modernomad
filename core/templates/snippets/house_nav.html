@@ -109,26 +109,6 @@
 				</li>
 				{% endif %}
 			</ul>
-			<!-- <ul class="nav navbar-nav navbar-right">
-				{% if user.is_authenticated %}
-				<li class="dropdown">
-				<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-					<i class="glyphicon glyphicon-user"></i> {{ user.get_full_name }} <b class="caret"></b>
-				</a>
-				<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-					<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-					<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
-					{% if user.is_superuser %}
-					<li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
-					{% endif %}
-					<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
-				</ul>
-				</li>
-				{% endif %}
-				{% if not user.is_authenticated %}
-				<li><a href="/people/login/?next={{request.path}}">Login</a></li>
-				{% endif %}
-			</ul> -->
 		</div>
 		</nav>
 	</div> <!-- end col-md-12 -->
