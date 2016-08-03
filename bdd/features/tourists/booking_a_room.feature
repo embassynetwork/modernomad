@@ -5,13 +5,16 @@ Feature: Booking a room
   a major financial engine for the embassy network.
 
   Background:
-    Given there is a house called "The Red Vic"
+    Given there is a location called "The Red Vic"
     And   "The Red Vic" has a room "Swanky Hostel" with 4 beds available
     And   "The Red Vic" has a room "Love Nest" with 1 bed available
 
   Scenario: A new tourist should be able to apply to book a bed
     Given a new site visitor is looking at options to stay at "The Red Vic"
-    And   they want to say from the 1st - 3rd of next month
+    When  they want to say 60 days from now for 2 nights
     Then  ensure they are offered "Swanky Hostel" and "Love Nest" rooms
     When  they ask to book a bed in "Swanky Hostel"
-    Then  something good should happen
+    Then  they should be asked to create a profile
+    When  they create a valid profile
+    Then  they should have a pending reservation
+    And   the house admins get an email about a new pending reservation
