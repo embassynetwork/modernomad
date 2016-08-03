@@ -115,6 +115,10 @@ a:hover {
 	font-size: 1.5em;
 }
 
+.jumbotron .logo {
+	height: 70px;
+}
+
 .jumbotron .btn {
 	font-family: 'Raleway', sans-serif;
 	margin-top: 30px;
@@ -1375,6 +1379,11 @@ h3.no-top-margin {
 
 .navbar-brand {
 	font-family: 'Raleway', sans-serif;
+}
+
+.navbar-brand .logo {
+	height: 30px;
+	margin-top: -7px;
 }
 
 #nav-network {
