@@ -18,6 +18,7 @@
 		<link rel="stylesheet" href="{% static 'fonts/font-awesome-4.3.0/css/font-awesome.min.css' %}">
 		<link rel="shortcut icon" href="/favicon.ico">
 		<link href="https://fonts.googleapis.com/css?family=Dancing+Script" rel="stylesheet">
+		<link href='https://fonts.googleapis.com/css?family=Raleway:800' rel='stylesheet' type='text/css'>
 
 		<!-- Asyncronous Font Loading -->
 		<script src="{% static 'js/webfont.js' %}"></script>
@@ -59,19 +60,18 @@
 							<span class="icon-bar"></span>
 							<span class="icon-bar"></span>
 						</button>
+						<a href="/" class="navbar-brand"><span class="highlight"><i class="fa fa-shield" aria-hidden="true"></i> Embassy Network</span></a>
 					</div>
 					<div class="collapse navbar-collapse" id="main-navbar">
 						<ul class="nav navbar-nav navbar-left">
-							<li style="padding-top: 15px; padding-bottom:15px; color: #777; "></li>
-							<li><a href="/" class="navbar-brand"><span class="highlight"><i class="fa fa-shield" aria-hidden="true"></i> Embassy Network</span></a></li>
-							<li style="padding-top: 15px; padding-bottom:15px; color: #777; ">:: <em>Communities experimenting with culture and commoning.</em></li>
+							<li style="padding-top: 15px; padding-bottom:15px; color: #777; " class="hidden-xs hidden-sm">:: <em>Communities experimenting with culture and commoning.</em></li>
 						</ul>
 						<ul class="nav navbar-nav navbar-right">
-							<li><a href="{% url 'location_list' %}">Locations</a></li>
+							<!-- <li><a class="locations-btn">Locations</a></li> -->
 							{% if user.is_authenticated %}
 							<li class="dropdown">
 							<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-								<i class="glyphicon glyphicon-user"></i> {{ user.get_full_name }} <b class="caret"></b>
+								{{ user.get_full_name }} <b class="caret"></b>
 							</a>
 							<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
 								<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
@@ -100,6 +100,13 @@
 
 	<!-- javascript for every page -->
 	<script type="text/javascript">
+
+	// call to action scroll
+	$(".locations-btn").click(function() {
+		$('html, body').animate({
+				scrollTop: $("#locations").offset().top
+		}, 500);
+	});
 
 	</script>
 

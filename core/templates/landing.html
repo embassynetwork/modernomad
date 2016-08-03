@@ -31,21 +31,21 @@
 </div>
 
 <div class="row" id="community-section">
-	<div class="col-md-12" id="profiles">
-		{% for person in location.people_in_coming_month %}
-		<div class="float-left homepage-user-wrapper">
+	{% for person in location.people_in_coming_month %}
+	<div class="col-sm-3 col-lg-2 text-center">
+		<a href="{% url 'user_detail' person.username %}">
 			{% if person.profile.image %}
-				<img class="homepage-user-img" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
+				<img class="homepage-user-img img-responsive" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
 			{% else %}
 				<img class="homepage-user-img" src="/static/img/default.jpg" />
 			{% endif %}
-			<div class="homepage-user-descr" id="user-{{person.id}}">
-				<p class="homepage-user-text">{{person.profile.bio|truncatewords:40 }}</p>
-				... <a class="homepage-user-link" href="{% url 'user_detail' person.username %}"> {{ person.first_name|title}} {{person.last_name|title}}</a>
+			<div class="homepage-user-info">
+				<p class="homepage-user-link"> {{ person.first_name|title}} {{person.last_name|title}}</p>
+				<p class="homepage-user-text">{{person.profile.bio|truncatewords:10 }}</p>
 			</div>
-		</div>
-		{% endfor %}
+		</a>
 	</div>
+	{% endfor %}
 </div>
 
 <div class="row" id="location">
