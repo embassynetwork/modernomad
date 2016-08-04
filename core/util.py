@@ -35,7 +35,8 @@ def repeat_guests(num_stays, location=None):
 	all_users = User.objects.all()
 	for u in all_users:
 		if location:
-			if u.reservations.count(location=location) >= num_stays:
+			at_loc = u.reservations.filter(location = location)
+			if len(at_loc) >= num_stays:
 				users.append(u)
 		else:
 			if u.reservations.count() >= num_stays:
