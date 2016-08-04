@@ -28,7 +28,8 @@ def people_with_reservations_longer_than(min_length):
 		length = r.nights_between(r.arrive, r.depart)
 		if length >= min_length:
 			users.append(r.user)
-	return users
+	# make sure the returned list has only unique users
+	return list(set(users))
 
 def repeat_guests(num_stays, location=None):
 	users = []
