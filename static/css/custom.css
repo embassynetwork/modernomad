@@ -1,21 +1,10 @@
 /* ==========================================================
 ==========================[Typography]==========================
 ========================================================== */
-@font-face {
-	font-family:'Clarendon';
-	src: url(/static/fonts/Clarendon_LT_Roman.ttf) format("truetype");
-}
-
-@font-face {
-	font-family:'Clarendon Light';
-	src: url(/static/fonts/Clarendon_LT_Light.ttf) format("truetype");
-}
 
 body {
 	font-family:'Open Sans', sans-serif;
 	-webkit-font-smoothing: antialiased;
-	margin-left: 1em;
-	margin-right: 1em;
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
@@ -85,7 +74,7 @@ span.highlight {
 	color: #FFF;
 	text-decoration: none;
 	background: gray;
-	
+
 }
 .top-nav a:hover {
 	background: green;
@@ -102,6 +91,63 @@ a {
 a:hover {
 	color: #ea6f56;
 	text-decoration: none;
+}
+
+.jumbotron {
+	font-size: 1em;
+	background-image: url(/static/img/embassysf.jpg);
+	background-size: cover;
+	color: white;
+}
+
+.jumbotron .light {
+	font-family: 'Raleway', sans-serif;
+	font-size: 1em;
+}
+
+.jumbotron .bold {
+	font-family: 'Raleway', sans-serif;
+	font-size: 2em;
+}
+
+.jumbotron .script {
+	font-family: 'Dancing Script', cursive;
+	font-size: 1.5em;
+}
+
+.jumbotron .logo {
+	height: 70px;
+}
+
+.jumbotron .btn {
+	font-family: 'Raleway', sans-serif;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	background-color: rgb(183, 68, 37);
+	border-color: rgb(183, 68, 37);
+}
+
+.embassy-logo {
+	margin-top: 5px;
+}
+
+/* Press section */
+
+#press-section {
+	margin: 50px 0;
+}
+
+.press-logo {
+	height: 40px;
+	margin: 30px;
+}
+
+/* join section */
+
+#join-section {
+	background-color: #f5f5f5;;
+	margin: 50px 0;
+	padding: 50px 0;
 }
 
 #login {
@@ -135,11 +181,7 @@ a:hover {
 }
 
 #house-desc {
-	margin-bottom: 50px;	
-}
-
-#house-name-title {
-
+	margin-bottom: 50px;
 }
 
 #actions {
@@ -178,7 +220,7 @@ a:hover {
 #list-signup-input:focus {
 	color:#fff;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
-	
+
 }
 
 #map-marker-h1-color, #map-marker-h1-dark {
@@ -210,7 +252,7 @@ a:hover {
 
 .placeholder {
 	color:rgba(255,255,255,0.3);
-	
+
 }
 
 #rsvp-status-yes, #rsvp-status-no {
@@ -220,7 +262,7 @@ a:hover {
 #eventlist-signup-wrapper .btn {
 	background:#fff;
 	height:70px;
-	
+
 }
 
 @media (min-width: 768px) {
@@ -288,7 +330,7 @@ a:hover {
 	padding: 0;
 	font-size: 24px;
 	color:rgba(0,0,0,0.3);
-	
+
 }
 
 .event .date span {
@@ -311,55 +353,18 @@ a:hover {
 	text-align: right;
 }
 
-
-.profiles {
-	padding-left: 16px;
-}
-
-
-.homepage-user-descr {
-	position: absolute;
-	top: 0;
-	left: 0;
-	background: rgba(92, 71, 65, 0.82);
-	color: #fff;
+.homepage-user-info {
+	height: 140px;
 	overflow: hidden;
-	padding: 5px;
-	height: 170px;
-	visibility: hidden;
-	opacity: 0;
-	z-index:1000;
-}
-
-.homepage-user-descr:hover {
-  visibility: visible;
-  opacity: 1;
-}
-
-.homepage-user-wrapper {
-	position: relative;
-	margin-right: 16px;
-	margin-bottom: 16px;
 }
 
 .homepage-user-text {
-	height: 140px;
-	width: 160px;
-	overflow: hidden;
-	margin-bottom: 0px;
+	color: #333;
 }
 
 .homepage-user-link {
-	color: #e71d99;
-}
-
-.homepage-user-wrapper:hover .homepage-user-text {
-	visibility: visible;
-	opacity: 1;
-}
-.homepage-user-wrapper:hover .homepage-user-link {
-	visibility: visible;
-	opacity: 1;
+	font-family: 'Raleway', sans-serif;
+	margin-top: 10px;
 }
 
 #location-map {
@@ -431,8 +436,8 @@ a:hover {
 }
 
 .homepage-user-img {
-	width: 170px;
-	height: 170px;
+	/*width: 170px;
+	height: 170px;*/
 }
 
 
@@ -451,7 +456,7 @@ a:hover {
 ========================================================== */
 
 #img-name, #big-img-name, .reverse-emph {
-	background: #333;	
+	background: #333;
 }
 
 #img-name-back, #big-img-name-back {
@@ -1002,7 +1007,7 @@ div#spinner
     margin-top: -100px;
     z-index:2;
     overflow: auto;
-} 
+}
 
 .paid-bg-img {
 	background: url(/static/img/watermark-paid.jpg) 50% 50% no-repeat;
@@ -1059,13 +1064,13 @@ div#spinner
 }
 
 #rooms-available-calendar input[type=radio] {
-    display:none; 
+    display:none;
     margin:10px;
 }
 
 .room-info {
 	display: none;
-} 
+}
 
 .room-avail-descr {
 	margin: 15px 5px 15px 5px;
@@ -1236,7 +1241,7 @@ div#spinner
 
 .room-row {
 	margin-top: 0px;
-	margin-bottom: 40px;	
+	margin-bottom: 40px;
 }
 
 .user-event-row {
@@ -1372,10 +1377,17 @@ h3.no-top-margin {
 	height: 100%;
 }
 
+.navbar-brand {
+	font-family: 'Raleway', sans-serif;
+}
+
+.navbar-brand .logo {
+	height: 30px;
+	margin-top: -7px;
+}
 #nav-network {
 	padding-right: 20px;
 	margin-bottom: 1px;
-	font-family: 'Clarendon Light', serif;
 }
 
 #nav-location {
@@ -1383,7 +1395,6 @@ h3.no-top-margin {
 	border-color: transparent;
 	margin-bottom: 0px;
 	margin-top: 20px;
-	font-family: 'Clarendon Light', serif;
 }
 
 table tr.row-even td { background: #eee; }
@@ -1403,7 +1414,7 @@ table tr.row-even td { background: #eee; }
 }
 
 #community-section {
-	margin-top: 60px;
+	margin: 60px 0;
 }
 
 .money {
@@ -1486,19 +1497,9 @@ table tr.row-even td { background: #eee; }
 /* Featurettes
 ------------------------- */
 
-.featurette-divider {
-	margin: 80px 0; /* Space out the Bootstrap <hr> more */
-}
-
-.featurette-image {
-	overflow: hidden;
-}
-
 /* Thin out the marketing headings */
 .featurette-heading {
-	font-weight: 300;
-	line-height: 1;
-	letter-spacing: -1px;
+	font-family: 'Raleway', sans-serif;
 }
 
 @media (min-width: 768px) {
@@ -1534,7 +1535,7 @@ table tr.row-even td { background: #eee; }
 .index-loc-info span {
 	display: inline-block;
 	vertical-align: middle;
-	line-height: normal;    
+	line-height: normal;
 }
 
 .index-intro-text strong, {
@@ -1562,7 +1563,7 @@ p.lead strong {
 #index-check-availability div {
 	display: inline-block;
 	vertical-align: middle;
-	line-height: normal;    
+	line-height: normal;
 }
 
 #index-check-availability form {
@@ -1584,7 +1585,7 @@ p.lead strong {
 }
 
 /* Small devices (tablets, 768px and up) */
-@media (max-width: @screen-sm-max) { 
+@media (max-width: @screen-sm-max) {
 	#member-collage {
 		width: 300px;
 		height: 300px;
@@ -1604,12 +1605,6 @@ p.lead strong {
 	color: #EEE;
 }
 
-.press-logo {
-	height: 40px;
-	margin-bottom: 20px;
-	margin-right: 10px;
-}
-
 .room-avail-text-success {
 	color: #3c763d !important;
 }
@@ -1618,18 +1613,50 @@ p.lead strong {
 	color: #a94442 !important;
 }
 
-.location-img-preview {
-	width: 850px;
-	height: 225px;
+.location-box h2, .location-box h2 em {
+	color: white;
+	font-weight: bold;
 }
 
-.location-preview { 
+.location-box {
 	margin-top: 50px;
+	position: relative;
 }
-	
+
 .location-preview .col-md-3 {
+    height: 225px;
+    overflow: hidden;
+}
+
+.location-box .col-md-4 {
 	height: 225px;
 	overflow: hidden;
+	padding: 0;
+}
+
+.location-img-preview {
+    width: 850px;
+    height: 225px;
+}
+
+.location-name {
+	position:absolute;
+	top:20px;
+	padding: 20px;
+}
+
+.location-name h2 {
+	padding: 40px;
+}
+
+.locations-btn {
+	cursor:pointer;
+}
+
+@media (max-width: 992px) and (min-width: 768px) {
+	.location-name h2 {
+		padding: 40px 190px;
+	}
 }
 
 .socialmedia-icon {
@@ -1658,30 +1685,6 @@ p.lead strong {
 	padding: 10px;
 }
 
-
-/*Mobile Styles*/
-
-@media (max-width: 450px) {
-	
-	.navbar-brand {
-		float: none;
-		height: auto;
-		margin-bottom: 10px;
-		border-bottom: 1px solid #e2e2e2;
-		
-		
-	}
-	
-	#index-header {
-		padding-right: 0;
-		background-image: none; 
-	}
-	
-	.featurette-divider {
-		margin: 30px 0;
-	}
-	
-}
 
 .registration-form {
     max-width: 75rem;
@@ -1739,7 +1742,7 @@ p.lead strong {
 
 #notes-link:hover {
 	cursor: pointer;
-	color: #ea6f56; 
+	color: #ea6f56;
 }
 
 .note-pre {
@@ -1818,7 +1821,7 @@ label.light {
 }
 
 input.disabled {
-	color: grey; 
+	color: grey;
 	background-color: #F0F0F0;
 }
 
@@ -1850,8 +1853,8 @@ input.disabled {
 	height: 100%;
 }
 
-.hidden { 
-	display: none; 
+.hidden {
+	display: none;
 }
 
 .clickable:hover {
