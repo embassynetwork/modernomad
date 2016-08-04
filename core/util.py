@@ -1,6 +1,7 @@
 from core.views import monthly_occupant_report
 from core.models import *
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 def monthly_occupant_report_console(location_slug, year, month):
 	(occupants, messages) = monthly_occupant_report(location_slug, year, month)
@@ -35,11 +36,11 @@ def repeat_guests(num_stays, location=None):
 	all_users = User.objects.all()
 	for u in all_users:
 		if location:
-			at_loc = u.reservations.filter(location = location)
+			at_loc = u.reservations.filter(Q(status='approved') | (status='confirmed')).filter(location = location)
 			if len(at_loc) >= num_stays:
 				users.append(u)
 		else:
-			if u.reservations.count() >= num_stays:
+			if u.reservations.filter(Q(status='approved') | (status='confirmed')).count() >= num_stays:
 				users.append(u)
 	return users
 
