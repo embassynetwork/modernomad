@@ -162,7 +162,7 @@ def _bed_data_by_month(bed, month, year):
 	payments_for_bed = Payment.objects.reservation_payments_by_bed(bed).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	payments_cash = 0
 	for p in payments_for_bed:
-		payments_cash += p.paid_amount
+		payments_cash += p.to_house()
 
 	nights_available = 0
 	nights_occupied = 0
@@ -635,13 +635,13 @@ def calendar(request, location_slug):
 			location_beds.append(bed)
 
 	reservations_by_bed = []
-	empty_rooms = 0
+	empty_beds = 0
 
 	# this is tracked here to help us determine what height the timeline div
 	# should be. it's kind of a hack.
-	num_rows_in_chart = 0
-	for room in rooms:
-		num_rows_in_chart += room.beds.count()
+	num_rows_in_chart = len(location_beds)
+	print 'num rows in chart to start'
+	print num_rows_in_chart
 
 	if len(reservations) == 0:
 		any_reservations = False
@@ -654,11 +654,11 @@ def calendar(request, location_slug):
 
 		reservation_list_this_bed = list(reservations.filter(bed=bed))
 
-		#if len(reservation_list_this_bed) == 0:
-		#	empty_rooms += 1
-		#	num_rows_in_chart -= room.beds.count()
+		if len(reservation_list_this_bed) == 0:
+			empty_beds += 1
+			num_rows_in_chart -= 1
+			print 'subtracting row...'
 
-		#else:
 		for r in reservation_list_this_bed:
 			if r.arrive < start:
 				display_start = start
@@ -672,15 +672,12 @@ def calendar(request, location_slug):
 
 		reservations_by_bed.append((bed, reservations_this_bed))
 
-	print("Reservations by Bed for calendar view:")
-	print(reservations_by_bed)
-
 	# create the calendar object
 	guest_calendar = GuestCalendar(reservations, year, month, location).formatmonth(year, month)
 
 	return render(request, "calendar.html", {'reservations': reservations, 'reservations_by_bed': reservations_by_bed,
-		'month_start': start, 'month_end': end, "next_month": next_month, "prev_month": prev_month, 'rows_in_chart': num_rows_in_chart,
-		"report_date": report_date, 'location': location, 'empty_rooms': empty_rooms, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
+		'month_start': start, 'month_end': end, "next_month": next_month, "prev_month": prev_month, 'num_rows_in_chart': num_rows_in_chart,
+		"report_date": report_date, 'location': location, 'any_reservations': any_reservations, 'calendar': mark_safe(guest_calendar) })
 
 
 def room_cal_request(request, location_slug, room_id, month=None, year=None, browse_past=True):
@@ -777,26 +774,9 @@ def UserDetail(request, username):
 			user_is_house_admin_somewhere = True
 			break
 
-	# grab the rooms that this user is a backer/resident of
-	room_forms = []
-	rooms = user.rooms.all()
-	for room in rooms:
-		room_reservables = room.reservables.all().order_by('start_date')
-		reservables_forms = []
-		for reservable in room_reservables:
-		 	id_str = "reservable-%d-%%s" % reservable.id
-			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
-		id_str = "room-%d-new-reservable-%%s" % room.id
-		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
-		if room.image:
-			has_image = True
-		else:
-			has_image = False
-		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, room.location.slug, has_image))
-
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
-		"room_forms": room_forms, "events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+		"events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 def location_list(request):
 	locations = Location.objects.filter(visibility='public').order_by("name")

@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div id="guestcalendar"></div>
-
+<div class="row">
+	<div id="guestcalendar"></div>
+</div>
 <div id="guest-calendar">
 	{{calendar}}
 </div>
@@ -72,40 +73,46 @@
 				dataTable.addColumn({ type: 'date', id: 'End' });
 				dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
 
-				dataTable.addRows([
+					// JKS: issues w this visualization - if a room is overbooked,
+					// the height of the chart will be off by a row. it also
+					// only shows rooms with bookings, so the total number of
+					// rooms might vary from month to month which is confusing. 
 					{% for bed, reservations_this_bed in reservations_by_bed %}
 						{% with last_bed=forloop.last %}
 
-						// note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1. 
-						{% for res_info in reservations_this_bed %}	
-							[ 
-							"{{bed.room.name|safe}} (bed {{bed.name|safe}}, id {{bed.id|safe}})", "{{res_info.reservation.user.first_name|title}} ({{res_info.reservation.status}})", 
-								new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}), 
-								new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}), 
-								"<div class='guestinfo-tooltip'><h3>{{res_info.reservation.user.first_name|title}}</h3><p><em>{{res_info.reservation.status}}</em></p><p>Arrive: {{ res_info.reservation.arrive}}</p><p>Depart: {{ res_info.reservation.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.reservation.user.profile.image_thumb}}'></div>"
+							// note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1. 
+							{% for res_info in reservations_this_bed %}	
+							dataTable.addRows([
+								[ 
+								"{{bed.room.name|safe}} ({{bed.name|safe}})", "{{res_info.reservation.user.first_name|title}} ({{res_info.reservation.status}})", 
+									new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}), 
+									new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}), 
+									"<div class='guestinfo-tooltip'><h3>{{res_info.reservation.user.first_name|title}}</h3><p><em>{{res_info.reservation.status}}</em></p><p>Arrive: {{ res_info.reservation.arrive}}</p><p>Depart: {{ res_info.reservation.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.reservation.user.profile.image_thumb}}'></div>"
 
-							{% if last_bed and forloop.last %}
-								]
-							{% else %}
-								],
-							{% endif %}
+								{% if last_bed and forloop.last %}
+									]
+								{% else %}
+									],
+								{% endif %}
 
-						{% endfor %}
+							]);
+							{% endfor %}
 
-					{% endwith %}
+						{% endwith %}
 					{% endfor %}
-				]);
 
-				var rowHeight = 35; // this value is from inspection, we are not setting the height here (indeed, there doesn't seem to be a way to do that)
-
-				// getNumberOfRows is calculating the total possible rows, but empty rows are not being displayed, so the value that function returns is off. 
-				chartHeight = {{rows_in_chart}} * rowHeight;
+				// the value of row height is from visual inspection. :-O
+				var rowHeight = 40; 
+				// will not account for overbooked rooms which take up an extra row. 
+				var rowsHeight = {{num_rows_in_chart}} * rowHeight;
+				console.log({{num_rows_in_chart}});
+				// some padding to account for titles and any overbooked rooms. it's a best effort guess. 
+				var paddingHeight = 60;
+				var chartHeight = rowsHeight + paddingHeight;
 				console.log(chartHeight);
-				console.log({{rows_in_chart}});
 				var options = {
-					height: chartHeight,
-					timeline: {singleColor: '#EA6F56'}
-				}	
+					height: chartHeight
+					}
 				chart.draw(dataTable, options);
 
 				function myMouseOverHandler(e){
