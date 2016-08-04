@@ -25,7 +25,7 @@ def people_with_reservations_longer_than(min_length):
 	users = []
 	reservations = Reservation.objects.all()
 	for r in reservations:
-		lenth = r.nights_between(r.arrive, r.depart)
+		length = r.nights_between(r.arrive, r.depart)
 		if length >= min_length:
 			users.append(r.user)
 	return users
