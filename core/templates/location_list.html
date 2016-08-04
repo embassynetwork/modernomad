@@ -17,20 +17,19 @@
 		<div class="col-md-3">
 			<p class="lead">{{ location.short_description|striptags }}</p>
 		</div>
-		
+
 		{% else %}
-		
+
 		<div class="col-md-3">
 			<p class="lead">{{ location.short_description|striptags }}</p>
 		</div>
 		<div class="col-md-9">
 			<img class="location-img-preview" src="{{location.image.url}}">
 		</div>
-		
+
 		{% endif %}
 	</div>
 	{% endfor %}
 </div>
 
 {% endblock %}
-
