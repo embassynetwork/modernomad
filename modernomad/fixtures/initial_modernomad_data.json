@@ -1,6 +1,108 @@
 [
 {
     "fields": {
+        "comment": null,
+        "generated_on": "2016-08-05T08:17:26.541Z"
+    },
+    "model": "core.bill",
+    "pk": 1
+},
+{
+    "fields": {
+        "comment": null,
+        "generated_on": "2016-08-05T08:37:50.265Z"
+    },
+    "model": "core.bill",
+    "pk": 2
+},
+{
+    "fields": {
+        "comment": null,
+        "generated_on": "2016-08-05T08:45:44.451Z"
+    },
+    "model": "core.bill",
+    "pk": 3
+},
+{
+    "fields": {},
+    "model": "core.reservationbill",
+    "pk": 1
+},
+{
+    "fields": {},
+    "model": "core.reservationbill",
+    "pk": 2
+},
+{
+    "fields": {},
+    "model": "core.reservationbill",
+    "pk": 3
+},
+{
+    "fields": {
+        "fee": null,
+        "description": "Master Suite (1 * $185.00)",
+        "bill": 1,
+        "paid_by_house": false,
+        "custom": false,
+        "amount": "185.00"
+    },
+    "model": "core.billlineitem",
+    "pk": 1
+},
+{
+    "fields": {
+        "fee": null,
+        "description": "Private Room (26 * $135.00)",
+        "bill": 2,
+        "paid_by_house": false,
+        "custom": false,
+        "amount": "3510.00"
+    },
+    "model": "core.billlineitem",
+    "pk": 2
+},
+{
+    "fields": {
+        "fee": null,
+        "description": "Shared Room (17 * $65.00)",
+        "bill": 3,
+        "paid_by_house": false,
+        "custom": false,
+        "amount": "1105.00"
+    },
+    "model": "core.billlineitem",
+    "pk": 3
+},
+{
+    "fields": {
+        "room": 1,
+        "end_date": null,
+        "start_date": "2016-08-04"
+    },
+    "model": "core.reservable",
+    "pk": 1
+},
+{
+    "fields": {
+        "room": 3,
+        "end_date": null,
+        "start_date": "2016-08-04"
+    },
+    "model": "core.reservable",
+    "pk": 2
+},
+{
+    "fields": {
+        "room": 2,
+        "end_date": null,
+        "start_date": "2016-08-04"
+    },
+    "model": "core.reservable",
+    "pk": 3
+},
+{
+    "fields": {
         "codename": "add_location",
         "name": "Can add location",
         "content_type": 1
@@ -1162,10 +1264,352 @@
 },
 {
     "fields": {
+        "username": "testy_mcgee",
+        "first_name": "Testy",
+        "last_name": "Mcgee",
+        "is_active": true,
+        "is_superuser": true,
+        "is_staff": true,
+        "last_login": "2016-08-05T08:34:32.191Z",
+        "groups": [],
+        "user_permissions": [],
+        "password": "pbkdf2_sha256$20000$bmSLopiGEP6Z$WGe7CuCSIfcebKnkmwRC6X5yZnFjWpOGzi4dk8drmvA=",
+        "email": "test@embassynetwork.com",
+        "date_joined": "2016-08-03T07:20:47.834Z"
+    },
+    "model": "auth.user",
+    "pk": 1
+},
+{
+    "fields": {
+        "username": "neil_armstrong",
+        "first_name": "Neil",
+        "last_name": "Armstrong",
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2016-08-05T08:37:04.850Z",
+        "groups": [],
+        "user_permissions": [],
+        "password": "pbkdf2_sha256$20000$c18xlqVcyQiH$6LrhXBkSsvXjBNkajUbF8Vk3wQ3/8o42DLvW48SQTeM=",
+        "email": "neil@embassynetwork.com",
+        "date_joined": "2016-08-05T08:33:50.992Z"
+    },
+    "model": "auth.user",
+    "pk": 2
+},
+{
+    "fields": {
+        "username": "terrance_turkey",
+        "first_name": "Terrance",
+        "last_name": "Turkey",
+        "is_active": true,
+        "is_superuser": false,
+        "is_staff": false,
+        "last_login": "2016-08-05T08:43:49.551Z",
+        "groups": [],
+        "user_permissions": [],
+        "password": "pbkdf2_sha256$20000$vh5aLh1gq6JH$oz9pLU1ulbRmemc1ty6rbApAhoekw0FjVUAchrCAzMA=",
+        "email": "terrance@embassynetwork.com",
+        "date_joined": "2016-08-05T08:43:49.316Z"
+    },
+    "model": "auth.user",
+    "pk": 3
+},
+{
+    "fields": {
+        "expire_date": "2016-08-19T08:43:49.553Z",
+        "session_data": "OGFlMWI4NTNlMzVlMGQ4YTJhYjkyNDRjZDQ4MGRiMzM5YmIwMWZmODp7Il9hdXRoX3VzZXJfaGFzaCI6IjQwMjM3MjJjNWNmMDY2MjUwZGMyNzk3Y2E5MzU5NGE4ZDNjY2Y4ZWUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJtb2Rlcm5vbWFkLmJhY2tlbmRzLkVtYWlsT3JVc2VybmFtZU1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiIzIn0="
+    },
+    "model": "sessions.session",
+    "pk": "m14f655ebevte0d7rlix4w4v2vxyhmqc"
+},
+{
+    "fields": {
         "domain": "example.com",
         "name": "example.com"
     },
     "model": "sites.site",
+    "pk": 1
+},
+{
+    "fields": {
+        "action_flag": 1,
+        "action_time": "2016-08-03T07:28:29.243Z",
+        "object_repr": "Tree House",
+        "object_id": "1",
+        "change_message": "",
+        "user": 1,
+        "content_type": 1
+    },
+    "model": "admin.logentry",
+    "pk": 1
+},
+{
+    "fields": {
+        "action_flag": 2,
+        "action_time": "2016-08-03T07:30:20.741Z",
+        "object_repr": "Tree House",
+        "object_id": "1",
+        "change_message": "Added room \"Shared Room\". Added room \"Private Room\".",
+        "user": 1,
+        "content_type": 1
+    },
+    "model": "admin.logentry",
+    "pk": 2
+},
+{
+    "fields": {
+        "action_flag": 2,
+        "action_time": "2016-08-03T07:32:54.195Z",
+        "object_repr": "Tree House",
+        "object_id": "1",
+        "change_message": "Changed slug.",
+        "user": 1,
+        "content_type": 1
+    },
+    "model": "admin.logentry",
+    "pk": 3
+},
+{
+    "fields": {
+        "action_flag": 2,
+        "action_time": "2016-08-05T08:35:07.088Z",
+        "object_repr": "Tree House",
+        "object_id": "1",
+        "change_message": "Changed max_reservation_days.",
+        "user": 1,
+        "content_type": 1
+    },
+    "model": "admin.logentry",
+    "pk": 4
+},
+{
+    "fields": {
+        "location": 1,
+        "users": [
+            1
+        ]
+    },
+    "model": "gather.eventadmingroup",
+    "pk": 1
+},
+{
+    "fields": {
+        "bio": "Im the testing account",
+        "updated": "2016-08-03T07:20:48.285Z",
+        "sharing": "Only if its permitted",
+        "customer_id": null,
+        "links": "http://embassynetwork.com",
+        "city": "San Francisco",
+        "image": "avatars/testy_mcgee/8f11c4f7-8a74-4fde-af0f-123ca7c0c9ba.png",
+        "phone": "",
+        "user": 1,
+        "last4": null,
+        "image_thumb": "avatars/testy_mcgee/8f11c4f7-8a74-4fde-af0f-123ca7c0c9ba.thumb.png",
+        "referral": "The internet",
+        "discussion": "How can we keep making this thing better?",
+        "projects": "Modernomad development"
+    },
+    "model": "core.userprofile",
+    "pk": 1
+},
+{
+    "fields": {
+        "bio": "Off to the Jupiter",
+        "updated": "2016-08-05T08:33:51.150Z",
+        "sharing": "The outside looking in",
+        "customer_id": null,
+        "links": "http://nasa.gov",
+        "city": "10 k Olympus Mons nw 60 130",
+        "image": "avatars/neil_armstrong/7744d522-0742-4614-8e18-f22d538fde07.png",
+        "phone": "",
+        "user": 2,
+        "last4": null,
+        "image_thumb": "avatars/neil_armstrong/7744d522-0742-4614-8e18-f22d538fde07.thumb.png",
+        "referral": "A dark smoky corner on mars",
+        "discussion": "How long with humans continue to live on the planet Earth?",
+        "projects": "Satellites and space colonies "
+    },
+    "model": "core.userprofile",
+    "pk": 2
+},
+{
+    "fields": {
+        "bio": "Turkey with laser eyes",
+        "updated": "2016-08-05T08:43:49.482Z",
+        "sharing": "Red laser beams",
+        "customer_id": null,
+        "links": "http://bit.ly/2aCGgzs",
+        "city": "undefined",
+        "image": "avatars/terrance_turkey/7aae2682-12d4-4267-95c7-daaa1b589268.png",
+        "phone": "",
+        "user": 3,
+        "last4": null,
+        "image_thumb": "avatars/terrance_turkey/7aae2682-12d4-4267-95c7-daaa1b589268.thumb.png",
+        "referral": "ODB",
+        "discussion": "All humans must flee!",
+        "projects": "General destruction and mayhem!"
+    },
+    "model": "core.userprofile",
+    "pk": 3
+},
+{
+    "fields": {
+        "status": "pending",
+        "updated": "2016-08-05T08:17:26.536Z",
+        "bill": 1,
+        "depart": "2016-08-06",
+        "room": 1,
+        "last_msg": null,
+        "created": "2016-08-05T08:17:26.532Z",
+        "suppressed_fees": [],
+        "purpose": "Putting a good foot forward for the future of humanity",
+        "tags": null,
+        "uuid": "e3e4c5c1e5d74db6ba88b44f537acf16",
+        "comments": "",
+        "arrival_time": "",
+        "rate": "185.00",
+        "user": 1,
+        "arrive": "2016-08-05",
+        "location": 1
+    },
+    "model": "core.reservation",
+    "pk": 1
+},
+{
+    "fields": {
+        "status": "pending",
+        "updated": "2016-08-05T08:39:00.462Z",
+        "bill": 2,
+        "depart": "2016-08-31",
+        "room": 3,
+        "last_msg": null,
+        "created": "2016-08-05T08:37:50.257Z",
+        "suppressed_fees": [],
+        "purpose": "Space in the Haight!",
+        "tags": null,
+        "uuid": "5ad89dad961c4572a139f909320485cf",
+        "comments": "",
+        "arrival_time": "",
+        "rate": "135.00",
+        "user": 2,
+        "arrive": "2016-08-05",
+        "location": 1
+    },
+    "model": "core.reservation",
+    "pk": 2
+},
+{
+    "fields": {
+        "status": "pending",
+        "updated": "2016-08-05T08:45:44.447Z",
+        "bill": 3,
+        "depart": "2016-08-22",
+        "room": 2,
+        "last_msg": null,
+        "created": "2016-08-05T08:45:44.446Z",
+        "suppressed_fees": [],
+        "purpose": "Striking fear in the hearts of fleeing masses!",
+        "tags": null,
+        "uuid": "21af4d3a981a4465873c5c9d33c60416",
+        "comments": "",
+        "arrival_time": "",
+        "rate": "65.00",
+        "user": 3,
+        "arrive": "2016-08-05",
+        "location": 1
+    },
+    "model": "core.reservation",
+    "pk": 3
+},
+{
+    "fields": {
+        "beds": 1,
+        "description": "The Big Room on the top of the tree",
+        "cancellation_policy": "24 hours",
+        "image": "rooms/063a5610-7a6d-48e8-b82f-81faa82d8085.jpg",
+        "summary": "Summary",
+        "default_rate": "185.00",
+        "location": 1,
+        "shared": false,
+        "residents": [],
+        "name": "Master Suite"
+    },
+    "model": "core.room",
+    "pk": 1
+},
+{
+    "fields": {
+        "beds": 12,
+        "description": "A bunk room for many people",
+        "cancellation_policy": "24 hours",
+        "image": "rooms/02cd6f1f-f246-4f8b-bf94-08d8259f233f.jpg",
+        "summary": "Bunk Room",
+        "default_rate": "65.00",
+        "location": 1,
+        "shared": true,
+        "residents": [],
+        "name": "Shared Room"
+    },
+    "model": "core.room",
+    "pk": 2
+},
+{
+    "fields": {
+        "beds": 2,
+        "description": "A nice place to lay your head",
+        "cancellation_policy": "24 hours",
+        "image": "rooms/8ee4cf2e-15e5-48bd-9724-a277cc223d81.jpg",
+        "summary": "Private Room",
+        "default_rate": "135.00",
+        "location": 1,
+        "shared": false,
+        "residents": [],
+        "name": "Private Room"
+    },
+    "model": "core.room",
+    "pk": 3
+},
+{
+    "fields": {
+        "image": "locations/af1916c8-52c5-46fa-abf6-dab2c8a1600a.jpg",
+        "name_on_account": "",
+        "timezone": "America/Los_Angeles",
+        "announcement": "This is far left of three sections underneath the main landing page text to use for announcements and news. HTML is supported.",
+        "check_in": "4:00 PM",
+        "residents": [
+            1
+        ],
+        "ssid": "",
+        "slug": "treehouse",
+        "latitude": 37.769665,
+        "email_subject_prefix": "Tree House",
+        "bank_name": "",
+        "profile_image": "",
+        "visibility": "public",
+        "short_description": "This is a shell of a location that we can put some stuff into",
+        "readonly_admins": [
+            1
+        ],
+        "address": "1665 Haight St, San Francisco, CA 94117",
+        "check_out": "1:00 PM",
+        "bank_account_number": null,
+        "front_page_participate": "This is far right of three sections underneath the main landing page text to tell people how to get involved with your community. There is a link to the Events page underneath. HTML is supported. ",
+        "house_admins": [
+            1
+        ],
+        "routing_number": null,
+        "stay_page": "This is the page which has some descriptive text at the top (this text), and then lists the available rooms. HTML is supported.",
+        "name": "Tree House",
+        "house_access_code": "",
+        "longitude": 122.449921,
+        "front_page_stay": "This is the middle of three sections underneath the main landing page text to entice people to stay with you, and then links to the stay page (above). HTML is supported.",
+        "welcome_email_days_ahead": 2,
+        "max_reservation_days": 31,
+        "ssid_password": ""
+    },
+    "model": "core.location",
     "pk": 1
 }
 ]
