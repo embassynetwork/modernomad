@@ -1288,7 +1288,7 @@
         "is_active": true,
         "is_superuser": false,
         "is_staff": false,
-        "last_login": "2016-08-05T08:37:04.850Z",
+        "last_login": "2016-08-05T09:05:31.480Z",
         "groups": [],
         "user_permissions": [],
         "password": "pbkdf2_sha256$20000$c18xlqVcyQiH$6LrhXBkSsvXjBNkajUbF8Vk3wQ3/8o42DLvW48SQTeM=",
@@ -1318,11 +1318,11 @@
 },
 {
     "fields": {
-        "expire_date": "2016-08-19T08:43:49.553Z",
-        "session_data": "OGFlMWI4NTNlMzVlMGQ4YTJhYjkyNDRjZDQ4MGRiMzM5YmIwMWZmODp7Il9hdXRoX3VzZXJfaGFzaCI6IjQwMjM3MjJjNWNmMDY2MjUwZGMyNzk3Y2E5MzU5NGE4ZDNjY2Y4ZWUiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJtb2Rlcm5vbWFkLmJhY2tlbmRzLkVtYWlsT3JVc2VybmFtZU1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiIzIn0="
+        "expire_date": "2016-08-19T09:05:31.482Z",
+        "session_data": "ZGQ0OWU1MmI3M2ZmOGUyYzg5ZGUyYWI3YzAzZjA3NWE2ZWYyNGNhZDp7Il9hdXRoX3VzZXJfaGFzaCI6IjU0ODZlZTczMTgxYWVlZTQwZjUyZGViZWYyZThlNDBlZjJkMzU4YzMiLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJtb2Rlcm5vbWFkLmJhY2tlbmRzLkVtYWlsT3JVc2VybmFtZU1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOiIyIn0="
     },
     "model": "sessions.session",
-    "pk": "m14f655ebevte0d7rlix4w4v2vxyhmqc"
+    "pk": "1r1h8cq9o6jy7euhc9riensztlu1orkq"
 },
 {
     "fields": {
@@ -1383,6 +1383,70 @@
     },
     "model": "admin.logentry",
     "pk": 4
+},
+{
+    "fields": {
+        "status": "waiting for approval",
+        "organizers": [
+            2,
+            3
+        ],
+        "updated": "2016-08-05T09:04:21.717Z",
+        "endorsements": [],
+        "end": "2016-08-13T06:59:00Z",
+        "description": "<p>Roasting root vegetables over an open fire</p>",
+        "title": "Roasting",
+        "admin": 1,
+        "series": null,
+        "image": "events/c5c6d4fa-c25a-49e1-a63f-6bb06eab2614.jpg",
+        "created": "2016-08-05T09:04:21.699Z",
+        "organizer_notes": "",
+        "visibility": "public",
+        "start": "2016-08-13T00:00:00Z",
+        "creator": 3,
+        "limit": 100,
+        "location": 1,
+        "attendees": [
+            3
+        ],
+        "where": "tree house",
+        "slug": "roasting",
+        "notifications": false
+    },
+    "model": "gather.event",
+    "pk": 1
+},
+{
+    "fields": {
+        "status": "waiting for approval",
+        "organizers": [
+            2,
+            1
+        ],
+        "updated": "2016-08-05T09:09:33.879Z",
+        "endorsements": [],
+        "end": "2016-09-01T19:00:00Z",
+        "description": "<p>Im taking the last best hope for humanity and setting off!</p>",
+        "title": "Launch time",
+        "admin": 1,
+        "series": null,
+        "image": "events/7f8f35cd-b5c1-4df5-a0f0-60b6c15219b3.jpg",
+        "created": "2016-08-05T09:09:33.834Z",
+        "organizer_notes": "Lets no post it on facebook just yet",
+        "visibility": "public",
+        "start": "2016-08-31T19:00:00Z",
+        "creator": 2,
+        "limit": 1800,
+        "location": 1,
+        "attendees": [
+            2
+        ],
+        "where": "Secret underground launch facility",
+        "slug": "launch-time",
+        "notifications": false
+    },
+    "model": "gather.event",
+    "pk": 2
 },
 {
     "fields": {
