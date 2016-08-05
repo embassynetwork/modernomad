@@ -121,6 +121,7 @@
 
 	// call to action scroll
 	$(".locations-btn").click(function() {
+		mixpanel.track("Locations button clicked");
 		$('html, body').animate({
 				scrollTop: $("#locations").offset().top
 		}, 500);
