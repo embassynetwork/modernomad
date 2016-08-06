@@ -131,6 +131,8 @@ INSTALLED_APPS = (
 	'gather',
 	'modernomad',
 	'api',
+    'django_behave',
+    'bdd',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',
@@ -144,7 +146,7 @@ INSTALLED_APPS = (
 	#'debug_toolbar',
 )
 
-TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
