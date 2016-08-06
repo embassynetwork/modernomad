@@ -475,7 +475,7 @@ def occupancy(request, location_slug):
 			comp = True
 			unpaid = False
 		else:
-			this_room_occupancy = room_occupancy.get(r.room, 0)
+			this_room_occupancy = room_occupancy.get(r.resource, 0)
 			this_room_occupancy += nights_this_month
 			room_occupancy[r.resource] = this_room_occupancy
 
@@ -894,6 +894,7 @@ def ReservationSubmit(request, location_slug):
 				messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your reservation request.')
 				return HttpResponseRedirect(reverse('registration_register'))
 		else:
+			logger.debug(request.POST)
 			logger.debug(form.errors)
 	# GET request
 	else:
@@ -2281,7 +2282,7 @@ def process_unsaved_reservation(request):
 				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
 				depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']),
 				location = Location.objects.get(id=details['location']['id']),
-				room = Resource.objects.get(id=details['room']['id']),
+				resource = Resource.objects.get(id=details['resource']['id']),
 				purpose = details['purpose'],
 				arrival_time = details['arrival_time'],
 				comments = details['comments'],

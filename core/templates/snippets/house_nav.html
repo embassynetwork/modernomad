@@ -86,7 +86,7 @@
 					<b class="caret"></b>
 				</a>
 				<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-					{% if location.rooms.count > 0 %}
+					{% if location.resources.count > 0 %}
 						{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">Occupancy</a></li>
 							<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>

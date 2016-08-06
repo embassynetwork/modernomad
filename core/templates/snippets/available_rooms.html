@@ -7,7 +7,7 @@
 		<div id="rooms-available-calendar">
 			{% for room in available_reservations.keys %}
 				<div class="col-lg-6">
-					<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-panel room-select">
+					<label for="select-resource-{{room.id}}" id="label-resource-{{room.id}}" class="room-panel room-select">
 						<div class="panel panel-default">
 							<div class="panel-heading">
 								<h3 class="panel-title">{{room.name}} <span class="pull-right">${{room.default_rate|floatformat:0}}</span></h3>
@@ -19,7 +19,7 @@
 							</div>
 						</div>
 					</label>
-					<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
+					<input type="radio" name="resource" id="select-resource-{{room.id}}" value="{{room.id}}">
 				</div>
 			{% endfor %}
 		</div>
@@ -31,7 +31,7 @@
 		<form id="the-reservation-form" method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
 			<input id="id_arrive" type="hidden" name="arrive" value="{{arrive_date}}">
 			<input id="id_depart" type="hidden" name="depart" value="{{depart_date}}">
-			<input type="hidden" name="room" id="res-selected-room" value="">
+			<input type="hidden" name="resource" id="res-selected-room" value="">
 
 			{% for room, res_dict in available_reservations.items %}
 

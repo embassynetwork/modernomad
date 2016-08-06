@@ -103,7 +103,7 @@ class Location(models.Model):
 		return "stay@%s.mail.embassynetwork.com" % self.slug
 
 	def get_rooms(self):
-		return list(Room.objects.filter(location=self))
+		return list(Resource.objects.filter(location=self))
 
 	def get_members(self):
 		active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
@@ -121,7 +121,7 @@ class Location(models.Model):
 
 	def _rooms_with_future_reservability_queryset(self):
 		today = timezone.localtime(timezone.now())
-		return Room.objects.filter(reservables__isnull=False).filter(location=self).filter(Q(reservables__end_date__gte=today) | Q(reservables__end_date=None)).distinct()
+		return Resource.objects.filter(reservables__isnull=False).filter(location=self).filter(Q(reservables__end_date__gte=today) | Q(reservables__end_date=None)).distinct()
 
 	def reservable_rooms_on_day(self, the_day):
 		rooms_at_location = self.filter(location=self)
@@ -141,7 +141,7 @@ class Location(models.Model):
 					available_beds[room].append({'the_date': the_day, 'beds_free' : 0})
 				else:
 					beds_this_room = room.beds
-					bookings_today = Reservation.objects.confirmed_approved_on_date(the_day, self, room=room)
+					bookings_today = Reservation.objects.confirmed_approved_on_date(the_day, self, resource=room)
 					for booking in bookings_today:
 						beds_this_room = beds_this_room - 1
 					available_beds[room].append({'the_date': the_day, 'beds_free' : beds_this_room })
@@ -149,7 +149,7 @@ class Location(models.Model):
 		return available_beds
 
 	def rooms_free(self, arrive, depart):
-		available = list(self.rooms.all())
+		available = list(self.resources.all())
 		for room in self.get_rooms():
 			the_day = arrive
 			while the_day < depart:
@@ -986,7 +986,7 @@ class Reservation(models.Model):
 				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
 				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
 				'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug':self.location.slug},
-				'room': {'id': self.resource.id, 'name': self.resource.name, 'description': self.resource.description, 'cancellation_policy': self.resource.cancellation_policy},
+				'resource': {'id': self.resource.id, 'name': self.resource.name, 'description': self.resource.description, 'cancellation_policy': self.resource.cancellation_policy},
 				'purpose': self.purpose,
 				'arrival_time': self.arrival_time,
 				'comments': self.comments,

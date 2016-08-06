@@ -331,6 +331,7 @@ class ReservationForm(forms.ModelForm):
 			'purpose': forms.TextInput(attrs={'class':'form-control form-group'}),
 			'comments': forms.Textarea(attrs={'class':'form-control form-group'}),
 		}
+		labels = {'resource': 'Room'}
 
 	def __init__(self, location, *args, **kwargs):
 		super(ReservationForm, self).__init__(*args, **kwargs)
