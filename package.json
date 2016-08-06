@@ -1,0 +1,30 @@
+{
+  "name": "modernomad",
+  "version": "1.0.0",
+  "description": "The embassy network web interface",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/embassynetwork/modernomad.git"
+  },
+  "author": "Jessy Kate Schingler",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/embassynetwork/modernomad/issues"
+  },
+  "homepage": "https://github.com/embassynetwork/modernomad#readme",
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-core": "^6.13.2",
+    "babel-loader": "^6.2.4",
+    "react": "^15.3.0",
+    "webpack": "^1.13.1",
+    "webpack-bundle-tracker": "0.0.93"
+  }
+}
