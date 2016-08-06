@@ -18,3 +18,4 @@ django.log
 .vagrant
 modernomad.komodoproject
 modernomad/local_settings.py.bak
+ghostdriver.log
