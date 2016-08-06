@@ -12,12 +12,9 @@ celery
 local_templates/
 local_templates_hidden/
 backups
-build/
 backup/
 django.log
 .vagrant
 modernomad.komodoproject
 modernomad/local_settings.py.bak
 ghostdriver.log
-node_modules/
-static/bundles/

@@ -4,9 +4,9 @@ var BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
   context: __dirname,
-  entry: './static/webpack/js/index',
+  entry: './js/index',
   output: {
-      path: path.resolve('./static/bundles/'),
+      path: path.resolve('./build/'),
       filename: "[name]-[hash].js"
   },
 
