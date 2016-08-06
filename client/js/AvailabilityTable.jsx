@@ -24,13 +24,14 @@ export default class AvailabilityTable extends React.Component {
     const availabilities = this.props.availabilities;
 
     const rows = availabilities.map((availiability) => {
-      const className = (availiability.id == availabilities[0].id) ? 'success current' : ''
+      const currentRow = availiability.id == availabilities[0].id;
+      const className = currentRow ? 'success current' : ''
       const desc = `${availiability.quantity} booking${availiability.quantity == 1 ? '' : 's'}`
       return (
         <tr key={availiability.id} className={className}>
           <td>{this.formatDate(availiability.start)}</td>
           <td>{desc}</td>
-          <td></td>
+          <td>{currentRow ? null : <a><i className="fa fa-trash pull-right" /></a>}</td>
         </tr>
       )
     });
