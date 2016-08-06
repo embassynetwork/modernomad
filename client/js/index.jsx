@@ -1,5 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import MyComponent from './app'
+import AvailabilityTable from './AvailabilityTable'
 
-ReactDOM.render(<MyComponent />, document.getElementById('react-app'));
+var topLevelComponents = {}
+topLevelComponents.AvailabilityTable = AvailabilityTable;
+
+window.renderReactComponent = function(id, componentName) {
+  var component = topLevelComponents[componentName];
+  ReactDOM.render(React.createElement(component, {}), document.getElementById(id));
+}

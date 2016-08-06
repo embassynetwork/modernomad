@@ -1,67 +1,68 @@
 {% load staticfiles %}
 {% for room_form, reservables_forms, room_id, room_name, room_location_slug, has_image in room_forms %}
-
-<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
-	<form id="form-room_{{room_id}}" class="room-form form-horizontal" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}"> {% csrf_token %}
-		{% for field in room_form %}
-			{% if not field.is_hidden %} 
-				<div class="form-group">
-				{{ field.errors }}
-				{{ field.label_tag }} 
-				<span class="form-help-text">{{ field.help_text}}</span>
-				{{ field }}
-				</div>
-				{% if field.name == 'image' %}
-					<div class="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
-						{% if has_image %}
-							<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ room_form.instance.image.url }}">
-						{% else %}
-							<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ STATIC_URL }}img/default.jpg">
-						{% endif %}
+	<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
+		<form id="form-room_{{room_id}}" class="room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}"> {% csrf_token %}
+			{% for field in room_form %}
+				{% if not field.is_hidden %}
+					<div class="form-group">
+					{{ field.errors }}
+					{{ field.label_tag }}
+					<span class="form-help-text">{{ field.help_text}}</span>
+					{{ field }}
 					</div>
+					{% if field.name == 'image' %}
+						<div class="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
+							{% if has_image %}
+								<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ room_form.instance.image.url }}">
+							{% else %}
+								<img class="img-responsive" id="id_room_{{room_id}}-image-preview" src="{{ STATIC_URL }}img/default.jpg">
+							{% endif %}
+						</div>
+					{% endif %}
+				{% else %}
+					{{ field }}
 				{% endif %}
-			{% else %}
-				{{ field }}
-			{% endif %}
 
-		{% endfor %}
-		<input type="hidden" name="room_id" value="{{room_id}}">
-		<input type="hidden" name="page" value="{{page}}">
-		<input type="hidden" name="username" value="{{username}}">
-		<div class="form-group">
-			<button type="submit" class="btn btn-large btn-default">Submit Room Changes</button>
-		</div>
-	</form>
+			{% endfor %}
+			<input type="hidden" name="room_id" value="{{room_id}}">
+			<input type="hidden" name="page" value="{{page}}">
+			<input type="hidden" name="username" value="{{username}}">
+			<div class="form-group">
+				<button type="submit" class="btn btn-large btn-default">Submit Room Changes</button>
+			</div>
+		</form>
 
-	<hr>
+		<!--
+		<hr>
+		{% if reservables_forms %}
+			<h4>Date Ranges that this room should be reservable</h4>
+			<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
+			<p>The end date entered <em>will</em> be reservable; i.e.,
+			if you enter an end date of April 15, then the room will be
+			reservable on the night of April 15, but not on April 16.
+			</p>
+			{% for reservable_form, reservable_id in reservables_forms %}
+				<form class="form-inline" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}">
+					<div class="form-group">
+						{% for field in reservable_form %}
+							{{ field.errors }}
+							<label>{{ field.label }}</label>
+							{{ field }}
+						{% endfor %}
+						<input type="hidden" name="reservable_id" value="{{reservable_id}}">
+						<input type="hidden" name="room_fk" value="{{room_id}}">
+						<input type="hidden" name="page" value="{{page}}">
+						<input type="hidden" name="username" value="{{username}}">
+						<input class="form-control" type="submit" value="Submit">
+					</div>
+					{% csrf_token %}
+				</form>
+			{% endfor %}
+		{% endif %} -->
 
-	{% if reservables_forms %}
-		<h4>Date Ranges that this room should be reservable</h4>
-		<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
-		<p>The end date entered <em>will</em> be reservable; i.e.,
-		if you enter an end date of April 15, then the room will be
-		reservable on the night of April 15, but not on April 16.
-		</p>
-		{% for reservable_form, reservable_id in reservables_forms %}
-			<form class="form-inline" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}">
-				<div class="form-group">
-					{% for field in reservable_form %}
-						{{ field.errors }}
-						<label>{{ field.label }}</label>
-						{{ field }}
-					{% endfor %}
-					<input type="hidden" name="reservable_id" value="{{reservable_id}}">
-					<input type="hidden" name="room_fk" value="{{room_id}}">
-					<input type="hidden" name="page" value="{{page}}">
-					<input type="hidden" name="username" value="{{username}}">
-					<input class="form-control" type="submit" value="Submit">
-				</div>
-				{% csrf_token %}
-			</form>
-		{% endfor %}
-	{% endif %}
-
-</div>		
+		<div id="react-app-{{room_id}}"></div>
+		<script type="text/javascript">window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityTable')</script>
+	</div>
 {% endfor %}
 
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
@@ -157,13 +158,13 @@
 	image_has_changed = false;
 
 	$("[id^=id_][id$=-image").change(function() {
-		// we need to get the specific room so we can target the right image_preview element. this will be of the form 'id_room_x-image'. 
+		// we need to get the specific room so we can target the right image_preview element. this will be of the form 'id_room_x-image'.
 		console.log('registered image change...');
 		image_has_changed = true;
 		the_this = this;
 		this_image_id = $(this).attr("id");
-	
-		// get just the room_x part. 
+
+		// get just the room_x part.
 		room_x = this_image_id.match(/id_(.*)-image/)[1]
 		preview_id = "#id_"+room_x+"-image-preview"
 		console.log('preview_id')
@@ -171,7 +172,7 @@
 
 		// destroy the previous cropper if it existed
 		$(preview_id).cropper('destroy');
-		
+
 		if ($("#"+this_image_id).val()) {
 			showImage(this, preview_id);
 		}
@@ -185,14 +186,14 @@
 			room_x = form_id.match(/form-(.*)/)[1]
 			preview_id = "#id_"+room_x+"-image-preview"
 			cropped_img_data = "#id_"+room_x+"-cropped_image_data";
-			
+
 			// add the cropped image data to the form, then submit.
 			$(cropped_img_data).val($(preview_id).cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
 		}
 		return true;
 	})
 
-	// multiple select using search and tags. 
+	// multiple select using search and tags.
 	$(".chosen-select").chosen({
 		no_results_text: "No user with that username. Make sure you are searching by username.",
 		width: "95%",

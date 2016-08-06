@@ -37,6 +37,8 @@
 		mixpanel.init("4b2494ff72befabff33e599d5222d8d3");</script>
 		<!-- end Mixpanel -->
 
+		{% render_bundle 'main' %}
+
 		<!-- Begin Inspectlet Embed Code -->
 		<script type="text/javascript" id="inspectletjs">
 		window.__insp = window.__insp || [];
@@ -135,8 +137,5 @@
 
 	{% block extrajs %}
 	{% endblock %}
-
-	<div id="react-app"></div>
-	{% render_bundle 'main' %}
   </body>
 </html>

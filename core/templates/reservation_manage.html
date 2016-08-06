@@ -5,7 +5,7 @@
 
 <div id="spinner">
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
-</div>	
+</div>
 
 {% include "snippets/manage-email-modal.html" %}
 
@@ -15,7 +15,7 @@
     <div class="modal-content">
       <div class="modal-body center">
 		<p class="para-padding">
-			Share this link with a 3rd party if they are submitting payment for you. 
+			Share this link with a 3rd party if they are submitting payment for you.
 		</p>
 		<p class="bg-warning para-padding">
 			https://{{domain}}{% url 'reservation_payment' location.slug r.uuid %}
@@ -95,7 +95,7 @@
 		</ul>
 	</div>
 
-	<div class="col-md-7">	
+	<div class="col-md-7">
 
 		<div class="tab-content">
 
@@ -111,7 +111,7 @@
 			</div>
 
 			<div role="tabpanel" class="tab-pane" id="reservation-manage-bill">
-				<h3>Bill Details</h3>	
+				<h3>Bill Details</h3>
 				{% with bill=r.bill %}
 					{% include "snippets/manage-page-bill-details.html" %}
 				{% endwith %}
@@ -137,7 +137,7 @@
 		</div>
 
 	</div> <!-- end col-md-7 -->
-</div> 
+</div>
 
 {% if r.is_canceled %}
 </div>
@@ -150,7 +150,7 @@
 {% block extrajs %}
 <script language="JavaScript">
 
-function UpdateRefundValue(id, val, field_status) { 
+function UpdateRefundValue(id, val, field_status) {
 	$("#refund-amount-"+id).val(val);
 	if (field_status == "readonly") {
 		$("#refund-amount-"+id).attr("readonly", "readonly");
@@ -160,7 +160,7 @@ function UpdateRefundValue(id, val, field_status) {
 		$("#refund-amount-"+id).removeAttr("readonly");
 		$("#refund-amount-"+id).removeClass("disabled");
 	}
-} 
+}
 
 function toggleRefundDetails(id){
 	if($('#refund-details-'+id).is(':hidden')) {
@@ -203,11 +203,11 @@ function ajax_call(el) {
 	console.log('el is');
 	console.log(action_el);
 	res_action = $(el).attr('id')
-	request = $.ajax({ 
+	request = $.ajax({
 		data: {
 			'reservation-action': res_action,
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
-		}, 
+		},
 		type: $("#res-action-form").attr('method'), // GET or POST
 		url: $("#res-action-form").attr('action') // the url to hit
 	});
@@ -219,7 +219,7 @@ function ajax_call(el) {
 		}
 		// also need to re-register the ajax calls on the new html divs one
 		// it is injected (or we won't be able to chain multiple calls
-		// together without refreshing the page). 
+		// together without refreshing the page).
 		register_actions();
 	});
 	request.fail(function(msg) {
@@ -232,14 +232,14 @@ function ajax_call(el) {
 
 function register_actions() {
 	// comping a reservation reslts in a page reload so we can rely on the
-	// template language here. 
+	// template language here.
 	payment_status = $("#payment-status").html();
-	
+
 	if (payment_status == 'paid') {
 		$("#res-action-toggle-comp").remove();
 	}
 
-	$('.res-manage-action').click(function() { 
+	$('.res-manage-action').click(function() {
 		// action_el gets reset every time res-manage-action is clicked
 		action_el = this;
 		console.log(action_el);
@@ -269,7 +269,7 @@ $(document).ready(function() {
 			'<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
 			'{{f.body|escapejs}}' +
 			'{{f.footer|escapejs}}' +
-			'</div>' + 
+			'</div>' +
 			'<submit value="Send">' +
 			'<div class="modal-footer">' +
 				'<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
@@ -279,13 +279,13 @@ $(document).ready(function() {
 	{% endfor %}
 	console.log($email_templates);
 
-	$('#res-action-charge').submit(function() { 
+	$('#res-action-charge').submit(function() {
 		submitdata = {
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
 		};
 		console.log(submitdata);
-		request = $.ajax({ 
-			data: submitdata, 
+		request = $.ajax({
+			data: submitdata,
 			type: $("#res-action-charge").attr('method'), // GET or POST
 			url: $("#res-action-charge").attr('action'), // the file to call
 		});
@@ -304,12 +304,12 @@ $(document).ready(function() {
 	});
 
 
-	// wire up the ajax-y spinning animated GIF when an ajax call is made. 	
+	// wire up the ajax-y spinning animated GIF when an ajax call is made.
 	$('#spinner').ajaxStart(function () {
         $(this).fadeIn('fast');
     }).ajaxStop(function () {
         $(this).stop().fadeOut('fast');
-    });	
+    });
 });
 
 
