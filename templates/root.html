@@ -1,6 +1,6 @@
 {% load core_tag_extras %}
 {% load staticfiles %}
-
+{% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -136,5 +136,7 @@
 	{% block extrajs %}
 	{% endblock %}
 
+	<div id="react-app"></div>
+	{% render_bundle 'main' %}
   </body>
 </html>

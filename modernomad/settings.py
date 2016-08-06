@@ -4,6 +4,8 @@ import datetime
 
 # Make filepaths relative to settings.
 ROOT = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.normpath(ROOT + '/..')
+
 path = lambda *a: os.path.join(ROOT, *a)
 
 BACKUP_ROOT = ROOT + '/backups/'
@@ -125,6 +127,13 @@ TEMPLATE_DIRS = (
 	path("core/templates/"),
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    }
+}
+
 INSTALLED_APPS = (
 	'core',
 	'djcelery',
@@ -143,6 +152,7 @@ INSTALLED_APPS = (
 	'django.contrib.flatpages',
 	'django.contrib.admindocs',
 	'django.contrib.humanize',
+    'webpack_loader'
 	#'debug_toolbar',
 )
 
