@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='room',
             name='image',
-            field=models.ImageField(help_text=b'Images should be 500px x 325px or a 1 to 0.65 ratio ', null=True, upload_to=core.models.room_img_upload_to, blank=True),
+            field=models.ImageField(help_text=b'Images should be 500px x 325px or a 1 to 0.65 ratio ', null=True, upload_to=core.models.resource_img_upload_to, blank=True),
         ),
     ]

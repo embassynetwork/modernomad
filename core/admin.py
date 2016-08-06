@@ -27,13 +27,13 @@ class EventAdminGroupInline(admin.TabularInline):
 class ReservableAdminInline(admin.TabularInline):
 	model = Reservable
 
-class RoomAdmin(admin.ModelAdmin):
-	model = Room
+class ResourceAdmin(admin.ModelAdmin):
+	model = Resource
 	inlines = [ReservableAdminInline]
 	save_as = True
 
-class RoomAdminInline(admin.TabularInline):
-	model = Room
+class ResourceAdminInline(admin.TabularInline):
+	model = Resource
 	extra = 0
 
 class LocationAdmin(admin.ModelAdmin):
@@ -56,7 +56,7 @@ class LocationAdmin(admin.ModelAdmin):
 	filter_horizontal = ['residents', 'house_admins', 'readonly_admins']
 	actions= ['send_admin_daily_update', 'send_guests_residents_daily_update']
 
-	inlines = [RoomAdminInline]
+	inlines = [ResourceAdminInline]
 	if 'gather' in settings.INSTALLED_APPS:
 		 inlines.append(EventAdminGroupInline)
 
@@ -216,7 +216,7 @@ class ReservationAdmin(admin.ModelAdmin):
 
 	model = Reservation
 	list_filter = ('status', 'location')
-	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'room', 'total_nights', rate, fees, bill, to_house, paid )
+	list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'resource', 'total_nights', rate, fees, bill, to_house, paid )
 	#list_editable = ('status',) # Depricated in favor of drop down actions
 	search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
 	ordering = ['-arrive', 'id']
@@ -269,7 +269,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
-admin.site.register(Room, RoomAdmin)
+admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Bill, BillAdmin)
 admin.site.register(Payment, PaymentAdmin)

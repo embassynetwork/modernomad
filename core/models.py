@@ -114,7 +114,7 @@ class Location(models.Model):
 
 	def rooms_with_future_reservability(self):
 		future_reservability = []
-		for room in Room.objects.filter(location=self):
+		for room in Resource.objects.filter(location=self):
 			if room.future_reservability():
 				future_reservability.append(room)
 		return future_reservability
@@ -253,7 +253,7 @@ def get_location(location_slug):
 			raise LocationNotUniqueException("You did not specify a location and yet there is more than one location defined. Please specify a location.")
 	return location
 
-def room_img_upload_to(instance, filename):
+def resource_img_upload_to(instance, filename):
 	ext = filename.split('.')[-1]
 	# rename file to random string
 	filename = "%s.%s" % (uuid.uuid4(), ext.lower())
@@ -290,17 +290,17 @@ class RoomCalendar(calendar.HTMLCalendar):
 			else:
 				return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 
-class Room(models.Model):
+class Resource(models.Model):
 	name = models.CharField(max_length=200)
-	location = models.ForeignKey(Location, related_name='rooms', null=True)
+	location = models.ForeignKey(Location, related_name='resources', null=True)
 	default_rate = models.DecimalField(decimal_places=2,max_digits=9)
 	description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
 	summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
 	cancellation_policy = models.CharField(max_length=400, default="24 hours")
 	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
 	beds = models.IntegerField()
-	residents = models.ManyToManyField(User, related_name="rooms", help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room.", blank=True) # a room may have many residents and a resident may have many rooms
-	image = models.ImageField(upload_to=room_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
+	residents = models.ManyToManyField(User, related_name="resources", help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room.", blank=True) # a room may have many residents and a resident may have many rooms
+	image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
 
 	def __unicode__(self):
 		return self.name
@@ -316,17 +316,16 @@ class Room(models.Model):
 	def is_reservable(self, this_day):
 		# should never be more than 1 reservable on a given day...
 		try:
-			reservable_today = self.reservables.filter(room=self).filter(start_date__lte=this_day).get(Q(end_date__gte=this_day) | Q(end_date=None))
+			reservable_today = self.reservables.filter(resource=self).filter(start_date__lte=this_day).get(Q(end_date__gte=this_day) | Q(end_date=None))
 		except:
 			reservable_today = False
 		return reservable_today
 
 	def available_on(self, this_day):
-		# a room is available if it is reservable and if it has free beds.
-		# JKS i added the filter(room=self) - need to test this.
+		# a resource is available if it is reservable and if it has free beds.
 		if not self.is_reservable(this_day):
 			return False
-		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, room=self)
+		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
 		beds_left = self.beds
 		for r in reservations_on_this_day:
 			beds_left -= 1
@@ -360,19 +359,19 @@ class ReservationManager(models.Manager):
 		all_on_date = super(ReservationManager, self).get_queryset().filter(location=location).filter(arrive__lte = the_day).filter(depart__gt = the_day)
 		return all_on_date.filter(status=status)
 
-	def confirmed_approved_on_date(self, the_day, location, room=None):
+	def confirmed_approved_on_date(self, the_day, location, resource=None):
 		# return the approved or confirmed reservations that intersect this day
 		approved_reservations = self.on_date(the_day, status= "approved", location=location)
 		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
-		if room:
-			approved_reservations = approved_reservations.filter(room=room)
-			confirmed_reservations = confirmed_reservations.filter(room=room)
+		if resource:
+			approved_reservations = approved_reservations.filter(resource=resource)
+			confirmed_reservations = confirmed_reservations.filter(resource=resource)
 		return (list(approved_reservations) + list(confirmed_reservations))
 
-	def confirmed_on_date(self, the_day, location, room=None):
+	def confirmed_on_date(self, the_day, location, resource=None):
 		confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
-		if room:
-			confirmed_reservations = confirmed_reservations.filter(room=room)
+		if resource:
+			confirmed_reservations = confirmed_reservations.filter(resource=resource)
 		return list(confirmed_reservations)
 
 	def confirmed_but_unpaid(self, location):
@@ -432,13 +431,13 @@ class Bill(models.Model):
 
 	def subtotal_items(self):
 		# items that go into the subtotal before calculating taxes and fees.
-		# NOTE: will return an *ordered* list with the base room fee first.
+		# NOTE: will return an *ordered* list with the base resource fee first.
 
-		# the base room fee is not derived from a standing fee, and is not a custom fee
-		base_room_fee = self.line_items.filter(fee__isnull=True).filter(custom=False)
+		# the base resource fee is not derived from a standing fee, and is not a custom fee
+		base_resource_fee = self.line_items.filter(fee__isnull=True).filter(custom=False)
 		# all other line items that go into the subtotal are custom fees
 		addl_fees = self.line_items.filter(fee__isnull=True).filter(custom=True)
-		return list(base_room_fee) + list(addl_fees)
+		return list(base_resource_fee) + list(addl_fees)
 
 	def fees(self):
 		# the taxes and fees on top of subtotal
@@ -480,12 +479,12 @@ class Bill(models.Model):
 			return None
 
 	def ordered_line_items(self):
-		# return bill line items orderer first with the room item, then the
+		# return bill line items orderer first with the resource item, then the
 		# custom items, then the fees
-		room_item = self.line_items.filter(custom=False).filter(fee=None)
+		resource_item = self.line_items.filter(custom=False).filter(fee=None)
 		custom_items = self.line_items.filter(custom=True)
 		fees = self.line_items.filter(fee__isnull=False)
-		return list(room_item) + list(custom_items) + list(fees)
+		return list(resource_item) + list(custom_items) + list(fees)
 
 	def is_reservation_bill(self):
 		return hasattr(self, 'reservationbill')
@@ -742,7 +741,7 @@ class Subscription(models.Model):
 		line_items.append(line_item)
 
 		# Incorporate any custom fees or discounts. As well, track the
-		# effective room charge to be used in calculation of percentage-based
+		# effective resource charge to be used in calculation of percentage-based
 		# fees
 		effective_bill_charge = price
 		for item in custom_items:
@@ -870,13 +869,6 @@ class SubscriptionBill(Bill):
 			days = (end - self.period_start).days
 		return days
 
-
-
-# TBD
-#class RoomSubscription(Subscription):
-#	nights = models.IntegerField(help_text="How many nights does this subscription entitle the member to?")
-
-
 class ReservationBill(Bill):
 	pass
 
@@ -913,7 +905,7 @@ class Reservation(models.Model):
 	arrive = models.DateField(verbose_name='Arrival Date')
 	depart = models.DateField(verbose_name='Departure Date')
 	arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-	room = models.ForeignKey(Room, null=True)
+	resource = models.ForeignKey(Resource, null=True)
 	tags = models.CharField(max_length =200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
 	purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
 	comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
@@ -953,17 +945,17 @@ class Reservation(models.Model):
 
 		line_items = []
 
-		# The first line item is for the room charge
-		room_charge_desc = "%s (%d * $%s)" % (self.room.name, self.total_nights(), self.get_rate())
-		room_charge = self.base_value()
-		room_line_item = BillLineItem(bill=reservation_bill, description=room_charge_desc, amount=room_charge, paid_by_house=False)
-		line_items.append(room_line_item)
+		# The first line item is for the resource charge
+		resource_charge_desc = "%s (%d * $%s)" % (self.resource.name, self.total_nights(), self.get_rate())
+		resource_charge = self.base_value()
+		resource_line_item = BillLineItem(bill=reservation_bill, description=resource_charge_desc, amount=resource_charge, paid_by_house=False)
+		line_items.append(resource_line_item)
 
 		# Incorporate any custom fees or discounts
-		effective_room_charge = room_charge
+		effective_resource_charge = resource_charge
 		for item in custom_items:
 			line_items.append(item)
-			effective_room_charge += item.amount #may be negative
+			effective_resource_charge += item.amount #may be negative
 
 		# A line item for every fee that applies to this location
 		if reset_suppressed:
@@ -973,7 +965,7 @@ class Reservation(models.Model):
 			#print location_fee.fee not in self.suppressed_fees.all()
 			if location_fee.fee not in self.suppressed_fees.all():
 				desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
-				amount = float(effective_room_charge) * location_fee.fee.percentage
+				amount = float(effective_resource_charge) * location_fee.fee.percentage
 				fee_line_item = BillLineItem(bill=reservation_bill, description=desc, amount=amount, paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee)
 				line_items.append(fee_line_item)
 
@@ -994,7 +986,7 @@ class Reservation(models.Model):
 				'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
 				'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
 				'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug':self.location.slug},
-				'room': {'id': self.room.id, 'name': self.room.name, 'description': self.room.description, 'cancellation_policy': self.room.cancellation_policy},
+				'room': {'id': self.resource.id, 'name': self.resource.name, 'description': self.resource.description, 'cancellation_policy': self.resource.cancellation_policy},
 				'purpose': self.purpose,
 				'arrival_time': self.arrival_time,
 				'comments': self.comments,
@@ -1048,7 +1040,7 @@ class Reservation(models.Model):
 	def default_rate(self):
 		# default_rate always returns the default rate regardless of comps or
 		# custom rates.
-		return self.room.default_rate
+		return self.resource.default_rate
 
 	def get_rate(self):
 		if self.rate == None:
@@ -1062,20 +1054,20 @@ class Reservation(models.Model):
 
 	def calc_non_house_fees(self):
 		# Calculate the amount of fees not paid by the house
-		room_charge = self.base_value()
+		resource_charge = self.base_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if not location_fee.fee.paid_by_house:
-				amount = amount + (room_charge * location_fee.fee.percentage)
+				amount = amount + (resource_charge * location_fee.fee.percentage)
 		return amount
 
 	def calc_house_fees(self):
 		# Calculate the amount of fees the house owes
-		room_charge = self.base_value()
+		resource_charge = self.base_value()
 		amount = 0.0
 		for location_fee in LocationFee.objects.filter(location = self.location):
 			if location_fee.fee.paid_by_house:
-				amount = amount + (room_charge * location_fee.fee.percentage)
+				amount = amount + (resource_charge * location_fee.fee.percentage)
 		return amount
 
 	def calc_bill_amount(self):
@@ -1096,7 +1088,7 @@ class Reservation(models.Model):
 		self.generate_bill()
 
 	def reset_rate(self):
-		self.set_rate(self.room.default_rate)
+		self.set_rate(self.resource.default_rate)
 
 	def mark_last_msg(self):
 		self.last_msg = datetime.datetime.now()
@@ -1179,8 +1171,8 @@ class PaymentManager(models.Manager):
 		subscription_payments = Payment.objects.filter(bill__in=SubscriptionBill.objects.filter(subscription__location=location))
 		return subscription_payments
 
-	def reservation_payments_by_room(self, room):
-		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__room=room))
+	def reservation_payments_by_resource(self, resource):
+		reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__resource=resource))
 		return reservation_payments
 
 class Payment(models.Model):
@@ -1434,7 +1426,7 @@ class LocationFee(models.Model):
 class BillLineItem(models.Model):
 	bill = models.ForeignKey(Bill, related_name="line_items", null=True)
 	# the fee that this line item was based on, if any (line items are also
-	# generated for the base room rate, which doesn't have an associated fee)
+	# generated for the base resource rate, which doesn't have an associated fee)
 	fee = models.ForeignKey(Fee, null=True)
 	description = models.CharField(max_length=200)
 	# the actual amount of this line item (if this is a line item derived from
@@ -1478,7 +1470,7 @@ class LocationFlatPage(models.Model):
 		return self.flatpage.title
 
 class Reservable(models.Model):
-	room = models.ForeignKey(Room, related_name="reservables")
+	resource = models.ForeignKey(Resource, related_name="reservables")
 	start_date = models.DateField()
 	end_date = models.DateField(null=True, blank=True, help_text="Leave this blank for a guest room or room with open ended reservability.")
 
@@ -1510,14 +1502,14 @@ class SubscriptionNote(models.Model):
 		return '%s - %d: %s' % (self.created.date(), self.subscription.id, self.note)
 
 class BaseImage(models.Model):
-	original = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
-	large = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
-	med = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
-	thumb = models.ImageField(upload_to=room_img_upload_to, blank=True, null=True)
+	original = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
+	large = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
+	med = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
+	thumb = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
 	caption = models.CharField(max_length=200, blank=True, null=True)
 
 class RoomImage(BaseImage):
-	room = models.ForeignKey(Room)
+	resource = models.ForeignKey(Resource)
 
 class LocationImage(BaseImage):
 	location = models.ForeignKey(Location)

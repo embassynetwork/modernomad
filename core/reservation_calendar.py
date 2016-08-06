@@ -1,6 +1,6 @@
 from calendar import HTMLCalendar
 from datetime import date, timedelta
-from core.models import Reservation, Room
+from core.models import Reservation, Resource
 
 from django.utils.html import conditional_escape as esc
 
@@ -31,7 +31,7 @@ class GuestCalendar(HTMLCalendar):
 				if not any_availability:
 					cssclass += ' full-today'
 				for reservation in self.reservations[day]:
-					if reservation.room.shared:
+					if reservation.resource.shared:
 						num_shared += 1
 					else:
 						num_private += 1
@@ -41,7 +41,7 @@ class GuestCalendar(HTMLCalendar):
 						body.append('<a href="#reservation%d" class="greyed-out">' % reservation.id)
 					else:
 						body.append('<a href="#reservation%d">' % reservation.id)
-					body.append(esc("%s (%s)" % (reservation.user.first_name.title(), reservation.room.name)))
+					body.append(esc("%s (%s)" % (reservation.user.first_name.title(), reservation.resource.name)))
 					body.append('</a>')
 					if reservation.arrive.day == day:
 						body.append('<em> (Arrive)</em>') 					

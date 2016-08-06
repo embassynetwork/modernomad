@@ -75,7 +75,7 @@ def guest_rooms(request, location_slug):
 
 def view_room(request, location_slug, room_id):
 	location = get_object_or_404(Location, slug=location_slug)
-	room = get_object_or_404(Room, id=room_id)
+	room = get_object_or_404(Resource, id=room_id)
 	today = timezone.localtime(timezone.now())
 	month = request.GET.get("month")
 	year = request.GET.get("year")
@@ -154,10 +154,10 @@ def room_occupancy_month(room, month, year):
 
 	# note the day parameter is meaningless
 	report_date = datetime.date(year, month, 1)
-	reservations = Reservation.objects.filter(room=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+	reservations = Reservation.objects.filter(resource=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
 	# payments *received* this month for this room
-	payments_for_room = Payment.objects.reservation_payments_by_room(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
+	payments_for_room = Payment.objects.reservation_payments_by_resource(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
 	payments_cash = 0
 	for p in payments_for_room:
 		payments_cash += p.paid_amount
@@ -254,7 +254,7 @@ def room_occupancy_month(room, month, year):
 
 @resident_or_admin_required
 def room_occupancy(request, location_slug, room_id, year):
-	room = get_object_or_404(Room, id=room_id)
+	room = get_object_or_404(Resource, id=room_id)
 	year = int(year)
 	response = HttpResponse(content_type='text/csv')
 	output_filename = "%s Occupancy Report %d.csv" % (room.name, year)
@@ -477,14 +477,14 @@ def occupancy(request, location_slug):
 		else:
 			this_room_occupancy = room_occupancy.get(r.room, 0)
 			this_room_occupancy += nights_this_month
-			room_occupancy[r.room] = this_room_occupancy
+			room_occupancy[r.resource] = this_room_occupancy
 
 			# the bill has the amount that goes to the house after fees
 			to_house_per_night = r.bill.to_house()/r.total_nights()
 			total_income += nights_this_month*to_house_per_night
-			this_room_income = room_income.get(r.room, 0)
+			this_room_income = room_income.get(r.resource, 0)
 			this_room_income += nights_this_month*to_house_per_night
-			room_income[r.room] = this_room_income
+			room_income[r.resource] = this_room_income
 
 			# If there are payments, calculate the payment rate
 			if r.payments():
@@ -516,7 +516,7 @@ def occupancy(request, location_slug):
 		person_nights_data.append({
 			'reservation': r,
 			'nights_this_month': nights_this_month,
-			'room': r.room.name,
+			'room': r.resource.name,
 			'rate': rate,
 			'partial_payment': partial_payment,
 			'total_owed': total_owed,
@@ -527,7 +527,7 @@ def occupancy(request, location_slug):
 		total_occupied_person_nights += nights_this_month
 
 	rooms_with_availability_this_month = []
-	location_rooms = location.rooms.all()
+	location_rooms = location.resources.all()
 	total_reservable_days = 0
 	reservable_days_per_room = {}
 	for room in location_rooms:
@@ -624,7 +624,7 @@ def calendar(request, location_slug):
 	reservations = (Reservation.objects.filter(Q(status="confirmed") | Q(status="approved"))
 		.filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
 
-	rooms = Room.objects.filter(location=location)
+	rooms = Resource.objects.filter(location=location)
 	reservations_by_room = []
 	empty_rooms = 0
 
@@ -642,7 +642,7 @@ def calendar(request, location_slug):
 	for room in rooms:
 		reservations_this_room = []
 
-		reservation_list_this_room = list(reservations.filter(room=room))
+		reservation_list_this_room = list(reservations.filter(resource=room))
 
 		if len(reservation_list_this_room) == 0:
 			empty_rooms += 1
@@ -686,7 +686,7 @@ def room_cal_request(request, location_slug, room_id, month=None, year=None, bro
 
 	try:
 		location = get_object_or_404(Location, slug=location_slug)
-		room = Room.objects.get(id=room_id)
+		room = Resource.objects.get(id=room_id)
 	except:
 		return HttpResponseRedirect('/')
 
@@ -769,7 +769,7 @@ def UserDetail(request, username):
 
 	# grab the rooms that this user is a backer/resident of
 	room_forms = []
-	rooms = user.rooms.all()
+	rooms = user.resources.all()
 	for room in rooms:
 		room_reservables = room.reservables.all().order_by('start_date')
 		reservables_forms = []
@@ -819,7 +819,7 @@ def CheckRoomAvailability(request, location_slug):
 	# Create some mock reservations for each available room so we can generate the bill
 	free_rooms = location.rooms_free(arrive, depart)
 	for room in free_rooms:
-		reservation = Reservation(id=-1, room=room, arrive=arrive, depart=depart, location=location)
+		reservation = Reservation(id=-1, resource=room, arrive=arrive, depart=depart, location=location)
 		bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
 		total = Decimal(0.0)
 		for item in bill_line_items:
@@ -1090,7 +1090,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 	# yet!)
 	original_arrive = reservation.arrive
 	original_depart = reservation.depart
-	original_room = reservation.room
+	original_room = reservation.resource
 	if request.user.is_authenticated() and request.user == reservation.user:
 		logger.debug("ReservationEdit: Authenticated and same user")
 		if request.user in reservation.location.house_admins.all():
@@ -1112,7 +1112,7 @@ def ReservationEdit(request, reservation_id, location_slug):
 				logger.debug("is_pending: %s" % reservation.is_pending())
 				logger.debug("arrive: %s, original: %s" % (reservation.arrive, original_arrive))
 				logger.debug("depart: %s, original: %s" % (reservation.depart, original_depart))
-				logger.debug("room: %s, original: %s" % (reservation.room, original_room))
+				logger.debug("room: %s, original: %s" % (reservation.resource, original_room))
 				if (not reservation.is_pending() and (reservation.arrive != original_arrive or
 					reservation.depart != original_depart or reservation.room != original_room )):
 					logger.debug("reservation room or date was changed. updating status.")
@@ -1360,7 +1360,7 @@ def LocationEditPages(request, location_slug):
 def LocationEditRooms(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
 
-	location_rooms = location.rooms.all().order_by('name')
+	location_rooms = location.resources.all().order_by('name')
 
 	if request.method == 'POST':
 		print 'received new room or room data'
@@ -1370,7 +1370,7 @@ def LocationEditRooms(request, location_slug):
 				# editing an existing item
 				print 'updating an existing room'
 				action = "updated"
-				room = Room.objects.get(id=room_id)
+				room = Resource.objects.get(id=room_id)
 				# request.POST keys now have a prefix, so don't forget to pass that along here!
 				prefix = "room_%d" % room_id
 				form = LocationRoomForm(request.POST, request.FILES, instance=room, prefix=prefix)
@@ -1406,11 +1406,11 @@ def LocationEditRooms(request, location_slug):
 					form.save()
 				else:
 					room_fk = request.POST.get('room_fk')
-					room = Room.objects.get(id=room_fk)
+					room = Resource.objects.get(id=room_fk)
 					new_reservable = form.save(commit=False)
-					new_reservable.room = room
+					new_reservable.resource = room
 					new_reservable.save()
-				room = Room.objects.get(id=request.POST.get('room_fk'))
+				room = Resource.objects.get(id=request.POST.get('room_fk'))
 				messages.add_message(request, messages.INFO, "Reservable date range %s for %s." % (action, room.name))
 			else:
 				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
@@ -1557,7 +1557,7 @@ def ReservationManage(request, location_slug, reservation_id):
 	availability = location.availability(reservation.arrive, reservation.depart)
 	free = location.rooms_free(reservation.arrive, reservation.depart)
 	date_list = date_range_to_list(reservation.arrive, reservation.depart)
-	if reservation.room in free:
+	if reservation.resource in free:
 		room_has_availability = True
 	else:
 		room_has_availability = False
@@ -1678,8 +1678,8 @@ def ReservationManageEdit(request, location_slug, reservation_id):
 			messages.add_message(request, messages.INFO, "Invalid room given!")
 	elif 'room_id' in request.POST:
 		try:
-			new_room = Room.objects.get(pk=request.POST.get("room_id"))
-			reservation.room = new_room
+			new_room = Resource.objects.get(pk=request.POST.get("room_id"))
+			reservation.resource = new_room
 			reservation.save()
 			reservation.reset_rate()
 			messages.add_message(request, messages.INFO, "Room changed.")
@@ -2281,7 +2281,7 @@ def process_unsaved_reservation(request):
 				arrive = datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
 				depart = datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']),
 				location = Location.objects.get(id=details['location']['id']),
-				room = Room.objects.get(id=details['room']['id']),
+				room = Resource.objects.get(id=details['room']['id']),
 				purpose = details['purpose'],
 				arrival_time = details['arrival_time'],
 				comments = details['comments'],
