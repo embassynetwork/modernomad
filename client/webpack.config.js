@@ -11,8 +11,6 @@ module.exports = {
   output: {
       path: path.resolve('./build/'),
       filename: "[name]-[hash].js",
-	  //does this need to match our build/ directory?
-	  //publicPath: 'http://localhost:3000/assets/bundles/', // Tell django to use this URL to load packages and not use STATIC_URL + bundle_name
 	  publicPath: 'http://localhost:3000/build/', // Tell django to use this URL to load packages and not use STATIC_URL + bundle_name
   },
 
