@@ -61,7 +61,14 @@
 		{% endif %} -->
 
 		<div id="react-app-{{room_id}}"></div>
-		<script type="text/javascript">window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityTable')</script>
+		<script type="text/javascript">window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityTable', {
+			availabilities: [
+	      {id: 1, start: null, quantity: 1},
+	      {id: 2, start: "2016-02-03", quantity: 3},
+	      {id: 3, start: "2016-03-01", quantity: 0},
+	      {id: 4, start: "2018-12-25", quantity: 20}
+	    ]
+		})</script>
 	</div>
 {% endfor %}
 

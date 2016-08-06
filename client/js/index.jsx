@@ -5,7 +5,7 @@ import AvailabilityTable from './AvailabilityTable'
 var topLevelComponents = {}
 topLevelComponents.AvailabilityTable = AvailabilityTable;
 
-window.renderReactComponent = function(id, componentName) {
+window.renderReactComponent = function(id, componentName, props) {
   var component = topLevelComponents[componentName];
-  ReactDOM.render(React.createElement(component, {}), document.getElementById(id));
+  ReactDOM.render(React.createElement(component, props), document.getElementById(id));
 }
