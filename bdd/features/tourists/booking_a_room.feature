@@ -17,4 +17,4 @@ Feature: Booking a room
     Then  they should be asked to create a profile
     When  they create a valid profile
     Then  they should have a pending reservation
-    And   the house admins get an email about a new pending reservation
+    # And   the house admins get an email about a new pending reservation

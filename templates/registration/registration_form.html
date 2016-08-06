@@ -9,11 +9,18 @@
 	<script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
 	<!-- image cropping -->
 	<link  href="https://cdn.rawgit.com/fengyuanchen/cropper/v1.0.0/dist/cropper.min.css" rel="stylesheet">
-	<script src="https://cdn.rawgit.com/fengyuanchen/cropper/v1.0.0/dist/cropper.min.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
+
+	{% if MODE == PRODUCTION %}
+		<script src="https://cdn.rawgit.com/fengyuanchen/cropper/v1.0.0/dist/cropper.min.js"></script>
+	{% else %}
+		<script src="{% static 'js/cropper.js' %}"></script>
+	{% endif %}
+
+	<!-- <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script> -->
 {% endblock %}
 
 {% block body %}
+
 <div class="row"><div class="col-sm-10 col-sm-offset-1">
 	{% if messages %}
 	<div class="messages top-spacer">

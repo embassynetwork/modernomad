@@ -61,6 +61,8 @@ def impl(context):
     context.browser.execute_script("$('input[name=city]').prop('disabled', false)")
     context.browser.find_by_id('profilesubmit').first.click()
 
+    time.sleep(1)
+
     context.current_user = User.objects.get(email="bilbo@baggins.com")
 
     assert context.browser.is_text_present("Thank you! Your reservation has been submitted")
@@ -77,9 +79,6 @@ def impl(context):
     context.browser.find_link_by_text('Reservations').click()
     table_rows = context.browser.find_by_css('#reservation-list-table tr')
     expect(len(table_rows)).to.eq(1)
-    # print(table.text)
-    # if not table.is_text_present("pending"):
-    #     assert False
 
 @then(u'they should be asked to create a profile')
 def impl(context):

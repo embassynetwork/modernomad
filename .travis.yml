@@ -3,6 +3,10 @@ python:
   - "2.7"
 services:
   - postgresql
+before_install:
+  - export CHROME_BIN=chromium-browser
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
 install:
   - "pip install -r requirements.txt"
   - "pip install -r requirements.test.txt"
