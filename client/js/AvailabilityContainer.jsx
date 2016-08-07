@@ -4,7 +4,7 @@ import { clone } from 'lodash'
 
 export default class AvailabilityContainer extends React.Component {
   constructor(props) {
-    super({})
+    super(props)
     this.state = clone(props)
   }
 

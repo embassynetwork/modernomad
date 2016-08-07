@@ -2,12 +2,19 @@ import React, {PropTypes} from 'react'
 var moment = require('moment');
 
 export default class AvailabilityTable extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      showForm: false
+    }
+  }
+
   static propTypes = {
-    availabilities: PropTypes.arrayOf({
+    availabilities: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.number.isRequired,
       start: PropTypes.string,
       quantity: PropTypes.number.isRequired
-    }).isRequired
+    })).isRequired
   }
 
   formatDate(date) {
@@ -17,6 +24,18 @@ export default class AvailabilityTable extends React.Component {
       return momentDate.format(formatString)
     } else {
       return "now";
+    }
+  }
+
+  openForm() {
+    this.setState({showForm: true})
+  }
+
+  renderForm() {
+    if (this.state.showForm) {
+      return <div>the form</div>
+    } else {
+      return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Add availability</button>
     }
   }
 
@@ -49,7 +68,7 @@ export default class AvailabilityTable extends React.Component {
           {rows}
         </tbody>
       </table>
-      <button className="btn btn-default">Add availability</button>
+      {this.renderForm()}
     </div>;
   }
 }
