@@ -32,9 +32,13 @@ export default class AvailabilityTable extends React.Component {
     this.setState({showForm: true})
   }
 
+  closeForm() {
+    this.setState({showForm: false})
+  }
+
   renderForm() {
     if (this.state.showForm) {
-      return <AvailabilityForm />
+      return <AvailabilityForm onCancel={this.closeForm.bind(this)} />
     } else {
       return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Add availability</button>
     }

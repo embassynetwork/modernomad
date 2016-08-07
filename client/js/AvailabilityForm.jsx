@@ -1,6 +1,10 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 
 export default class AvailabilityForm extends React.Component {
+  static propTypes = {
+    onCancel: PropTypes.func
+  }
+
   render() {
     return (
       <div className="well">
@@ -15,7 +19,10 @@ export default class AvailabilityForm extends React.Component {
               <input type="number" className="form-control" id="inputEmail3" min="0" max="100" />
             </div>
           </div>
-          <button className="btn btn-primary">Submit</button>
+          <div>
+            <a className="btn btn-default" onClick={this.props.onCancel}>Cancel</a>
+            <button className="btn btn-primary pull-right">Submit</button>
+          </div>
         </form>
       </div>
     );
