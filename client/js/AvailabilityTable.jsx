@@ -36,9 +36,13 @@ export default class AvailabilityTable extends React.Component {
     this.setState({showForm: false})
   }
 
+  onFormSubmit(values) {
+    console.log("values received from form", values)
+  }
+
   renderForm() {
     if (this.state.showForm) {
-      return <AvailabilityForm onCancel={this.closeForm.bind(this)} />
+      return <AvailabilityForm onCancel={this.closeForm.bind(this)} onSubmit={this.onFormSubmit.bind(this)} />
     } else {
       return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Add availability</button>
     }

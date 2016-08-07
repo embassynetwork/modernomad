@@ -2,21 +2,31 @@ import React, {PropTypes} from 'react'
 
 export default class AvailabilityForm extends React.Component {
   static propTypes = {
-    onCancel: PropTypes.func
+    onCancel: PropTypes.func.isRequired,
+    onSubmit: PropTypes.func.isRequired
+  }
+
+  submit(event) {
+    const values = {
+      date: this.refs.date.value,
+      quantity: parseInt(this.refs.quantity.value) || 0
+    }
+    event.preventDefault()
+    this.props.onSubmit(values);
   }
 
   render() {
     return (
       <div className="well">
-        <form className="form-inline">
+        <form className="form-inline" onSubmit={this.submit.bind(this)}>
           <div className="row">
             <div className="form-group col-xs-8">
-              <label for="inputEmail3" className="control-label">Start date</label>
-              <input type="date" className="form-control" id="inputEmail3" placeholder="date" />
+              <label htmlFor="date" className="control-label">Start date</label>
+              <input name="date" type="date" className="form-control" ref="date" required={true} />
             </div>
             <div className="form-group col-xs-4">
-              <label for="inputEmail3" className="control-label">Availability</label>
-              <input type="number" className="form-control" id="inputEmail3" min="0" max="100" />
+              <label htmlFor="quantity" className="control-label">Availability</label>
+              <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} />
             </div>
           </div>
           <div>
