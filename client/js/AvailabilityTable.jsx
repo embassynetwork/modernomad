@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react'
+import AvailabilityForm from './AvailabilityForm'
 var moment = require('moment');
 
 export default class AvailabilityTable extends React.Component {
@@ -33,7 +34,7 @@ export default class AvailabilityTable extends React.Component {
 
   renderForm() {
     if (this.state.showForm) {
-      return <div>the form</div>
+      return <AvailabilityForm />
     } else {
       return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Add availability</button>
     }
