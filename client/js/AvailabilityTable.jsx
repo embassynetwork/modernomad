@@ -45,7 +45,7 @@ export default class AvailabilityTable extends React.Component {
     if (this.state.showForm) {
       return <AvailabilityForm onCancel={this.closeForm.bind(this)} onSubmit={this.onFormSubmit.bind(this)} />
     } else {
-      return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Add availability</button>
+      return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Schedule a change</button>
     }
   }
 
@@ -55,29 +55,44 @@ export default class AvailabilityTable extends React.Component {
     const rows = availabilities.map((availiability) => {
       const currentRow = availiability.id == availabilities[0].id;
       const className = currentRow ? 'success current' : ''
-      const desc = `${availiability.quantity} booking${availiability.quantity == 1 ? '' : 's'}`
+      const desc = `${availiability.quantity}`
+      if (currentRow) {
+        return null;
+      }
       return (
         <tr key={availiability.id} className={className}>
           <td>{this.formatDate(availiability.start)}</td>
-          <td>{desc}</td>
+          <td><span className="text-success" style={{backgroundColor: "#DDDDDD", border: "1px solid #3c763d", display: "inline-block", padding: "0 6px", borderRadius: "4px"}}>{desc}</span></td>
           <td>{currentRow ? null : <a><i className="fa fa-trash pull-right" /></a>}</td>
         </tr>
       )
     });
 
     return <div>
-      <table className="table table-striped availabilities-table">
-        <thead>
-          <tr>
-            <th>Starting</th>
-            <th>Availability for...</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows}
-        </tbody>
-      </table>
+      <div style={{fontSize: "150%"}}>
+        <h3>Availability</h3>
+        <p>
+          Currently accepts <span style={{backgroundColor: "#DDDDDD", color: "#3c763d", border: "1px solid #3c763d", display: "inline-block", padding: "0 6px", borderRadius: "4px"}}>2</span> bookings
+          at a time
+        </p>
+      </div>
+      <div className="panel panel-default">
+        <div className="panel-heading">
+          <h4>Upcoming availability changes</h4>
+        </div>
+        <table className="table table-striped availabilities-table">
+          <thead>
+            <tr>
+              <th>On</th>
+              <th>Availability changes to</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows}
+          </tbody>
+        </table>
+      </div>
       {this.renderForm()}
     </div>;
   }
