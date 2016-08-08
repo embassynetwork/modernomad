@@ -21,11 +21,12 @@ export default class AvailabilityTable extends React.Component {
   formatDate(date) {
     if (date) {
       const momentDate = moment(date);
-      const formatString = (momentDate.year() == moment().year()) ? "Mo MMM" : "Mo MMM, Y"
-      return momentDate.format(formatString)
-    } else {
-      return "now";
+      if (momentDate > moment().endOf("day")) {
+        const formatString = (momentDate.year() == moment().year()) ? "Mo MMM" : "Mo MMM, Y"
+        return momentDate.format(formatString)
+      }
     }
+    return "now";
   }
 
   openForm() {
