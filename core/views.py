@@ -1427,7 +1427,7 @@ def LocationEditRooms(request, location_slug):
 		room_names = []
 		room_names.append("New Room")
 		# the empty form
-		room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room", location.slug, False, "[]"))
+		room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room", location.slug, False, "null", "[]"))
 		# forms for the existing rooms
 		for room in location_rooms:
 			room_reservables = room.reservables.all().order_by('start_date')
@@ -1444,15 +1444,14 @@ def LocationEditRooms(request, location_slug):
 			today = timezone.localtime(timezone.now())
 			availabilities = list(Availability.objects.filter(resource=room, start_date__gt=today).order_by('start_date'))
 			current = Availability.objects.filter(resource=room, start_date__lte=today).order_by('-start_date').first()
-			if current is not None:
-				availabilities = [current] + availabilities
+			if current:
+				current = current.toDict()
 			availabilities_list = []
 			for a in availabilities:
-				row = {'id': a.id, 'start': a.start_date.strftime("%Y-%m-%d"), 'quantity': a.quantity}
-				availabilities_list.append(row)
-			
-			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, 
-				room.id, room.name, room.location.slug, has_image, json.dumps(availabilities_list)))
+				availabilities_list.append(a.toDict())
+
+			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms,
+				room.id, room.name, room.location.slug, has_image, json.dumps(current), json.dumps(availabilities_list)))
 			room_names.append(room.name)
 
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms,})

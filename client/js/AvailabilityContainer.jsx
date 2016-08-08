@@ -9,6 +9,6 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   render() {
-    return <AvailabilityTable availabilities={this.state.availabilities} />;
+    return <AvailabilityTable currentAvailability={this.state.currentAvailability} upcomingAvailabilities={this.state.upcomingAvailabilities} />;
   }
 }

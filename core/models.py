@@ -1524,3 +1524,5 @@ class Availability(models.Model):
 	class Meta:
 		verbose_name_plural = 'Availabilities'
 
+	def toDict(self):
+		return {'id': self.id, 'start': self.start_date.strftime("%Y-%m-%d"), 'quantity': self.quantity}
