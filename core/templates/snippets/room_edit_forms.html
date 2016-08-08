@@ -1,5 +1,5 @@
 {% load staticfiles %}
-{% for room_form, reservables_forms, room_id, room_name, room_location_slug, has_image in room_forms %}
+{% for room_form, reservables_forms, room_id, room_name, room_location_slug, has_image, room_availabilities in room_forms %}
 	<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
 		<form id="form-room_{{room_id}}" class="room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}"> {% csrf_token %}
 			{% for field in room_form %}
@@ -61,14 +61,13 @@
 		{% endif %} -->
 
 		<div id="react-app-{{room_id}}"></div>
-		<script type="text/javascript">window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityContainer', {
-			availabilities: [
-	      {id: 1, start: null, quantity: 1},
-	      {id: 2, start: "2016-02-03", quantity: 3},
-	      {id: 3, start: "2016-03-01", quantity: 0},
-	      {id: 4, start: "2018-12-25", quantity: 20}
-	    ]
-		})</script>
+		<script type="text/javascript">
+			if ({{room_id}} > 0 ) {
+				window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityContainer', {
+					availabilities: {{room_availabilities|safe}}
+				})
+			}
+		</script>
 	</div>
 {% endfor %}
 

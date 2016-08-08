@@ -1519,5 +1519,8 @@ class Availability(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	resource = models.ForeignKey(Resource)
 	start_date = models.DateTimeField()
-	number = models.IntegerField()
+	quantity = models.IntegerField()
+
+	class Meta:
+		verbose_name_plural = 'Availabilities'
 

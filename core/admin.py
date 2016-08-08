@@ -267,6 +267,9 @@ class SubscriptionAdmin(admin.ModelAdmin):
 	actions= ['generate_bill', 'generate_all_bills']
 	exclude = ('bills',)
 
+class AvailabilityAdmin(admin.ModelAdmin):
+	model = Availability
+
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(Resource, ResourceAdmin)
@@ -278,6 +281,7 @@ admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)
 admin.site.register(UserNote, UserNoteAdmin)
+admin.site.register(Availability, AvailabilityAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
