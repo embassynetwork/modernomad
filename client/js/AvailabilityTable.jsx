@@ -43,6 +43,7 @@ export default class AvailabilityTable extends React.Component {
 
   onFormSubmit(values) {
     console.log("values received from form", values)
+    alert("Jessy, you need to tell me what endpoint to submit this to. - Craig")
   }
 
   renderForm() {
