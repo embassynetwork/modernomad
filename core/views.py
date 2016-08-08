@@ -1441,7 +1441,11 @@ def LocationEditRooms(request, location_slug):
 				has_image = True
 			else:
 				has_image = False
-			availabilities = Availability.objects.filter(resource=room)
+			today = timezone.localtime(timezone.now())
+			availabilities = list(Availability.objects.filter(resource=room, start_date__gt=today).order_by('start_date'))
+			current = Availability.objects.filter(resource=room, start_date__lte=today).order_by('-start_date').first()
+			if current is not None:
+				availabilities = [current] + availabilities
 			availabilities_list = []
 			for a in availabilities:
 				row = {'id': a.id, 'start': a.start_date.strftime("%Y-%m-%d"), 'quantity': a.quantity}
