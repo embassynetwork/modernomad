@@ -1513,3 +1513,11 @@ class RoomImage(BaseImage):
 
 class LocationImage(BaseImage):
 	location = models.ForeignKey(Location)
+
+
+class Availability(models.Model):
+	created = models.DateTimeField(auto_now_add=True)
+	resource = models.ForeignKey(Resource)
+	start_date = models.DateTimeField()
+	number = models.IntegerField()
+
