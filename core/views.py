@@ -43,6 +43,8 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import csv
 from django.http import Http404
+from core.data_fetchers import SerializedRoomAvailability
+from core.data_fetchers import SerializedNullRoomAvailability
 
 logger = logging.getLogger(__name__)
 
@@ -771,18 +773,13 @@ def UserDetail(request, username):
 	room_forms = []
 	rooms = user.resources.all()
 	for room in rooms:
-		room_reservables = room.reservables.all().order_by('start_date')
-		reservables_forms = []
-		for reservable in room_reservables:
-		 	id_str = "reservable-%d-%%s" % reservable.id
-			reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
-		id_str = "room-%d-new-reservable-%%s" % room.id
-		reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
 		if room.image:
 			has_image = True
 		else:
 			has_image = False
-		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms, room.id, room.name, room.location.slug, has_image))
+
+		room_availability = SerializedRoomAvailability(room, timezone.localtime(timezone.now()))
+		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), room.id, room.name, room.location.slug, has_image, json.dumps(room_availability.as_dict())))
 
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
@@ -1355,9 +1352,6 @@ def LocationEditPages(request, location_slug):
 
 	return render(request, 'location_edit_pages.html', {'page':'pages', 'location': location, 'menus':menus,
 		'page_forms':page_forms, 'new_page_form':new_page_form})
-
-from core.data_fetchers import SerializedRoomAvailability
-from core.data_fetchers import SerializedNullRoomAvailability
 
 @resident_or_admin_required
 def LocationEditRooms(request, location_slug):
