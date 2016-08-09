@@ -1,5 +1,5 @@
 {% load staticfiles %}
-{% for room_form, room_id, room_name, room_location_slug, has_image, room_availability, room_upcoming_availabilities in room_forms %}
+{% for room_form, room_id, room_name, room_location_slug, has_image, room_availability in room_forms %}
 	<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
 		<form id="form-room_{{room_id}}" class="room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}"> {% csrf_token %}
 			{% for field in room_form %}
@@ -35,10 +35,7 @@
 		<div id="react-app-{{room_id}}"></div>
 		<script type="text/javascript">
 			if ({{room_id}} > 0 ) {
-				window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityContainer', {
-					currentAvailability: {{room_availability|safe}},
-					upcomingAvailabilities: {{room_upcoming_availabilities|safe}}
-				})
+				window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityContainer', {{room_availability|safe}})
 			}
 		</script>
 	</div>

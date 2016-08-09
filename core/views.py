@@ -1357,6 +1357,7 @@ def LocationEditPages(request, location_slug):
 		'page_forms':page_forms, 'new_page_form':new_page_form})
 
 from core.data_fetchers import SerializedRoomAvailability
+from core.data_fetchers import SerializedNullRoomAvailability
 
 @resident_or_admin_required
 def LocationEditRooms(request, location_slug):
@@ -1428,7 +1429,9 @@ def LocationEditRooms(request, location_slug):
 		room_names = []
 		room_names.append("New Room")
 		# the empty form
-		room_forms.append((LocationRoomForm(prefix="new"), -1, "new room", location.slug, False, "null", "[]"))
+		room_availability = SerializedNullRoomAvailability()
+		room_forms.append((LocationRoomForm(prefix="new"), -1, "new room", location.slug, False, json.dumps(room_availability.as_dict())))
+
 		# forms for the existing rooms
 		for room in location_rooms:
 			if room.image:
@@ -1437,11 +1440,9 @@ def LocationEditRooms(request, location_slug):
 				has_image = False
 
 			room_availability = SerializedRoomAvailability(room, timezone.localtime(timezone.now()))
-			current = room_availability.current_availability()
-			availabilities_list = room_availability.upcoming_availabilities()
 
 			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id),
-				room.id, room.name, room.location.slug, has_image, json.dumps(current), json.dumps(availabilities_list)))
+				room.id, room.name, room.location.slug, has_image, json.dumps(room_availability.as_dict())))
 			room_names.append(room.name)
 
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms,})

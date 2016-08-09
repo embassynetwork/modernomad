@@ -1,18 +1,25 @@
 from core.models import Availability
 
 class RoomAvailability:
-	def __init__(self, room, date):
-		self.room = room
-		self.date = date
+    def __init__(self, room, date):
+        self.room = room
+        self.date = date
 
-	def current_availability(self):
-		return self.base_scope().filter(start_date__lte=self.date).order_by('-start_date').first()
+    def current_availability(self):
+        return self.base_scope().filter(start_date__lte=self.date).order_by('-start_date').first()
 
-	def upcoming_availabilities(self):
-		return list(self.base_scope().filter(start_date__gt=self.date).order_by('start_date'))
+    def upcoming_availabilities(self):
+        return list(self.base_scope().filter(start_date__gt=self.date).order_by('start_date'))
 
-	def base_scope(self):
-		return Availability.objects.filter(resource=self.room)
+    def base_scope(self):
+        return Availability.objects.filter(resource=self.room)
+
+class SerializedNullRoomAvailability:
+    def as_dict(self):
+        return {
+            'currentAvailability': None,
+            'upcomingAvailabilities': []
+        }
 
 class SerializedRoomAvailability:
     def __init__(self, room, date):
@@ -25,6 +32,12 @@ class SerializedRoomAvailability:
     def upcoming_availabilities(self):
         availabilities = self.room_availability.upcoming_availabilities()
         return map(self.__serializeRecord, availabilities)
+
+    def as_dict(self):
+        return {
+            'currentAvailability': self.current_availability(),
+            'upcomingAvailabilities': self.upcoming_availabilities()
+        }
 
     def __serializeRecord(self, record):
         return record.toDict() if record else None
