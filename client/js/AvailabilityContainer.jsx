@@ -1,5 +1,5 @@
 import React from 'react'
-import AvailabilityTable from './AvailabilityTable'
+import AvailabilityManager from './AvailabilityManager'
 import { clone } from 'lodash'
 
 export default class AvailabilityContainer extends React.Component {
@@ -9,6 +9,6 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   render() {
-    return <AvailabilityTable currentAvailability={this.state.currentAvailability} upcomingAvailabilities={this.state.upcomingAvailabilities} />;
+    return <AvailabilityManager currentAvailability={this.state.currentAvailability} upcomingAvailabilities={this.state.upcomingAvailabilities} />;
   }
 }

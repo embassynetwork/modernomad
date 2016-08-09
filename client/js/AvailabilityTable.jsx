@@ -1,27 +1,7 @@
-import React, {PropTypes} from 'react'
-import AvailabilityForm from './AvailabilityForm'
-import CurrentAvailability from './CurrentAvailability'
+import React from 'react'
 var moment = require('moment');
 
-const availabilitySchema = PropTypes.shape({
-  id: PropTypes.number.isRequired,
-  start: PropTypes.string,
-  quantity: PropTypes.number.isRequired
-})
-
 export default class AvailabilityTable extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      showForm: false
-    }
-  }
-
-  static propTypes = {
-    currentAvailability: availabilitySchema,
-    upcomingAvailabilities: PropTypes.arrayOf(availabilitySchema).isRequired
-  }
-
   formatDate(date) {
     if (date) {
       const momentDate = moment(date);
@@ -33,29 +13,8 @@ export default class AvailabilityTable extends React.Component {
     return "now";
   }
 
-  openForm() {
-    this.setState({showForm: true})
-  }
-
-  closeForm() {
-    this.setState({showForm: false})
-  }
-
-  onFormSubmit(values) {
-    console.log("values received from form", values)
-    alert("Jessy, you need to tell me what endpoint to submit this to. - Craig")
-  }
-
-  renderForm() {
-    if (this.state.showForm) {
-      return <AvailabilityForm onCancel={this.closeForm.bind(this)} onSubmit={this.onFormSubmit.bind(this)} />
-    } else {
-      return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Schedule a change</button>
-    }
-  }
-
   render() {
-    const availabilities = this.props.upcomingAvailabilities;
+    const availabilities = this.props.availabilities;
 
     const rows = availabilities.map((availiability) => {
       const desc = `${availiability.quantity}`
@@ -68,8 +27,7 @@ export default class AvailabilityTable extends React.Component {
       )
     });
 
-    return <div>
-      <CurrentAvailability availability={this.props.currentAvailability} />
+    return (
       <div className="panel panel-default">
         <div className="panel-heading">
           <h4>Upcoming changes</h4>
@@ -87,7 +45,6 @@ export default class AvailabilityTable extends React.Component {
           </tbody>
         </table>
       </div>
-      {this.renderForm()}
-    </div>;
+    );
   }
 }
