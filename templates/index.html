@@ -3,63 +3,73 @@
 
 {% block body %}
 
-<div class="jumbotron" id="center">
-	<div class="container">
-		<h1>The Embassy Network</h1>
-		<h2 class="text-muted">
-			<em>People and spaces experimenting with culture and commoning. </em>
+<div class="jumbotron home-page" id="center">
+	<div class="container text-center dept-of-housing">
+		<img src="{% static 'img/en-logo-transparent.png' %}" class="logo" alt="" />
+		<h3 class="light embassy-logo">Embassy Network</h3>
+		<h2>
+			<div class="light">a global</div>
+			<span class="bold">housing layer</span> <span class="script"><em>for</em></span></br>
+			<span class="bold">the new world</span>
 		</h2>
-		<h2 class="text-muted">
-		The Embassy Network is designing new ways to manage resources and govern space together. Our member spaces are embassies of a future that is abundant, collaborative, and transparent. 
-		</h2>
+		<a type="button" name="button" class="btn btn-primary btn-lg locations-btn">LOCATIONS</a>
+		<div class="row">
+			<h3 class="col-sm-8 col-sm-offset-2">We are building a cooperative movement for those leveraging housing towards greater aims, where those aims are strengthened by operating in community with others, global fluid mobility, and by connection to other networks.</h3>
+		</div>
 	</div>
 </div>
 
-<div class="container">
+<div class="text-center container" id="locations">
 
-	<hr class="featurette-divider">
+	<h2 class="featurette-heading">Locations</h2>
 
-	<div class="row featurette">
-		<div class="col-md-5">
-			<img class="featurette-image img-responsive" src="/static/img/network-map-icon.png">
-		</div>
-		<div class="col-md-7">
-			<h2 class="featurette-heading">An Open Collaborative Ecosystem.</h2>
-			<p class="lead">
-			Independent houses come together to share resources and best practices, to work on projects, and create a social network of opportunities and services. 
-			</p>
-		</div>
-	</div>
 
-	<hr class="featurette-divider">
+	{% for location in locations %}
 
-	<div class="row featurette">
-		<div class="col-md-7">
-			<h2 class="featurette-heading">Create a Commons and Share with Others</h2>
-			<p class="lead">A global multitude of commons, from libraries to housing. We develop tools and systems for managing and sharing resources internally, publically, and to trusted collaborators.</p>
-		</div>
-		<div class="col-md-5">
-			<img class="featurette-image img-responsive" src="/static/img/share-icon.svg">
-		</div>
-	</div>
-
-	<hr class="featurette-divider">
-
-	<div class="row featurette">
-		<div class="col-md-10 col-md-offset-1">
-			<h2 class="featurette-heading">Join a Community of Practitioners and Prototypers.</h2>
-			<p class="lead">
-			Together, we organize events, exchanges, discussions and projects. We start spaces, support new ones, and collaborate with existing ones. Between us, we use these spaces to prototype new approaches to open, collaborative and <em>supra</em>-market resource management, decision making, and financial systems. 
-			</p>
-			<h2>Get in Touch</h2>
-			<a href="mailto:hello@embassynetwork.com">
-			<h2>hello@embassynetwork.com</h2>
-			</a>
+		<a href="{% url 'location_home' location.slug %}" class="col-lg-4 col-md-6">
+				<div class="location-box">
+					<img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo">
+					<div class="location-name">
+	      		<h2 class="bold">{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
+	    		</div>
+				</div>
+		</a>
+	{% endfor %}
+</div>
+	<div id="join-section">
+		<div class="container text-center">
+			<div class="row featurette">
+				<div class="col-md-10 col-md-offset-1">
+					<h2 class="featurette-heading">Join a Community of Practitioners and Prototypers.</h2>
+					<p class="lead">
+					Together, we start and support spaces that prototype new
+					approaches to an open, creative society. These spaces
+					are <em>embassies</em> of a future that is abundant, collaborative and transparent.
+					</p>
+					<h2>Get in Touch</h2>
+					<a href="mailto:hello@embassynetwork.com">
+					<h3>hello@embassynetwork.com</h3>
+					</a>
+				</div>
+			</div>
 		</div>
 	</div>
 
-
-	<hr class="featurette-divider">
+	<div id="press-section">
+		<div class="container text-center">
+			<h2 class="featurette-heading">Press</h2>
+			<div class="row">
+				<a href="http://www.ft.com/intl/cms/s/2/091e540a-baf5-11e1-81e0-00144feabdc0.html#axzz2NxTef1Yd" target="blank" title="Over the Rainbow: Communal living is back in vogue, especially among Silicon Valley’s young technology workers"><img class="press-logo" src="{% static 'img/ft-logo.jpg' %}">
+				<a title="" target="blank" href="http://www.nytimes.com/2013/12/12/fashion/Bay-Area-millenials-intentional-communities-communes.html?_r=0&adxnnl=1&rref=fashion&hpw=&pagewanted=all&adxnnlx=1387416498-ClhePTg+t6ZVfKx9MaVw2g"><img class="press-logo" src="{% static 'img/nyt-logo.png' %}"></a>
+				<a title="" target="blank" href="http://www.sfgate.com/bayarea/article/Tech-entrepreneurs-revive-communal-living-4988388.php"><img class="press-logo" src="{% static 'img/sf_chronicle_logo3.gif' %}"></a>
+			</div>
+			<div class="row">
+				<a title="" target="blank" href="http://www.theatlanticcities.com/housing/2013/12/one-answer-san-franciscos-overpriced-housing-co-living/7654/"><img class="press-logo" src="{% static 'img/atlantic-cities-logo.jpg' %}"></a>
+				<a title="" target="blank" href="http://www.npr.org/blogs/alltechconsidered/2013/12/19/250548681/bay-areas-steep-housing-costs-spark-return-to-communal-living"><img class="press-logo" src="{% static 'img/npr_logo.png' %}"></a>
+				<a title="" target="blank" href="http://www.csmonitor.com/The-Culture/Family/2014/0330/Shared-housing-The-sharing-economy-gives-roommates-a-new-image"><img class="press-logo" src="{% static 'img/csr_logo.jpg' %}"></a>
+			</div>
+		</div>
+	</div>
 
 </div>
 
@@ -67,24 +77,32 @@
 
 {% block footer %}
 <div id="network-footer">
-	<div class="container">
+	<div class="container text-center">
 		<div class="row">
-			<div class="col-md-8" id="footer-press">
-				<div class="row">
-				<a href="http://www.ft.com/intl/cms/s/2/091e540a-baf5-11e1-81e0-00144feabdc0.html#axzz2NxTef1Yd" target="blank" title="Over the Rainbow: Communal living is back in vogue, especially among Silicon Valley’s young technology workers"><img class="press-logo" src="{% static 'img/ft-logo.jpg' %}">
-					<a title="" target="blank" href="http://www.nytimes.com/2013/12/12/fashion/Bay-Area-millenials-intentional-communities-communes.html?_r=0&adxnnl=1&rref=fashion&hpw=&pagewanted=all&adxnnlx=1387416498-ClhePTg+t6ZVfKx9MaVw2g"><img class="press-logo" src="{% static 'img/nyt-logo.png' %}"></a>
-					<a title="" target="blank" href="http://www.sfgate.com/bayarea/article/Tech-entrepreneurs-revive-communal-living-4988388.php"><img class="press-logo" src="{% static 'img/sf_chronicle_logo3.gif' %}"></a>
-				</div>
-				<div class="row">
-					<a title="" target="blank" href="http://www.theatlanticcities.com/housing/2013/12/one-answer-san-franciscos-overpriced-housing-co-living/7654/"><img class="press-logo" src="{% static 'img/atlantic-cities-logo.jpg' %}"></a>
-					<a title="" target="blank" href="http://www.npr.org/blogs/alltechconsidered/2013/12/19/250548681/bay-areas-steep-housing-costs-spark-return-to-communal-living"><img class="press-logo" src="{% static 'img/npr_logo.png' %}"></a>
-					<a title="" target="blank" href="http://www.csmonitor.com/The-Culture/Family/2014/0330/Shared-housing-The-sharing-economy-gives-roommates-a-new-image"><img class="press-logo" src="{% static 'img/csr_logo.jpg' %}"></a>
-				</div>
+			<h3>Commune with us on</h3>
+			<div id="footer-socialmedia">
+				<a href="https://twitter.com/embassynetwork" target="_blank">
+					<span class="fa-stack fa-3x">
+					  <i class="fa fa-circle-thin fa-stack-2x"></i>
+					  <i class="fa fa-twitter fa-stack-1x"></i>
+					</span>
+				</a>
+				<a href="https://www.facebook.com/embassynetwork" target="_blank">
+					<span class="fa-stack fa-3x">
+					  <i class="fa fa-circle-thin fa-stack-2x"></i>
+					  <i class="fa fa-facebook fa-stack-1x"></i>
+					</span>
+				</a>
+				<a href="https://medium.com/embassy-network" target="_blank">
+					<span class="fa-stack fa-3x">
+					  <i class="fa fa-circle-thin fa-stack-2x"></i>
+					  <i class="fa fa-medium fa-stack-1x"></i>
+					</span>
+				</a>
 			</div>
-			<div class="col-md-4" id="footer-socialmedia">
-				<a href="https://twitter.com/embassynetwork"><img class="pull-right socialmedia-icon" src="{% static 'img/twitter-icon.png' %}"></a>
-				<a href="https://www.facebook.com/embassynetwork"><img class="pull-right socialmedia-icon" src="{% static 'img/facebook-icon.png' %}"></a>
-			</div>
+			<div class="text-muted">
+        <h5>© Embassy Network</h5>
+      </div>
 		</div>
 	</div>
 </div>

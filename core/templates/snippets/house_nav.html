@@ -12,9 +12,9 @@
 			</button>
 			<a class="navbar-brand" href="{% url 'location_home' location.slug %}">
 				{% if location.visibility == 'link' %}
-					<i class="text-warning fa fa-eye" title="Location is unlisted but visible to anyone with the link" ></i> 
+					<i class="text-warning fa fa-eye" title="Location is unlisted but visible to anyone with the link" ></i>
 				{% elif location.visibility == 'members' %}
-					<i class="text-danger fa fa-eye" title="Location is visible to explicit members only" ></i> 
+					<i class="text-danger fa fa-eye" title="Location is visible to explicit members only" ></i>
 				{% endif %}
 				{{ location.name }}
 			</a>
@@ -59,7 +59,7 @@
 				</li>
 				{% endifappexists %}
 
-				
+
 				{% if location.residents or location.house_admins %}
 					<li class="dropdown">
 						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
@@ -86,7 +86,7 @@
 					<b class="caret"></b>
 				</a>
 				<ul id="menu3" class="dropdown-menu" role="menu" aria-labelledby="drop3">
-					{% if location.rooms.count > 0 %}
+					{% if location.resources.count > 0 %}
 						{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 							<li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">Occupancy</a></li>
 							<li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>
@@ -109,29 +109,7 @@
 				</li>
 				{% endif %}
 			</ul>
-			<ul class="nav navbar-nav navbar-right">		
-				{% if user.is_authenticated %}
-				<li class="dropdown">
-				<a class="dropdown-toggle" id="drop2" role="button" data-toggle="dropdown" href="#">
-					<i class="glyphicon glyphicon-user"></i> {{ user.get_full_name }} <b class="caret"></b>
-				</a>
-				<ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
-					<li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
-					<li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
-					{% if user.is_superuser %}
-					<li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
-					{% endif %}
-					<li><a tabindex="-1" href="/people/logout/">Logout</a></li>
-				</ul>
-				</li>
-				{% endif %}
-				{% if not user.is_authenticated %}
-				<li><a href="/people/login/?next={{request.path}}">Login</a></li>
-				{% endif %}
-			</ul>
 		</div>
 		</nav>
 	</div> <!-- end col-md-12 -->
 </div> <!-- end row -->
-
-

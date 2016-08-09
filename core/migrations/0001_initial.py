@@ -206,7 +206,7 @@ class Migration(migrations.Migration):
                 ('cancellation_policy', models.CharField(default=b'24 hours', max_length=400)),
                 ('shared', models.BooleanField(default=False, verbose_name=b'Is this a hostel/shared accommodation room?')),
                 ('beds', models.IntegerField()),
-                ('image', models.ImageField(null=True, upload_to=core.models.room_img_upload_to, blank=True)),
+                ('image', models.ImageField(null=True, upload_to=core.models.resource_img_upload_to, blank=True)),
                 ('location', models.ForeignKey(related_name='rooms', to='core.Location', null=True)),
                 ('residents', models.ManyToManyField(help_text=b'This field is optional.', related_name='residents', null=True, to=settings.AUTH_USER_MODEL, blank=True)),
             ],

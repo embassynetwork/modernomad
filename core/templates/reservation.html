@@ -6,7 +6,7 @@
 {% comment %} shown only when a background request is being made {% endcomment %}
 <div id="spinner">
 	<img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
-</div>	
+</div>
 
 {% if messages %}
 <div class="messages">
@@ -29,7 +29,7 @@
 			<div class="reservation-dates row top-spacer">
 				<div class="col-md-3 form-group">
 					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
-				</div> 
+				</div>
 				<div class="col-md-3 form-group">
 					<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
 				</div>
@@ -48,7 +48,7 @@
 				<div class="col-md-9 col-sm-12" id="availability-area">
 					<div class="row" id="rooms-available-calendar">
 						{% for room in rooms %}
-							<div class="col-lg-6 col-sm-12">
+							<div class="col-lg-6 col-sm-12 room">
 								<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-panel">
 									<div class="panel panel-default">
 										<div class="panel-heading">
@@ -70,7 +70,7 @@
 					<div id="sticky-sidebar">
 					</div>
 				</div>
-			
+
 			</div>
     </div>
 {% endblock %}
@@ -107,7 +107,7 @@
 		room_info_div_id = "#room-info-" + room_id;
 
 		$(".room-info").hide();
-		
+
 		// update styling on the rooms that are not currently selected
 		$(".room-select").removeClass("emphasize");
 		$(".room-select").addClass("room-subtle");
@@ -136,7 +136,7 @@
 	          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
 	          	console.log(rMax);
 	          	$('#depart_date').datepicker("option","minDate",rMin);
-	          	$('#depart_date').datepicker("option","maxDate",rMax);                    
+	          	$('#depart_date').datepicker("option","maxDate",rMax);
 			}
 			// we need to explicitly fire the change event on the underlying
 			// input or it won't fire on its own!
@@ -144,7 +144,7 @@
         }
 	});
 
-	/******************** unlikely to use this but just in case... 
+	/******************** unlikely to use this but just in case...
 	$(".a_day").click(function(event) {
 		console.log(event.target);
 		// should we make this the arrive or depart date?
@@ -163,7 +163,7 @@
 	***************************** */
 
 	$("#arrive_date, #depart_date").change(function(event) {
-		// Get arrive and depart dates, update value. 
+		// Get arrive and depart dates, update value.
 		$arrive = $("#arrive_date").val();
 		$depart = $("#depart_date").val();
 
@@ -179,16 +179,16 @@
 			} else {
 
 				console.log("checking availability...");
-				request = $.ajax({ 
+				request = $.ajax({
 					data: {
 						'arrive' : $arrive,
 						'depart' : $depart,
 						'csrfmiddlewaretoken': '{{ csrf_token }}'
-					}, 
+					},
 					type: "POST",
 					url: '{% url "room_availability" location.slug %}'
 				});
-			
+
 				request.done(function(msg) { // on success..
 					$("#show-room-availability").html(msg);
 				});
@@ -199,17 +199,17 @@
 				$("#reservation-items").empty()
 				$("#reservation-total").html("0")
 			} // end room availability check
-		} 
+		}
 
 
 		// wire up the ajax-y spinning animated GIF to show when an ajax call
-		// is made. 	
+		// is made.
 		$('#spinner').ajaxStart(function () {
 			$(this).fadeIn('fast');
 		}).ajaxStop(function () {
 			$(this).stop().fadeOut('fast');
-		});	
-	
+		});
+
 	});
 
 </script>

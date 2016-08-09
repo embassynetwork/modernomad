@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Room, Location, LocationMenu, Reservable, Subscription, Subscription
+from core.models import UserProfile, Reservation, EmailTemplate, Resource, Location, LocationMenu, Reservable, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
@@ -276,7 +276,7 @@ class LocationPageForm(forms.Form):
 class LocationRoomForm(forms.ModelForm):
 	cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 	class Meta:
-		model = Room
+		model = Resource
 		exclude = ['location',]
 		widgets = { 
 			'description': forms.Textarea(attrs={'rows': '3'}),
@@ -313,7 +313,7 @@ class LocationRoomForm(forms.ModelForm):
 class LocationReservableForm(BootstrapModelForm):
 	class Meta:
 		model = Reservable
-		exclude = ['room',]
+		exclude = ['resource',]
 		widgets = { 
 			'start_date': forms.DateInput(attrs={'class':'datepicker'}),
 			'end_date': forms.DateInput(attrs={'class':'datepicker'}),
@@ -327,17 +327,18 @@ class ReservationForm(forms.ModelForm):
 			'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
 			'depart': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
 			'arrival_time': forms.TextInput(attrs={'class':'form-control form-group'}),
-			'room': forms.Select(attrs={'class':'form-control form-group'}),
+			'resource': forms.Select(attrs={'class':'form-control form-group'}),
 			'purpose': forms.TextInput(attrs={'class':'form-control form-group'}),
 			'comments': forms.Textarea(attrs={'class':'form-control form-group'}),
 		}
+		labels = {'resource': 'Room'}
 
 	def __init__(self, location, *args, **kwargs):
 		super(ReservationForm, self).__init__(*args, **kwargs)
 		if not location:
 			raise Exception("No location given!")
 		self.location = location
-		self.fields['room'].queryset = self.location._rooms_with_future_reservability_queryset()
+		self.fields['resource'].queryset = self.location._rooms_with_future_reservability_queryset()
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
@@ -428,7 +429,7 @@ class ReservationEmailTemplateForm(EmailTemplateForm):
 			'arrive': reservation.arrive, 
 			'depart': reservation.depart, 
 			'arrival_time': reservation.arrival_time,
-			'room': reservation.room, 
+			'room': reservation.resource, 
 			'num_nights': reservation.total_nights(), 
 			'purpose': reservation.purpose,
 			'comments': reservation.comments,
