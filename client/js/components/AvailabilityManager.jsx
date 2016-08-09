@@ -20,7 +20,8 @@ export default class AvailabilityManager extends React.Component {
   static propTypes = {
     currentAvailability: availabilitySchema,
     upcomingAvailabilities: PropTypes.arrayOf(availabilitySchema).isRequired,
-    onSubmitNew: PropTypes.func.isRequired
+    onSubmitNew: PropTypes.func.isRequired,
+    formLoading: PropTypes.bool
   }
 
   openForm() {
@@ -33,7 +34,7 @@ export default class AvailabilityManager extends React.Component {
 
   renderForm() {
     if (this.state.showForm) {
-      return <AvailabilityForm onCancel={this.closeForm.bind(this)} onSubmit={this.props.onSubmitNew} />
+      return <AvailabilityForm loading={this.props.formLoading} onCancel={this.closeForm.bind(this)} onSubmit={this.props.onSubmitNew} />
     } else {
       return <button className="btn btn-default" onClick={this.openForm.bind(this)}>Schedule a change</button>
     }

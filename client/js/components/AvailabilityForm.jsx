@@ -16,6 +16,9 @@ export default class AvailabilityForm extends React.Component {
   }
 
   render() {
+    if (this.props.loading) {
+      return (<div>loading...</div>);
+    }
     return (
       <div className="well">
         <form className="form-inline" onSubmit={this.submit.bind(this)}>

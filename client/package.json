@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/embassynetwork/modernomad#readme",
   "devDependencies": {
+    "axios": "^0.13.1",
     "babel": "^6.5.2",
     "babel-core": "^6.13.2",
     "babel-loader": "^6.2.4",
