@@ -1,5 +1,5 @@
 {% load staticfiles %}
-{% for room_form, reservables_forms, room_id, room_name, room_location_slug, has_image, room_availability, room_upcoming_availabilities in room_forms %}
+{% for room_form, room_id, room_name, room_location_slug, has_image, room_availability, room_upcoming_availabilities in room_forms %}
 	<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
 		<form id="form-room_{{room_id}}" class="room-form" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}"> {% csrf_token %}
 			{% for field in room_form %}
@@ -31,34 +31,6 @@
 				<button type="submit" class="btn btn-large btn-default">Submit Room Changes</button>
 			</div>
 		</form>
-
-		<!--
-		<hr>
-		{% if reservables_forms %}
-			<h4>Date Ranges that this room should be reservable</h4>
-			<p>Leave the end date blank for a guest room or room with open ended reservability.</p>
-			<p>The end date entered <em>will</em> be reservable; i.e.,
-			if you enter an end date of April 15, then the room will be
-			reservable on the night of April 15, but not on April 16.
-			</p>
-			{% for reservable_form, reservable_id in reservables_forms %}
-				<form class="form-inline" method="post" enctype="multipart/form-data" action="{% url 'location_edit_rooms' room_location_slug %}">
-					<div class="form-group">
-						{% for field in reservable_form %}
-							{{ field.errors }}
-							<label>{{ field.label }}</label>
-							{{ field }}
-						{% endfor %}
-						<input type="hidden" name="reservable_id" value="{{reservable_id}}">
-						<input type="hidden" name="room_fk" value="{{room_id}}">
-						<input type="hidden" name="page" value="{{page}}">
-						<input type="hidden" name="username" value="{{username}}">
-						<input class="form-control" type="submit" value="Submit">
-					</div>
-					{% csrf_token %}
-				</form>
-			{% endfor %}
-		{% endif %} -->
 
 		<div id="react-app-{{room_id}}"></div>
 		<script type="text/javascript">
@@ -114,13 +86,6 @@
 				required: true
 			},
 			beds: {
-				required: true
-			}
-		}
-	})
-	$(".reservables-form").validate({
-		rules: {
-			start_date: {
 				required: true
 			}
 		}

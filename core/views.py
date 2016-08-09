@@ -1427,16 +1427,9 @@ def LocationEditRooms(request, location_slug):
 		room_names = []
 		room_names.append("New Room")
 		# the empty form
-		room_forms.append((LocationRoomForm(prefix="new"), None, -1, "new room", location.slug, False, "null", "[]"))
+		room_forms.append((LocationRoomForm(prefix="new"), -1, "new room", location.slug, False, "null", "[]"))
 		# forms for the existing rooms
 		for room in location_rooms:
-			room_reservables = room.reservables.all().order_by('start_date')
-			reservables_forms = []
-			for reservable in room_reservables:
-				id_str = "reservable-%d-%%s" % reservable.id
-				reservables_forms.append((LocationReservableForm(instance=reservable, auto_id=id_str), reservable.id))
-			id_str = "room-%d-new-reservable-%%s" % room.id
-			reservables_forms.append((LocationReservableForm(auto_id=id_str), -1))
 			if room.image:
 				has_image = True
 			else:
@@ -1450,7 +1443,7 @@ def LocationEditRooms(request, location_slug):
 			for a in availabilities:
 				availabilities_list.append(a.toDict())
 
-			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), reservables_forms,
+			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id),
 				room.id, room.name, room.location.slug, has_image, json.dumps(current), json.dumps(availabilities_list)))
 			room_names.append(room.name)
 
