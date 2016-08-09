@@ -43,8 +43,8 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import csv
 from django.http import Http404
-from core.data_fetchers import SerializedRoomAvailability
-from core.data_fetchers import SerializedNullRoomAvailability
+from core.data_fetchers import SerializedResourceAvailability
+from core.data_fetchers import SerializedNullResourceAvailability
 
 logger = logging.getLogger(__name__)
 
@@ -778,8 +778,8 @@ def UserDetail(request, username):
 		else:
 			has_image = False
 
-		room_availability = SerializedRoomAvailability(room, timezone.localtime(timezone.now()))
-		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), room.id, room.name, room.location.slug, has_image, json.dumps(room_availability.as_dict())))
+		resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
+		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), room.id, room.name, room.location.slug, has_image, json.dumps(resource_availability.as_dict())))
 
 	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
@@ -1423,8 +1423,8 @@ def LocationEditRooms(request, location_slug):
 		room_names = []
 		room_names.append("New Room")
 		# the empty form
-		room_availability = SerializedNullRoomAvailability()
-		room_forms.append((LocationRoomForm(prefix="new"), -1, "new room", location.slug, False, json.dumps(room_availability.as_dict())))
+		resource_availability = SerializedNullResourceAvailability()
+		room_forms.append((LocationRoomForm(prefix="new"), -1, "new room", location.slug, False, json.dumps(resource_availability.as_dict())))
 
 		# forms for the existing rooms
 		for room in location_rooms:
@@ -1433,10 +1433,10 @@ def LocationEditRooms(request, location_slug):
 			else:
 				has_image = False
 
-			room_availability = SerializedRoomAvailability(room, timezone.localtime(timezone.now()))
+			resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
 
 			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id),
-				room.id, room.name, room.location.slug, has_image, json.dumps(room_availability.as_dict())))
+				room.id, room.name, room.location.slug, has_image, json.dumps(resource_availability.as_dict())))
 			room_names.append(room.name)
 
 		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms,})

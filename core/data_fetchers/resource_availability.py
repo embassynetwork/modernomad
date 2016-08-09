@@ -1,8 +1,8 @@
 from core.models import Availability
 
-class RoomAvailability:
-    def __init__(self, room, date):
-        self.room = room
+class ResourceAvailability:
+    def __init__(self, resource, date):
+        self.resource = resource
         self.date = date
 
     def current_availability(self):
@@ -12,25 +12,25 @@ class RoomAvailability:
         return list(self.base_scope().filter(start_date__gt=self.date).order_by('start_date'))
 
     def base_scope(self):
-        return Availability.objects.filter(resource=self.room)
+        return Availability.objects.filter(resource=self.resource)
 
-class SerializedNullRoomAvailability:
+class SerializedNullResourceAvailability:
     def as_dict(self):
         return {
             'currentAvailability': None,
             'upcomingAvailabilities': []
         }
 
-class SerializedRoomAvailability:
-    def __init__(self, room, date):
-        self.room_availability = RoomAvailability(room, date)
+class SerializedResourceAvailability:
+    def __init__(self, resource, date):
+        self.resource_availability = ResourceAvailability(resource, date)
 
     def current_availability(self):
-        record = self.room_availability.current_availability()
+        record = self.resource_availability.current_availability()
         return self.__serializeRecord(record)
 
     def upcoming_availabilities(self):
-        availabilities = self.room_availability.upcoming_availabilities()
+        availabilities = self.resource_availability.upcoming_availabilities()
         return map(self.__serializeRecord, availabilities)
 
     def as_dict(self):

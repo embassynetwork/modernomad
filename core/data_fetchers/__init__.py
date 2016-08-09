@@ -1,1 +1,1 @@
-from .room_availability import *
+from .resource_availability import *
