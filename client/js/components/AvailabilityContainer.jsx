@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 import AvailabilityManager from './AvailabilityManager'
 import { clone } from 'lodash'
 import axios from 'axios'
@@ -12,12 +12,16 @@ export default class AvailabilityContainer extends React.Component {
     }
   }
 
+  static propTypes = {
+    resourceId: PropTypes.number.isRequired
+  }
+
   addAvailability(values) {
     // this.setState({
     //   upcomingAvailabilities: [...this.state.upcomingAvailabilities, values]
     // })
 
-    axios.post(`/api/resource/141/availabilities`, {
+    axios.post(`/api/resource/${this.props.resourceId}/availabilities`, {
         firstName: 'Fred',
         lastName: 'Flintstone'
       })

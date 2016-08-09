@@ -5,6 +5,9 @@ class ResourceAvailability:
         self.resource = resource
         self.date = date
 
+    def resource_id(self):
+        return self.resource.id
+
     def current_availability(self):
         return self.base_scope().filter(start_date__lte=self.date).order_by('-start_date').first()
 
@@ -17,6 +20,7 @@ class ResourceAvailability:
 class SerializedNullResourceAvailability:
     def as_dict(self):
         return {
+            'resourceId' : None,
             'currentAvailability': None,
             'upcomingAvailabilities': []
         }
@@ -35,6 +39,7 @@ class SerializedResourceAvailability:
 
     def as_dict(self):
         return {
+            'resourceId' : self.resource_availability.resource_id(),
             'currentAvailability': self.current_availability(),
             'upcomingAvailabilities': self.upcoming_availabilities()
         }
