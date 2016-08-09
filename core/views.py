@@ -1356,6 +1356,7 @@ def LocationEditPages(request, location_slug):
 	return render(request, 'location_edit_pages.html', {'page':'pages', 'location': location, 'menus':menus,
 		'page_forms':page_forms, 'new_page_form':new_page_form})
 
+from core.data_fetchers import SerializedRoomAvailability
 
 @resident_or_admin_required
 def LocationEditRooms(request, location_slug):
@@ -1434,14 +1435,10 @@ def LocationEditRooms(request, location_slug):
 				has_image = True
 			else:
 				has_image = False
-			today = timezone.localtime(timezone.now())
-			availabilities = list(Availability.objects.filter(resource=room, start_date__gt=today).order_by('start_date'))
-			current = Availability.objects.filter(resource=room, start_date__lte=today).order_by('-start_date').first()
-			if current:
-				current = current.toDict()
-			availabilities_list = []
-			for a in availabilities:
-				availabilities_list.append(a.toDict())
+
+			room_availability = SerializedRoomAvailability(room, timezone.localtime(timezone.now()))
+			current = room_availability.current_availability()
+			availabilities_list = room_availability.upcoming_availabilities()
 
 			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id),
 				room.id, room.name, room.location.slug, has_image, json.dumps(current), json.dumps(availabilities_list)))

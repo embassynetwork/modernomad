@@ -1,0 +1,2 @@
+from .room_availability import RoomAvailability
+from .room_availability import SerializedRoomAvailability

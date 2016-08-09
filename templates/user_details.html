@@ -7,7 +7,7 @@
 
 
 <div class="col-md-12" id="page-spacer">
-	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1> 
+	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1>
 	{% if u.profile.city != "" %}
 	<em> based in {{ u.profile.city }}</em>
 	{% else %}
@@ -42,7 +42,7 @@
 			<div>
 				<form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
 					{% csrf_token %}
-					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
+					<input type="submit" id="pay-button" class="btn btn-success res-status-btn"
 						value="Add Credit Card" >
 					<div>
 						<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
@@ -54,7 +54,7 @@
 			{% endif %}
 		</div>
 	{% endifequal %}
-	
+
 	{% if user_is_house_admin_somewhere %}
 
 		<div class="dropdown top-spacer-sm">
@@ -67,7 +67,7 @@
 				{% endfor %}
 			</ul>
 		</div>
-	
+
 	{% endif %}
 
 </div>
@@ -92,7 +92,7 @@
 
 		{% include "snippets/profile_links.html" %}
 	{% endif %}
-	
+
 
 	{% if u == user or user_is_house_admin_somewhere %}
 
@@ -128,16 +128,16 @@
 							</label>
 						</div>
 						<hr>
-						<div>Receive notifications when new events are published: 
+						<div>Receive notifications when new events are published:
 
 							{% for location in network_locations %}
 							{% if location.visibility = 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
 							<div class="checkbox">
 								<label>
-									<input 
-										type="checkbox" 
-										name="publish_{{ location.slug }}" 
-										id="publish_{{ location.slug }}" 
+									<input
+										type="checkbox"
+										name="publish_{{ location.slug }}"
+										id="publish_{{ location.slug }}"
 										{% if location in u.event_notifications.location_publish.all %} checked {% endif %}
 										> {{ location.name }} {% if not location.visibility = 'public' %} <em>(location is private)</em> {% endif %}
 								</label>
@@ -146,16 +146,16 @@
 							{% endfor %}
 						<hr>
 						<div>
-							Receive weekly emails about upcoming events: 
+							Receive weekly emails about upcoming events:
 
 							{% for location in network_locations %}
 							{% if location.visibility = 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
 							<div class="checkbox">
 								<label>
-									<input 
-										type="checkbox" 
-										name="weekly_{{ location.slug }}" 
-										id="weekly_{{ location.slug }}" 
+									<input
+										type="checkbox"
+										name="weekly_{{ location.slug }}"
+										id="weekly_{{ location.slug }}"
 										{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
 										> {{ location.name }} {% if not location.visibility = 'public' %} <em>(location is private)</em> {% endif %}
 								</label>
@@ -168,7 +168,7 @@
 				</div>
 			</div>
 		</div>
-	</div> 
+	</div>
 	</div> <!-- end email tab -->
 
 	<div role="tabpanel" class="tab-pane" id="reservations">
@@ -233,5 +233,3 @@
 </script>
 
 {% endblock %}
-
-
