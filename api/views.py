@@ -7,12 +7,76 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
+from django.shortcuts import get_object_or_404
 
 from jwt_auth.mixins import JSONWebTokenAuthMixin
 from jwt_auth.compat import json
-from core.models import Reservation, Subscription
+from core.models import *
+from api.serializers import *
+
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+
 
 # Create your views here.
+
+class JSONResponse(HttpResponse):
+    """
+    An HttpResponse that renders its content into JSON.
+    """
+    def __init__(self, data, **kwargs):
+        content = JSONRenderer().render(data)
+        kwargs['content_type'] = 'application/json'
+        super(JSONResponse, self).__init__(content, **kwargs)
+
+def availability_list_all(request):
+	''' List or create availabilities for a specific resource.'''
+	if request.method == 'GET':
+		availabilities = Availability.objects.all()
+		serializer = AvailabilitySerializer(availabilities, many=True)
+		return JSONResponse(serializer.data)
+	
+@csrf_exempt
+def availability_list(request, resource_id):
+	''' List or create availabilities for a specific resource.'''
+	if request.method == 'GET':
+		resource = get_object_or_404(Resource, id=resource_id)
+		availabilities = Availability.objects.filter(resource=resource)
+		serializer = AvailabilitySerializer(availabilities, many=True)
+		return JSONResponse(serializer.data)
+	
+	elif request.method == 'POST':
+		data = JSONParser().parse(request)
+		serializer = AvailabilitySerializer(data=data)
+		if serializer.is_valid():
+			serializer.save()
+			return JSONResponse(serializer.data, status=201)
+		return JSONResponse(serializer.errors, status=400)
+
+@csrf_exempt
+def availability_detail(request, availability_id):
+    ''' Retrieve, update or delete an availability.'''
+    try:
+        availability = Availability.objects.get(pk=availability_id)
+    except Availability.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = AvailabilitySerializer(availability)
+        return JSONResponse(serializer.data)
+
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        serializer = AvailabilitySerializer(availability, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JSONResponse(serializer.data)
+        return JSONResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        availability.delete()
+        return HttpResponse(status=204)
 
 def api_test(request):
 	return HttpResponse(200)

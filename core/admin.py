@@ -269,6 +269,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 class AvailabilityAdmin(admin.ModelAdmin):
 	model = Availability
+	list_display=('resource', 'start_date', 'quantity')
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Reservation, ReservationAdmin)
