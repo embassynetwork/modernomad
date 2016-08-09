@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import AvailabilityContainer from './AvailabilityContainer'
+import AvailabilityContainer from './components/AvailabilityContainer'
 
 var topLevelComponents = {}
 topLevelComponents.AvailabilityContainer = AvailabilityContainer;
