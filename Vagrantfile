@@ -20,10 +20,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       # Every Vagrant virtual environment requires a box to build off of.
       config.vm.box = "precise32"
-
-      config.vm.provider "virtualbox" do |v|
-        v.memory = 1024
-      end
       
       # custom baked ubuntu vm that hass updates applied and packages applied
       config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-i386-vagrant-disk1.box"
@@ -41,4 +37,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 config.vm.provision :shell, :path => "bootstrap_vagrant.sh"
    
+end
+
+
+# This creates a host only network for host access
+Vagrant.configure("2") do |config|
+    config.vm.network "private_network", ip: "192.168.50.4"
+    config.vm.provider "virtualbox" do |v|
+      v.memory = 1024
+    end
 end
