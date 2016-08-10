@@ -24,11 +24,11 @@ export default class AvailabilityForm extends React.Component {
         <form className="form-inline" onSubmit={this.submit.bind(this)}>
           <div className="row">
             <div className="form-group col-xs-8">
-              <label htmlFor="date" className="control-label">Start date</label>
+              <label htmlFor="date" className="control-label" style={{display: 'block'}}>Start date</label>
               <input name="start_date" type="date" className="form-control" ref="start_date" required={true} />
             </div>
             <div className="form-group col-xs-4">
-              <label htmlFor="quantity" className="control-label">Availability</label>
+              <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Availability</label>
               <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} />
             </div>
           </div>
