@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import AvailabilityManager from './AvailabilityManager'
-import { clone } from 'lodash'
+import { clone, reject } from 'lodash'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -30,11 +30,18 @@ export default class AvailabilityContainer extends React.Component {
         this.insertAvailability(response.data)
       })
       .catch((error) => {
-        console.log("error occured", error);
+        console.log("error occured in post", error);
       });
-    //
-    // // this.setState({formLoading: true})
-    // console.log("values received from form", values)
+  }
+
+  triggerDelete(availabilityId) {
+    axios.delete(`/api/availability/${availabilityId}`)
+      .then((response) => {
+        this.deleteAvailability(availabilityId)
+      })
+      .catch((error) => {
+        console.log("error occured in delete", error);
+      });
   }
 
   insertAvailability(availability) {
@@ -43,8 +50,10 @@ export default class AvailabilityContainer extends React.Component {
     })
   }
 
-  triggerDelete(availabilityId) {
-    console.log('trigger delete', availabilityId)
+  deleteAvailability(availabilityId) {
+    this.setState({
+      upcomingAvailabilities: reject(this.state.upcomingAvailabilities, {id: availabilityId})
+    })
   }
 
   render() {
