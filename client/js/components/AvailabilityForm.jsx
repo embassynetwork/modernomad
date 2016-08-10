@@ -8,7 +8,7 @@ export default class AvailabilityForm extends React.Component {
 
   submit(event) {
     const values = {
-      date: this.refs.date.value,
+      start_date: this.refs.start_date.value,
       quantity: parseInt(this.refs.quantity.value) || 0
     }
     event.preventDefault()
@@ -25,7 +25,7 @@ export default class AvailabilityForm extends React.Component {
           <div className="row">
             <div className="form-group col-xs-8">
               <label htmlFor="date" className="control-label">Start date</label>
-              <input name="date" type="date" className="form-control" ref="date" required={true} />
+              <input name="start_date" type="date" className="form-control" ref="start_date" required={true} />
             </div>
             <div className="form-group col-xs-4">
               <label htmlFor="quantity" className="control-label">Availability</label>

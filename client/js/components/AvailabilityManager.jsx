@@ -5,7 +5,7 @@ import AvailabilityTable from './AvailabilityTable'
 
 const availabilitySchema = PropTypes.shape({
   id: PropTypes.number.isRequired,
-  start: PropTypes.string,
+  start_date: PropTypes.string,
   quantity: PropTypes.number.isRequired
 })
 
