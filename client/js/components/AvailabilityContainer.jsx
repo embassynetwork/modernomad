@@ -43,11 +43,16 @@ export default class AvailabilityContainer extends React.Component {
     })
   }
 
+  triggerDelete(availabilityId) {
+    console.log('trigger delete', availabilityId)
+  }
+
   render() {
     return <AvailabilityManager
       currentAvailability={this.state.currentAvailability}
       upcomingAvailabilities={this.state.upcomingAvailabilities}
       formLoading={this.state.formLoading}
-      onSubmitNew={this.addAvailability.bind(this)} />;
+      onSubmitNew={this.addAvailability.bind(this)}
+      onDelete={this.triggerDelete.bind(this)} />;
   }
 }

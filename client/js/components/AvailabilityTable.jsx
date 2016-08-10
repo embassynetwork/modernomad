@@ -1,7 +1,11 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 var moment = require('moment');
 
 export default class AvailabilityTable extends React.Component {
+  static propTypes = {
+    onDelete: PropTypes.func.isRequired
+  }
+
   formatDate(date) {
     if (date) {
       const momentDate = moment(date);
@@ -18,11 +22,15 @@ export default class AvailabilityTable extends React.Component {
 
     const rows = availabilities.map((availiability) => {
       const desc = `${availiability.quantity}`
+      const onDelete = (event) => {
+        event.preventDefault();
+        this.props.onDelete(availiability.id);
+      }
       return (
         <tr key={availiability.id}>
           <td>{this.formatDate(availiability.start_date)}</td>
           <td><span className="text-success" style={{backgroundColor: "#DDDDDD", border: "1px solid #3c763d", display: "inline-block", padding: "0 6px", borderRadius: "4px"}}>{desc}</span></td>
-          <td><a><i className="fa fa-trash pull-right" /></a></td>
+          <td><a onClick={onDelete}><i className="fa fa-trash pull-right" /></a></td>
         </tr>
       )
     });

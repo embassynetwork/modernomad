@@ -21,6 +21,7 @@ export default class AvailabilityManager extends React.Component {
     currentAvailability: availabilitySchema,
     upcomingAvailabilities: PropTypes.arrayOf(availabilitySchema).isRequired,
     onSubmitNew: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
     formLoading: PropTypes.bool
   }
 
@@ -44,7 +45,7 @@ export default class AvailabilityManager extends React.Component {
     return (
       <div>
         <CurrentAvailability availability={this.props.currentAvailability} />
-        {this.props.upcomingAvailabilities.length == 0 ? null : <AvailabilityTable availabilities={this.props.upcomingAvailabilities} />}
+        {this.props.upcomingAvailabilities.length == 0 ? null : <AvailabilityTable onDelete={this.props.onDelete} availabilities={this.props.upcomingAvailabilities} />}
         {this.renderForm()}
       </div>
     );
