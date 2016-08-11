@@ -10,7 +10,7 @@ export default class AvailabilityTable extends React.Component {
     if (date) {
       const momentDate = moment(date);
       if (momentDate > moment().endOf("day")) {
-        const formatString = (momentDate.year() == moment().year()) ? "Mo MMM" : "Mo MMM, Y"
+        const formatString = (momentDate.year() == moment().year()) ? "Do MMM" : "Do MMM, Y"
         return momentDate.format(formatString)
       }
     }
