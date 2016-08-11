@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import AvailabilityManager from './AvailabilityManager'
-import { clone, reject } from 'lodash'
+import { clone, reject, sortBy } from 'lodash'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -12,6 +12,7 @@ export default class AvailabilityContainer extends React.Component {
     super(props);
     this.state = {
       ...props,
+      upcomingAvailabilities: this.sortedAvailabilities(props.upcomingAvailabilities),
       formLoading: false
     }
   }
@@ -44,9 +45,16 @@ export default class AvailabilityContainer extends React.Component {
       });
   }
 
+  sortedAvailabilities(availabilities) {
+    return sortBy(availabilities, (availability) => {
+      moment(availability.start_date)
+    })
+  }
+
   insertAvailability(availability) {
+    const newCollection = this.sortedAvailabilities([...this.state.upcomingAvailabilities, availability])
     this.setState({
-      upcomingAvailabilities: [...this.state.upcomingAvailabilities, availability]
+      upcomingAvailabilities: newCollection
     })
   }
 
