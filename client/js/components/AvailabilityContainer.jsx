@@ -22,7 +22,7 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   addAvailability(values) {
-    axios.post(`/api/resource/${this.props.resourceId}/availabilities/`, {
+    axios.post(`/api/availabilities/`, {
         start_date: moment(values.start_date).format(),
         quantity: values.quantity,
         resource: this.props.resourceId

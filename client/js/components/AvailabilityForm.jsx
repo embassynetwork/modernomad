@@ -19,17 +19,18 @@ export default class AvailabilityForm extends React.Component {
     if (this.props.loading) {
       return (<div>loading...</div>);
     }
+    let inputStyles = {display: "block", width: "100%"}
     return (
       <div className="well">
         <form className="form-inline" onSubmit={this.submit.bind(this)}>
           <div className="row">
             <div className="form-group col-xs-8">
               <label htmlFor="date" className="control-label" style={{display: 'block'}}>Start date</label>
-              <input name="start_date" type="date" className="form-control" ref="start_date" required={true} />
+              <input name="start_date" type="date" className="form-control" ref="start_date" required={true} style={inputStyles} />
             </div>
             <div className="form-group col-xs-4">
               <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Availability</label>
-              <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} />
+              <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} style={inputStyles} />
             </div>
           </div>
           <div>
