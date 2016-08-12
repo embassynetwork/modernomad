@@ -13,6 +13,7 @@ from jwt_auth.mixins import JSONWebTokenAuthMixin
 from jwt_auth.compat import json
 from core.models import *
 from core.serializers import *
+from commands import *
 
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
@@ -32,20 +33,27 @@ class JSONResponse(HttpResponse):
 
 @csrf_exempt
 def availabilities(request):
-    # ''' List or create availabilities for a specific resource.'''
-    # if request.method == 'GET':
-    #     resource = get_object_or_404(Resource, id=resource_id)
-    #     availabilities = Availability.objects.filter(resource=resource)
-    #     serializer = AvailabilitySerializer(availabilities, many=True)
-    #     return JSONResponse(serializer.data)
-
     if request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = AvailabilitySerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data, status=201)
-        return JSONResponse(serializer.errors, status=400)
+
+        command = AddAvailabilityChange(request.user, **data)
+        if command.is_valid():
+          command.execute()
+          return JSONResponse(command.success_data(), status=201)
+        return JSONResponse(command.errors(), status=400)
+
+        # serializer = command.deserialized_model
+        # if command.is_valid():
+        #     serializer.save()
+        #     return JSONResponse(serializer.data, status=201)
+        # return JSONResponse(serializer.errors, status=400)
+
+
+        # serializer = AvailabilitySerializer(data=data)
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     return JSONResponse(serializer.data, status=201)
+        # return JSONResponse(serializer.errors, status=400)
     else:
         return HttpResponseNotFound("404 not found")
 
