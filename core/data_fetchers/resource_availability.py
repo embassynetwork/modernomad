@@ -1,4 +1,5 @@
 from core.models import Availability
+from core.serializers import AvailabilitySerializer
 
 class ResourceAvailability:
     def __init__(self, resource, date):
@@ -45,4 +46,4 @@ class SerializedResourceAvailability:
         }
 
     def __serializeRecord(self, record):
-        return record.toDict() if record else None
+        return AvailabilitySerializer(record).data if record else None

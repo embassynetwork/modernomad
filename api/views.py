@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from jwt_auth.mixins import JSONWebTokenAuthMixin
 from jwt_auth.compat import json
 from core.models import *
-from api.serializers import *
+from core.serializers import *
 
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
@@ -36,7 +36,7 @@ def availability_list_all(request):
 		availabilities = Availability.objects.all()
 		serializer = AvailabilitySerializer(availabilities, many=True)
 		return JSONResponse(serializer.data)
-	
+
 @csrf_exempt
 def availability_list(request, resource_id):
 	''' List or create availabilities for a specific resource.'''
@@ -45,7 +45,7 @@ def availability_list(request, resource_id):
 		availabilities = Availability.objects.filter(resource=resource)
 		serializer = AvailabilitySerializer(availabilities, many=True)
 		return JSONResponse(serializer.data)
-	
+
 	elif request.method == 'POST':
 		data = JSONParser().parse(request)
 		serializer = AvailabilitySerializer(data=data)
@@ -124,7 +124,7 @@ class CurrentLocationOccupancies(JSONWebTokenAuthMixin, View):
 
 		if location:
 			# people today includes residents, guests and subscribers. does not
-			# currently include event attendees. 
+			# currently include event attendees.
 			people_today = location.people_today()
 			print 'people today'
 			print people_today
@@ -141,7 +141,7 @@ class CurrentLocationOccupancies(JSONWebTokenAuthMixin, View):
 				user_data = {
 						'id': u.id,
 						'name': "%s %s" % (u.first_name, u.last_name),
-						'username': u.username, 
+						'username': u.username,
 						'avatar': profile_img,
 						'profile_url': domain + reverse('user_detail', args=(u.username,)),
 					}
