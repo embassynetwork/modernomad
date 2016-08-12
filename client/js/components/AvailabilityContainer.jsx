@@ -47,7 +47,7 @@ export default class AvailabilityContainer extends React.Component {
 
   sortedAvailabilities(availabilities) {
     return sortBy(availabilities, (availability) => {
-      moment(availability.start_date)
+      return moment(availability.start_date)
     })
   }
 
