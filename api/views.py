@@ -31,31 +31,19 @@ class JSONResponse(HttpResponse):
         kwargs['content_type'] = 'application/json'
         super(JSONResponse, self).__init__(content, **kwargs)
 
+
 @csrf_exempt
 def availabilities(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
 
         command = AddAvailabilityChange(request.user, **data)
-        if command.is_valid():
-          command.execute()
-          return JSONResponse(command.success_data(), status=201)
-        return JSONResponse(command.errors(), status=400)
-
-        # serializer = command.deserialized_model
-        # if command.is_valid():
-        #     serializer.save()
-        #     return JSONResponse(serializer.data, status=201)
-        # return JSONResponse(serializer.errors, status=400)
-
-
-        # serializer = AvailabilitySerializer(data=data)
-        # if serializer.is_valid():
-        #     serializer.save()
-        #     return JSONResponse(serializer.data, status=201)
-        # return JSONResponse(serializer.errors, status=400)
+        if command.execute():
+            return JSONResponse(command.result().serialize(), status=201)
+        return JSONResponse(command.result().serialize(), status=400)
     else:
         return HttpResponseNotFound("404 not found")
+
 
 @csrf_exempt
 def availability_detail(request, availability_id):
@@ -81,8 +69,10 @@ def availability_detail(request, availability_id):
         availability.delete()
         return HttpResponse(status=204)
 
+
 def api_test(request):
     return HttpResponse(200)
+
 
 class CurrentLocationOccupancies(JSONWebTokenAuthMixin, View):
     ''' Expects a proper JWT token to be passed into the header. If valid, the
@@ -112,7 +102,6 @@ class CurrentLocationOccupancies(JSONWebTokenAuthMixin, View):
             user_location = subscriptions[0].location
 
         return user_location
-
 
     def get(self, request, username):
         try:
