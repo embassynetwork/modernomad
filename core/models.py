@@ -1518,7 +1518,7 @@ class LocationImage(BaseImage):
 class Availability(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	resource = models.ForeignKey(Resource)
-	start_date = models.DateTimeField()
+	start_date = models.DateField()
 	quantity = models.IntegerField()
 
 	class Meta:

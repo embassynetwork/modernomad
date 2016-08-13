@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('start_date', models.DateTimeField()),
+                ('start_date', models.DateField()),
                 ('number', models.IntegerField()),
             ],
         ),
