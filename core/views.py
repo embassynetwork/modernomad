@@ -1353,71 +1353,6 @@ def LocationEditPages(request, location_slug):
 	return render(request, 'location_edit_pages.html', {'page':'pages', 'location': location, 'menus':menus,
 		'page_forms':page_forms, 'new_page_form':new_page_form})
 
-#@resident_or_admin_required
-#def LocationEditRooms(request, location_slug):
-#	location = get_object_or_404(Location, slug=location_slug)
-#
-#	location_rooms = location.resources.all().order_by('name')
-#
-#	if request.method == 'POST':
-#		print 'received new room or room data'
-#		if request.POST.get("room_id"):
-#			room_id = int(request.POST.get("room_id"))
-#			if room_id > 0:
-#				# editing an existing item
-#				print 'updating an existing room'
-#				action = "updated"
-#				room = Resource.objects.get(id=room_id)
-#				# request.POST keys now have a prefix, so don't forget to pass that along here!
-#				prefix = "room_%d" % room_id
-#				form = LocationRoomForm(request.POST, request.FILES, instance=room, prefix=prefix)
-#			else:
-#				# new item
-#				action = "created"
-#				form = LocationRoomForm(request.POST, request.FILES)
-#			if form.is_valid():
-#				if action == "updated":
-#					form.save()
-#					messages.add_message(request, messages.INFO, "%s %s." % (room.name, action))
-#				else:
-#					new_room = form.save(commit=False)
-#					new_room.location = location
-#					new_room.save()
-#					messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
-#			else:
-#				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
-#		else:
-#			messages.add_message(request, messages.INFO, "Error: no id was provided.")
-#
-#	page = request.POST.get('page')
-#	if page == 'user_detail':
-#		print 'redirecting to user page'
-#		return HttpResponseRedirect(reverse('user_detail', args=(request.POST.get('username'), )))
-#	else:
-#		room_forms = []
-#		room_names = []
-#		room_names.append("New Room")
-#		# the empty form
-#		resource_availability = SerializedNullResourceAvailability()
-#		room_forms.append((LocationRoomForm(prefix="new"), -1, "new room", location.slug, False, json.dumps(resource_availability.as_dict())))
-#
-#		# forms for the existing rooms
-#		for room in location_rooms:
-#			if room.image:
-#				has_image = True
-#			else:
-#				has_image = False
-#
-#			resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
-#
-#			room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id),
-#				room.id, room.name, room.location.slug, has_image, json.dumps(resource_availability.as_dict())))
-#			room_names.append(room.name)
-#
-#		return render(request, 'location_edit_rooms.html', {'page':'rooms', 'location': location, 'room_forms':room_forms, 'room_names': room_names, 'location_rooms': location_rooms,})
-
-#######
-
 @house_admin_required
 def LocationManageRooms(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
@@ -1464,8 +1399,6 @@ def LocationNewRoom(request, location_slug):
 		resource_availability = SerializedNullResourceAvailability()
 
 	return render(request, 'location_edit_room.html', {'location': location, 'form':form, 'rooms': resources, 'room_availability': resource_availability})
-
-#######
 
 def LocationEditContent(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
