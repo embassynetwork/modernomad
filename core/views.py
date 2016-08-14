@@ -1386,31 +1386,6 @@ def LocationEditRooms(request, location_slug):
 					messages.add_message(request, messages.INFO, "%s %s." % (new_room.name, action))
 			else:
 				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
-		elif request.POST.get("reservable_id"):
-			reservable_id = int(request.POST.get("reservable_id"))
-			if reservable_id > 0:
-				# editing an existing reservable
-				action = "updated"
-				reservable = Reservable.objects.get(id=reservable_id)
-				form = LocationReservableForm(request.POST, request.FILES, instance=reservable)
-			else:
-				# creating a new reservable
-				action = "created"
-				form = LocationReservableForm(request.POST, request.FILES)
-
-			if form.is_valid():
-				if action == "updated":
-					form.save()
-				else:
-					room_fk = request.POST.get('room_fk')
-					room = Resource.objects.get(id=room_fk)
-					new_reservable = form.save(commit=False)
-					new_reservable.resource = room
-					new_reservable.save()
-				room = Resource.objects.get(id=request.POST.get('room_fk'))
-				messages.add_message(request, messages.INFO, "Reservable date range %s for %s." % (action, room.name))
-			else:
-				messages.add_message(request, messages.INFO, "Form error(s): %s." % form.errors)
 		else:
 			messages.add_message(request, messages.INFO, "Error: no id was provided.")
 
