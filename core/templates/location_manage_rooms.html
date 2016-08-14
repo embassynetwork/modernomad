@@ -1,0 +1,33 @@
+{% extends "location_edit.html" %}
+{% load staticfiles %}
+
+{% block sub-content %}
+
+<div class="row top-spacer">
+
+    <div class="col-md-3">
+        {% include 'snippets/location_manage_rooms_nav.html' %}
+    </div>
+
+    <div class="col-md-6">
+
+        {% block formarea %}
+
+            <h3>Editing Rooms and Beds</h3>
+            <p>
+            Select a room or bed on the right to get started.
+            </p>
+
+        {% endblock %}
+
+    </div>        
+
+
+</div>
+
+{% endblock %}
+{% block extrajs %}
+<script>
+    $("#manage_rooms_help").addClass("active");
+</script>
+{% endblock %}
