@@ -752,7 +752,6 @@ def UserDetail(request, username):
 
 	events = list(user.events_attending.all())
 	events.reverse()
-	print type(events)
 
 	reservations = Reservation.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
 	subscriptions = Subscription.objects.filter(user=user).order_by('start_date')
@@ -763,27 +762,62 @@ def UserDetail(request, username):
 			upcoming_reservations.append(reservation)
 		else:
 			past_reservations.append(reservation)
+
 	user_is_house_admin_somewhere = False
 	for location in Location.objects.filter(visibility='public'):
 		if request.user in location.house_admins.all():
 			user_is_house_admin_somewhere = True
 			break
 
-	# grab the rooms that this user is a backer/resident of
-	room_forms = []
-	rooms = user.resources.all()
-	for room in rooms:
-		if room.image:
-			has_image = True
-		else:
-			has_image = False
-
-		resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
-		room_forms.append((LocationRoomForm(instance=room, prefix="room_%d" % room.id), room.id, room.name, room.location.slug, has_image, json.dumps(resource_availability.as_dict())))
-
-	return render(request, "user_details.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+	return render(request, "user_content_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
-		"room_forms": room_forms, "events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+		"events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+
+def _get_user_and_perms(request, username):
+	try:
+		user = User.objects.get(username=username)
+	except:
+		messages.add_message(request, messages.INFO, 'There is no user with that username.')
+		return HttpResponseRedirect('/404')
+
+	user_is_house_admin_somewhere = False
+	for location in Location.objects.filter(visibility='public'):
+		if request.user in location.house_admins.all():
+			user_is_house_admin_somewhere = True
+			break
+	return user, user_is_house_admin_somewhere
+
+@login_required
+def user_email_settings(request, username):
+	''' TODO: rethink permissions here'''
+	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+
+	return render(request, "user_email_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+
+@login_required
+def user_edit_room(request, username, room_id):
+	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+
+	room = Resource.objects.get(id=room_id)
+	if room not in user.resources.all():
+		return HttpResponseRedirect('/404')
+
+	if room.image:
+		has_image = True
+	else:
+		has_image = False
+
+	resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
+	room_availability = json.dumps(resource_availability.as_dict())
+	location = room.location
+	form = LocationRoomForm(instance=room)
+
+	return render(request, "user_room_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+		'form': form, 'room_id': room.id, 'room_name': room.name, 'location': location, 'has_image': has_image, 
+		'room_availability': room_availability, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+	
+
 
 def location_list(request):
 	locations = Location.objects.filter(visibility='public').order_by("name")
@@ -1368,13 +1402,26 @@ def LocationEditRoom(request, location_slug, room_id):
 	resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
 	resource_availability_as_dict = json.dumps(resource_availability.as_dict())
 
+	print request.method
 	if request.method == 'POST':
-		form = LocationRoomForm(request.POST, request.FILES, instance = Resource.objects.get(id=room_id))
-		print 'form is bound?'
-		print form.is_bound
+		page = request.POST.get('page')
+		if page== 'user_detail':
+			prefix = "room_%s" % room_id
+			form = LocationRoomForm(request.POST, request.FILES, instance = Resource.objects.get(id=room_id), prefix=prefix)
+		else:
+			form = LocationRoomForm(request.POST, request.FILES, instance = Resource.objects.get(id=room_id))
 		if form.is_valid():
+			print 'form was valid'
 			resource = form.save()
 			messages.add_message(request, messages.INFO, "%s updated." % resource.name)
+		else:
+			print 'form was not valid'
+			print form.errors
+
+		if page == 'user_detail':
+			print 'redirecting to user page'
+			return HttpResponseRedirect(reverse('user_detail', args=(request.POST.get('username'), )))
+
 	else:
 		form = LocationRoomForm(instance=Resource.objects.get(id=room_id))
 

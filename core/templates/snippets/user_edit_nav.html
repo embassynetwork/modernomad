@@ -1,0 +1,21 @@
+<div>
+<ul class="nav nav-stacked page-spacer">
+	<li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+	<li role="presentation"><a href="{% url 'user_email_settings' u.username %}" aria-controls="email" role="tab">Email</a></li>
+	<li role="presentation"><a href="#reservations" aria-controls="reservations" role="tab" data-toggle="tab">Reservations</a></li>
+	<li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions</a></li>
+	<li role="presentation"><a href="#events" aria-controls="events" role="tab" data-toggle="tab">Events</a></li>
+	{% if u.resources.count and u == user %}
+	<li role="presentation" class="dropdown">
+		<a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+			Rooms <span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu">
+			{% for r in u.resources.all %}
+			<li><a href="{% url 'user_edit_room' u.username r.id %}" aria-controls="events" role="tab">{{r.name}}</a></li>
+			{% endfor %}
+		</ul>
+	</li>
+	{% endif %}
+</ul>
+</div>
