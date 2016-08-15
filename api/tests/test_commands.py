@@ -24,12 +24,22 @@ class AddAvailabilityChangeTestCase(TestCase):
         expected_data = {'quantity': 2, 'resource': self.resource.pk, 'id': availability.pk, 'start_date': '4016-01-13'}
         self.assertEqual(command.result().serialize(), expected_data)
 
+    def test_that_command_with_missing_data_fails(self):
+        command = AddAvailabilityChange(self.user, resource=self.resource.pk, quantity=2)
+
+        self.assertFalse(command.execute())
+
+        expected_data = {'errors': {
+            'start_date': [u'This field is required.']
+        }}
+        self.assertEqual(command.result().serialize(), expected_data)
+
     def test_that_a_date_in_the_past_fails(self):
         command = AddAvailabilityChange(self.user, start_date="1016-01-13", resource=self.resource.pk, quantity=2)
 
         self.assertFalse(command.execute())
 
-        expected_data = {'errors': [
-            {'field': 'start_date', 'message': 'The start date must not be in the past'}
-        ]}
+        expected_data = {'errors': {
+            'start_date': [u'The start date must not be in the past']
+        }}
         self.assertEqual(command.result().serialize(), expected_data)

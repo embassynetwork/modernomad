@@ -24,7 +24,7 @@ class Command:
         self.result_object = None
         self.issuing_user = issuing_user
         self.data = kwargs
-        self.errors = []
+        self.errors = {}
         self._setup()
 
     def is_valid(self):
@@ -49,7 +49,7 @@ class Command:
             return False
 
     def add_error(self, field, message):
-        self.errors.append({'field': field, 'message': message})
+        self.errors.setdefault(field, []).append(message)
 
     def _has_errors(self):
         return bool(self.errors)
@@ -90,7 +90,9 @@ class ModelCreationBaseCommand(Command):
         return _check_if_model_valid()
 
     def _check_if_model_valid(self):
-        return self.deserialized_model.is_valid()
+        result = self.deserialized_model.is_valid()
+        self._append_model_errors()
+        return result
 
     def _execute_on_valid(self):
         return self.deserialized_model.save()
@@ -99,5 +101,10 @@ class ModelCreationBaseCommand(Command):
         return CommandSuccess(data=self.deserialized_model.data)
 
     def _get_failure_result(self):
-        # return CommandFailed(errors=self.deserialized_model.errors)
         return CommandFailed(errors=self.errors)
+
+    def _append_model_errors(self):
+        if self.deserialized_model.errors:
+            for field_name, messages in self.deserialized_model.errors.iteritems():
+                for message in messages:
+                    self.add_error(field_name, message)

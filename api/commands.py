@@ -12,7 +12,7 @@ class AddAvailabilityChange(ModelCreationBaseCommand):
             return False
 
         if self.validated_data('start_date') < datetime.now(self.tz()).date():
-            self.add_error('start_date', 'The start date must not be in the past')
+            self.add_error('start_date', u'The start date must not be in the past')
 
         return not self._has_errors()
 
