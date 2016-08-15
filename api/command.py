@@ -34,6 +34,7 @@ class Command:
         self.result_object = None
         self.issuing_user = issuing_user
         self.input_data = kwargs
+        self.result_data = None
         self.errors = {}
         self.warnings = {}
         self._setup()
@@ -80,10 +81,10 @@ class Command:
             return self._get_failure_result()
 
     def _get_success_result(self):
-        return CommandSuccess()
+        return CommandSuccess(warnings=self.warnings)
 
     def _get_failure_result(self):
-        return CommandFailed(errors=self.errors)
+        return CommandFailed(errors=self.errors, warnings=self.warnings)
 
     def _check_if_valid(self):
         return True
@@ -109,13 +110,17 @@ class ModelCreationBaseCommand(Command):
         return result
 
     def _execute_on_valid(self):
-        return self.deserialized_model.save()
+        self._save_deserialized_model()
+
+    def _save_deserialized_model(self):
+        self.deserialized_model.save()
+        self.result_data = self.deserialized_model.data
 
     def _get_success_result(self):
-        return CommandSuccess(data=self.deserialized_model.data)
+        return CommandSuccess(data=self.result_data, warnings=self.warnings)
 
     def _get_failure_result(self):
-        return CommandFailed(errors=self.errors)
+        return CommandFailed(errors=self.errors, warnings=self.warnings)
 
     def _append_model_errors(self):
         if self.deserialized_model.errors:

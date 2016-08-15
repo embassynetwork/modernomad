@@ -17,9 +17,10 @@ class AddAvailabilityChange(ModelCreationBaseCommand):
 
     def _execute_on_valid(self):
         if self._would_not_change_quantity():
-            return True
+            self.add_warning('quantity', u'This is not a change from the previous availability')
+            return
 
-        return self.deserialized_model.save()
+        self._save_deserialized_model()
 
     def _tz(self):
         return self.validated_data('resource').tz()
