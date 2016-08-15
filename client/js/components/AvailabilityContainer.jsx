@@ -31,8 +31,10 @@ export default class AvailabilityContainer extends React.Component {
         resource: this.props.resourceId
       })
       .then((response) => {
-        this.setState({formLoading: false, errors: null})
-        this.insertAvailability(response.data.data)
+        this.setState({formLoading: false, errors: null, warnings: response.data.warnings})
+        if (response.data.data) {
+          this.insertAvailability(response.data.data)
+        }
       })
       .catch((error) => {
         this.setState({formLoading: false})
@@ -46,6 +48,10 @@ export default class AvailabilityContainer extends React.Component {
 
   displayErrors(errors) {
     this.setState({errors: errors})
+  }
+
+  displayWarnings(errors) {
+    this.setState({warnings: warnings})
   }
 
   triggerDelete(availabilityId) {
@@ -86,7 +92,8 @@ export default class AvailabilityContainer extends React.Component {
           formLoading={this.state.formLoading}
           onSubmitNew={this.addAvailability.bind(this)}
           onDelete={this.triggerDelete.bind(this)} />
-        {this.state.errors && <ErrorDisplay errors={this.state.errors} />}
+        {this.state.errors && <ErrorDisplay errors={this.state.errors} category="danger" />}
+        {this.state.warnings && <ErrorDisplay errors={this.state.warnings} category="warning" />}
       </div>
     )
   }
