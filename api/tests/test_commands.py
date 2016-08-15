@@ -22,7 +22,7 @@ class AddAvailabilityChangeTestCase(TestCase):
         self.assertEqual(availability.start_date, datetime.date(4016, 1, 13))
 
         expected_data = {'quantity': 2, 'resource': self.resource.pk, 'id': availability.pk, 'start_date': '4016-01-13'}
-        self.assertEqual(command.result().serialize(), expected_data)
+        self.assertEqual(command.result().serialize(), {'data': expected_data})
 
     def test_that_command_with_missing_data_fails(self):
         command = AddAvailabilityChange(self.user, resource=self.resource.pk, quantity=2)
@@ -52,7 +52,7 @@ class AddAvailabilityChangeTestCase(TestCase):
         self.assertTrue(command2.execute())
         self.assertEqual(Availability.objects.count(), 1)
 
-        expected_data = {'errors': {
-            'start_date': [u'The start date must not be in the past']
+        expected_data = {'warnings': {
+            'quantity': [u'This is not a change from the previous availability']
         }}
         self.assertEqual(command2.result().serialize(), expected_data)

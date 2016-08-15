@@ -28,4 +28,4 @@ class AddAvailabilityChange(ModelCreationBaseCommand):
         return self._previous_quantity() == self.validated_data('quantity')
 
     def _previous_quantity(self):
-        1
+        return Availability.quantity_on(self.validated_data('start_date'))

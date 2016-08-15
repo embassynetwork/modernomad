@@ -2,19 +2,29 @@ from core.serializers import *
 
 
 class CommandResult:
-    def __init__(self, data=None, errors=[]):
+    def __init__(self, data=None, errors={}, warnings={}):
         self.data = data
         self.errors = errors
+        self.warnings = warnings
+
+    def serialize(self):
+        result = {}
+        if self.data:
+            result['data'] = self.data
+        if self.errors:
+            result['errors'] = self.errors
+        if self.warnings:
+            result['warnings'] = self.warnings
+
+        return result
 
 
 class CommandSuccess(CommandResult):
-    def serialize(self):
-        return self.data
+    pass
 
 
 class CommandFailed(CommandResult):
-    def serialize(self):
-        return {'errors': self.errors}
+    pass
 
 
 class Command:

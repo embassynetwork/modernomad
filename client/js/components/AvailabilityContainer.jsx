@@ -32,7 +32,7 @@ export default class AvailabilityContainer extends React.Component {
       })
       .then((response) => {
         this.setState({formLoading: false, errors: null})
-        this.insertAvailability(response.data)
+        this.insertAvailability(response.data.data)
       })
       .catch((error) => {
         this.setState({formLoading: false})
