@@ -1534,3 +1534,11 @@ class Availability(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'Availabilities'
+
+	@classmethod
+	def quantity_on(cls, date):
+		latest_change = cls.objects.filter(start_date__lte=date).order_by('-start_date').first()
+		if latest_change:
+			return latest_change.quantity
+		else:
+			return 0

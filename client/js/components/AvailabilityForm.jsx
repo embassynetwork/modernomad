@@ -16,9 +16,6 @@ export default class AvailabilityForm extends React.Component {
   }
 
   render() {
-    if (this.props.loading) {
-      return (<div>loading...</div>);
-    }
     let inputStyles = {display: "block", width: "100%"}
     return (
       <div className="well">
@@ -26,16 +23,16 @@ export default class AvailabilityForm extends React.Component {
           <div className="row">
             <div className="form-group col-xs-8">
               <label htmlFor="date" className="control-label" style={{display: 'block'}}>Start date</label>
-              <input name="start_date" type="date" className="form-control" ref="start_date" required={true} style={inputStyles} />
+              <input name="start_date" type="date" className="form-control" ref="start_date" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
             <div className="form-group col-xs-4">
               <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Availability</label>
-              <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} style={inputStyles} />
+              <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
           </div>
           <div>
             <a className="btn btn-default" onClick={this.props.onCancel}>Cancel</a>
-            <button className="btn btn-primary pull-right">Submit</button>
+            <button className="btn btn-primary pull-right" disabled={this.props.loading}>Submit</button>
           </div>
         </form>
       </div>

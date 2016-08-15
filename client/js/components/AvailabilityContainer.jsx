@@ -23,26 +23,25 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   addAvailability(values) {
+    this.setState({formLoading: true})
+
     axios.post(`/api/availabilities/`, {
         start_date: moment(values.start_date).format("Y-MM-DD"),
         quantity: values.quantity,
         resource: this.props.resourceId
       })
       .then((response) => {
-        this.clearErrors();
+        this.setState({formLoading: false, errors: null})
         this.insertAvailability(response.data)
       })
       .catch((error) => {
+        this.setState({formLoading: false})
         if (error.response.status == '400' && error.response.data.errors) {
           this.displayErrors(error.response.data.errors);
         } else {
           console.log("error occured in post", error);
         }
       });
-  }
-
-  clearErrors() {
-    this.setState({errors: null})
   }
 
   displayErrors(errors) {

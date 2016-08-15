@@ -43,3 +43,16 @@ class AddAvailabilityChangeTestCase(TestCase):
             'start_date': [u'The start date must not be in the past']
         }}
         self.assertEqual(command.result().serialize(), expected_data)
+
+    def test_that_changing_availability_to_the_same_quantity_has_no_effect(self):
+        command1 = AddAvailabilityChange(self.user, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
+        command1.execute()
+
+        command2 = AddAvailabilityChange(self.user, start_date="4016-01-15", resource=self.resource.pk, quantity=2)
+        self.assertTrue(command2.execute())
+        self.assertEqual(Availability.objects.count(), 1)
+
+        expected_data = {'errors': {
+            'start_date': [u'The start date must not be in the past']
+        }}
+        self.assertEqual(command2.result().serialize(), expected_data)

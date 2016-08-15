@@ -10,10 +10,22 @@ class AddAvailabilityChange(ModelCreationBaseCommand):
         if not self._check_if_model_valid():
             return False
 
-        if self.validated_data('start_date') < datetime.now(self.tz()).date():
+        if self.validated_data('start_date') < datetime.now(self._tz()).date():
             self.add_error('start_date', u'The start date must not be in the past')
 
         return not self._has_errors()
 
-    def tz(self):
+    def _execute_on_valid(self):
+        if self._would_not_change_quantity():
+            return True
+
+        return self.deserialized_model.save()
+
+    def _tz(self):
         return self.validated_data('resource').tz()
+
+    def _would_not_change_quantity(self):
+        return self._previous_quantity() == self.validated_data('quantity')
+
+    def _previous_quantity(self):
+        1

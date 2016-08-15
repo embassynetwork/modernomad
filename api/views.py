@@ -14,6 +14,7 @@ from jwt_auth.compat import json
 from core.models import *
 from core.serializers import *
 from commands import *
+import time
 
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
@@ -37,6 +38,7 @@ def availabilities(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
 
+        time.sleep(5)
         command = AddAvailabilityChange(request.user, **data)
         if command.execute():
             return JSONResponse(command.result().serialize(), status=201)
