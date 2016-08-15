@@ -1,4 +1,5 @@
 from core.serializers import *
+import datetime
 
 
 class CommandResult:
@@ -44,13 +45,14 @@ class Command:
             self._execute_on_valid()
             return True
         else:
+            self.executed = True
             return False
 
     def _setup():
         pass
 
     def _get_result(self):
-        assert self.executed
+        assert self.executed, "You must execute this command before asking for the result"
 
         if self.is_valid():
             return self._get_success_result()
@@ -70,11 +72,15 @@ class Command:
         raise Exception("override _execute_on_valid to make your command work")
 
 
-class AddAvailabilityChange(Command):
+class ModelCreationBaseCommand(Command):
     def _setup(self):
-        self.deserialized_model = AvailabilitySerializer(data=self.data)
+        model_class = self._model_class()
+        self.deserialized_model = model_class(data=self.data)
 
     def _check_if_valid(self):
+        return _check_if_model_valid()
+
+    def _check_if_model_valid(self):
         return self.deserialized_model.is_valid()
 
     def _execute_on_valid(self):
@@ -85,3 +91,14 @@ class AddAvailabilityChange(Command):
 
     def _get_failure_result(self):
         return CommandFailed(errors=self.deserialized_model.errors)
+
+
+class AddAvailabilityChange(ModelCreationBaseCommand):
+    def _model_class(self):
+        return AvailabilitySerializer
+
+    def _check_if_valid(self):
+        if not self._check_if_model_valid():
+            return False
+        if self.deserialized_model.validated_data['start_date'] < datetime.date.today():
+            return False
