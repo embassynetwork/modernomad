@@ -12,9 +12,9 @@ class AddAvailabilityChange(ModelCreationBaseCommand):
             return False
 
         if self.validated_data('start_date') < datetime.now(self.tz()).date():
-            return False
+            self.add_error('start_date', 'The start date must not be in the past')
 
-        return True
+        return not self._has_errors()
 
     def tz(self):
         return self.validated_data('resource').tz()

@@ -14,7 +14,7 @@ class CommandSuccess(CommandResult):
 
 class CommandFailed(CommandResult):
     def serialize(self):
-        return self.errors
+        return {'errors': self.errors}
 
 
 class Command:
@@ -24,6 +24,7 @@ class Command:
         self.result_object = None
         self.issuing_user = issuing_user
         self.data = kwargs
+        self.errors = []
         self._setup()
 
     def is_valid(self):
@@ -47,7 +48,13 @@ class Command:
             self.executed = True
             return False
 
-    def _setup():
+    def add_error(self, field, message):
+        self.errors.append({'field': field, 'message': message})
+
+    def _has_errors(self):
+        return bool(self.errors)
+
+    def _setup(self):
         pass
 
     def _get_result(self):
@@ -62,7 +69,7 @@ class Command:
         return CommandSuccess()
 
     def _get_failure_result(self):
-        return CommandFailed()
+        return CommandFailed(errors=self.errors)
 
     def _check_if_valid(self):
         return True
@@ -92,4 +99,5 @@ class ModelCreationBaseCommand(Command):
         return CommandSuccess(data=self.deserialized_model.data)
 
     def _get_failure_result(self):
-        return CommandFailed(errors=self.deserialized_model.errors)
+        # return CommandFailed(errors=self.deserialized_model.errors)
+        return CommandFailed(errors=self.errors)

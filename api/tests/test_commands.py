@@ -29,5 +29,7 @@ class AddAvailabilityChangeTestCase(TestCase):
 
         self.assertFalse(command.execute())
 
-        # expected_data = {'errors': {'start_date': ['The start date must not be in the past']}}
-        # self.assertEqual(command.result().serialize(), expected_data)
+        expected_data = {'errors': [
+            {'field': 'start_date', 'message': 'The start date must not be in the past'}
+        ]}
+        self.assertEqual(command.result().serialize(), expected_data)
