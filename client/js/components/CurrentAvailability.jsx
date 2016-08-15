@@ -18,8 +18,7 @@ export default class CurrentAvailability extends React.Component {
   }
 
   renderDescription() {
-    // const quantity = 0; this.quantity()
-    const quantity = 0
+    const quantity = this.quantity();
 
     return <p>
       Currently accepts {this.renderQuantityIndicator(quantity)} bookings
