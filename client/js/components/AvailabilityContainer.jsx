@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react'
 import AvailabilityManager from './AvailabilityManager'
+import ErrorDisplay from './ErrorDisplay'
 import { clone, reject, sortBy } from 'lodash'
 import axios from 'axios'
 import moment from 'moment'
@@ -28,11 +29,24 @@ export default class AvailabilityContainer extends React.Component {
         resource: this.props.resourceId
       })
       .then((response) => {
+        this.clearErrors();
         this.insertAvailability(response.data)
       })
       .catch((error) => {
-        console.log("error occured in post", error);
+        if (error.response.status == '400' && error.response.data.errors) {
+          this.displayErrors(error.response.data.errors);
+        } else {
+          console.log("error occured in post", error);
+        }
       });
+  }
+
+  clearErrors() {
+    this.setState({errors: null})
+  }
+
+  displayErrors(errors) {
+    this.setState({errors: errors})
   }
 
   triggerDelete(availabilityId) {
@@ -65,11 +79,16 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   render() {
-    return <AvailabilityManager
-      currentAvailability={this.state.currentAvailability}
-      upcomingAvailabilities={this.state.upcomingAvailabilities}
-      formLoading={this.state.formLoading}
-      onSubmitNew={this.addAvailability.bind(this)}
-      onDelete={this.triggerDelete.bind(this)} />;
+    return (
+      <div>
+        <AvailabilityManager
+          currentAvailability={this.state.currentAvailability}
+          upcomingAvailabilities={this.state.upcomingAvailabilities}
+          formLoading={this.state.formLoading}
+          onSubmitNew={this.addAvailability.bind(this)}
+          onDelete={this.triggerDelete.bind(this)} />
+        {this.state.errors && <ErrorDisplay errors={this.state.errors} />}
+      </div>
+    )
   }
 }

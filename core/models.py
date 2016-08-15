@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.flatpages.models import FlatPage
 from uuidfield import UUIDField
+import pytz
 
 # imports for signals
 import django.dispatch
@@ -235,7 +236,7 @@ class Location(models.Model):
 
 	def tz(self):
 		if self.timezone:
-			return timezone(self.timezone)
+			return pytz.timezone(self.timezone)
 		else:
 			return None
 

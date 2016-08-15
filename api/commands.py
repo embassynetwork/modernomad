@@ -1,6 +1,5 @@
 from command import *
 from datetime import datetime
-from pytz import timezone
 
 
 class AddAvailabilityChange(ModelCreationBaseCommand):
