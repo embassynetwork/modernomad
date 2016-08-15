@@ -100,5 +100,8 @@ class AddAvailabilityChange(ModelCreationBaseCommand):
     def _check_if_valid(self):
         if not self._check_if_model_valid():
             return False
+
         if self.deserialized_model.validated_data['start_date'] < datetime.date.today():
             return False
+
+        return True
