@@ -9,7 +9,7 @@ class AddAvailabilityChangeTestCase(TestCase):
         self.user = None
         self.resource = ResourceFactory()
 
-    def test_command_with_valid_data_creates_an_availability(self):
+    def test_that_command_with_valid_data_creates_an_availability(self):
         command = AddAvailabilityChange(self.user, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
 
         if not command.execute():
@@ -23,3 +23,11 @@ class AddAvailabilityChangeTestCase(TestCase):
 
         expected_data = {'quantity': 2, 'resource': self.resource.pk, 'id': availability.pk, 'start_date': '4016-01-13'}
         self.assertEqual(command.result().serialize(), expected_data)
+
+    def test_that_a_date_in_the_past_fails(self):
+        command = AddAvailabilityChange(self.user, start_date="1016-01-13", resource=self.resource.pk, quantity=2)
+
+        self.assertFalse(command.execute())
+
+        # expected_data = {'errors': {'start_date': ['The start date must not be in the past']}}
+        # self.assertEqual(command.result().serialize(), expected_data)
