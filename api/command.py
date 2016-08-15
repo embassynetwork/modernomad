@@ -33,8 +33,9 @@ class Command:
         self.valid = None
         self.result_object = None
         self.issuing_user = issuing_user
-        self.data = kwargs
+        self.input_data = kwargs
         self.errors = {}
+        self.warnings = {}
         self._setup()
 
     def is_valid(self):
@@ -60,6 +61,9 @@ class Command:
 
     def add_error(self, field, message):
         self.errors.setdefault(field, []).append(message)
+
+    def add_warning(self, field, message):
+        self.warnings.setdefault(field, []).append(message)
 
     def _has_errors(self):
         return bool(self.errors)
@@ -94,7 +98,7 @@ class ModelCreationBaseCommand(Command):
 
     def _setup(self):
         model_class = self._model_class()
-        self.deserialized_model = model_class(data=self.data)
+        self.deserialized_model = model_class(data=self.input_data)
 
     def _check_if_valid(self):
         return _check_if_model_valid()
