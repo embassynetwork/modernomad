@@ -233,6 +233,12 @@ class Location(models.Model):
 	def get_menus(self):
 		return LocationMenu.objects.filter(location=self)
 
+	def tz(self):
+		if self.timezone:
+			return timezone(self.timezone)
+		else:
+			return None
+
 
 class LocationNotUniqueException(Exception):
 	pass
@@ -343,6 +349,10 @@ class Resource(models.Model):
 		room_cal = RoomCalendar(self, location, year, month)
 		month_html = room_cal.formatmonth(year, month)
 		return month_html
+
+	def tz(self):
+		assert self.location, "You can't fetch a timezone on a resource without a location"
+		return self.location.tz()
 
 class Fee(models.Model):
 	description = models.CharField(max_length=100, verbose_name="Fee Name")

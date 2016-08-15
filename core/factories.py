@@ -1,6 +1,7 @@
 import factory
 from models import *
 
+
 class LocationFactory(factory.DjangoModelFactory):
     class Meta:
         model = Location
@@ -10,6 +11,7 @@ class LocationFactory(factory.DjangoModelFactory):
     latitude = 1.0
     longitude = 2.0
 
+
 class ResourceFactory(factory.DjangoModelFactory):
     class Meta:
         model = Resource
@@ -17,3 +19,9 @@ class ResourceFactory(factory.DjangoModelFactory):
     name = "Chamber of Salons"
     default_rate = 100
     beds = 1
+    location = factory.SubFactory(LocationFactory)
+
+
+class LocationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Location
