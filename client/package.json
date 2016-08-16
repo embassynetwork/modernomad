@@ -30,6 +30,7 @@
     "babel-preset-es2015": "^6.13.2",
     "babel-preset-react": "^6.11.1",
     "camelize": "^1.0.0",
+    "humanize-string": "^1.0.1",
     "lodash": "^4.14.1",
     "moment": "^2.14.1",
     "react": "^15.3.0",
