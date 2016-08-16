@@ -81,7 +81,7 @@ class Command:
             return self._get_failure_result()
 
     def _get_success_result(self):
-        return CommandSuccess(warnings=self.warnings)
+        return CommandSuccess(data=self.result_data, warnings=self.warnings)
 
     def _get_failure_result(self):
         return CommandFailed(errors=self.errors, warnings=self.warnings)
@@ -115,12 +115,6 @@ class ModelCreationBaseCommand(Command):
     def _save_deserialized_model(self):
         self.deserialized_model.save()
         self.result_data = self.deserialized_model.data
-
-    def _get_success_result(self):
-        return CommandSuccess(data=self.result_data, warnings=self.warnings)
-
-    def _get_failure_result(self):
-        return CommandFailed(errors=self.errors, warnings=self.warnings)
 
     def _append_model_errors(self):
         if self.deserialized_model.errors:

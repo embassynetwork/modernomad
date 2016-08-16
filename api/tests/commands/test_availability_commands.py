@@ -29,9 +29,7 @@ class AddAvailabilityChangeTestCase(TestCase):
 
         self.assertFalse(command.execute())
 
-        expected_data = {'errors': {
-            'start_date': [u'This field is required.']
-        }}
+        expected_data = {'errors': {'start_date': [u'This field is required.']}}
         self.assertEqual(command.result().serialize(), expected_data)
 
     def test_that_a_date_in_the_past_fails(self):
@@ -52,9 +50,7 @@ class AddAvailabilityChangeTestCase(TestCase):
         self.assertTrue(command2.execute())
         self.assertEqual(Availability.objects.count(), 1)
 
-        expected_data = {'warnings': {
-            'quantity': [u'This is not a change from the previous availability']
-        }}
+        expected_data = {'warnings': {'quantity': [u'This is not a change from the previous availability']}}
         self.assertEqual(command2.result().serialize(), expected_data)
 
     def test_availability_cant_have_same_date_as_another_for_same_resource(self):
@@ -65,7 +61,29 @@ class AddAvailabilityChangeTestCase(TestCase):
         self.assertFalse(command2.execute())
         self.assertEqual(Availability.objects.count(), 1)
 
-        expected_data = {'errors': {
-            u'non_field_errors': [u'The fields start_date, resource must make a unique set.']
-        }}
+        expected_data = {'errors': {u'non_field_errors': [u'The fields start_date, resource must make a unique set.']}}
         self.assertEqual(command2.result().serialize(), expected_data)
+
+
+class DeleteAvailabilityChangeTestCase(TestCase):
+    def setUp(self):
+        self.user = None
+        self.resource = ResourceFactory()
+
+    def test_can_delete_availability_in_the_future(self):
+        availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
+
+        command = DeleteAvailabilityChange(self.user, availability=availability)
+        self.assertTrue(command.execute())
+        self.assertEqual(Availability.objects.count(), 0)
+        expected_data = {'data': {'deleted': {'availability': [availability.pk]}}}
+        self.assertEqual(command.result().serialize(), expected_data)
+
+    def test_cant_delete_availability_in_the_past(self):
+        availability = Availability.objects.create(start_date=datetime.date(1016, 1, 13), resource=self.resource, quantity=2)
+
+        command = DeleteAvailabilityChange(self.user, availability=availability)
+        self.assertFalse(command.execute())
+        self.assertEqual(Availability.objects.count(), 1)
+        expected_data = {'errors': {'start_date': [u'The start date must not be in the past']}}
+        self.assertEqual(command.result().serialize(), expected_data)

@@ -8,6 +8,7 @@ from api.commands.availabilities import *
 from core.models import Availability
 from core.serializers import AvailabilitySerializer
 
+
 @csrf_exempt
 def availabilities(request):
     if request.method == 'POST':
@@ -42,5 +43,7 @@ def availability_detail(request, availability_id):
         return JSONResponse(serializer.errors, status=400)
 
     elif request.method == 'DELETE':
-        availability.delete()
-        return HttpResponse(status=204)
+        command = DeleteAvailabilityChange(request.user, availability=availability)
+        if command.execute():
+            return JSONResponse(command.result().serialize(), status=204)
+        return JSONResponse(command.result().serialize(), status=400)
