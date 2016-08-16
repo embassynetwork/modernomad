@@ -28,21 +28,6 @@
 				{% endif %}
 			</div>
 
-			<div role="tabpanel" class="tab-pane" id="reservations">
-				<h3>Reservations</h3>
-				{% include "snippets/user_reservations.html" %}
-			</div> <!-- end reservations tab -->
-
-			<div role="tabpanel" class="tab-pane" id="subscriptions">
-				<h3>Subscriptions</h3>
-				{% include "snippets/user_subscriptions.html" %}
-			</div> <!-- end subscriptions tab -->
-
-			<div role="tabpanel" class="tab-pane" id="events">
-				<h3>Events</h3>
-				{% include "snippets/user_events.html" %}
-			</div> <!-- end events tab -->
-
 			{% for form, room_id, room_name, location, has_image, room_availability in room_forms %}
 				{% with page='user_detail' username=u.username %}
 					<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">

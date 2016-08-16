@@ -1,11 +1,11 @@
 {% load core_tag_extras %}
 
-{% if past_reservations|length > 0 %}
-	<h4>Previous</h4>
+{% if upcoming_reservations|length > 0 %}
+	<h4>Upcoming</h4>
 	<table class="table" id="reservation-list-table">
-		{% for reservation in past_reservations %}
+	{% for reservation in upcoming_reservations %}
 		<tr {% if reservation.status == 'canceled' %} class="faded" {% endif %} >
-		<td>
+			<td>
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
 		</td>
@@ -15,12 +15,12 @@
 	</table>
 {% endif %}
 
-{% if upcoming_reservations|length > 0 %}
-	<h4>Upcoming</h4>
+{% if past_reservations|length > 0 %}
+	<h4>Previous</h4>
 	<table class="table" id="reservation-list-table">
-	{% for reservation in upcoming_reservations %}
+		{% for reservation in past_reservations %}
 		<tr {% if reservation.status == 'canceled' %} class="faded" {% endif %} >
-			<td>
+		<td>
 			<a href="{% url 'reservation_detail' reservation.location.slug reservation.id %}">{{reservation.arrive}} - {{reservation.depart}}</a> 
 			at <a href="{% url 'location_home' reservation.location.slug %}">{{reservation.location.name}}</a>
 		</td>

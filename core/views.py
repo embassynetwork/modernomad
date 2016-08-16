@@ -45,6 +45,7 @@ import csv
 from django.http import Http404
 from core.data_fetchers import SerializedResourceAvailability
 from core.data_fetchers import SerializedNullResourceAvailability
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -742,37 +743,6 @@ def ListUsers(request):
 	users = User.objects.filter(is_active=True)
 	return render(request, "user_list.html", {"users": users})
 
-@login_required
-def UserDetail(request, username):
-	try:
-		user = User.objects.get(username=username)
-	except:
-		messages.add_message(request, messages.INFO, 'There is no user with that username.')
-		return HttpResponseRedirect('/404')
-
-	events = list(user.events_attending.all())
-	events.reverse()
-
-	reservations = Reservation.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
-	subscriptions = Subscription.objects.filter(user=user).order_by('start_date')
-	past_reservations = []
-	upcoming_reservations = []
-	for reservation in reservations:
-		if reservation.arrive >= datetime.date.today():
-			upcoming_reservations.append(reservation)
-		else:
-			past_reservations.append(reservation)
-
-	user_is_house_admin_somewhere = False
-	for location in Location.objects.filter(visibility='public'):
-		if request.user in location.house_admins.all():
-			user_is_house_admin_somewhere = True
-			break
-
-	return render(request, "user_content_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-		"past_reservations": past_reservations, "upcoming_reservations": upcoming_reservations, 'subscriptions': subscriptions,
-		"events": events, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
-
 def _get_user_and_perms(request, username):
 	try:
 		user = User.objects.get(username=username)
@@ -788,18 +758,63 @@ def _get_user_and_perms(request, username):
 	return user, user_is_house_admin_somewhere
 
 @login_required
+def UserDetail(request, username):
+	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+
+	return render(request, "user_profile.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+
+@login_required
 def user_email_settings(request, username):
 	''' TODO: rethink permissions here'''
 	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
 
-	return render(request, "user_email_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+	return render(request, "user_email.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+
+@login_required
+def user_reservations(request, username):
+	''' TODO: rethink permissions here'''
+	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+	reservations = Reservation.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
+	past_reservations = []
+	upcoming_reservations = []
+	for reservation in reservations:
+		if reservation.arrive >= datetime.date.today():
+			upcoming_reservations.append(reservation)
+		else:
+			past_reservations.append(reservation)
+
+	return render(request, "user_reservations.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+		'past_reservations': past_reservations, 'upcoming_reservations': upcoming_reservations, 
+		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
+
+@login_required
+def user_subscriptions(request, username):
+	''' TODO: rethink permissions here'''
+	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+	subscriptions = Subscription.objects.filter(user=user).order_by('start_date')
+
+	return render(request, "user_subscriptions.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, 'subscriptions': subscriptions})
+
+@login_required
+def user_events(request, username):
+	''' TODO: rethink permissions here'''
+	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+	events = list(user.events_attending.all())
+	events.reverse()
+
+	return render(request, "user_events.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
+		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY, 'events': events})
 
 @login_required
 def user_edit_room(request, username, room_id):
 	user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
 
 	room = Resource.objects.get(id=room_id)
+
+	# make sure this user has permissions on the room
 	if room not in user.resources.all():
 		return HttpResponseRedirect('/404')
 
@@ -815,8 +830,7 @@ def user_edit_room(request, username, room_id):
 
 	return render(request, "user_room_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
 		'form': form, 'room_id': room.id, 'room_name': room.name, 'location': location, 'has_image': has_image, 
-		'room_availability': room_availability, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
-	
+		'room_availability': room_availability, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})	
 
 
 def location_list(request):
@@ -1405,22 +1419,17 @@ def LocationEditRoom(request, location_slug, room_id):
 	print request.method
 	if request.method == 'POST':
 		page = request.POST.get('page')
-		if page== 'user_detail':
-			prefix = "room_%s" % room_id
-			form = LocationRoomForm(request.POST, request.FILES, instance = Resource.objects.get(id=room_id), prefix=prefix)
-		else:
-			form = LocationRoomForm(request.POST, request.FILES, instance = Resource.objects.get(id=room_id))
+		form = LocationRoomForm(request.POST, request.FILES, instance = Resource.objects.get(id=room_id))
 		if form.is_valid():
-			print 'form was valid'
 			resource = form.save()
 			messages.add_message(request, messages.INFO, "%s updated." % resource.name)
 		else:
 			print 'form was not valid'
 			print form.errors
 
-		if page == 'user_detail':
-			print 'redirecting to user page'
-			return HttpResponseRedirect(reverse('user_detail', args=(request.POST.get('username'), )))
+		if request.META['HTTP_REFERER'] and 'people' in request.META['HTTP_REFERER']:
+			# return to the user page we came from
+			return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 	else:
 		form = LocationRoomForm(instance=Resource.objects.get(id=room_id))
