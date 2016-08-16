@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react'
+import DatePicker from './DatePicker'
 
 export default class AvailabilityForm extends React.Component {
   static propTypes = {
@@ -8,7 +9,7 @@ export default class AvailabilityForm extends React.Component {
 
   submit(event) {
     const values = {
-      start_date: this.refs.start_date.value,
+		start_date: this.refs.start_date.value(),
       quantity: parseInt(this.refs.quantity.value) || 0
     }
     event.preventDefault()
@@ -23,7 +24,7 @@ export default class AvailabilityForm extends React.Component {
           <div className="row">
             <div className="form-group col-xs-8">
               <label htmlFor="date" className="control-label" style={{display: 'block'}}>Start date</label>
-              <input name="start_date" type="date" className="form-control" ref="start_date" required={true} style={inputStyles} disabled={this.props.loading} />
+              <DatePicker name="start_date" className="form-control" ref="start_date" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
             <div className="form-group col-xs-4">
               <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Availability</label>
