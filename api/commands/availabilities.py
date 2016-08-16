@@ -1,4 +1,4 @@
-from command import *
+from api.command import *
 from datetime import datetime
 
 

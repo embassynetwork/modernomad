@@ -1,6 +1,6 @@
 from django.test import TestCase
 from core.factories import *
-from api.commands import *
+from api.commands.availabilities import *
 from core.models import *
 
 
@@ -54,5 +54,18 @@ class AddAvailabilityChangeTestCase(TestCase):
 
         expected_data = {'warnings': {
             'quantity': [u'This is not a change from the previous availability']
+        }}
+        self.assertEqual(command2.result().serialize(), expected_data)
+
+    def test_availability_cant_have_same_date_as_another_for_same_resource(self):
+        command1 = AddAvailabilityChange(self.user, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
+        command1.execute()
+
+        command2 = AddAvailabilityChange(self.user, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
+        self.assertFalse(command2.execute())
+        self.assertEqual(Availability.objects.count(), 1)
+
+        expected_data = {'errors': {
+            u'non_field_errors': [u'The fields start_date, resource must make a unique set.']
         }}
         self.assertEqual(command2.result().serialize(), expected_data)

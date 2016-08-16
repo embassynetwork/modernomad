@@ -1534,6 +1534,7 @@ class Availability(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'Availabilities'
+		unique_together = ('start_date', 'resource',)
 
 	@classmethod
 	def quantity_on(cls, date):
