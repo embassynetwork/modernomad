@@ -24,12 +24,16 @@ class EventAdminGroupInline(admin.TabularInline):
 	model = EventAdminGroup
 	filter_horizontal = ['users',]
 
+class AvailabilityAdminInline(admin.TabularInline):
+	model = Availability
+	ordering= ("start_date",)
+
 class ReservableAdminInline(admin.TabularInline):
 	model = Reservable
 
 class ResourceAdmin(admin.ModelAdmin):
 	model = Resource
-	inlines = [ReservableAdminInline]
+	inlines = [ReservableAdminInline, AvailabilityAdminInline]
 	save_as = True
 
 class ResourceAdminInline(admin.TabularInline):
