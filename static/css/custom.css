@@ -1885,3 +1885,23 @@ input.disabled {
 .availabilities-table .current {
 	font-weight: bold;
 }
+
+@keyframes yellowfade {
+  from { background: yellow; }
+  to { background: transparent; }
+}
+
+@keyframes yellowfadestripe {
+  from { background: yellow; }
+  to { background: #f9f9f9; }
+}
+
+table.availabilities-table > tbody > tr.animrow-enter > td {
+    animation-name: yellowfade;
+    animation-duration: 1s;
+}
+
+table.availabilities-table > tbody > tr.animrow-enter:nth-child(odd) > td {
+    animation-name: yellowfadestripe;
+    animation-duration: 1s;
+}
