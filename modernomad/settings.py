@@ -18,7 +18,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'modernomad.db',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
@@ -67,12 +67,12 @@ STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 AUTHENTICATION_BACKENDS = (
-	'modernomad.backends.EmailOrUsernameModelBackend',
-	'django.contrib.auth.backends.ModelBackend'
+    'modernomad.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
 )
 
 EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
@@ -81,34 +81,34 @@ EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
-	'django.middleware.common.CommonMiddleware',
-	'django.contrib.sessions.middleware.SessionMiddleware',
-	'django.middleware.csrf.CsrfViewMiddleware',
-	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.contrib.messages.middleware.MessageMiddleware',
-	'modernomad.middleware.crossdomainxhr.CORSMiddleware',
-	'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-	# Uncomment the next line for simple clickjacking protection:
-	# 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'modernomad.middleware.crossdomainxhr.CORSMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    # Uncomment the next line for simple clickjacking protection:
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-#default template context processors
+# default template context processors
 TEMPLATE_CONTEXT_PROCESSORS = (
-	"django.contrib.auth.context_processors.auth",
-	"django.core.context_processors.debug",
-	"django.core.context_processors.i18n",
-	"django.core.context_processors.media",
-	"django.core.context_processors.static",
-	"django.core.context_processors.tz",
-	"django.core.context_processors.request",
-	"django.contrib.messages.context_processors.messages",
-	"core.context_processors.location.location_variables",
-	"core.context_processors.location.network_locations",
-	"core.context_processors.analytics.google_analytics",
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.core.context_processors.request",
+    "django.contrib.messages.context_processors.messages",
+    "core.context_processors.location.location_variables",
+    "core.context_processors.location.network_locations",
+    "core.context_processors.analytics.google_analytics",
 )
 
 # other JWT options available at https://github.com/jpadilla/django-jwt-auth
@@ -120,11 +120,11 @@ ROOT_URLCONF = 'modernomad.urls.main'
 WSGI_APPLICATION = 'modernomad.wsgi.application'
 
 TEMPLATE_DIRS = (
-	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-	# Always use forward slashes, even on Windows.
-	# Don't forget to use absolute paths, not relative paths.
-	path("../templates/"),
-	path("core/templates/"),
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    path("../templates/"),
+    path("core/templates/"),
 )
 
 WEBPACK_LOADER = {
@@ -135,26 +135,26 @@ WEBPACK_LOADER = {
 }
 
 INSTALLED_APPS = (
-	'core',
-	'djcelery',
-	'gather',
-	'modernomad',
-	'api',
+    'core',
+    'djcelery',
+    'gather',
+    'modernomad',
+    'api',
     'django_behave',
     'bdd',
-	'rest_framework',
-	'django.contrib.auth',
-	'django.contrib.contenttypes',
-	'django.contrib.sessions',
-	'django.contrib.sites',
-	'django.contrib.messages',
-	'django.contrib.staticfiles',
-	'django.contrib.admin',
-	'django.contrib.flatpages',
-	'django.contrib.admindocs',
-	'django.contrib.humanize',
+    'rest_framework',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.admin',
+    'django.contrib.flatpages',
+    'django.contrib.admindocs',
+    'django.contrib.humanize',
     'webpack_loader'
-	#'debug_toolbar',
+    # 'debug_toolbar',
 )
 
 TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
@@ -180,23 +180,25 @@ CELERY_ENABLE_UTC = True
 CELERY_ACCEPT_CONTENT = ['json', 'yaml']
 
 REST_FRAMEWORK = {
-	'DEFAULT_PERMISSION_CLASSES': [
-		'rest_framework.permissions.IsAuthenticated',
-	]
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 # import any local settings
 try:
-	from local_settings import *
-	TMP_TEMPLATE_DIRS = ()
-	for local_tmpl_dir in LOCAL_TEMPLATE_DIRS:
-		TMP_TEMPLATE_DIRS += (path(local_tmpl_dir),)
-	# make sure any local overrides are found first before the default
-	# templates
-	TEMPLATE_DIRS = TMP_TEMPLATE_DIRS + TEMPLATE_DIRS
+    from local_settings import *
+    TMP_TEMPLATE_DIRS = ()
+    for local_tmpl_dir in LOCAL_TEMPLATE_DIRS:
+        TMP_TEMPLATE_DIRS += (path(local_tmpl_dir),)
+    # make sure any local overrides are found first before the default
+    # templates
+    TEMPLATE_DIRS = TMP_TEMPLATE_DIRS + TEMPLATE_DIRS
 except ImportError:
-	pass
+    pass
 
 
-NOSE_ARGS = ['--nocapture',
-			'--nologcapture',]
+NOSE_ARGS = [
+    '--nocapture',
+    '--nologcapture'
+]
