@@ -20,8 +20,3 @@ class ResourceFactory(factory.DjangoModelFactory):
     default_rate = 100
     beds = 1
     location = factory.SubFactory(LocationFactory)
-
-
-class LocationFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Location
