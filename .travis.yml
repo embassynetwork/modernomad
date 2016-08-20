@@ -8,7 +8,8 @@ install:
   - "pip install -r requirements.txt"
   - "pip install -r requirements.test.txt"
 before_script:
-  - "cd client && npm install && webpack --config travis-webpack.config.js"
+  - "cd client && npm install && cd .."
+  - "cd client && webpack --config travis-webpack.config.js && cd .."
   - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
 script: ./manage.py test modernomad core bdd
 notifications:
