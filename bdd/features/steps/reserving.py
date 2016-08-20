@@ -24,7 +24,7 @@ def impl(context, days_in_future, nights):
     arrive = today + timedelta(days=days_in_future)
     depart = arrive + timedelta(days=nights)
 
-    print context.browser.html
+    print(context.browser.html)
     context.browser.fill('arrive', arrive.strftime("%m/%d/%Y"))
     context.browser.fill('depart', depart.strftime("%m/%d/%Y"))
     context.browser.find_by_tag('body').click()
