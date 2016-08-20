@@ -7,7 +7,9 @@ services:
 install:
   - "pip install -r requirements.txt"
   - "pip install -r requirements.test.txt"
-before_script: "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
+before_script:
+  - "cd client && webpack --config travis-webpack.config.js"
+  - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
 script: ./manage.py test modernomad core bdd
 notifications:
   slack:
