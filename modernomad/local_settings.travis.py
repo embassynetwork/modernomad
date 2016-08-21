@@ -76,6 +76,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 
+ROOT = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.normpath(ROOT + '/..')
+
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'client/dist/',
