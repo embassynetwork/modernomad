@@ -54,17 +54,8 @@ MAILGUN_API_KEY = "key-XXXX"
 
 LIST_DOMAIN = "somedomain.com"
 
-if MODE == DEVELOPMENT:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    DEBUG = True
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_USE_TLS = True
-    EMAIL_HOST = 'somehost'
-    EMAIL_PORT = 587
-    EMAIL_HOST_USER = 'some@email.com'
-    EMAIL_HOST_PASSWORD = 'password'
-    DEBUG = False
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
