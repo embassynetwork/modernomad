@@ -1,6 +1,7 @@
 from core.models import Availability
 from core.serializers import AvailabilitySerializer
 
+
 class ResourceAvailability:
     def __init__(self, resource, date):
         self.resource = resource
@@ -18,13 +19,15 @@ class ResourceAvailability:
     def base_scope(self):
         return Availability.objects.filter(resource=self.resource)
 
+
 class SerializedNullResourceAvailability:
     def as_dict(self):
         return {
-            'resourceId' : None,
+            'resourceId': None,
             'currentAvailability': None,
             'upcomingAvailabilities': []
         }
+
 
 class SerializedResourceAvailability:
     def __init__(self, resource, date):
@@ -40,7 +43,7 @@ class SerializedResourceAvailability:
 
     def as_dict(self):
         return {
-            'resourceId' : self.resource_availability.resource_id(),
+            'resourceId': self.resource_availability.resource_id(),
             'currentAvailability': self.current_availability(),
             'upcomingAvailabilities': self.upcoming_availabilities()
         }
