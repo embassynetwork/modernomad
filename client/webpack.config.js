@@ -2,24 +2,34 @@ var path = require("path");
 var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
 
-var config = require('./webpack.base.config.js')
+module.exports = {
+  context: __dirname,
+  entry: [
+    'webpack-dev-server/client?http://localhost:3000',
+    'webpack/hot/only-dev-server',
+    './js/index'
+  ],
 
-// Use webpack dev server
-config.entry = [
-  'webpack-dev-server/client?http://localhost:3000',
-  'webpack/hot/only-dev-server',
-  './js/index'
-]
+  output: {
+    path: path.resolve('./build/'),
+    filename: "[name]-[hash].js",
+    publicPath: 'http://localhost:3000/build/', // Tell django to use this URL to load packages and not use STATIC_URL + bundle_name
+  },
 
-// override django's STATIC_URL for webpack bundles
-config.output.publicPath = 'http://localhost:3000/build/'
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin(), // don't reload if there is an error
+    new BundleTracker({filename: './webpack-stats.json'})
+  ],
 
+  module: {
+    loaders: [
+      { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['react-hot', 'babel-loader'], }, // to transform JSX into JS
+    ],
+  },
 
-// Add HotModuleReplacementPlugin and BundleTracker plugins
-config.plugins = config.plugins.concat([
-  new webpack.HotModuleReplacementPlugin(),
-  new webpack.NoErrorsPlugin(),
-  new BundleTracker({filename: './webpack-stats.json'}),
-])
-
-module.exports = config
+  resolve: {
+    modulesDirectories: ['node_modules'],
+    extensions: ['', '.js', '.jsx']
+  }
+}
