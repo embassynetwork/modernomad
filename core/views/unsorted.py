@@ -31,8 +31,8 @@ from dateutil.relativedelta import relativedelta
 import time
 import json, datetime, stripe
 from django.http import JsonResponse
-from reservation_calendar import GuestCalendar
-from emails import send_reservation_receipt, send_subscription_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify, subscription_note_notify
+from core.reservation_calendar import GuestCalendar
+from core.emails import send_reservation_receipt, send_subscription_receipt, new_reservation_notify, updated_reservation_notify, send_from_location_address, admin_new_subscription_notify, subscription_note_notify
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
@@ -786,7 +786,7 @@ def user_reservations(request, username):
 			past_reservations.append(reservation)
 
 	return render(request, "user_reservations.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-		'past_reservations': past_reservations, 'upcoming_reservations': upcoming_reservations, 
+		'past_reservations': past_reservations, 'upcoming_reservations': upcoming_reservations,
 		"stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 @login_required
@@ -829,8 +829,8 @@ def user_edit_room(request, username, room_id):
 	form = LocationRoomForm(instance=room)
 
 	return render(request, "user_room_area.html", {"u": user, 'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-		'form': form, 'room_id': room.id, 'room_name': room.name, 'location': location, 'has_image': has_image, 
-		'room_availability': room_availability, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})	
+		'form': form, 'room_id': room.id, 'room_name': room.name, 'location': location, 'has_image': has_image,
+		'room_availability': room_availability, "stripe_publishable_key":settings.STRIPE_PUBLISHABLE_KEY})
 
 
 def location_list(request):
@@ -2015,7 +2015,7 @@ def SubscriptionSendMail(request, location_slug, subscription_id):
 @resident_or_admin_required
 def payments_today(request, location_slug):
 	today = timezone.localtime(timezone.now())
-	return HttpResponseRedirect(reverse('core.views.payments', args=[], kwargs={'location_slug':location_slug, 'year':today.year, 'month':today.month}))
+	return HttpResponseRedirect(reverse('core.views.unsorted.payments', args=[], kwargs={'location_slug':location_slug, 'year':today.year, 'month':today.month}))
 
 @login_required
 def PeopleDaterangeQuery(request, location_slug):

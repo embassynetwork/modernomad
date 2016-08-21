@@ -97,7 +97,7 @@ class Location(models.Model):
 		return self.name
 
 	def get_absolute_url(self):
-		return reverse('core.views.location', args=[str(self.slug)])
+		return reverse('core.views.unsorted.location', args=[str(self.slug)])
 
 	def from_email(self):
 		''' return a location-specific email in the standard format we use.'''
@@ -930,7 +930,7 @@ class Reservation(models.Model):
 
 	@models.permalink
 	def get_absolute_url(self):
-		return ('core.views.ReservationDetail', [str(self.location.slug), str(self.id)])
+		return ('core.views.unsorted.ReservationDetail', [str(self.location.slug), str(self.id)])
 
 
 	def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
