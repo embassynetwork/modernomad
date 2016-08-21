@@ -5,26 +5,26 @@
 SECRET_KEY = 'secret'
 
 ADMINS = (
-          ('Craig Ambrose', 'craig@enspiral.com'),
-          )
+    ('Craig Ambrose', 'craig@enspiral.com')
+)
 
-ALLOWED_HOSTS=['domain.com']
+ALLOWED_HOSTS = ['domain.com']
 
 DATABASES = {
     'default': {
-        'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'USER':'postgres',
-        'NAME':'modernomadb'
-}
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'USER': 'postgres',
+        'NAME': 'modernomadb'
+    }
 }
 
 MEDIA_ROOT = "../media"
-BACKUP_ROOT= "../backups/"
+BACKUP_ROOT = "../backups/"
 BACKUP_COUNT = 30
 
 # use XS_SHARING_ALLOWED_ORIGINS = '*' for all domains
 XS_SHARING_ALLOWED_ORIGINS = "http://localhost:8989/"
-XS_SHARING_ALLOWED_METHODS = ['POST','GET', 'PUT', 'OPTIONS', 'DELETE']
+XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'PUT', 'OPTIONS', 'DELETE']
 XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 
 # what mode are we running in? use this to trigger different settings.
@@ -55,16 +55,16 @@ MAILGUN_API_KEY = "key-XXXX"
 LIST_DOMAIN = "somedomain.com"
 
 if MODE == DEVELOPMENT:
-	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-	DEBUG=True
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEBUG = True
 else:
-	EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-	EMAIL_USE_TLS = True
-	EMAIL_HOST = 'somehost'
-	EMAIL_PORT = 587
-	EMAIL_HOST_USER = 'some@email.com'
-	EMAIL_HOST_PASSWORD = 'password'
-	DEBUG=False
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = 'somehost'
+    EMAIL_PORT = 587
+    EMAIL_HOST_USER = 'some@email.com'
+    EMAIL_HOST_PASSWORD = 'password'
+    DEBUG = False
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -89,49 +89,49 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
-                },
-                'simple': {
-                    'format': '%(levelname)s %(message)s'
-                },
-                    },
-                'handlers': {
-                    'file': {
-                        'level': 'DEBUG',
-                        'class': 'logging.FileHandler',
-                        'filename': './django.log',
-                        'formatter': 'verbose',
-                    },
-                    'mail_admins': {
-                        'level': 'ERROR',
-                        'class': 'django.utils.log.AdminEmailHandler',
-                        'include_html': True,
-                        'formatter': 'verbose',
-                }
-                },
-                'loggers': {
-                    'django': {
-                        'handlers': ['file'],
-                        'level': 'INFO',
-                        'propagate': True,
-                    },
-                    'django.request': {
-                        'handlers': ['file', 'mail_admins'],
-                        'level': 'INFO',
-                        'propagate': True,
-                    },
-                    'core': {
-                        'handlers': ['file'],
-                        'level': 'DEBUG',
-                    },
-                    'modernomad': {
-                        'handlers': ['file'],
-                        'level': 'DEBUG',
-                    },
-                    'gather': {
-                        'handlers': ['file'],
-                        'level': 'DEBUG',
-                    },
-                },
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './django.log',
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+            'formatter': 'verbose',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'core': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'modernomad': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'gather': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+    },
 }
