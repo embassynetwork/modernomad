@@ -127,12 +127,20 @@ TEMPLATE_DIRS = (
     path("core/templates/"),
 )
 
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'client/build/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats.json'),
+if DEBUG:
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': 'client/build/',
+            'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats.json'),
+        }
     }
-}
+else:
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': 'dist/',
+            'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats-prod.json'),
+        }
+    }
 
 INSTALLED_APPS = (
     'core',
