@@ -1,3 +1,5 @@
+import os
+
 # copy this file to local_settings.py. it should be exluded from the repo
 # (ensure local_settings.py is in .gitignore)
 
