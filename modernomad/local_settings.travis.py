@@ -74,6 +74,13 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'client/dist/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats-prod.json'),
+    }
+}
+
 # Logging
 LOGGING = {
     'version': 1,
