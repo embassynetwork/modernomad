@@ -12,7 +12,7 @@
 			<span class="bold">housing layer</span> <span class="script"><em>for</em></span></br>
 			<span class="bold">the new world</span>
 		</h2>
-		<a type="button" name="button" class="btn btn-primary btn-lg locations-btn">LOCATIONS</a>
+		<a type="button" name="button" class="btn btn-primary btn-lg btn-brand locations-btn">LOCATIONS</a>
 		<div class="row">
 			<h3 class="col-sm-8 col-sm-offset-2">We are building a cooperative movement for those leveraging housing towards greater aims, where those aims are strengthened by operating in community with others, global fluid mobility, and by connection to other networks.</h3>
 		</div>
@@ -27,12 +27,12 @@
 	{% for location in locations %}
 
 		<a href="{% url 'location_home' location.slug %}" class="col-lg-4 col-md-6">
-				<div class="location-box">
-					<img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo">
-					<div class="location-name">
-	      		<h2 class="bold">{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
-	    		</div>
-				</div>
+			<div class="location-box">
+				<img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo">
+				<div class="location-name">
+      		<h2 class="bold">{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
+    		</div>
+			</div>
 		</a>
 	{% endfor %}
 </div>
