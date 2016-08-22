@@ -41,6 +41,7 @@
 
 	<div class="row">
 
+<<<<<<< 829caee4ee7e1c18ed5cbc21c0886526565bcec8
 			<div id="show-room-availability">
 
 				<div class="top-spacer"></div>
@@ -59,20 +60,21 @@
 											<img src="/media/{{room.image}}" class="room-info-image" />
 										</div>
 									</div>
-								</label>
-								<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
-							</div>
-						{% endfor %}
-					</div>
+								</div>
+							</label>
+							<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
+						</div>
+					{% endfor %}
 				</div>
-
-				<div class="col-md-3 col-sm-12" id="detail-sidebar">
-					<div id="sticky-sidebar">
-					</div>
-				</div>
-
 			</div>
-    </div>
+
+			<div class="col-md-3 col-sm-12" id="detail-sidebar">
+				<div id="sticky-sidebar">
+				</div>
+			</div>
+
+		</div>
+  </div>
 {% endblock %}
 
 {% block extrajs %}
@@ -164,10 +166,16 @@
 
 	$("#arrive_date, #depart_date").change(function(event) {
 		// Get arrive and depart dates, update value.
+		pollRooms();
+	});
+
+	var pollRooms = function() {
+		// once the dates are selected, poll for a list of available rooms
+
 		$arrive = $("#arrive_date").val();
+		console.log($arrive);
 		$depart = $("#depart_date").val();
 
-		// once the dates are selected, poll for a list of available rooms
 		if ($arrive && $depart) {
 
 			$delta_ms = new Date($depart) - new Date($arrive)
@@ -211,6 +219,18 @@
 		});
 
 	});
+
+	if (window.location.search) {
+		$('#rooms-available-calendar').hide();
+		// alert(window.location.search);
+		var s = unescape(window.location.search);
+		var a = s.split('&');
+		$("#arrive_date").val(a[0].split('=')[1])
+		console.log(a[1].split('=')[1]);
+		$("#depart_date").val(a[1].split('=')[1])
+
+		pollRooms();
+	}
 
 </script>
 

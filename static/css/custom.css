@@ -11,6 +11,10 @@ h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-da
 	-webkit-font-smoothing: antialiased;
 }
 
+h1, h2, h3 {
+	font-family: 'Raleway', sans-serif;
+}
+
 .fancy-header {
 	-webkit-font-smoothing: antialiased;
 }
@@ -119,10 +123,18 @@ a:hover {
 	height: 70px;
 }
 
-.jumbotron .btn {
-	font-family: 'Raleway', sans-serif;
+.jumbotron .btn-brand {
 	margin-top: 30px;
 	margin-bottom: 30px;
+}
+
+.btn-brand {
+	font-family: 'Raleway', sans-serif;
+	background-color: rgb(183, 68, 37);
+	border-color: rgb(183, 68, 37);
+}
+
+.btn-brand:hover {
 	background-color: rgb(183, 68, 37);
 	border-color: rgb(183, 68, 37);
 }
@@ -165,23 +177,45 @@ a:hover {
 	padding-top:17px;
 }
 
-#homepage-wrap {
-}
-
+/* location landing page */
 #house {
 	background:#2f2f2f;
 	color:#fff;
 	height:223px;
 }
 
-#house-image {
+.house-box {
+	position: relative;
+}
+
+.house-image {
 	height:auto;
 	width:100%;
 	padding:0;
 }
 
+.house-name {
+	position:absolute;
+	top:30%;
+	padding: 20px;
+	background-color: rgba(183,68,37,0.9);
+	color: white;
+	left: 50%;
+	margin-left: -225px;
+	width: 450px;
+}
+
+.house-name h1 {
+	padding: 20px 0;
+}
+
 #house-desc {
 	margin-bottom: 50px;
+}
+
+.book-room {
+		background-color: #f5f5f5;
+		padding: 20px 0;
 }
 
 #actions {
@@ -1647,10 +1681,6 @@ p.lead strong {
 
 .location-name h2 {
 	padding: 40px;
-}
-
-.locations-btn {
-	cursor:pointer;
 }
 
 @media (max-width: 992px) and (min-width: 768px) {
