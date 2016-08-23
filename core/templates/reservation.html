@@ -25,14 +25,16 @@
 
 	<div class="row top-spacer">
 		<div class="col-md-12">
-			<h3>Filter by dates and preferences</h3>
 			<div class="reservation-dates row top-spacer">
-				<div class="col-md-3 form-group">
-					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
-				</div>
-				<div class="col-md-3 form-group">
-					<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
-				</div>
+				<form class="form-inline">
+					<div class="form-group">
+						<label for="">Filter by dates</label>
+						<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
+					</div>
+					<div class="form-group">
+						<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
+					</div>
+				</form>
 			</div>
 		</div>
 		<div class="col-md-4" id="res-detail">
@@ -171,10 +173,14 @@
 		// once the dates are selected, poll for a list of available rooms
 
 		$arrive = $("#arrive_date").val();
-		console.log($arrive);
 		$depart = $("#depart_date").val();
 
 		if ($arrive && $depart) {
+
+			if (history.pushState) {
+    		var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?arrive=" + $("#arrive_date").val() + "&depart=" + $("#depart_date").val();
+    		window.history.pushState({path:newurl},'',newurl);
+			}
 
 			$delta_ms = new Date($depart) - new Date($arrive)
 			$delta_days = $delta_ms/(1000*60*60*24)
@@ -219,12 +225,10 @@
 
 	if (window.location.search) {
 		$('#rooms-available-calendar').hide();
-		// alert(window.location.search);
-		var s = unescape(window.location.search);
-		var a = s.split('&');
-		$("#arrive_date").val(a[0].split('=')[1])
+		var a = window.location.search.replace(/-/g,'/').split('&');
+		$("#arrive_date").val(a[0].split('=')[1]);
 		console.log(a[1].split('=')[1]);
-		$("#depart_date").val(a[1].split('=')[1])
+		$("#depart_date").val(a[1].split('=')[1]);
 
 		pollRooms();
 	}

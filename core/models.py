@@ -368,24 +368,20 @@ class Resource(models.Model):
         else:
             return False
 
-    def is_reservable(self, this_day):
+    def availabilities_on(self, this_day):
         # should never be more than 1 reservable on a given day...
-        try:
-            reservable_today = self.reservables.filter(resource=self).filter(start_date__lte=this_day) \
-                                   .get(Q(end_date__gte=this_day) | Q(end_date=None))
-        except:
-            reservable_today = False
-        return reservable_today
+		if Availability.objects.quantity_on(resource, this_day) > 0:
+			return True
+		else:
+			return False
 
-    def available_on(self, this_day):
-        # a resource is available if it is reservable and if it has free beds.
-        if not self.is_reservable(this_day):
+    def bookable_on(self, this_day):
+        # a resource is bookable if it has availability slots that are not already booked.
+		availabilities = self.availabilities_on(this_day)
+        if not availabilities:
             return False
         reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-        beds_left = self.beds
-        for r in reservations_on_this_day:
-            beds_left -= 1
-        if beds_left > 0:
+		if len(reservations_on_this_day) < availabilities:
             return True
         else:
             return False
@@ -1611,21 +1607,23 @@ class RoomImage(BaseImage):
 class LocationImage(BaseImage):
     location = models.ForeignKey(Location)
 
+class AvailabilityManager(models.Manager):
+	def quantity_on(self, date, resource):
+		latest_change = self.filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
+		if latest_change:
+			return latest_change.quantity
+		else:
+			return 0
 
 class Availability(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    resource = models.ForeignKey(Resource)
-    start_date = models.DateField()
-    quantity = models.IntegerField()
+	created = models.DateTimeField(auto_now_add=True)
+	resource = models.ForeignKey(Resource)
+	start_date = models.DateField()
+	quantity = models.IntegerField()
+	objects = AvailabilityManager()
 
-    class Meta:
-        verbose_name_plural = 'Availabilities'
-        unique_together = ('start_date', 'resource',)
+	class Meta:
+		verbose_name_plural = 'Availabilities'
+		unique_together = ('start_date', 'resource',)
 
-    @classmethod
-    def quantity_on(cls, date):
-        latest_change = cls.objects.filter(start_date__lte=date).order_by('-start_date').first()
-        if latest_change:
-            return latest_change.quantity
-        else:
-            return 0
+

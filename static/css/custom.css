@@ -209,6 +209,10 @@ a:hover {
 	padding: 20px 0;
 }
 
+.house-name a {
+	color: white;
+}
+
 #house-desc {
 	margin-bottom: 50px;
 }
