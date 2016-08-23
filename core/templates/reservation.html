@@ -41,24 +41,24 @@
 
 	<div class="row">
 
-			<div id="show-room-availability">
+		<div id="show-room-availability">
 
-				<div class="top-spacer"></div>
+			<div class="top-spacer"></div>
 
-				<div class="col-md-9 col-sm-12" id="availability-area">
-					<div class="row" id="rooms-available-calendar">
-						{% for room in rooms %}
-							<div class="col-lg-6 col-sm-12 room">
-								<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-panel">
-									<div class="panel panel-default">
-										<div class="panel-heading">
-											<h3 class="panel-title">{{room.name}} <span class="pull-right">${{room.default_rate|floatformat:0}}</span></h3>
-										</div>
-										<div class="panel-body">
-											<p class="room-avail-descr">{{ room.summary|truncatechars:140 }}</p>
-											<img src="/media/{{room.image}}" class="room-info-image" />
-										</div>
+			<div class="col-md-9 col-sm-12" id="availability-area">
+				<div class="row" id="rooms-available-calendar">
+					{% for room in rooms %}
+						<div class="col-lg-6 col-sm-12 room">
+							<label for="select-room-{{room.id}}" id="label-room-{{room.id}}" class="room-panel">
+								<div class="panel panel-default">
+									<div class="panel-heading">
+										<h3 class="panel-title">{{room.name}} <span class="pull-right">${{room.default_rate|floatformat:0}}</span></h3>
 									</div>
+									<div class="panel-body">
+										<p class="room-avail-descr">{{ room.summary|truncatechars:140 }}</p>
+										<img src="/media/{{room.image}}" class="room-info-image" />
+									</div>
+								</div>
 							</label>
 							<input type="radio" name="room" id="select-room-{{room.id}}" value="{{room.id}}">
 						</div>
@@ -215,7 +215,6 @@
 		}).ajaxStop(function () {
 			$(this).stop().fadeOut('fast');
 		});
-
 	}
 
 	if (window.location.search) {
