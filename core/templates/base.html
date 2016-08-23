@@ -4,22 +4,21 @@
 <!-- block body -->
 {% block body %}
 	{% if location %}
-	<div class="row">
-		<img src="{{ MEDIA_URL }}{{ location.image }}" id="house-image">
+	<div class="house-box">
+		<img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
+		<!-- <img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo"> -->
+		<div class="house-name">
+			<h1 class="bold text-center">{{ location.name }}</h1>
+		</div>
 	</div>
 
-	<div class="row">
-		<div class="col-xs-10 col-xs-offset-1">
-			{% include 'snippets/house_nav.html' %}
+	<div class="container">
+		{% include 'snippets/house_nav.html' %}
 
-			<hr>
+		<hr>
 
-			{% block content %}
-			{% endblock %}
-		</div>
+		{% block content %}
+		{% endblock %}
 	</div>
 	{% endif %}
 {% endblock %}
-
-
-
