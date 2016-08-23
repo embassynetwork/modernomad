@@ -2,11 +2,11 @@ from django.conf.urls import patterns, include, url
 
 from api.views.location import *
 from api.views.availabilities import *
-from api.serializers import *
+from rest_framework import routers
+
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-
 
 urlpatterns = patterns(
     'api.views',

@@ -11,7 +11,7 @@ import core.forms
 #	url(r'^register/$', Registration.as_view(form_class = core.forms.UserProfileForm), name='registration_register'),
 #)
 
-urlpatterns = patterns('core.views',
+urlpatterns = patterns('core.views.unsorted',
 	url(r'^$', 'ListUsers', name='user_list'),
 	url(r'^login/$', 'user_login', name='user_login'),
 	url(r'^check/email$', 'email_available', name='email_available'),
@@ -40,5 +40,3 @@ urlpatterns += patterns('',
 
 # XXX can this be extracted and put into the gather app?
 urlpatterns += url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'gather.views.user_events', name='user_events'),
-
-

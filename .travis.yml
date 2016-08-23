@@ -1,12 +1,16 @@
 language: python
 python:
   - "2.7"
+cache: pip
 services:
   - postgresql
 install:
   - "pip install -r requirements.txt"
   - "pip install -r requirements.test.txt"
-before_script: "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
+before_script:
+  - "cd client && npm install && cd .."
+  - "cd client && webpack --config webpack.prod.config.js && cd .."
+  - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
 script: ./manage.py test modernomad core bdd
 notifications:
   slack:

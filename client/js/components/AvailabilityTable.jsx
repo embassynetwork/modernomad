@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react'
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 var moment = require('moment');
 
 export default class AvailabilityTable extends React.Component {
@@ -48,9 +49,9 @@ export default class AvailabilityTable extends React.Component {
               <th></th>
             </tr>
           </thead>
-          <tbody>
+          <ReactCSSTransitionGroup component="tbody" transitionName="animrow" transitionEnterTimeout={1500} transitionLeave={false}>
             {rows}
-          </tbody>
+          </ReactCSSTransitionGroup>
         </table>
       </div>
     );
