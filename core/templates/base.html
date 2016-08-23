@@ -6,7 +6,7 @@
 	{% if location %}
 	<div class="house-box">
 		<img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
-		<div class="house-name">
+		<div class="house-name hidden-xs">
 			<h1 class="bold text-center"><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h1>
 		</div>
 	</div>
