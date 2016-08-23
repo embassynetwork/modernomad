@@ -16,31 +16,25 @@
 
 	<div class="col-sm-5 text-center book-room">
 		<h3>BOOK A ROOM</h3>
-		<div class="row">
-			<div class="reservation-dates row top-spacer">
-				<form class="form-inline" id="searchRoomForm">
-					<div class="form-group">
-						<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
-					</div>
-					<div class="form-group">
-						<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
-					</div>
-					<div class="form-group">
-						<button type="submit" class="btn btn-primary btn-brand">Search</button>
-					</div>
-				</form>
-			</div>
+		<div class="reservation-dates top-spacer">
+			<form class="form-inline" id="searchRoomForm">
+				<div class="form-group">
+					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
+				</div>
+				<div class="form-group">
+					<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-brand">Search</button>
+				</div>
+			</form>
 		</div>
-		<div class="row">
-			<h4>-OR-</h4>
-		</div>
-		<div class="row">
-			<h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
-		</div>
+		<h4>-OR-</h4>
+		<h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
 	</div>
 </div>
 
-<!-- <div class="row">
+<div class="row">
 		<div class="col-md-4" id="participate">
 			<p class="easy-reading">{{ location.announcement|safe }}</p>
 		</div>
@@ -54,7 +48,7 @@
 			{% ifappexists gather %}
 			{% endifappexists %}
 		</div>
-</div> -->
+</div>
 
 <div class="row" id="community-section">
 	{% for person in location.people_in_coming_month %}
@@ -108,7 +102,7 @@
 					if(this.id == 'arrive_date') {
 						startDate = $('#arrive_date').datepicker("getDate");
 			          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
-			          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 8 ); // Max Date = Selected + max_days
+			          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
 			          	console.log(rMax);
 			          	$('#depart_date').datepicker("option","minDate",rMin);
 			          	$('#depart_date').datepicker("option","maxDate",rMax);

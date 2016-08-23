@@ -66,7 +66,7 @@ def location(request, location_slug):
 	except Location.DoesNotExist:
 		raise Http404("The location does not exist or you do not have permission to view it")
 
-	return render(request, "landing.html", {'location': location})
+	return render(request, "landing.html", {'location': location, 'max_days': location.max_reservation_days})
 
 def guest_rooms(request, location_slug):
 	location = get_object_or_404(Location, slug=location_slug)
