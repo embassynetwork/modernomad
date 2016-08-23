@@ -18,7 +18,7 @@
 		<h3>BOOK A ROOM</h3>
 		<div class="row">
 			<div class="reservation-dates row top-spacer">
-				<form class="form-inline" action="stay">
+				<form class="form-inline" id="searchRoomForm">
 					<div class="form-group">
 						<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
 					</div>
@@ -26,7 +26,7 @@
 						<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
 					</div>
 					<div class="form-group">
-						<button type="submit" class="btn btn-default">Search</button>
+						<button type="submit" class="btn btn-primary btn-brand">Search</button>
 					</div>
 				</form>
 			</div>
@@ -117,6 +117,11 @@
 					// input or it won't fire on its own!
 					$(this).change();
 		        }
+			});
+
+			$('#searchRoomForm').on('submit', function(e) {
+				e.preventDefault();
+				window.location = "stay?arrive=" + $("#arrive_date").val() + "&depart=" + $("#depart_date").val();
 			});
 		});
 

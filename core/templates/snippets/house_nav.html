@@ -16,6 +16,7 @@
 				{% elif location.visibility == 'members' %}
 					<i class="text-danger fa fa-eye" title="Location is visible to explicit members only" ></i>
 				{% endif %}
+				{{ location.name }}
 			</a>
 		</div>
 		<div class="collapse navbar-collapse" id="house-navbar">
@@ -59,7 +60,7 @@
 				{% endifappexists %}
 
 
-				{% if location.residents or location.house_admins %}
+				<!-- {% if location.residents or location.house_admins %}
 					<li class="dropdown">
 						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
 							People <b class="caret"></b>
@@ -72,7 +73,7 @@
 							{% endif %}
 						</ul>
 					</li>
-				{% endif %}
+				{% endif %} -->
 
 				{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 				<li class="dropdown">
