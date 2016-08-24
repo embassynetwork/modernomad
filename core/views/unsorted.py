@@ -1016,7 +1016,7 @@ def RoomsAvailableOnDates(request, location_slug):
         depart = datetime.datetime.strptime(request.POST['depart'], '%Y-%m-%d').date()
     free_rooms = location.rooms_free(arrive, depart)
     rooms_availability = {}
-    for room in location.rooms_with_future_reservability():
+    for room in location.rooms_with_future_availability():
         if room in free_rooms:
             rooms_availability[room.name] = {'available': True, 'id': room.id}
         else:
