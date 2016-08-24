@@ -28,9 +28,6 @@ per_location_patterns = [
 	url(r'^email/unsubscribe$', 'core.emails.unsubscribe', name='location_email_unsubscribe'),
 	url(r'^email/announce$', 'core.emails.announce', name='location_email_announce'),
 
-	# internal views
-	url(r'^rooms_availabile_on_dates/$', 'core.views.unsorted.RoomsAvailableOnDates', name='rooms_available_on_dates'),
-
 	url(r'^reservation/', include('core.urls.reservations')),
 	url(r'^manage/', include('core.urls.manage')),
 	url(r'^room/', include('core.urls.room')),
