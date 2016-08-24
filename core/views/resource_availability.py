@@ -17,8 +17,6 @@ def CheckRoomAvailability(request, location_slug):
     depart = datetime.date(int(d_year), int(d_month), int(d_day))
     availability = location.availability(arrive, depart)
     date_list = date_range_to_list(arrive, depart)
-    logger.debug("Checking room availability for date list")
-    logger.debug(date_list)
     available_reservations = {}
     # Create some mock reservations for each available room so we can generate the bill
     free_rooms = location.rooms_free(arrive, depart)

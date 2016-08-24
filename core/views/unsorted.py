@@ -1040,9 +1040,7 @@ def ReservationSubmit(request, location_slug):
                 messages.add_message(
                     request,
                     messages.INFO,
-                    'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. ' +
-                    'You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas ' +
-                    'have changed since your last visit.' % reservation.user.username
+                    'Thanks! Your reservation was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.' % reservation.user.username
                 )
                 return HttpResponseRedirect(reverse('reservation_detail', args=(location_slug, reservation.id)))
             else:
@@ -1062,7 +1060,7 @@ def ReservationSubmit(request, location_slug):
     month = request.GET.get("month")
     year = request.GET.get("year")
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-    rooms = location.rooms_with_future_reservability()
+    rooms = location.rooms_with_future_availability()
     return render(
         request,
         'reservation.html',

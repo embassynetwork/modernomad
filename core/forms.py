@@ -338,7 +338,7 @@ class ReservationForm(forms.ModelForm):
 		if not location:
 			raise Exception("No location given!")
 		self.location = location
-		self.fields['resource'].queryset = self.location._rooms_with_future_reservability_queryset()
+		self.fields['resource'].choices = self.location.rooms_with_future_availability()
 
 	def clean(self):
 		cleaned_data = super(ReservationForm, self).clean()
