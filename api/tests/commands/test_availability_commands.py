@@ -6,8 +6,9 @@ from core.models import *
 
 class AddAvailabilityChangeTestCase(TestCase):
     def setUp(self):
-        self.user = None
+        self.user = UserFactory()
         self.resource = ResourceFactory()
+        self.resource.location.house_admins.add(self.user)
 
     def test_that_command_with_valid_data_creates_an_availability(self):
         command = AddAvailabilityChange(self.user, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
@@ -23,6 +24,11 @@ class AddAvailabilityChangeTestCase(TestCase):
 
         expected_data = {'quantity': 2, 'resource': self.resource.pk, 'id': availability.pk, 'start_date': '4016-01-13'}
         self.assertEqual(command.result().serialize(), {'data': expected_data})
+
+    def test_that_command_from_non_house_admin_fails(self):
+        non_admin = UserFactory(username="samwise")
+        command = AddAvailabilityChange(non_admin, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
+        self.assertFalse(command.execute())
 
     def test_that_command_with_missing_data_fails(self):
         command = AddAvailabilityChange(self.user, resource=self.resource.pk, quantity=2)
@@ -67,8 +73,15 @@ class AddAvailabilityChangeTestCase(TestCase):
 
 class DeleteAvailabilityChangeTestCase(TestCase):
     def setUp(self):
-        self.user = None
+        self.user = UserFactory()
         self.resource = ResourceFactory()
+        self.resource.location.house_admins.add(self.user)
+
+    def test_that_command_from_non_house_admin_fails(self):
+        availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
+        non_admin = UserFactory(username="samwise")
+        command = DeleteAvailabilityChange(non_admin, availability=availability)
+        self.assertFalse(command.execute())
 
     def test_can_delete_availability_in_the_future(self):
         availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)

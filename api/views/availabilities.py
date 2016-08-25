@@ -15,9 +15,8 @@ def availabilities(request):
         data = JSONParser().parse(request)
 
         command = AddAvailabilityChange(request.user, **data)
-        if command.execute():
-            return JSONResponse(command.result().serialize(), status=201)
-        return JSONResponse(command.result().serialize(), status=400)
+        command.execute()
+        return JSONResponse(command.result().serialize(), status=command.result().http_status())
     else:
         return HttpResponseNotFound("404 not found")
 
@@ -44,6 +43,5 @@ def availability_detail(request, availability_id):
 
     elif request.method == 'DELETE':
         command = DeleteAvailabilityChange(request.user, availability=availability)
-        if command.execute():
-            return JSONResponse(command.result().serialize(), status=204)
-        return JSONResponse(command.result().serialize(), status=400)
+        command.execute()
+        return JSONResponse(command.result().serialize(), status=command.result().http_status())

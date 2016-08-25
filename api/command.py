@@ -20,11 +20,18 @@ class CommandResult:
 
 
 class CommandSuccess(CommandResult):
-    pass
+    def http_status(self):
+        return 200
 
 
 class CommandFailed(CommandResult):
-    pass
+    def http_status(self):
+        return 400
+
+
+class CommandUnauthorized(CommandResult):
+    def http_status(self):
+        return 403
 
 
 class Command:
@@ -66,7 +73,14 @@ class Command:
     def add_warning(self, field, message):
         self.warnings.setdefault(field, []).append(message)
 
-    def _has_errors(self):
+    def unauthorized(self):
+        self.add_error('auth', 'does not have permission to do this')
+        return False
+
+    def is_authorized(self):
+        bool(self.errors.get('auth', []))
+
+    def has_errors(self):
         return bool(self.errors)
 
     def _setup(self):
@@ -77,11 +91,16 @@ class Command:
 
         if self.is_valid():
             return self._get_success_result()
+        elif self.is_authorized():
+            return self._get_unauthorized_result()
         else:
             return self._get_failure_result()
 
     def _get_success_result(self):
         return CommandSuccess(data=self.result_data, warnings=self.warnings)
+
+    def _get_unauthorized_result(self):
+        return CommandUnauthorized(errors=self.errors)
 
     def _get_failure_result(self):
         return CommandFailed(errors=self.errors, warnings=self.warnings)
@@ -95,7 +114,7 @@ class Command:
 
 class ModelCreationBaseCommand(Command):
     def validated_data(self, key):
-        return self.deserialized_model.validated_data[key]
+        return self.deserialized_model.validated_data.get(key, None)
 
     def _setup(self):
         model_class = self._model_class()

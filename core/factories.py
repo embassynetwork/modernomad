@@ -20,3 +20,10 @@ class ResourceFactory(factory.DjangoModelFactory):
     default_rate = 100
     beds = 1
     location = factory.SubFactory(LocationFactory)
+
+
+class UserFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = User
+
+    username = "bilbo"
