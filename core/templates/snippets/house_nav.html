@@ -40,7 +40,7 @@
 					{% endif %}
 				{% endfor %}
 
-				{% if location.rooms_with_future_reservability %}
+				{% if location.rooms_with_future_availability %}
 					<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
 				{% endif %}
 
