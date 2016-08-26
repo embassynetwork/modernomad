@@ -78,7 +78,7 @@ def location(request, location_slug):
     except Location.DoesNotExist:
         raise Http404("The location does not exist or you do not have permission to view it")
 
-    return render(request, "landing.html", {'location': location})
+    return render(request, "landing.html", {'location': location, 'max_days': location.max_reservation_days})
 
 
 def guest_rooms(request, location_slug):
@@ -199,9 +199,6 @@ def room_occupancy_month(room, month, year):
     # not calculating:
     # payments this month for previous months
     # payments for this month FROM past months (except inasmuch as its captured in the payments_accrual)
-
-    # iterate over the reservables to calculate how many nights the room was
-    # actually available.
 
     total_owed = Decimal(0.0)
     total_user_value = Decimal(0.0)
