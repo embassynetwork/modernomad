@@ -203,11 +203,15 @@ def room_occupancy_month(room, month, year):
     # iterate over the reservables to calculate how many nights the room was
     # actually available.
 
+    total_owed = Decimal(0.0)
+    total_user_value = Decimal(0.0)
+    net_to_house = Decimal(0.0)
+    externalized_fees = Decimal(0.0)
+    internal_fees = Decimal(0.0)
     # occupancy for room this month
     for r in reservations:
         comp = False
         partial_payment = False
-        total_owed = 0.0
 
         # in case this reservation crossed a month boundary, first calculate
         # nights of this reservation that took place this month
@@ -227,19 +231,18 @@ def room_occupancy_month(room, month, year):
 
         nights_occupied += nights_this_month
 
-        # XXX Note! get_rate() returns the base rate, but does not incorporate
-        # any discounts. so we use subtotal_amount here.
-        rate = r.bill.subtotal_amount()/r.total_nights()
-
         if r.is_comped():
             total_comped_nights += nights_this_month
             total_comped_value += nights_this_month*r.default_rate()
             comp = True
             unpaid = False
         else:
-            # XXX todo do we want to check if a res is fully paid vs.just
-            # existence of payments? if it's partially paid what is the desired
-            # behavior.
+            
+            total_user_value += (r.bill.amount()/r.total_nights())*nights_this_month
+            net_to_house += (r.bill.to_house()/r.total_nights())*nights_this_month
+            externalized_fees += (r.bill.non_house_fees()/r.total_nights())*nights_this_month
+            internal_fees += (r.bill.house_fees()/r.total_nights())*nights_this_month
+
             if r.payments():
                 paid_rate = r.bill.to_house() / r.total_nights()
                 payments_accrual += nights_this_month*paid_rate
@@ -258,6 +261,11 @@ def room_occupancy_month(room, month, year):
         room.quantity_between(start, end),
         partial_paid_reservations,
         total_comped_nights,
+        outstanding_value,
+        total_user_value,
+        net_to_house,
+        externalized_fees,
+        internal_fees,
         round(total_comped_value, 2)
     ]
     return params
@@ -277,8 +285,10 @@ def room_occupancy(request, location_slug, room_id, year):
 
     writer.writerow([str(year) + " Report for " + room.name])
     writer.writerow([
-        'Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied',
-        'Nights Available', 'Partial Paid Reservations', 'Comped Nights', 'Comped Value'
+        'Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied', 'Nights Available', 
+        'Partial Paid Reservations', 'Comped Nights', 'Outstanding Value', 'Total User Value', 
+        'Net Value to House', 'Externalized Fees', 'Internal Fees', 'Comped Value'
+        
     ])
     # we don't have data before 2012 or in the future
     if (year < 2012) or (year > datetime.date.today().year):
