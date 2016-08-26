@@ -189,7 +189,6 @@ def room_occupancy_month(room, month, year):
     for p in payments_for_room:
         payments_cash += p.paid_amount
 
-    nights_available = 0
     nights_occupied = 0
     payments_accrual = 0
     outstanding_value = 0
@@ -203,31 +202,6 @@ def room_occupancy_month(room, month, year):
 
     # iterate over the reservables to calculate how many nights the room was
     # actually available.
-    room_reservables = room.reservables.all()
-    for reservable in room_reservables:
-        if not reservable.end_date:
-            # XXX account for reservables without end date by temporarily
-            # setting the end date to be the end of the month.  IMPT: do
-            # NOT save this. it's a temporary hack so that we can work with
-            # end dates.
-            reservable.end_date = end
-
-        if reservable.end_date < start or reservable.start_date > end:
-            # no reservable dates in this month
-            continue
-        if reservable.start_date < start:
-            start_reservable = start
-        else:
-            start_reservable = reservable.start_date
-        if reservable.end_date > end:
-            end_reservable = end
-        else:
-            end_reservable = reservable.end_date
-        nights_available += (end_reservable - start_reservable).days
-    if room.shared:
-        nights_available *= room.beds
-
-    # cash for room this month
 
     # occupancy for room this month
     for r in reservations:
@@ -281,7 +255,7 @@ def room_occupancy_month(room, month, year):
         round(payments_cash, 2),
         round(payments_accrual, 2),
         nights_occupied,
-        nights_available,
+        room.quantity_between(start, end),
         partial_paid_reservations,
         total_comped_nights,
         round(total_comped_value, 2)
@@ -576,18 +550,8 @@ def occupancy(request, location_slug):
     location_rooms = location.resources.all()
     total_reservable_days = 0
     reservable_days_per_room = {}
-    for room in location_rooms:
-        print "********"
-        print room.name
-        reservable_days_this_room = 0
-        the_day = start
-        while the_day < end:
-            quantity_today = room.availabilities_on(the_day)
-            print the_day, quantity_today
-            reservable_days_this_room += quantity_today
-            the_day += datetime.timedelta(1)
-        print reservable_days_this_room
-        reservable_days_per_room[room] = reservable_days_this_room
+    for room in location_rooms: 
+        reservable_days_per_room[room] = room.quantity_between(start, end)
 
     total_income_for_this_month = income_for_this_month + income_from_past_months
     total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months

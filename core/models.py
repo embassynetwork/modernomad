@@ -356,6 +356,14 @@ class Resource(models.Model):
     def __unicode__(self):
         return self.name
 
+    def quantity_between(self, start, end):
+        total = 0
+        the_day = start
+        while the_day < end:
+            total += self.availabilities_on(the_day)
+            the_day += datetime.timedelta(1)
+        return total
+
     def availabilities_between(self, start, end):
         avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
         avails_between = []
