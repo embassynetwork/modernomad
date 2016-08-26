@@ -39,6 +39,9 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
         if self._would_not_change_previous_quantity():
             self.add_warning('quantity', u'This is not a change from the previous availability')
             return
+        if self._same_as_next_quantity():
+            self.add_warning('quantity', u'The availability change was combined with the one following it, which was the same.')
+            self._delete_next_quantity()
 
         self._save_deserialized_model()
 
@@ -48,8 +51,19 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
     def _would_not_change_previous_quantity(self):
         return self._previous_quantity() == self.validated_data('quantity')
 
+    def _delete_next_quantity(self):
+        self._next_availability().delete()
+
+    def _same_as_next_quantity(self):
+        return self._next_quantity() == self.validated_data('quantity')
+
+    def _next_availability(self):
+        next_avail = Availability.objects.filter(start_date__gt=self.validated_data('start_date'), resource=self.validated_data('resource')).order_by('start_date').first()
+        print next_avail.start_date, next_avail.quantity
+        return next_avail
+
     def _next_quantity(self):
-        return Availability.objects.filter(start_date__gt=self.validated_data('start_date'), resource=self.validated_data('resource')).order_by('start_date').first()
+        return self._next_availability().quantity
 
     def _previous_quantity(self):
         return Availability.objects.quantity_on(self.validated_data('start_date'), self.validated_data('resource'))
