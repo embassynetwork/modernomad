@@ -463,7 +463,7 @@ def occupancy(request, location_slug):
     # because there's many edge cases causd by reservations being edited,
     # appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
     # work on it, don't say i didn't warn you :).
-
+    
     payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
     for p in payments_this_month:
         r = p.bill.reservationbill.reservation
@@ -516,16 +516,15 @@ def occupancy(request, location_slug):
         # XXX Note! get_rate() returns the base rate, but does not incorporate
         # any discounts. so we use subtotal_amount here.
         rate = r.bill.subtotal_amount()/r.total_nights()
+        
+        room_occupancy[r.resource] = room_occupancy.get(r.resource, 0) + nights_this_month
+
         if r.is_comped():
             total_comped_nights += nights_this_month
             total_comped_income += nights_this_month*r.default_rate()
             comp = True
             unpaid = False
         else:
-            this_room_occupancy = room_occupancy.get(r.resource, 0)
-            this_room_occupancy += nights_this_month
-            room_occupancy[r.resource] = this_room_occupancy
-
             # the bill has the amount that goes to the house after fees
             to_house_per_night = r.bill.to_house()/r.total_nights()
             total_income += nights_this_month*to_house_per_night
@@ -550,7 +549,7 @@ def occupancy(request, location_slug):
                     # if the payment was sometime this month, we account for
                     # it. if it was in a future month, we'll show it as "income
                     # for previous months" in that month. we skip it here.
-                    elif p.payment_date.date() <= end:
+                    elif p.payment_date.date() < end:
                         income_for_this_month += nights_this_month*(p.to_house()/(r.depart - r.arrive).days)
                     unpaid = False
             else:
@@ -578,31 +577,32 @@ def occupancy(request, location_slug):
     total_reservable_days = 0
     reservable_days_per_room = {}
     for room in location_rooms:
-		reservable_days_this_room = 0
-		the_day = start
-		while the_day < end:
-			reservable_days_this_room += room.availabilities_on(the_day)
-			the_day += datetime.timedelta(1)
-		reservable_days_per_room[room] = reservable_days_this_room
+        print "********"
+        print room.name
+        reservable_days_this_room = 0
+        the_day = start
+        while the_day < end:
+            quantity_today = room.availabilities_on(the_day)
+            print the_day, quantity_today
+            reservable_days_this_room += quantity_today
+            the_day += datetime.timedelta(1)
+        print reservable_days_this_room
+        reservable_days_per_room[room] = reservable_days_this_room
 
     total_income_for_this_month = income_for_this_month + income_from_past_months
     total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
     total_by_rooms = sum(room_income.itervalues())
-	for room, income in room_income.iteritems():
-		# this is a bit weird, but a room can be booked by an admin even if it
-		# isn't listed as reservable, effectively increasing the reservable
-		# nights. we're not changing the "reservable" objects, but since it was
-		# reserved, it will throw off the occupancy calculation unless we add
-		# those days to the number of reservable days per room.
-		# TODO should we enforce availabilities existing in order to book?
-        if reservable_days_per_room[room] < room_occupancy[room]:
-            reservable_days_per_room[room] = room_occupancy[room]
-        if reservable_days_per_room[room] > 0:
-            room_occupancy_rate = 100*float(room_occupancy[room])/reservable_days_per_room[room]
+    for room in location_rooms:
+        # JKS: it is possible for this to be > 100% if admins overbook a room
+        # or book it when it was not listed as available. 
+        if reservable_days_per_room.get(room, 0):
+            room_occupancy_rate = 100*float(room_occupancy.get(room, 0))/reservable_days_per_room[room]
         else:
-            room_occupancy_rate = 0
+            room_occupancy_rate = 0.0
         # tuple with income, num nights occupied, and % occupancy rate
-        room_income_occupancy[room] = (income, room_occupancy[room], room_occupancy_rate)
+        room_income_occupancy[room] = (room_income.get(room, 0), room_occupancy_rate, room_occupancy.get(room, 0), reservable_days_per_room.get(room, 0))
+        print room.name
+        print room_income_occupancy[room]
         total_reservable_days += reservable_days_per_room[room]
     overall_occupancy = 0
     if total_reservable_days > 0:

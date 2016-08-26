@@ -55,7 +55,8 @@
 					<th>Room</th>
 					<th>Income</th>
 					<th>Occupancy Rate <br><small>(based on reservables)</small></th>
-					<th>Nights</th>
+					<th>Occupied</th>
+                    <th>Available</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -63,8 +64,9 @@
 				<tr class="{% cycle 'row-even' 'row-odd' %}">
 					<td>{{ room.name|title }}<a target="blank" href="{% url 'room_occupancy' location.slug room.id report_date.year %}"> <span class="glyphicon glyphicon-cloud-download"></span></a></td> 
 					<td>${{ tup.0|floatformat:2|intcomma  }}</td>
-					<td>{{tup.2|floatformat:2}}%</td> 
-					<td>{{tup.1}}</td>
+					<td>{{tup.1|floatformat:2}}%</td> 
+					<td>{{tup.2}}</td>
+					<td>{{tup.3}}</td>
 				</tr>
 				{% empty %}
 					None
