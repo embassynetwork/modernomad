@@ -422,6 +422,17 @@ class Resource(models.Model):
         else:
             return False
 
+    def max_daily_availabilities_between(self, start, end):
+        max_quantity = 0
+        avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
+        for a in avails:
+            if a.quantity > max_quantity:
+                max_quantity = a.quantity
+            if a.start_date <= start:
+                break
+        return max_quantity
+
+
     def availability_calendar_html(self, month=None, year=None):
         if not (month and year):
             today = timezone.localtime(timezone.now())

@@ -659,7 +659,7 @@ def calendar(request, location_slug):
     # should be. it's kind of a hack.
     num_rows_in_chart = 0
     for room in rooms:
-        num_rows_in_chart += room.beds
+        num_rows_in_chart += room.max_daily_availabilities_between(start, end)
 
     if len(reservations) == 0:
         any_reservations = False
@@ -673,7 +673,7 @@ def calendar(request, location_slug):
 
         if len(reservation_list_this_room) == 0:
             empty_rooms += 1
-            num_rows_in_chart -= room.beds
+            num_rows_in_chart -= room.max_daily_availabilities_between(start, end)
 
         else:
             for r in reservation_list_this_room:
