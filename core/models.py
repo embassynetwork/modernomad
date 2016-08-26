@@ -338,95 +338,95 @@ class RoomCalendar(calendar.HTMLCalendar):
 
 
 class Resource(models.Model):
-	name = models.CharField(max_length=200)
-	location = models.ForeignKey(Location, related_name='resources', null=True)
-	default_rate = models.DecimalField(decimal_places=2, max_digits=9)
-	description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
-	summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
-	cancellation_policy = models.CharField(max_length=400, default="24 hours")
-	shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
-	beds = models.IntegerField()
-	residents = models.ManyToManyField(
-			User, related_name="resources", blank=True,
-			help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people " +
-			"will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room."
-			)  # a room may have many residents and a resident may have many rooms
-	image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
+    name = models.CharField(max_length=200)
+    location = models.ForeignKey(Location, related_name='resources', null=True)
+    default_rate = models.DecimalField(decimal_places=2, max_digits=9)
+    description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
+    summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
+    cancellation_policy = models.CharField(max_length=400, default="24 hours")
+    shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
+    beds = models.IntegerField()
+    residents = models.ManyToManyField(
+            User, related_name="resources", blank=True,
+            help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people " +
+            "will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room."
+            )  # a room may have many residents and a resident may have many rooms
+    image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
 
-	def __unicode__(self):
-		return self.name
+    def __unicode__(self):
+        return self.name
 
-	def availabilities_between(self, start, end):
-		avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
-		avails_between = []
-		for a in avails:
-			# since we already filtered out availabilities ahead of our date
-			# range, we just need to go backwards until the first avail that
-			# starts on or before our start date, and then break. 
-			if a.start_date > start:
-				avails_between.append(a)
-			else:
-				avails_between.append(a)
-				break
-		return avails_between
+    def availabilities_between(self, start, end):
+        avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
+        avails_between = []
+        for a in avails:
+            # since we already filtered out availabilities ahead of our date
+            # range, we just need to go backwards until the first avail that
+            # starts on or before our start date, and then break. 
+            if a.start_date > start:
+                avails_between.append(a)
+            else:
+                avails_between.append(a)
+                break
+        return avails_between
 
-	def availabilities_today_forward(self):
-		today = timezone.localtime(timezone.now()).date()
-		all_avails = self.availabilities.all().order_by('-start_date')
-		select_avails = []
-		for a in all_avails:
-			if a.start_date > today:
-				select_avails.append(a)
-			else:
-				select_avails.append(a)
-				# we want only the first availability that does not start in
-				# the future, if it exists
-				break
-		return select_avails
+    def availabilities_today_forward(self):
+        today = timezone.localtime(timezone.now()).date()
+        all_avails = self.availabilities.all().order_by('-start_date')
+        select_avails = []
+        for a in all_avails:
+            if a.start_date > today:
+                select_avails.append(a)
+            else:
+                select_avails.append(a)
+                # we want only the first availability that does not start in
+                # the future, if it exists
+                break
+        return select_avails
 
-	def has_future_availability(self):
-		today = timezone.localtime(timezone.now()).date()
-		# iterate backwards over time through availabilities. if there's any
-		# non-zero availabilities current or future, then this resource has
-		# SOME 'future' availability.
-		avails = self.availabilities.all().order_by('-start_date')
-		for a in avails:
-			if a.start_date >= today and a.quantity > 0:
-				return True
-			# we only ever want to go one availability into the past.
-			elif a.start_date < today:
-				if a.quantity > 0:
-					return True
-				else:
-					return False
+    def has_future_availability(self):
+        today = timezone.localtime(timezone.now()).date()
+        # iterate backwards over time through availabilities. if there's any
+        # non-zero availabilities current or future, then this resource has
+        # SOME 'future' availability.
+        avails = self.availabilities.all().order_by('-start_date')
+        for a in avails:
+            if a.start_date >= today and a.quantity > 0:
+                return True
+            # we only ever want to go one availability into the past.
+            elif a.start_date < today:
+                if a.quantity > 0:
+                    return True
+                else:
+                    return False
 
-	def availabilities_on(self, this_day):
-		return Availability.objects.quantity_on(this_day, self)
+    def availabilities_on(self, this_day):
+        return Availability.objects.quantity_on(this_day, self)
 
-	def bookable_on(self, this_day):
-		# a resource is bookable if it has availability slots that are not already booked.
-		availabilities = self.availabilities_on(this_day)
-		if not availabilities:
-			return False
-		reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-		if len(reservations_on_this_day) < availabilities:
-			return True
-		else:
-			return False
+    def bookable_on(self, this_day):
+        # a resource is bookable if it has availability slots that are not already booked.
+        availabilities = self.availabilities_on(this_day)
+        if not availabilities:
+            return False
+        reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
+        if len(reservations_on_this_day) < availabilities:
+            return True
+        else:
+            return False
 
-	def availability_calendar_html(self, month=None, year=None):
-		if not (month and year):
-			today = timezone.localtime(timezone.now())
-			month = today.month
-			year = today.year
-		location = self.location
-		room_cal = RoomCalendar(self, location, year, month)
-		month_html = room_cal.formatmonth(year, month)
-		return month_html
+    def availability_calendar_html(self, month=None, year=None):
+        if not (month and year):
+            today = timezone.localtime(timezone.now())
+            month = today.month
+            year = today.year
+        location = self.location
+        room_cal = RoomCalendar(self, location, year, month)
+        month_html = room_cal.formatmonth(year, month)
+        return month_html
 
-	def tz(self):
-		assert self.location, "You can't fetch a timezone on a resource without a location"
-		return self.location.tz()
+    def tz(self):
+        assert self.location, "You can't fetch a timezone on a resource without a location"
+        return self.location.tz()
 
 
 class Fee(models.Model):
