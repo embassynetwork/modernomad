@@ -33,14 +33,6 @@ def availability_detail(request, availability_id):
         serializer = AvailabilitySerializer(availability)
         return JSONResponse(serializer.data)
 
-    elif request.method == 'PUT':
-        data = JSONParser().parse(request)
-        serializer = AvailabilitySerializer(availability, data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JSONResponse(serializer.data)
-        return JSONResponse(serializer.errors, status=400)
-
     elif request.method == 'DELETE':
         command = DeleteAvailabilityChange(request.user, availability=availability)
         command.execute()
