@@ -57,7 +57,8 @@ export default class AvailabilityContainer extends React.Component {
   triggerDelete(availabilityId) {
     axios.delete(`/api/availability/${availabilityId}`)
       .then((response) => {
-        this.deleteAvailability(availabilityId)
+          console.log(response.data.data.deleted.availabilities)
+        this.deleteAvailability(response.data.data.deleted.availabilities)
       })
       .catch((error) => {
         console.log("error occured in delete", error);
@@ -77,9 +78,9 @@ export default class AvailabilityContainer extends React.Component {
     })
   }
 
-  deleteAvailability(availabilityId) {
+  deleteAvailability(deleted_availabilities) {
     this.setState({
-      upcomingAvailabilities: reject(this.state.upcomingAvailabilities, {id: availabilityId})
+        upcomingAvailabilities: reject(this.state.upcomingAvailabilities, {id: deleted_availabilities})
     })
   }
 

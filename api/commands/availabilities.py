@@ -36,7 +36,7 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
         return not self.has_errors()
 
     def _execute_on_valid(self):
-        if self._would_not_change_quantity():
+        if self._would_not_change_previous_quantity():
             self.add_warning('quantity', u'This is not a change from the previous availability')
             return
 
@@ -45,8 +45,11 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
     def resource(self):
         return self.validated_data('resource')
 
-    def _would_not_change_quantity(self):
+    def _would_not_change_previous_quantity(self):
         return self._previous_quantity() == self.validated_data('quantity')
+
+    def _next_quantity(self):
+        return Availability.objects.filter(start_date__gt=self.validated_data('start_date'), resource=self.validated_data('resource')).order_by('start_date').first()
 
     def _previous_quantity(self):
         return Availability.objects.quantity_on(self.validated_data('start_date'), self.validated_data('resource'))
@@ -65,10 +68,56 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
 
         return not self.has_errors()
 
+    def _get_prev_and_next_indexes(self, avail, all_avails):
+        # keep the availabilities in increasing-date-order here, so that 'next'
+        # is intuitive (future date)
+        idx = all_avails.index(avail)
+
+        if len(all_avails) > idx+1: 
+            next = idx+1 
+        else:
+            next = None
+
+        if idx != 0:
+            prev = idx-1 
+        else: 
+            prev = None
+
+        return (prev, next)
+
+    def adjust_adjacent(self):
+        print 'in adjust adjacent'
+        this_avail = self.input_data['availability']
+        all_avails = list(Availability.objects.filter(resource=this_avail.resource).order_by('start_date'))
+        prev, next = self._get_prev_and_next_indexes(this_avail, all_avails)
+        if prev is None or next is None:
+            print 'no adjustments needed'
+            return None
+
+        print 'prev and next availabilities'
+        print all_avails[prev].id, all_avails[prev].start_date, all_avails[prev].quantity  
+        print all_avails[next].id, all_avails[next].start_date, all_avails[next].quantity  
+
+        delete_idxs = []
+        if all_avails[next].quantity == all_avails[prev].quantity:
+            print 'adjusting'
+            to_delete = all_avails[next]
+            deleted_pk = to_delete.pk
+            to_delete.delete()
+            print 'deleted_pk'
+            print deleted_pk
+            return deleted_pk
+        else:
+            print 'quantities were different, moving on'
+
     def _execute_on_valid(self):
+        deleted_id = self.adjust_adjacent()
+        deleted_list = [self.availability().pk]
         self.availability().delete()
+        if deleted_id:
+            deleted_list.append(deleted_id)
         self.result_data = {
-            'deleted': {'availability': [self.availability().pk]}
+            'deleted': {'availabilities': deleted_list}
         }
 
     def resource(self):
