@@ -578,44 +578,23 @@ def occupancy(request, location_slug):
     total_reservable_days = 0
     reservable_days_per_room = {}
     for room in location_rooms:
-        room_reservables = room.reservables.all()
-		#availabilities = room.availabilities_between(start, end)
-        reservable_days_this_room = 0
-        for reservable in room_reservables:
-            if not reservable.end_date:
-                # XXX  account for reservables without end date by temporarily
-                # setting the end date to be the end of the month.  IMPT: do
-                # NOT save this. it's a temporary hack so that we can work with
-                # end dates.
-                reservable.end_date = end
-
-            if reservable.end_date < start or reservable.start_date > end:
-                # no reservable dates in this month
-                continue
-            if reservable.start_date < start:
-                start_reservable = start
-            else:
-                start_reservable = reservable.start_date
-            if reservable.end_date > end:
-                end_reservable = end
-            else:
-                end_reservable = reservable.end_date
-            reservable_days_this_room += (end_reservable - start_reservable).days
-
-        if room.shared:
-            reservable_days_this_room *= room.beds
-        reservable_days_per_room[room] = reservable_days_this_room
+		reservable_days_this_room = 0
+		the_day = start
+		while the_day < end:
+			reservable_days_this_room += room.availabilities_on(the_day)
+			the_day += datetime.timedelta(1)
+		reservable_days_per_room[room] = reservable_days_this_room
 
     total_income_for_this_month = income_for_this_month + income_from_past_months
     total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
     total_by_rooms = sum(room_income.itervalues())
-    for room, income in room_income.iteritems():
-        # this is a bit weird, but a room can be booked by an admin even if it
-        # isn't listed as reservable, effectively increasing the reservable
-        # nights. we're not changing the "reservable" objects, but since it was
-        # reserved, it will throw off the occupancy calculation unless we add
-        # those days to the number of reservable days per room.
-        # TODO *should* we add create reservables here?
+	for room, income in room_income.iteritems():
+		# this is a bit weird, but a room can be booked by an admin even if it
+		# isn't listed as reservable, effectively increasing the reservable
+		# nights. we're not changing the "reservable" objects, but since it was
+		# reserved, it will throw off the occupancy calculation unless we add
+		# those days to the number of reservable days per room.
+		# TODO should we enforce availabilities existing in order to book?
         if reservable_days_per_room[room] < room_occupancy[room]:
             reservable_days_per_room[room] = room_occupancy[room]
         if reservable_days_per_room[room] > 0:
