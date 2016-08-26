@@ -14,6 +14,4 @@ def impl(context, location_name, room_name, bed_count, beds):
     room = Resource(name=room_name, beds=bed_count, location=location,
                     default_rate=100, shared=True, summary="blah")
     room.save()
-    reservable = Reservable(start_date=datetime.date.today(), resource=room)
-    reservable.save()
-    # assertEqual(room_name, False)
+    Availability(start_date=datetime.date.today(), resource=room, quantity=1).save()
