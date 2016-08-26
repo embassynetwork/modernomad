@@ -146,7 +146,7 @@ class Location(models.Model):
     def rooms_with_future_availability(self):
         future_availability = []
         for room in Resource.objects.filter(location=self):
-            if room.future_availability():
+            if room.has_future_availability():
                 future_availability.append(room)
         return future_availability
 
@@ -356,7 +356,7 @@ class Resource(models.Model):
     def __unicode__(self):
         return self.name
 
-    def future_availability(self):
+    def has_future_availability(self):
         today = timezone.localtime(timezone.now()).date()
         # iterate backwards over time through availabilities. if there's any
         # non-zero availabilities current or future, then this resource has

@@ -579,6 +579,7 @@ def occupancy(request, location_slug):
     reservable_days_per_room = {}
     for room in location_rooms:
         room_reservables = room.reservables.all()
+		#availabilities = room.availabilities_between(start, end)
         reservable_days_this_room = 0
         for reservable in room_reservables:
             if not reservable.end_date:
