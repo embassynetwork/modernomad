@@ -370,7 +370,7 @@ class Resource(models.Model):
         for a in avails:
             # since we already filtered out availabilities ahead of our date
             # range, we just need to go backwards until the first avail that
-            # starts on or before our start date, and then break. 
+            # starts on or before our start date, and then break.
             if a.start_date > start:
                 avails_between.append(a)
             else:
@@ -431,7 +431,6 @@ class Resource(models.Model):
             if a.start_date <= start:
                 break
         return max_quantity
-
 
     def availability_calendar_html(self, month=None, year=None):
         if not (month and year):

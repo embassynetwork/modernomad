@@ -30,7 +30,7 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
         if not self.can_administer_resource():
             return self.unauthorized()
 
-        if self.validated_data('start_date') < datetime.now(self.tz()).date():
+        if self.start_date() < datetime.now(self.tz()).date():
             self.add_error('start_date', u'The start date must not be in the past')
 
         return not self.has_errors()
@@ -48,6 +48,9 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
     def resource(self):
         return self.validated_data('resource')
 
+    def start_date(self):
+        return self.validated_data('start_date')
+
     def _would_not_change_previous_quantity(self):
         return self._previous_quantity() == self.validated_data('quantity')
 
@@ -58,15 +61,15 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
         return self._next_quantity() == self.validated_data('quantity')
 
     def _next_availability(self):
-        next_avail = Availability.objects.filter(start_date__gt=self.validated_data('start_date'), resource=self.validated_data('resource')).order_by('start_date').first()
-        print next_avail.start_date, next_avail.quantity
-        return next_avail
+        return Availability.objects.filter(start_date__gt=self.start_date(), resource=self.resource()) \
+                           .order_by('start_date').first()
 
     def _next_quantity(self):
-        return self._next_availability().quantity
+        availability = self._next_availability()
+        return availability.quantity if availability else None
 
     def _previous_quantity(self):
-        return Availability.objects.quantity_on(self.validated_data('start_date'), self.validated_data('resource'))
+        return Availability.objects.quantity_on(self.start_date(), self.resource())
 
 
 class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
@@ -87,14 +90,14 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
         # is intuitive (future date)
         idx = all_avails.index(avail)
 
-        if len(all_avails) > idx+1: 
-            next = idx+1 
+        if len(all_avails) > idx+1:
+            next = idx+1
         else:
             next = None
 
         if idx != 0:
-            prev = idx-1 
-        else: 
+            prev = idx-1
+        else:
             prev = None
 
         return (prev, next)
@@ -109,8 +112,8 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
             return None
 
         print 'prev and next availabilities'
-        print all_avails[prev].id, all_avails[prev].start_date, all_avails[prev].quantity  
-        print all_avails[next].id, all_avails[next].start_date, all_avails[next].quantity  
+        print all_avails[prev].id, all_avails[prev].start_date, all_avails[prev].quantity
+        print all_avails[next].id, all_avails[next].start_date, all_avails[next].quantity
 
         delete_idxs = []
         if all_avails[next].quantity == all_avails[prev].quantity:
