@@ -85,11 +85,12 @@ class DeleteAvailabilityChangeTestCase(TestCase):
 
     def test_can_delete_availability_in_the_future(self):
         availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
+        expected_id = availability.pk
 
         command = DeleteAvailabilityChange(self.user, availability=availability)
         self.assertTrue(command.execute())
         self.assertEqual(Availability.objects.count(), 0)
-        expected_data = {'data': {'deleted': {'availability': [availability.pk]}}}
+        expected_data = {'data': {'deleted': {'availability': [expected_id]}}}
         self.assertEqual(command.result().serialize(), expected_data)
 
     def test_cant_delete_availability_in_the_past(self):

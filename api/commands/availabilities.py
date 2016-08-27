@@ -76,6 +76,9 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
     def availability(self):
         return self.input_data['availability']
 
+    def resource(self):
+        return self.availability().resource
+
     def _check_if_valid(self):
         if not self.can_administer_resource():
             return self.unauthorized()
@@ -84,6 +87,16 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
             self.add_error('start_date', u'The start date must not be in the past')
 
         return not self.has_errors()
+
+    def _execute_on_valid(self):
+        deleted_id = self._adjust_adjacent()
+        deleted_list = [self.availability().pk]
+        self.availability().delete()
+        if deleted_id:
+            deleted_list.append(deleted_id)
+        self.result_data = {
+            'deleted': {'availability': deleted_list}
+        }
 
     def _get_prev_and_next_indexes(self, avail, all_avails):
         # keep the availabilities in increasing-date-order here, so that 'next'
@@ -102,7 +115,7 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
 
         return (prev, next)
 
-    def adjust_adjacent(self):
+    def _adjust_adjacent(self):
         print 'in adjust adjacent'
         this_avail = self.input_data['availability']
         all_avails = list(Availability.objects.filter(resource=this_avail.resource).order_by('start_date'))
@@ -126,16 +139,3 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
             return deleted_pk
         else:
             print 'quantities were different, moving on'
-
-    def _execute_on_valid(self):
-        deleted_id = self.adjust_adjacent()
-        deleted_list = [self.availability().pk]
-        self.availability().delete()
-        if deleted_id:
-            deleted_list.append(deleted_id)
-        self.result_data = {
-            'deleted': {'availabilities': deleted_list}
-        }
-
-    def resource(self):
-        return self.availability().resource
