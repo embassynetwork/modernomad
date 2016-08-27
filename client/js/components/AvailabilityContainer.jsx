@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import AvailabilityManager from './AvailabilityManager'
 import ErrorDisplay from './ErrorDisplay'
-import { clone, reject, sortBy } from 'lodash'
+import _ from 'lodash'
 import axios from 'axios'
 import moment from 'moment'
 
@@ -57,7 +57,6 @@ export default class AvailabilityContainer extends React.Component {
   triggerDelete(availabilityId) {
     axios.delete(`/api/availability/${availabilityId}`)
       .then((response) => {
-          console.log(response.data.data.deleted.availabilities)
         this.deleteAvailability(response.data.data.deleted.availabilities)
       })
       .catch((error) => {
@@ -66,7 +65,7 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   sortedAvailabilities(availabilities) {
-    return sortBy(availabilities, (availability) => {
+    return _.sortBy(availabilities, (availability) => {
       return moment(availability.start_date)
     })
   }
@@ -80,7 +79,9 @@ export default class AvailabilityContainer extends React.Component {
 
   deleteAvailability(deleted_availabilities) {
     this.setState({
-        upcomingAvailabilities: reject(this.state.upcomingAvailabilities, {id: deleted_availabilities})
+        upcomingAvailabilities: _.reject(this.state.upcomingAvailabilities, (availability) => {
+          return _.includes(deleted_availabilities, availability.id)
+        })
     })
   }
 

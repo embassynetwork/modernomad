@@ -95,7 +95,7 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
         if deleted_id:
             deleted_list.append(deleted_id)
         self.result_data = {
-            'deleted': {'availability': deleted_list}
+            'deleted': {'availabilities': deleted_list}
         }
 
     def _get_prev_and_next_indexes(self, avail, all_avails):
