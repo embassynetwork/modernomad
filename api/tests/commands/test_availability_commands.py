@@ -77,21 +77,17 @@ class DeleteAvailabilityChangeTestCase(TestCase):
         self.resource = ResourceFactory()
         self.resource.location.house_admins.add(self.user)
 
+    def expect_deleted_availabilities(self, expected_ids, remaining=0):
+        self.assertTrue(self.command.execute())
+        self.assertEqual(Availability.objects.count(), remaining)
+        expected_data = {'data': {'deleted': {'availabilities': expected_ids}}}
+        self.assertEqual(self.command.result().serialize(), expected_data)
+
     def test_that_command_from_non_house_admin_fails(self):
         availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
         non_admin = UserFactory(username="samwise")
-        command = DeleteAvailabilityChange(non_admin, availability=availability)
-        self.assertFalse(command.execute())
-
-    def test_can_delete_availability_in_the_future(self):
-        availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
-        expected_id = availability.pk
-
-        command = DeleteAvailabilityChange(self.user, availability=availability)
-        self.assertTrue(command.execute())
-        self.assertEqual(Availability.objects.count(), 0)
-        expected_data = {'data': {'deleted': {'availabilities': [expected_id]}}}
-        self.assertEqual(command.result().serialize(), expected_data)
+        self.command = DeleteAvailabilityChange(non_admin, availability=availability)
+        self.assertFalse(self.command.execute())
 
     def test_cant_delete_availability_in_the_past(self):
         availability = Availability.objects.create(start_date=datetime.date(1016, 1, 13), resource=self.resource, quantity=2)
@@ -101,3 +97,22 @@ class DeleteAvailabilityChangeTestCase(TestCase):
         self.assertEqual(Availability.objects.count(), 1)
         expected_data = {'errors': {'start_date': [u'The start date must not be in the past']}}
         self.assertEqual(command.result().serialize(), expected_data)
+
+    def test_can_delete_availability_in_the_future(self):
+        availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
+        self.command = DeleteAvailabilityChange(self.user, availability=availability)
+        self.expect_deleted_availabilities([availability.pk])
+
+    def test_deleting_availability_also_deletes_next_one_if_it_is_the_same_as_previous(self):
+        previous_availability = Availability.objects.create(start_date=datetime.date(4016, 1, 12), resource=self.resource, quantity=3)
+        availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
+        next_availability = Availability.objects.create(start_date=datetime.date(4016, 1, 14), resource=self.resource, quantity=3)
+        self.command = DeleteAvailabilityChange(self.user, availability=availability)
+        self.expect_deleted_availabilities([availability.pk, next_availability.pk], remaining=1)
+
+    def test_deleting_availability_doesnt_deletes_next_one_if_it_different_to_previous(self):
+        previous_availability = Availability.objects.create(start_date=datetime.date(4016, 1, 12), resource=self.resource, quantity=4)
+        availability = Availability.objects.create(start_date=datetime.date(4016, 1, 13), resource=self.resource, quantity=2)
+        next_availability = Availability.objects.create(start_date=datetime.date(4016, 1, 14), resource=self.resource, quantity=3)
+        self.command = DeleteAvailabilityChange(self.user, availability=availability)
+        self.expect_deleted_availabilities([availability.pk], remaining=2)
