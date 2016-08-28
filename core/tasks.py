@@ -129,14 +129,14 @@ def slack_embassysf_daily():
 	logger.debug("Slack response: %s" % resp.text)
 
 
-@periodic_task(run_every=crontab(hour=5, minute=11))
+@periodic_task(run_every=crontab(hour=0, minute=11))
 def slack_ams_daily():
 	''' post daily arrivals and departures to slack. to enable, add an incoming
 	web hook to the specific channel you want this to post to. grab the webhook
 	url and put it in the webhook variable below.'''
 	webhook = "https://hooks.slack.com/services/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"
 	today = timezone.localtime(timezone.now())
-	location = Location.objects.get(slug="ams")
+	location = Location.objects.get(slug="amsterdam")
 	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
 	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 
