@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Resource, Location, LocationMenu, Reservable, Subscription, Subscription
+from core.models import UserProfile, Reservation, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
@@ -309,15 +309,6 @@ class LocationRoomForm(forms.ModelForm):
             relative_file_name = save_cropped_image(img_data, upload_path)
             self.cleaned_data['image'] = relative_file_name
 
-
-class LocationReservableForm(BootstrapModelForm):
-    class Meta:
-        model = Reservable
-        exclude = ['resource',]
-        widgets = {
-            'start_date': forms.DateInput(attrs={'class':'datepicker'}),
-            'end_date': forms.DateInput(attrs={'class':'datepicker'}),
-        }
 
 class ReservationForm(forms.ModelForm):
     class Meta:

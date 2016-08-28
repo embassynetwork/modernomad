@@ -18,7 +18,6 @@ class ResourceFactory(factory.DjangoModelFactory):
 
     name = "Chamber of Salons"
     default_rate = 100
-    beds = 1
     location = factory.SubFactory(LocationFactory)
 
 

@@ -1599,12 +1599,6 @@ class LocationFlatPage(models.Model):
         return self.flatpage.title
 
 
-class Reservable(models.Model):
-    resource = models.ForeignKey(Resource, related_name="reservables")
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True, help_text="Leave this blank for a guest room or room with open ended reservability.")
-
-
 class UserNote(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, null=True)

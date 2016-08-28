@@ -11,7 +11,6 @@ from django.template import RequestContext
 from core.forms import ReservationForm, AdminReservationForm, UserProfileForm, SubscriptionEmailTemplateForm
 from core.forms import ReservationEmailTemplateForm, PaymentForm, AdminSubscriptionForm, LocationSettingsForm
 from core.forms import LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm
-from core.forms import LocationReservableForm
 from django.core import urlresolvers
 from django.contrib import messages
 from django.conf import settings
@@ -234,7 +233,7 @@ def room_occupancy_month(room, month, year):
             comp = True
             unpaid = False
         else:
-            
+
             total_user_value += (r.bill.amount()/r.total_nights())*nights_this_month
             net_to_house += (r.bill.to_house()/r.total_nights())*nights_this_month
             externalized_fees += (r.bill.non_house_fees()/r.total_nights())*nights_this_month
@@ -282,10 +281,10 @@ def room_occupancy(request, location_slug, room_id, year):
 
     writer.writerow([str(year) + " Report for " + room.name])
     writer.writerow([
-        'Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied', 'Nights Available', 
-        'Partial Paid Reservations', 'Comped Nights', 'Outstanding Value', 'Total User Value', 
+        'Month', 'Year', 'Payments Cash', 'Payments Accrual', 'Nights Occupied', 'Nights Available',
+        'Partial Paid Reservations', 'Comped Nights', 'Outstanding Value', 'Total User Value',
         'Net Value to House', 'Externalized Fees', 'Internal Fees', 'Comped Value'
-        
+
     ])
     # we don't have data before 2012 or in the future
     if (year < 2012) or (year > datetime.date.today().year):
@@ -444,7 +443,7 @@ def occupancy(request, location_slug):
     # because there's many edge cases causd by reservations being edited,
     # appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
     # work on it, don't say i didn't warn you :).
-    
+
     payments_this_month = Payment.objects.reservation_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
     for p in payments_this_month:
         r = p.bill.reservationbill.reservation
@@ -497,7 +496,7 @@ def occupancy(request, location_slug):
         # XXX Note! get_rate() returns the base rate, but does not incorporate
         # any discounts. so we use subtotal_amount here.
         rate = r.bill.subtotal_amount()/r.total_nights()
-        
+
         room_occupancy[r.resource] = room_occupancy.get(r.resource, 0) + nights_this_month
 
         if r.is_comped():
@@ -557,7 +556,7 @@ def occupancy(request, location_slug):
     location_rooms = location.resources.all()
     total_reservable_days = 0
     reservable_days_per_room = {}
-    for room in location_rooms: 
+    for room in location_rooms:
         reservable_days_per_room[room] = room.quantity_between(start, end)
 
     total_income_for_this_month = income_for_this_month + income_from_past_months
@@ -565,7 +564,7 @@ def occupancy(request, location_slug):
     total_by_rooms = sum(room_income.itervalues())
     for room in location_rooms:
         # JKS: it is possible for this to be > 100% if admins overbook a room
-        # or book it when it was not listed as available. 
+        # or book it when it was not listed as available.
         if reservable_days_per_room.get(room, 0):
             room_occupancy_rate = 100*float(room_occupancy.get(room, 0))/reservable_days_per_room[room]
         else:
