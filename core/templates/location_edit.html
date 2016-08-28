@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block content %}
-
 	{% if messages %}
 	<div class="messages">
 		{% for message in messages %}
@@ -20,7 +19,7 @@
 
 
 	<h4>
-		<strong>Edit Location:</strong> 
+		<strong>Edit Location:</strong>
 
 		{% if page == 'settings' %}
 			Settings |
@@ -43,7 +42,7 @@
 		{% if page == 'rooms' %}
 			Rooms |
 		{% else %}
-			<a href="{% url 'location_edit_rooms' location.slug %}">Rooms</a> |
+			<a href="{% url 'location_manage_rooms' location.slug %}">Rooms</a> |
 		{% endif %}
 
 		{% if page == 'pages' %}
@@ -63,5 +62,5 @@
 
 	{% block sub-content %}
 	{% endblock %}
-	
+
 {% endblock %}

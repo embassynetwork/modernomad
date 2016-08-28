@@ -7,7 +7,7 @@
 
 
 <div class="col-md-12" id="page-spacer">
-	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1> 
+	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1>
 	{% if u.profile.city != "" %}
 	<em> based in {{ u.profile.city }}</em>
 	{% else %}
@@ -31,169 +31,56 @@
 		{% endif %}
 	</div>
 
-	{% ifequal u user %}
-		<div id="edit-profile">
+	<div id="edit-profile">
+		{% ifequal u user %}
+		<div>
 			<a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
 			{% if user.profile.customer_id %}
-			<form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
-				<input type="submit" class="btn btn-danger btn-small" value="Delete saved card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %}">
-			</form>
-			{% else %}
-			<div>
-				<form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
-					{% csrf_token %}
-					<input type="submit" id="pay-button" class="btn btn-success res-status-btn" 
-						value="Add Credit Card" >
-					<div>
-						<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
-							secure credit card processing with SSL encryption. Your card card
-						information is never stored on our servers.</small></em></p>
-					</div>
+				<form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
+					<input type="submit" class="btn btn-danger btn-small" value="Delete saved card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %}">
 				</form>
-			</div>
+			{% else %}
+				<div>
+					<form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
+						{% csrf_token %}
+						<input type="submit" id="pay-button" class="btn btn-success res-status-btn"
+							value="Add Credit Card" >
+						<div>
+							<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+								secure credit card processing with SSL encryption. Your card card
+							information is never stored on our servers.</small></em></p>
+						</div>
+					</form>
+				</div>
 			{% endif %}
 		</div>
-	{% endifequal %}
-	
-	{% if user_is_house_admin_somewhere %}
+		{% endifequal %}
 
-		<div class="dropdown top-spacer-sm">
-			<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-				New Reservation<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu">
-				{% for l in user.house_admin.all %}
-				<li><a href="{% url 'reservation_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
-				{% endfor %}
-			</ul>
-		</div>
-	
-	{% endif %}
+		{% if user_is_house_admin_somewhere %}
+			<div class="dropdown top-spacer-sm">
+				<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					New Reservation<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					{% for l in user.house_admin.all %}
+					<li><a href="{% url 'reservation_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+		{% endif %}
+
+		{% if u == user or user_is_house_admin_somewhere %}
+			{% include "snippets/user_edit_nav.html" %}
+		{% endif %}
+	</div>
+
+
 
 </div>
 
 <div class="col-md-9">
-	{% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
-
-		{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
-
-	{% else %}
-		<h4>About {{u.first_name|title}}:</h4>
-		<p>{{ u.profile.bio|default:"Nothing written yet." }}</p>
-
-		<h4>Current Projects:</h4>
-		<p>{{ u.profile.projects|default:"Empty" }}</p>
-
-		<h4>Learning and Sharing Interests:</h4>
-		<p>{{ u.profile.sharing|default:"Empty" }}</p>
-
-		<h4>Discussion topics:</h4>
-		<p>{{ u.profile.discussion|default:"Empty" }}</p>
-
-		{% include "snippets/profile_links.html" %}
-	{% endif %}
-	
-
-	{% if u == user or user_is_house_admin_somewhere %}
-
-		<ul class="nav nav-tabs page-spacer">
-			<li role="presentation" class="active"><a href="#email" aria-controls="email" role="tab" data-toggle="tab">Email</a></li>
-			<li role="presentation"><a href="#reservations" aria-controls="reservations" role="tab" data-toggle="tab">Reservations</a></li>
-			<li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions</a></li>
-			<li role="presentation"><a href="#events" aria-controls="events" role="tab" data-toggle="tab">Events</a></li>
-			{% if u.rooms.count %}
-			<li role="presentation" class="dropdown">
-			    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-					Rooms <span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu">
-					{% for r in u.rooms.all %}
-						<li><a href="#{{r.name|slugify}}" aria-controls="events" role="tab" data-toggle="tab">{{r.name}}</a></li>
-					{% endfor %}
-				</ul>
-			</li>
-			{% endif %}
-		</ul>
-
-		<div class="tab-content col-md-10">
-
-		<div role="tabpanel" class="tab-pane active" id="email">
-			<h3>Email Notifications</h3>
-			<div class="row">
-				<div class="col-md-12">
-					<form class="" method="post" action="{% url 'gather_email_preferences' u.username %}">{% csrf_token %}
-						<div class="checkbox">
-							<label> Receive automatic reminders of events you are attending
-								<input type="checkbox" name="event_reminders" id="event_reminders" {% if u.event_notifications.reminders %} checked {% endif %}>
-							</label>
-						</div>
-						<hr>
-						<div>Receive notifications when new events are published: 
-
-							{% for location in network_locations %}
-							{% if location.visibility = 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
-							<div class="checkbox">
-								<label>
-									<input 
-										type="checkbox" 
-										name="publish_{{ location.slug }}" 
-										id="publish_{{ location.slug }}" 
-										{% if location in u.event_notifications.location_publish.all %} checked {% endif %}
-										> {{ location.name }} {% if not location.visibility = 'public' %} <em>(location is private)</em> {% endif %}
-								</label>
-							</div>
-							{% endif %}
-							{% endfor %}
-						<hr>
-						<div>
-							Receive weekly emails about upcoming events: 
-
-							{% for location in network_locations %}
-							{% if location.visibility = 'public' or user in location.house_admins.all or user in location.residents.all or user in location.event_admins.all %}
-							<div class="checkbox">
-								<label>
-									<input 
-										type="checkbox" 
-										name="weekly_{{ location.slug }}" 
-										id="weekly_{{ location.slug }}" 
-										{% if location in u.event_notifications.location_weekly.all %} checked {% endif %}
-										> {{ location.name }} {% if not location.visibility = 'public' %} <em>(location is private)</em> {% endif %}
-								</label>
-						</div>
-							{% endif %}
-							{% endfor %}
-						<hr>
-						<input type="submit" value="Save" class="btn btn-default">
-					</form>
-				</div>
-			</div>
-		</div>
-	</div> 
-	</div> <!-- end email tab -->
-
-	<div role="tabpanel" class="tab-pane" id="reservations">
-		<h3>Reservations</h3>
-		{% include "snippets/user_reservations.html" %}
-	</div> <!-- end reservations tab -->
-
-	<div role="tabpanel" class="tab-pane" id="subscriptions">
-		<h3>Subscriptions</h3>
-		{% include "snippets/user_subscriptions.html" %}
-	</div> <!-- end subscriptions tab -->
-
-	<div role="tabpanel" class="tab-pane" id="events">
-		<h3>Events</h3>
-		{% include "snippets/user_events.html" %}
-	</div> <!-- end events tab -->
-
-	{% with page='user_detail' username=u.username %}
-		{% include 'snippets/room_edit_forms.html' %}
-	{% endwith %}
-
-	</div><!-- end tab content -->
-
-	{% endif %}
-
+	{% block user_content_area %}
+	{% endblock %}
 </div>
 
 {% endblock %}
@@ -233,5 +120,3 @@
 </script>
 
 {% endblock %}
-
-

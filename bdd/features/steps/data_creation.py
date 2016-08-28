@@ -2,16 +2,15 @@ from behave import *
 from core.factories import LocationFactory
 from core.models import *
 
+
 @given(u'there is a location called "{location_name}"')
 def impl(context, location_name):
-    LocationFactory.create(name = location_name).save()
+    LocationFactory(name=location_name)
+
 
 @given(u'"{location_name}" has a room "{room_name}" with {bed_count:d} {beds} available')
 def impl(context, location_name, room_name, bed_count, beds):
     location = Location.objects.get(name=location_name)
-    room = Resource(name=room_name, beds=bed_count, location=location,
-        default_rate=100, shared=True, summary="blah")
+    room = Resource(name=room_name, location=location, default_rate=100, summary="blah")
     room.save()
-    reservable = Reservable(start_date=datetime.date.today(), resource=room)
-    reservable.save()
-    # assertEqual(room_name, False)
+    Availability(start_date=datetime.date.today(), resource=room, quantity=1).save()

@@ -2,33 +2,30 @@
 {% block content %}
 
 {{ location_stay_text|safe }}
- 
+
 <div class="button-spacer">
-	<div class="col-md-4 col-md-offset-4">
-		<a class="btn btn-lg btn-rouge" type="button" href="{% url 'reservation_create' location.slug %}">Make a Reservation</a>
-	</div>
+  <div class="col-md-4 col-md-offset-4">
+    <a class="btn btn-lg btn-rouge" type="button" href="{% url 'reservation_create' location.slug %}">Make a Reservation</a>
+  </div>
 </div>
 
 <div class="room-list">
-	<h2>Explore the Rooms</h2>
-	{% for room in rooms %}
-		<div class="row room-row">
-			<div class="col-md-3">
-				<a href="{% url 'view_room' location.slug room.id %}"><img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-preview-image" /></a>
-			</div>
-			<div class="col-md-9">
-				<h3>
-					<a href="{% url 'view_room' location.slug room.id %}">{{ room.name|title }}</a>
-					- ${{ room.default_rate }}/night
-					{% if room.shared %}
-						<div class="btn btn-danger" disabled="disabled"> <span class="glyphicon glyphicon-bullhorn"></span> This is a shared room</div>
-					{% endif %}
-				</h3>
-			</div>
-			<div class="col-md-8">
-				<div>{{ room.description }}</div>
-			</div>
-		</div>
-	{% endfor %}
+  <h2>Explore the Rooms</h2>
+  {% for room in rooms %}
+    <div class="row room-row">
+      <div class="col-md-3">
+        <a href="{% url 'view_room' location.slug room.id %}"><img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-preview-image" /></a>
+      </div>
+      <div class="col-md-9">
+        <h3>
+          <a href="{% url 'view_room' location.slug room.id %}">{{ room.name|title }}</a>
+          - ${{ room.default_rate }}/night
+        </h3>
+      </div>
+      <div class="col-md-8">
+        <div>{{ room.description }}</div>
+      </div>
+    </div>
+  {% endfor %}
 </div>
 {% endblock %}
