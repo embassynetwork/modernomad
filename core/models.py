@@ -167,7 +167,6 @@ class Location(models.Model):
                 if not room.availabilities_on(the_day):
                     available_beds[room].append({'the_date': the_day, 'beds_free': 0})
                 else:
-                    beds_this_room = room.beds
                     bookings_today = Reservation.objects.confirmed_approved_on_date(the_day, self, resource=room)
                     free_beds = room.availabilities_on(the_day) - len(bookings_today)
                     # the ternary makes sure that we never display a negative
@@ -344,8 +343,6 @@ class Resource(models.Model):
     description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
     summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
     cancellation_policy = models.CharField(max_length=400, default="24 hours")
-    shared = models.BooleanField(default=False, verbose_name="Is this a hostel/shared accommodation room?")
-    beds = models.IntegerField()
     residents = models.ManyToManyField(
             User, related_name="resources", blank=True,
             help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people " +
