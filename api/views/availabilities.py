@@ -14,7 +14,7 @@ def availabilities(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
 
-        command = AddAvailabilityChange(request.user, **data)
+        command = UpdateOrAddAvailabilityChange(request.user, **data)
         command.execute()
         return JSONResponse(command.result().serialize(), status=command.result().http_status())
     else:

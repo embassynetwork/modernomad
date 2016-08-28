@@ -112,7 +112,29 @@ class Command:
         raise Exception("override _execute_on_valid to make your command work")
 
 
-class ModelCreationBaseCommand(Command):
+class DecoratorCommand(Command):
+    def _setup(self):
+        self.inner_command = None
+
+    def execute(self):
+        self._determine_inner()
+        if self.inner_command:
+            return self.inner_command.execute()
+        else:
+            return False
+
+    def _execute_on_valid(self):
+        print "execute inner"
+        return self.inner_command._execute_on_valid()
+
+    def result(self):
+        if self.inner_command:
+            return self.inner_command.result()
+        else:
+            super(Command, self).result()
+
+
+class SerializedModelCommand(Command):
     def validated_data(self, key):
         return self.deserialized_model.validated_data.get(key, None)
 
@@ -140,3 +162,20 @@ class ModelCreationBaseCommand(Command):
             for field_name, messages in self.deserialized_model.errors.iteritems():
                 for message in messages:
                     self.add_error(field_name, message)
+
+
+class ModelCommand(Command):
+    def _execute_on_valid(self):
+        self.model().save()
+        self.result_data = self._serialize_model()
+
+    def _is_model_valid(self):
+        try:
+            self.model().full_clean()
+            return True
+        except ValidationError as e:
+            e.message_dict
+            for field_name, messages in e.message_dict:
+                for message in messages:
+                    self.add_error(field_name, message)
+            return False

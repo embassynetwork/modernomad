@@ -1,5 +1,7 @@
 from api.command import *
 from datetime import datetime
+from core.models import Resource
+from django.core.exceptions import ValidationError
 
 
 def user_can_administer_a_resource(user, resource):
@@ -15,14 +17,80 @@ class AvailabilityCommandHelpers:
     def tz(self):
         return self.resource().tz()
 
+    def current_date_for_tz(self):
+        return datetime.now(self.tz()).date()
+
     def can_administer_resource(self):
         return user_can_administer_a_resource(self.issuing_user, self.resource())
 
+    def _validate_not_in_past(self):
+        if self.start_date() < self.current_date_for_tz():
+            self.add_error('start_date', u'The start date must not be in the past')
 
-class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers):
+    def _resource_availabilities(self, order='start_date'):
+        return Availability.objects.filter(resource=self.resource()).order_by(order)
+
+    def _next_availability(self):
+        return self._resource_availabilities('start_date').filter(start_date__gt=self.start_date()).first()
+
+    def _previous_availability(self):
+        return self._resource_availabilities('-start_date').filter(start_date__lt=self.start_date()).first()
+
+
+class SerializedAvailabilityCommand(SerializedModelCommand):
     def _model_class(self):
         return AvailabilitySerializer
 
+    def resource(self):
+        return self.validated_data('resource')
+
+    def start_date(self):
+        return self.validated_data('start_date')
+
+
+class UpdateOrAddAvailabilityChange(DecoratorCommand, AvailabilityCommandHelpers):
+    def _determine_inner(self):
+        existing = self._fetch_existing_availability_for_date(self.start_date())
+        if existing:
+            self.inner_command = UpdateAvailabilityChange(self.issuing_user, availability=existing, quantity=self.input_data.get('quantity'))
+        else:
+            self.inner_command = AddAvailabilityChange(self.issuing_user, **self.input_data)
+
+    def resource(self):
+        return Resource.objects.get(pk=self.input_data['resource'])
+
+    def start_date(self):
+        date_string = self.input_data.get('start_date')
+        if date_string:
+            return datetime.strptime(date_string, "%Y-%m-%d").date()
+
+    def _fetch_existing_availability_for_date(self, start_date):
+        return self._resource_availabilities().filter(start_date=start_date).first()
+
+
+class UpdateAvailabilityChange(ModelCommand, AvailabilityCommandHelpers):
+    def _check_if_valid(self):
+        self.model().quantity = self.input_data['quantity']
+
+        self._validate_not_in_past()
+        self._is_model_valid()
+
+        return not self.has_errors()
+
+    def model(self):
+        return self.input_data['availability']
+
+    def resource(self):
+        return self.model().resource
+
+    def start_date(self):
+        return self.model().start_date
+
+    def _serialize_model(self):
+        return AvailabilitySerializer(self.model()).data
+
+
+class AddAvailabilityChange(SerializedAvailabilityCommand, AvailabilityCommandHelpers):
     def _check_if_valid(self):
         if not self._check_if_model_valid():
             return False
@@ -30,8 +98,7 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
         if not self.can_administer_resource():
             return self.unauthorized()
 
-        if self.start_date() < datetime.now(self.tz()).date():
-            self.add_error('start_date', u'The start date must not be in the past')
+        self._validate_not_in_past()
 
         return not self.has_errors()
 
@@ -45,12 +112,6 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
 
         self._save_deserialized_model()
 
-    def resource(self):
-        return self.validated_data('resource')
-
-    def start_date(self):
-        return self.validated_data('start_date')
-
     def _would_not_change_previous_quantity(self):
         return self._previous_quantity() == self.validated_data('quantity')
 
@@ -59,10 +120,6 @@ class AddAvailabilityChange(ModelCreationBaseCommand, AvailabilityCommandHelpers
 
     def _same_as_next_quantity(self):
         return self._next_quantity() == self.validated_data('quantity')
-
-    def _next_availability(self):
-        return Availability.objects.filter(start_date__gt=self.start_date(), resource=self.resource()) \
-                           .order_by('start_date').first()
 
     def _next_quantity(self):
         availability = self._next_availability()
@@ -86,8 +143,7 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
         if not self.can_administer_resource():
             return self.unauthorized()
 
-        if self.start_date() < datetime.now(self.tz()).date():
-            self.add_error('start_date', u'The start date must not be in the past')
+        self._validate_not_in_past()
 
         return not self.has_errors()
 
@@ -98,15 +154,6 @@ class DeleteAvailabilityChange(Command, AvailabilityCommandHelpers):
             record.delete()
 
         self.result_data = {'deleted': {'availabilities': keys}}
-
-    def _resource_availabilities(self, order='start_date'):
-        return Availability.objects.filter(resource=self.resource()).order_by(order)
-
-    def _next_availability(self):
-        return self._resource_availabilities('start_date').filter(start_date__gt=self.start_date()).first()
-
-    def _previous_availability(self):
-        return self._resource_availabilities('-start_date').filter(start_date__lt=self.start_date()).first()
 
     def _to_delete(self):
         result = [self.availability()]
