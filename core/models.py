@@ -143,6 +143,13 @@ class Location(models.Model):
             subscribers.append(s.user)
         return list(list(self.residents.all()) + list(self.house_admins.all()) + list(self.event_admin_group.users.all()) + subscribers)
 
+    def rooms_with_future_availability_choices(self):
+        choices = []
+        rooms = self.rooms_with_future_availability()
+        for room in rooms:
+            choices.append((room.id, room.name))
+        return choices
+
     def rooms_with_future_availability(self):
         future_availability = []
         for room in Resource.objects.filter(location=self):
