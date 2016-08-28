@@ -70,6 +70,9 @@ class UpdateOrAddAvailabilityChange(DecoratorCommand, AvailabilityCommandHelpers
 
 class UpdateAvailabilityChange(ModelCommand, AvailabilityCommandHelpers):
     def _check_if_valid(self):
+        if not self.can_administer_resource():
+            return self.unauthorized()
+
         self.model().quantity = self.input_data['quantity']
 
         self._validate_not_in_past()

@@ -79,7 +79,7 @@ class AddAvailabilityChangeTestCase(TestCase):
         self.assertEqual(command.result().serialize(), expected_data)
 
     def test_that_update_command_from_non_house_admin_fails(self):
-        availability = Availability.objects.create(start_date="1016-01-13", resource=self.resource, quantity=2)
+        availability = Availability.objects.create(start_date="4016-01-13", resource=self.resource, quantity=2)
 
         non_admin = UserFactory(username="samwise")
         command = UpdateOrAddAvailabilityChange(non_admin, start_date="4016-01-13", resource=self.resource.pk, quantity=3)
