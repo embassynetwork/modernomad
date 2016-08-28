@@ -71,7 +71,8 @@ export default class AvailabilityContainer extends React.Component {
   }
 
   insertAvailability(availability) {
-    const newCollection = this.sortedAvailabilities([...this.state.upcomingAvailabilities, availability])
+    const withoutExisting = _.reject(this.state.upcomingAvailabilities, {id: availability.id})
+    const newCollection = this.sortedAvailabilities([...withoutExisting, availability])
     this.setState({
       upcomingAvailabilities: newCollection
     })
