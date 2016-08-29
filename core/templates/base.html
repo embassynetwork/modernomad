@@ -3,23 +3,25 @@
 
 <!-- block body -->
 {% block body %}
-	{% if location %}
-	<div class="house-box">
-		<img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
-		<div class="house-name hidden-xs">
-			<h1 class="bold text-center"><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h1>
-		</div>
-	</div>
+  {% if location %}
+  <div class="house-box">
+    <img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
+    {% if location.slug != "redvic" %}
+      <div class="house-name hidden-xs">
+        <h1 class="bold text-center"><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h1>
+      </div>
+    {% endif %}
+  </div>
 
-	<div class="row">
-		<div class="col-xs-10 col-xs-offset-1">
-			{% include 'snippets/house_nav.html' %}
+  <div class="row">
+    <div class="col-xs-10 col-xs-offset-1">
+      {% include 'snippets/house_nav.html' %}
 
-			<hr>
+      <hr>
 
-			{% block content %}
-			{% endblock %}
-		</div>
-	</div>
-	{% endif %}
+      {% block content %}
+      {% endblock %}
+    </div>
+  </div>
+  {% endif %}
 {% endblock %}
