@@ -8,9 +8,29 @@
 	<div class="col-sm-10 col-sm-offset-1"> {% include "snippets/messages.html" %} </div>
 </div>
 
+
 <div class="row" id="house-desc">
-	<div class="col-sm-12">
+	<div class="col-sm-7">
 		{{ location.short_description|safe }}
+	</div>
+
+	<div class="col-sm-5 text-center book-room">
+		<h3>BOOK A ROOM</h3>
+		<div class="reservation-dates top-spacer">
+			<form class="form-inline" id="searchRoomForm">
+				<div class="form-group">
+					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
+				</div>
+				<div class="form-group">
+					<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-brand">Search</button>
+				</div>
+			</form>
+		</div>
+		<h4>-OR-</h4>
+		<h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
 	</div>
 </div>
 
@@ -75,7 +95,30 @@
 			var popup = L.popup({closeButton: false});
 			popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
 			marker.bindPopup(popup).openPopup();
+
+			$("#arrive_date, #depart_date").datepicker({
+				minDate: 0,
+				onSelect: function( selectedDate ) {
+					if(this.id == 'arrive_date') {
+						startDate = $('#arrive_date').datepicker("getDate");
+			          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+			          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
+			          	console.log(rMax);
+			          	$('#depart_date').datepicker("option","minDate",rMin);
+			          	$('#depart_date').datepicker("option","maxDate",rMax);
+					}
+					// we need to explicitly fire the change event on the underlying
+					// input or it won't fire on its own!
+					$(this).change();
+		        }
+			});
+
+			$('#searchRoomForm').on('submit', function(e) {
+				e.preventDefault();
+				window.location = "stay?arrive=" + $("#arrive_date").val() + "&depart=" + $("#depart_date").val();
+			});
 		});
+
 
 	</script>
 

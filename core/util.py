@@ -1,4 +1,4 @@
-from core.views import monthly_occupant_report
+from core.views.unsorted import monthly_occupant_report
 from core.models import *
 from django.contrib.auth.models import User
 
@@ -43,7 +43,3 @@ def repeat_guests(num_stays, location=None):
 			if u.reservations.filter(status='confirmed').count() >= num_stays:
 				users.append(u)
 	return users
-
-
-
-

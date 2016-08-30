@@ -40,7 +40,7 @@
 					{% endif %}
 				{% endfor %}
 
-				{% if location.rooms_with_future_reservability %}
+				{% if location.rooms_with_future_availability %}
 					<li><a href="{% url 'location_stay' location.slug %}">Stay</a></li>
 				{% endif %}
 
@@ -60,7 +60,7 @@
 				{% endifappexists %}
 
 
-				{% if location.residents or location.house_admins %}
+				<!-- {% if location.residents or location.house_admins %}
 					<li class="dropdown">
 						<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
 							People <b class="caret"></b>
@@ -73,7 +73,7 @@
 							{% endif %}
 						</ul>
 					</li>
-				{% endif %}
+				{% endif %} -->
 
 				{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 				<li class="dropdown">

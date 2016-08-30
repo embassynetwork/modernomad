@@ -11,7 +11,7 @@ import core.forms
 #	url(r'^register/$', Registration.as_view(form_class = core.forms.UserProfileForm), name='registration_register'),
 #)
 
-urlpatterns = patterns('core.views',
+urlpatterns = patterns('core.views.unsorted',
 	url(r'^$', 'ListUsers', name='user_list'),
 	url(r'^login/$', 'user_login', name='user_login'),
 	url(r'^check/email$', 'email_available', name='email_available'),
@@ -23,6 +23,11 @@ urlpatterns = patterns('core.views',
 	url(r'^(?P<username>[\w\d\-\.@+_]+)/edit/$', 'UserEdit', name='user_edit'),
 	url(r'^(?P<username>[\w\d\-\.@+_]+)/addcard/$', 'UserAddCard', name='user_add_card'),
 	url(r'^(?P<username>[\w\d\-\.@+_]+)/deletecard/$', 'UserDeleteCard', name='user_delete_card'),
+	url(r'^(?P<username>[\w\d\-\.@+_]+)/email/$', 'user_email_settings', name='user_email_settings'),
+	url(r'^(?P<username>[\w\d\-\.@+_]+)/reservations/$', 'user_reservations', name='user_reservations'),
+	url(r'^(?P<username>[\w\d\-\.@+_]+)/subscriptions/$', 'user_subscriptions', name='user_subscriptions'),
+	url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'user_events', name='user_events'),
+	url(r'^(?P<username>[\w\d\-\.@+_]+)/room/(?P<room_id>\d+)/$', 'user_edit_room', name='user_edit_room'),
 )
 
 urlpatterns += patterns('',
@@ -35,5 +40,3 @@ urlpatterns += patterns('',
 
 # XXX can this be extracted and put into the gather app?
 urlpatterns += url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'gather.views.user_events', name='user_events'),
-
-

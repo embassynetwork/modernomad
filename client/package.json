@@ -1,0 +1,45 @@
+{
+  "name": "modernomad",
+  "version": "1.0.0",
+  "description": "The embassy network web interface",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/embassynetwork/modernomad.git"
+  },
+  "author": "Jessy Kate Schingler",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/embassynetwork/modernomad/issues"
+  },
+  "homepage": "https://github.com/embassynetwork/modernomad#readme",
+  "devDependencies": {
+    "axios": "^0.13.1",
+    "babel": "^6.5.2",
+    "babel-core": "^6.13.2",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-transform-class-properties": "^6.11.5",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "babel-preset-es2015": "^6.13.2",
+    "babel-preset-react": "^6.11.1",
+    "camelize": "^1.0.0",
+    "humanize-string": "^1.0.1",
+    "lodash": "^4.14.1",
+    "moment": "^2.14.1",
+    "react": "^15.3.1",
+    "react-addons-css-transition-group": "^15.3.1",
+    "react-dom": "^15.3.1",
+    "react-hot-loader": "^1.3.0",
+    "snakeize": "^0.1.0",
+    "webpack": "^1.13.1",
+    "webpack-bundle-tracker": "0.0.93",
+    "webpack-dev-server": "^1.14.1"
+  }
+}

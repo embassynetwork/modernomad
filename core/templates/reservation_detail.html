@@ -13,7 +13,7 @@
     <div class="modal-content">
       <div class="modal-body center">
 		<p class="para-padding">
-			Share this link with a 3rd party if they are submitting payment for you. 
+			Share this link with a 3rd party if they are submitting payment for you.
 		</p>
 		<p class="bg-warning para-padding">
 		<a target="_blank" href="https://{{domain}}{% url 'reservation_payment' location.slug reservation.uuid %}">https://{{domain}}{% url 'reservation_payment' location.slug reservation.uuid %}</a>
@@ -42,15 +42,15 @@
 		<div class="col-md-12">
 			<div class="alert alert-warning">
 				{% if reservation.user.profile.customer_id %}
-					<span class="fa fa-exclamation-circle"></span> 
+					<span class="fa fa-exclamation-circle"></span>
 					This reservation is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
 				{% else %}
 
 					<p class="row-spacer">
-						<span class="fa fa-credit-card"> </span> 
+						<span class="fa fa-credit-card"> </span>
 						Please enter a credit card so that we can confirm this reservation.
 					</p>
-					
+
 					<div class="col-md-4">
 						<form action="{% url 'user_add_card' reservation.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
 
@@ -95,11 +95,11 @@
 						</form>
 					</div>
 					<div class="clear"></div>
-					
+
 					<p>
 						Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a> (they will not have to log in).
 					</p>
-					
+
 					<p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
 				{% endif %}
 			</div>
@@ -138,7 +138,7 @@
 		{% endif %}
 	</div> <!-- end col-md-4 -->
 	<div class="col-md-8 col-md-pull-4">
-		<h3>Reservation for 
+		<h3>Reservation for
 			<em><a href="{% url 'user_detail' reservation.user.username %}">{{ reservation.user.first_name|title }} {{reservation.user.last_name}}</a></em>
 		</h3>
 		<h4>{{reservation.arrive }} - {{reservation.depart}}.</h4>
@@ -163,11 +163,13 @@
 		<div class="col-md-12">
 			<h3> Also here during your stay</h3>
 			{% for subset in users_during_stay|subsets_size:12 %}
-				<div class="row row-spacer">	
+				<div class="row row-spacer">
 					{% for user in subset %}
-						<div class="col-lg-1 col-sm-3 col-xs-4">
-							<img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
-							<p> <a href="{% url 'user_detail' user.username %}">{{user.first_name}} {{user.last_name}}</a> </p>
+						<div class="col-md-2 col-sm-3 col-xs-6">
+              <a href="{% url 'user_detail' user.username %}">
+  							<img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
+  							<p class="text-center">{{user.first_name}}</p>
+              </a>
 						</div>
 					{% endfor %}
 				</div>
@@ -187,7 +189,7 @@
 			<div>
 				<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify reservation</a>
 				<form id="res-delete" class="btn-inline" method="post" action="{% url 'reservation_delete' location.slug reservation.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
-			</div> 
+			</div>
 
 			<div id="dialog-confirm" title="Delete this Reservation?">
 				<p>
