@@ -31,7 +31,7 @@ export default class AvailabilityTable extends React.Component {
         <tr key={availiability.id}>
           <td>{this.formatDate(availiability.start_date)}</td>
           <td><span className="text-success" style={{backgroundColor: "#DDDDDD", border: "1px solid #3c763d", display: "inline-block", padding: "0 6px", borderRadius: "4px"}}>{desc}</span></td>
-          <td><a onClick={onDelete}><i className="fa fa-trash pull-right" /></a></td>
+          <td><a onClick={onDelete} href="#"><i className="fa fa-trash pull-right" /></a></td>
         </tr>
       )
     });

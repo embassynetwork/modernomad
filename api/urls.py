@@ -12,7 +12,7 @@ urlpatterns = patterns(
     'api.views',
     url(r'^', include(router.urls)),
     url(r'^availabilities/$', availabilities),
-    url(r'^availability/(?P<availability_id>[0-9]+)/$', availability_detail),
+    url(r'^availability/(?P<availability_id>[0-9]+)$', availability_detail),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(
         r'user/(?P<username>[\w\d\-\.@+_]+)/current_location/occupancies.json$',
