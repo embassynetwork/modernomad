@@ -1,11 +1,15 @@
 import graphene
 
-import graphapi.event_schema
+import graphapi.schemas.events
+import graphapi.schemas.reservations
+import graphapi.schemas.locations
 
 
-class Query(graphapi.event_schema.Query):
-    # This class will inherit from multiple Queries
-    # as we begin to add more apps to our project
+class Query(
+    graphapi.schemas.events.Query,
+    graphapi.schemas.reservations.Query,
+    graphapi.schemas.locations.Query
+):
     pass
 
 schema = graphene.Schema(name='Modernomad Schema')
