@@ -23,6 +23,8 @@ django-webpack-loader==0.3.3
 djangorestframework
 markdown
 django-filter
+graphene[django]
+django-graphiql
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
