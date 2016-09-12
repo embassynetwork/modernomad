@@ -23,6 +23,11 @@
 	{{ location.stay_page|safe }}
 {% endif %}
 
+<div id="room-container"></div>
+<script type="text/javascript">
+		window.renderReactComponent('room-container', 'RoomContainer', {})
+</script>
+
 	<div class="row top-spacer">
 		<div class="col-md-12">
 			<div class="reservation-dates row top-spacer">

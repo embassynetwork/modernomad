@@ -514,11 +514,11 @@ a:hover {
 }
 
 
-.item { margin: 0 80px 0 80px; }
+/*.item { margin: 0 80px 0 80px; }*/
 
-.carousel-control {
+/*.carousel-control {
 	margin: 0;
-}
+}*/
 
 .big-img {
 	position: static;
