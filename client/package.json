@@ -40,6 +40,7 @@
     "snakeize": "^0.1.0",
     "webpack": "^1.13.1",
     "webpack-bundle-tracker": "0.0.93",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "react-bootstrap": "^0.30.3"
   }
 }
