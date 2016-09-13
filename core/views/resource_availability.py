@@ -2,11 +2,12 @@ from django.shortcuts import get_object_or_404, render
 from core.models import *
 from core.forms import UserProfileForm
 from core.views.unsorted import date_range_to_list
+from django.http import HttpResponseNotAllowed
 
 
 def CheckRoomAvailability(request, location_slug):
     if not request.method == 'POST':
-        return HttpResponseRedirect('/404')
+        return HttpResponseNotAllowed('Only POST requests supported')
 
     location = get_object_or_404(Location, slug=location_slug)
     arrive_str = request.POST.get('arrive')
