@@ -20,6 +20,6 @@ export default class RoomContainer extends React.Component {
   }
 
   render() {
-    return <RoomIndex rooms={this.state.rooms} onChange={this.triggerChange.bind(this)} />
+    return <RoomIndex rooms={this.state.rooms} routeParams={this.props.routeParams} onChange={this.triggerChange.bind(this)} />
   }
 }
