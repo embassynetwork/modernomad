@@ -1,11 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import AvailabilityContainer from './components/AvailabilityContainer'
-import RoomContainer from './components/booking/RoomContainer'
+import RoomBooking from './components/booking/RoomBooking'
 
 var topLevelComponents = {
   AvailabilityContainer : AvailabilityContainer,
-  RoomContainer : RoomContainer
+  RoomBooking : RoomBooking
 }
 
 window.renderReactComponent = function(id, componentName, props) {

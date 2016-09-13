@@ -25,7 +25,7 @@
 
 <div id="room-container"></div>
 <script type="text/javascript">
-		window.renderReactComponent('room-container', 'RoomContainer', {})
+		window.renderReactComponent('room-container', 'RoomBooking', {})
 </script>
 
 	<div class="row top-spacer">
@@ -92,7 +92,7 @@
 
 <script>
 
-	$("#sticky-sidebar").waypoint('sticky');
+	/*$("#sticky-sidebar").waypoint('sticky');
 	function set_summary_width(elem) {
 		console.log('setting summary width for ' + elem);
         box_width = $(elem).parent().width();
@@ -131,10 +131,10 @@
 		$("#the-reservation-form").show();
 		$("#reservation-additional-info").show();
 		$(room_info_div_id).show();
-	});
+	});*/
 
 
-	$("#arrive_date, #depart_date").datepicker({
+	/*$("#arrive_date, #depart_date").datepicker({
 		minDate: 0,
 		onSelect: function( selectedDate ) {
 			if(this.id == 'arrive_date') {
@@ -149,7 +149,7 @@
 			// input or it won't fire on its own!
 			$(this).change();
         }
-	});
+	});*/
 
 	/******************** unlikely to use this but just in case...
 	$(".a_day").click(function(event) {
@@ -169,7 +169,7 @@
 	})
 	***************************** */
 
-	$("#arrive_date, #depart_date").change(function(event) {
+	/*$("#arrive_date, #depart_date").change(function(event) {
 		// Get arrive and depart dates, update value.
 		pollRooms();
 	});
@@ -236,7 +236,7 @@
 		$("#depart_date").val(a[1].split('=')[1]);
 
 		pollRooms();
-	}
+	}*/
 
 </script>
 

@@ -11,7 +11,7 @@ export default class RoomIndex extends React.Component {
   render() {
     const roomCards = this.props.rooms.map((room) => {
       // return <RoomCard key={room.id} room={room.name} img={room.img} />
-      return <RoomCard key={room.id} {...room} />
+      return <RoomCard key={room.id} routeParams={this.props.routeParams} {...room} />
     })
 
     return (
