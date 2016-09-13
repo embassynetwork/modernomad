@@ -17,7 +17,7 @@
 	<div class="col-sm-5 text-center book-room">
 		<h3>BOOK A ROOM</h3>
 		<div class="reservation-dates top-spacer">
-			<form class="form-inline" id="searchRoomForm">
+			<form class="form-inline" id="searchRoomForm" action="stay">
 				<div class="form-group">
 					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
 				</div>
@@ -113,10 +113,6 @@
 		        }
 			});
 
-			$('#searchRoomForm').on('submit', function(e) {
-				e.preventDefault();
-				window.location = "stay?arrive=" + $("#arrive_date").val() + "&depart=" + $("#depart_date").val();
-			});
 		});
 
 

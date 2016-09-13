@@ -41,7 +41,7 @@ export default class DateRangeSelector extends React.Component {
   minDepart(currentArrive) {
     const bestArrive = currentArrive || this.state.arrive
     const arrival = bestArrive || moment()
-    return arrival.clone().add('days', 1)
+    return arrival.clone().add(1, 'days')
   }
 
   render() {
@@ -49,10 +49,10 @@ export default class DateRangeSelector extends React.Component {
       <div className="row">
         <div className="col-sm-2">Dates</div>
         <div className="col-sm-3">
-          <DatePicker selected={this.state.arrive} onChange={this.changeHandler('arrive')} minDate={moment()} />
+          <DatePicker className="form-control" selected={this.state.arrive} onChange={this.changeHandler('arrive')} minDate={moment()} />
 				</div>
 				<div className="col-sm-3">
-          <DatePicker selected={this.state.depart} onChange={this.changeHandler('depart')} minDate={this.minDepart()} />
+          <DatePicker className="form-control" selected={this.state.depart} onChange={this.changeHandler('depart')} minDate={this.minDepart()} />
 				</div>
 			</div>
     )
