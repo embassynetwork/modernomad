@@ -15,11 +15,16 @@ export default class RoomContainer extends React.Component {
     this.state = {rooms: hardcodedRooms}
   }
 
-  triggerChange(arrive, depart) {
+  reFilter(filters) {
+    console.log('calling reFilter', filters)
     this.setState({rooms: []})
   }
 
   render() {
-    return <RoomIndex rooms={this.state.rooms} routeParams={this.props.routeParams} onChange={this.triggerChange.bind(this)} />
+    return <RoomIndex
+      rooms={this.state.rooms}
+      routeParams={this.props.routeParams}
+      query={this.props.location.query}
+      onFilterChange={this.reFilter.bind(this)} />
   }
 }
