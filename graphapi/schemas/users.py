@@ -1,25 +1,15 @@
-from graphene import relay, ObjectType
-import graphene
-from graphene.contrib.django.filter import DjangoFilterConnectionField
-from graphene.contrib.django.types import DjangoNode
-from graphene.utils import with_context
+from graphene import AbstractType, Field, Node
+from graphene_django.types import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 from django.contrib.auth.models import User
 
 
-class UserNode(DjangoNode):
+class UserNode(DjangoObjectType):
     class Meta:
         model = User
-        only_fields = ['username', 'first_name', 'last_name', 'email']
+        interfaces = (Node, )
 
 
-class Query(ObjectType):
-    # current_user = DjangoFilterConnectionField(UserNode)
-    current_user = graphene.Field(UserNode)
-
-    class Meta:
-        abstract = True
-
-    @with_context
-    def resolve_current_user(self, args, context, info):
-        return context.user if context.user else None
+class Query(AbstractType):
+    all_users = DjangoFilterConnectionField(UserNode)

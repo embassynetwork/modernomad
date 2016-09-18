@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
 from jwt_auth.mixins import JSONWebTokenAuthMixin
-from graphene.contrib.django.views import GraphQLView
+from graphene_django.views import GraphQLView
 from graphapi.schema import schema
 from jwt_auth.utils import get_authorization_header
 

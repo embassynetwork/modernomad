@@ -1,20 +1,15 @@
-from graphene import relay, ObjectType
-from graphene.contrib.django.filter import DjangoFilterConnectionField
-from graphene.contrib.django.types import DjangoNode
-
+from graphene import AbstractType, Field, Node
+from graphene_django.types import DjangoObjectType
 from gather.models import Event
+from graphene_django.filter import DjangoFilterConnectionField
 
-
-class EventNode(DjangoNode):
+class EventNode(DjangoObjectType):
     class Meta:
         model = Event
         filter_fields = ['slug', 'title']
         filter_order_by = ['slug']
 
 
-class Query(ObjectType):
-    event = relay.NodeField(EventNode)
+class Query(AbstractType):
+    # event = relay.NodeField(EventNode)
     all_events = DjangoFilterConnectionField(EventNode)
-
-    class Meta:
-        abstract = True

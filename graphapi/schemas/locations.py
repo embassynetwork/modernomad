@@ -1,21 +1,15 @@
-from graphene import relay, ObjectType
-from graphene.contrib.django.filter import DjangoFilterConnectionField
-from graphene.contrib.django.types import DjangoNode
-from graphene.utils import with_context
+from graphene import AbstractType, Field, Node
+from graphene_django.types import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 
 from core.models import Location
 
 
-class LocationNode(DjangoNode):
+class LocationNode(DjangoObjectType):
     class Meta:
         model = Location
-        # filter_fields = {
-        #     'reservation': ['exact']
-        # }
+        interfaces = (Node, )
 
 
-class Query(ObjectType):
+class Query(AbstractType):
     all_locations = DjangoFilterConnectionField(LocationNode)
-
-    class Meta:
-        abstract = True

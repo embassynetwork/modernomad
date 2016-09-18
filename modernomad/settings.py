@@ -141,7 +141,7 @@ INSTALLED_APPS = (
     'modernomad',
     'api',
     'django_graphiql',
-    'graphene.contrib.django',
+    'graphene_django',
     'graphapi',
     'django_behave',
     'bdd',
