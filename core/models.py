@@ -174,7 +174,7 @@ class Location(models.Model):
                 if not room.availabilities_on(the_day):
                     available_beds[room].append({'the_date': the_day, 'beds_free': 0})
                 else:
-                    bookings_today = Reservation.objects.confirmed_approved_on_date(the_day, self, resource=room)
+                    bookings_today = Booking.objects.confirmed_approved_on_date(the_day, self, resource=room)
                     free_beds = room.availabilities_on(the_day) - len(bookings_today)
                     # the ternary makes sure that we never display a negative
                     # room number to a user, eg. if an admin decided to
@@ -221,7 +221,7 @@ class Location(models.Model):
 
     def coming_month_reservations(self, days=30):
         today = timezone.localtime(timezone.now())
-        return Reservation.objects.filter(
+        return Booking.objects.filter(
                 Q(status="confirmed") | Q(status="approved")
                 ).filter(location=self).exclude(depart__lt=today).exclude(arrive__gt=today+datetime.timedelta(days=days))
 
@@ -261,7 +261,7 @@ class Location(models.Model):
 
     def guests_today(self):
         today = timezone.now()
-        reservations_today = Reservation.objects.filter(location=self) \
+        reservations_today = Booking.objects.filter(location=self) \
                                         .filter(Q(status="confirmed") | Q(status="approved")) \
                                         .exclude(depart__lt=today).exclude(arrive__gt=today)
         guests_today = []
@@ -420,7 +420,7 @@ class Resource(models.Model):
         availabilities = self.availabilities_on(this_day)
         if not availabilities:
             return False
-        reservations_on_this_day = Reservation.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
+        reservations_on_this_day = Booking.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
         if len(reservations_on_this_day) < availabilities:
             return True
         else:
@@ -460,11 +460,11 @@ class Fee(models.Model):
         return self.description
 
 
-class ReservationManager(models.Manager):
+class BookingManager(models.Manager):
 
     def on_date(self, the_day, status, location):
         # return the reservations that intersect this day, of any status
-        all_on_date = super(ReservationManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
+        all_on_date = super(BookingManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
         return all_on_date.filter(status=status)
 
     def confirmed_approved_on_date(self, the_day, location, resource=None):
@@ -483,7 +483,7 @@ class ReservationManager(models.Manager):
         return list(confirmed_reservations)
 
     def confirmed_but_unpaid(self, location):
-        confirmed_this_location = super(ReservationManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
+        confirmed_this_location = super(BookingManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
         unpaid_this_location = []
         for res in confirmed_this_location:
             if not res.bill.is_paid():
@@ -493,7 +493,7 @@ class ReservationManager(models.Manager):
 
 class Bill(models.Model):
     ''' there are foreign keys (many to one) pointing towards this Bill object
-    from Reservation, BillLineItem and Payment. Each bill can have many
+    from Booking, BillLineItem and Payment. Each bill can have many
     reservations, bill line items and many payments. Line items can be accessed
     with the related name bill.line_items, and payments can be accessed with
     the related name bill.payments.'''
@@ -977,11 +977,11 @@ class SubscriptionBill(Bill):
         return days
 
 
-class ReservationBill(Bill):
+class BookingBill(Bill):
     pass
 
 
-class Reservation(models.Model):
+class Booking(models.Model):
 
     class ResActionError(Exception):
         def __init__(self, value):
@@ -1021,23 +1021,23 @@ class Reservation(models.Model):
     last_msg = models.DateTimeField(blank=True, null=True)
     rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
     uuid = UUIDField(auto=True, blank=True, null=True)  # the blank and null = True are artifacts of the migration JKS
-    bill = models.OneToOneField(ReservationBill, null=True, related_name="reservation")
+    bill = models.OneToOneField(BookingBill, null=True, related_name="booking")
     suppressed_fees = models.ManyToManyField(Fee, blank=True)
 
-    objects = ReservationManager()
+    objects = BookingManager()
 
     @models.permalink
     def get_absolute_url(self):
         return ('core.views.unsorted.ReservationDetail', [str(self.location.slug), str(self.id)])
 
     def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
-        # during the reservation process, we simulate a reservation to generate
-        # a bill and show the user what the reservation would cost. in this
-        # case, the reservation object will not yet have a bill because it has
+        # during the booking process, we simulate a booking to generate
+        # a bill and show the user what the booking would cost. in this
+        # case, the booking object will not yet have a bill because it has
         # not been saved.
         reservation_bill = None
         if not self.bill and save:
-            self.bill = ReservationBill.objects.create()
+            self.bill = BookingBill.objects.create()
         if self.bill:
             reservation_bill = self.bill
 
@@ -1136,8 +1136,8 @@ class Reservation(models.Model):
 
     def __unicode__(self):
         if self.id:
-            return "reservation (id = %d)" % self.id
-        return "reservation (unsaved)"
+            return "booking (id = %d)" % self.id
+        return "booking (unsaved)"
 
     def suppress_fee(self, line_item):
         print 'suppressing fee'
@@ -1160,7 +1160,7 @@ class Reservation(models.Model):
         return self.rate
 
     def base_value(self):
-        # value of the reservation, regardless of what has been paid
+        # value of the booking, regardless of what has been paid
         # get_rate checks for comps and custom rates.
         return self.total_nights() * self.get_rate()
 
@@ -1207,23 +1207,23 @@ class Reservation(models.Model):
         self.save()
 
     def pending(self):
-        self.status = Reservation.PENDING
+        self.status = Booking.PENDING
         self.save()
 
     def approve(self):
-        self.status = Reservation.APPROVED
+        self.status = Booking.APPROVED
         self.save()
 
     def confirm(self):
-        self.status = Reservation.CONFIRMED
+        self.status = Booking.CONFIRMED
         self.save()
 
     def cancel(self):
-        # cancel this reservation.
+        # cancel this booking.
         # JKS note: we *don't* delete the bill here, because if there was a
         # refund, we want to keep it around to know how much to refund from the
         # associated fees.
-        self.status = Reservation.CANCELED
+        self.status = Booking.CANCELED
         self.save()
 
     def comp(self):
@@ -1236,16 +1236,16 @@ class Reservation(models.Model):
         return self.rate == 0
 
     def is_pending(self):
-        return self.status == Reservation.PENDING
+        return self.status == Booking.PENDING
 
     def is_approved(self):
-        return self.status == Reservation.APPROVED
+        return self.status == Booking.APPROVED
 
     def is_confirmed(self):
-        return self.status == Reservation.CONFIRMED
+        return self.status == Booking.CONFIRMED
 
     def is_canceled(self):
-        return self.status == Reservation.CANCELED
+        return self.status == Booking.CANCELED
 
     def payments(self):
         return self.bill.payments.all()
@@ -1254,7 +1254,7 @@ class Reservation(models.Model):
         return self.bill.payments.filter(paid_amount__gt=0)
 
     def nights_between(self, start, end):
-        ''' return the number of nights of this reservation that occur between start and end '''
+        ''' return the number of nights of this booking that occur between start and end '''
         nights = 0
         if self.arrive >= start and self.depart <= end:
             nights = (self.depart - self.arrive).days
@@ -1267,17 +1267,17 @@ class Reservation(models.Model):
         return nights
 
 
-@receiver(pre_save, sender=Reservation)
+@receiver(pre_save, sender=Booking)
 def reservation_create_bill(sender, instance, **kwargs):
-    # create a new bill object if the reservation does not already have one.
+    # create a new bill object if the booking does not already have one.
     if not instance.bill:
-        bill = ReservationBill.objects.create()
+        bill = BookingBill.objects.create()
         instance.bill = bill
 
 
 class PaymentManager(models.Manager):
     def reservation_payments_by_location(self, location):
-        reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__location=location))
+        reservation_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(reservation__location=location))
         return reservation_payments
 
     def subscription_payments_by_location(self, location):
@@ -1285,7 +1285,7 @@ class PaymentManager(models.Manager):
         return subscription_payments
 
     def reservation_payments_by_resource(self, resource):
-        reservation_payments = Payment.objects.filter(bill__in=ReservationBill.objects.filter(reservation__resource=resource))
+        reservation_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(reservation__resource=resource))
         return reservation_payments
 
 
@@ -1442,7 +1442,6 @@ def size_images(sender, instance, **kwargs):
     try:
         obj = UserProfile.objects.get(pk=instance.pk)
     except UserProfile.DoesNotExist:
-        # if the reservation does not exist yet, then it's new.
         obj = None
 
     # if this is the default avatar, reuse it for the thumbnail (lazy, but only
@@ -1492,13 +1491,13 @@ def size_images(sender, instance, **kwargs):
 class EmailTemplate(models.Model):
     ''' Templates for the typical emails sent by administrators of the system.
     The from-address is usually set from the location settings,
-    and the recipients are determined by the action and reservation in question. '''
+    and the recipients are determined by the action and booking in question. '''
 
     SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
     FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
 
     context_options = (
-        ('reservation', 'Reservation'),
+        ('booking', 'Booking'),
         ('subscription', 'Subscription')
     )
 
@@ -1529,9 +1528,9 @@ class LocationEmailTemplate(models.Model):
             (ADMIN_DAILY, 'Admin Daily Update'),
             (GUEST_DAILY, 'Guest Daily Update'),
             (INVOICE, 'Invoice'),
-            (RECEIPT, 'Reservation Receipt'),
+            (RECEIPT, 'Booking Receipt'),
             (SUBSCRIPTION_RECEIPT, 'Subscription Receipt'),
-            (NEW_RESERVATION, 'New Reservation'),
+            (NEW_RESERVATION, 'New Booking'),
             (WELCOME, 'Pre-Arrival Welcome'),
             (DEPARTURE, 'Departure'),
         )
@@ -1619,11 +1618,11 @@ class UserNote(models.Model):
 class ReservationNote(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, null=True)
-    reservation = models.ForeignKey(Reservation, blank=False, null=False, related_name="reservation_notes")
+    booking = models.ForeignKey(Booking, blank=False, null=False, related_name="reservation_notes")
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return '%s - %d: %s' % (self.created.date(), self.reservation.id, self.note)
+        return '%s - %d: %s' % (self.created.date(), self.booking.id, self.note)
 
 
 class SubscriptionNote(models.Model):
