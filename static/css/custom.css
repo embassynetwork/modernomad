@@ -15,6 +15,10 @@ h1, h2, h3 {
 	font-family: 'Raleway', sans-serif;
 }
 
+.form-control {
+	background-color: transparent;
+}
+
 .fancy-header {
 	-webkit-font-smoothing: antialiased;
 }
@@ -1839,6 +1843,34 @@ label.light {
 
 #rooms-available-calendar {
 	width: auto;
+}
+
+.date-range-row {
+	margin: 20px 0;
+}
+
+.room-thumbnail {
+	margin: 20px 0;
+}
+
+.room-card-container {
+		background-color: #f5f5f5;
+}
+
+.room-cost {
+	color: #777;
+	font-size: 14px;
+	font-family: "Open Sans", sans-serif;
+	background-color: rgba(183,68,37,0.9);
+	color: white;
+	padding: 10px 20px;
+	margin-right: -30px;
+	margin-top: -65px;
+}
+
+.room-tags{
+		color: #777;
+		margin-top: 20px;
 }
 
 .room-panel, .room-preview {

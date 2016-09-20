@@ -20,8 +20,10 @@ export default class RoomIndex extends React.Component {
 
     return (
       <div>
-        <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
-        <div className="row">{roomCards}</div>
+        <div className="date-range-row">
+          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
+        </div>
+        <div className="row room-card-container">{roomCards}</div>
       </div>
     )
   }

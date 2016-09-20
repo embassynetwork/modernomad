@@ -50,6 +50,10 @@
 		</div>
 </div>
 
+<div class="row" id="location">
+	<div id="location-map"></div>
+</div>
+
 <div class="row" id="community-section">
 	{% for person in location.people_in_coming_month %}
 	<div class="col-sm-3 col-lg-2 text-center">
@@ -68,9 +72,6 @@
 	{% endfor %}
 </div>
 
-<div class="row" id="location">
-	<div id="location-map"></div>
-</div>
 {% endblock %}
 
 {% block extrajs %}
