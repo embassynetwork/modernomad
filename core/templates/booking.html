@@ -30,7 +30,7 @@
 
 	<!-- <div class="row top-spacer">
 		<div class="col-md-12">
-			<div class="reservation-dates row top-spacer">
+			<div class="booking-dates row top-spacer">
 				<form class="form-inline">
 					<div class="form-group">
 						<label for="">Filter by dates</label>
@@ -128,8 +128,8 @@
 			$(".emphasize .billing-message").delay(1200);
 			$(".emphasize .billing-message").slideUp( "slow");
 		}
-		$("#the-reservation-form").show();
-		$("#reservation-additional-info").show();
+		$("#the-booking-form").show();
+		$("#booking-additional-info").show();
 		$(room_info_div_id).show();
 	});*/
 
@@ -213,8 +213,8 @@
 				request.fail(function(msg) {
 					$("#show-room-availability").html("<p class='bg-danger general-pad'>Hmm, there was a problem. Please try selecting your dates again.</p>")
 				});
-				$("#reservation-items").empty()
-				$("#reservation-total").html("0")
+				$("#booking-items").empty()
+				$("#booking-total").html("0")
 			} // end room availability check
 		}
 

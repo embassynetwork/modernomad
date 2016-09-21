@@ -8,7 +8,7 @@ The majority of the configuration is around
 
 ## Location Settings
 
-- `MAX_RESERVATION_DAYS` sets a limit for the longest a guest can request a
+- `MAX_BOOKING_DAYS` sets a limit for the longest a guest can request a
   booking for. This is easily to override in the admin interface, but we have
   found a sane default to be helpful. 
 - `WELCOME_EMAIL_DAYS_AHEAD` says how many days ahead to send guests their
@@ -51,12 +51,12 @@ by house admins.
 - admin_today_notification is a sparse text email that goes out daily
   announcing arrivals and departures. 
 - invoice is currently unused
-- receipt is automatically sent when a user pays for their reservation. At a
+- receipt is automatically sent when a user pays for their booking. At a
   minimum, this should be customized for the details of your house name,
   location, and legal information. this is an HTML email so there is a text and
   html version, make sure to change both. 
-- the newreservation email can easily be left unchanged; it is sent to house
-  admins upon receipt of a new reservation request. 
+- the newbooking email can easily be left unchanged; it is sent to house
+  admins upon receipt of a new booking request. 
 - The pre_arrival_welcome email is sent to guests before they arrive and
   contains details completely specific to your house. Make sure to customize
   this, and take note of the variables available to the template. 
@@ -76,7 +76,7 @@ own.
 ## Defining Rooms
 
 It is necessary to define the rooms available in your house. These room objects
-are used to display availability on the reservation request page. Rooms can be
+are used to display availability on the booking request page. Rooms can be
 defined in the admin pages under `/admin/core/room/`. Rooms have a name,
 optional description, default rate, a primary use (guest or private) and a
 cancellation policy (which default to 24 hours but can be overwritten on a
@@ -85,7 +85,7 @@ per-room basis).
 ## Adding House Admins
 Any user can be promoted to a resident and/or house admin. Residents are
 displayed on the `community` page; House admins receive email notifications of
-new reservation requests and have permissions to manage those requests on the
+new booking requests and have permissions to manage those requests on the
 website. 
 
 A user must have an account before being added to any special group. Once the

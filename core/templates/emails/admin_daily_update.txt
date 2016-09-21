@@ -18,7 +18,7 @@
 	People arriving today:
 	{% for r in arriving %}
 		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+		https://{{ domain }}{% url 'booking_manage' r.location.slug r.id %}
 	{% endfor %}
 {% endif %}
 
@@ -26,27 +26,27 @@
 	People departing today:
 	{% for r in departing %}
 		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+		https://{{ domain }}{% url 'booking_manage' r.location.slug r.id %}
 	{% endfor %}
 {% endif %}
 
 {% if maybe_arriving %}
-Heads up! The following reservations are approved and show an arrival date of today but are not confirmed. May need to check in with the person. 
+Heads up! The following bookings are approved and show an arrival date of today but are not confirmed. May need to check in with the person. 
 	{% for r in maybe_arriving %}
 		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+		https://{{ domain }}{% url 'booking_manage' r.location.slug r.id %}
 	{% endfor %}
 {% endif %}
 
 {% if pending_now or approved_now %}
-The following reservations are awaiting action:
+The following bookings are awaiting action:
 	{% for r in pending_now %}
 		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+		https://{{ domain }}{% url 'booking_manage' r.location.slug r.id %}
 	{% endfor %}
 	{% for r in approved_now %}
 		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-		https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+		https://{{ domain }}{% url 'booking_manage' r.location.slug r.id %}
 	{% endfor %}
 {% endif %}
 

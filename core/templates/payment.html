@@ -10,11 +10,11 @@
 
 		<div class="col-md-5">
 
-			<h2 id="submit-payment-header">Submit Payment for this reservation</h2>
+			<h2 id="submit-payment-header">Submit Payment for this booking</h2>
 
 			<div id="payment-errors"></div> 
 
-			<form action="{% url 'reservation_payment' location.slug r.uuid %}" method="POST" class="form-horizontal" id="payment-form">{% csrf_token %}
+			<form action="{% url 'booking_payment' location.slug r.uuid %}" method="POST" class="form-horizontal" id="payment-form">{% csrf_token %}
 
 				<div class="form-group">
 					<div class="col-md-2">
@@ -100,10 +100,10 @@
 	{% endif %}
 
 
-		<div id="reservation-amount-summary-box" class="col-md-5 col-md-offset-1">
+		<div id="booking-amount-summary-box" class="col-md-5 col-md-offset-1">
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h3>Reservation for {{ r.user.first_name|title }} {{r.user.last_name}} </h3>
+					<h3>Booking for {{ r.user.first_name|title }} {{r.user.last_name}} </h3>
 					<h4>{{ r.room.name|title}}</h4>
 					<h4> {{r.arrive }} - {{r.depart}} </h4>
 				</div>
@@ -117,10 +117,10 @@
 
 	<div class="row text-center">
 		{% ifequal r.user user %}
-			<a href="{% url 'reservation_detail' r.location.slug r.id %}">Return to Reservation Detail</a>
+			<a href="{% url 'booking_detail' r.location.slug r.id %}">Return to Booking Detail</a>
 		{% else %}
 			{% if user in location.house_admins.all %}
-				<a href="{% url 'reservation_manage' r.location.slug r.id %}">Manage Reservation</a>
+				<a href="{% url 'booking_manage' r.location.slug r.id %}">Manage Booking</a>
 			{% endif %}
 		{% endifequal %}
 	</div>

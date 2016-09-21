@@ -16,5 +16,5 @@ Feature: Booking a room
     When  they ask to book a bed in "Swanky Hostel"
     Then  they should be asked to create a profile
     When  they create a valid profile
-    Then  they should have a pending reservation
-    # And   the house admins get an email about a new pending reservation
+    Then  they should have a pending booking
+    # And   the house admins get an email about a new pending booking

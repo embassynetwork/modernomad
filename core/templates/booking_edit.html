@@ -15,14 +15,14 @@
 
     <div class="row">
         <div class="col-xs-12 page-text">
-            <p>Editing your existing reservation for {{arrive}} to {{depart}}.</p>
-            <p class="text-warning">Note: if you change your dates, this reservation will need to be re-approved to confirm availability.</p>
+            <p>Editing your existing booking for {{arrive}} to {{depart}}.</p>
+            <p class="text-warning">Note: if you change your dates, this booking will need to be re-approved to confirm availability.</p>
         </div>
     </div>
     
     <div class="row">
         <div class="col-xs-6">
-            <form role="form" method="post" action="{% url 'reservation_edit' location.slug reservation_id %}">{% csrf_token %}
+            <form role="form" method="post" action="{% url 'booking_edit' location.slug booking_id %}">{% csrf_token %}
                 {% for field in form %}
                     {{ field.errors }}
                     {% if field.name == 'arrive' or field.name == 'depart' %} <span class="fa fa-calendar"></span> {% endif %}

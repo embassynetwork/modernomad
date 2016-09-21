@@ -57,22 +57,6 @@
 			</li>
 			{% endifappexists %}
 
-
-			<!-- {% if location.residents or location.house_admins %}
-				<li class="dropdown">
-					<a class="dropdown-toggle" id="drop4" role="button" data-toggle="dropdown" href="#">
-						People <b class="caret"></b>
-					</a>
-					<ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
-						<li><a href="{% url 'location_community' location.slug %}">Community</a></li>
-						<li><a href="{% url 'location_team' location.slug %}">Core Team</a></li>
-						{% if user.is_authenticated and location.guests_today %}
-							<li><a href="{% url 'location_guests' location.slug %}">Guests Today</a></li>
-						{% endif %}
-					</ul>
-				</li>
-			{% endif %} -->
-
 			{% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
 			<li class="dropdown">
 			<a class="dropdown-toggle" id="drop3" role="button" data-toggle="dropdown" href="#">

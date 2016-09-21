@@ -7,7 +7,7 @@
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
 </div>	
 
-<div class="row" id="reservation-nav">
+<div class="row" id="booking-nav">
 	<a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
 </div>
 
@@ -147,7 +147,7 @@
         }
 	})
 	
-	// Check reservation dates and room for avilability, warn admin if overbooking room.
+	// Check booking dates and room for avilability, warn admin if overbooking room.
 	$(".listening").change(function(event) {
 		// Get start and end dates, update value. 
 		var start_date = $("#id_start_date").val();

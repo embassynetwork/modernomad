@@ -16,7 +16,7 @@
 	<li><a href="#inactive" data-toggle="tab">Inactive ({{inactive.count}})</a></li>
 </ul>
 
-<div class="tab-content" id="reservation-list-tab-content">
+<div class="tab-content" id="booking-list-tab-content">
 	
 	<div class="tab-pane active" id="active">
 		{% with subscriptions=active %}
@@ -65,7 +65,7 @@ $(document).ready(function() {
 		$('html,body').scrollTop(scrollmem);
 	});
 
-	$('.reservation-list').dataTable({
+	$('.booking-list').dataTable({
 	"iDisplayLength": 50,
 	"order": [[ 2, "asc"]],
 	"aoColumns": [

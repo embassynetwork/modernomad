@@ -716,7 +716,7 @@ p.notice {
 	font-size: 120%;
 }
 
-.new-reservation {
+.new-booking {
 	padding-top: 30px;
 }
 
@@ -848,7 +848,7 @@ ul.errorlist, u {
     margin-left: .2em;
 }
 
-.reservation-list-item {
+.booking-list-item {
 	padding-bottom: 30px;
 	border-top: 2px solid #eee;
 }
@@ -857,20 +857,20 @@ ul.errorlist, u {
 	padding-left: 120px;
 }
 
-.reservation-title {
+.booking-title {
 	padding-bottom: 10px;
 	padding-top: 25px;
 }
 
 @media (min-width: 992px) {
-    #the-reservation-form.stuck, #sticky-sidebar.stuck {
+    #the-booking-form.stuck, #sticky-sidebar.stuck {
         position: fixed;
         top: 10px;
     }
 }
 
 @media (min-width: 992px) {
-    #reservation-amount-summary-box.stuck {
+    #booking-amount-summary-box.stuck {
         position: fixed;
         top: 10px;
     }
@@ -880,7 +880,7 @@ ul.errorlist, u {
 	background-color: #d2bc37;
 }
 
-#reservation-sticky-info {
+#booking-sticky-info {
 	background: #cfedb1;
     padding: 10px;
     position:static;
@@ -1003,7 +1003,7 @@ textarea#id_comments, textarea#id_purpose {
 	padding-bottom: 10px;
 }
 
-#reservation-nav {
+#booking-nav {
 	margin-top: 30px;
 	margin-bottom: 30px;
 }
@@ -1161,7 +1161,7 @@ div#spinner
 	margin-top: 60px;
 }
 
-.reservation-form-dates {
+.booking-form-dates {
 	padding-right: 15px;
 }
 
@@ -1169,7 +1169,7 @@ div#spinner
 	padding-top: 25px;
 }
 
-#submit-reservation {
+#submit-booking {
 	margin-top: 30px;
 	width: 100%;
 }
@@ -1462,7 +1462,7 @@ table tr.row-even td { background: #eee; }
 #payment-list td {
 	text-align: center;
 }
-#reservation-header {
+#booking-header {
 	text-align:center;
 	border-bottom: 1px solid black;
 }
@@ -1778,7 +1778,7 @@ p.lead strong {
 	margin-bottom: 20px;
 }
 
-#reservation-list-tab-content {
+#booking-list-tab-content {
 	margin-top: 40px;
 }
 
@@ -1812,15 +1812,15 @@ label.light {
 	overflow: scroll;
 }
 
-.reservation-label {
+.booking-label {
 	font-weight: normal;
 }
 
-.reservation-info-tab {
+.booking-info-tab {
 	font-size: 120%;
 }
 
-#reservation-tabs > li.active > a, #reservation-tabs  > li.active > a:hover, #reservation-tabs > li.active > a:focus {
+#booking-tabs > li.active > a, #booking-tabs  > li.active > a:hover, #booking-tabs > li.active > a:focus {
 }
 
 .available-today, .not-available-today {
@@ -1849,7 +1849,7 @@ label.light {
 	position: fixed;
 }
 
-#the-reservation-form {
+#the-booking-form {
 	margin-bottom: 4px;
 }
 
@@ -1907,7 +1907,7 @@ label.light {
 	margin-bottom: 40px;
 }
 
-#reservation-list-table {
+#booking-list-table {
 	width: inherit;
 }
 

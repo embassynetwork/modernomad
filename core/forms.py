@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Reservation, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
+from core.models import UserProfile, Booking, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
@@ -212,7 +212,7 @@ class LocationSettingsForm(forms.ModelForm):
     class Meta:
         model = Location
         # Not sure about Timezones and Bank Information.  Not including for now - JLS
-        fields = ['name', 'slug', 'address', 'latitude', 'longitude',  'max_reservation_days', 'welcome_email_days_ahead', 'house_access_code',
+        fields = ['name', 'slug', 'address', 'latitude', 'longitude',  'max_booking_days', 'welcome_email_days_ahead', 'house_access_code',
                     'ssid', 'ssid_password', 'email_subject_prefix', 'check_out', 'check_in', 'visibility']
         widgets = {
             'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
@@ -220,7 +220,7 @@ class LocationSettingsForm(forms.ModelForm):
             'address': forms.TextInput(attrs={'class':'form-control', 'size': '64'}),
             'latitude': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
             'longitude': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
-            'max_reservation_days': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
+            'max_booking_days': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
             'welcome_email_days_ahead': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
             'house_access_code': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
             'ssid': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
@@ -310,9 +310,9 @@ class LocationRoomForm(forms.ModelForm):
             self.cleaned_data['image'] = relative_file_name
 
 
-class ReservationForm(forms.ModelForm):
+class BookingForm(forms.ModelForm):
     class Meta:
-        model = Reservation
+        model = Booking
         exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
         widgets = {
             'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
@@ -325,26 +325,26 @@ class ReservationForm(forms.ModelForm):
         labels = {'resource': 'Room'}
 
     def __init__(self, location, *args, **kwargs):
-        super(ReservationForm, self).__init__(*args, **kwargs)
+        super(BookingForm, self).__init__(*args, **kwargs)
         if not location:
             raise Exception("No location given!")
         self.location = location
         self.fields['resource'].choices = self.location.rooms_with_future_availability_choices()
 
     def clean(self):
-        cleaned_data = super(ReservationForm, self).clean()
+        cleaned_data = super(BookingForm, self).clean()
         arrive = cleaned_data.get('arrive')
         depart = cleaned_data.get('depart')
-        if (depart - arrive).days > self.location.max_reservation_days:
-            self._errors["depart"] = self.error_class(['Sorry! We only accept reservation requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
+        if (depart - arrive).days > self.location.max_booking_days:
+            self._errors["depart"] = self.error_class(['Sorry! We only accept booking requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
         return cleaned_data
 
     # XXX TODO
     # make sure depart is at least one day after arrive.
 
-class AdminReservationForm(forms.ModelForm):
+class AdminBookingForm(forms.ModelForm):
     class Meta:
-        model = Reservation
+        model = Booking
         exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
 
 
@@ -389,46 +389,46 @@ class EmailTemplateForm(forms.Form):
     body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
 
 
-class ReservationEmailTemplateForm(EmailTemplateForm):
+class BookingEmailTemplateForm(EmailTemplateForm):
 
-    def __init__(self, tpl, reservation, location):
-        ''' pass in an EmailTemplate instance, and a reservation object '''
+    def __init__(self, tpl, booking, location):
+        ''' pass in an EmailTemplate instance, and a booking object '''
 
         domain = Site.objects.get_current().domain
         # calling super will initialize the form fields
-        super(ReservationEmailTemplateForm, self).__init__()
+        super(BookingEmailTemplateForm, self).__init__()
 
         # add in the extra fields
         self.fields['sender'].initial = location.from_email()
-        self.fields['recipient'].initial = "%s, %s" % (reservation.user.email, location.from_email())
+        self.fields['recipient'].initial = "%s, %s" % (booking.user.email, location.from_email())
         self.fields['footer'].initial = forms.CharField(
                 widget=forms.Textarea(attrs={'readonly':'readonly'})
             )
-        self.fields['footer'].initial = '''--------------------------------\nYour reservation is from %s to %s.\nManage your reservation at https://%s%s.''' % (reservation.arrive, reservation.depart, domain, reservation.get_absolute_url())
+        self.fields['footer'].initial = '''--------------------------------\nYour booking is from %s to %s.\nManage your booking at https://%s%s.''' % (booking.arrive, booking.depart, domain, booking.get_absolute_url())
 
         # both the subject and body fields expect to have access to all fields
-        # associated with a reservation, so all reservation model fields are
+        # associated with a booking, so all booking model fields are
         # passed to the template renderer, even though we don't know (and so
         # that we don't have to know) which specific fields a given template
         # wants to use).
 
         template_variables = {
-            'created': reservation.created,
-            'updated': reservation.updated,
-            'status': reservation.status,
-            'user': reservation.user,
-            'arrive': reservation.arrive,
-            'depart': reservation.depart,
-            'arrival_time': reservation.arrival_time,
-            'room': reservation.resource,
-            'num_nights': reservation.total_nights(),
-            'purpose': reservation.purpose,
-            'comments': reservation.comments,
+            'created': booking.created,
+            'updated': booking.updated,
+            'status': booking.status,
+            'user': booking.user,
+            'arrive': booking.arrive,
+            'depart': booking.depart,
+            'arrival_time': booking.arrival_time,
+            'room': booking.resource,
+            'num_nights': booking.total_nights(),
+            'purpose': booking.purpose,
+            'comments': booking.comments,
             'welcome_email_days_ahead': location.welcome_email_days_ahead,
-            'reservation_url': "https://"+domain+reservation.get_absolute_url()
+            'booking_url': "https://"+domain+booking.get_absolute_url()
         }
 
-        self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables)) + ' (#' + str(reservation.id) + ')'
+        self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables)) + ' (#' + str(booking.id) + ')'
         self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
 
 class SubscriptionEmailTemplateForm(EmailTemplateForm):
@@ -449,7 +449,7 @@ class SubscriptionEmailTemplateForm(EmailTemplateForm):
         self.fields['footer'].initial = '''--------------------------------\nYour membership id is %d. Manage your membership from your profile page https://%s/people/%s.''' % (subscription.id, domain, subscription.user.username)
 
         # both the subject and body fields expect to have access to all fields
-        # associated with a reservation, so all reservation model fields are
+        # associated with a booking, so all booking model fields are
         # passed to the template renderer, even though we don't know (and so
         # that we don't have to know) which specific fields a given template
         # wants to use).
