@@ -19,6 +19,15 @@ h1, h2, h3 {
 	background-color: transparent;
 }
 
+.btn {
+	border-radius: 2px;
+	text-transform: none;
+}
+
+.panel {
+	border-radius: 2px;
+}
+
 .fancy-header {
 	-webkit-font-smoothing: antialiased;
 }
