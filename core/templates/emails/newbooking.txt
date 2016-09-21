@@ -1,0 +1,29 @@
+Howdy, 
+
+A new booking has been submitted. The current status of this booking is [ {{ status }} ].
+You can reply-all to discuss this booking with all house admins.
+
+---------------------------------------------------
+
+{{ first_name }} {{last_name }} requests {{ room_name }} accommodation from {{ arrive }} to {{ depart }}.
+
+Purpose of trip: {{ purpose }}.
+
+Additional Comments: {{ comments }}.
+
+---- ABOUT THEM -----
+
+About them: {{ bio }}
+
+How they heard about us: {{ referral}}
+
+Projects: {{ projects }}
+
+Sharing interests: {{ sharing }}
+
+Discussion interests: {{ discussion }}
+
+
+-------------------------------------
+
+You can manage this request, including email the user, at {{ admin_url }}

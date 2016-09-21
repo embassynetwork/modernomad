@@ -5,9 +5,9 @@
 
 <div class="row pull-right">
 	<div class="col-md-12">
-		<a href="{% url 'reservation_manage_create' location.slug %}">
+		<a href="{% url 'booking_manage_create' location.slug %}">
 			<i class="fa fa-plus-circle"></i>
-			New Reservation</a>
+			New Booking</a>
 	</div>
 </div>
 
@@ -19,49 +19,49 @@
 	<li><a href="#canceled" data-toggle="tab">Canceled ({{canceled.count}})</a></li>
 </ul>
 
-<div class="tab-content" id="reservation-list-tab-content">
+<div class="tab-content" id="booking-list-tab-content">
 	
 	<div class="tab-pane active" id="pending">
-		{% with reservations=pending %}
-			{% include "snippets/reservation_list_table.html" %}
+		{% with bookings=pending %}
+			{% include "snippets/booking_list_table.html" %}
 		{% endwith %}
 	</div>
 
 	<div class="tab-pane" id="approved">
-		{% with reservations=approved %}
-			{% include "snippets/reservation_list_table.html" %}
+		{% with bookings=approved %}
+			{% include "snippets/booking_list_table.html" %}
 		{% endwith %}
 	</div>
 
 	<div class="tab-pane" id="confirmed">
-		{% with reservations=confirmed %}
-			{% include "snippets/reservation_list_table.html" %}
+		{% with bookings=confirmed %}
+			{% include "snippets/booking_list_table.html" %}
 		{% endwith %}
-		<em>Only reservations with departure date in the future shown by default.</em> [ <a href="?show_all=True">Show All</a> ]
+		<em>Only bookings with departure date in the future shown by default.</em> [ <a href="?show_all=True">Show All</a> ]
 	</div>
 
 	<div class="tab-pane" id="owing">
-		{% with reservations=owing %}
-			<div class="bottom-spacer"><em>Only reservations confirmed but unpaid are shown.</em> </div>
-			{% include "snippets/reservation_list_table.html" %}
+		{% with bookings=owing %}
+			<div class="bottom-spacer"><em>Only bookings confirmed but unpaid are shown.</em> </div>
+			{% include "snippets/booking_list_table.html" %}
 		{% endwith %}
 	</div>
 
 	<div class="tab-pane" id="canceled">
-		{% with reservations=canceled %}
-			{% include "snippets/reservation_list_table.html" %}
+		{% with bookings=canceled %}
+			{% include "snippets/booking_list_table.html" %}
 		{% endwith %}
 		[ <a href="?show_all=True">Show All</a> ]
 	</div>
 
-	<div id="reservation-manage-detail"> </div>
+	<div id="booking-manage-detail"> </div>
 </div>
 
 <div class="row row-spacer">
 	<div class="col-md-12">
 		<form method="POST">
-			<strong>Go To Reservation:</strong>
-			<input name="reservation_id" size="4" placeholder="ID"/>
+			<strong>Go To Booking:</strong>
+			<input name="booking_id" size="4" placeholder="ID"/>
 			<input type="submit" value="Go!"/>
 			{% csrf_token %}
 		</form>
@@ -102,7 +102,7 @@ $(document).ready(function() {
 		$('html,body').scrollTop(scrollmem);
 	});
 
-	$('.reservation-list').dataTable({
+	$('.booking-list').dataTable({
 	"iDisplayLength": 50,
 	"order": [[ 2, "asc"]],
 	"aoColumns": [

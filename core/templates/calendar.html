@@ -15,12 +15,12 @@
 	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
 </div>
 
-<h3>Reservation Details</h3>
+<h3>Booking Details</h3>
 
-{% for r in reservations %}
-	<div class="reservation-list-item">
-	<div class="reservation-title">
-	<a id="reservation{{r.id}}"></a>
+{% for r in bookings %}
+	<div class="booking-list-item">
+	<div class="booking-title">
+	<a id="booking{{r.id}}"></a>
 	<h4 class="inline">
 	<a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
 	</h4>
@@ -59,7 +59,7 @@
 	
 	<script type="text/javascript">
 
-		{% if any_reservations %}
+		{% if any_bookings %}
 			google.setOnLoadCallback(drawChart);
 			function drawChart() {
 				var container = document.getElementById('guestcalendar');
@@ -73,16 +73,16 @@
 				dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
 
 				dataTable.addRows([
-					{% for room, reservations_this_room in reservations_by_room %}
+					{% for room, bookings_this_room in bookings_by_room %}
 						{% with last_room=forloop.last %}
 
 						// note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1. 
-						{% for res_info in reservations_this_room %}	
+						{% for res_info in bookings_this_room %}	
 							[ 
-							"{{room.name|safe}}", "{{res_info.reservation.user.first_name|title}} ({{res_info.reservation.status}})", 
+							"{{room.name|safe}}", "{{res_info.booking.user.first_name|title}} ({{res_info.booking.status}})", 
 								new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}), 
 								new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}), 
-								"<div class='guestinfo-tooltip'><h3>{{res_info.reservation.user.first_name|title}}</h3><p><em>{{res_info.reservation.status}}</em></p><p>Arrive: {{ res_info.reservation.arrive}}</p><p>Depart: {{ res_info.reservation.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.reservation.user.profile.image_thumb}}'></div>"
+								"<div class='guestinfo-tooltip'><h3>{{res_info.booking.user.first_name|title}}</h3><p><em>{{res_info.booking.status}}</em></p><p>Arrive: {{ res_info.booking.arrive}}</p><p>Depart: {{ res_info.booking.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.booking.user.profile.image_thumb}}'></div>"
 
 							{% if last_room and forloop.last %}
 								]
@@ -121,7 +121,7 @@
 			}
     
 		{% else %}
-			$("#guestcalendar").html('<h4>No reservations yet this month!</h4>');
+			$("#guestcalendar").html('<h4>No bookings yet this month!</h4>');
 		{% endif %}
 	</script>
 

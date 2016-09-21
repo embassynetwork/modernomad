@@ -59,7 +59,7 @@ you ran syncdb). click on 'users' and then any user (you probably only have one
 user right now). on the user page under 'groups' highlight the option
 'house_admin', and then hit 'save.'
 
-in the admin interface you should also define some rooms, since the reservation
+in the admin interface you should also define some rooms, since the booking
 form presents a choice to users based on the rooms and rates defined here. 
 
 finally, set the value of the site variable so that full urls will have the

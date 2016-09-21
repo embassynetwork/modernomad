@@ -1,21 +1,21 @@
 Dear {{ first_name }},
 
-Thanks for staying with us! This email contains your invoice information. Your reservation details are available online at https://{{ domain }}{% url 'reservation_detail' location.slug reservation.id %}. 
+Thanks for staying with us! This email contains your invoice information. Your booking details are available online at https://{{ domain }}{% url 'booking_detail' location.slug booking.id %}. 
 
 Invoice Date: {{ today }}
 Arrival Date: {{ arrive }}
 Departure Date: {{ depart }}
 
 Charges
-{% for line_item in reservation.bill.ordered_line_items %}{% if not line_item.paid_by_house %}
+{% for line_item in booking.bill.ordered_line_items %}{% if not line_item.paid_by_house %}
 {{ line_item.description }}:  ${{ line_item.amount|floatformat:2 }}
 {% endif %}{% endfor %}
 
-Total Owed: ${{ reservation.bill.total_owed|floatformat:2 }}
+Total Owed: ${{ booking.bill.total_owed|floatformat:2 }}
 
 You can pay via credit card, cash, check, bank transfer, or Dwolla. 
 
-Credit card: https://{{ domain }}{% url 'reservation_detail' location.slug reservation.id %}
+Credit card: https://{{ domain }}{% url 'booking_detail' location.slug booking.id %}
 Dwolla: https://www.dwolla.com/hub/embassynetwork
 Bank Details: Account number 164108426532 // Routing number 121000358
 

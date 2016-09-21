@@ -20,11 +20,11 @@ def monthly_occupant_report_console(location_slug, year, month):
 		print message
 
 
-def people_with_reservations_longer_than(min_length):
-	# JKS this should probably be a manager method Reservation.objects.length(...)
+def people_with_bookings_longer_than(min_length):
+	# JKS this should probably be a manager method Booking.objects.length(...)
 	users = []
-	reservations = Reservation.objects.all()
-	for r in reservations:
+	bookings = Booking.objects.all()
+	for r in bookings:
 		length = r.nights_between(r.arrive, r.depart)
 		if length >= min_length:
 			users.append(r.user)
@@ -36,10 +36,10 @@ def repeat_guests(num_stays, location=None):
 	all_users = User.objects.all()
 	for u in all_users:
 		if location:
-			at_loc = u.reservations.filter(location = location).filter(status='confirmed')
+			at_loc = u.bookings.filter(location = location).filter(status='confirmed')
 			if len(at_loc) >= num_stays:
 				users.append(u)
 		else:
-			if u.reservations.filter(status='confirmed').count() >= num_stays:
+			if u.bookings.filter(status='confirmed').count() >= num_stays:
 				users.append(u)
 	return users

@@ -3,19 +3,19 @@
 *-*-*- Reimagine Home -*-*-*
 
 {{ user.first_name }} {{ user.last_name }}
-Paid on: {{ reservation.bill.payment_date }}
+Paid on: {{ booking.bill.payment_date }}
 
 Location: {{ location }}
-Arrival Date: {{ reservation.arrive }}
-Departure Date: {{ reservation.depart }}
-Total Nights: {{ reservation.total_nights }}
+Arrival Date: {{ booking.arrive }}
+Departure Date: {{ booking.depart }}
+Total Nights: {{ booking.total_nights }}
 
 Charges
-{% for line_item in reservation.bill.ordered_line_items %}{% if not line_item.paid_by_house %}
+{% for line_item in booking.bill.ordered_line_items %}{% if not line_item.paid_by_house %}
 {{ line_item.description }}:  ${{ line_item.amount|floatformat:2 }}
 {% endif %}{% endfor %}
 
-Total Paid: ${{ reservation.bill.total_paid|floatformat:2 }}
+Total Paid: ${{ booking.bill.total_paid|floatformat:2 }}
 
 Have fun on your onward adventures!
 The Embassy Team

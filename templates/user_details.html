@@ -59,11 +59,11 @@
 		{% if user_is_house_admin_somewhere %}
 			<div class="dropdown top-spacer-sm">
 				<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-					New Reservation<span class="caret"></span>
+					New Booking<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
 					{% for l in user.house_admin.all %}
-					<li><a href="{% url 'reservation_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
+					<li><a href="{% url 'booking_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
 					{% endfor %}
 				</ul>
 			</div>
@@ -90,13 +90,13 @@
 
 <script>
 	$(document).ready(function() {
-		$customer_id = "{{ reservation.user.profile.customer_id }}";
+		$customer_id = "{{ booking.user.profile.customer_id }}";
 		$('#pay-button').click(function(event){
 			event.preventDefault();
 			// if the user has a saved card, go straight to the
 			// payment processing page. (note: this shouldn't happen for new
-			// reservations but might for legacy reservations)
-			$customer_id = "{{ reservation.user.profile.customer_id }}";
+			// bookings but might for legacy bookings)
+			$customer_id = "{{ booking.user.profile.customer_id }}";
 			console.log($customer_id);
 
 			if ($customer_id == "None" || $customer_id == "") {

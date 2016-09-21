@@ -7,15 +7,15 @@
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
 </div>	
 
-<div class="row" id="reservation-nav">
-	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
+<div class="row" id="booking-nav">
+	<a href="{% url 'booking_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to bookings</a>
 </div>
 
 {% include 'snippets/messages.html' %}
 
 <div class="row">
 	<div class="col-md-7">
-		<h2 class="res-field field">Create a New Reservation </h2>
+		<h2 class="res-field field">Create a New Booking </h2>
 	</div>
 </div>
 
@@ -34,8 +34,8 @@
 	<div class="col-md-7">	
 
 
-		<div id="reservation-details-form">
-			<form method="POST" role="form" class="form-horizontal" id="manage-reservation-form" action="{% url 'reservation_manage_create' location.slug %}">{% csrf_token %}
+		<div id="booking-details-form">
+			<form method="POST" role="form" class="form-horizontal" id="manage-booking-form" action="{% url 'booking_manage_create' location.slug %}">{% csrf_token %}
 
 				<div class="form-group">
 					<label class="col-sm-2 control-label">User</label> 
@@ -78,7 +78,7 @@
 					<label class="col-sm-2 control-label">Status</label> 
 					<div class="col-sm-4">
 						<select name="status" class="form-control" required>
-							{% for status_tup in reservation_statuses %}
+							{% for status_tup in booking_statuses %}
 							<option value="{{status_tup.0}}">{{status_tup.1}}</option>
 							{% endfor %}
 						</select>
@@ -90,11 +90,11 @@
 
 				<div class="form-group">
 					<div class="col-sm-6 col-md-offset-2">
-						<input type="checkbox" name="email_announce" id="email_announce" > Announce this reservation by email?
+						<input type="checkbox" name="email_announce" id="email_announce" > Announce this booking by email?
 					</div>
 				</div>
 
-				<input type="submit" value="Create Reservation" class="btn btn-default">
+				<input type="submit" value="Create Booking" class="btn btn-default">
 			</form>
 
 		</div>
@@ -170,7 +170,7 @@
         }
 	})
 	
-	// Check reservation dates and room for avilability, warn admin if overbooking room.
+	// Check booking dates and room for avilability, warn admin if overbooking room.
 	$(".listening").change(function(event) {
 		// Get arrive and depart dates, update value. 
 		var arrive = $("#id_arrive").val();
@@ -215,7 +215,7 @@
 		}
 	});
 
-	$("#manage-reservation-form").validate();
+	$("#manage-booking-form").validate();
 
 
 </script>

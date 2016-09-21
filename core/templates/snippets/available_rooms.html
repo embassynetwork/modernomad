@@ -1,11 +1,11 @@
 {% load staticfiles %}
 <div class="row top-spacer-large">
 
-	{% if available_reservations %}
+	{% if available_bookings %}
 
 	<div class="col-md-9 col-sm-12" id="availability-area">
 		<div id="rooms-available-calendar">
-			{% for room in available_reservations.keys %}
+			{% for room in available_bookings.keys %}
 				<div class="col-lg-6">
 					<label for="select-resource-{{room.id}}" id="label-resource-{{room.id}}" class="room-panel room-select">
 						<div class="panel panel-default">
@@ -28,12 +28,12 @@
 	<div class="col-md-3 col-sm-12" id="detail-sidebar">
 
 		<div>
-		<form id="the-reservation-form" method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
+		<form id="the-booking-form" method="post" role="form" action="{% url 'location_stay' location.slug %}" >{% csrf_token %}
 			<input id="id_arrive" type="hidden" name="arrive" value="{{arrive_date}}">
 			<input id="id_depart" type="hidden" name="depart" value="{{depart_date}}">
 			<input type="hidden" name="resource" id="res-selected-room" value="">
 
-			{% for room, res_dict in available_reservations.items %}
+			{% for room, res_dict in available_bookings.items %}
 
 			<div class="room-info" id="room-info-{{room.id}}">
 
@@ -42,7 +42,7 @@
 						{{arrive|date:"F d"}} - {{depart|date:"F d"}}
 					</div>
 					<table class="table">
-						<tbody id="reservation-items">
+						<tbody id="booking-items">
 							{% for line_item in res_dict.bill_line_items %}
 							{% if not line_item.paid_by_house %}
 							<tr class="a-room-fee">
@@ -55,7 +55,7 @@
 						<tbody>
 							<tr>
 								<td><strong>Total</strong></td>
-								<td><strong>$<span id="room-{{room.id}}-reservation-total">{{ res_dict.total|floatformat:2 }}</span></strong></td>
+								<td><strong>$<span id="room-{{room.id}}-booking-total">{{ res_dict.total|floatformat:2 }}</span></strong></td>
 							</tr>
 						</tbody>
 					</table>
@@ -65,7 +65,7 @@
 
 			{% endfor %}
 
-			<div id="reservation-additional-info">
+			<div id="booking-additional-info">
 
 				<div class="field-wrapper">
 					<label for="id_purpose"><sup><i class="fa fa-asterisk text-danger"></i></sup> Tell us a little about the purpose of your trip</label>
@@ -94,9 +94,9 @@
 						</div>
 					</div>
 				</div>
-			</div><!-- end reservation-additional-info -->
+			</div><!-- end booking-additional-info -->
 
-			<input id="submit-reservation" type="submit" class="btn btn-success" value='Submit'>
+			<input id="submit-booking" type="submit" class="btn btn-success" value='Submit'>
 		</form>
 		</div>
 
@@ -113,5 +113,5 @@
 
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script>
-		$("#the-reservation-form").validate();
+		$("#the-booking-form").validate();
 </script>

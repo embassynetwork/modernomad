@@ -4,9 +4,9 @@
 <div class="row">
 
 	<div class="col-md-4">
-	<ul class="nav nav-tabs nav-justified" id="reservation-tabs" role="tablist">
-		<li class="reservation-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms</a></li>
-		<li class="reservation-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Matrix</a></li>
+	<ul class="nav nav-tabs nav-justified" id="booking-tabs" role="tablist">
+		<li class="booking-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms</a></li>
+		<li class="booking-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Matrix</a></li>
 	</ul>
 	</div>
 
@@ -32,13 +32,13 @@ $(function(){
 	});
 
     $('[data-toggle="tooltip"]').tooltip();
-	$("#the-reservation-form").waypoint('sticky');
+	$("#the-booking-form").waypoint('sticky');
 
 	$(".room-select .billing-message").hide();
 
 	$(".room-select").click(function() {
 		console.log('in room select');
-		$("#the-reservation-form").hide();
+		$("#the-booking-form").hide();
 		// relies on the fact that the input tag is directly after the label tag
 		// for each room option.
 		$(this).next().prop("checked", true);
@@ -61,21 +61,21 @@ $(function(){
 			$(".emphasize .billing-message").delay(1200);
 			$(".emphasize .billing-message").slideUp( "slow");
 		}
-		$("#the-reservation-form").show();
+		$("#the-booking-form").show();
 		$(room_info_div_id).show();
 	});
 
-	$("#the-reservation-form").hide();
+	$("#the-booking-form").hide();
 
     $(document).ready(function() {
-        set_summary_width('#the-reservation-form');
+        set_summary_width('#the-booking-form');
     });
     $(window).resize(function() {
-        set_summary_width('#the-reservation-form');
+        set_summary_width('#the-booking-form');
 	});
 
 	$("#click-availability-tab").click(function() {
-		$('#reservation-pills a[href="#showavailability"]').tab('show')
+		$('#booking-pills a[href="#showavailability"]').tab('show')
 	});
 
 })

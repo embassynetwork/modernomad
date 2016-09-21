@@ -1,6 +1,6 @@
 from celery.task.schedules import crontab
 from celery.task import periodic_task
-from core.models import Reservation, Location, Subscription
+from core.models import Booking, Location, Subscription
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from modernomad.backup import BackupManager
 from django.contrib.sites.models import Site
@@ -32,24 +32,24 @@ def send_admin_daily_update():
 #@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 @periodic_task(run_every=crontab(hour=5, minute=0))
 def send_guest_welcome():
-	# get all reservations WELCOME_EMAIL_DAYS_AHEAD from now. 
+	# get all bookings WELCOME_EMAIL_DAYS_AHEAD from now. 
 	locations = Location.objects.all()
 	for location in locations:
 		soon = datetime.datetime.today() + datetime.timedelta(days=location.welcome_email_days_ahead)
-		upcoming = Reservation.objects.filter(location=location).filter(arrive=soon).filter(status='confirmed')
-		for reservation in upcoming:
-			guest_welcome(reservation)
+		upcoming = Booking.objects.filter(location=location).filter(arrive=soon).filter(status='confirmed')
+		for booking in upcoming:
+			guest_welcome(booking)
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
 def send_departure_email():
-	# get all reservations departing today
+	# get all bookings departing today
 	locations = Location.objects.all()
 	for location in locations:
 		today = timezone.localtime(timezone.now())
-		departing = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
-		for reservation in departing:
-			print 'sending goodbye email to %s' % reservation.user.email
-			goodbye_email(reservation)
+		departing = Booking.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+		for booking in departing:
+			print 'sending goodbye email to %s' % booking.user.email
+			goodbye_email(booking)
 
 @periodic_task(run_every=crontab(hour=2, minute=0))
 def make_backup():
@@ -84,14 +84,14 @@ def _format_attachment(r, color):
 		profile_img_url = domain+r.user.profile.image.url
 	else:
 		profile_img_url = domain+"/static/img/default.jpg"
-	reservation_url = '<%s%s|%s - %s in %s>\n%s' % (domain, r.get_absolute_url(), r.arrive.strftime("%B %d"), r.depart.strftime("%B %d"), r.resource.name, r.user.profile.bio)
+	booking_url = '<%s%s|%s - %s in %s>\n%s' % (domain, r.get_absolute_url(), r.arrive.strftime("%B %d"), r.depart.strftime("%B %d"), r.resource.name, r.user.profile.bio)
 	profile_url = domain + urlresolvers.reverse('user_detail', args=(r.user.username,)),
 	item = {
 			'color': color,
 			'fallback' : r.user.get_full_name(),
 			'title': r.user.get_full_name(),
 			'title_link': profile_url[0], 
-			'text': reservation_url, 
+			'text': booking_url, 
 			'thumb_url': profile_img_url,
 	}
 	return item
@@ -104,8 +104,8 @@ def slack_embassysf_daily():
 	webhook = "https://hooks.slack.com/services/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"
 	today = timezone.localtime(timezone.now())
 	location = Location.objects.get(slug="embassysf")
-	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
-	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+	arriving_today = Booking.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	departing_today = Booking.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 
 	payload = {
 			'text': 'Arrivals and Departures for %s' % today.strftime("%B %d, %Y"),
@@ -137,8 +137,8 @@ def slack_ams_daily():
 	webhook = "https://hooks.slack.com/services/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"
 	today = timezone.localtime(timezone.now())
 	location = Location.objects.get(slug="amsterdam")
-	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
-	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+	arriving_today = Booking.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	departing_today = Booking.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 
 	payload = {
 			'text': 'Arrivals and Departures for %s' % today.strftime("%B %d, %Y"),
@@ -170,8 +170,8 @@ def slack_redvic_daily():
 	webhook = "https://hooks.slack.com/services/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"
 	today = timezone.localtime(timezone.now())
 	location = Location.objects.get(slug="redvic")
-	arriving_today = Reservation.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
-	departing_today = Reservation.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+	arriving_today = Booking.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	departing_today = Booking.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 
 	payload = {
 			'text': 'Arrivals and Departures for %s' % today.strftime("%B %d, %Y"),

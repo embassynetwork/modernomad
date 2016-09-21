@@ -10,7 +10,7 @@
 		{% for room, days_list in availability_table.items %}	
 		<tr>
 			<td class="cell-right-breather"> 
-				{% if room in available_reservations %}
+				{% if room in available_bookings %}
 				<div id="info-room-{{room.id}}">{{room.name}}</div>
 				{% else %}
 				<div data-toggle="tooltip" data-placement="top" title="This room is unavailable for your date range">
