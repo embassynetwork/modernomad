@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 per_location_patterns = [
 	url(r'^$', 'core.views.unsorted.location', name='location_home'),
-	url(r'^stay/$', 'core.views.unsorted.ReservationSubmit', name='location_stay'),
+	url(r'^stay/$', 'core.views.unsorted.BookingSubmit', name='location_stay'),
 	url(r'^community/$', 'core.views.unsorted.community', name='location_community'),
 	url(r'^team/$', 'core.views.unsorted.team', name='location_team'),
 	url(r'^guests/$', 'core.views.unsorted.guests', name='location_guests'),
@@ -31,7 +31,7 @@ per_location_patterns = [
 	# internal views
 	url(r'^rooms_availabile_on_dates/$', 'core.views.unsorted.RoomsAvailableOnDates', name='rooms_available_on_dates'),
 
-	url(r'^reservation/', include('core.urls.reservations')),
+	url(r'^booking/', include('core.urls.bookings')),
 	url(r'^manage/', include('core.urls.manage')),
 	url(r'^room/', include('core.urls.room')),
 

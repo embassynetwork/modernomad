@@ -6,7 +6,7 @@
 * Content
 * Mailing lists
 * Events
-* Reservation management
+* Booking management
 
 ## Specifics (may be behind, please nudge someone if this seems incomplete)
 
@@ -30,27 +30,27 @@
 * current@for all current guests and residents today
 * announce@ for all people following the community 
 
-### Reservation Management
+### Booking Management
 
 * Rooms
  * room features include title, price, description, shared, private bath, num beds, photo 
  * custom, reservable date ranges 
-* Customize max length of reservation requests
-* Automated email workflow around new reservation requests - email house admins with new requests, email guest with approval or confirmation info (house access, rules, general info, etc.)
-* Sophisticated reservation management backend
+* Customize max length of booking requests
+* Automated email workflow around new booking requests - email house admins with new requests, email guest with approval or confirmation info (house access, rules, general info, etc.)
+* Sophisticated booking management backend
 * Per location default fees and taxes 
-* Customizable bill line items per reservation
+* Customizable bill line items per booking
 * Detailed occupancy and earnings analysis
-* Guests can edit and cancel reservation after creation (before being confirmed)
+* Guests can edit and cancel booking after creation (before being confirmed)
 * Custom rates and comps
-* Calendar view of reservations by month
+* Calendar view of bookings by month
 * Detailed payments information
 * Online credit card payments
 * 3rd party payment option
 * Daily emails for admins, community members and guests with information on arrivals, departures and/or events today. 
 * Automated, customizable pre-arrival welcome emails 
 * Automated, customizable departure emails
-* Other customizable emails for new reservations, receipts, daily updates 
+* Other customizable emails for new bookings, receipts, daily updates 
 
 ### Events
 

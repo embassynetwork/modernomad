@@ -1,4 +1,4 @@
-<table class="dataTable table table-striped reservation-list">
+<table class="dataTable table table-striped booking-list">
 	<thead>
 		<tr>
 			<th>ID</th>
@@ -14,10 +14,10 @@
 		</tr>
 	</thead>
 	<tbody>
-			{% for r in reservations %}
+			{% for r in bookings %}
 				<tr class="{% cycle 'row-even' 'row-odd' %}">
 					<td>
-						<a href="{% url 'reservation_manage' location.slug r.id %}">{{ r.id }}</a>
+						<a href="{% url 'booking_manage' location.slug r.id %}">{{ r.id }}</a>
 					</td>
 					<td>
 						<a href="{% url 'user_detail' r.user.username %}">{{ r.user.get_full_name|truncatechars:16 }}</a> 

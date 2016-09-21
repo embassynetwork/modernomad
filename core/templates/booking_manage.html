@@ -18,7 +18,7 @@
 			Share this link with a 3rd party if they are submitting payment for you.
 		</p>
 		<p class="bg-warning para-padding">
-			https://{{domain}}{% url 'reservation_payment' location.slug r.uuid %}
+			https://{{domain}}{% url 'booking_payment' location.slug r.uuid %}
 		</p>
       </div>
     </div>
@@ -27,8 +27,8 @@
 
 
 
-<div class="row" id="reservation-nav">
-	<a href="{% url 'reservation_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to reservations</a>
+<div class="row" id="booking-nav">
+	<a href="{% url 'booking_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to bookings</a>
 </div>
 
 {% if r.is_canceled %}
@@ -49,16 +49,16 @@
 	<div class="col-md-7">
 
 		<h1 class="res-field field">
-			{% if past_reservations or upcoming_reservations %}<i class="fa fa-repeat" id="repeat-guest-icon"></i>{% endif %}
+			{% if past_bookings or upcoming_bookings %}<i class="fa fa-repeat" id="repeat-guest-icon"></i>{% endif %}
 			{{ r.user.first_name|title }} {{r.user.last_name|title }}
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
-		{% with notes=reservation_notes %}
+		{% with notes=booking_notes %}
 			{% include "snippets/notes.html" %}
 		{% endwith %}
 
-		<div id="reservation-details">
+		<div id="booking-details">
 			<h3>
 				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
 				<span class="pull-right">Value: ${{ r.bill.amount }}</span>
@@ -87,11 +87,11 @@
 	<div class="col-md-3">
 		<div class="res-actions-secondary"><h2>Manage</h2></div>
 		<ul class="nav nav-pills nav-stacked" role="tablist">
-			<li class="active"><a href="#reservation-manage-calendar" data-toggle="pill"><h4>Availability</h4></a></li>
-			<li><a role="tab" href="#reservation-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
-			<li><a role="tab" href="#reservation-manage-bill" data-toggle="pill"><h4>Bill</h4></a></li>
-			<li><a role="tab" href="#reservation-manage-payment" data-toggle="pill"><h4>Payment</h4></a></li>
-			<li><a role="tab" href="#reservation-manage-user-info" data-toggle="pill"><h4>User</h4></a></li>
+			<li class="active"><a href="#booking-manage-calendar" data-toggle="pill"><h4>Availability</h4></a></li>
+			<li><a role="tab" href="#booking-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+			<li><a role="tab" href="#booking-manage-bill" data-toggle="pill"><h4>Bill</h4></a></li>
+			<li><a role="tab" href="#booking-manage-payment" data-toggle="pill"><h4>Payment</h4></a></li>
+			<li><a role="tab" href="#booking-manage-user-info" data-toggle="pill"><h4>User</h4></a></li>
 		</ul>
 	</div>
 
@@ -99,29 +99,29 @@
 
 		<div class="tab-content">
 
-			<div role="tabpanel" class="tab-pane active" id="reservation-manage-calendar">
+			<div role="tabpanel" class="tab-pane active" id="booking-manage-calendar">
 				<h3>Availability</h3>
 				{% include "snippets/res_status_area.html" %}
 				<hr>
 				{% include "snippets/manage-page-availability-calendar.html" %}
 			</div>
 
-			<div role="tabpanel" class="tab-pane" id="reservation-manage-edit">
+			<div role="tabpanel" class="tab-pane" id="booking-manage-edit">
 				{% include "snippets/manage-page-advanced-edit.html" %}
 			</div>
 
-			<div role="tabpanel" class="tab-pane" id="reservation-manage-bill">
+			<div role="tabpanel" class="tab-pane" id="booking-manage-bill">
 				<h3>Bill Details</h3>
 				{% with bill=r.bill %}
 					{% include "snippets/manage-page-bill-details.html" %}
 				{% endwith %}
 			</div>
 
-			<div role="tabpanel" class="tab-pane" id="reservation-manage-payment">
+			<div role="tabpanel" class="tab-pane" id="booking-manage-payment">
 				<button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
 				{% with bill=r.bill %}
 					{% if bill.is_paid %}
-					<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'reservation_send_receipt' location.slug r.id %}" >
+					<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug r.id %}" >
 						{% csrf_token %}
 						<input class="btn-default btn" type="submit" value="Send Receipt">
 					</form>
@@ -130,7 +130,7 @@
 				{% endwith %}
 			</div>
 
-			<div role="tabpanel" class="tab-pane" id="reservation-manage-user-info">
+			<div role="tabpanel" class="tab-pane" id="booking-manage-user-info">
 				{% include "snippets/manage-page-user-details.html" %}
 			</div>
 
@@ -174,14 +174,14 @@ toggleRefundDetails();
 function toggleNotes(){
 	if($('#notes-area').is(':hidden')) {
 		$('#notes-area').show();
-		$('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Reservation notes');
+		$('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Booking notes');
 	} else {
 		$('#notes-area').hide();
-		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{reservation_notes|length}} reservation note{{reservation_notes|length|pluralize}}');
+		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{booking_notes|length}} booking note{{booking_notes|length|pluralize}}');
 	}
 }
 
-if ({{reservation_notes|length}} == 0) {
+if ({{booking_notes|length}} == 0) {
 	toggleNotes();
 }
 
@@ -205,7 +205,7 @@ function ajax_call(el) {
 	res_action = $(el).attr('id')
 	request = $.ajax({
 		data: {
-			'reservation-action': res_action,
+			'booking-action': res_action,
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
 		},
 		type: $("#res-action-form").attr('method'), // GET or POST
@@ -223,7 +223,7 @@ function ajax_call(el) {
 		register_actions();
 	});
 	request.fail(function(msg) {
-		console.log("Error in reservation update:");
+		console.log("Error in booking update:");
 		console.log(msg);
 		error_alert = '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">×</button><div {% if message.tags %} class="{{ message.tags }}"{% endif %}>The card was declined</div></div>'
 		$("#res-status-area").before(error_alert);
@@ -231,7 +231,7 @@ function ajax_call(el) {
 }
 
 function register_actions() {
-	// comping a reservation reslts in a page reload so we can rely on the
+	// comping a booking reslts in a page reload so we can rely on the
 	// template language here.
 	payment_status = $("#payment-status").html();
 
@@ -261,7 +261,7 @@ $(document).ready(function() {
 	$email_templates = {};
 	{% for f in email_forms %}
 		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
-			'<form id="res-action-email-user" method=POST action="{% url 'reservation_send_mail' location.slug r.id %}" >' +
+			'<form id="res-action-email-user" method=POST action="{% url 'booking_send_mail' location.slug r.id %}" >' +
 			"{% csrf_token %}" +
 			'<div class="form-group">' +
 			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
@@ -296,7 +296,7 @@ $(document).ready(function() {
 			$("#res-status-area").addClass("paid-bg-img");
 		});
 		request.fail(function(msg) {
-			console.log("Error in reservation update:");
+			console.log("Error in booking update:");
 			console.log(msg);
 		});
 

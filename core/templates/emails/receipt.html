@@ -5,25 +5,25 @@
 
 		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 			<tr><td width="600px" align="center" style="font-size:140%;"><strong>
-				{% if reservation.bill.total_owed == 0 %}
+				{% if booking.bill.total_owed == 0 %}
 					RECEIPT
 					{% else %}
 					UNPAID
 					{% endif %}
 			</strong></td></tr> 
-			<tr><td width="600px" align="center" style="font-size:140%;"><strong>{{reservation.location.name|title}}</strong></td></tr>
+			<tr><td width="600px" align="center" style="font-size:140%;"><strong>{{booking.location.name|title}}</strong></td></tr>
 			<tr><td width="600px" align="center" style="font-size:140%;"><strong>Be at Home Across the Globe</strong></td></tr>
 		</table>
 
 		<tr><td width="600px"><p margin="1.6em 0 1.6em 0"><hr></p></td></tr>
 
-		<tr><td margin="0 0 1.6em 0" style="font-size:120%;"> Reservation for {{ user.first_name }} {{ user.last_name }} </td></tr>	
+		<tr><td margin="0 0 1.6em 0" style="font-size:120%;"> Booking for {{ user.first_name }} {{ user.last_name }} </td></tr>	
 		
 		<table border="0" cellspacing="0" cellpadding="0" border="0">
 			<tr><td width="150px"><strong>Location:</strong></td><td width="150px"> {{ location }}</td></tr>
-			<tr><td width="150px"><strong>Arrival Date:</strong></td><td width="150px"> {{ reservation.arrive }}</td></tr>
-			<tr><td width="150px"><strong>Departure Date:</strong></td><td width="150px"> {{ reservation.depart }}</td></tr>
-			<tr><td width="150px"><strong>Total Nights:</strong></td><td width="150px"> {{ reservation.total_nights }}</td></tr>
+			<tr><td width="150px"><strong>Arrival Date:</strong></td><td width="150px"> {{ booking.arrive }}</td></tr>
+			<tr><td width="150px"><strong>Departure Date:</strong></td><td width="150px"> {{ booking.depart }}</td></tr>
+			<tr><td width="150px"><strong>Total Nights:</strong></td><td width="150px"> {{ booking.total_nights }}</td></tr>
 		</table>
 
 		<tr><td width="600px"><p margin="1.6em 0 1.6em 0"><hr></p></td></tr>
@@ -33,7 +33,7 @@
 			<th style="text-align: left; width:200px">Description</th>
 			<th style="text-align: right;">Amount</th>
 		</tr>
-		{% for line_item in reservation.bill.line_items.all %}
+		{% for line_item in booking.bill.line_items.all %}
 			{% if not line_item.paid_by_house %}
 				<tr>
 					<td align="left" width="200px">{{ line_item.description }}</td>
@@ -43,13 +43,13 @@
 		{% endfor %}
 		<tr>
 			<td colspan="2" align="right" width="600px">
-				{% if reservation.bill.total_owed == 0 %}
-					<strong>Total Paid:</strong> ${{ reservation.bill.total_paid|floatformat:2 }}
+				{% if booking.bill.total_owed == 0 %}
+					<strong>Total Paid:</strong> ${{ booking.bill.total_paid|floatformat:2 }}
 				{% else %}
-					<strong>Total Owed:</strong> ${{ reservation.bill.total_owed|floatformat:2 }}
+					<strong>Total Owed:</strong> ${{ booking.bill.total_owed|floatformat:2 }}
 				{% endif %}
 			</td>
-			<tr><td width="150px">Details: <a href="{{reservation_url}}">{{reservation_url}}</a></td></tr>
+			<tr><td width="150px">Details: <a href="{{booking_url}}">{{booking_url}}</a></td></tr>
 		</table>
 
 		
@@ -57,8 +57,8 @@
 
 		<p style="margin: 1em 0 0 0;">
 			Thank you for staying with us!<br/>
-			The {{reservation.location.name|title}} Team<br/>
-			<em>{{ reservation.location.from_email }}</em>
+			The {{booking.location.name|title}} Team<br/>
+			<em>{{ booking.location.from_email }}</em>
 		</p>
 
 	</td></tr>

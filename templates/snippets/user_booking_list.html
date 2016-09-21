@@ -1,0 +1,36 @@
+{% load core_tag_extras %}
+
+{% if upcoming_bookings|length > 0 %}
+	<h4>Upcoming</h4>
+	<table class="table" id="booking-list-table">
+	{% for booking in upcoming_bookings %}
+		<tr {% if booking.status == 'canceled' %} class="faded" {% endif %} >
+			<td>
+			<a href="{% url 'booking_detail' booking.location.slug booking.id %}">{{booking.arrive}} - {{booking.depart}}</a> 
+			at <a href="{% url 'location_home' booking.location.slug %}">{{booking.location.name}}</a>
+		</td>
+		<td><em>{{booking.status}}</em></td>
+		</tr>
+	{% endfor %}
+	</table>
+{% endif %}
+
+{% if past_bookings|length > 0 %}
+	<h4>Previous</h4>
+	<table class="table" id="booking-list-table">
+		{% for booking in past_bookings %}
+		<tr {% if booking.status == 'canceled' %} class="faded" {% endif %} >
+		<td>
+			<a href="{% url 'booking_detail' booking.location.slug booking.id %}">{{booking.arrive}} - {{booking.depart}}</a> 
+			at <a href="{% url 'location_home' booking.location.slug %}">{{booking.location.name}}</a>
+		</td>
+		<td><em>{{booking.status}}</em></td>
+		</tr>
+	{% endfor %}
+	</table>
+{% endif %}
+
+{% if upcoming_bookings|length == 0 and past_bookings|length == 0 %}
+	<p>No bookings</p>
+{% endif %}
+

@@ -9,7 +9,7 @@
 
 {% include "snippets/manage-email-modal.html" %}
 
-<div class="row" id="reservation-nav">
+<div class="row" id="booking-nav">
 	<a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
 </div>
 
@@ -33,7 +33,7 @@
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
-		<div id="reservation-details">
+		<div id="booking-details">
 			<h3>
 				Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }} 
 				<span class="pull-right">Base Value: ${{ s.price }}</span>
@@ -221,7 +221,7 @@ function ajax_call(el) {
 	res_action = $(el).attr('id')
 	request = $.ajax({ 
 		data: {
-			'reservation-action': res_action,
+			'booking-action': res_action,
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
 		}, 
 		type: $("#res-action-form").attr('method'), // GET or POST
@@ -239,13 +239,13 @@ function ajax_call(el) {
 		register_actions();
 	});
 	request.fail(function(msg) {
-		console.log("Error in reservation update:");
+		console.log("Error in booking update:");
 		console.log(msg);
 	});
 }
 
 function register_actions() {
-	// comping a reservation reslts in a page reload so we can rely on the
+	// comping a booking reslts in a page reload so we can rely on the
 	// template language here. 
 	payment_status = $("#payment-status").html();
 	

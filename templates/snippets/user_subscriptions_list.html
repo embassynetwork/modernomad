@@ -1,7 +1,7 @@
 {% load core_tag_extras %}
 {% if subscriptions|length > 0 %}
 	<p>If you need to update or cancel a subscription, please use the inquiries link by the individual subscription.</p>
-	<table class="table" id="reservation-list-table">
+	<table class="table" id="booking-list-table">
 		{% for s in subscriptions %}
 			<tr>
 				<td> {{ s.location }} </td>

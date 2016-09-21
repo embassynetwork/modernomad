@@ -36,6 +36,6 @@ def robots(request):
 	for l in Location.objects.all():
 		content += "Disallow: /locations/%s/team/\n" % l.slug
 		content += "Disallow: /locations/%s/community/\n" % l.slug
-		content += "Disallow: /locations/%s/reservation/create/\n" % l.slug
+		content += "Disallow: /locations/%s/booking/create/\n" % l.slug
 		content += "Disallow: /locations/%s/events/create/\n" % l.slug
 	return HttpResponse(content, content_type="text/plain")

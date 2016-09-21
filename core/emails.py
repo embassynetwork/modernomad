@@ -99,7 +99,7 @@ def render_templates(context, location, email_key, language='en-us'):
 	return (text_content, html_content)
 
 ############################################
-#            RESERVATION EMAILS            #
+#            BOOKING EMAILS            #
 ############################################
 
 def send_booking_receipt(booking, send_to=None):
@@ -193,7 +193,7 @@ def new_booking_notify(booking):
 		'discussion' : booking.user.profile.discussion, 
 		"admin_url" : "https://" + domain + urlresolvers.reverse('booking_manage', args=(location.slug, booking.id,))
 	})
-	text_content, html_content = render_templates(c, location, LocationEmailTemplate.NEW_RESERVATION)
+	text_content, html_content = render_templates(c, location, LocationEmailTemplate.NEW_BOOKING)
 
 	return send_from_location_address(subject, text_content, html_content, recipients, booking.location)
 

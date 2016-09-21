@@ -49,7 +49,7 @@
 <div class="row top-spacer">
 	<div class="col-md-6">
 		<h4> Income to House by Room, for Occupancy this month</h4>
-		<table class="dataTable table table-striped reservation-list">
+		<table class="dataTable table table-striped booking-list">
 			<thead>
 				<tr>
 					<th>Room</th>
@@ -84,8 +84,8 @@
 		<tbody>
 			<tr><td>Total comped nights </td><td>{{total_comped_nights}}</td></tr>
 			<tr><td>Est. lost income from comps (@ default room rates)</td><td>${{total_comped_income|floatformat:2}}</td></tr>
-			<tr><td>Total value of unpaid reservations with outstanding balances (even if they have partial payments)</td><td> ${{unpaid_total|floatformat:2|intcomma }}</td></tr>
-			<tr><td>Reservations that look like they have partial payments</td><td> {{ payment_discrepancies|join:", "|default:"none" }}</td></tr>
+			<tr><td>Total value of unpaid bookings with outstanding balances (even if they have partial payments)</td><td> ${{unpaid_total|floatformat:2|intcomma }}</td></tr>
+			<tr><td>Bookings that look like they have partial payments</td><td> {{ payment_discrepancies|join:", "|default:"none" }}</td></tr>
 			<tr><td>Total outstanding amount</td><td> ${{ paid_rate_discrepancy|floatformat:2|intcomma }}</td></tr>
 		</tbody>
 	</table>
@@ -96,12 +96,12 @@
 <hr>
 
 <div class="row top-spacer">
-	<h4>Reservation Details</h4>
+	<h4>Booking Details</h4>
 {% for item in data %}
 	<div>
 	<p>
-		{{ item.reservation.user.first_name|title }} {{ item.reservation.user.last_name|title }}, 
-		<a href="{{item.reservation.get_absolute_url}}">{{item.reservation.arrive}} - {{item.reservation.depart}}</a>. 
+		{{ item.booking.user.first_name|title }} {{ item.booking.user.last_name|title }}, 
+		<a href="{{item.booking.get_absolute_url}}">{{item.booking.arrive}} - {{item.booking.depart}}</a>. 
 		{{ item.nights_this_month }} nights during this month @ ${{item.rate|floatformat:2|intcomma }} ({{item.room}}) = 
 		{% if item.unpaid %}
 			<span class="red-text">
@@ -142,7 +142,7 @@
 	} );
 
 	$(document).ready(function() {
-		$('.reservation-list').dataTable({
+		$('.booking-list').dataTable({
 		"iDisplayLength": 50,
 		"order": [[ 2, "desc"]],
 		"sDom": 't',

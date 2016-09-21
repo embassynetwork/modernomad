@@ -2,11 +2,11 @@
 
 	{% include "snippets/messages.html" %}
 
-	The current status of this reservation is <span id="the-reservation-status" type="button" class="btn disabled btn-info">{{ r.status }}</span>
+	The current status of this booking is <span id="the-booking-status" type="button" class="btn disabled btn-info">{{ r.status }}</span>
 	<span id="payment_status" style="visibility:hidden;">{% if r.is_paid %}paid{% endif %}</span>
 	
 	{% if r.is_comped %}
-		<p><i class="icon-heart"i></i> This reservation is a comp</p>
+		<p><i class="icon-heart"i></i> This booking is a comp</p>
 	{% endif %}
 
 	{% if not r.is_canceled %}
@@ -18,28 +18,28 @@
 	{% endif %}
 
 
-	<form method="POST" action="{% url 'reservation_manage_action' location.slug r.id %}" id="res-action-form">
+	<form method="POST" action="{% url 'booking_manage_action' location.slug r.id %}" id="res-action-form">
 		
 	{% if not r.is_comped %}
 		{% if r.is_pending %}
 			{% if r.user.profile.customer_id %}
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
 				Charge the user's card ${{r.bill.total_owed}} and notify them via email
-				</a> to confirm this reservation. (A receipt will be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
+				</a> to confirm this booking. (A receipt will be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away)
 			{% else %}
 			You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
-				tentatively confirm this reservation</a> and prompt the user to confirm with payment.
+				tentatively confirm this booking</a> and prompt the user to confirm with payment.
 			{% endif %}
 
 		{% elif r.is_approved %}
 			{% if r.user.profile.customer_id %}
-				The reservation is approved and the user has valid payment
+				The booking is approved and the user has valid payment
 				details. 
 				<a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
-				Charge the user's card </a> to confirm this reservation.  (A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away) They will have the
+				Charge the user's card </a> to confirm this booking.  (A receipt will always be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away) They will have the
 				opportunity to cancel if desired. 
 			{% else %}
-				This reservation is waiting on the user to confirm; there is no
+				This booking is waiting on the user to confirm; there is no
 				action to take. Optionally, you can nudge this user by 
 				<a href="#emailModal" data-toggle="modal">sending them an email reminder to confirm</a>. 
 			{% endif %}
@@ -47,12 +47,12 @@
 		{% elif r.is_confirmed %}
 			{% if r.user.profile.customer_id %}
 				{% if r.is_paid %}
-					<p>This reservation is confirmed and paid. No action needed.</p>  
+					<p>This booking is confirmed and paid. No action needed.</p>  
 				{% else %}
-					<p>The reservation is confirmed, although unpaid.</p>
+					<p>The booking is confirmed, although unpaid.</p>
 					<p><a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
 					Charge the user's card ${{r.bill.total_owed}}</a>.</p>
-					<p>(A receipt will always be sent automatically. The welcome email will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)</p>
+					<p>(A receipt will always be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away)</p>
 				{% endif %}
 			{% else %}
 				This user is confirmed but has not entered payment info. You can always remind them 
@@ -61,14 +61,14 @@
 
 		{% endif %} 
 
-	{% else %} <!-- if the reservation IS a comp... -->
+	{% else %} <!-- if the booking IS a comp... -->
 		{% if r.is_pending or r.is_approved %}
-		This complimentary reservation is {{r.status}}. <a href="#"
+		This complimentary booking is {{r.status}}. <a href="#"
 			class="res-manage-action res-manage-btn"
-			id="set-confirm">Confirm this reservation</a>. (House information will be sent immediately if this reservation is less than {{days_before_welcome_email}} days away)
+			id="set-confirm">Confirm this booking</a>. (House information will be sent immediately if this booking is less than {{days_before_welcome_email}} days away)
 
 		{% elif r.is_confirmed %}
-			<p>This reservation is confirmed as a comp. No action required.</p>
+			<p>This booking is confirmed as a comp. No action required.</p>
 
 		{% endif %} <!-- end confirmed -->
 
@@ -76,7 +76,7 @@
 
 	</form>
 	
-	<small><em class="last-contact">Last contact about this reservation: {{ r.last_msg|default:"Never" }}</em></small>
+	<small><em class="last-contact">Last contact about this booking: {{ r.last_msg|default:"Never" }}</em></small>
 </div>
 
 
