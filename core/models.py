@@ -92,7 +92,7 @@ class Location(models.Model):
             blank=True, null=True,
             default="This is far left of three sections underneath the main landing page text to use for announcements and news. HTML is supported."
             )
-    max_reservation_days = models.IntegerField(default=14)
+    max_booking_days = models.IntegerField(default=14)
     welcome_email_days_ahead = models.IntegerField(default=2)
     house_access_code = models.CharField(max_length=50, blank=True, null=True)
     ssid = models.CharField(max_length=200, blank=True, null=True)
@@ -219,7 +219,7 @@ class Location(models.Model):
                         .exclude(start__gte=today+datetime.timedelta(days=days))
         return None
 
-    def coming_month_reservations(self, days=30):
+    def coming_month_bookings(self, days=30):
         today = timezone.localtime(timezone.now())
         return Booking.objects.filter(
                 Q(status="confirmed") | Q(status="approved")
@@ -235,9 +235,9 @@ class Location(models.Model):
         return (guests+residents+members)
 
     def people_in_coming_month(self):
-        # pull out all reservations in the coming month
+        # pull out all bookings in the coming month
         people = []
-        for r in self.coming_month_reservations():
+        for r in self.coming_month_bookings():
             if r.user not in people:
                 people.append(r.user)
 
@@ -261,11 +261,11 @@ class Location(models.Model):
 
     def guests_today(self):
         today = timezone.now()
-        reservations_today = Booking.objects.filter(location=self) \
+        bookings_today = Booking.objects.filter(location=self) \
                                         .filter(Q(status="confirmed") | Q(status="approved")) \
                                         .exclude(depart__lt=today).exclude(arrive__gt=today)
         guests_today = []
-        for r in reservations_today:
+        for r in bookings_today:
             if r.user not in guests_today:
                 guests_today.append(r.user)
         return guests_today
@@ -420,8 +420,8 @@ class Resource(models.Model):
         availabilities = self.availabilities_on(this_day)
         if not availabilities:
             return False
-        reservations_on_this_day = Booking.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-        if len(reservations_on_this_day) < availabilities:
+        bookings_on_this_day = Booking.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
+        if len(bookings_on_this_day) < availabilities:
             return True
         else:
             return False
@@ -463,24 +463,24 @@ class Fee(models.Model):
 class BookingManager(models.Manager):
 
     def on_date(self, the_day, status, location):
-        # return the reservations that intersect this day, of any status
+        # return the bookings that intersect this day, of any status
         all_on_date = super(BookingManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
         return all_on_date.filter(status=status)
 
     def confirmed_approved_on_date(self, the_day, location, resource=None):
-        # return the approved or confirmed reservations that intersect this day
-        approved_reservations = self.on_date(the_day, status="approved", location=location)
-        confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
+        # return the approved or confirmed bookings that intersect this day
+        approved_bookings = self.on_date(the_day, status="approved", location=location)
+        confirmed_bookings = self.on_date(the_day, status="confirmed", location=location)
         if resource:
-            approved_reservations = approved_reservations.filter(resource=resource)
-            confirmed_reservations = confirmed_reservations.filter(resource=resource)
-        return (list(approved_reservations) + list(confirmed_reservations))
+            approved_bookings = approved_bookings.filter(resource=resource)
+            confirmed_bookings = confirmed_bookings.filter(resource=resource)
+        return (list(approved_bookings) + list(confirmed_bookings))
 
     def confirmed_on_date(self, the_day, location, resource=None):
-        confirmed_reservations = self.on_date(the_day, status="confirmed", location=location)
+        confirmed_bookings = self.on_date(the_day, status="confirmed", location=location)
         if resource:
-            confirmed_reservations = confirmed_reservations.filter(resource=resource)
-        return list(confirmed_reservations)
+            confirmed_bookings = confirmed_bookings.filter(resource=resource)
+        return list(confirmed_bookings)
 
     def confirmed_but_unpaid(self, location):
         confirmed_this_location = super(BookingManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
@@ -494,7 +494,7 @@ class BookingManager(models.Manager):
 class Bill(models.Model):
     ''' there are foreign keys (many to one) pointing towards this Bill object
     from Booking, BillLineItem and Payment. Each bill can have many
-    reservations, bill line items and many payments. Line items can be accessed
+    bookings, bill line items and many payments. Line items can be accessed
     with the related name bill.line_items, and payments can be accessed with
     the related name bill.payments.'''
     generated_on = models.DateTimeField(auto_now=True)
@@ -593,8 +593,8 @@ class Bill(models.Model):
         fees = self.line_items.filter(fee__isnull=False)
         return list(resource_item) + list(custom_items) + list(fees)
 
-    def is_reservation_bill(self):
-        return hasattr(self, 'reservationbill')
+    def is_bookings_bill(self):
+        return hasattr(self, 'bookingbill')
 
     def is_subscription_bill(self):
         return hasattr(self, 'subscriptionbill')
@@ -997,7 +997,7 @@ class Booking(models.Model):
     USER_DECLINED = 'user declined'
     CANCELED = 'canceled'
 
-    RESERVATION_STATUSES = (
+    BOOKING_STATUSES = (
             (PENDING, 'Pending'),
             (APPROVED, 'Approved'),
             (CONFIRMED, 'Confirmed'),
@@ -1006,11 +1006,11 @@ class Booking(models.Model):
             (CANCELED, 'Canceled'),
         )
 
-    location = models.ForeignKey(Location, related_name='reservations', null=True)
+    location = models.ForeignKey(Location, related_name='bookings', null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=200, choices=RESERVATION_STATUSES, default=PENDING, blank=True)
-    user = models.ForeignKey(User, related_name='reservations')
+    status = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True)
+    user = models.ForeignKey(User, related_name='bookings')
     arrive = models.DateField(verbose_name='Arrival Date')
     depart = models.DateField(verbose_name='Departure Date')
     arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
@@ -1028,26 +1028,26 @@ class Booking(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('core.views.unsorted.ReservationDetail', [str(self.location.slug), str(self.id)])
+        return ('core.views.unsorted.BookingDetail', [str(self.location.slug), str(self.id)])
 
     def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
         # during the booking process, we simulate a booking to generate
         # a bill and show the user what the booking would cost. in this
         # case, the booking object will not yet have a bill because it has
         # not been saved.
-        reservation_bill = None
+        booking_bill = None
         if not self.bill and save:
             self.bill = BookingBill.objects.create()
         if self.bill:
-            reservation_bill = self.bill
+            booking_bill = self.bill
 
         # impt! save the custom items first or they'll be blown away when the
         # bill is regenerated.
         custom_items = []
-        if reservation_bill:
-            custom_items = list(reservation_bill.line_items.filter(custom=True))
+        if booking_bill:
+            custom_items = list(booking_bill.line_items.filter(custom=True))
             if delete_old_items:
-                for item in reservation_bill.line_items.all():
+                for item in booking_bill.line_items.all():
                     item.delete()
 
         line_items = []
@@ -1055,7 +1055,7 @@ class Booking(models.Model):
         # The first line item is for the resource charge
         resource_charge_desc = "%s (%d * $%s)" % (self.resource.name, self.total_nights(), self.get_rate())
         resource_charge = self.base_value()
-        resource_line_item = BillLineItem(bill=reservation_bill, description=resource_charge_desc, amount=resource_charge, paid_by_house=False)
+        resource_line_item = BillLineItem(bill=booking_bill, description=resource_charge_desc, amount=resource_charge, paid_by_house=False)
         line_items.append(resource_line_item)
 
         # Incorporate any custom fees or discounts
@@ -1074,14 +1074,14 @@ class Booking(models.Model):
                 desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
                 amount = float(effective_resource_charge) * location_fee.fee.percentage
                 fee_line_item = BillLineItem(
-                    bill=reservation_bill, description=desc, amount=amount,
+                    bill=booking_bill, description=desc, amount=amount,
                     paid_by_house=location_fee.fee.paid_by_house, fee=location_fee.fee
                 )
                 line_items.append(fee_line_item)
 
         # Optionally save the line items to the database
         if save:
-            reservation_bill.save()
+            booking_bill.save()
             for item in line_items:
                 item.save()
 
@@ -1268,7 +1268,7 @@ class Booking(models.Model):
 
 
 @receiver(pre_save, sender=Booking)
-def reservation_create_bill(sender, instance, **kwargs):
+def booking_create_bill(sender, instance, **kwargs):
     # create a new bill object if the booking does not already have one.
     if not instance.bill:
         bill = BookingBill.objects.create()
@@ -1276,17 +1276,17 @@ def reservation_create_bill(sender, instance, **kwargs):
 
 
 class PaymentManager(models.Manager):
-    def reservation_payments_by_location(self, location):
-        reservation_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(reservation__location=location))
-        return reservation_payments
+    def booking_payments_by_location(self, location):
+        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__location=location))
+        return booking_payments
 
     def subscription_payments_by_location(self, location):
         subscription_payments = Payment.objects.filter(bill__in=SubscriptionBill.objects.filter(subscription__location=location))
         return subscription_payments
 
-    def reservation_payments_by_resource(self, resource):
-        reservation_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(reservation__resource=resource))
-        return reservation_payments
+    def booking_payments_by_resource(self, resource):
+        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__resource=resource))
+        return booking_payments
 
 
 class Payment(models.Model):
@@ -1520,7 +1520,7 @@ class LocationEmailTemplate(models.Model):
     INVOICE = 'invoice'
     RECEIPT = 'receipt'
     SUBSCRIPTION_RECEIPT = 'subscription_receipt'
-    NEW_RESERVATION = 'newreservation'
+    NEW_BOOKING = 'newbooking'
     WELCOME = 'pre_arrival_welcome'
     DEPARTURE = 'departure'
 
@@ -1530,7 +1530,7 @@ class LocationEmailTemplate(models.Model):
             (INVOICE, 'Invoice'),
             (RECEIPT, 'Booking Receipt'),
             (SUBSCRIPTION_RECEIPT, 'Subscription Receipt'),
-            (NEW_RESERVATION, 'New Booking'),
+            (NEW_BOOKING, 'New Booking'),
             (WELCOME, 'Pre-Arrival Welcome'),
             (DEPARTURE, 'Departure'),
         )
@@ -1615,10 +1615,10 @@ class UserNote(models.Model):
         return '%s - %s: %s' % (self.created.date(), self.user.username, self.note)
 
 
-class ReservationNote(models.Model):
+class BookingNote(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, null=True)
-    booking = models.ForeignKey(Booking, blank=False, null=False, related_name="reservation_notes")
+    booking = models.ForeignKey(Booking, blank=False, null=False, related_name="booking_notes")
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):

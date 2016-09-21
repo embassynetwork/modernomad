@@ -1,7 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core import urlresolvers
-from models import Reservation, Payment
+from models import Booking, Payment
 from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 class PaymentException(Exception):
 	pass
 
-def charge_reservation(reservation):
+def charge_booking(booking):
 	if settings.STRIPE_SECRET_KEY:
-		return stripe_charge_reservation(reservation)
+		return stripe_charge_booking(booking)
 	elif settings.USA_E_PAY_KEY:
-		return usaepay_charge_reservation(reservation)
+		return usaepay_charge_booking(booking)
 	else:
 		raise PaymentException("No payment system configured")
 
@@ -49,21 +49,21 @@ def issue_refund(payment, amount=None):
 # Stripe Methods
 ###################################################################
 
-def charge_description(reservation):
-	reservation_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('reservation_detail', args=(reservation.location.slug, reservation.id))
-	descr = "%s from %s - %s. Details: %s." % (reservation.user.get_full_name(),
-			str(reservation.arrive), str(reservation.depart), reservation_url)
+def charge_description(booking):
+	booking_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('booking_detail', args=(booking.location.slug, booking.id))
+	descr = "%s from %s - %s. Details: %s." % (booking.user.get_full_name(),
+			str(booking.arrive), str(booking.depart), booking_url)
 	return descr
 
 
-def stripe_charge_card_third_party(reservation, amount, token, charge_descr):
-	logger.debug("stripe_charge_card_third_party(reservation=%s)" % reservation.id)
+def stripe_charge_card_third_party(booking, amount, token, charge_descr):
+	logger.debug("stripe_charge_card_third_party(booking=%s)" % booking.id)
 	print 'in charge card 3rd party'
 	
 	# stripe will raise a stripe.CardError if the charge fails. this
 	# function purposefully does not handle that error so the calling
 	# function can decide what to do.
-	descr = charge_description(reservation)
+	descr = charge_description(booking)
 	descr += charge_descr
 
 	amt_owed_cents = int(amount * 100)
@@ -108,21 +108,21 @@ def stripe_charge_user(user, bill, amount_dollars, reference):
 		last4 = charge.card.last4
 	)
 
-def stripe_charge_reservation(reservation):
-	logger.debug("stripe_charge_reservation(reservation=%s)" % reservation.id)
+def stripe_charge_booking(booking):
+	logger.debug("stripe_charge_booking(booking=%s)" % booking.id)
 	
 	# stripe will raise a stripe.CardError if the charge fails. this
 	# function purposefully does not handle that error so the calling
 	# function can decide what to do.
-	descr = charge_description(reservation)
+	descr = charge_description(booking)
 
-	amt_owed = reservation.bill.total_owed()
+	amt_owed = booking.bill.total_owed()
 	amt_owed_cents = int(amt_owed * 100)
 	stripe.api_key = settings.STRIPE_SECRET_KEY
 	charge = stripe.Charge.create(
 			amount=amt_owed_cents,
 			currency="usd",
-			customer = reservation.user.profile.customer_id,
+			customer = booking.user.profile.customer_id,
 			description=descr
 		)
 
@@ -132,8 +132,8 @@ def stripe_charge_reservation(reservation):
 	print charge.card.last4
 
 	# Store the charge details in a Payment object
-	return Payment.objects.create(bill=reservation.bill,
-		user = reservation.user,
+	return Payment.objects.create(bill=booking.bill,
+		user = booking.user,
 		payment_service = "Stripe",
 		payment_method = charge.card.brand,
 		paid_amount = amt_owed,
@@ -169,8 +169,8 @@ def stripe_issue_refund(payment, refund_amount=None):
 # USAePay Methods
 ###################################################################
 
-def usaepay_charge_reservation(reservation):
-	logger.debug("usaepay_charge_card(reservation=%s)" % reservation.id)
+def usaepay_charge_booking(booking):
+	logger.debug("usaepay_charge_card(booking=%s)" % booking.id)
 	return None
 
 def usaepay_issue_refund(payment):

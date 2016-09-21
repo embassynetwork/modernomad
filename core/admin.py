@@ -82,10 +82,10 @@ class PaymentAdmin(admin.ModelAdmin):
             return '''None'''
     user.allow_tags = True
 
-    def reservation(self):
-        r = self.bill.reservationbill.reservation
-        return '''<a href="/locations/%s/reservation/%s/">%s''' % (r.location.slug, r.id, r)
-    reservation.allow_tags = True
+    def booking(self):
+        r = self.bill.bookingbill.booking
+        return '''<a href="/locations/%s/booking/%s/">%s''' % (r.location.slug, r.id, r)
+    booking.allow_tags = True
 
     model = Payment
     list_display = ('payment_date', user, 'payment_method', 'paid_amount')
@@ -125,7 +125,7 @@ def gen_message(queryset, noun, pl_noun, suffix):
     return msg
 
 
-class ReservationAdmin(admin.ModelAdmin):
+class BookingAdmin(admin.ModelAdmin):
     def rate(self):
         if self.rate is None:
             return None
@@ -154,15 +154,15 @@ class ReservationAdmin(admin.ModelAdmin):
         success_list = []
         failure_list = []
         for res in queryset:
-            if send_reservation_receipt(res):
+            if send_booking_receipt(res):
                 success_list.append(str(res.id))
             else:
                 failure_list.append(str(res.id))
         msg = ""
         if len(success_list) > 0:
-            msg += "Receipts sent for reservation(s) %s. " % ",".join(success_list)
+            msg += "Receipts sent for booking(s) %s. " % ",".join(success_list)
         if len(failure_list) > 0:
-            msg += "Receipt sending failed for reservation(s) %s. (Make sure all payment information has been entered in the reservation details and that the status of the reservation is either unpaid or paid.)" % ",".join(failure_list)
+            msg += "Receipt sending failed for booking(s) %s. (Make sure all payment information has been entered in the booking details and that the status of the booking is either unpaid or paid.)" % ",".join(failure_list)
         self.message_user(request, msg)
 
     def send_invoice(self, request, queryset):
@@ -171,15 +171,15 @@ class ReservationAdmin(admin.ModelAdmin):
         msg = gen_message(queryset, "invoice", "invoices", "sent")
         self.message_user(request, msg)
 
-    def send_new_reservation_notify(self, request, queryset):
+    def send_new_booking_notify(self, request, queryset):
         for res in queryset:
-            new_reservation_notify(res)
+            new_booking_notify(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
-    def send_updated_reservation_notify(self, request, queryset):
+    def send_updated_booking_notify(self, request, queryset):
         for res in queryset:
-            updated_reservation_notify(res)
+            updated_booking_notify(res)
         msg = gen_message(queryset, "email", "emails", "sent")
         self.message_user(request, msg)
 
@@ -192,37 +192,37 @@ class ReservationAdmin(admin.ModelAdmin):
     def mark_as_comp(self, request, queryset):
         for res in queryset:
             res.comp()
-        msg = gen_message(queryset, "reservation", "reservations", "marked as comp")
+        msg = gen_message(queryset, "booking", "bookings", "marked as comp")
         self.message_user(request, msg)
 
     def revert_to_pending(self, request, queryset):
         for res in queryset:
             res.pending()
-        msg = gen_message(queryset, "reservation", "reservations", "reverted to pending")
+        msg = gen_message(queryset, "booking", "bookings", "reverted to pending")
         self.message_user(request, msg)
 
     def approve(self, request, queryset):
         for res in queryset:
             res.approve()
-        msg = gen_message(queryset, "reservation", "reservations", "approved")
+        msg = gen_message(queryset, "booking", "bookings", "approved")
         self.message_user(request, msg)
 
     def confirm(self, request, queryset):
         for res in queryset:
             res.confirm()
-        msg = gen_message(queryset, "reservation", "reservations", "confirmed")
+        msg = gen_message(queryset, "booking", "bookings", "confirmed")
         self.message_user(request, msg)
 
     def cancel(self, request, queryset):
         for res in queryset:
             res.cancel()
-        msg = gen_message(queryset, "reservation", "reservations", "canceled")
+        msg = gen_message(queryset, "booking", "bookings", "canceled")
         self.message_user(request, msg)
 
     def reset_rate(self, request, queryset):
         for res in queryset:
             res.reset_rate()
-        msg = gen_message(queryset, "reservation", "reservations", "set to default rate")
+        msg = gen_message(queryset, "booking", "bookings", "set to default rate")
         self.message_user(request, msg)
 
     def recalculate_bill(self, request, queryset):
@@ -231,13 +231,13 @@ class ReservationAdmin(admin.ModelAdmin):
         msg = gen_message(queryset, "bill", "bills", "recalculated")
         self.message_user(request, msg)
 
-    model = Reservation
+    model = Booking
     list_filter = ('status', 'location')
     list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'resource', 'total_nights', rate, fees, bill, to_house, paid )
     #list_editable = ('status',) # Depricated in favor of drop down actions
     search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
     ordering = ['-arrive', 'id']
-    actions= ['send_guest_welcome', 'send_new_reservation_notify', 'send_updated_reservation_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
+    actions= ['send_guest_welcome', 'send_new_booking_notify', 'send_updated_booking_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
     save_as = True
 
 class UserProfileInline(admin.StackedInline):
@@ -289,7 +289,7 @@ class AvailabilityAdmin(admin.ModelAdmin):
     list_display=('resource', 'start_date', 'quantity')
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
-admin.site.register(Reservation, ReservationAdmin)
+admin.site.register(Booking, BookingAdmin)
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Bill, BillAdmin)

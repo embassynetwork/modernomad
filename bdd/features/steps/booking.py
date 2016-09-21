@@ -19,7 +19,7 @@ def impl(context, location_name):
 
 @when(u'they want to say {days_in_future:d} days from now for {nights:d} nights')
 def impl(context, days_in_future, nights):
-    # JKS: note, this will break when we push the new reservation code.
+    # JKS: note, this will break when we push the new booking code.
     today = datetime.datetime.today()
     arrive = today + timedelta(days=days_in_future)
     depart = arrive + timedelta(days=nights)
@@ -44,7 +44,7 @@ def impl(context, room_name):
         if room.html.startswith(room_name):
             room.click()
     context.browser.fill("purpose", "I want to have a great stay")
-    context.browser.find_by_id('submit-reservation').first.click()
+    context.browser.find_by_id('submit-booking').first.click()
 
 
 @when(u'they create a valid profile')
@@ -72,24 +72,24 @@ def impl(context):
 
     context.current_user = User.objects.get(email="bilbo@baggins.com")
 
-    assert context.browser.is_text_present("Thank you! Your reservation has been submitted")
+    assert context.browser.is_text_present("Thank you! Your booking has been submitted")
 
 
-@then(u'the house admins get an email about a new pending reservation')
+@then(u'the house admins get an email about a new pending booking')
 def impl(context):
     # time.sleep(30)
     assert False
 
 
-@then(u'they should have a pending reservation')
+@then(u'they should have a pending booking')
 def impl(context):
     assert context.current_user
     visit_path(context, '/people/' + context.current_user.username)
-    context.browser.find_link_by_text('Reservations').click()
-    table_rows = context.browser.find_by_css('#reservation-list-table tr')
+    context.browser.find_link_by_text('bookings').click()
+    table_rows = context.browser.find_by_css('#booking-list-table tr')
     expect(len(table_rows)).to.eq(1)
 
 
 @then(u'they should be asked to create a profile')
 def impl(context):
-    assert context.browser.is_text_present("Please make a profile to complete your reservation request")
+    assert context.browser.is_text_present("Please make a profile to complete your booking request")
