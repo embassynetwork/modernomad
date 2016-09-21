@@ -171,15 +171,9 @@ class Location(models.Model):
             the_day = start
             available_beds[room] = []
             while the_day < end:
-                if not room.availabilities_on(the_day):
-                    available_beds[room].append({'the_date': the_day, 'beds_free': 0})
-                else:
-                    bookings_today = Booking.objects.confirmed_approved_on_date(the_day, self, resource=room)
-                    free_beds = room.availabilities_on(the_day) - len(bookings_today)
-                    # the ternary makes sure that we never display a negative
-                    # room number to a user, eg. if an admin decided to
-                    # manually overbook a room.
-                    available_beds[room].append({'the_date': the_day, 'beds_free': free_beds if free_beds >= 0 else 0})
+                bookings_today = Booking.objects.confirmed_approved_on_date(the_day, self, resource=room)
+                free_beds = room.availabilities_on(the_day) - len(bookings_today)
+                available_beds[room].append({'the_date': the_day, 'beds_free': free_beds})
                 the_day = the_day + datetime.timedelta(1)
         return available_beds
 
