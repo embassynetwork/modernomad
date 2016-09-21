@@ -17,6 +17,7 @@ h1, h2, h3 {
 
 .form-control {
 	background-color: transparent;
+	border-radius: 2px;
 }
 
 .btn {
@@ -25,7 +26,10 @@ h1, h2, h3 {
 }
 
 .panel {
-	border-radius: 2px;
+  border: none;
+  border-radius: 2px;
+  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .fancy-header {
@@ -1860,11 +1864,14 @@ label.light {
 
 .room-type-btn {
 	text-transform: none;
+	margin-top: 0;
+	text-align: left;
+	padding-left: 10px;
 }
 
 .room-type-btn input[type="checkbox"] {
 	float: right;
-	margin-left: 10px;
+	margin-right: 10px;
 }
 
 .room-type-row {
