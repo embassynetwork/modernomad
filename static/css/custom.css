@@ -218,7 +218,7 @@ a:hover {
 }
 
 #house-desc {
-	margin-bottom: 50px;
+	margin: 50px 0;
 }
 
 .book-room {
@@ -1436,7 +1436,6 @@ h3.no-top-margin {
 	background-color: transparent;
 	border-color: transparent;
 	margin-bottom: 0px;
-	margin-top: 20px;
 }
 
 table tr.row-even td { background: #eee; }
@@ -1468,7 +1467,7 @@ table tr.row-even td { background: #eee; }
 }
 
 #full-page-wrapper {
-	margin-bottom: 50px;
+	/*margin-bottom: 50px;*/
 }
 
 .bottom-pad-thirty {
@@ -1846,7 +1845,21 @@ label.light {
 }
 
 .date-range-row {
-	margin: 20px 0;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.room-type-btn {
+	text-transform: none;
+}
+
+.room-type-btn input[type="checkbox"] {
+	float: right;
+	margin-left: 10px;
+}
+
+.room-type-row {
+	margin-top: 20px;
 }
 
 .room-thumbnail {

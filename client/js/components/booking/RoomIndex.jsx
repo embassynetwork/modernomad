@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react'
 import RoomCard from './RoomCard'
 import DateRangeSelector from './DateRangeSelector'
+import { FormGroup, Checkbox, Button } from 'react-bootstrap';
 
 export default class RoomIndex extends React.Component {
   static propTypes = {
@@ -20,10 +21,28 @@ export default class RoomIndex extends React.Component {
 
     return (
       <div>
-        <div className="date-range-row">
+        <div className="date-range-row container">
           <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
+          <div className="row room-type-row">
+            <div className="col-md-2 col-sm-4"><h5>Room Type</h5></div>
+            <div className="col-md-10 col-sm-4">
+              <FormGroup>
+                <Checkbox inline className="col-md-2 btn btn-default room-type-btn">
+                  <i className="fa fa-lock"></i> Private Room
+                </Checkbox>
+                {' '}
+                <Checkbox inline className="btn btn-default room-type-btn">
+                  <i className="fa fa-unlock-alt"></i> Shared Room
+                </Checkbox>
+              </FormGroup>
+            </div>
+          </div>
         </div>
-        <div className="row room-card-container">{roomCards}</div>
+        <div className="room-card-container">
+          <div className="container">
+            <div className="row">{roomCards}</div>
+          </div>
+        </div>
       </div>
     )
   }

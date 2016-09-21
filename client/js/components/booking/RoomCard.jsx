@@ -17,7 +17,7 @@ export default class RoomCard extends React.Component {
 
             <ImageCarousel img={this.props.img} />
             <Link className="col-xs-12" to={{pathname:`/locations/${this.props.routeParams.location}/stay/room/${this.props.id}`, query: this.props.query}}>
-              <h3>{this.props.name} <span className="pull-right room-cost">${this.props.cost} / night</span></h3>
+              <h3>{this.props.name} <span className="pull-right room-cost"><b>${this.props.cost} / night</b></span></h3>
               <div className="row text-center room-tags">
                 { this.props.type == "Shared Room" ?
                   <div className="col-xs-6"><i className="fa fa-unlock-alt fa-2x"></i><br></br>{this.props.type}</div>
