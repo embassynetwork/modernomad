@@ -183,7 +183,7 @@ def room_occupancy_month(room, month, year):
     bookings = Booking.objects.filter(resource=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
     # payments *received* this month for this room
-    payments_for_room = Payment.objects.bookings_payments_by_resource(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
+    payments_for_room = Payment.objects.booking_payments_by_resource(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
     payments_cash = 0
     for p in payments_for_room:
         payments_cash += p.paid_amount
@@ -444,7 +444,7 @@ def occupancy(request, location_slug):
     # appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
     # work on it, don't say i didn't warn you :).
 
-    payments_this_month = Payment.objects.bookings_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
+    payments_this_month = Payment.objects.booking_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
     for p in payments_this_month:
         r = p.bill.bookingbill.booking
         nights_before_this_month = datetime.timedelta(0)
@@ -838,7 +838,7 @@ def user_bookings(request, username):
     bookings = Booking.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
     past_bookings = []
     upcoming_bookings = []
-    for bookings in bookings:
+    for booking in bookings:
         if booking.arrive >= datetime.date.today():
             upcoming_bookings.append(booking)
         else:

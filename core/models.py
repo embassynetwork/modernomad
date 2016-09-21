@@ -593,7 +593,7 @@ class Bill(models.Model):
         fees = self.line_items.filter(fee__isnull=False)
         return list(resource_item) + list(custom_items) + list(fees)
 
-    def is_bookings_bill(self):
+    def is_booking_bill(self):
         return hasattr(self, 'bookingbill')
 
     def is_subscription_bill(self):

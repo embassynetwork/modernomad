@@ -85,7 +85,7 @@ def impl(context):
 def impl(context):
     assert context.current_user
     visit_path(context, '/people/' + context.current_user.username)
-    context.browser.find_link_by_text('bookings').click()
+    context.browser.find_link_by_text('Bookings').click()
     table_rows = context.browser.find_by_css('#booking-list-table tr')
     expect(len(table_rows)).to.eq(1)
 
