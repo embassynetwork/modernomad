@@ -4,15 +4,15 @@ from graphene_django.types import DjangoObjectType
 from graphene.types import String
 from graphene_django.filter import DjangoFilterConnectionField
 from .users import UserNode
-from core.models import Reservation, Location
+from core.models import Booking, Location
 from django.contrib.auth.models import User
 
 
-class ReservationNode(DjangoObjectType):
+class BookingNode(DjangoObjectType):
     occupants = graphene.List(lambda: UserNode)
 
     class Meta:
-        model = Reservation
+        model = Booking
         interfaces = (Node, )
         filter_fields = ['arrive', 'location']
         filter_order_by = True
@@ -22,10 +22,10 @@ class ReservationNode(DjangoObjectType):
 
 
 class Query(AbstractType):
-    my_reservations = DjangoFilterConnectionField(ReservationNode)
+    my_bookings = DjangoFilterConnectionField(BookingNode)
 
-    def resolve_my_reservations(self, args, context, info):
+    def resolve_my_bookings(self, args, context, info):
         if not context.user.is_authenticated():
-            return Reservation.objects.none()
+            return Booking.objects.none()
         else:
-            return Reservation.objects.filter(user=context.user)
+            return Booking.objects.filter(user=context.user)
