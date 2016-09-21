@@ -15,7 +15,7 @@ export default class RoomCard extends React.Component {
         <div className="panel panel-default">
           <div className="panel-body">
 
-            <ImageCarousel img={this.props.img} />
+            {this.props.img && <ImageCarousel img={this.props.img} />}
             <Link className="col-xs-12" to={{pathname:`/locations/${this.props.routeParams.location}/stay/room/${this.props.id}`, query: this.props.query}}>
               <h3>{this.props.name} <span className="pull-right room-cost"><b>${this.props.cost} / night</b></span></h3>
               <div className="row text-center room-tags">
