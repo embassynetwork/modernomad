@@ -1026,6 +1026,10 @@ def BookingSubmit(request, location_slug):
     )
 
 
+def room(request, location_slug, room_id):
+    return render(request, 'booking.html')
+
+
 @login_required
 def BookingDetail(request, booking_id, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
