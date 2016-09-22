@@ -8,7 +8,7 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from core.forms import BookingForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
+from core.forms import UseForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
 from core.forms import BookingEmailTemplateForm, PaymentForm, AdminSubscriptionForm, LocationSettingsForm
 from core.forms import LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm
 from django.core import urlresolvers
@@ -977,15 +977,18 @@ def RoomsAvailableOnDates(request, location_slug):
 def BookingSubmit(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     if request.method == 'POST':
-        form = BookingForm(location, request.POST)
+        form = UseForm(location, request.POST)
         if form.is_valid():
-            booking = form.save(commit=False)
-            booking.location = location
+            comment = request.POST.pop('comment')
+            use = form.save(commit=False)
+            use.location = location
+            booking = Booking(use=use, comment=comment)
+            booking.reset_rate()
             if request.user.is_authenticated():
-                booking.user = request.user
+                use.user = request.user
+                use.save()
+                # XXX do we need booking.save()?
                 booking.save()
-                # Make sure the rate is set and then generate a bill
-                booking.reset_rate()
                 new_booking_notify(booking)
                 messages.add_message(
                     request,
@@ -994,8 +997,8 @@ def BookingSubmit(request, location_slug):
                 )
                 return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking.id)))
             else:
-                res_info = booking.serialize()
-                request.session['booking'] = res_info
+                booking_data = booking.serialize()
+                request.session['booking'] = booking_data
                 messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your booking request.')
                 return HttpResponseRedirect(reverse('registration_register'))
         else:
@@ -1161,7 +1164,7 @@ def UserAddCard(request, username):
         # card) is the user associated with this booking, or an admin (i am
         # not sure this is necessary since you need to be the booking user
         # or a house admin to view the booking in the first place!).
-        if (request.user != user) and (request.user not in booking.location.house_admins.all()):
+        if (request.user != user) and (request.user not in booking.use.location.house_admins.all()):
             print 'there was an error adding the user\'s card: authenticated user is not the booking user'
             print request.POST
             print request.user
@@ -1176,7 +1179,7 @@ def UserAddCard(request, username):
     if not token:
         messages.add_message(request, messages.INFO, "No credit card information was given.")
         if booking_id:
-            return HttpResponseRedirect(reverse('booking_detail', args=(booking.location.slug, booking.id)))
+            return HttpResponseRedirect(reverse('booking_detail', args=(booking.use.location.slug, booking.id)))
         return HttpResponseRedirect("/people/%s" % username)
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -1197,7 +1200,7 @@ def UserAddCard(request, username):
     except Exception, e:
         messages.add_message(request, messages.INFO, '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>' % e)
     if booking_id:
-        return HttpResponseRedirect(reverse('booking_detail', args=(booking.location.slug, booking.id)))
+        return HttpResponseRedirect(reverse('booking_detail', args=(booking.use.location.slug, booking.id)))
     return HttpResponseRedirect("/people/%s" % username)
 
 
@@ -1229,7 +1232,7 @@ def BookingEdit(request, booking_id, location_slug):
     original_room = booking.resource
     if request.user.is_authenticated() and request.user == booking.user:
         logger.debug("BookingEdit: Authenticated and same user")
-        if request.user in booking.location.house_admins.all():
+        if request.user in booking.use.location.house_admins.all():
             is_house_admin = True
         else:
             is_house_admin = False
@@ -1313,7 +1316,7 @@ def BookingConfirm(request, booking_id, location_slug):
             # if booking start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
             # need to send them house info manually.
             days_until_arrival = (booking.arrive - datetime.date.today()).days
-            if days_until_arrival <= booking.location.welcome_email_days_ahead:
+            if days_until_arrival <= booking.use.location.welcome_email_days_ahead:
                 guest_welcome(booking)
 
             messages.add_message(
@@ -1645,7 +1648,7 @@ def BookingManageList(request, location_slug):
     if request.method == "POST":
         booking_id = request.POST.get('booking_id')
         booking = get_object_or_404(Booking, id=booking_id)
-        return HttpResponseRedirect(reverse('booking_manage', args=(booking.location.slug, booking.id)))
+        return HttpResponseRedirect(reverse('booking_manage', args=(booking.use.location.slug, booking.id)))
 
     location = get_object_or_404(Location, slug=location_slug)
 
@@ -2287,7 +2290,7 @@ def PeopleDaterangeQuery(request, location_slug):
 def BookingReceipt(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = get_object_or_404(Booking, id=booking_id)
-    if request.user != booking.user or location != booking.location:
+    if request.user != booking.user or location != booking.use.location:
         if not request.user.is_staff:
             return HttpResponseRedirect("/404")
 
@@ -2296,7 +2299,7 @@ def BookingReceipt(request, location_slug, booking_id):
     c = Context({
         'today': timezone.localtime(timezone.now()),
         'user': booking.user,
-        'location': booking.location,
+        'location': booking.use.location,
         'booking': booking,
         'booking_url': "https://" + Site.objects.get_current().domain + booking.get_absolute_url()
         })
@@ -2361,7 +2364,7 @@ def submit_payment(request, booking_uuid, location_slug):
 
                     # XXX TODO need a way to check if this has already been sent :/
                     days_until_arrival = (booking.arrive - datetime.date.today()).days
-                    if days_until_arrival <= booking.location.welcome_email_days_ahead:
+                    if days_until_arrival <= booking.use.location.welcome_email_days_ahead:
                         guest_welcome(booking)
                     messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)
                 else:
@@ -2567,24 +2570,26 @@ def process_unsaved_booking(request):
         logger.debug('found booking')
         logger.debug(request.session['booking'])
         details = request.session.pop('booking')
-        new_res = Booking(
+        use = Use(
             arrive=datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
             depart=datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']),
             location=Location.objects.get(id=details['location']['id']),
             resource=Resource.objects.get(id=details['resource']['id']),
             purpose=details['purpose'],
             arrival_time=details['arrival_time'],
-            comments=details['comments'],
             user=request.user,
         )
-        new_res.save()
-        new_res.reset_rate()
-        new_res.generate_bill()
-        logger.debug('new booking %d saved.' % new_res.id)
-        new_booking_notify(new_res)
+        use.save()
+        booking = (use=use, comments=details['comments'])
+        # reset rate calls set_rate which calls generate_bill
+        booking.reset_rate()
+        booking.save()
+
+        logger.debug('new booking %d saved.' % booking.id)
+        new_booking_notify(booking)
         # we can't just redirect here because the user doesn't get logged
         # in. so save the reservaton ID and redirect below.
-        request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
+        request.session['new_booking_redirect'] = {'booking_id': booking.id, 'location_slug': booking.use.location.slug}
     else:
         logger.debug("no booking found")
     return
@@ -2616,15 +2621,15 @@ def user_login(request):
 
             process_unsaved_booking(request)
             # if there was a pending booking redirect to the booking page
-            if request.session.get('new_res_redirect'):
-                res_id = request.session['new_res_redirect']['res_id']
-                location_slug = request.session['new_res_redirect']['location_slug']
-                request.session.pop('new_res_redirect')
+            if request.session.get('new_booking_redirect'):
+                booking_id = request.session['new_booking_redirect']['booking_id']
+                location_slug = request.session['new_booking_redirect']['location_slug']
+                request.session.pop('new_booking_redirect')
                 messages.add_message(
                     request, messages.INFO,
                     'Thank you! Your booking has been submitted. Please allow us up to 24 hours to respond.'
                 )
-                return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, res_id)))
+                return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking_id)))
 
             # this is where they go on successful login if there is not pending booking
             if not next_page or len(next_page) == 0 or "logout" in next_page:

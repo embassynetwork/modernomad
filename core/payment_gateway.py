@@ -50,7 +50,7 @@ def issue_refund(payment, amount=None):
 ###################################################################
 
 def charge_description(booking):
-	booking_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('booking_detail', args=(booking.location.slug, booking.id))
+	booking_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('booking_detail', args=(booking.use.location.slug, booking.id))
 	descr = "%s from %s - %s. Details: %s." % (booking.user.get_full_name(),
 			str(booking.arrive), str(booking.depart), booking_url)
 	return descr

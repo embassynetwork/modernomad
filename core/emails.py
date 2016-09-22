@@ -103,7 +103,7 @@ def render_templates(context, location, email_key, language='en-us'):
 ############################################
 
 def send_booking_receipt(booking, send_to=None):
-	location = booking.location
+	location = booking.use.location
 	subject = "[%s] Receipt for Booking %s - %s" % (location.email_subject_prefix, str(booking.arrive), str(booking.depart))
 	if send_to:
 		recipient = [send_to,]
@@ -145,7 +145,7 @@ def send_invoice(booking):
 	if booking.is_comped():
 		return send_comp_invoice(booking)
 
-	location = booking.location
+	location = booking.use.location
 	subject = "[%s] Thanks for Staying with us!" % location.email_subject_prefix 
 	recipient = [booking.user.email,]
 	c = Context({
@@ -164,9 +164,9 @@ def send_comp_invoice(booking):
 	return
 
 def new_booking_notify(booking):
-	house_admins = booking.location.house_admins.all()
+	house_admins = booking.use.location.house_admins.all()
 	domain = Site.objects.get_current().domain
-	location = booking.location
+	location = booking.use.location
 
 	subject = "[%s] Booking Request, %s %s, %s - %s" % (location.email_subject_prefix, booking.user.first_name, 
 		booking.user.last_name, str(booking.arrive), str(booking.depart))
@@ -195,7 +195,7 @@ def new_booking_notify(booking):
 	})
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.NEW_BOOKING)
 
-	return send_from_location_address(subject, text_content, html_content, recipients, booking.location)
+	return send_from_location_address(subject, text_content, html_content, recipients, booking.use.location)
 
 def subscription_note_notify(subscription):
 	domain = Site.objects.get_current().domain
@@ -240,15 +240,15 @@ def admin_new_subscription_notify(subscription):
 
 def updated_booking_notify(booking):
 	domain = Site.objects.get_current().domain
-	admin_path = urlresolvers.reverse('booking_manage', args=(booking.location.slug, booking.id,))
+	admin_path = urlresolvers.reverse('booking_manage', args=(booking.use.location.slug, booking.id,))
 	text_content = '''Howdy,\n\nA booking has been updated and requires your review.\n\nManage this booking at %s%s.''' % (domain, admin_path)
 	recipients = []
-	for admin in booking.location.house_admins.all():
+	for admin in booking.use.location.house_admins.all():
 		if not admin.email in recipients:
 			recipients.append(admin.email)
-	subject = "[%s] Booking Updated, %s %s, %s - %s" % (booking.location.email_subject_prefix, booking.user.first_name, 
+	subject = "[%s] Booking Updated, %s %s, %s - %s" % (booking.use.location.email_subject_prefix, booking.user.first_name, 
 		booking.user.last_name, str(booking.arrive), str(booking.depart))
-	mailgun_data={"from": booking.location.from_email(),
+	mailgun_data={"from": booking.use.location.from_email(),
 		"to": recipients,
 		"subject": subject,
 		"text": text_content,
@@ -259,11 +259,11 @@ def goodbye_email(booking):
 	''' Send guest a welcome email'''
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
-	location = booking.location
+	location = booking.use.location
 	
 	c = Context({
 		'first_name': booking.user.first_name,
-		'location': booking.location,
+		'location': booking.use.location,
 		'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, booking.id,)),
 		'new_booking_url' : "https://" + domain + urlresolvers.reverse('booking_create', args=(location.slug,)),
 	})
@@ -271,7 +271,7 @@ def goodbye_email(booking):
 	
 	subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
 	mailgun_data={
-			"from": booking.location.from_email(),
+			"from": booking.use.location.from_email(),
 			"to": [booking.user.email,],
 			"subject": subject,
 			"text": text_content,
@@ -285,7 +285,7 @@ def guest_welcome(booking):
 	''' Send guest a welcome email'''
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
-	location = booking.location
+	location = booking.use.location
 	intersecting_bookings = Booking.objects.filter(arrive__gte=booking.arrive).filter(depart__lte=booking.depart)
 	residents = location.residents.all()
 	intersecting_events = Event.objects.filter(location=location).filter(start__gte=booking.arrive).filter(end__lte=booking.depart)
@@ -295,7 +295,7 @@ def guest_welcome(booking):
 	c = Context({
 		'first_name': booking.user.first_name,
 		'day_of_week' : day_of_week,
-		'location': booking.location,
+		'location': booking.use.location,
 		'booking': booking,
 		'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
 		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
@@ -309,9 +309,9 @@ def guest_welcome(booking):
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.WELCOME)
 	
 	mailgun_data={
-			"from": booking.location.from_email(),
+			"from": booking.use.location.from_email(),
 			"to": [booking.user.email,],
-			"subject": "[%s] See you on %s" % (booking.location.email_subject_prefix, day_of_week),
+			"subject": "[%s] See you on %s" % (booking.use.location.email_subject_prefix, day_of_week),
 			"text": text_content,
 		}
 	if html_content:

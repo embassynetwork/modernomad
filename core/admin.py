@@ -83,8 +83,8 @@ class PaymentAdmin(admin.ModelAdmin):
     user.allow_tags = True
 
     def booking(self):
-        r = self.bill.bookingbill.booking
-        return '''<a href="/locations/%s/booking/%s/">%s''' % (r.location.slug, r.id, r)
+        b = self.bill.bookingbill.booking
+        return '''<a href="/locations/%s/booking/%s/">%s''' % (b.use.location.slug, r.id, r)
     booking.allow_tags = True
 
     model = Payment

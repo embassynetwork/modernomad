@@ -117,10 +117,10 @@
 
 	<div class="row text-center">
 		{% ifequal r.user user %}
-			<a href="{% url 'booking_detail' r.location.slug r.id %}">Return to Booking Detail</a>
+			<a href="{% url 'booking_detail' r.use.location.slug r.id %}">Return to Booking Detail</a>
 		{% else %}
 			{% if user in location.house_admins.all %}
-				<a href="{% url 'booking_manage' r.location.slug r.id %}">Manage Booking</a>
+				<a href="{% url 'booking_manage' r.use.location.slug r.id %}">Manage Booking</a>
 			{% endif %}
 		{% endifequal %}
 	</div>

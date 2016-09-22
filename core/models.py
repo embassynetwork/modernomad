@@ -1047,14 +1047,14 @@ class Booking(models.Model):
     
     # deprecated fields to be deleted soon ("soon")
     location_deprecated = models.ForeignKey(Location, related_name='bookings', null=True)
-    status_deprecated = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True)
-    user_deprecated = models.ForeignKey(User, related_name='bookings')
-    arrive_deprecated = models.DateField(verbose_name='Arrival Date')
-    depart_deprecated = models.DateField(verbose_name='Departure Date')
+    status_deprecated = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True, null=True)
+    user_deprecated = models.ForeignKey(User, related_name='bookings', null=True)
+    arrive_deprecated = models.DateField(verbose_name='Arrival Date', null=True)
+    depart_deprecated = models.DateField(verbose_name='Departure Date', null=True)
     arrival_time_deprecated = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
     resource_deprecated = models.ForeignKey(Resource, null=True)
     tags_deprecated = models.CharField(max_length=200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
-    purpose_deprecated = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
+    purpose_deprecated = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay', null=True)
     last_msg_deprecated = models.DateTimeField(blank=True, null=True)
 
     comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
@@ -1091,7 +1091,7 @@ class Booking(models.Model):
         line_items = []
 
         # The first line item is for the resource charge
-        resource_charge_desc = "%s (%d * $%s)" % (self.resource.name, self.use.total_nights(), self.get_rate())
+        resource_charge_desc = "%s (%d * $%s)" % (self.use.resource.name, self.use.total_nights(), self.get_rate())
         resource_charge = self.base_value()
         resource_line_item = BillLineItem(bill=booking_bill, description=resource_charge_desc, amount=resource_charge, paid_by_house=False)
         line_items.append(resource_line_item)
@@ -1130,15 +1130,15 @@ class Booking(models.Model):
             self.id = -1
 
         res_info = {
-                'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
-                'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
-                'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug': self.location.slug},
+                'arrive': {'year': self.use.arrive.year, 'month': self.use.arrive.month, 'day': self.use.arrive.day},
+                'depart': {'year': self.use.depart.year, 'month': self.use.depart.month, 'day': self.use.depart.day},
+                'location': {'id': self.use.location.id, 'short_description': self.use.location.short_description, 'slug': self.use.location.slug},
                 'resource': {
-                    'id': self.resource.id, 'name': self.resource.name, 'description': self.resource.description,
-                    'cancellation_policy': self.resource.cancellation_policy
+                    'id': self.use.resource.id, 'name': self.use.resource.name, 'description': self.use.resource.description,
+                    'cancellation_policy': self.use.resource.cancellation_policy
                 },
-                'purpose': self.purpose,
-                'arrival_time': self.arrival_time,
+                'purpose': self.use.purpose,
+                'arrival_time': self.use.arrival_time,
                 'comments': self.comments,
             }
 

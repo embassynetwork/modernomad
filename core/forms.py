@@ -310,10 +310,12 @@ class LocationRoomForm(forms.ModelForm):
             self.cleaned_data['image'] = relative_file_name
 
 
-class BookingForm(forms.ModelForm):
+class UseForm(forms.ModelForm):
+    '''Form for Use model with comment field added in.'''
+    comments = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control form-group"}))
     class Meta:
-        model = Booking
-        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
+        model = Use
+        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location']
         widgets = {
             'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
             'depart': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
@@ -325,22 +327,19 @@ class BookingForm(forms.ModelForm):
         labels = {'resource': 'Room'}
 
     def __init__(self, location, *args, **kwargs):
-        super(BookingForm, self).__init__(*args, **kwargs)
+        super(UseForm, self).__init__(*args, **kwargs)
         if not location:
             raise Exception("No location given!")
         self.location = location
         self.fields['resource'].choices = self.location.rooms_with_future_availability_choices()
 
     def clean(self):
-        cleaned_data = super(BookingForm, self).clean()
+        cleaned_data = super(UseForm, self).clean()
         arrive = cleaned_data.get('arrive')
         depart = cleaned_data.get('depart')
         if (depart - arrive).days > self.location.max_booking_days:
-            self._errors["depart"] = self.error_class(['Sorry! We only accept booking requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
+            self._errors["depart"] = self.error_class(['Sorry! We only accept booking requests greater than %s in special circumstances. Please limit your request to %s or shorter, and add a comment if you would like to be consdered for a longer stay.' % (self.location.max_booking_days, self.location.max_booking_days)])
         return cleaned_data
-
-    # XXX TODO
-    # make sure depart is at least one day after arrive.
 
 class AdminBookingForm(forms.ModelForm):
     class Meta:

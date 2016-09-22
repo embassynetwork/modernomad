@@ -12,7 +12,7 @@
 					<div class="col-md-2">
 						<img src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}">
 						<p>
-							<a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a> in {{r.resource.name}} for <a href="{% url 'booking_detail' r.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
+							<a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a> in {{r.resource.name}} for <a href="{% url 'booking_detail' r.use.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
 						</p>
 						{% if not r.is_paid %}
 						<p><span class="text-danger"> <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Unpaid</span></p>
@@ -34,7 +34,7 @@
 					<div class="col-md-2">
 						<img src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}">
 						<p><a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a></p>
-						<p>In {{r.resource.name}} for <a href="{% url 'booking_detail' r.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
+						<p>In {{r.resource.name}} for <a href="{% url 'booking_detail' r.use.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
 					</div>
 				{% endfor %}
 			</div>

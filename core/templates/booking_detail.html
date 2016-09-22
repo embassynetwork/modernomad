@@ -23,9 +23,9 @@
   </div>
 </div>
 
-<div class="row {% if booking.status == 'canceled' %}greyed-out{% endif %}">
+<div class="row {% if booking.use.status == 'canceled' %}greyed-out{% endif %}">
 
-	{% if booking.status == 'canceled' %}
+	{% if booking.use.status == 'canceled' %}
 		<div class="col-md-12">
 			<div class="alert alert-danger">
 				<span class="fa fa-ban"></span> This booking is canceled
@@ -41,7 +41,7 @@
 	{% else %}
 		<div class="col-md-12">
 			<div class="alert alert-warning">
-				{% if booking.user.profile.customer_id %}
+				{% if booking.use.user.profile.customer_id %}
 					<span class="fa fa-exclamation-circle"></span>
 					This booking is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
 				{% else %}
@@ -52,7 +52,7 @@
 					</p>
 
 					<div class="col-md-4">
-						<form action="{% url 'user_add_card' booking.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
+						<form action="{% url 'user_add_card' booking.use.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
 
 							<input type="hidden" name="res-id" value="{{booking.id}}">
 
@@ -125,7 +125,7 @@
 					{% include 'snippets/booking_bill_line_items_and_payments.html' %}
 				{% endwith %}
 				<div class="panel-footer text-muted">
-					<em>Cancellation policy for the {{ booking.resource }} is {{booking.resource.cancellation_policy}}.</em>
+					<em>Cancellation policy for the {{ booking.use.resource }} is {{booking.use.resource.cancellation_policy}}.</em>
 				</div>
 			</div>
 		</div>
@@ -139,27 +139,27 @@
 	</div> <!-- end col-md-4 -->
 	<div class="col-md-8 col-md-pull-4">
 		<h3>Booking for
-			<em><a href="{% url 'user_detail' booking.user.username %}">{{ booking.user.first_name|title }} {{booking.user.last_name}}</a></em>
+			<em><a href="{% url 'user_detail' booking.use.user.username %}">{{ booking.use.user.first_name|title }} {{booking.use.user.last_name}}</a></em>
 		</h3>
-		<h4>{{booking.arrive }} - {{booking.depart}}.</h4>
+		<h4>{{booking.use.arrive }} - {{booking.use.depart}}.</h4>
 		<div class="row">
-			<div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ booking.resource.name|title}}</div>
+			<div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ booking.use.resource.name|title}}</div>
 		</div>
 		<div class="row">
-			<div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ booking.purpose}}</div>
+			<div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ booking.use.purpose}}</div>
 		</div>
 		<div class="row">
 			<div class="col-md-3"><b>Additional Comments</b></div><div class="col-md-9">{{  booking.comments|default:"None" }}</div>
 		</div>
 		<div class="row">
-			<div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ booking.arrival_time|default:"Not specified" }}</div>
+			<div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ booking.use.arrival_time|default:"Not specified" }}</div>
 		</div>
 
 	</div>
 
 </div>
 
-<div class="row top-spacer-xl {% if booking.status == 'canceled' %}greyed-images greyed-out {% endif %}">
+<div class="row top-spacer-xl {% if booking.use.status == 'canceled' %}greyed-images greyed-out {% endif %}">
 		<div class="col-md-12">
 			<h3> Also here during your stay</h3>
 			{% for subset in users_during_stay|subsets_size:12 %}
@@ -178,13 +178,13 @@
 	</div>
 
 
-{% ifequal booking.user user %}
+{% ifequal booking.use.user user %}
 	<div class="res-modify-btn row-spacer">
 		{% if past %}
 			<p class="notice">This booking is in the past and cannot be modified</p>
 		{% elif paid %}
 			<p class="notice">This booking has already been paid for. </p>
-		{% elif booking.status == 'canceled' %}
+		{% elif booking.use.status == 'canceled' %}
 		{% else %}
 			<div>
 				<a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify booking</a>
