@@ -1,8 +1,6 @@
 import React, {PropTypes} from 'react'
 import { browserHistory } from 'react-router'
 import RoomIndex from './RoomIndex'
-import { graphql } from 'react-apollo'
-import gql from 'graphql-tag'
 import _ from 'lodash'
 
 const hardcodedRooms = [
@@ -13,27 +11,7 @@ const hardcodedRooms = [
   {id: 5, name: "Peacock Hostel", cost:"63", type: "Shared Room", guests:"1", img: ["/media/rooms/f9aa1552-bb84-4450-a719-34c504276d62.png", "/media/rooms/ed6e58fa-df9f-4e94-848e-7f402516421e.png"]}
 ]
 
-const resourcesQuery = gql`
-{
-  allResources(location: "TG9jYXRpb25Ob2RlOjE2") {
-    edges {
-      node {
-        id
-        name
-        description
-        summary
-        image
-        location {
-          id
-        }
-      }
-    }
-  }
-}
-`;
-
-
-class RoomContainerWithoutQuery extends React.Component {
+export default class RoomContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {rooms: hardcodedRooms}
@@ -64,6 +42,3 @@ class RoomContainerWithoutQuery extends React.Component {
     }
   }
 }
-
-const RoomContainer = graphql(resourcesQuery)(RoomContainerWithoutQuery)
-export default  RoomContainer
