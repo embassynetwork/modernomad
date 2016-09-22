@@ -147,7 +147,7 @@ class BookingAdmin(admin.ModelAdmin):
         return "$%d" % self.bill.total_paid()
 
     def user_profile(self):
-        return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.user.username, self.user.first_name, self.user.last_name, self.user.username)
+        return '''<a href="/people/%s">%s %s</a> (%s)''' % (self.use.user.username, self.use.user.first_name, self.use.user.last_name, self.use.user.username)
     user_profile.allow_tags = True
 
     def send_receipt(self, request, queryset):
@@ -232,11 +232,11 @@ class BookingAdmin(admin.ModelAdmin):
         self.message_user(request, msg)
 
     model = Booking
-    list_filter = ('status', 'location')
-    list_display = ('id', user_profile, 'status', 'arrive', 'depart', 'resource', 'total_nights', rate, fees, bill, to_house, paid )
+    list_filter = ('status_deprecated', 'location_deprecated')
+    list_display = ('id', user_profile, 'status_deprecated', 'arrive_deprecated', 'depart_deprecated', 'resource_deprecated', 'total_nights', rate, fees, bill, to_house, paid )
     #list_editable = ('status',) # Depricated in favor of drop down actions
-    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'id')
-    ordering = ['-arrive', 'id']
+    search_fields = ('use__user__username', 'use__user__first_name', 'use__user__last_name', 'id')
+    ordering = ['-arrive_deprecated', 'id']
     actions= ['send_guest_welcome', 'send_new_booking_notify', 'send_updated_booking_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
     save_as = True
 

@@ -454,11 +454,11 @@ class Fee(models.Model):
         return self.description
 
 
-class BookingManager(models.Manager):
+class UseManager(models.Manager):
 
     def on_date(self, the_day, status, location):
         # return the bookings that intersect this day, of any status
-        all_on_date = super(BookingManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
+        all_on_date = super(UseManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
         return all_on_date.filter(status=status)
 
     def confirmed_approved_on_date(self, the_day, location, resource=None):
@@ -477,7 +477,7 @@ class BookingManager(models.Manager):
         return list(confirmed_bookings)
 
     def confirmed_but_unpaid(self, location):
-        confirmed_this_location = super(BookingManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
+        confirmed_this_location = super(UseManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
         unpaid_this_location = []
         for res in confirmed_this_location:
             if not res.bill.is_paid():
@@ -974,8 +974,41 @@ class SubscriptionBill(Bill):
 class BookingBill(Bill):
     pass
 
+class Use(models.Model):
+    ''' record of a use for a specific resource.'''
+
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    CONFIRMED = 'confirmed'
+    HOUSE_DECLINED = 'house declined'
+    USER_DECLINED = 'user declined'
+    CANCELED = 'canceled'
+
+    USE_STATUSES = (
+            (PENDING, 'Pending'),
+            (APPROVED, 'Approved'),
+            (CONFIRMED, 'Confirmed'),
+            (HOUSE_DECLINED, 'House Declined'),
+            (USER_DECLINED, 'User Declined'),
+            (CANCELED, 'Canceled'),
+        )
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    location = models.ForeignKey(Location, related_name='uses', null=True)
+    status = models.CharField(max_length=200, choices=USE_STATUSES, default=PENDING, blank=True)
+    user = models.ForeignKey(User, related_name='uses')
+    arrive = models.DateField(verbose_name='Arrival Date')
+    depart = models.DateField(verbose_name='Departure Date')
+    arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
+    resource = models.ForeignKey(Resource, null=True)
+    purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
+    last_msg = models.DateTimeField(blank=True, null=True)
+
+    objects = UseManager()
 
 class Booking(models.Model):
+    ''' a model to handle the payment details related to uses''' 
 
     class ResActionError(Exception):
         def __init__(self, value):
@@ -1000,25 +1033,27 @@ class Booking(models.Model):
             (CANCELED, 'Canceled'),
         )
 
-    location = models.ForeignKey(Location, related_name='bookings', null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True)
-    user = models.ForeignKey(User, related_name='bookings')
-    arrive = models.DateField(verbose_name='Arrival Date')
-    depart = models.DateField(verbose_name='Departure Date')
-    arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-    resource = models.ForeignKey(Resource, null=True)
-    tags = models.CharField(max_length=200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
-    purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
+    
+    # deprecated fields to be deleted soon ("soon")
+    location_deprecated = models.ForeignKey(Location, related_name='bookings', null=True)
+    status_deprecated = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True)
+    user_deprecated = models.ForeignKey(User, related_name='bookings')
+    arrive_deprecated = models.DateField(verbose_name='Arrival Date')
+    depart_deprecated = models.DateField(verbose_name='Departure Date')
+    arrival_time_deprecated = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
+    resource_deprecated = models.ForeignKey(Resource, null=True)
+    tags_deprecated = models.CharField(max_length=200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
+    purpose_deprecated = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
+    last_msg_deprecated = models.DateTimeField(blank=True, null=True)
+
     comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
-    last_msg = models.DateTimeField(blank=True, null=True)
     rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
     uuid = UUIDField(auto=True, blank=True, null=True)  # the blank and null = True are artifacts of the migration JKS
     bill = models.OneToOneField(BookingBill, null=True, related_name="booking")
     suppressed_fees = models.ManyToManyField(Fee, blank=True)
-
-    objects = BookingManager()
+    use = models.OneToOneField(Use, null=False, related_name="booking")
 
     @models.permalink
     def get_absolute_url(self):
@@ -1609,10 +1644,11 @@ class UserNote(models.Model):
         return '%s - %s: %s' % (self.created.date(), self.user.username, self.note)
 
 
-class BookingNote(models.Model):
+class UseNote(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, null=True)
-    booking = models.ForeignKey(Booking, blank=False, null=False, related_name="booking_notes")
+    booking_deprecated = models.ForeignKey(Booking, blank=False, null=False, related_name="booking_notes")
+    use = models.ForeignKey(Use, blank=True, null=True, related_name="use_notes")
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
