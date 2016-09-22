@@ -11,6 +11,7 @@ const resourcesQuery = gql`
     edges {
       node {
         id
+        rid
         name
         description
         summary
@@ -29,9 +30,9 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
     const routeParams = this.props.routeParams
 
     if (routeParams.id) {
-      return <RoomDetail {...this.props} rooms={this.allResources()} />
+      return <RoomDetail {...this.props} room={this.oneResource(routeParams.id)} />
     } else {
-      return <RoomContainer {...this.props} />
+      return <RoomContainer {...this.props} rooms={this.allResources()} />
     }
   }
 
@@ -42,6 +43,10 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
     } else {
       return []
     }
+  }
+
+  oneResource(id) {
+    return this.allResources()[0]
   }
 
   render() {

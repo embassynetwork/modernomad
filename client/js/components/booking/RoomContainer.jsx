@@ -27,18 +27,10 @@ export default class RoomContainer extends React.Component {
   }
 
   render() {
-    const queryResults = this.props.data.allResources
-
-    if (queryResults) {
-      const rooms = _.map(queryResults.edges, 'node')
-
-      return <RoomIndex
-        rooms={rooms}
-        routeParams={this.props.routeParams}
-        query={this.props.location.query}
-        onFilterChange={this.reFilter.bind(this)} />
-    } else {
-     return <div>loading</div>
-    }
+    return <RoomIndex
+      rooms={this.props.rooms}
+      routeParams={this.props.routeParams}
+      query={this.props.location.query}
+      onFilterChange={this.reFilter.bind(this)} />
   }
 }

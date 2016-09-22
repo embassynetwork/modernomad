@@ -11,26 +11,29 @@ const hardcodedRooms = [
 ]
 
 export default class RoomDetail extends React.Component {
+  static propTypes = {
+    room: PropTypes.object.isRequired
+  }
 
   constructor(props) {
     super(props)
-
     this.state = {rooms: hardcodedRooms}
   }
 
   render() {
+    const room = this.props.room
 
     return (
       <div className="row">
         <div className="col-sm-8">
-          <h1>{this.state.rooms[this.props.params.id].name}</h1>
-          <p>{this.state.rooms[this.props.params.id].summary}</p>
-          <ImageCarousel img={this.state.rooms[this.props.params.id-1].img} />
+          <h1>{room.name}</h1>
+          <p>{room.summary}</p>
+          {room.img && <ImageCarousel img={room.img} />}
         </div>
         <div className="col-sm-4">
           <DateRangeSelector />
           <div className="alert alert-success">These dates are available</div>
-          <p>${this.state.rooms[this.props.params.id].cost}*nights<span className="pull-right">$</span></p>
+          <p>${room.cost}*nights<span className="pull-right">$</span></p>
           <hr></hr>
           <p>SF Hotel Taxes <span className="pull-right">$</span></p>
           <hr></hr>

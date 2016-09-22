@@ -3,10 +3,17 @@ import { Link } from 'react-router'
 import ImageCarousel from './ImageCarousel'
 
 export default class RoomCard extends React.Component {
-
   static propTypes = {
     name: PropTypes.string.isRequired,
     img: PropTypes.array.isRequired
+  }
+
+  detailUrl() {
+    return `/locations/${this.props.routeParams.location}/stay/room/${this.props.rid}`
+  }
+
+  detailLinkDetails() {
+    return {pathname: this.detailUrl(), query: this.props.query}
   }
 
   render() {
@@ -16,7 +23,7 @@ export default class RoomCard extends React.Component {
           <div className="panel-body">
 
             {this.props.img && <ImageCarousel img={this.props.img} />}
-            <Link className="col-xs-12" to={{pathname:`/locations/${this.props.routeParams.location}/stay/room/${this.props.id}`, query: this.props.query}}>
+            <Link className="col-xs-12" to={this.detailLinkDetails()}>
               <h3>{this.props.name} <span className="pull-right room-cost"><b>${this.props.cost} / night</b></span></h3>
               <div className="row text-center room-tags">
                 { this.props.type == "Shared Room" ?
