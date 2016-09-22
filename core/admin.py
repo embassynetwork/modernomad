@@ -124,6 +124,8 @@ def gen_message(queryset, noun, pl_noun, suffix):
     msg = prefix + " " + suffix + "."
     return msg
 
+class UseAdmin(admin.ModelAdmin):
+    model = Use
 
 class BookingAdmin(admin.ModelAdmin):
     def rate(self):
@@ -233,8 +235,7 @@ class BookingAdmin(admin.ModelAdmin):
 
     model = Booking
     list_filter = ('status_deprecated', 'location_deprecated')
-    list_display = ('id', user_profile, 'status_deprecated', 'arrive_deprecated', 'depart_deprecated', 'resource_deprecated', 'total_nights', rate, fees, bill, to_house, paid )
-    #list_editable = ('status',) # Depricated in favor of drop down actions
+    list_display = ('id', user_profile, 'status_deprecated', 'arrive_deprecated', 'depart_deprecated', 'resource_deprecated', rate, fees, bill, to_house, paid )
     search_fields = ('use__user__username', 'use__user__first_name', 'use__user__last_name', 'id')
     ordering = ['-arrive_deprecated', 'id']
     actions= ['send_guest_welcome', 'send_new_booking_notify', 'send_updated_booking_notify', 'send_receipt', 'send_invoice', 'recalculate_bill', 'mark_as_comp', 'reset_rate', 'revert_to_pending', 'approve', 'confirm', 'cancel']
@@ -300,6 +301,7 @@ admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)
 admin.site.register(UserNote, UserNoteAdmin)
 admin.site.register(Availability, AvailabilityAdmin)
+admin.site.register(Use, UseAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)

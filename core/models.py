@@ -1007,6 +1007,15 @@ class Use(models.Model):
 
     objects = UseManager()
 
+    def __str__(self):
+        return "%d" % self.id
+
+    def total_nights(self):
+        return (self.depart - self.arrive).days
+    total_nights.short_description = "Nights"
+
+
+
 class Booking(models.Model):
     ''' a model to handle the payment details related to uses''' 
 
@@ -1082,7 +1091,7 @@ class Booking(models.Model):
         line_items = []
 
         # The first line item is for the resource charge
-        resource_charge_desc = "%s (%d * $%s)" % (self.resource.name, self.total_nights(), self.get_rate())
+        resource_charge_desc = "%s (%d * $%s)" % (self.resource.name, self.use.total_nights(), self.get_rate())
         resource_charge = self.base_value()
         resource_line_item = BillLineItem(bill=booking_bill, description=resource_charge_desc, amount=resource_charge, paid_by_house=False)
         line_items.append(resource_line_item)
@@ -1174,10 +1183,6 @@ class Booking(models.Model):
         self.suppressed_fees.add(line_item.fee)
         self.save()
 
-    def total_nights(self):
-        return (self.depart - self.arrive).days
-    total_nights.short_description = "Nights"
-
     def default_rate(self):
         # default_rate always returns the default rate regardless of comps or
         # custom rates.
@@ -1191,7 +1196,7 @@ class Booking(models.Model):
     def base_value(self):
         # value of the booking, regardless of what has been paid
         # get_rate checks for comps and custom rates.
-        return self.total_nights() * self.get_rate()
+        return self.use.total_nights() * self.get_rate()
 
     def calc_non_house_fees(self):
         # Calculate the amount of fees not paid by the house
