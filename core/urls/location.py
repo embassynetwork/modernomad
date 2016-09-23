@@ -36,6 +36,10 @@ per_location_patterns = [
 	url(r'^room/', include('core.urls.room')),
 
 	url(r'^events/', include('gather.urls')),
+
+    # redirect from old 'reservation' paths
+	url(r'^reservation/(?P<rest_of_path>(.+))/$', 'core.views.redirects.reservation_redirect'),
+
 ]
 
 urlpatterns = patterns('core.views.unsorted',
