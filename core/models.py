@@ -1253,7 +1253,7 @@ class Booking(models.Model):
 
     def pending(self):
         self.use.status = Booking.PENDING
-        self.save()
+        self.use.save()
 
     def approve(self):
         self.use.status = Booking.APPROVED

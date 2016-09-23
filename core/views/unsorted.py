@@ -8,7 +8,7 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from core.forms import UseForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
+from core.forms import BookingUseForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
 from core.forms import BookingEmailTemplateForm, PaymentForm, AdminSubscriptionForm, LocationSettingsForm
 from core.forms import LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm
 from django.core import urlresolvers
@@ -978,7 +978,7 @@ def RoomsAvailableOnDates(request, location_slug):
 def BookingSubmit(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     if request.method == 'POST':
-        form = UseForm(location, request.POST)
+        form = BookingUseForm(location, request.POST)
         if form.is_valid():
             print 'form is valid'
             comments = request.POST.get('comments')
@@ -1013,7 +1013,7 @@ def BookingSubmit(request, location_slug):
             logger.debug(form.errors)
     # GET request
     else:
-        form = UseForm(location)
+        form = BookingUseForm(location)
     # pass the rate for each room to the template so we can update the cost of
     # a booking in real time.
     today = timezone.localtime(timezone.now())
@@ -1212,13 +1212,13 @@ def BookingEdit(request, booking_id, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     # need to pull these dates out before we pass the instance into
-    # the UseForm, since it (apparently) updates the instance
+    # the BookingUseForm, since it (apparently) updates the instance
     # immediately (which is weird, since it hasn't validated the form
     # yet!)
-    original_arrive = booking.arrive
-    original_depart = booking.depart
-    original_room = booking.resource
-    if request.user.is_authenticated() and request.user == booking.user:
+    original_arrive = booking.use.arrive
+    original_depart = booking.use.depart
+    original_room = booking.use.resource
+    if request.user.is_authenticated() and request.user == booking.use.user:
         logger.debug("BookingEdit: Authenticated and same user")
         if request.user in booking.use.location.house_admins.all():
             is_house_admin = True
@@ -1227,25 +1227,22 @@ def BookingEdit(request, booking_id, location_slug):
 
         if request.method == "POST":
             logger.debug("BookingEdit: POST")
-            # don't forget to specify the "instance" argument or a new object will get created!
-            # form = get_booking_form_for_perms(request, post=True, instance=booking)
-            form = UseForm(location, request.POST, instance=booking)
+            form = BookingUseForm(location, request.POST, instance=booking.use)
             if form.is_valid():
                 logger.debug("BookingEdit: Valid Form")
-
-                # if the dates have been changed, and the booking isn't
-                # still pending to begin with, notify an admin and go back to
-                # pending.
-                logger.debug("is_pending: %s" % booking.is_pending())
-                logger.debug("arrive: %s, original: %s" % (booking.arrive, original_arrive))
-                logger.debug("depart: %s, original: %s" % (booking.depart, original_depart))
-                logger.debug("room: %s, original: %s" % (booking.resource, original_room))
+                comments = request.POST.get('comments')
+                print 'comments?'
+                print comments
+                booking.comments = comments
+                booking.generate_bill()
+                booking.save()
+                form.save()
                 if (
                     not booking.is_pending() and
                     (
-                        booking.arrive != original_arrive or
-                        booking.depart != original_depart or
-                        booking.room != original_room
+                        booking.use.arrive != original_arrive or
+                        booking.use.depart != original_depart or
+                        booking.use.resource != original_room
                     )
                 ):
                     logger.debug("booking room or date was changed. updating status.")
@@ -1259,12 +1256,11 @@ def BookingEdit(request, booking_id, location_slug):
                 else:
                     client_msg = 'The booking was updated.'
                 # save the instance *after* the status has been updated as needed.
-                form.save()
                 messages.add_message(request, messages.INFO, client_msg)
                 return HttpResponseRedirect(reverse("booking_detail", args=(location.slug, booking_id)))
         else:
             # form = get_booking_form_for_perms(request, post=False, instance=booking)
-            form = UseForm(location, instance=booking)
+            form = BookingUseForm(location, instance=booking.use)
 
         return render(
             request,
@@ -1272,8 +1268,8 @@ def BookingEdit(request, booking_id, location_slug):
             {
                 'form': form,
                 'booking_id': booking_id,
-                'arrive': booking.arrive,
-                'depart': booking.depart,
+                'arrive': booking.use.arrive,
+                'depart': booking.use.depart,
                 'is_house_admin': is_house_admin,
                 'max_days': location.max_booking_days,
                 'location': location

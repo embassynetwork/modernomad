@@ -310,8 +310,8 @@ class LocationRoomForm(forms.ModelForm):
             self.cleaned_data['image'] = relative_file_name
 
 
-class UseForm(forms.ModelForm):
-    '''Form for Use model with comment field added in.'''
+class BookingUseForm(forms.ModelForm):
+    '''Form for Use model with comment field added in (assumes an associated booking).'''
     comments = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control form-group"}), required=False)
     class Meta:
         model = Use
@@ -327,14 +327,18 @@ class UseForm(forms.ModelForm):
         labels = {'resource': 'Room'}
 
     def __init__(self, location, *args, **kwargs):
-        super(UseForm, self).__init__(*args, **kwargs)
+        super(BookingUseForm, self).__init__(*args, **kwargs)
         if not location:
             raise Exception("No location given!")
+        if not hasattr(Use, 'booking'):
+            raise Exception("This form requires a Booking object to be associated with the Use")
+        self.fields['comments'].initial = self.instance.booking.comments
+
         self.location = location
         self.fields['resource'].choices = self.location.rooms_with_future_availability_choices()
 
     def clean(self):
-        cleaned_data = super(UseForm, self).clean()
+        cleaned_data = super(BookingUseForm, self).clean()
         arrive = cleaned_data.get('arrive')
         depart = cleaned_data.get('depart')
         if (depart - arrive).days > self.location.max_booking_days:
