@@ -1006,7 +1006,7 @@ def BookingSubmit(request, location_slug):
             logger.debug(form.errors)
     # GET request
     else:
-        form = BookingForm(location)
+        form = UseForm(location)
     # pass the rate for each room to the template so we can update the cost of
     # a booking in real time.
     today = timezone.localtime(timezone.now())
@@ -1224,7 +1224,7 @@ def BookingEdit(request, booking_id, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     # need to pull these dates out before we pass the instance into
-    # the BookingForm, since it (apparently) updates the instance
+    # the UseForm, since it (apparently) updates the instance
     # immediately (which is weird, since it hasn't validated the form
     # yet!)
     original_arrive = booking.arrive
@@ -1241,7 +1241,7 @@ def BookingEdit(request, booking_id, location_slug):
             logger.debug("BookingEdit: POST")
             # don't forget to specify the "instance" argument or a new object will get created!
             # form = get_booking_form_for_perms(request, post=True, instance=booking)
-            form = BookingForm(location, request.POST, instance=booking)
+            form = UseForm(location, request.POST, instance=booking)
             if form.is_valid():
                 logger.debug("BookingEdit: Valid Form")
 
@@ -1276,7 +1276,7 @@ def BookingEdit(request, booking_id, location_slug):
                 return HttpResponseRedirect(reverse("booking_detail", args=(location.slug, booking_id)))
         else:
             # form = get_booking_form_for_perms(request, post=False, instance=booking)
-            form = BookingForm(location, instance=booking)
+            form = UseForm(location, instance=booking)
 
         return render(
             request,
@@ -2580,7 +2580,8 @@ def process_unsaved_booking(request):
             user=request.user,
         )
         use.save()
-        booking = (use=use, comments=details['comments'])
+        comment = details['comments']
+        booking = Booking(use=use, comments=comment)
         # reset rate calls set_rate which calls generate_bill
         booking.reset_rate()
         booking.save()

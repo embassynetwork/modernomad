@@ -171,8 +171,8 @@ class Location(models.Model):
             the_day = start
             available_beds[room] = []
             while the_day < end:
-                bookings_today = Booking.objects.confirmed_approved_on_date(the_day, self, resource=room)
-                free_beds = room.availabilities_on(the_day) - len(bookings_today)
+                uses_today = Use.objects.confirmed_approved_on_date(the_day, self, resource=room)
+                free_beds = room.availabilities_on(the_day) - len(uses_today)
                 available_beds[room].append({'the_date': the_day, 'beds_free': free_beds})
                 the_day = the_day + datetime.timedelta(1)
         return available_beds
@@ -255,11 +255,11 @@ class Location(models.Model):
 
     def guests_today(self):
         today = timezone.now()
-        bookings_today = Booking.objects.filter(location=self) \
+        uses_today = Use.objects.filter(location=self) \
                                         .filter(Q(status="confirmed") | Q(status="approved")) \
                                         .exclude(depart__lt=today).exclude(arrive__gt=today)
         guests_today = []
-        for r in bookings_today:
+        for r in uses_today:
             if r.user not in guests_today:
                 guests_today.append(r.user)
         return guests_today
@@ -414,8 +414,8 @@ class Resource(models.Model):
         availabilities = self.availabilities_on(this_day)
         if not availabilities:
             return False
-        bookings_on_this_day = Booking.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-        if len(bookings_on_this_day) < availabilities:
+        uses_on_this_day = Use.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
+        if len(uses_on_this_day) < availabilities:
             return True
         else:
             return False

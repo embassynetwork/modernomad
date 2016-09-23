@@ -5,7 +5,7 @@ from PIL import Image
 import os, datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Booking, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
+from core.models import UserProfile, Use, Booking, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
