@@ -312,7 +312,7 @@ class LocationRoomForm(forms.ModelForm):
 
 class UseForm(forms.ModelForm):
     '''Form for Use model with comment field added in.'''
-    comments = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control form-group"}))
+    comments = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control form-group"}), required=False)
     class Meta:
         model = Use
         exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location']

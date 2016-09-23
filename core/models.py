@@ -213,14 +213,14 @@ class Location(models.Model):
                         .exclude(start__gte=today+datetime.timedelta(days=days))
         return None
 
-    def coming_month_bookings(self, days=30):
+    def coming_month_uses(self, days=30):
         today = timezone.localtime(timezone.now())
-        return Booking.objects.filter(
+        return Use.objects.filter(
                 Q(status="confirmed") | Q(status="approved")
                 ).filter(location=self).exclude(depart__lt=today).exclude(arrive__gt=today+datetime.timedelta(days=days))
 
-        def people_today(self):
-            guests = self.guests_today()
+    def people_today(self):
+        guests = self.guests_today()
         residents = list(self.residents.all())
         active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
         members = []
@@ -231,9 +231,9 @@ class Location(models.Model):
     def people_in_coming_month(self):
         # pull out all bookings in the coming month
         people = []
-        for r in self.coming_month_bookings():
-            if r.user not in people:
-                people.append(r.user)
+        for use in self.coming_month_uses():
+            if use.user not in people:
+                people.append(use.user)
 
         # add residents to the list of people in the house in the coming month.
         for r in self.residents.all():
@@ -1014,6 +1014,19 @@ class Use(models.Model):
         return (self.depart - self.arrive).days
     total_nights.short_description = "Nights"
 
+    def nights_between(self, start, end):
+        ''' return the number of nights of this booking that occur between start and end '''
+        nights = 0
+        if self.arrive >= start and self.depart <= end:
+            nights = (self.depart - self.arrive).days
+        elif self.arrive <= start and self.depart >= end:
+            nights = (end - start).days
+        elif self.arrive < start:
+            nights = (self.depart - start).days
+        elif self.depart > end:
+            nights = (end - self.arrive).days
+        return nights
+
 
 
 class Booking(models.Model):
@@ -1066,7 +1079,7 @@ class Booking(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('core.views.unsorted.BookingDetail', [str(self.location.slug), str(self.id)])
+        return ('core.views.unsorted.BookingDetail', [str(self.use.location.slug), str(self.id)])
 
     def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
         # during the booking process, we simulate a booking to generate
@@ -1105,9 +1118,7 @@ class Booking(models.Model):
         # A line item for every fee that applies to this location
         if reset_suppressed:
             self.suppressed_fees.clear()
-        for location_fee in LocationFee.objects.filter(location=self.location):
-            # print location_fee.fee.description
-            # print location_fee.fee not in self.suppressed_fees.all()
+        for location_fee in LocationFee.objects.filter(location=self.use.location):
             if location_fee.fee not in self.suppressed_fees.all():
                 desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
                 amount = float(effective_resource_charge) * location_fee.fee.percentage
@@ -1186,7 +1197,7 @@ class Booking(models.Model):
     def default_rate(self):
         # default_rate always returns the default rate regardless of comps or
         # custom rates.
-        return self.resource.default_rate
+        return self.use.resource.default_rate
 
     def get_rate(self):
         if self.rate is None:
@@ -1234,22 +1245,22 @@ class Booking(models.Model):
         self.generate_bill()
 
     def reset_rate(self):
-        self.set_rate(self.resource.default_rate)
+        self.set_rate(self.use.resource.default_rate)
 
     def mark_last_msg(self):
-        self.last_msg = datetime.datetime.now()
+        self.use.last_msg = datetime.datetime.now()
         self.save()
 
     def pending(self):
-        self.status = Booking.PENDING
+        self.use.status = Booking.PENDING
         self.save()
 
     def approve(self):
-        self.status = Booking.APPROVED
+        self.use.status = Booking.APPROVED
         self.save()
 
     def confirm(self):
-        self.status = Booking.CONFIRMED
+        self.use.status = Booking.CONFIRMED
         self.save()
 
     def cancel(self):
@@ -1257,7 +1268,7 @@ class Booking(models.Model):
         # JKS note: we *don't* delete the bill here, because if there was a
         # refund, we want to keep it around to know how much to refund from the
         # associated fees.
-        self.status = Booking.CANCELED
+        self.use.status = Booking.CANCELED
         self.save()
 
     def comp(self):
@@ -1270,36 +1281,22 @@ class Booking(models.Model):
         return self.rate == 0
 
     def is_pending(self):
-        return self.status == Booking.PENDING
+        return self.use.status == Booking.PENDING
 
     def is_approved(self):
-        return self.status == Booking.APPROVED
+        return self.use.status == Booking.APPROVED
 
     def is_confirmed(self):
-        return self.status == Booking.CONFIRMED
+        return self.use.status == Booking.CONFIRMED
 
     def is_canceled(self):
-        return self.status == Booking.CANCELED
+        return self.use.status == Booking.CANCELED
 
     def payments(self):
         return self.bill.payments.all()
 
     def non_refund_payments(self):
         return self.bill.payments.filter(paid_amount__gt=0)
-
-    def nights_between(self, start, end):
-        ''' return the number of nights of this booking that occur between start and end '''
-        nights = 0
-        if self.arrive >= start and self.depart <= end:
-            nights = (self.depart - self.arrive).days
-        elif self.arrive <= start and self.depart >= end:
-            nights = (end - start).days
-        elif self.arrive < start:
-            nights = (self.depart - start).days
-        elif self.depart > end:
-            nights = (end - self.arrive).days
-        return nights
-
 
 @receiver(pre_save, sender=Booking)
 def booking_create_bill(sender, instance, **kwargs):

@@ -320,7 +320,7 @@ def monthly_occupant_report(location_slug, year, month):
 
     bookings = Booking.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
     for r in bookings:
-        nights_this_month = r.nights_between(start, end)
+        nights_this_month = r.use.nights_between(start, end)
         u = r.user
         comped_nights_this_month = 0
         owing = []
@@ -487,7 +487,7 @@ def occupancy(request, location_slug):
         partial_payment = False
         total_owed = 0.0
 
-        nights_this_month = r.nights_between(start, end)
+        nights_this_month = r.use.nights_between(start, end)
         # if it's the first of the month and the person left on the 1st, then
         # that's actually 0 days this month which we don't need to include.
         if nights_this_month == 0:
@@ -835,11 +835,12 @@ def user_email_settings(request, username):
 def user_bookings(request, username):
     ''' TODO: rethink permissions here'''
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    bookings = Booking.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
+    #uses = Use.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
+    bookings = Booking.objects.filter(use__user=user).exclude(use__status='deleted')
     past_bookings = []
     upcoming_bookings = []
     for booking in bookings:
-        if booking.arrive >= datetime.date.today():
+        if booking.use.arrive >= datetime.date.today():
             upcoming_bookings.append(booking)
         else:
             past_bookings.append(booking)
@@ -979,21 +980,26 @@ def BookingSubmit(request, location_slug):
     if request.method == 'POST':
         form = UseForm(location, request.POST)
         if form.is_valid():
-            comment = request.POST.pop('comment')
+            print 'form is valid'
+            comments = request.POST.get('comments')
             use = form.save(commit=False)
             use.location = location
-            booking = Booking(use=use, comment=comment)
-            booking.reset_rate()
+            booking = Booking(use=use, comments=comments)
+            # reset_rate also generates the bill. 
             if request.user.is_authenticated():
                 use.user = request.user
                 use.save()
-                # XXX do we need booking.save()?
+                # we already set the value of 'use' when creating the Booking,
+                # but it wasn't saved at that point, and Django complains about
+                # a missing primary key here otherwise, so re-setting.
+                booking.use = use
                 booking.save()
+                booking.reset_rate()
                 new_booking_notify(booking)
                 messages.add_message(
                     request,
                     messages.INFO,
-                    'Thanks! Your booking was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.' % booking.user.username
+                    'Thanks! Your booking was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.' % booking.use.user.username
                 )
                 return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking.id)))
             else:
@@ -1002,6 +1008,7 @@ def BookingSubmit(request, location_slug):
                 messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your booking request.')
                 return HttpResponseRedirect(reverse('registration_register'))
         else:
+            print 'form was not valid'
             logger.debug(request.POST)
             logger.debug(form.errors)
     # GET request
@@ -1043,11 +1050,11 @@ def BookingDetail(request, booking_id, location_slug):
     # make sure the user is either an admin, resident or the booking holder
     # (we can't use the decorator here because the user themselves also has to
     # be able to see the page).
-    if ((request.user == booking.user) or
+    if ((request.user == booking.use.user) or
             (request.user in location.house_admins.all()) or
             (request.user in location.readonly_admins.all()) or
             (request.user in location.residents.all())):
-        if booking.arrive >= datetime.date.today():
+        if booking.use.arrive >= datetime.date.today():
             past = False
         else:
             past = True
@@ -1060,26 +1067,14 @@ def BookingDetail(request, booking_id, location_slug):
 
         # users that intersect this stay
         users_during_stay = []
-        bookings = Booking.objects.filter(status="confirmed").filter(location=location) \
-                                  .exclude(depart__lt=booking.arrive).exclude(arrive__gt=booking.depart)
-        for res in bookings:
-            if res.user not in users_during_stay:
-                users_during_stay.append(res.user)
+        uses = Use.objects.filter(status="confirmed").filter(location=location) \
+                                  .exclude(depart__lt=booking.use.arrive).exclude(arrive__gt=booking.use.depart)
+        for use in uses:
+            if use.user not in users_during_stay:
+                users_during_stay.append(use.user)
         for member in location.residents.all():
             if member not in users_during_stay:
                 users_during_stay.append(member)
-
-        # events that intersected your stay
-        # events_during_stay = []
-        # all_events = Event.objects.filter(location=location).exclude(end__lt=booking.arrive).exclude( start__gt=booking.depart)
-        # events_during_stay += list(all_events.filter(status="public"))
-        # if they are a member, include the community-only events
-        # if request.user in location.residents.all():
-        #    events_during_stay += list(all_events.filter(status="community"))
-        # if they RSVPed for any private events, include those
-        # private = all_events.filter(status="private").filter(attendees__in=[request.user,])
-        # if len(private) > 0:
-        #    events_during_stay += list(private)
 
         return render(
             request,
@@ -1161,18 +1156,11 @@ def UserAddCard(request, username):
     if booking_id:
         booking = Booking.objects.get(id=booking_id)
         # double checks that the authenticated user (the one trying to add the
-        # card) is the user associated with this booking, or an admin (i am
-        # not sure this is necessary since you need to be the booking user
-        # or a house admin to view the booking in the first place!).
+        # card) is the user associated with this booking, or an admin 
         if (request.user != user) and (request.user not in booking.use.location.house_admins.all()):
-            print 'there was an error adding the user\'s card: authenticated user is not the booking user'
-            print request.POST
-            print request.user
             messages.add_message(
                 request,
-                messages.INFO,
-                "You are not authorized to add a credit card to this page. Please log in or use the 3rd party"
-            )
+                messages.INFO, "You are not authorized to add a credit card to this page. Please log in or use the 3rd party")
             return HttpResponseRedirect('/404')
 
     token = request.POST.get('stripeToken')
@@ -1194,7 +1182,7 @@ def UserAddCard(request, username):
         # assumes the user has only one card stored with their profile.
         profile.last4 = customer.sources.data[0].last4
         profile.save()
-        if booking_id and booking.status == Booking.APPROVED:
+        if booking_id and booking.use.status == Use.APPROVED:
             updated_booking_notify(booking)
         messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
     except Exception, e:

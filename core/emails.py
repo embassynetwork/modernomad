@@ -104,14 +104,14 @@ def render_templates(context, location, email_key, language='en-us'):
 
 def send_booking_receipt(booking, send_to=None):
 	location = booking.use.location
-	subject = "[%s] Receipt for Booking %s - %s" % (location.email_subject_prefix, str(booking.arrive), str(booking.depart))
+	subject = "[%s] Receipt for Booking %s - %s" % (location.email_subject_prefix, str(booking.use.arrive), str(booking.use.depart))
 	if send_to:
 		recipient = [send_to,]
 	else:
-		recipient = [booking.user.email,]
+		recipient = [booking.use.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
-		'user': booking.user, 
+		'user': booking.use.user, 
 		'location': location,
 		'booking': booking,
 		'booking_url': "https://" + Site.objects.get_current().domain + booking.get_absolute_url() 
@@ -147,10 +147,10 @@ def send_invoice(booking):
 
 	location = booking.use.location
 	subject = "[%s] Thanks for Staying with us!" % location.email_subject_prefix 
-	recipient = [booking.user.email,]
+	recipient = [booking.use.user.email,]
 	c = Context({
 		'today': timezone.localtime(timezone.now()), 
-		'user': booking.user, 
+		'user': booking.use.user, 
 		'location': location,
 		'booking': booking,
 		'domain': Site.objects.get_current().domain,
@@ -168,8 +168,8 @@ def new_booking_notify(booking):
 	domain = Site.objects.get_current().domain
 	location = booking.use.location
 
-	subject = "[%s] Booking Request, %s %s, %s - %s" % (location.email_subject_prefix, booking.user.first_name, 
-		booking.user.last_name, str(booking.arrive), str(booking.depart))
+	subject = "[%s] Booking Request, %s %s, %s - %s" % (location.email_subject_prefix, booking.use.user.first_name, 
+		booking.use.user.last_name, str(booking.use.arrive), str(booking.use.depart))
 	sender = location.from_email()
 	recipients = []
 	for admin in house_admins:
@@ -177,20 +177,20 @@ def new_booking_notify(booking):
 
 	c = Context({
 		'location': location.name,
-		'status': booking.status, 
-		'user_image' : "https://" + domain+"/media/"+ str(booking.user.profile.image_thumb),
-		'first_name': booking.user.first_name, 
-		'last_name' : booking.user.last_name, 
-		'room_name' : booking.resource.name, 
-		'arrive' : str(booking.arrive), 
-		'depart' : str(booking.depart), 
-		'purpose': booking.purpose, 
+		'status': booking.use.status, 
+		'user_image' : "https://" + domain+"/media/"+ str(booking.use.user.profile.image_thumb),
+		'first_name': booking.use.user.first_name, 
+		'last_name' : booking.use.user.last_name, 
+		'room_name' : booking.use.resource.name, 
+		'arrive' : str(booking.use.arrive), 
+		'depart' : str(booking.use.depart), 
+		'purpose': booking.use.purpose, 
 		'comments' : booking.comments, 
-		'bio' : booking.user.profile.bio,
-		'referral' : booking.user.profile.referral, 
-		'projects' : booking.user.profile.projects, 
-		'sharing': booking.user.profile.sharing, 
-		'discussion' : booking.user.profile.discussion, 
+		'bio' : booking.use.user.profile.bio,
+		'referral' : booking.use.user.profile.referral, 
+		'projects' : booking.use.user.profile.projects, 
+		'sharing': booking.use.user.profile.sharing, 
+		'discussion' : booking.use.user.profile.discussion, 
 		"admin_url" : "https://" + domain + urlresolvers.reverse('booking_manage', args=(location.slug, booking.id,))
 	})
 	text_content, html_content = render_templates(c, location, LocationEmailTemplate.NEW_BOOKING)
