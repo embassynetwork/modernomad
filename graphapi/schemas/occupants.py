@@ -8,8 +8,9 @@ from core.models import Booking, Location
 from django.contrib.auth.models import User
 
 
-class BookingNode(DjangoObjectType):
-    occupants = graphene.List(lambda: UserNode)
+class OccupantNode(DjangoObjectType):
+    occupants_during = graphene.List(lambda: OccupantNode)
+    type = graphene.String()
 
     class Meta:
         model = Booking
@@ -17,14 +18,17 @@ class BookingNode(DjangoObjectType):
         filter_fields = ['arrive', 'location']
         filter_order_by = True
 
-    def resolve_occupants(self, args, *_):
-        return User.objects.all()[:15]
+    def resolve_occupants_during(self, args, *_):
+        return Booking.objects.all()[:15]
+
+    def resolve_type(self, args, *_):
+        return "guest"
 
 
 class Query(AbstractType):
-    my_bookings = DjangoFilterConnectionField(BookingNode)
+    my_occupancies = DjangoFilterConnectionField(OccupantNode)
 
-    def resolve_my_bookings(self, args, context, info):
+    def resolve_my_occupancies(self, args, context, info):
         if not context.user.is_authenticated():
             return Booking.objects.none()
         else:
