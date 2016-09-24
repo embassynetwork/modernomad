@@ -6,6 +6,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from .users import UserNode
 from core.models import Booking, Location
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class OccupantNode(DjangoObjectType):
@@ -37,9 +38,17 @@ class OccupantNode(DjangoObjectType):
 
 class Query(AbstractType):
     my_occupancies = DjangoFilterConnectionField(OccupantNode)
+    my_current_occupancies = DjangoFilterConnectionField(OccupantNode)
 
     def resolve_my_occupancies(self, args, context, info):
         if not context.user.is_authenticated():
             return Booking.objects.none()
         else:
             return Booking.objects.filter(user=context.user)
+
+    def resolve_my_current_occupancies(self, args, context, info):
+        if not context.user.is_authenticated():
+            return Booking.objects.none()
+        else:
+            today = timezone.now()
+            return Booking.objects.filter(user=context.user, depart__gte=today)
