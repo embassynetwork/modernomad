@@ -19,7 +19,17 @@ class OccupantNode(DjangoObjectType):
         filter_order_by = True
 
     def resolve_occupants_during(self, args, *_):
-        return Booking.objects.all()[:15]
+        query = (
+            Booking.objects
+            .filter(location=self.location, status="confirmed")
+            .exclude(user=self.user)
+            .filter(arrive__lte=self.depart)
+            .filter(depart__gte=self.arrive)
+            .order_by('user__last_name', 'user__first_name')
+            .distinct('user__last_name', 'user__first_name')
+        )
+
+        return query.all()
 
     def resolve_type(self, args, *_):
         return "guest"
