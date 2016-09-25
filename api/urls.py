@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 
-from api.views.location import *
 from api.views.availabilities import *
 from rest_framework import routers
 
