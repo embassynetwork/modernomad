@@ -347,8 +347,8 @@ class BookingUseForm(forms.ModelForm):
 
 class AdminBookingForm(forms.ModelForm):
     class Meta:
-        model = Booking
-        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
+        model = Use
+        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location',]
 
 
 class PaymentForm(forms.Form):
@@ -403,11 +403,11 @@ class BookingEmailTemplateForm(EmailTemplateForm):
 
         # add in the extra fields
         self.fields['sender'].initial = location.from_email()
-        self.fields['recipient'].initial = "%s, %s" % (booking.user.email, location.from_email())
+        self.fields['recipient'].initial = "%s, %s" % (booking.use.user.email, location.from_email())
         self.fields['footer'].initial = forms.CharField(
                 widget=forms.Textarea(attrs={'readonly':'readonly'})
             )
-        self.fields['footer'].initial = '''--------------------------------\nYour booking is from %s to %s.\nManage your booking at https://%s%s.''' % (booking.arrive, booking.depart, domain, booking.get_absolute_url())
+        self.fields['footer'].initial = '''--------------------------------\nYour booking is from %s to %s.\nManage your booking at https://%s%s.''' % (booking.use.arrive, booking.use.depart, domain, booking.get_absolute_url())
 
         # both the subject and body fields expect to have access to all fields
         # associated with a booking, so all booking model fields are
@@ -418,17 +418,17 @@ class BookingEmailTemplateForm(EmailTemplateForm):
         template_variables = {
             'created': booking.created,
             'updated': booking.updated,
-            'status': booking.status,
-            'user': booking.user,
-            'arrive': booking.arrive,
-            'depart': booking.depart,
-            'arrival_time': booking.arrival_time,
-            'room': booking.resource,
-            'num_nights': booking.total_nights(),
-            'purpose': booking.purpose,
+            'status': booking.use.status,
+            'user': booking.use.user,
+            'arrive': booking.use.arrive,
+            'depart': booking.use.depart,
+            'arrival_time': booking.use.arrival_time,
+            'room': booking.use.resource,
+            'num_nights': booking.use.total_nights(),
+            'purpose': booking.use.purpose,
             'comments': booking.comments,
             'welcome_email_days_ahead': location.welcome_email_days_ahead,
-            'booking_url': "https://"+domain+booking.get_absolute_url()
+            'reservation_url': "https://"+domain+booking.get_absolute_url()
         }
 
         self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables)) + ' (#' + str(booking.id) + ')'

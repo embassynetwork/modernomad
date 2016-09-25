@@ -1328,7 +1328,7 @@ def BookingCancel(request, booking_id, location_slug):
     if (
         not (
             request.user.is_authenticated() and
-            request.user == booking.user
+            request.user == booking.use.user
         ) and
         request.user not in location.house_admins.all()
     ):
@@ -1338,7 +1338,7 @@ def BookingCancel(request, booking_id, location_slug):
 
     booking.cancel()
     messages.add_message(request, messages.INFO, 'The booking has been cancelled.')
-    username = booking.user.username
+    username = booking.use.user.username
     return HttpResponseRedirect(redirect)
 
 
@@ -1640,16 +1640,16 @@ def BookingManageList(request, location_slug):
     if 'show_all' in request.GET and request.GET.get('show_all') == "True":
         show_all = True
 
-    pending = Booking.objects.filter(location=location).filter(status="pending").order_by('-id')
-    approved = Booking.objects.filter(location=location).filter(status="approved").order_by('-id')
-    confirmed = Booking.objects.filter(location=location).filter(status="confirmed").order_by('-id')
-    canceled = Booking.objects.filter(location=location).exclude(status="confirmed") \
-                          .exclude(status="approved").exclude(status="pending").order_by('-id')
+    pending = Booking.objects.filter(use__location=location).filter(use__status="pending").order_by('-id')
+    approved = Booking.objects.filter(use__location=location).filter(use__status="approved").order_by('-id')
+    confirmed = Booking.objects.filter(use__location=location).filter(use__status="confirmed").order_by('-id')
+    canceled = Booking.objects.filter(use__location=location).exclude(use__status="confirmed") \
+                          .exclude(use__status="approved").exclude(use__status="pending").order_by('-id')
     if not show_all:
         today = timezone.localtime(timezone.now())
-        confirmed = confirmed.filter(depart__gt=today)
-        canceled = canceled.filter(depart__gt=today)
-    owing = Booking.objects.confirmed_but_unpaid(location=location)
+        confirmed = confirmed.filter(use__depart__gt=today)
+        canceled = canceled.filter(use__depart__gt=today)
+    owing = Use.objects.confirmed_but_unpaid(location=location)
 
     return render(
         request,
@@ -1683,12 +1683,13 @@ def BookingManageCreate(request, location_slug):
 
         form = AdminBookingForm(request.POST)
         if form.is_valid():
-            booking = form.save(commit=False)
-            booking.location = location
-            booking.user = the_user
-            booking.status = request.POST.get('status')
-            booking.save()
+            use = form.save(commit=False)
+            use.location = location
+            use.user = the_user
+            use.status = request.POST.get('status')
+            use.save()
             # Make sure the rate is set and then generate a bill
+            booking = Booking(use=use)
             booking.reset_rate()
             if notify:
                 new_booking_notify(booking)
@@ -1696,7 +1697,7 @@ def BookingManageCreate(request, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                "The booking for %s %s was created." % (booking.user.first_name, booking.user.last_name)
+                "The booking for %s %s was created." % (use.user.first_name, use.user.last_name)
             )
             return HttpResponseRedirect(reverse('booking_manage', args=(location.slug, booking.id)))
         else:
@@ -1721,15 +1722,15 @@ def BookingManageCreate(request, location_slug):
 def BookingManage(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = get_object_or_404(Booking, id=booking_id)
-    user = User.objects.get(username=booking.user.username)
-    other_bookings = Booking.objects.filter(user=user).exclude(status='deleted').exclude(id=booking_id)
+    user = User.objects.get(username=booking.use.user.username)
+    other_bookings = Booking.objects.filter(use__user=user).exclude(use__status='canceled').exclude(id=booking_id)
     past_bookings = []
     upcoming_bookings = []
-    for res in other_bookings:
-        if res.arrive >= datetime.date.today():
-            upcoming_bookings.append(res)
+    for b in other_bookings:
+        if b.use.arrive >= datetime.date.today():
+            upcoming_bookings.append(b)
         else:
-            past_bookings.append(res)
+            past_bookings.append(b)
     domain = Site.objects.get_current().domain
     emails = EmailTemplate.objects.filter(context='booking').filter(Q(shared=True) | Q(creator=request.user))
     email_forms = []
@@ -1739,10 +1740,10 @@ def BookingManage(request, location_slug, booking_id):
         email_forms.append(form)
         email_templates_by_name.append(email_template.name)
 
-    availability = location.availability(booking.arrive, booking.depart)
-    free = location.rooms_free(booking.arrive, booking.depart)
-    date_list = date_range_to_list(booking.arrive, booking.depart)
-    if booking.resource in free:
+    availability = location.availability(booking.use.arrive, booking.use.depart)
+    free = location.rooms_free(booking.use.arrive, booking.use.depart)
+    date_list = date_range_to_list(booking.use.arrive, booking.use.depart)
+    if booking.use.resource in free:
         room_has_availability = True
     else:
         room_has_availability = False
@@ -1751,12 +1752,12 @@ def BookingManage(request, location_slug, booking_id):
     if 'note' in request.POST:
         note = request.POST['note']
         if note:
-            BookingNote.objects.create(booking=booking, created_by=request.user, note=note)
+            UseNote.objects.create(use=booking.use, created_by=request.user, note=note)
             # The Right Thing is to do an HttpResponseRedirect after a form
             # submission, which clears the POST request data (even though we
             # are redirecting to the same view)
             return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
-    booking_notes = BookingNote.objects.filter(booking=booking)
+    use_notes = UseNote.objects.filter(use=booking.use)
 
     # Pull all the user notes for this person
     if 'user_note' in request.POST:
@@ -1772,9 +1773,9 @@ def BookingManage(request, location_slug, booking_id):
         "past_bookings": past_bookings,
         "upcoming_bookings": upcoming_bookings,
         "user_notes": user_notes,
-        "booking_notes": booking_notes,
+        "use_notes": use_notes,
         "email_forms": email_forms,
-        "booking_statuses": Booking.BOOKING_STATUSES,
+        "use_statuses": Use.USE_STATUSES,
         "email_templates_by_name": email_templates_by_name,
         "days_before_welcome_email": location.welcome_email_days_ahead,
         "room_has_availability": room_has_availability,
@@ -1798,7 +1799,7 @@ def BookingManageAction(request, location_slug, booking_id):
         booking.approve()
     elif booking_action == 'set-confirm':
         booking.confirm()
-        days_until_arrival = (booking.arrive - datetime.date.today()).days
+        days_until_arrival = (booking.use.arrive - datetime.date.today()).days
         if days_until_arrival <= location.welcome_email_days_ahead:
             guest_welcome(booking)
     elif booking_action == 'set-comp':
@@ -1808,7 +1809,7 @@ def BookingManageAction(request, location_slug, booking_id):
             payment_gateway.charge_booking(booking)
             booking.confirm()
             send_booking_receipt(booking)
-            days_until_arrival = (booking.arrive - datetime.date.today()).days
+            days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
                 guest_welcome(booking)
         except stripe.CardError, e:
@@ -1833,8 +1834,8 @@ def BookingManageEdit(request, location_slug, booking_id):
     if 'username' in request.POST:
         try:
             new_user = User.objects.get(username=request.POST.get("username"))
-            booking.user = new_user
-            booking.save()
+            booking.use.user = new_user
+            booking.use.save()
             messages.add_message(request, messages.INFO, "User changed.")
         except:
             messages.add_message(request, messages.INFO, "Invalid user given!")
@@ -1845,9 +1846,9 @@ def BookingManageEdit(request, location_slug, booking_id):
             if arrive >= depart:
                 messages.add_message(request, messages.INFO, "Arrival must be at least 1 day before Departure.")
             else:
-                booking.arrive = arrive
-                booking.depart = depart
-                booking.save()
+                booking.use.arrive = arrive
+                booking.use.depart = depart
+                booking.use.save()
                 booking.generate_bill()
                 messages.add_message(request, messages.INFO, "Dates changed.")
         except:
@@ -1856,8 +1857,8 @@ def BookingManageEdit(request, location_slug, booking_id):
     elif 'status' in request.POST:
         try:
             status = request.POST.get("status")
-            booking.status = status
-            booking.save()
+            booking.use.status = status
+            booking.use.save()
             if status == "confirmed":
                 messages.add_message(request, messages.INFO, "Status changed. You must manually send a confirmation email if desired.")
             else:
@@ -1867,8 +1868,8 @@ def BookingManageEdit(request, location_slug, booking_id):
     elif 'room_id' in request.POST:
         try:
             new_room = Resource.objects.get(pk=request.POST.get("room_id"))
-            booking.resource = new_room
-            booking.save()
+            booking.use.resource = new_room
+            booking.use.save()
             booking.reset_rate()
             messages.add_message(request, messages.INFO, "Room changed.")
         except:
@@ -2347,7 +2348,7 @@ def submit_payment(request, booking_uuid, location_slug):
                     send_booking_receipt(booking, send_to=pay_email)
 
                     # XXX TODO need a way to check if this has already been sent :/
-                    days_until_arrival = (booking.arrive - datetime.date.today()).days
+                    days_until_arrival = (booking.use.arrive - datetime.date.today()).days
                     if days_until_arrival <= booking.use.location.welcome_email_days_ahead:
                         guest_welcome(booking)
                     messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)

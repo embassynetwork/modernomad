@@ -1,4 +1,5 @@
 <!-- availability calendar -->
+{% with use=r.use %}
 <table id="rooms-available-calendar">
 	<tr>
 	<th>Room</th>
@@ -14,23 +15,23 @@
 		</td>
 
 		{% for day_info in days_list %}
-			{% if room_obj == r.resource and room_has_availability %}
+			{% if room_obj == use.resource and room_has_availability %}
 				<td class="bg-success">
-			{% elif room_obj == r.resource and r.status == 'approved' and day_info.beds_free >= 0 %}
+			{% elif room_obj == use.resource and use.status == 'approved' and day_info.beds_free >= 0 %}
 				<td class="bg-success">
-			{% elif room_obj == r.resource and r.status == 'confirmed' and day_info.beds_free >= 0 %}
+			{% elif room_obj == use.resource and use.status == 'confirmed' and day_info.beds_free >= 0 %}
 				<td class="bg-success">
-			{% elif room_obj == r.resource and not room_has_availability %}
+			{% elif room_obj == use.resource and not room_has_availability %}
 				<td class="bg-danger">
 			{% else %}
 				<td>
 			{% endif %}
 
-			{% comment %} {% if r.status == 'pending' or r.status == 'canceled'%} {% endcomment %}
+			{% comment %} {% if use.status == 'pending' or use.status == 'canceled'%} {% endcomment %}
 
-			{% if r.status == 'approved' and r.resource == room_obj %}
+			{% if use.status == 'approved' and use.resource == room_obj %}
 				<div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
-			{% elif r.status == 'confirmed' and r.resource == room_obj %}
+			{% elif use.status == 'confirmed' and use.resource == room_obj %}
 				<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
 			{% else %}
 				{% if day_info.beds_free %}
@@ -44,5 +45,5 @@
 	</tr>
 	{% endfor %}
 </table>
-
+{% endwith %}
 

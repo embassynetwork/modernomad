@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Template, TemplateDoesNotExist, Context
 from django.contrib.sites.models import Site
-from models import get_location, Booking, LocationEmailTemplate
+from models import get_location, Booking, LocationEmailTemplate, Use
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
@@ -246,8 +246,8 @@ def updated_booking_notify(booking):
 	for admin in booking.use.location.house_admins.all():
 		if not admin.email in recipients:
 			recipients.append(admin.email)
-	subject = "[%s] Booking Updated, %s %s, %s - %s" % (booking.use.location.email_subject_prefix, booking.user.first_name, 
-		booking.user.last_name, str(booking.arrive), str(booking.depart))
+	subject = "[%s] Booking Updated, %s %s, %s - %s" % (booking.use.location.email_subject_prefix, booking.use.user.first_name, 
+		booking.use.user.last_name, str(booking.use.arrive), str(booking.use.depart))
 	mailgun_data={"from": booking.use.location.from_email(),
 		"to": recipients,
 		"subject": subject,
@@ -262,7 +262,7 @@ def goodbye_email(booking):
 	location = booking.use.location
 	
 	c = Context({
-		'first_name': booking.user.first_name,
+		'first_name': booking.use.user.first_name,
 		'location': booking.use.location,
 		'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, booking.id,)),
 		'new_booking_url' : "https://" + domain + urlresolvers.reverse('booking_create', args=(location.slug,)),
@@ -272,7 +272,7 @@ def goodbye_email(booking):
 	subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
 	mailgun_data={
 			"from": booking.use.location.from_email(),
-			"to": [booking.user.email,],
+			"to": [booking.use.user.email,],
 			"subject": subject,
 			"text": text_content,
 		}
@@ -286,23 +286,23 @@ def guest_welcome(booking):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	domain = Site.objects.get_current().domain
 	location = booking.use.location
-	intersecting_bookings = Booking.objects.filter(arrive__gte=booking.arrive).filter(depart__lte=booking.depart)
+	intersecting_uses = Use.objects.filter(arrive__gte=booking.use.arrive).filter(depart__lte=booking.use.depart)
 	residents = location.residents.all()
-	intersecting_events = Event.objects.filter(location=location).filter(start__gte=booking.arrive).filter(end__lte=booking.depart)
+	intersecting_events = Event.objects.filter(location=location).filter(start__gte=booking.use.arrive).filter(end__lte=booking.use.depart)
 	profiles = None
-	day_of_week = weekday_number_to_name[booking.arrive.weekday()]
+	day_of_week = weekday_number_to_name[booking.use.arrive.weekday()]
 	
 	c = Context({
-		'first_name': booking.user.first_name,
+		'first_name': booking.use.user.first_name,
 		'day_of_week' : day_of_week,
 		'location': booking.use.location,
 		'booking': booking,
 		'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
 		'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
 		'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
-		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(booking.user.username,)),
+		'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(booking.use.user.username,)),
 		'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, booking.id,)),
-		'intersecting_bookings': intersecting_bookings,
+		'intersecting_bookings': intersecting_uses,
 		'intersecting_events': intersecting_events,
 		'residents': residents,
 	})
@@ -310,7 +310,7 @@ def guest_welcome(booking):
 	
 	mailgun_data={
 			"from": booking.use.location.from_email(),
-			"to": [booking.user.email,],
+			"to": [booking.use.user.email,],
 			"subject": "[%s] See you on %s" % (booking.use.location.email_subject_prefix, day_of_week),
 			"text": text_content,
 		}
@@ -326,8 +326,8 @@ def guest_welcome(booking):
 def guests_residents_daily_update(location):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	today = timezone.localtime(timezone.now())
-	arriving_today = Booking.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
-	departing_today = Booking.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+	arriving_today = Use.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	departing_today = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 	events_today = published_events_today_local(location=location)
 
 	if not arriving_today and not departing_today and not events_today:
@@ -344,7 +344,7 @@ def guests_residents_daily_update(location):
 	print admin_emails
 
 	to_emails = []
-	for r in Booking.objects.confirmed_on_date(today, location):
+	for r in Use.objects.confirmed_on_date(today, location):
 		if (not r.user.email in admin_emails) and (not r.user.email in to_emails):
 			to_emails.append(r.user.email)
 
@@ -381,11 +381,11 @@ def guests_residents_daily_update(location):
 def admin_daily_update(location):
 	# this is split out by location because each location has a timezone that affects the value of 'today'
 	today = timezone.localtime(timezone.now()).date()
-	arriving_today = Booking.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
-	maybe_arriving_today = Booking.objects.filter(location=location).filter(arrive=today).filter(status='approved')
-	pending_now = Booking.objects.filter(location=location).filter(status='pending')
-	approved_now = Booking.objects.filter(location=location).filter(status='approved')
-	departing_today = Booking.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+	arriving_today = Use.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+	maybe_arriving_today = Use.objects.filter(location=location).filter(arrive=today).filter(status='approved')
+	pending_now = Use.objects.filter(location=location).filter(status='pending')
+	approved_now = Use.objects.filter(location=location).filter(status='approved')
+	departing_today = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
 	events_today = published_events_today_local(location=location)
 	pending_or_feedback = events_pending(location=location)
 	# if there are subscriptions ready for billing, the bills should have been
@@ -479,7 +479,7 @@ def current(request, location_slug):
 
 	# Add any current bookings
 	current_emails = [] 
-	for r in Booking.objects.confirmed_on_date(today, location):
+	for r in Use.objects.confirmed_on_date(today, location):
 		current_emails.append(r.user.email)
 
 	# Add all the residents at this location

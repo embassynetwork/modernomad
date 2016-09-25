@@ -20,14 +20,13 @@
 						<a href="{% url 'booking_manage' location.slug r.id %}">{{ r.id }}</a>
 					</td>
 					<td>
-						<a href="{% url 'user_detail' r.user.username %}">{{ r.user.get_full_name|truncatechars:16 }}</a> 
-						<!-- ({{r.user.username}})-->
+						<a href="{% url 'user_detail' r.use.user.username %}">{{ r.use.user.get_full_name|truncatechars:16 }}</a> 
+						<!-- ({{r.use.user.username}})-->
 					</td>
-					<!--<td>{{r.status}}</td>-->
-					<td>{{r.arrive}}</td>
-					<td>{{r.depart}}</td>
-					<td>{{r.resource}}</td>
-					<td style="text-align:center;">{{r.total_nights}}</td>
+					<td>{{r.use.arrive}}</td>
+					<td>{{r.use.depart}}</td>
+					<td>{{r.use.resource}}</td>
+					<td style="text-align:center;">{{r.use.total_nights}}</td>
 					<td>${{r.rate}}</td>
 					<td>${{r.bill.amount}}</td>
 					<td>

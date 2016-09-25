@@ -51,8 +51,8 @@ def issue_refund(payment, amount=None):
 
 def charge_description(booking):
 	booking_url = "https://" + Site.objects.get_current().domain + urlresolvers.reverse('booking_detail', args=(booking.use.location.slug, booking.id))
-	descr = "%s from %s - %s. Details: %s." % (booking.user.get_full_name(),
-			str(booking.arrive), str(booking.depart), booking_url)
+	descr = "%s from %s - %s. Details: %s." % (booking.use.user.get_full_name(),
+			str(booking.use.arrive), str(booking.use.depart), booking_url)
 	return descr
 
 
@@ -122,7 +122,7 @@ def stripe_charge_booking(booking):
 	charge = stripe.Charge.create(
 			amount=amt_owed_cents,
 			currency="usd",
-			customer = booking.user.profile.customer_id,
+			customer = booking.use.user.profile.customer_id,
 			description=descr
 		)
 
@@ -133,7 +133,7 @@ def stripe_charge_booking(booking):
 
 	# Store the charge details in a Payment object
 	return Payment.objects.create(bill=booking.bill,
-		user = booking.user,
+		user = booking.use.user,
 		payment_service = "Stripe",
 		payment_method = charge.card.brand,
 		paid_amount = amt_owed,

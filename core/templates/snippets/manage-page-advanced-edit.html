@@ -1,3 +1,4 @@
+{% with use=r.use %}
 <div id="booking-details-form">
 	<h3>Edit Booking Details</h3>
 	<div class="form-help-text" style="margin-bottom: 12px;">
@@ -8,7 +9,7 @@
 		<div class="form-group">
 			<label class="col-sm-2 control-label">User</label> 
 			<div class="col-sm-7">
-				<input class="form-control" name="username" value="{{ r.user.username }}"/>
+				<input class="form-control" name="username" value="{{ use.user.username }}"/>
 			</div>
 			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change User"/>
 		</div>
@@ -69,11 +70,11 @@
 			<label class="col-sm-2 control-label">Dates</label> 
 			<label class="col-sm-2 control-label">Arrive</label> 
 			<div class="col-sm-2">
-				<input class="form-control" name="arrive" value="{{ r.arrive|date:'Y-m-d' }}" size="8"/>
+				<input class="form-control" name="arrive" value="{{ use.arrive|date:'Y-m-d' }}" size="8"/>
 			</div>
 			<label class="col-sm-1 control-label">Depart</label> 
 			<div class="col-sm-2">
-				<input class="form-control" name="depart" value="{{ r.depart|date:'Y-m-d' }}" size="8"/>
+				<input class="form-control" name="depart" value="{{ use.depart|date:'Y-m-d' }}" size="8"/>
 			</div>
 			<input type="submit" class="btn btn-default pull-right col-sm-2" style="width:120px;" value="Change Dates"/>
 		</div>
@@ -85,7 +86,7 @@
 			<div class="col-sm-4">
 				<select class="form-control" name="room_id">
 					{% for room in location.get_rooms %}
-					<option value="{{room.id}}" {% if room.id == r.room.id %}SELECTED{% endif %}>{{room.name}}</option>
+					<option value="{{room.id}}" {% if room.id == use.resource.id %}SELECTED{% endif %}>{{room.name}}</option>
 					{% endfor %}
 				</select>
 			</div>
@@ -98,8 +99,8 @@
 			<label class="col-sm-2 control-label">Status</label> 
 			<div class="col-sm-4">
 				<select name="status" class="form-control">
-					{% for status_tup in booking_statuses %}
-					<option value="{{status_tup.0}}" {% if r.status == status_tup.0 %}SELECTED{% endif %}>{{status_tup.1}}</option>
+					{% for status_tup in use_statuses %}
+					<option value="{{status_tup.0}}" {% if use.status == status_tup.0 %}SELECTED{% endif %}>{{status_tup.1}}</option>
 					{% endfor %}
 				</select>
 			</div>
@@ -145,5 +146,5 @@
 
 
 </div>
-
+{% endwith %}
 

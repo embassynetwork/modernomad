@@ -38,9 +38,9 @@
 <div class="row">
 
 	<div class="col-md-3">
-		{% if r.user.profile.image %}
+		{% if r.use.user.profile.image %}
 		<div class="img-polaroid">
-			<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.user.profile.image|default:'data/avatars/default.jpg' }}" />
+			<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.use.user.profile.image|default:'data/avatars/default.jpg' }}" />
 		</div>
 		{% endif %}
 	</div>
@@ -50,24 +50,24 @@
 
 		<h1 class="res-field field">
 			{% if past_bookings or upcoming_bookings %}<i class="fa fa-repeat" id="repeat-guest-icon"></i>{% endif %}
-			{{ r.user.first_name|title }} {{r.user.last_name|title }}
+			{{ r.use.user.first_name|title }} {{r.use.user.last_name|title }}
 			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
 		</h1>
 
-		{% with notes=booking_notes %}
+		{% with notes=use_notes %}
 			{% include "snippets/notes.html" %}
 		{% endwith %}
 
 		<div id="booking-details">
 			<h3>
-				{{ r.arrive }} - {{ r.depart }} {% if r.arrival_time %} around {{r.arrival_time}} {% endif %}
+				{{ r.use.arrive }} - {{ r.use.depart }} {% if r.use.arrival_time %} around {{r.use.arrival_time}} {% endif %}
 				<span class="pull-right">Value: ${{ r.bill.amount }}</span>
 			</h3>
 			<div class="row">
-				<div class="col-sm-2"><strong>Room</strong></div><div class="col-sm-10">{{ r.resource }}</div>
+				<div class="col-sm-2"><strong>Room</strong></div><div class="col-sm-10">{{ r.use.resource }}</div>
 			</div>
 			<div class="row">
-				<div class="col-sm-2"><strong>Purpose</strong></div><div class="col-sm-10">{{ r.purpose }}</div>
+				<div class="col-sm-2"><strong>Purpose</strong></div><div class="col-sm-10">{{ r.use.purpose }}</div>
 			</div>
 			<div class="row">
 				<div class="col-sm-2"><strong>Comments</strong></div><div class="col-sm-10">{{ r.comments|default:"None" }}</div>
@@ -177,11 +177,11 @@ function toggleNotes(){
 		$('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Booking notes');
 	} else {
 		$('#notes-area').hide();
-		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{booking_notes|length}} booking note{{booking_notes|length|pluralize}}');
+		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{use_notes|length}} booking note{{use_notes|length|pluralize}}');
 	}
 }
 
-if ({{booking_notes|length}} == 0) {
+if ({{use_notes|length}} == 0) {
 	toggleNotes();
 }
 
@@ -243,9 +243,9 @@ function register_actions() {
 		// action_el gets reset every time res-manage-action is clicked
 		action_el = this;
 		console.log(action_el);
-		console.log('{{r.status}}');
+		console.log('{{r.use.status}}');
 		console.log('{{room_has_availability}}')
-		if ('{{r.status}}' == 'pending' && '{{ room_has_availability }}' == 'False') {
+		if ('{{r.use.status}}' == 'pending' && '{{ room_has_availability }}' == 'False') {
 			$("#dialog-warn-full").dialog("open");
 		} else {
 			ajax_call(action_el);

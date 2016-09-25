@@ -479,9 +479,14 @@ class UseManager(models.Manager):
     def confirmed_but_unpaid(self, location):
         confirmed_this_location = super(UseManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
         unpaid_this_location = []
-        for res in confirmed_this_location:
-            if not res.bill.is_paid():
-                unpaid_this_location.append(res)
+        for use in confirmed_this_location:
+            try:
+                # use try-except in case the use doesn't have a booking
+                # XXX FIXME. this is a horrible hack. 
+                if not use.booking.bill.is_paid():
+                    unpaid_this_location.append(use.booking)
+            except:
+                pass
         return unpaid_this_location
 
 
@@ -1249,7 +1254,7 @@ class Booking(models.Model):
 
     def mark_last_msg(self):
         self.use.last_msg = datetime.datetime.now()
-        self.save()
+        self.use.save()
 
     def pending(self):
         self.use.status = Booking.PENDING
@@ -1257,11 +1262,11 @@ class Booking(models.Model):
 
     def approve(self):
         self.use.status = Booking.APPROVED
-        self.save()
+        self.use.save()
 
     def confirm(self):
         self.use.status = Booking.CONFIRMED
-        self.save()
+        self.use.save()
 
     def cancel(self):
         # cancel this booking.
@@ -1269,10 +1274,12 @@ class Booking(models.Model):
         # refund, we want to keep it around to know how much to refund from the
         # associated fees.
         self.use.status = Booking.CANCELED
-        self.save()
+        self.use.save()
 
     def comp(self):
         self.set_rate(0)
+        self.generate_bill()
+        self.save()
 
     def is_paid(self):
         return self.bill.total_owed() <= 0
@@ -1649,8 +1656,8 @@ class UserNote(models.Model):
 class UseNote(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, null=True)
-    booking_deprecated = models.ForeignKey(Booking, blank=False, null=False, related_name="booking_notes")
-    use = models.ForeignKey(Use, blank=True, null=True, related_name="use_notes")
+    booking_deprecated = models.ForeignKey(Booking, blank=True, null=True, related_name="booking_notes")
+    use = models.ForeignKey(Use, blank=False, null=False, related_name="use_notes")
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
