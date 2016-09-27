@@ -1838,6 +1838,10 @@ label.light {
 	margin-bottom: 20px;
 }
 
+.react-datepicker__input-container {
+	width: 100%;
+}
+
 .room-type-btn {
 	text-transform: none;
 	margin-top: 0;
@@ -1879,7 +1883,7 @@ label.light {
 	color: white;
 	padding: 10px 20px;
 	margin-right: -30px;
-	margin-top: -65px;
+	margin-top: -110px;
 }
 
 .room-tags{
