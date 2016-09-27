@@ -45,7 +45,7 @@ class OccupantNode(DjangoObjectType):
             .filter(start__gte=today)
             .order_by('start')
         )
-        return query.all()
+        return query.all()[:3]
 
     def resolve_type(self, args, *_):
         return "guest"
