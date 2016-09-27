@@ -6,8 +6,8 @@ import { graphql } from 'react-apollo'
 import _ from 'lodash'
 
 const resourcesQuery = gql`
-{
-  allResources(location: "UmVzb3VyY2VOb2RlOjE=") {
+query AllResourcesForLocation($locationSlug: String!) {
+  allResources(location_Slug: $locationSlug) {
     edges {
       node {
         id
@@ -63,5 +63,13 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
   }
 }
 
-const RoomIndexOrDetail = graphql(resourcesQuery)(RoomIndexOrDetailWithoutQuery)
+const RoomIndexOrDetail = graphql(resourcesQuery, {
+  options: (props) => {
+    return {
+      variables: {
+        locationSlug: props.routeParams.location
+      }
+    }
+  }
+})(RoomIndexOrDetailWithoutQuery)
 export default RoomIndexOrDetail

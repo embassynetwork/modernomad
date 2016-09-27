@@ -13,7 +13,8 @@ class ResourceNode(DjangoObjectType):
         model = Resource
         interfaces = (Node, )
         filter_fields = {
-            'location': ['exact']
+            'location': ['exact'],
+            'location__slug': ['exact'],
         }
         # filter_order_by = ['slug']
 
