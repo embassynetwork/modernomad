@@ -3,14 +3,17 @@ from graphene import AbstractType, Field, Node
 from graphene_django.types import DjangoObjectType
 from graphene.types import String
 from graphene_django.filter import DjangoFilterConnectionField
-from .users import UserNode
 from core.models import Booking, Location
 from django.contrib.auth.models import User
 from django.utils import timezone
+from .users import UserNode
+from .events import EventNode
+from gather.models import Event
 
 
 class OccupantNode(DjangoObjectType):
     occupants_during = graphene.List(lambda: OccupantNode)
+    events_during = graphene.List(lambda: EventNode)
     type = graphene.String()
 
     class Meta:
@@ -29,7 +32,16 @@ class OccupantNode(DjangoObjectType):
             .order_by('user__last_name', 'user__first_name')
             .distinct('user__last_name', 'user__first_name')
         )
+        return query.all()
 
+    def resolve_events_during(self, args, *_):
+        query = (
+            Event.objects
+            .filter(location=self.location, status="live", visibility="public")
+            .filter(start__lte=self.depart)
+            .filter(end__gte=self.arrive)
+            .order_by('start')
+        )
         return query.all()
 
     def resolve_type(self, args, *_):
