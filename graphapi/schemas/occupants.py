@@ -13,7 +13,7 @@ from gather.models import Event
 
 class OccupantNode(DjangoObjectType):
     occupants_during = graphene.List(lambda: OccupantNode)
-    events_during = graphene.List(lambda: EventNode)
+    upcoming_events_during = graphene.List(lambda: EventNode)
     type = graphene.String()
 
     class Meta:
@@ -34,12 +34,15 @@ class OccupantNode(DjangoObjectType):
         )
         return query.all()
 
-    def resolve_events_during(self, args, *_):
+    def resolve_upcoming_events_during(self, args, *_):
+        today = timezone.now()
+
         query = (
             Event.objects
             .filter(location=self.location, status="live", visibility="public")
             .filter(start__lte=self.depart)
             .filter(end__gte=self.arrive)
+            .filter(start__gte=today)
             .order_by('start')
         )
         return query.all()
