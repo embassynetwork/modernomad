@@ -4,8 +4,7 @@ import ImageCarousel from './ImageCarousel'
 
 export default class RoomCard extends React.Component {
   static propTypes = {
-    name: PropTypes.string.isRequired,
-    img: PropTypes.array.isRequired
+    name: PropTypes.string.isRequired
   }
 
   detailUrl() {
@@ -18,13 +17,14 @@ export default class RoomCard extends React.Component {
 
   render() {
     return (
-      <div className="col-md-4 room-thumbnail">
+      <div className="col-md-4 col-sm-6 room-thumbnail">
         <div className="panel panel-default">
           <div className="panel-body">
 
-            {this.props.img && <ImageCarousel img={this.props.img} />}
+            {/*this.props.image && <ImageCarousel img={this.props.image} />*/}
+            <img className="room-image" src={"/media/"+this.props.image} />
             <Link className="col-xs-12" to={this.detailLinkDetails()}>
-              <h3>{this.props.name} <span className="pull-right room-cost"><b>${this.props.cost} / night</b></span></h3>
+              <h3>{this.props.name} <span className="pull-right room-cost"><b>${this.props.defaultRate} / night</b></span></h3>
               <div className="row text-center room-tags">
                 { this.props.type == "Shared Room" ?
                   <div className="col-xs-6"><i className="fa fa-unlock-alt fa-2x"></i><br></br>{this.props.type}</div>

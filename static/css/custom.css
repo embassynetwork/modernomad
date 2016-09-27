@@ -1123,30 +1123,6 @@ div#spinner
     margin:10px;
 }
 
-.room-info {
-	display: none;
-}
-
-.room-avail-descr {
-	margin: 15px 5px 15px 5px;
-	height: 40px;
-	overflow: hidden;
-}
-
-.room-panel .panel-body, .room-preview .panel-body {
-	padding: 0px;
-	font-weight: normal;
-}
-
-.room-select .panel:hover {
-	cursor: pointer;
-}
-
-.room-panel .panel-heading, .room-preview .panel-heading {
-	margin-bottom: 0px;
-	text-align: center;
-}
-
 #mock-invoice-panel-heading, .emphasize .panel-heading {
 	background-color: #ea6f56;
 	color: #FFF;
@@ -1880,6 +1856,15 @@ label.light {
 
 .room-thumbnail {
 	margin: 20px 0;
+}
+
+.room-thumbnail .panel {
+	height: 400px;
+}
+
+.room-image {
+	max-width: 100%;
+	max-height: 80%;
 }
 
 .room-card-container {

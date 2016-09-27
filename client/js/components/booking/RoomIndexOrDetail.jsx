@@ -7,7 +7,7 @@ import _ from 'lodash'
 
 const resourcesQuery = gql`
 {
-  allResources(location: "TG9jYXRpb25Ob2RlOjE2") {
+  allResources(location: "UmVzb3VyY2VOb2RlOjE=") {
     edges {
       node {
         id
@@ -16,6 +16,7 @@ const resourcesQuery = gql`
         description
         summary
         image
+        defaultRate
         location {
           id
         }
