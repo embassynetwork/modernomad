@@ -15,7 +15,7 @@ class UserProfileNode(DjangoObjectType):
 
 class UserNode(DjangoObjectType):
     name = graphene.String()
-    status = graphene.String()
+    url = graphene.String()
 
     class Meta:
         model = User
@@ -24,9 +24,8 @@ class UserNode(DjangoObjectType):
     def resolve_name(self, args, *_):
         return " ".join([self.first_name, self.last_name])
 
-    # This really needs to go on some booking object and be properly calculated
-    def resolve_status(self, args, *_):
-        return "guest"
+    def resolve_url(self, args, *_):
+        return "/people/" + self.username
 
 
 class Query(AbstractType):

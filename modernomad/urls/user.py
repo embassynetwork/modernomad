@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
+
 import core.forms
 
 # Add the user registration and account management patters from the
@@ -28,7 +29,14 @@ urlpatterns = patterns('core.views.unsorted',
 	url(r'^(?P<username>[\w\d\-\.@+_]+)/subscriptions/$', 'user_subscriptions', name='user_subscriptions'),
 	url(r'^(?P<username>[\w\d\-\.@+_]+)/events/$', 'user_events', name='user_events'),
 	url(r'^(?P<username>[\w\d\-\.@+_]+)/room/(?P<room_id>\d+)/$', 'user_edit_room', name='user_edit_room'),
+
 )
+
+urlpatterns += patterns('core.views',
+    # gracefully handle old urls
+	url(r'^(?P<username>[\w\d\-\.@+_]+)/reservations/$', 'redirects.old_user_bookings_redirect'),
+)
+
 
 urlpatterns += patterns('',
 	url(r'^logout/$', 'django.contrib.auth.views.logout_then_login'),
