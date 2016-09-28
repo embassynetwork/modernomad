@@ -1875,6 +1875,10 @@ label.light {
 		background-color: #f5f5f5;
 }
 
+.availability-table-toggle {
+	margin-top: 20px;
+}
+
 .room-cost {
 	color: #777;
 	font-size: 14px;

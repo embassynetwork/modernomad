@@ -1,7 +1,8 @@
 import React, {PropTypes} from 'react'
 import RoomCard from './RoomCard'
 import DateRangeSelector from './DateRangeSelector'
-import { FormGroup, Checkbox, Button } from 'react-bootstrap';
+import AvailabilityMatrix from './AvailabilityMatrix'
+import { FormGroup, Checkbox, Button, Nav, NavItem } from 'react-bootstrap';
 
 export default class RoomIndex extends React.Component {
   static propTypes = {
@@ -9,8 +10,22 @@ export default class RoomIndex extends React.Component {
     onFilterChange: PropTypes.func.isRequired
   }
 
+  constructor(props) {
+    super(props)
+
+    this.state = {activeKey: 2, showAvailabilityTable: true}
+  }
+
   onDateRangeChange(dates) {
     this.props.onFilterChange({dates: dates})
+  }
+
+
+  handleSelect(selectedKey) {
+    this.setState({activeKey: selectedKey})
+    if (selectedKey == 1) {
+      this.setState({showAvailabilityTable: false})
+    } else { this.setState({showAvailabilityTable: true})}
   }
 
   render() {
@@ -39,7 +54,17 @@ export default class RoomIndex extends React.Component {
         </div>
         <div className="room-card-container">
           <div className="container">
-            <div className="row">{roomCards}</div>
+            <div className="row availability-table-toggle">
+              <Nav bsStyle="pills" className="pull-right" activeKey={this.state.activeKey} onSelect={this.handleSelect.bind(this)}>
+                <NavItem eventKey={1} title="Room Grid"><i className="fa fa-th"></i></NavItem>
+                <NavItem eventKey={2} title="Availability Matrix"><i className="fa fa-list"></i></NavItem>
+              </Nav>
+            </div>
+            {!this.state.showAvailabilityTable ?
+              <div className="row">{roomCards}</div>
+            :
+              <AvailabilityMatrix rooms={this.props.rooms} routeParams={this.props.routeParams} query={this.props.query}></AvailabilityMatrix>
+            }
           </div>
         </div>
       </div>
