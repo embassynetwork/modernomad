@@ -28,9 +28,22 @@ export default class RoomIndex extends React.Component {
     } else { this.setState({showAvailabilityTable: true})}
   }
 
+  hasDateQuery() {
+    return this.props.query.arrive
+  }
+
+  displayableRooms() {
+    if (this.hasDateQuery()) {
+      return _.filter(this.props.rooms, (room) => {
+        return !_.find(room.bookabilities, {quantity: 0})
+      })
+    } else {
+      return this.props.rooms
+    }
+  }
+
   render() {
-    const roomCards = this.props.rooms.map((room) => {
-      // return <RoomCard key={room.id} room={room.name} img={room.img} />
+    const roomCards = this.displayableRooms().map((room) => {
       return <RoomCard key={room.id} routeParams={this.props.routeParams} query={this.props.query} {...room} />
     })
 
