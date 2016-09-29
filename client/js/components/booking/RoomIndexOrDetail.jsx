@@ -17,6 +17,10 @@ query AllResourcesForLocation($locationSlug: String!) {
         summary
         image
         defaultRate
+        bookabilities(arrive: "2017-10-15", depart: "2017-10-16") {
+          date
+          quantity
+        }
         location {
           id
         }
