@@ -6,7 +6,7 @@ import { graphql } from 'react-apollo'
 import _ from 'lodash'
 
 const resourcesQuery = gql`
-query AllResourcesForLocation($locationSlug: String!) {
+query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depart: DateTime!) {
   allResources(location_Slug: $locationSlug) {
     edges {
       node {
@@ -17,7 +17,7 @@ query AllResourcesForLocation($locationSlug: String!) {
         summary
         image
         defaultRate
-        bookabilities(arrive: "2017-10-15", depart: "2017-10-16") {
+        bookabilities(arrive: $arrive, depart: $depart) {
           date
           quantity
         }
@@ -71,7 +71,9 @@ const RoomIndexOrDetail = graphql(resourcesQuery, {
   options: (props) => {
     return {
       variables: {
-        locationSlug: props.routeParams.location
+        locationSlug: props.routeParams.location,
+        arrive: "2016-09-03T20:56:35.450686",
+        depart: "2016-09-05T20:56:35.450686"
       }
     }
   }
