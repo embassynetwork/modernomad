@@ -480,8 +480,7 @@ class BookingManager(models.Manager):
         return all_on_date.filter(status=status)
 
     def confirmed_between_dates(self, start, end):
-        query = super(BookingManager, self).get_queryset()
-        return query.filter(depart__gte=start, arrive__lte=end).filter(status__in=["approved", "confirmed"])
+        return self.filter(depart__gte=start, arrive__lte=end).filter(status__in=["approved", "confirmed"])
 
     def confirmed_approved_on_date(self, the_day, location, resource=None):
         # return the approved or confirmed bookings that intersect this day

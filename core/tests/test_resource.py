@@ -21,6 +21,14 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
             depart=depart, status="confirmed",
             user=self.booker)
 
+    def booking_on_other_resource(self, arrive, depart):
+        resource = ResourceFactory(location=self.resource.location)
+        return Booking.objects.create(
+            resource=resource, arrive=arrive,
+            depart=depart, status="confirmed",
+            user=self.booker)
+
+
     # With no data
 
     def test_it_returns_zero_quantities_for_each_date_if_resource_has_no_availabilities(self):
@@ -99,4 +107,18 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
             (date(2016, 1, 12), 2),
             (date(2016, 1, 13), 1),
             (date(2016, 1, 14), 1)
+        ])
+
+    def test_it_doesnt_subtract_bookings_for_another_resource(self):
+        self.availability_on(date(2016, 1, 8), 10)
+
+        self.booking_on_other_resource(date(2016, 1, 11), date(2016, 1, 14))
+
+        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        self.assertEqual(result, [
+            (date(2016, 1, 10), 10),
+            (date(2016, 1, 11), 10),
+            (date(2016, 1, 12), 10),
+            (date(2016, 1, 13), 10),
+            (date(2016, 1, 14), 10)
         ])
