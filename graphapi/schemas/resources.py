@@ -7,14 +7,14 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.models import Resource
 
 
-class UsabilityNode(graphene.ObjectType):
+class BookabilityNode(graphene.ObjectType):
     date = DateTime()
     quantity = graphene.Int()
 
 
 class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
-    usabilities = graphene.List(lambda: UsabilityNode, arrive=DateTime(), depart=DateTime())
+    bookabilities = graphene.List(lambda: UsabilityNode, arrive=DateTime(), depart=DateTime())
 
     class Meta:
         model = Resource
@@ -27,8 +27,9 @@ class ResourceNode(DjangoObjectType):
     def resolve_rid(self, args, *_):
         return self.id
 
-    def resolve_usabilities(self, args, *stuff):
-        return [UsabilityNode(args['arrive'], 12)]
+    def resolve_bookabilities(self, args, *stuff):
+        # self.usabilities_between(args['arrive'], args['depart'])
+        return [BookabilityNode(args['arrive'], 12)]
 
 
 class Query(AbstractType):

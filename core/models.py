@@ -20,6 +20,7 @@ import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.flatpages.models import FlatPage
+from core.libs.dates import dates_within, count_range_objects_on_day
 import pytz
 
 # imports for signals
@@ -361,7 +362,10 @@ class Resource(models.Model):
             the_day += datetime.timedelta(1)
         return total
 
-    def availabilities_between(self, start, end):
+    # Returns all the availability change objects that affect the time period
+    # described, in chronological order. This includes the immediately before or on
+    # the start date, and any others through to and including the end date.
+    def availabilities_within(self, start, end):
         avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
         avails_between = []
         for a in avails:
@@ -373,21 +377,11 @@ class Resource(models.Model):
             else:
                 avails_between.append(a)
                 break
+        avails_between.reverse()
         return avails_between
 
-    def availabilities_today_forward(self):
-        today = timezone.localtime(timezone.now()).date()
-        all_avails = self.availabilities.all().order_by('-start_date')
-        select_avails = []
-        for a in all_avails:
-            if a.start_date > today:
-                select_avails.append(a)
-            else:
-                select_avails.append(a)
-                # we want only the first availability that does not start in
-                # the future, if it exists
-                break
-        return select_avails
+    def confirmed_bookings_between(self, start, end):
+        return self.booking_set.confirmed_between_dates(start, end)
 
     def has_future_availability(self):
         today = timezone.localtime(timezone.now()).date()
@@ -418,6 +412,31 @@ class Resource(models.Model):
             return True
         else:
             return False
+
+    def daily_availabilities_within(self, start, end):
+        availabilities = self.availabilities_within(start, end)
+
+        quantity = 0
+        result = []
+        for day in dates_within(start, end):
+            if availabilities and availabilities[0].start_date <= day:
+                quantity = availabilities.pop(0).quantity
+            result.append((day, quantity))
+
+        return result
+
+    def daily_bookabilities_within(self, start, end):
+        daily_availabilities = self.daily_availabilities_within(start, end)
+        bookings = self.confirmed_bookings_between(start, end)
+
+        result = []
+        for daily_availability in daily_availabilities:
+            day = daily_availability[0]
+            booking_quantity = count_range_objects_on_day(bookings, day)
+            bookable_quantity = daily_availability[1] - booking_quantity
+            result.append((day, bookable_quantity))
+
+        return result
 
     def max_daily_availabilities_between(self, start, end):
         max_quantity = 0
@@ -459,6 +478,10 @@ class BookingManager(models.Manager):
         # return the bookings that intersect this day, of any status
         all_on_date = super(BookingManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
         return all_on_date.filter(status=status)
+
+    def confirmed_between_dates(self, start, end):
+        query = super(BookingManager, self).get_queryset()
+        return query.filter(depart__gte=start, arrive__lte=end).filter(status__in=["approved", "confirmed"])
 
     def confirmed_approved_on_date(self, the_day, location, resource=None):
         # return the approved or confirmed bookings that intersect this day
