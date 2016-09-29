@@ -19,7 +19,6 @@ export default class RoomCard extends React.Component {
 
   isBookable() {
     return !_.find(this.props.bookabilities, {quantity: 0})
-
   }
 
   render() {

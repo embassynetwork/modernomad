@@ -70,11 +70,16 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
 
 const RoomIndexOrDetail = graphql(resourcesQuery, {
   options: (props) => {
+    const formatString = 'Y-MM-DTHH:mm:ss.ms'
+    const query = props.location.query
+    const arrive = query.arrive ? moment(query.arrive) : moment()
+    const depart = query.depart ? moment(query.depart) : arrive.clone().add('days', 7)
+
     return {
       variables: {
         locationSlug: props.routeParams.location,
-        arrive: moment(props.location.query.arrive).format('Y-MM-DTHH:mm:ss.ms'),
-        depart: moment(props.location.query.depart).format('Y-MM-DTHH:mm:ss.ms')
+        arrive: arrive.format(formatString),
+        depart: depart.format(formatString)
       }
     }
   }
