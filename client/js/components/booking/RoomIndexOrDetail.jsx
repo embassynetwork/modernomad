@@ -73,7 +73,7 @@ const RoomIndexOrDetail = graphql(resourcesQuery, {
     const formatString = 'Y-MM-DTHH:mm:ss.ms'
     const query = props.location.query
     const arrive = query.arrive ? moment(query.arrive) : moment()
-    const depart = query.depart ? moment(query.depart) : arrive.clone().add('days', 7)
+    const depart = query.depart ? moment(query.depart) : arrive.clone().add(7, 'days')
 
     return {
       variables: {

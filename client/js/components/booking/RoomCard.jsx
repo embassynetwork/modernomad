@@ -28,7 +28,7 @@ export default class RoomCard extends React.Component {
             <Link className="col-xs-12" to={this.detailLinkDetails()}>
               <h3>{this.props.name}</h3>
               <span className="pull-right room-cost"><b>${this.props.defaultRate} / night</b></span>
-              <div className="row text-center room-tags">
+              {/*}<div className="row text-center room-tags">
                 { this.props.type == "Shared Room" ?
                   <div className="col-xs-6"><i className="fa fa-unlock-alt fa-2x"></i><br></br>{this.props.type}</div>
                   :
@@ -39,7 +39,7 @@ export default class RoomCard extends React.Component {
                   :
                   <div className="col-xs-6"><i className="fa fa-users fa-2x"></i><br></br>{this.props.guests} Guests</div>
                 }
-              </div>
+              </div>*/}
             </Link>
           </div>
         </div>

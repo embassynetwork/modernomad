@@ -220,6 +220,14 @@ a:hover {
 	left: 50%;
 	margin-left: -225px;
 	width: 450px;
+	/*full height/width black background?*/
+	/*position: absolute;
+	bottom: 0;
+	padding: 20px;
+	background-color: rgba(0,0,0,0.5);
+	color: white;
+	width: 100%;
+	height: 100%;*/
 }
 
 .house-name h1 {
@@ -1859,11 +1867,12 @@ label.light {
 }
 
 .room-thumbnail {
-	margin: 20px 0;
+	margin: 5px 0;
 }
 
 .room-thumbnail .panel {
-	height: 400px;
+	/*height: 400px;*/
+	height: 330px;
 }
 
 .room-image {
@@ -1876,7 +1885,16 @@ label.light {
 }
 
 .availability-table-toggle {
-	margin-top: 20px;
+	margin: 20px 0 10px 0;
+}
+
+.availability-area {
+	overflow: scroll;
+	margin: 20px 0 40px 0;
+}
+
+.availabilities-table {
+	width: auto;
 }
 
 .room-cost {

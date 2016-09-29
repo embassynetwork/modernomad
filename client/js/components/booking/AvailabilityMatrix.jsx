@@ -29,7 +29,7 @@ export default class AvailabilityMatrix extends React.Component {
         <tr key={room.id}>
           <td><Link key={room.id} to={this.detailLinkDetails(room.rid)}>{room.name}</Link></td>
           {room.bookabilities.map(function(bookability) {
-            return <td key={bookability.date}>{bookability.quantity}</td>
+            return <td key={bookability.date} className={(bookability.quantity ? "success" : "")}>{bookability.quantity}</td>
           })}
         </tr>
       )
@@ -37,13 +37,13 @@ export default class AvailabilityMatrix extends React.Component {
 
     const dateColumn = this.props.rooms[0].bookabilities.map((bookability) => {
       return (
-        <th key={bookability.date}>{bookability.date}</th>
+        <th key={bookability.date}>{moment(bookability.date).format('MMM DD')}</th>
       )
     })
 
     return (
-      <div>
-        <Table striped bordered hover>
+      <div className="availability-area">
+        <Table className="panel table-responsive availabilities-table">
           <thead>
             <tr>
               <th>Room Name</th>

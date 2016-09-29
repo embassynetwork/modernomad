@@ -51,7 +51,7 @@ export default class RoomIndex extends React.Component {
       <div>
         <div className="date-range-row container">
           <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
-          <div className="row room-type-row">
+          {/*}<div className="row room-type-row">
             <div className="col-md-2 col-sm-4"><h5>Room Type</h5></div>
             <div className="col-md-2 col-sm-4">
               <Checkbox className="btn btn-default btn-block room-type-btn">
@@ -63,7 +63,7 @@ export default class RoomIndex extends React.Component {
                 <i className="fa fa-unlock-alt"></i> Shared Room
               </Checkbox>
             </div>
-          </div>
+          </div>*/}
         </div>
         <div className="room-card-container">
           <div className="container">
