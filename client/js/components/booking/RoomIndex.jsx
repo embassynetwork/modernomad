@@ -13,7 +13,7 @@ export default class RoomIndex extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = {activeKey: 2, showAvailabilityTable: true}
+    this.state = {activeKey: 1, showAvailabilityTable: false}
   }
 
   onDateRangeChange(dates) {
