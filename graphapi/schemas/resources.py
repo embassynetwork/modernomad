@@ -14,7 +14,7 @@ class BookabilityNode(graphene.ObjectType):
 
 class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
-    bookabilities = graphene.List(lambda: UsabilityNode, arrive=DateTime(), depart=DateTime())
+    bookabilities = graphene.List(lambda: BookabilityNode, arrive=DateTime(), depart=DateTime())
 
     class Meta:
         model = Resource
@@ -28,8 +28,12 @@ class ResourceNode(DjangoObjectType):
         return self.id
 
     def resolve_bookabilities(self, args, *stuff):
-        # self.usabilities_between(args['arrive'], args['depart'])
-        return [BookabilityNode(args['arrive'], 12)]
+        assert args['arrive'], "you must specify arrival date"
+        assert args['depart'], "you must specify departure date"
+
+        bookabilities = self.daily_bookabilities_within(args['arrive'].date(), args['depart'].date())
+
+        return [BookabilityNode(*bookability) for bookability in bookabilities]
 
 
 class Query(AbstractType):
