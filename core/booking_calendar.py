@@ -6,11 +6,11 @@ from django.utils.html import conditional_escape as esc
 
 
 class GuestCalendar(HTMLCalendar):
-    def __init__(self, bookings, year, month, location):
+    def __init__(self, uses, year, month, location):
         # self.formatmonth(year, month)
         self.year, self.month = year, month
         super(GuestCalendar, self).__init__()
-        self.bookings = self.group_by_day(bookings)
+        self.uses = self.group_by_day(uses)
         self.location = location
 
     def formatday(self, day, weekday):
@@ -22,24 +22,24 @@ class GuestCalendar(HTMLCalendar):
                 today = True
             else:
                 today = False
-            if day in self.bookings:
+            if day in self.uses:
                 body = ['<ul>']
-                num_today = len(self.bookings[day])
+                num_today = len(self.uses[day])
                 this_date = date(self.year, self.month, day)
                 any_availability = self.location.rooms_free(this_date, tomorrow)
                 if not any_availability:
                     cssclass += ' full-today'
-                for booking in self.bookings[day]:
-                    body.append('<li id="res%d-cal-item">' % booking.id)
-                    if booking.is_approved():
-                        body.append('<a href="#booking%d" class="greyed-out">' % booking.id)
+                for use in self.uses[day]:
+                    body.append('<li id="res%d-cal-item">' % use.booking.id)
+                    if use.booking.is_approved():
+                        body.append('<a href="#booking%d" class="greyed-out">' % use.booking.id)
                     else:
-                        body.append('<a href="#booking%d">' % booking.id)
-                    body.append(esc("%s (%s)" % (booking.user.first_name.title(), booking.resource.name)))
+                        body.append('<a href="#booking%d">' % use.booking.id)
+                    body.append(esc("%s (%s)" % (use.user.first_name.title(), use.resource.name)))
                     body.append('</a>')
-                    if booking.arrive.day == day:
+                    if use.arrive.day == day:
                         body.append('<em> (Arrive)</em>')
-                    if booking.depart == tomorrow:
+                    if use.depart == tomorrow:
                         body.append('<em> (Last night)</em>')
                     body.append('</li>')
                     body.append('</span>')
@@ -49,9 +49,9 @@ class GuestCalendar(HTMLCalendar):
             return self.day_cell(cssclass, day)
         return self.day_cell('noday', '&nbsp;')
 
-    def group_by_day(self, bookings):
+    def group_by_day(self, uses):
         ''' create a dictionary of day: items key-value pairs, where items is
-        a list of all bookings that intersect this day. '''
+        a list of all uses that intersect this day. '''
 
         next_month = (self.month+1) % 12
         if next_month == 0:
@@ -64,15 +64,15 @@ class GuestCalendar(HTMLCalendar):
 
         guests_by_day = {}
         for day in range(1, days+1):
-            today_bookings = []
+            today_uses = []
             the_day = date(self.year, self.month, day)
-            for r in bookings:
-                # only check that r.depart is strictly greater than the_day,
+            for u in uses:
+                # only check that u.depart is strictly greater than the_day,
                 # since people don't need a bed on the day they leave.
-                if r.arrive <= the_day and r.depart > the_day:
-                    today_bookings.append(r)
-            if len(today_bookings) > 0:
-                guests_by_day[day] = today_bookings
+                if u.arrive <= the_day and u.depart > the_day:
+                    today_uses.append(u)
+            if len(today_uses) > 0:
+                guests_by_day[day] = today_uses
         return guests_by_day
 
     def day_cell(self, cssclass, body):

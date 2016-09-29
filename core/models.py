@@ -1315,7 +1315,7 @@ def booking_create_bill(sender, instance, **kwargs):
 
 class PaymentManager(models.Manager):
     def booking_payments_by_location(self, location):
-        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__location=location))
+        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__use__location=location))
         return booking_payments
 
     def subscription_payments_by_location(self, location):
@@ -1323,7 +1323,7 @@ class PaymentManager(models.Manager):
         return subscription_payments
 
     def booking_payments_by_resource(self, resource):
-        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__resource=resource))
+        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__use__resource=resource))
         return booking_payments
 
 

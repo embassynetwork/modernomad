@@ -17,7 +17,7 @@
 
 <h3>Booking Details</h3>
 
-{% for r in bookings %}
+{% for r in uses %}
 	<div class="booking-list-item">
 	<div class="booking-title">
 	<a id="booking{{r.id}}"></a>
@@ -59,7 +59,7 @@
 	
 	<script type="text/javascript">
 
-		{% if any_bookings %}
+		{% if any_uses %}
 			google.setOnLoadCallback(drawChart);
 			function drawChart() {
 				var container = document.getElementById('guestcalendar');
@@ -73,16 +73,16 @@
 				dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
 
 				dataTable.addRows([
-					{% for room, bookings_this_room in bookings_by_room %}
+					{% for room, uses_this_room in uses_by_room %}
 						{% with last_room=forloop.last %}
 
 						// note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1. 
-						{% for res_info in bookings_this_room %}	
+						{% for res_info in uses_this_room %}	
 							[ 
-							"{{room.name|safe}}", "{{res_info.booking.user.first_name|title}} ({{res_info.booking.status}})", 
+							"{{room.name|safe}}", "{{res_info.use.user.first_name|title}} ({{res_info.use.status}})", 
 								new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}), 
 								new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}), 
-								"<div class='guestinfo-tooltip'><h3>{{res_info.booking.user.first_name|title}}</h3><p><em>{{res_info.booking.status}}</em></p><p>Arrive: {{ res_info.booking.arrive}}</p><p>Depart: {{ res_info.booking.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.booking.user.profile.image_thumb}}'></div>"
+								"<div class='guestinfo-tooltip'><h3>{{res_info.use.user.first_name|title}}</h3><p><em>{{res_info.use.status}}</em></p><p>Arrive: {{ res_info.use.arrive}}</p><p>Depart: {{ res_info.use.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.use.user.profile.image_thumb}}'></div>"
 
 							{% if last_room and forloop.last %}
 								]

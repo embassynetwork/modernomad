@@ -180,7 +180,7 @@ def room_occupancy_month(room, month, year):
 
     # note the day parameter is meaningless
     report_date = datetime.date(year, month, 1)
-    bookings = Booking.objects.filter(resource=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+    uses = Use.objects.filter(resource=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
     # payments *received* this month for this room
     payments_for_room = Payment.objects.booking_payments_by_resource(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
@@ -205,20 +205,20 @@ def room_occupancy_month(room, month, year):
     externalized_fees = Decimal(0.0)
     internal_fees = Decimal(0.0)
     # occupancy for room this month
-    for r in bookings:
+    for u in uses:
         comp = False
         partial_payment = False
 
         # in case this Booking crossed a month boundary, first calculate
         # nights of this Booking that took place this month
-        if r.arrive >= start and r.depart <= end:
-            nights_this_month = (r.depart - r.arrive).days
-        elif r.arrive <= start and r.depart >= end:
+        if u.arrive >= start and u.depart <= end:
+            nights_this_month = (u.depart - u.arrive).days
+        elif u.arrive <= start and u.depart >= end:
             nights_this_month = (end - start).days
-        elif r.arrive < start:
-            nights_this_month = (r.depart - start).days
-        elif r.depart > end:
-            nights_this_month = (end - r.arrive).days
+        elif u.arrive < start:
+            nights_this_month = (u.depart - start).days
+        elif u.depart > end:
+            nights_this_month = (end - u.arrive).days
 
         # if it's the first of the month and the person left on the 1st, then
         # that's actually 0 days this month which we don't need to include.
@@ -227,26 +227,26 @@ def room_occupancy_month(room, month, year):
 
         nights_occupied += nights_this_month
 
-        if r.is_comped():
+        if u.booking.is_comped():
             total_comped_nights += nights_this_month
-            total_comped_value += nights_this_month*r.default_rate()
+            total_comped_value += nights_this_month*u.booking.default_rate()
             comp = True
             unpaid = False
         else:
 
-            total_user_value += (r.bill.amount()/r.total_nights())*nights_this_month
-            net_to_house += (r.bill.to_house()/r.total_nights())*nights_this_month
-            externalized_fees += (r.bill.non_house_fees()/r.total_nights())*nights_this_month
-            internal_fees += (r.bill.house_fees()/r.total_nights())*nights_this_month
+            total_user_value += (u.booking.bill.amount()/u.total_nights())*nights_this_month
+            net_to_house += (u.booking.bill.to_house()/u.total_nights())*nights_this_month
+            externalized_fees += (u.booking.bill.non_house_fees()/u.total_nights())*nights_this_month
+            internal_fees += (u.booking.bill.house_fees()/u.total_nights())*nights_this_month
 
-            if r.payments():
-                paid_rate = r.bill.to_house() / r.total_nights()
+            if u.booking.payments():
+                paid_rate = u.booking.bill.to_house() / u.total_nights()
                 payments_accrual += nights_this_month*paid_rate
 
             # if a Booking rate is set to 0 is automatically gets counted as a comp
-            if r.bill.total_owed() > 0:
-                outstanding_value += r.bill.total_owed()
-                partial_paid_bookings.append(r.id)
+            if u.booking.bill.total_owed() > 0:
+                outstanding_value += u.booking.bill.total_owed()
+                partial_paid_bookings.append(u.booking.id)
 
     params = [
         month,
@@ -414,7 +414,7 @@ def occupancy(request, location_slug):
 
     # note the day parameter is meaningless
     report_date = datetime.date(year, month, 1)
-    bookings = Booking.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+    uses = Use.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
     person_nights_data = []
     total_occupied_person_nights = 0
@@ -440,54 +440,54 @@ def occupancy(request, location_slug):
     # JKS note: this section breaks down income by whether it is income for this
     # month, for future months, from past months, for past months, for this
     # month, etc... but it turns out that this gets almost impossible to track
-    # because there's many edge cases causd by bookings being edited,
+    # because there's many edge cases causd by uses being edited,
     # appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
     # work on it, don't say i didn't warn you :).
 
     payments_this_month = Payment.objects.booking_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
     for p in payments_this_month:
-        r = p.bill.bookingbill.booking
+        u = p.bill.bookingbill.booking.use
         nights_before_this_month = datetime.timedelta(0)
         nights_after_this_month = datetime.timedelta(0)
-        if r.arrive < start and r.depart < start:
+        if u.arrive < start and u.depart < start:
             # all nights for this booking were in a previous month
-            nights_before_this_month = (r.depart - r.arrive)
+            nights_before_this_month = (u.depart - u.arrive)
 
-        elif r.arrive < start and r.depart <= end:
+        elif u.arrive < start and u.depart <= end:
             # only nights before and during this month, but night for this
             # month are calculated below so only tally the nights for before
             # this month here.
-            nights_before_this_month = (start - r.arrive)
+            nights_before_this_month = (start - u.arrive)
 
-        elif r.arrive >= start and r.depart <= end:
+        elif u.arrive >= start and u.depart <= end:
             # only nights this month, don't need to calculate this here because
             # it's calculated below.
             continue
 
-        elif r.arrive >= start and r.arrive <= end and r.depart > end:
+        elif u.arrive >= start and u.arrive <= end and u.depart > end:
             # some nights are after this month
-            nights_after_this_month = (r.depart - end)
+            nights_after_this_month = (u.depart - end)
 
-        elif r.arrive > end:
+        elif u.arrive > end:
             # all nights are after this month
-            nights_after_this_month = (r.depart - r.arrive)
+            nights_after_this_month = (u.depart - u.arrive)
 
-        elif r.arrive < start and r.depart > end:
+        elif u.arrive < start and u.depart > end:
             # there are some days paid for this month that belong to the previous month
-            nights_before_this_month = (start - r.arrive)
-            nights_after_this_month = (r.depart - end)
+            nights_before_this_month = (start - u.arrive)
+            nights_after_this_month = (u.depart - end)
 
         # in the event that there are multiple payments for a booking, this
         # will basically amortize each payment across all nights
-        income_for_future_months += nights_after_this_month.days*(p.to_house()/(r.depart - r.arrive).days)
-        income_for_past_months += nights_before_this_month.days*(p.to_house()/(r.depart - r.arrive).days)
+        income_for_future_months += nights_after_this_month.days*(p.to_house()/(u.depart - u.arrive).days)
+        income_for_past_months += nights_before_this_month.days*(p.to_house()/(u.depart - u.arrive).days)
 
-    for r in bookings:
+    for u in uses:
         comp = False
         partial_payment = False
         total_owed = 0.0
 
-        nights_this_month = r.use.nights_between(start, end)
+        nights_this_month = u.nights_between(start, end)
         # if it's the first of the month and the person left on the 1st, then
         # that's actually 0 days this month which we don't need to include.
         if nights_this_month == 0:
@@ -495,54 +495,54 @@ def occupancy(request, location_slug):
 
         # XXX Note! get_rate() returns the base rate, but does not incorporate
         # any discounts. so we use subtotal_amount here.
-        rate = r.bill.subtotal_amount()/r.total_nights()
+        rate = u.booking.bill.subtotal_amount()/u.total_nights()
 
-        room_occupancy[r.resource] = room_occupancy.get(r.resource, 0) + nights_this_month
+        room_occupancy[u.resource] = room_occupancy.get(u.resource, 0) + nights_this_month
 
-        if r.is_comped():
+        if u.booking.is_comped():
             total_comped_nights += nights_this_month
-            total_comped_income += nights_this_month*r.default_rate()
+            total_comped_income += nights_this_month*u.booking.default_rate()
             comp = True
             unpaid = False
         else:
             # the bill has the amount that goes to the house after fees
-            to_house_per_night = r.bill.to_house()/r.total_nights()
+            to_house_per_night = u.booking.bill.to_house()/u.total_nights()
             total_income += nights_this_month*to_house_per_night
-            this_room_income = room_income.get(r.resource, 0)
+            this_room_income = room_income.get(u.resource, 0)
             this_room_income += nights_this_month*to_house_per_night
-            room_income[r.resource] = this_room_income
+            room_income[u.resource] = this_room_income
 
             # If there are payments, calculate the payment rate
-            if r.payments():
-                paid_rate = (r.bill.total_paid() - r.bill.non_house_fees()) / r.total_nights()
+            if u.booking.payments():
+                paid_rate = (u.booking.bill.total_paid() - u.booking.bill.non_house_fees()) / u.total_nights()
                 if paid_rate != rate:
-                    logger.debug("booking %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate))
+                    logger.debug("booking %d has paid rate = $%d and rate set to $%d" % (u.booking.id, paid_rate, rate))
                     paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
-                    payment_discrepancies.append(r.id)
+                    payment_discrepancies.append(u.booking.id)
 
             # JKS this section tracks whether payment for this booking
             # were made in a prior month or in this month.
-            if r.is_paid():
-                for p in r.payments():
+            if u.booking.is_paid():
+                for p in u.booking.payments():
                     if p.payment_date.date() < start:
-                        income_from_past_months += nights_this_month*(p.to_house()/(r.depart - r.arrive).days)
+                        income_from_past_months += nights_this_month*(p.to_house()/(u.depart - u.arrive).days)
                     # if the payment was sometime this month, we account for
                     # it. if it was in a future month, we'll show it as "income
                     # for previous months" in that month. we skip it here.
                     elif p.payment_date.date() < end:
-                        income_for_this_month += nights_this_month*(p.to_house()/(r.depart - r.arrive).days)
+                        income_for_this_month += nights_this_month*(p.to_house()/(u.depart - u.arrive).days)
                     unpaid = False
             else:
                 unpaid_total += (to_house_per_night*nights_this_month)
                 unpaid = True
-                if r.bill.total_owed() < r.bill.amount():
+                if u.booking.bill.total_owed() < u.booking.bill.amount():
                     partial_payment = True
-                    total_owed = r.bill.total_owed()
+                    total_owed = u.booking.bill.total_owed()
 
         person_nights_data.append({
-            'booking': r,
+            'booking': u,
             'nights_this_month': nights_this_month,
-            'room': r.resource.name,
+            'room': u.resource.name,
             'rate': rate,
             'partial_payment': partial_payment,
             'total_owed': total_owed,
@@ -647,11 +647,11 @@ def calendar(request, location_slug):
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
     report_date = datetime.date(year, month, 1)
 
-    bookings = (Booking.objects.filter(Q(status="confirmed") | Q(status="approved"))
+    uses = (Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
                     .filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
 
     rooms = Resource.objects.filter(location=location)
-    bookings_by_room = []
+    uses_by_room = []
     empty_rooms = 0
 
     # this is tracked here to help us determine what height the timeline div
@@ -660,46 +660,46 @@ def calendar(request, location_slug):
     for room in rooms:
         num_rows_in_chart += room.max_daily_availabilities_between(start, end)
 
-    if len(bookings) == 0:
-        any_bookings = False
+    if len(uses) == 0:
+        any_uses = False
     else:
-        any_bookings = True
+        any_uses = True
 
     for room in rooms:
-        bookings_this_room = []
+        uses_this_room = []
 
-        bookings_list_this_room = list(bookings.filter(resource=room))
+        uses_list_this_room = list(uses.filter(resource=room))
 
-        if len(bookings_list_this_room) == 0:
+        if len(uses_list_this_room) == 0:
             empty_rooms += 1
             num_rows_in_chart -= room.max_daily_availabilities_between(start, end)
 
         else:
-            for r in bookings_list_this_room:
-                if r.arrive < start:
+            for u in uses_list_this_room:
+                if u.arrive < start:
                     display_start = start
                 else:
-                    display_start = r.arrive
-                if r.depart > end:
+                    display_start = u.arrive
+                if u.depart > end:
                     display_end = end
                 else:
-                    display_end = r.depart
-                bookings_this_room.append({'booking': r, 'display_start': display_start, 'display_end': display_end})
+                    display_end = u.depart
+                uses_this_room.append({'use': u, 'display_start': display_start, 'display_end': display_end})
 
-            bookings_by_room.append((room, bookings_this_room))
+            uses_by_room.append((room, uses_this_room))
 
-    logger.debug("Bookings by Room for calendar view:")
-    logger.debug(bookings_by_room)
+    logger.debug("Uses by Room for calendar view:")
+    logger.debug(uses_by_room)
 
     # create the calendar object
-    guest_calendar = GuestCalendar(bookings, year, month, location).formatmonth(year, month)
+    guest_calendar = GuestCalendar(uses, year, month, location).formatmonth(year, month)
 
     return render(
         request,
         "calendar.html",
         {
-            'bookings': bookings,
-            'bookings_by_room': bookings_by_room,
+            'uses': uses,
+            'uses_by_room': uses_by_room,
             'month_start': start,
             'month_end': end,
             "next_month": next_month,
@@ -708,7 +708,7 @@ def calendar(request, location_slug):
             "report_date": report_date,
             'location': location,
             'empty_rooms': empty_rooms,
-            'any_bookings': any_bookings,
+            'any_uses': any_uses,
             'calendar': mark_safe(guest_calendar)
         }
     )
