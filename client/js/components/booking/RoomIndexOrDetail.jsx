@@ -4,6 +4,7 @@ import RoomDetail from './RoomDetail'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import _ from 'lodash'
+import moment from 'moment'
 
 const resourcesQuery = gql`
 query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depart: DateTime!) {
@@ -72,8 +73,8 @@ const RoomIndexOrDetail = graphql(resourcesQuery, {
     return {
       variables: {
         locationSlug: props.routeParams.location,
-        arrive: "2016-09-03T20:56:35.450686",
-        depart: "2016-09-05T20:56:35.450686"
+        arrive: moment(props.location.query.arrive).format('Y-MM-DTHH:mm:ss.ms'),
+        depart: moment(props.location.query.depart).format('Y-MM-DTHH:mm:ss.ms')
       }
     }
   }
