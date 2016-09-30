@@ -20,7 +20,6 @@ export default class RoomIndex extends React.Component {
     this.props.onFilterChange({dates: dates})
   }
 
-
   handleSelect(selectedKey) {
     this.setState({activeKey: selectedKey})
     if (selectedKey == 1) {

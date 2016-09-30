@@ -9,7 +9,6 @@ export default class RoomContainer extends React.Component {
   }
 
   reFilter(filters) {
-    this.setState({rooms: []})
     const formattedDates = {arrive: filters.dates.arrive.format('MM/DD/YYYY'), depart: filters.dates.depart.format('MM/DD/YYYY')}
     browserHistory.push({
       pathname: '/locations/'+this.props.routeParams.location+'/stay',

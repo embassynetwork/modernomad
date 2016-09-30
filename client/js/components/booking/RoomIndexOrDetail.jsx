@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react'
+import { browserHistory } from 'react-router'
 import RoomContainer from './RoomContainer'
 import RoomDetail from './RoomDetail'
 import gql from 'graphql-tag'
@@ -36,10 +37,18 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
     const routeParams = this.props.routeParams
 
     if (routeParams.id) {
-      return <RoomDetail {...this.props} room={this.oneResource(routeParams.id)} />
+      return <RoomDetail {...this.props} room={this.oneResource(routeParams.id)} onFilterChange={this.reFilter.bind(this)} query={this.props.location.query} />
     } else {
       return <RoomContainer {...this.props} rooms={this.allResources()} />
     }
+  }
+
+  reFilter(filters) {
+    const formattedDates = {arrive: filters.dates.arrive.format('MM/DD/YYYY'), depart: filters.dates.depart.format('MM/DD/YYYY')}
+    browserHistory.push({
+      pathname: '/locations/'+this.props.routeParams.location+'/stay/room/'+this.props.routeParams.id,
+      query: formattedDates
+    })
   }
 
   allResources() {
@@ -52,7 +61,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
   }
 
   oneResource(id) {
-    return this.allResources()[0]
+    return _.find(this.allResources(), {rid: parseInt(id)})
   }
 
   render() {
