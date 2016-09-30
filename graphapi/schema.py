@@ -4,6 +4,7 @@ import graphapi.schemas.occupants
 import graphapi.schemas.locations
 import graphapi.schemas.users
 import graphapi.schemas.resources
+import graphapi.schemas.bookings
 
 
 class Query(
@@ -15,4 +16,9 @@ class Query(
 ):
     pass
 
-schema = graphene.Schema(query=Query)
+
+class Mutation(graphene.ObjectType):
+    create_booking = graphapi.schemas.bookings.CreateBooking.Field()
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
