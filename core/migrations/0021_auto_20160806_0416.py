@@ -17,17 +17,17 @@ class Migration(migrations.Migration):
         migrations.RenameModel(old_name='Room', new_name='Resource'),
         migrations.RenameField(
             model_name='reservable',
-			old_name = 'room',
+            old_name = 'room',
             new_name='resource'
         ),
         migrations.RenameField(
             model_name='reservation',
-			old_name = 'room',
+            old_name = 'room',
             new_name='resource'
         ),
         migrations.RenameField(
             model_name='roomimage',
-			old_name = 'room',
+            old_name = 'room',
             new_name='resource'
         ),
     ]

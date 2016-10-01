@@ -2,42 +2,42 @@
 
 {% block user_content_area %}
 
-	{% if u == user or user_is_house_admin_somewhere %}
+    {% if u == user or user_is_house_admin_somewhere %}
 
-		<div class="tab-content">
+        <div class="tab-content">
 
-			<div role="tabpanel" class="tab-pane active" id="profile">
-				{% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
+            <div role="tabpanel" class="tab-pane active" id="profile">
+                {% if not u.profile.bio and not u.profile.links and not u.profile.projects and not u.profile.sharing and not u.profile.discussion %}
 
-					{% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
+                    {% ifequal u user %} You have {% else %} {{u.first_name|title}} has {% endifequal %} not shared any profile information yet.
 
-				{% else %}
-					<h4>About {{u.first_name|title}}:</h4>
-					<p>{{ u.profile.bio|default:"Nothing written yet." }}</p>
+                {% else %}
+                    <h4>About {{u.first_name|title}}:</h4>
+                    <p>{{ u.profile.bio|default:"Nothing written yet." }}</p>
 
-					<h4>Current Projects:</h4>
-					<p>{{ u.profile.projects|default:"Empty" }}</p>
+                    <h4>Current Projects:</h4>
+                    <p>{{ u.profile.projects|default:"Empty" }}</p>
 
-					<h4>Learning and Sharing Interests:</h4>
-					<p>{{ u.profile.sharing|default:"Empty" }}</p>
+                    <h4>Learning and Sharing Interests:</h4>
+                    <p>{{ u.profile.sharing|default:"Empty" }}</p>
 
-					<h4>Discussion topics:</h4>
-					<p>{{ u.profile.discussion|default:"Empty" }}</p>
+                    <h4>Discussion topics:</h4>
+                    <p>{{ u.profile.discussion|default:"Empty" }}</p>
 
-					{% include "snippets/profile_links.html" %}
-				{% endif %}
-			</div>
+                    {% include "snippets/profile_links.html" %}
+                {% endif %}
+            </div>
 
-			{% for form, room_id, room_name, location, has_image, room_capacity in room_forms %}
-				{% with page='user_detail' username=u.username %}
-					<div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
-						{% include 'snippets/room_edit_form.html' %}
-					</div> <!-- end events tab -->
-				{% endwith %}
-			{% endfor %}
+            {% for form, room_id, room_name, location, has_image, room_capacity in room_forms %}
+                {% with page='user_detail' username=u.username %}
+                    <div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
+                        {% include 'snippets/room_edit_form.html' %}
+                    </div> <!-- end events tab -->
+                {% endwith %}
+            {% endfor %}
 
-		</div><!-- end tab content -->
+        </div><!-- end tab content -->
 
-	{% endif %}
+    {% endif %}
 
 {% endblock %}

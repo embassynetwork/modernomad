@@ -57,5 +57,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-		migrations.RunPython(migrate_fields_from_booking_to_use, reverse_migrate_fields_from_booking_to_use)
+        migrations.RunPython(migrate_fields_from_booking_to_use, reverse_migrate_fields_from_booking_to_use)
     ]

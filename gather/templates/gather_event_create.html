@@ -5,30 +5,30 @@
 
 {% if messages %}
 <div class="messages">
-	{% for message in messages %}
-	<div class="alert alert-info">
-		<button type="button" class="close" data-dismiss="alert">×</button>
-		<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-	</div>
-	{% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-info">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 
 
 <div class="col-md-8" id="event-preamble">
-	{% if not is_event_admin %}
-		{% include 'snippets/event_hosting_info.html' %}
-	{% else %}
-		{% include 'snippets/event_admin_info.html' %}
-	{% endif %}
+    {% if not is_event_admin %}
+        {% include 'snippets/event_hosting_info.html' %}
+    {% else %}
+        {% include 'snippets/event_admin_info.html' %}
+    {% endif %}
 </div>
 
 <div class="col-md-8">
 
-	<form class="form-horizontal" enctype="multipart/form-data" method="post" action="{% url 'gather_create_event' location.slug %}">{% csrf_token %}
-		{% include "snippets/event_form_body.html" %}
-		<input id="submit-event" type="submit" class="btn btn-lg" value="Submit Event">
-	</form>
+    <form class="form-horizontal" enctype="multipart/form-data" method="post" action="{% url 'gather_create_event' location.slug %}">{% csrf_token %}
+        {% include "snippets/event_form_body.html" %}
+        <input id="submit-event" type="submit" class="btn btn-lg" value="Submit Event">
+    </form>
 </div>
 <div class="col-md-4">
 </div>
@@ -39,35 +39,35 @@
 <script type="text/javascript" src="{% static 'js/jquery-ui-timepicker-addon.js' %}"></script>
 <script>
 
-	{% include "snippets/js/organizers_autocomplete.js" %}
+    {% include "snippets/js/organizers_autocomplete.js" %}
 
-	$('#id_start').datetimepicker({
-		controlType: 'select'
-	});	
-	$('#id_end').datetimepicker({
-		controlType: 'select'
-	});
+    $('#id_start').datetimepicker({
+        controlType: 'select'
+    });    
+    $('#id_end').datetimepicker({
+        controlType: 'select'
+    });
 
-	clean_slug_value = function(e) {
-		// make sure there's only letters, numbers and hyphens by removing
-		// special characters, and replace spaces with hyphens (making sure
-		// only one hyphen in a row). force the slug to lowercase. 
-		str = $(e.data.elem_id).val();
-		slugified = str.replace(/[^\d\w\- ]/g, "").replace(/ /g,"-").replace(/-{2,}/, "-").toLowerCase();
+    clean_slug_value = function(e) {
+        // make sure there's only letters, numbers and hyphens by removing
+        // special characters, and replace spaces with hyphens (making sure
+        // only one hyphen in a row). force the slug to lowercase. 
+        str = $(e.data.elem_id).val();
+        slugified = str.replace(/[^\d\w\- ]/g, "").replace(/ /g,"-").replace(/-{2,}/, "-").toLowerCase();
 
-		// check max length
-		if (slugified.length > 50) {
-			slugified = slugified.substring(0,50);
-		}
-		// make sure there's no trailing hyphens (after trimming, because that
-		// will change the last character)
-		slugified = slugified.replace(/-$/, "");
-		$("#id_slug").val(slugified);
-		return false;
-	};
+        // check max length
+        if (slugified.length > 50) {
+            slugified = slugified.substring(0,50);
+        }
+        // make sure there's no trailing hyphens (after trimming, because that
+        // will change the last character)
+        slugified = slugified.replace(/-$/, "");
+        $("#id_slug").val(slugified);
+        return false;
+    };
 
-	$("#id_title").on('input', {'elem_id': "#id_title"}, clean_slug_value);
-	$("#id_slug").focusout({'elem_id': "#id_slug"}, clean_slug_value)
+    $("#id_title").on('input', {'elem_id': "#id_title"}, clean_slug_value);
+    $("#id_slug").focusout({'elem_id': "#id_slug"}, clean_slug_value)
 
 
 </script>

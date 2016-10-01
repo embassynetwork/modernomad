@@ -4,68 +4,68 @@
 {% block content %}
 
 <div class="row pull-right">
-	<div class="col-md-12">
-		<a href="{% url 'booking_manage_create' location.slug %}">
-			<i class="fa fa-plus-circle"></i>
-			New Booking</a>
-	</div>
+    <div class="col-md-12">
+        <a href="{% url 'booking_manage_create' location.slug %}">
+            <i class="fa fa-plus-circle"></i>
+            New Booking</a>
+    </div>
 </div>
 
 <ul class="nav nav-tabs">
-	<li class="active"><a href="#pending" data-toggle="tab">Pending ({{pending.count}})</a></li>
-	<li><a href="#approved" data-toggle="tab">Approved ({{approved.count}})</a></li>
-	<li><a href="#confirmed" data-toggle="tab">Confirmed ({{confirmed.count}})</a></li>
-	<li><a href="#owing" data-toggle="tab">Owing ({{owing|length}})</a></li>
-	<li><a href="#canceled" data-toggle="tab">Canceled ({{canceled.count}})</a></li>
+    <li class="active"><a href="#pending" data-toggle="tab">Pending ({{pending.count}})</a></li>
+    <li><a href="#approved" data-toggle="tab">Approved ({{approved.count}})</a></li>
+    <li><a href="#confirmed" data-toggle="tab">Confirmed ({{confirmed.count}})</a></li>
+    <li><a href="#owing" data-toggle="tab">Owing ({{owing|length}})</a></li>
+    <li><a href="#canceled" data-toggle="tab">Canceled ({{canceled.count}})</a></li>
 </ul>
 
 <div class="tab-content" id="booking-list-tab-content">
-	
-	<div class="tab-pane active" id="pending">
-		{% with bookings=pending %}
-			{% include "snippets/booking_list_table.html" %}
-		{% endwith %}
-	</div>
+    
+    <div class="tab-pane active" id="pending">
+        {% with bookings=pending %}
+            {% include "snippets/booking_list_table.html" %}
+        {% endwith %}
+    </div>
 
-	<div class="tab-pane" id="approved">
-		{% with bookings=approved %}
-			{% include "snippets/booking_list_table.html" %}
-		{% endwith %}
-	</div>
+    <div class="tab-pane" id="approved">
+        {% with bookings=approved %}
+            {% include "snippets/booking_list_table.html" %}
+        {% endwith %}
+    </div>
 
-	<div class="tab-pane" id="confirmed">
-		{% with bookings=confirmed %}
-			{% include "snippets/booking_list_table.html" %}
-		{% endwith %}
-		<em>Only bookings with departure date in the future shown by default.</em> [ <a href="?show_all=True">Show All</a> ]
-	</div>
+    <div class="tab-pane" id="confirmed">
+        {% with bookings=confirmed %}
+            {% include "snippets/booking_list_table.html" %}
+        {% endwith %}
+        <em>Only bookings with departure date in the future shown by default.</em> [ <a href="?show_all=True">Show All</a> ]
+    </div>
 
-	<div class="tab-pane" id="owing">
-		{% with bookings=owing %}
-			<div class="bottom-spacer"><em>Only bookings confirmed but unpaid are shown.</em> </div>
-			{% include "snippets/booking_list_table.html" %}
-		{% endwith %}
-	</div>
+    <div class="tab-pane" id="owing">
+        {% with bookings=owing %}
+            <div class="bottom-spacer"><em>Only bookings confirmed but unpaid are shown.</em> </div>
+            {% include "snippets/booking_list_table.html" %}
+        {% endwith %}
+    </div>
 
-	<div class="tab-pane" id="canceled">
-		{% with bookings=canceled %}
-			{% include "snippets/booking_list_table.html" %}
-		{% endwith %}
-		[ <a href="?show_all=True">Show All</a> ]
-	</div>
+    <div class="tab-pane" id="canceled">
+        {% with bookings=canceled %}
+            {% include "snippets/booking_list_table.html" %}
+        {% endwith %}
+        [ <a href="?show_all=True">Show All</a> ]
+    </div>
 
-	<div id="booking-manage-detail"> </div>
+    <div id="booking-manage-detail"> </div>
 </div>
 
 <div class="row row-spacer">
-	<div class="col-md-12">
-		<form method="POST">
-			<strong>Go To Booking:</strong>
-			<input name="booking_id" size="4" placeholder="ID"/>
-			<input type="submit" value="Go!"/>
-			{% csrf_token %}
-		</form>
-	</div>
+    <div class="col-md-12">
+        <form method="POST">
+            <strong>Go To Booking:</strong>
+            <input name="booking_id" size="4" placeholder="ID"/>
+            <input type="submit" value="Go!"/>
+            {% csrf_token %}
+        </form>
+    </div>
 </div>
 
 
@@ -92,20 +92,20 @@ jQuery.extend( jQuery.fn.dataTableExt.oSort, {
 } );
 
 $(document).ready(function() {
-	var hash = window.location.hash;
-	hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+    var hash = window.location.hash;
+    hash && $('ul.nav a[href="' + hash + '"]').tab('show');
 
-	$('.nav-tabs a').click(function (e) {
-		$(this).tab('show');
-		var scrollmem = $('body').scrollTop();
-		window.location.hash = this.hash;
-		$('html,body').scrollTop(scrollmem);
-	});
+    $('.nav-tabs a').click(function (e) {
+        $(this).tab('show');
+        var scrollmem = $('body').scrollTop();
+        window.location.hash = this.hash;
+        $('html,body').scrollTop(scrollmem);
+    });
 
-	$('.booking-list').dataTable({
-	"iDisplayLength": 50,
-	"order": [[ 2, "asc"]],
-	"aoColumns": [
+    $('.booking-list').dataTable({
+    "iDisplayLength": 50,
+    "order": [[ 2, "asc"]],
+    "aoColumns": [
                 { "sType": "numeric" },
                 { "sType": "string" },
                 { "sType": "date" },
@@ -116,7 +116,7 @@ $(document).ready(function() {
                 { "sType": "currency" },
                 { "sType": "html" }
             ]
-	});
+    });
 } );
 </script>
 {% endblock %}

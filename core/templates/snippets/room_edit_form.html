@@ -1,59 +1,59 @@
 {% load staticfiles %}
 
 <form role="form" method="post" class="room-form" enctype="multipart/form-data"
-		{% if room_id %}
-			action="{% url 'location_edit_room' location.slug room_id %}"
-		{% else %}
-			action="{% url 'location_new_room' location.slug %}"
-		{% endif %}
-	>{% csrf_token %}
+        {% if room_id %}
+            action="{% url 'location_edit_room' location.slug room_id %}"
+        {% else %}
+            action="{% url 'location_new_room' location.slug %}"
+        {% endif %}
+    >{% csrf_token %}
 
-	{% if form.instance.pk %}
-		<h4 class="row-spacer">Editing {{ form.instance.name|title }}</h4>
-	{% else %}
-		<h4 class="row-spacer">New Room</h4>
-	{% endif %}
+    {% if form.instance.pk %}
+        <h4 class="row-spacer">Editing {{ form.instance.name|title }}</h4>
+    {% else %}
+        <h4 class="row-spacer">New Room</h4>
+    {% endif %}
 
-	{% for field in form %}
+    {% for field in form %}
 
-		{% if not field.is_hidden %}
-			<div class="form-group">
-			{{ field.errors }}
-			{{ field.label_tag }}
-			<span class="form-help-text">{{ field.help_text}}</span>
-			{% if field.name == 'default_rate' %}
-				<div class="input-group">
-				<div class="input-group-addon">$</div>
-			{% endif %}
-			{{ field }}
-			{% if field.name == 'default_rate' %}
-				</div>
-			{% endif %}
-			</div>
-			{% if field.name == 'image' %}
-				<div class="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
-					{% if form.instance.pk %}
-						<img class="img-responsive" id="id_image_preview" src="{{ form.instance.image.url }}">
-					{% else %}
-						<img class="img-responsive" id="id_image_preview" src="http://placehold.it/800x600">
-					{% endif %}
-				</div>
-			{% endif %}
-		{% else %}
-			{{ field }}
-		{% endif %}
+        {% if not field.is_hidden %}
+            <div class="form-group">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            <span class="form-help-text">{{ field.help_text}}</span>
+            {% if field.name == 'default_rate' %}
+                <div class="input-group">
+                <div class="input-group-addon">$</div>
+            {% endif %}
+            {{ field }}
+            {% if field.name == 'default_rate' %}
+                </div>
+            {% endif %}
+            </div>
+            {% if field.name == 'image' %}
+                <div class="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
+                    {% if form.instance.pk %}
+                        <img class="img-responsive" id="id_image_preview" src="{{ form.instance.image.url }}">
+                    {% else %}
+                        <img class="img-responsive" id="id_image_preview" src="http://placehold.it/800x600">
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            {{ field }}
+        {% endif %}
 
-	{% endfor %}
-	<input type="hidden" name="page" value="{{page}}">
-	<input type="hidden" name="username" value="{{username}}">
-	<button type="submit" class="top-spacer btn btn-default">Submit</button>
+    {% endfor %}
+    <input type="hidden" name="page" value="{{page}}">
+    <input type="hidden" name="username" value="{{username}}">
+    <button type="submit" class="top-spacer btn btn-default">Submit</button>
 </form>
 
 <div id="react-app-{{room_id}}"></div>
 <script type="text/javascript">
-	if ({{room_id}} > 0 ) {
-		window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
-	}
+    if ({{room_id}} > 0 ) {
+        window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
+    }
 </script>
 
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
@@ -65,9 +65,9 @@
         // relies on the DOM structure of bootstraps dropdown menus, fyi.
         $("#manage_rooms_room_name_{{room_id}}").parent().parent().addClass("active");
 
-	} else {
+    } else {
         $("#manage_rooms_new_room").addClass("active");
-	}
+    }
 
     jQuery.validator.addMethod("imageExists", function(value, element) {
         // will be None if there is no instance
@@ -134,11 +134,11 @@
         return true;
     })
 
-	// multiple select using search and tags.
-	$(".chosen-select").chosen({
-		no_results_text: "No user with that username. Make sure you are searching by username.",
-		width: "95%",
-		placeholder_text_multiple: "Search by username."
-	});
+    // multiple select using search and tags.
+    $(".chosen-select").chosen({
+        no_results_text: "No user with that username. Make sure you are searching by username.",
+        width: "95%",
+        placeholder_text_multiple: "Search by username."
+    });
 
 </script>

@@ -3,80 +3,80 @@
 
 <div class="row">
 
-	<div class="col-md-4">
-	<ul class="nav nav-tabs nav-justified" id="booking-tabs" role="tablist">
-		<li class="booking-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms</a></li>
-		<li class="booking-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Matrix</a></li>
-	</ul>
-	</div>
+    <div class="col-md-4">
+    <ul class="nav nav-tabs nav-justified" id="booking-tabs" role="tablist">
+        <li class="booking-info-tab active" role="presentation"><a href="#chooseroom" aria-controls="chooseroom" role="tab" data-toggle="tab">Available Rooms</a></li>
+        <li class="booking-info-tab" role="presentation"><a href="#showavailability" aria-controls="showavailability" role="tab" data-toggle="tab" >Availability Matrix</a></li>
+    </ul>
+    </div>
 
-	<div class="tab-content">
+    <div class="tab-content">
 
-		<div role="tabpanel" class="tab-pane active" id="chooseroom">
-			{% include 'snippets/available_rooms.html' %}
-		</div><!-- end tab chooseroom -->
+        <div role="tabpanel" class="tab-pane active" id="chooseroom">
+            {% include 'snippets/available_rooms.html' %}
+        </div><!-- end tab chooseroom -->
 
-		<div role="tabpanel" class="tab-pane" id="showavailability">
-			{% include 'snippets/availability_details.html' %}
-		</div>
-	
--	</div>
+        <div role="tabpanel" class="tab-pane" id="showavailability">
+            {% include 'snippets/availability_details.html' %}
+        </div>
+    
+-    </div>
 
 <script>
 
 $(function(){
 
-	$("#optional-fields-header").click(function() {
-		$("#optional-fields").slideToggle("slow");
-		$("#optional-fields-header-icon").toggleClass("fa-chevron-circle-right fa-chevron-circle-down")
-	});
+    $("#optional-fields-header").click(function() {
+        $("#optional-fields").slideToggle("slow");
+        $("#optional-fields-header-icon").toggleClass("fa-chevron-circle-right fa-chevron-circle-down")
+    });
 
     $('[data-toggle="tooltip"]').tooltip();
-	$("#the-booking-form").waypoint('sticky');
+    $("#the-booking-form").waypoint('sticky');
 
-	$(".room-select .billing-message").hide();
+    $(".room-select .billing-message").hide();
 
-	$(".room-select").click(function() {
-		console.log('in room select');
-		$("#the-booking-form").hide();
-		// relies on the fact that the input tag is directly after the label tag
-		// for each room option.
-		$(this).next().prop("checked", true);
-		room_id = $(this).next().val();
-		room_info_div_id = "#room-info-" + room_id;
-		$('#res-selected-room').val(room_id)
+    $(".room-select").click(function() {
+        console.log('in room select');
+        $("#the-booking-form").hide();
+        // relies on the fact that the input tag is directly after the label tag
+        // for each room option.
+        $(this).next().prop("checked", true);
+        room_id = $(this).next().val();
+        room_info_div_id = "#room-info-" + room_id;
+        $('#res-selected-room').val(room_id)
 
-		$(".room-info").hide();
-		
-		// update styling on the rooms that are not currently selected
-		$(".room-select").removeClass("emphasize");
-		$(".room-select").addClass("room-subtle");
-		$(".room-select .billing-message").hide();
+        $(".room-info").hide();
+        
+        // update styling on the rooms that are not currently selected
+        $(".room-select").removeClass("emphasize");
+        $(".room-select").addClass("room-subtle");
+        $(".room-select .billing-message").hide();
 
-		// update styling for the room that is currently selected.
-		$(this).removeClass("room-subtle");
-		$(this).addClass("emphasize");
-		if ($(window).width() <= 992 ) {
-			$(".emphasize .billing-message").slideDown( "slow");
-			$(".emphasize .billing-message").delay(1200);
-			$(".emphasize .billing-message").slideUp( "slow");
-		}
-		$("#the-booking-form").show();
-		$(room_info_div_id).show();
-	});
+        // update styling for the room that is currently selected.
+        $(this).removeClass("room-subtle");
+        $(this).addClass("emphasize");
+        if ($(window).width() <= 992 ) {
+            $(".emphasize .billing-message").slideDown( "slow");
+            $(".emphasize .billing-message").delay(1200);
+            $(".emphasize .billing-message").slideUp( "slow");
+        }
+        $("#the-booking-form").show();
+        $(room_info_div_id).show();
+    });
 
-	$("#the-booking-form").hide();
+    $("#the-booking-form").hide();
 
     $(document).ready(function() {
         set_summary_width('#the-booking-form');
     });
     $(window).resize(function() {
         set_summary_width('#the-booking-form');
-	});
+    });
 
-	$("#click-availability-tab").click(function() {
-		$('#booking-pills a[href="#showavailability"]').tab('show')
-	});
+    $("#click-availability-tab").click(function() {
+        $('#booking-pills a[href="#showavailability"]').tab('show')
+    });
 
 })
 

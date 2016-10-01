@@ -3,10 +3,10 @@
 {% if u.profile.links %}
 <div class="user-links">
 <span class="icon-spacer"><i class="icon-globe"></i></span>
-	{% with links=u.profile.links|split:', ' %}
-		{% for link in links %}
-			<span class="user-link"><a href="{{link}}">{{link}}</a></span>
-		{% endfor %}
-	{% endwith %}
+    {% with links=u.profile.links|split:', ' %}
+        {% for link in links %}
+            <span class="user-link"><a href="{{link}}">{{link}}</a></span>
+        {% endfor %}
+    {% endwith %}
 </div>
 {% endif %}

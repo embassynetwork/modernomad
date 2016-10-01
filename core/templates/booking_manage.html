@@ -14,12 +14,12 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-body center">
-		<p class="para-padding">
-			Share this link with a 3rd party if they are submitting payment for you.
-		</p>
-		<p class="bg-warning para-padding">
-			https://{{domain}}{% url 'booking_payment' location.slug r.uuid %}
-		</p>
+        <p class="para-padding">
+            Share this link with a 3rd party if they are submitting payment for you.
+        </p>
+        <p class="bg-warning para-padding">
+            https://{{domain}}{% url 'booking_payment' location.slug r.uuid %}
+        </p>
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@
 
 
 <div class="row" id="booking-nav">
-	<a href="{% url 'booking_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to bookings</a>
+    <a href="{% url 'booking_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to bookings</a>
 </div>
 
 {% if r.is_canceled %}
@@ -37,44 +37,44 @@
 
 <div class="row">
 
-	<div class="col-md-3">
-		{% if r.use.user.profile.image %}
-		<div class="img-polaroid">
-			<img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.use.user.profile.image|default:'data/avatars/default.jpg' }}" />
-		</div>
-		{% endif %}
-	</div>
+    <div class="col-md-3">
+        {% if r.use.user.profile.image %}
+        <div class="img-polaroid">
+            <img class="profile-page-img" src="{{ MEDIA_URL }}{{ r.use.user.profile.image|default:'data/avatars/default.jpg' }}" />
+        </div>
+        {% endif %}
+    </div>
 
 
-	<div class="col-md-7">
+    <div class="col-md-7">
 
-		<h1 class="res-field field">
-			{% if past_bookings or upcoming_bookings %}<i class="fa fa-repeat" id="repeat-guest-icon"></i>{% endif %}
-			{{ r.use.user.first_name|title }} {{r.use.user.last_name|title }}
-			<button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
-		</h1>
+        <h1 class="res-field field">
+            {% if past_bookings or upcoming_bookings %}<i class="fa fa-repeat" id="repeat-guest-icon"></i>{% endif %}
+            {{ r.use.user.first_name|title }} {{r.use.user.last_name|title }}
+            <button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+        </h1>
 
-		{% with notes=use_notes %}
-			{% include "snippets/notes.html" %}
-		{% endwith %}
+        {% with notes=use_notes %}
+            {% include "snippets/notes.html" %}
+        {% endwith %}
 
-		<div id="booking-details">
-			<h3>
-				{{ r.use.arrive }} - {{ r.use.depart }} {% if r.use.arrival_time %} around {{r.use.arrival_time}} {% endif %}
-				<span class="pull-right">Value: ${{ r.bill.amount }}</span>
-			</h3>
-			<div class="row">
-				<div class="col-sm-2"><strong>Room</strong></div><div class="col-sm-10">{{ r.use.resource }}</div>
-			</div>
-			<div class="row">
-				<div class="col-sm-2"><strong>Purpose</strong></div><div class="col-sm-10">{{ r.use.purpose }}</div>
-			</div>
-			<div class="row">
-				<div class="col-sm-2"><strong>Comments</strong></div><div class="col-sm-10">{{ r.comments|default:"None" }}</div>
-			</div>
-		</div>
+        <div id="booking-details">
+            <h3>
+                {{ r.use.arrive }} - {{ r.use.depart }} {% if r.use.arrival_time %} around {{r.use.arrival_time}} {% endif %}
+                <span class="pull-right">Value: ${{ r.bill.amount }}</span>
+            </h3>
+            <div class="row">
+                <div class="col-sm-2"><strong>Room</strong></div><div class="col-sm-10">{{ r.use.resource }}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2"><strong>Purpose</strong></div><div class="col-sm-10">{{ r.use.purpose }}</div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2"><strong>Comments</strong></div><div class="col-sm-10">{{ r.comments|default:"None" }}</div>
+            </div>
+        </div>
 
-	</div>
+    </div>
 
 </div>
 
@@ -84,59 +84,59 @@
 
 <div class="row" class="bottom-pad-thirty">
 
-	<div class="col-md-3">
-		<div class="res-actions-secondary"><h2>Manage</h2></div>
-		<ul class="nav nav-pills nav-stacked" role="tablist">
-			<li class="active"><a href="#booking-manage-calendar" data-toggle="pill"><h4>Capacity</h4></a></li>
-			<li><a role="tab" href="#booking-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
-			<li><a role="tab" href="#booking-manage-bill" data-toggle="pill"><h4>Bill</h4></a></li>
-			<li><a role="tab" href="#booking-manage-payment" data-toggle="pill"><h4>Payment</h4></a></li>
-			<li><a role="tab" href="#booking-manage-user-info" data-toggle="pill"><h4>User</h4></a></li>
-		</ul>
-	</div>
+    <div class="col-md-3">
+        <div class="res-actions-secondary"><h2>Manage</h2></div>
+        <ul class="nav nav-pills nav-stacked" role="tablist">
+            <li class="active"><a href="#booking-manage-calendar" data-toggle="pill"><h4>Capacity</h4></a></li>
+            <li><a role="tab" href="#booking-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
+            <li><a role="tab" href="#booking-manage-bill" data-toggle="pill"><h4>Bill</h4></a></li>
+            <li><a role="tab" href="#booking-manage-payment" data-toggle="pill"><h4>Payment</h4></a></li>
+            <li><a role="tab" href="#booking-manage-user-info" data-toggle="pill"><h4>User</h4></a></li>
+        </ul>
+    </div>
 
-	<div class="col-md-7">
+    <div class="col-md-7">
 
-		<div class="tab-content">
+        <div class="tab-content">
 
-			<div role="tabpanel" class="tab-pane active" id="booking-manage-calendar">
-				<h3>Capacity</h3>
-				{% include "snippets/res_status_area.html" %}
-				<hr>
-				{% include "snippets/manage-page-availability-calendar.html" %}
-			</div>
+            <div role="tabpanel" class="tab-pane active" id="booking-manage-calendar">
+                <h3>Capacity</h3>
+                {% include "snippets/res_status_area.html" %}
+                <hr>
+                {% include "snippets/manage-page-availability-calendar.html" %}
+            </div>
 
-			<div role="tabpanel" class="tab-pane" id="booking-manage-edit">
-				{% include "snippets/manage-page-advanced-edit.html" %}
-			</div>
+            <div role="tabpanel" class="tab-pane" id="booking-manage-edit">
+                {% include "snippets/manage-page-advanced-edit.html" %}
+            </div>
 
-			<div role="tabpanel" class="tab-pane" id="booking-manage-bill">
-				<h3>Bill Details</h3>
-				{% with bill=r.bill %}
-					{% include "snippets/manage-page-bill-details.html" %}
-				{% endwith %}
-			</div>
+            <div role="tabpanel" class="tab-pane" id="booking-manage-bill">
+                <h3>Bill Details</h3>
+                {% with bill=r.bill %}
+                    {% include "snippets/manage-page-bill-details.html" %}
+                {% endwith %}
+            </div>
 
-			<div role="tabpanel" class="tab-pane" id="booking-manage-payment">
-				<button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
-				{% with bill=r.bill %}
-					{% if bill.is_paid %}
-					<form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug r.id %}" >
-						{% csrf_token %}
-						<input class="btn-default btn" type="submit" value="Send Receipt">
-					</form>
-					{% endif %}
-					{% include "snippets/manage-page-payment-details.html" %}
-				{% endwith %}
-			</div>
+            <div role="tabpanel" class="tab-pane" id="booking-manage-payment">
+                <button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
+                {% with bill=r.bill %}
+                    {% if bill.is_paid %}
+                    <form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug r.id %}" >
+                        {% csrf_token %}
+                        <input class="btn-default btn" type="submit" value="Send Receipt">
+                    </form>
+                    {% endif %}
+                    {% include "snippets/manage-page-payment-details.html" %}
+                {% endwith %}
+            </div>
 
-			<div role="tabpanel" class="tab-pane" id="booking-manage-user-info">
-				{% include "snippets/manage-page-user-details.html" %}
-			</div>
+            <div role="tabpanel" class="tab-pane" id="booking-manage-user-info">
+                {% include "snippets/manage-page-user-details.html" %}
+            </div>
 
-		</div>
+        </div>
 
-	</div> <!-- end col-md-7 -->
+    </div> <!-- end col-md-7 -->
 </div>
 
 {% if r.is_canceled %}
@@ -151,161 +151,161 @@
 <script language="JavaScript">
 
 function UpdateRefundValue(id, val, field_status) {
-	$("#refund-amount-"+id).val(val);
-	if (field_status == "readonly") {
-		$("#refund-amount-"+id).attr("readonly", "readonly");
-		$("#refund-amount-"+id).addClass("disabled");
+    $("#refund-amount-"+id).val(val);
+    if (field_status == "readonly") {
+        $("#refund-amount-"+id).attr("readonly", "readonly");
+        $("#refund-amount-"+id).addClass("disabled");
 
-	} else {
-		$("#refund-amount-"+id).removeAttr("readonly");
-		$("#refund-amount-"+id).removeClass("disabled");
-	}
+    } else {
+        $("#refund-amount-"+id).removeAttr("readonly");
+        $("#refund-amount-"+id).removeClass("disabled");
+    }
 }
 
 function toggleRefundDetails(id){
-	if($('#refund-details-'+id).is(':hidden')) {
-		$('#refund-details-'+id).show();
-	} else {
-		$('#refund-details-'+id).hide();
-	}
+    if($('#refund-details-'+id).is(':hidden')) {
+        $('#refund-details-'+id).show();
+    } else {
+        $('#refund-details-'+id).hide();
+    }
 }
 toggleRefundDetails();
 
 function toggleNotes(){
-	if($('#notes-area').is(':hidden')) {
-		$('#notes-area').show();
-		$('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Booking notes');
-	} else {
-		$('#notes-area').hide();
-		$('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{use_notes|length}} booking note{{use_notes|length|pluralize}}');
-	}
+    if($('#notes-area').is(':hidden')) {
+        $('#notes-area').show();
+        $('#notes-link').html('<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"></span> Booking notes');
+    } else {
+        $('#notes-area').hide();
+        $('#notes-link').html('<span class="glyphicon glyphicon-expand" aria-hidden="true"></span> {{use_notes|length}} booking note{{use_notes|length|pluralize}}');
+    }
 }
 
 if ({{use_notes|length}} == 0) {
-	toggleNotes();
+    toggleNotes();
 }
 
 // don't have a default email selected when the modal pops up
 $("#which-email-select").prop("selectedIndex", -1);
 
 $("#which-email-select").change(function() {
-	// remove the previously active email form, if any
-	$("#selected-email").empty();
+    // remove the previously active email form, if any
+    $("#selected-email").empty();
 
-	// insert form fields with selected email template
-	var email_selection = $("select option:selected").prop("id")
-	var template_id = email_selection.match(/\d+/)
-	$("#selected-email").html($email_templates[template_id]);
+    // insert form fields with selected email template
+    var email_selection = $("select option:selected").prop("id")
+    var template_id = email_selection.match(/\d+/)
+    $("#selected-email").html($email_templates[template_id]);
 });
 
 var action_el;
 function ajax_call(el) {
-	console.log('el is');
-	console.log(action_el);
-	res_action = $(el).attr('id')
-	request = $.ajax({
-		data: {
-			'booking-action': res_action,
-			'csrfmiddlewaretoken': '{{ csrf_token }}'
-		},
-		type: $("#res-action-form").attr('method'), // GET or POST
-		url: $("#res-action-form").attr('action') // the url to hit
-	});
-	request.done(function(msg) { // on success..
-		console.log("Success!");
-		$("#res-status-area").html(msg);
-		if(res_action == "set-tentative" || res_action == 'res-charge-card') {
-			$("#emailModal").modal("show");
-		}
-		// also need to re-register the ajax calls on the new html divs one
-		// it is injected (or we won't be able to chain multiple calls
-		// together without refreshing the page).
-		register_actions();
-	});
-	request.fail(function(msg) {
-		console.log("Error in booking update:");
-		console.log(msg);
-		error_alert = '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">×</button><div {% if message.tags %} class="{{ message.tags }}"{% endif %}>The card was declined</div></div>'
-		$("#res-status-area").before(error_alert);
-	});
+    console.log('el is');
+    console.log(action_el);
+    res_action = $(el).attr('id')
+    request = $.ajax({
+        data: {
+            'booking-action': res_action,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        type: $("#res-action-form").attr('method'), // GET or POST
+        url: $("#res-action-form").attr('action') // the url to hit
+    });
+    request.done(function(msg) { // on success..
+        console.log("Success!");
+        $("#res-status-area").html(msg);
+        if(res_action == "set-tentative" || res_action == 'res-charge-card') {
+            $("#emailModal").modal("show");
+        }
+        // also need to re-register the ajax calls on the new html divs one
+        // it is injected (or we won't be able to chain multiple calls
+        // together without refreshing the page).
+        register_actions();
+    });
+    request.fail(function(msg) {
+        console.log("Error in booking update:");
+        console.log(msg);
+        error_alert = '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">×</button><div {% if message.tags %} class="{{ message.tags }}"{% endif %}>The card was declined</div></div>'
+        $("#res-status-area").before(error_alert);
+    });
 }
 
 function register_actions() {
-	// comping a booking reslts in a page reload so we can rely on the
-	// template language here.
-	payment_status = $("#payment-status").html();
+    // comping a booking reslts in a page reload so we can rely on the
+    // template language here.
+    payment_status = $("#payment-status").html();
 
-	if (payment_status == 'paid') {
-		$("#res-action-toggle-comp").remove();
-	}
+    if (payment_status == 'paid') {
+        $("#res-action-toggle-comp").remove();
+    }
 
-	$('.res-manage-action').click(function() {
-		// action_el gets reset every time res-manage-action is clicked
-		action_el = this;
-		console.log(action_el);
-		console.log('{{r.use.status}}');
-		console.log('{{room_has_capacity}}')
-		if ('{{r.use.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
-			$("#dialog-warn-full").dialog("open");
-		} else {
-			ajax_call(action_el);
-		}
-		return false;
-	})
+    $('.res-manage-action').click(function() {
+        // action_el gets reset every time res-manage-action is clicked
+        action_el = this;
+        console.log(action_el);
+        console.log('{{r.use.status}}');
+        console.log('{{room_has_capacity}}')
+        if ('{{r.use.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
+            $("#dialog-warn-full").dialog("open");
+        } else {
+            ajax_call(action_el);
+        }
+        return false;
+    })
 
 };
 
 $(document).ready(function() {
-	register_actions();
+    register_actions();
 
-	$email_templates = {};
-	{% for f in email_forms %}
-		$email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
-			'<form id="res-action-email-user" method=POST action="{% url 'booking_send_mail' location.slug r.id %}" >' +
-			"{% csrf_token %}" +
-			'<div class="form-group">' +
-			'<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
-			'<span class="email-form-label">From: </span> {{f.sender}} <br>' +
-			'<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
-			'{{f.body|escapejs}}' +
-			'{{f.footer|escapejs}}' +
-			'</div>' +
-			'<submit value="Send">' +
-			'<div class="modal-footer">' +
-				'<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
-				'<button type="submit" class="btn btn-primary">Send Email</button>' +
-			'</div>' +
-			'</div>'
-	{% endfor %}
-	console.log($email_templates);
+    $email_templates = {};
+    {% for f in email_forms %}
+        $email_templates[{{forloop.counter}}] = '<div id="form{{forloop.counter}}">' +
+            '<form id="res-action-email-user" method=POST action="{% url 'booking_send_mail' location.slug r.id %}" >' +
+            "{% csrf_token %}" +
+            '<div class="form-group">' +
+            '<span class="email-form-label">To: </span> {{f.recipient}} <br>' +
+            '<span class="email-form-label">From: </span> {{f.sender}} <br>' +
+            '<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
+            '{{f.body|escapejs}}' +
+            '{{f.footer|escapejs}}' +
+            '</div>' +
+            '<submit value="Send">' +
+            '<div class="modal-footer">' +
+                '<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
+                '<button type="submit" class="btn btn-primary">Send Email</button>' +
+            '</div>' +
+            '</div>'
+    {% endfor %}
+    console.log($email_templates);
 
-	$('#res-action-charge').submit(function() {
-		submitdata = {
-			'csrfmiddlewaretoken': '{{ csrf_token }}'
-		};
-		console.log(submitdata);
-		request = $.ajax({
-			data: submitdata,
-			type: $("#res-action-charge").attr('method'), // GET or POST
-			url: $("#res-action-charge").attr('action'), // the file to call
-		});
-		request.done(function(msg) { // on success..
-			console.log("Success!");
-			$("#res-action-charge-submit").val("PAID");
-			$("#res-action-charge-submit").addClass("disabled");
-			$("#res-status-area").addClass("paid-bg-img");
-		});
-		request.fail(function(msg) {
-			console.log("Error in booking update:");
-			console.log(msg);
-		});
+    $('#res-action-charge').submit(function() {
+        submitdata = {
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        };
+        console.log(submitdata);
+        request = $.ajax({
+            data: submitdata,
+            type: $("#res-action-charge").attr('method'), // GET or POST
+            url: $("#res-action-charge").attr('action'), // the file to call
+        });
+        request.done(function(msg) { // on success..
+            console.log("Success!");
+            $("#res-action-charge-submit").val("PAID");
+            $("#res-action-charge-submit").addClass("disabled");
+            $("#res-status-area").addClass("paid-bg-img");
+        });
+        request.fail(function(msg) {
+            console.log("Error in booking update:");
+            console.log(msg);
+        });
 
-		return false;
-	});
+        return false;
+    });
 
 
-	// wire up the ajax-y spinning animated GIF when an ajax call is made.
-	$('#spinner').ajaxStart(function () {
+    // wire up the ajax-y spinning animated GIF when an ajax call is made.
+    $('#spinner').ajaxStart(function () {
         $(this).fadeIn('fast');
     }).ajaxStop(function () {
         $(this).stop().fadeOut('fast');

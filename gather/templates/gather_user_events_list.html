@@ -3,53 +3,53 @@
 {% block body %}
 
 <ul class="nav nav-tabs" id="event-list-tabs">
-	<li class="dropdown active">
-		<a class="dropdown-toggle" data-toggle="dropdown" href="#"> Attendance <span class="caret"></span> </a>
-		<ul class="dropdown-menu">
-			<li class="active"><a href="#attend-upcoming" data-toggle="tab">Upcoming</a></li>
-			<li><a href="#attend-past" data-toggle="tab">Past</a></li>
-		</ul>
-	</li>
-	<li class="dropdown">
-		<a class="dropdown-toggle" data-toggle="dropdown" href="#"> Organizer <span class="caret"></span> </a>
-		<ul class="dropdown-menu">
-			<li><a href="#organize-upcoming" data-toggle="tab">Upcoming</a></li>
-			<li><a href="#organize-past" data-toggle="tab">Past</a></li>
-		</ul>
-	</li>
+    <li class="dropdown active">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Attendance <span class="caret"></span> </a>
+        <ul class="dropdown-menu">
+            <li class="active"><a href="#attend-upcoming" data-toggle="tab">Upcoming</a></li>
+            <li><a href="#attend-past" data-toggle="tab">Past</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Organizer <span class="caret"></span> </a>
+        <ul class="dropdown-menu">
+            <li><a href="#organize-upcoming" data-toggle="tab">Upcoming</a></li>
+            <li><a href="#organize-past" data-toggle="tab">Past</a></li>
+        </ul>
+    </li>
 
 </ul>
 
 <div class="tab-content">
 
-	<div id="attend-upcoming" class="tab-pane active fade in">
-		<h4>Upcoming</h4>
-		{% for event in events_attended_upcoming %}
-			{% include 'snippets/event-list-compact.html' %}
-		{% endfor %}
-	</div>
+    <div id="attend-upcoming" class="tab-pane active fade in">
+        <h4>Upcoming</h4>
+        {% for event in events_attended_upcoming %}
+            {% include 'snippets/event-list-compact.html' %}
+        {% endfor %}
+    </div>
 
-	<div id="attend-past" class="tab-pane fade">
-		<h4>Past</h4>
-		{% for event in events_attended_past %}
-			{% include 'snippets/event-list-compact.html' %}
-		{% endfor %}
-	</div>
+    <div id="attend-past" class="tab-pane fade">
+        <h4>Past</h4>
+        {% for event in events_attended_past %}
+            {% include 'snippets/event-list-compact.html' %}
+        {% endfor %}
+    </div>
 
-	<div id="organize-upcoming" class="tab-pane fade">
-		<h4>Upcoming</h4>
-		{% for event in events_organized_upcoming %}
-			{% include 'snippets/event-list-compact.html' %}
-		{% endfor %}
-	</div>
+    <div id="organize-upcoming" class="tab-pane fade">
+        <h4>Upcoming</h4>
+        {% for event in events_organized_upcoming %}
+            {% include 'snippets/event-list-compact.html' %}
+        {% endfor %}
+    </div>
 
-	<div id="organize-past" class="tab-pane fade">
-		<h4>Past</h4>
-		{% for event in events_organized_past %}
-			{% include 'snippets/event-list-compact.html' %}
-		{% endfor %}
-	</div>
-		
+    <div id="organize-past" class="tab-pane fade">
+        <h4>Past</h4>
+        {% for event in events_organized_past %}
+            {% include 'snippets/event-list-compact.html' %}
+        {% endfor %}
+    </div>
+        
 </div>
 
 {% endblock %}

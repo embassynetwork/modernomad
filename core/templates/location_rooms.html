@@ -3,20 +3,20 @@
 {% block content %}
 
 {% for room in rooms %}
-	<div class="row room-row">
-		<div class="col-md-3">
-			<a href="{% url 'view_room' location.slug room.id %}"><img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-info-image" /></a>
-		</div>
-		<div class="col-md-9">
-			<h3>
-				<a href="{% url 'view_room' location.slug room.id %}">{{ room.name|title }}</a>
-				- ${{ room.default_rate }}/night
-			</h3>
-		</div>
-		<div class="col-md-8">
-			<div>{{ room.description }}</div>
-		</div>
-	</div>
+    <div class="row room-row">
+        <div class="col-md-3">
+            <a href="{% url 'view_room' location.slug room.id %}"><img src="{{ MEDIA_URL }}{{room.image}}" class="img-rounded room-info-image" /></a>
+        </div>
+        <div class="col-md-9">
+            <h3>
+                <a href="{% url 'view_room' location.slug room.id %}">{{ room.name|title }}</a>
+                - ${{ room.default_rate }}/night
+            </h3>
+        </div>
+        <div class="col-md-8">
+            <div>{{ room.description }}</div>
+        </div>
+    </div>
 {% endfor %}
 
 {% endblock %}

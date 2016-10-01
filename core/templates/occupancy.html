@@ -6,89 +6,89 @@
 <h3>Occupancy report for {{report_date|date:"F, Y"}}</h3>
 
 <div id="by-month-nav">
-	<span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
-	<a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
-	<a href="{% url 'location_occupancy' location.slug %}"> Current </a> |
-	<a href="?month={{next_month.month}}&year={{next_month.year}}">Next</a>
-	<span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
+    <span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
+    <a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous</a> | 
+    <a href="{% url 'location_occupancy' location.slug %}"> Current </a> |
+    <a href="?month={{next_month.month}}&year={{next_month.year}}">Next</a>
+    <span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
 </div>
 
 <div class="row">
-	<div class="alert alert-warning" role="alert"><b>Note:</b> Totals on this page reflect net income to the community (minus any fees).</div>
+    <div class="alert alert-warning" role="alert"><b>Note:</b> Totals on this page reflect net income to the community (minus any fees).</div>
 </div>
 
 <div class="row top-spacer">
-	<div class="col-md-6">
-	<h4> Occupancy by Person Nights for {{report_date|date:"F"}}</h4>
-	<table class="table table-striped table-hover" cellspacing="0" width="100%">
-		<tbody>
-		<tr><td>Total guest nights</td><td>{{total_occupied_person_nights}}</td></tr>
-		<tr><td>Total reservable nights</td><td> {{total_reservable_days}}</td></tr>
-		<tr><td>Overall occupancy rate</td><td> {{overall_occupancy|floatformat:2}}%</td></tr>
-		<tr><td>Average guests per night</td><td> {{average_guests_per_day|floatformat:1}}</td></tr>
-		</tbody>
-	</table>
-	</div>
+    <div class="col-md-6">
+    <h4> Occupancy by Person Nights for {{report_date|date:"F"}}</h4>
+    <table class="table table-striped table-hover" cellspacing="0" width="100%">
+        <tbody>
+        <tr><td>Total guest nights</td><td>{{total_occupied_person_nights}}</td></tr>
+        <tr><td>Total reservable nights</td><td> {{total_reservable_days}}</td></tr>
+        <tr><td>Overall occupancy rate</td><td> {{overall_occupancy|floatformat:2}}%</td></tr>
+        <tr><td>Average guests per night</td><td> {{average_guests_per_day|floatformat:1}}</td></tr>
+        </tbody>
+    </table>
+    </div>
 </div>
 <div class="row top-spacer">
-	<div class="col-md-6">
-	<h4> Total Payments by Month Received</h4>
-	<table class="table table-striped table-hover" cellspacing="0" width="100%">
-		<tbody>
-			<tr><td>Income received this month, for this month</td><td> ${{ income_for_this_month|floatformat:2|intcomma }} </td></tr>
-			<tr><td>Income applied from past months</td><td> ${{ income_from_past_months|floatformat:2|intcomma  }}</td></tr>
-			<tr><td><em>Income received for past months</td><td> ${{ income_for_past_months|floatformat:2|intcomma  }}</em></td></tr>
-			<tr><td><em>Income received for future months</td><td> ${{ income_for_future_months|floatformat:2|intcomma  }}</em></td></tr>
-			<tr><td><strong>Total payments to house during this month (cash)</strong></td><td> <strong>${{ total_income_during_this_month|floatformat:2|intcomma  }}</strong></td></tr>
-			<tr><td><strong>Total payments to house for this month (accrual)</strong></td><td> <strong>${{ total_income_for_this_month|floatformat:2|intcomma }}</strong></td></tr>
-		</tbody>
-	</table>
-	</div>
+    <div class="col-md-6">
+    <h4> Total Payments by Month Received</h4>
+    <table class="table table-striped table-hover" cellspacing="0" width="100%">
+        <tbody>
+            <tr><td>Income received this month, for this month</td><td> ${{ income_for_this_month|floatformat:2|intcomma }} </td></tr>
+            <tr><td>Income applied from past months</td><td> ${{ income_from_past_months|floatformat:2|intcomma  }}</td></tr>
+            <tr><td><em>Income received for past months</td><td> ${{ income_for_past_months|floatformat:2|intcomma  }}</em></td></tr>
+            <tr><td><em>Income received for future months</td><td> ${{ income_for_future_months|floatformat:2|intcomma  }}</em></td></tr>
+            <tr><td><strong>Total payments to house during this month (cash)</strong></td><td> <strong>${{ total_income_during_this_month|floatformat:2|intcomma  }}</strong></td></tr>
+            <tr><td><strong>Total payments to house for this month (accrual)</strong></td><td> <strong>${{ total_income_for_this_month|floatformat:2|intcomma }}</strong></td></tr>
+        </tbody>
+    </table>
+    </div>
 </div>
 
 <div class="row top-spacer">
-	<div class="col-md-6">
-		<h4> Income to House by Room, for Occupancy this month</h4>
-		<table class="dataTable table table-striped booking-list">
-			<thead>
-				<tr>
-					<th>Room</th>
-					<th>Income</th>
-					<th>Occupancy Rate <br><small>(based on reservables)</small></th>
-					<th>Occupied</th>
+    <div class="col-md-6">
+        <h4> Income to House by Room, for Occupancy this month</h4>
+        <table class="dataTable table table-striped booking-list">
+            <thead>
+                <tr>
+                    <th>Room</th>
+                    <th>Income</th>
+                    <th>Occupancy Rate <br><small>(based on reservables)</small></th>
+                    <th>Occupied</th>
                     <th>Available</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for room, tup in room_income_occupancy.items %}
-				<tr class="{% cycle 'row-even' 'row-odd' %}">
-					<td>{{ room.name|title }}<a target="blank" href="{% url 'room_occupancy' location.slug room.id report_date.year %}"> <span class="glyphicon glyphicon-cloud-download"></span></a></td> 
-					<td>${{ tup.0|floatformat:2|intcomma  }}</td>
-					<td>{{tup.1|floatformat:2}}%</td> 
-					<td>{{tup.2}}</td>
-					<td>{{tup.3}}</td>
-				</tr>
-				{% empty %}
-					None
-				{% endfor %}
-			</tbody>
-		</table>
-		<p class="spacer-sm"><strong>Total income to location by rooms ${{ total_by_rooms|floatformat:2|intcomma  }}</strong> <small>(payments to house for this month (${{ total_income_for_this_month|floatformat:2|intcomma }}) + unpaid amounts for nights this month (${{unpaid_total|floatformat:2|intcomma }}))</small></p>
-	</div>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room, tup in room_income_occupancy.items %}
+                <tr class="{% cycle 'row-even' 'row-odd' %}">
+                    <td>{{ room.name|title }}<a target="blank" href="{% url 'room_occupancy' location.slug room.id report_date.year %}"> <span class="glyphicon glyphicon-cloud-download"></span></a></td> 
+                    <td>${{ tup.0|floatformat:2|intcomma  }}</td>
+                    <td>{{tup.1|floatformat:2}}%</td> 
+                    <td>{{tup.2}}</td>
+                    <td>{{tup.3}}</td>
+                </tr>
+                {% empty %}
+                    None
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="spacer-sm"><strong>Total income to location by rooms ${{ total_by_rooms|floatformat:2|intcomma  }}</strong> <small>(payments to house for this month (${{ total_income_for_this_month|floatformat:2|intcomma }}) + unpaid amounts for nights this month (${{unpaid_total|floatformat:2|intcomma }}))</small></p>
+    </div>
 </div>
 
 <div class="row top-spacer">
-	<div class="col-md-6">
-	<h4>Comped and Unpaid</h4>
-	<table class="table table-striped table-hover" cellspacing="0" width="100%">
-		<tbody>
-			<tr><td>Total comped nights </td><td>{{total_comped_nights}}</td></tr>
-			<tr><td>Est. lost income from comps (@ default room rates)</td><td>${{total_comped_income|floatformat:2}}</td></tr>
-			<tr><td>Total value of unpaid bookings with outstanding balances (even if they have partial payments)</td><td> ${{unpaid_total|floatformat:2|intcomma }}</td></tr>
-			<tr><td>Bookings that look like they have partial payments</td><td> {{ payment_discrepancies|join:", "|default:"none" }}</td></tr>
-			<tr><td>Total outstanding amount</td><td> ${{ paid_rate_discrepancy|floatformat:2|intcomma }}</td></tr>
-		</tbody>
-	</table>
+    <div class="col-md-6">
+    <h4>Comped and Unpaid</h4>
+    <table class="table table-striped table-hover" cellspacing="0" width="100%">
+        <tbody>
+            <tr><td>Total comped nights </td><td>{{total_comped_nights}}</td></tr>
+            <tr><td>Est. lost income from comps (@ default room rates)</td><td>${{total_comped_income|floatformat:2}}</td></tr>
+            <tr><td>Total value of unpaid bookings with outstanding balances (even if they have partial payments)</td><td> ${{unpaid_total|floatformat:2|intcomma }}</td></tr>
+            <tr><td>Bookings that look like they have partial payments</td><td> {{ payment_discrepancies|join:", "|default:"none" }}</td></tr>
+            <tr><td>Total outstanding amount</td><td> ${{ paid_rate_discrepancy|floatformat:2|intcomma }}</td></tr>
+        </tbody>
+    </table>
 </div>
 
 </div>
@@ -96,65 +96,65 @@
 <hr>
 
 <div class="row top-spacer">
-	<h4>Booking Details</h4>
+    <h4>Booking Details</h4>
 {% for item in data %}
-	<div>
-	<p>
-		{{ item.booking.user.first_name|title }} {{ item.booking.user.last_name|title }}, 
-		<a href="{{item.booking.get_absolute_url}}">{{item.booking.arrive}} - {{item.booking.depart}}</a>. 
-		{{ item.nights_this_month }} nights during this month @ ${{item.rate|floatformat:2|intcomma }} ({{item.room}}) = 
-		{% if item.unpaid %}
-			<span class="red-text">
-			${{item.total|floatformat:2|intcomma }} 
-			{% if item.partial_payment %} (partial payment, total owed {{item.total_owed}}) {% endif %}
-			</span>
-		{% else %}
-			${{item.total|floatformat:2|intcomma }}
-		{% endif %}
-		{% if item.comp %}
-		<span class="bg-success">COMP</span>
-		{% endif %}
-	</p>
-	</div>
+    <div>
+    <p>
+        {{ item.booking.user.first_name|title }} {{ item.booking.user.last_name|title }}, 
+        <a href="{{item.booking.get_absolute_url}}">{{item.booking.arrive}} - {{item.booking.depart}}</a>. 
+        {{ item.nights_this_month }} nights during this month @ ${{item.rate|floatformat:2|intcomma }} ({{item.room}}) = 
+        {% if item.unpaid %}
+            <span class="red-text">
+            ${{item.total|floatformat:2|intcomma }} 
+            {% if item.partial_payment %} (partial payment, total owed {{item.total_owed}}) {% endif %}
+            </span>
+        {% else %}
+            ${{item.total|floatformat:2|intcomma }}
+        {% endif %}
+        {% if item.comp %}
+        <span class="bg-success">COMP</span>
+        {% endif %}
+    </p>
+    </div>
 {% endfor %}
 </div>
 
 {% endblock %}
 
 {% block extrajs %}
-	<script type="text/javascript" src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
-	<link href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.5/js/jquery.dataTables.min.js"></script>
+    <link href="https://cdn.datatables.net/1.10.5/css/jquery.dataTables.min.css" rel="stylesheet">
 
-	<script>
-	jQuery.extend( jQuery.fn.dataTableExt.oSort, {
-		"strip-to-numeric-pre": function ( a ) {
-			a = (a==="-") ? 0 : a.replace( /[^\d\-\.]/g, "" );
-			return parseFloat( a );
-		},
-	
-		"strip-to-numeric-asc": function ( a, b ) {
-			return a - b;
-		},
-	
-		"strip-to-numeric-desc": function ( a, b ) {
-			return b - a;
-		}
-	} );
+    <script>
+    jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+        "strip-to-numeric-pre": function ( a ) {
+            a = (a==="-") ? 0 : a.replace( /[^\d\-\.]/g, "" );
+            return parseFloat( a );
+        },
+    
+        "strip-to-numeric-asc": function ( a, b ) {
+            return a - b;
+        },
+    
+        "strip-to-numeric-desc": function ( a, b ) {
+            return b - a;
+        }
+    } );
 
-	$(document).ready(function() {
-		$('.booking-list').dataTable({
-		"iDisplayLength": 50,
-		"order": [[ 2, "desc"]],
-		"sDom": 't',
-		"aoColumns": [
-					{ "sType": "string" },
-					{ "sType": "strip-to-numeric" },
-					{ "sType": "strip-to-numeric" },
-					{ "sType": "strip-to-numeric" },
-				]
-		});
-	} );
-	</script>
+    $(document).ready(function() {
+        $('.booking-list').dataTable({
+        "iDisplayLength": 50,
+        "order": [[ 2, "desc"]],
+        "sDom": 't',
+        "aoColumns": [
+                    { "sType": "string" },
+                    { "sType": "strip-to-numeric" },
+                    { "sType": "strip-to-numeric" },
+                    { "sType": "strip-to-numeric" },
+                ]
+        });
+    } );
+    </script>
 
 {% endblock %}
 

@@ -1,33 +1,33 @@
 <div class="panel panel-default sub-summary-panel">
-	<div class="panel-heading">
-		<h3 class="panel-title">Summary</h3>
-	</div>
-	<table class="table">
-		<tr><td>Subscription is {% if not s.is_active %} not {%endif %} active. </td></tr>
-			{% if s.get_next_period_start %} 
-				<tr><td> The next billing cycle will occur on {{ s.get_next_period_start }}</tr></td>
-			{% elif s.is_active %}
-				<tr><td> This is the last billing cycle</tr></td>
-			{% endif %} 
-		
-		<tr><td>
-		{% if s.user.profile.customer_id %}
-			The user has a card on file.
-		{% else %}
-			The user has no card on file. Send them an email to request it. 
-		{% endif %}
-		</tr></td>
-		<tr><td>
-		{% if s.has_unpaid_bills %}Subscription has unpaid bills{% else %} Subscription is current {% endif %}
-		</tr></td>
-		<tr><td>
-				<small class="text-muted">Subscription created by {{s.created_by}} on {{s.created}}</small>
-		</tr></td>
-	</table>
+    <div class="panel-heading">
+        <h3 class="panel-title">Summary</h3>
+    </div>
+    <table class="table">
+        <tr><td>Subscription is {% if not s.is_active %} not {%endif %} active. </td></tr>
+            {% if s.get_next_period_start %} 
+                <tr><td> The next billing cycle will occur on {{ s.get_next_period_start }}</tr></td>
+            {% elif s.is_active %}
+                <tr><td> This is the last billing cycle</tr></td>
+            {% endif %} 
+        
+        <tr><td>
+        {% if s.user.profile.customer_id %}
+            The user has a card on file.
+        {% else %}
+            The user has no card on file. Send them an email to request it. 
+        {% endif %}
+        </tr></td>
+        <tr><td>
+        {% if s.has_unpaid_bills %}Subscription has unpaid bills{% else %} Subscription is current {% endif %}
+        </tr></td>
+        <tr><td>
+                <small class="text-muted">Subscription created by {{s.created_by}} on {{s.created}}</small>
+        </tr></td>
+    </table>
 </div>
 {% with obj_type="subscription" %}
-	{% with notes=subscription_notes %}
-		{% include "snippets/notes.html" %}
-	{% endwith %}
+    {% with notes=subscription_notes %}
+        {% include "snippets/notes.html" %}
+    {% endwith %}
 {% endwith %}
 

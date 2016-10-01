@@ -5,15 +5,15 @@ from django.db import models, migrations
 from django.conf import settings
 
 def forward(apps, schema_editor):
-	Reservation = apps.get_model("core", "Reservation")
-	Bill = apps.get_model("core", "Bill")
-	ReservationBill = apps.get_model("core", "ReservationBill")
+    Reservation = apps.get_model("core", "Reservation")
+    Bill = apps.get_model("core", "Bill")
+    ReservationBill = apps.get_model("core", "ReservationBill")
 
-	reservations = Reservation.objects.all()
-	for r in reservations:
-		r.bill = ReservationBill.objects.create(bill_ptr=r.old_bill)
-		r.save()
-		
+    reservations = Reservation.objects.all()
+    for r in reservations:
+        r.bill = ReservationBill.objects.create(bill_ptr=r.old_bill)
+        r.save()
+        
 class Migration(migrations.Migration):
 
     dependencies = [

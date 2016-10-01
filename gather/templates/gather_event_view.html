@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block extrahead %}
-	<meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
-	<meta property="og:title" content="{{event.title|title}}"/>
-	<meta property="og:url" content="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" />
-	<meta property="og:description" content="{{event.description|striptags}}"/>
+    <meta property="og:image" content="https://{{domain}}{{ MEDIA_URL }}{{ event.image }}"/>
+    <meta property="og:title" content="{{event.title|title}}"/>
+    <meta property="og:url" content="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" />
+    <meta property="og:description" content="{{event.description|striptags}}"/>
 {% endblock %}
 
 {% block content %}
@@ -21,186 +21,186 @@
 
 
 <div id="event-view-wrapper">
-	<div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-med">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3 class="modal-title">Almost There...</h3>
-			</div>
-			<div class="modal-body">
-				<h4>We need a bit more info to keep you posted on this event. </h4> 	
-				<p><em>Already a member? <a href="{% url 'user_login' %}">Login instead</a></em></p>
-				<div id="new-user-form-errors"></div>
-				<form id="new-user-form" class="form-horizontal">
-					<div class="form-group">
-						<span class="col-sm-3">
-						{{ new_user_form.first_name.label_tag }}
-						</span>
-						<span class="col-sm-9">
-						{{ new_user_form.first_name }}
-						{{ new_user_form.first_name.errors }}
-						</span>
-					</div>
-					<div class="form-group">
-						<span class="col-sm-3">
-						{{ new_user_form.last_name.label_tag }}
-						</span>
-						<span class="col-sm-9">
-						{{ new_user_form.last_name }}
-						{{ new_user_form.last_name.errors }}
-						</span>
-					</div>
-					<div class="form-group">
-						<span class="col-sm-3">
-						{{ new_user_form.email.label_tag }}
-						</span>
-						<span class="col-sm-9">
-						{{ new_user_form.email }}
-						{{ new_user_form.email.errors }}
-						</span>
-					</div>
-					<div class="form-group">
-						<span class="col-sm-3">
-						{{ new_user_form.password1.label_tag }}
-						</span>
-						<span class="col-sm-9">
-						{{ new_user_form.password1 }}
-						{{ new_user_form.password1.errors }}
-						</span>
-					</div>
-					<div class="form-group">
-						<span class="col-sm-3">
-						{{ new_user_form.password2.label_tag }}
-						</span>
-						<span class="col-sm-9">
-						{{ new_user_form.password2 }}
-						{{ new_user_form.password2.errors }}
-						</span>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-12">
-							<div class="checkbox">
-								<label for="weekly-email-notifications">
-									<input id="id_email_notifications" type="checkbox" name="weekly-email-notifications" false> Receive a summary of weekly upcoming events in this community?
-								</label>
-							</div>
-							<div class="checkbox">
-								<label for="new-event-email-notifications">
-									<input id="id_new_event_notifications" type="checkbox" name="new-event-notifications" false> Get notified of newly published events in this community?
-								</label>
-							</div>
-							<div class="text-muted">We won't send you any other emails unless you ask for them!</div>
-						</div>
-					</div>
-					<input class="btn btn-default" type="submit" value="Submit RSVP">
-				</form>
-			</div>
-		</div>
-	</div>
-	</div>
+    <div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-med">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3 class="modal-title">Almost There...</h3>
+            </div>
+            <div class="modal-body">
+                <h4>We need a bit more info to keep you posted on this event. </h4>     
+                <p><em>Already a member? <a href="{% url 'user_login' %}">Login instead</a></em></p>
+                <div id="new-user-form-errors"></div>
+                <form id="new-user-form" class="form-horizontal">
+                    <div class="form-group">
+                        <span class="col-sm-3">
+                        {{ new_user_form.first_name.label_tag }}
+                        </span>
+                        <span class="col-sm-9">
+                        {{ new_user_form.first_name }}
+                        {{ new_user_form.first_name.errors }}
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <span class="col-sm-3">
+                        {{ new_user_form.last_name.label_tag }}
+                        </span>
+                        <span class="col-sm-9">
+                        {{ new_user_form.last_name }}
+                        {{ new_user_form.last_name.errors }}
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <span class="col-sm-3">
+                        {{ new_user_form.email.label_tag }}
+                        </span>
+                        <span class="col-sm-9">
+                        {{ new_user_form.email }}
+                        {{ new_user_form.email.errors }}
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <span class="col-sm-3">
+                        {{ new_user_form.password1.label_tag }}
+                        </span>
+                        <span class="col-sm-9">
+                        {{ new_user_form.password1 }}
+                        {{ new_user_form.password1.errors }}
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <span class="col-sm-3">
+                        {{ new_user_form.password2.label_tag }}
+                        </span>
+                        <span class="col-sm-9">
+                        {{ new_user_form.password2 }}
+                        {{ new_user_form.password2.errors }}
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="checkbox">
+                                <label for="weekly-email-notifications">
+                                    <input id="id_email_notifications" type="checkbox" name="weekly-email-notifications" false> Receive a summary of weekly upcoming events in this community?
+                                </label>
+                            </div>
+                            <div class="checkbox">
+                                <label for="new-event-email-notifications">
+                                    <input id="id_new_event_notifications" type="checkbox" name="new-event-notifications" false> Get notified of newly published events in this community?
+                                </label>
+                            </div>
+                            <div class="text-muted">We won't send you any other emails unless you ask for them!</div>
+                        </div>
+                    </div>
+                    <input class="btn btn-default" type="submit" value="Submit RSVP">
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
 
 
-	{% if messages %}
-	<div class="messages">
-		{% for message in messages %}
-		<div class="alert alert-info">
-			<button type="button" class="close" data-dismiss="alert">×</button>
-			<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</div>
-		</div>
-		{% endfor %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-info">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</div>
+        </div>
+        {% endfor %}
 </div>
-	{% endif %}
+    {% endif %}
 
-	<div id="event-status-area">
-		{% include 'snippets/event_status_area.html' %}
-	</div>
+    <div id="event-status-area">
+        {% include 'snippets/event_status_area.html' %}
+    </div>
 
-	{% if event.visibility = 'private' %}
-		<div class="event-status bg-warning">
-			<i class="fa fa-lock"></i> This event is private and is only viewable to those with the link.
-		</div>
-	{% elif event.visibility = 'community' %}
-		<div class="event-status bg-info">
-			<i class="fa fa-eye"></i> This is event is viewable only to members of the {{ event.location.name }} community.
-		</div>
-	{% endif %}
+    {% if event.visibility = 'private' %}
+        <div class="event-status bg-warning">
+            <i class="fa fa-lock"></i> This event is private and is only viewable to those with the link.
+        </div>
+    {% elif event.visibility = 'community' %}
+        <div class="event-status bg-info">
+            <i class="fa fa-eye"></i> This is event is viewable only to members of the {{ event.location.name }} community.
+        </div>
+    {% endif %}
 
-	{% if event.status == 'canceled' %}	
-	<div class="greyed-out">
-		<h2><i class="text-danger fa fa-warning" ></i> This event has been canceled</h2>
-	{% endif %}
+    {% if event.status == 'canceled' %}    
+    <div class="greyed-out">
+        <h2><i class="text-danger fa fa-warning" ></i> This event has been canceled</h2>
+    {% endif %}
 
-	<h1 class="event-detail-title">{{ event.title|title }}</h1> 
+    <h1 class="event-detail-title">{{ event.title|title }}</h1> 
 
-	{% if event.status != 'canceled' or user_is_organizer or user_is_event_admin %}
+    {% if event.status != 'canceled' or user_is_organizer or user_is_event_admin %}
 
-		{% if user_is_organizer or user_is_event_admin %}
-			<a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
-		{% endif %}
-		<div class="event-time"> 
-		{% with event.start|date as start_date %}
-		{% with event.end|date as end_date %}
-			<span class="event-date-day pull-left"> {{ event.start|date:'D'}}</span>
-			<span class="event-date-month pull-left">{{ event.start|date:'b'|title}}</span>
-			<span class="event-date-day pull-left"> {{ event.start|date:'j'}}</span>
-			<span class="event-date-time pull-left">{{ event.start|date:'f A'}}</span>
-			<span class="event-date-separator pull-left"><em>until</em></span>
-			{% if start_date != end_date %}
-			<span class="event-date-day pull-left"> {{ event.end|date:'D'}}</span>
-			<span class="event-date-month pull-left">{{ event.end|date:'b'|title}}</span>
-			<span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
-			{% endif %}
-			<span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
-			<span class="event-location">, {{event.where }}</span>
-		{% endwith %}
-		{% endwith %}
-		</div>
+        {% if user_is_organizer or user_is_event_admin %}
+            <a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
+        {% endif %}
+        <div class="event-time"> 
+        {% with event.start|date as start_date %}
+        {% with event.end|date as end_date %}
+            <span class="event-date-day pull-left"> {{ event.start|date:'D'}}</span>
+            <span class="event-date-month pull-left">{{ event.start|date:'b'|title}}</span>
+            <span class="event-date-day pull-left"> {{ event.start|date:'j'}}</span>
+            <span class="event-date-time pull-left">{{ event.start|date:'f A'}}</span>
+            <span class="event-date-separator pull-left"><em>until</em></span>
+            {% if start_date != end_date %}
+            <span class="event-date-day pull-left"> {{ event.end|date:'D'}}</span>
+            <span class="event-date-month pull-left">{{ event.end|date:'b'|title}}</span>
+            <span class="event-date-day pull-left"> {{ event.end|date:'j'}}</span>
+            {% endif %}
+            <span class="event-date-time pull-left">{{ event.end|date:'f A'}}</span>
+            <span class="event-location">, {{event.where }}</span>
+        {% endwith %}
+        {% endwith %}
+        </div>
 
-		<div class="col-md-7">
-			<div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
+        <div class="col-md-7">
+            <div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
 
-			{% with event.organizers.get_queryset as organizers %}
-			<h3>Organized by 
-				{% for o in organizers %}
-				<a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}
-				{% endfor %}
-			</h3>
-			{% endwith %}
-			{{ event.description|safe|linebreaks }}
-		</div>
+            {% with event.organizers.get_queryset as organizers %}
+            <h3>Organized by 
+                {% for o in organizers %}
+                <a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </h3>
+            {% endwith %}
+            {{ event.description|safe|linebreaks }}
+        </div>
 
-		<div class="col-md-4 col-md-offset-1" id="rsvp-info">
-			{% include 'snippets/rsvp_info.html' %}
-		</div>
+        <div class="col-md-4 col-md-offset-1" id="rsvp-info">
+            {% include 'snippets/rsvp_info.html' %}
+        </div>
 
-		{% if user_is_organizer %}
-		<div class="col-md-12" id="organizer-notes">
-			<hr>
-			<h4>Organizer Notes</h4>
-			<p>{{event.organizer_notes|default:"No notes"}}</p>
-		</div>
-		{% endif %}
+        {% if user_is_organizer %}
+        <div class="col-md-12" id="organizer-notes">
+            <hr>
+            <h4>Organizer Notes</h4>
+            <p>{{event.organizer_notes|default:"No notes"}}</p>
+        </div>
+        {% endif %}
 
-		{% endif %} {% comment %} end check for canceled event {% endcomment %}
+        {% endif %} {% comment %} end check for canceled event {% endcomment %}
 
-	{% if event.status == 'canceled' %}
-		</div>
-	{% endif %}
+    {% if event.status == 'canceled' %}
+        </div>
+    {% endif %}
 
 </div>
 
 {% if event.status == 'live' and event.visibility == 'public' %}
 <div class="row">
-	<div 
-		id="facebook-share-link" 
-		class="col-md-2 col-md-offset-5 fb-like" 
-		data-href="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}"  
-		data-action="like"
-		data-show-faces="false"
-		data-share="true"
-		data-layout="button"
-	> </div>
+    <div 
+        id="facebook-share-link" 
+        class="col-md-2 col-md-offset-5 fb-like" 
+        data-href="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}"  
+        data-action="like"
+        data-show-faces="false"
+        data-share="true"
+        data-layout="button"
+    > </div>
 </div>
 {% endif %}
 
@@ -210,93 +210,93 @@
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script>
 
-	newUserSubmit = function(form) {
-		form_data = $("#new-user-form").serialize();
-		form_data = form_data + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
-		request = $.ajax({ 
-			data: form_data,	
-			type: "POST",
-			url: "{% url 'gather_rsvp_new_user' location.slug event.id event.slug %}"
-		});
+    newUserSubmit = function(form) {
+        form_data = $("#new-user-form").serialize();
+        form_data = form_data + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
+        request = $.ajax({ 
+            data: form_data,    
+            type: "POST",
+            url: "{% url 'gather_rsvp_new_user' location.slug event.id event.slug %}"
+        });
 
-		request.done(function(msg) {
-			if (msg.length > 0) {
-				data = JSON.parse(JSON.parse(msg));
-				if (data.errors) {
-					console.log("errors");
-					errors = data.errors;
-					error_html = "<div class='text-danger'>There were errors in the form:</div>";
-					for (var k in errors) {
-						error_html += '<div class="text-danger">' + k + ': ' + errors[k] + '</div>';
-					}
-					console.log(error_html);
-					$("#new-user-form-errors").html(error_html);
-				} else {
-					console.log("shouldn't be here...");
-				} 
-			} else {
-				console.log("success");
-				location.reload();
-			}
-		});
+        request.done(function(msg) {
+            if (msg.length > 0) {
+                data = JSON.parse(JSON.parse(msg));
+                if (data.errors) {
+                    console.log("errors");
+                    errors = data.errors;
+                    error_html = "<div class='text-danger'>There were errors in the form:</div>";
+                    for (var k in errors) {
+                        error_html += '<div class="text-danger">' + k + ': ' + errors[k] + '</div>';
+                    }
+                    console.log(error_html);
+                    $("#new-user-form-errors").html(error_html);
+                } else {
+                    console.log("shouldn't be here...");
+                } 
+            } else {
+                console.log("success");
+                location.reload();
+            }
+        });
 
-		request.fail(function(msg) {
-			$("#attendance-message").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
-		});
+        request.fail(function(msg) {
+            $("#attendance-message").html('<span class="bg-danger">Oops, there was a problem. Please try again.</span>')
+        });
 
-		return false;
-	};
+        return false;
+    };
 
-	$.validator.addMethod("strictEmail", function(value, element) {
-		return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
-		}, "Please provide a valid email address."
-	);
+    $.validator.addMethod("strictEmail", function(value, element) {
+        return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value);
+        }, "Please provide a valid email address."
+    );
 
-	$("#new-user-form").validate({
-		submitHandler: newUserSubmit,
-		messages: {
-			password2: "The passwords do not match.",
-			email: {
-				strictEmail: "Please provide a valid email address.",
-				remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}'>login</a> page."
-			},
-			username: {
-				remote: "This username is already taken. Please choose another."
-			}
-		},
-		rules: {
-			first_name: {
-				required: true
-			},
-			last_name: {
-				required: true
-			},
-			email: {
-				required: true,
-				strictEmail: true,
-				remote: {
-					url: '{% url 'email_available' %}',
-					type: "post",
-					data: {'email': function() {return $( "#id_email" ).val()}}
-				}
-			}, 
-			username: {
-				required: true,
-				remote: {
-					url: '{% url 'username_available' %}',
-					type: "post",
-					data: {'username': function() {return $( "#id_username" ).val()}}
-				}
-			},
-			password1: {
-				required: true,
-			},
-			password2: {
-				required: true,
-				equalTo: "#id_password1"
-			}
-		}	
-	});
+    $("#new-user-form").validate({
+        submitHandler: newUserSubmit,
+        messages: {
+            password2: "The passwords do not match.",
+            email: {
+                strictEmail: "Please provide a valid email address.",
+                remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}'>login</a> page."
+            },
+            username: {
+                remote: "This username is already taken. Please choose another."
+            }
+        },
+        rules: {
+            first_name: {
+                required: true
+            },
+            last_name: {
+                required: true
+            },
+            email: {
+                required: true,
+                strictEmail: true,
+                remote: {
+                    url: '{% url 'email_available' %}',
+                    type: "post",
+                    data: {'email': function() {return $( "#id_email" ).val()}}
+                }
+            }, 
+            username: {
+                required: true,
+                remote: {
+                    url: '{% url 'username_available' %}',
+                    type: "post",
+                    data: {'username': function() {return $( "#id_username" ).val()}}
+                }
+            },
+            password1: {
+                required: true,
+            },
+            password2: {
+                required: true,
+                equalTo: "#id_password1"
+            }
+        }    
+    });
 
 </script>
 {% endblock %}

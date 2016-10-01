@@ -1,26 +1,26 @@
 <div class="panel panel-warning">
-		<div class="panel-heading" id="notes-link" onclick="toggleNotes(); return false;">
-			<span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close {{obj_type}} notes 
-		</div>
-	<div id="notes-area" class="panel-body">
-		{% for note in notes %}
-			<div class="user-field field">
-				<small>{{ note.created }} from {{note.created_by.first_name}}:</small> 
-				<pre class="note-pre">{{ note.note }}</pre>
-			</div>
-			<hr>
-		{% endfor %}
-		<form class="form-horizontal" method="POST" action=".">{% csrf_token %}
-			<div class="form-group" id="notes-input-group">
-				<div class="col-sm-9">
-					<textarea name="note" class="form-control" rows=1></textarea>
-				</div>
-				<div class="col-sm-3">
-					<button type="submit" class="btn btn-default">Add new note</button>
-				</div>
-			</div>
-		</form>
-	</div>
+        <div class="panel-heading" id="notes-link" onclick="toggleNotes(); return false;">
+            <span class="glyphicon glyphicon-collapse-up" aria-hidden="true"> </span> Close {{obj_type}} notes 
+        </div>
+    <div id="notes-area" class="panel-body">
+        {% for note in notes %}
+            <div class="user-field field">
+                <small>{{ note.created }} from {{note.created_by.first_name}}:</small> 
+                <pre class="note-pre">{{ note.note }}</pre>
+            </div>
+            <hr>
+        {% endfor %}
+        <form class="form-horizontal" method="POST" action=".">{% csrf_token %}
+            <div class="form-group" id="notes-input-group">
+                <div class="col-sm-9">
+                    <textarea name="note" class="form-control" rows=1></textarea>
+                </div>
+                <div class="col-sm-3">
+                    <button type="submit" class="btn btn-default">Add new note</button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 

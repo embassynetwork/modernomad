@@ -5,22 +5,22 @@
 <div class="text-danger" id="event-admin-heads-up"><span class="glyphicon glyphicon-exclamation-sign"></span> Only events in the future are shown here</div>
 
 <ul class="nav nav-tabs" id="event-list-tabs">
-	<li class="active"><a href="#pending" data-toggle="tab">Waiting Approval</a></li>
-	<li><a href="#feedback" data-toggle="tab">Seeking Feedback</a></li>
+    <li class="active"><a href="#pending" data-toggle="tab">Waiting Approval</a></li>
+    <li><a href="#feedback" data-toggle="tab">Seeking Feedback</a></li>
 </ul>
 
 <div class="tab-content">
 
-	<div id="pending" class="tab-pane active fade in">
-		{% for event in events_pending %}
-			{% include 'snippets/event-list-compact.html' %}
-		{% endfor %}
-	</div>
-	<div id="feedback" class="tab-pane fade">
-		{% for event in events_under_discussion %}
-			{% include 'snippets/event-list-compact.html' %}
-		{% endfor %}
-	</div>
+    <div id="pending" class="tab-pane active fade in">
+        {% for event in events_pending %}
+            {% include 'snippets/event-list-compact.html' %}
+        {% endfor %}
+    </div>
+    <div id="feedback" class="tab-pane fade">
+        {% for event in events_under_discussion %}
+            {% include 'snippets/event-list-compact.html' %}
+        {% endfor %}
+    </div>
 
 </div>
 

@@ -4,8 +4,8 @@
     <hr>
 
     {% for room in rooms %}
-	<li id="manage_rooms_edit_room_{{room.id}}" role="presentation">
-		<a href="{% url 'location_edit_room' location.slug room.id %}"><h5>{{room.name}}</h5></a>
-	</li>
+    <li id="manage_rooms_edit_room_{{room.id}}" role="presentation">
+        <a href="{% url 'location_edit_room' location.slug room.id %}"><h5>{{room.name}}</h5></a>
+    </li>
     {% endfor %}
 </ul>

@@ -1,18 +1,18 @@
 {% extends "location_edit.html" %}
 
 {% block sub-content %}
-	<form class="well form-inline" method="post" enctype="multipart/form-data" action=".">
-		{% for field in form %}
-			<div class="field-wrapper">
-				{{ field.errors }}
-				{{ field.label_tag }}
-				<span class="form-help-text">{{ field.help_text}}</span>
-				<div class="form-field-body">
-					{{ field }}
-				</div>
-			</div>
-		{% endfor %}
-		<input class="form-control" type="submit" value="Submit">
-		{% csrf_token %}
-	</form>
+    <form class="well form-inline" method="post" enctype="multipart/form-data" action=".">
+        {% for field in form %}
+            <div class="field-wrapper">
+                {{ field.errors }}
+                {{ field.label_tag }}
+                <span class="form-help-text">{{ field.help_text}}</span>
+                <div class="form-field-body">
+                    {{ field }}
+                </div>
+            </div>
+        {% endfor %}
+        <input class="form-control" type="submit" value="Submit">
+        {% csrf_token %}
+    </form>
 {% endblock %}

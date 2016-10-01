@@ -1,44 +1,44 @@
 <body><table  cellspacing="0" cellpadding="0" border="0">
-	<tr><td width="600px">
-		<p margin="0 0 1.6em 0">Dear {{ first_name }},</p>
-		<p margin="0 0 1.6em 0">Thanks for staying with us! This email contains your invoice information. As a reminder, your booking details are available <a href="https://{{ domain }}{% url 'booking_detail' location.slug booking.id %}">online</a>.</p> 
+    <tr><td width="600px">
+        <p margin="0 0 1.6em 0">Dear {{ first_name }},</p>
+        <p margin="0 0 1.6em 0">Thanks for staying with us! This email contains your invoice information. As a reminder, your booking details are available <a href="https://{{ domain }}{% url 'booking_detail' location.slug booking.id %}">online</a>.</p> 
 
-		<p margin="0 0 1.6em 0">
-			<strong>Invoice Date:</strong> {{ today }}
-		</p>
-		<table border="0" cellspacing="0" cellpadding="0" border="0">
-		<tr>
-			<th style="text-align: left; width:200px">Description</th>
-			<th style="text-align: right;">Amount</th>
-		</tr>
-		{% for line_item in booking.bill.ordered_line_items %}
-			{% if not line_item.paid_by_house %}
-				<tr>
-					<td align="left" width="200px">{{ line_item.description }}</td>
-					<td align="right" width="200px">${{ line_item.amount|floatformat:2 }}</td>
-				</tr>
-			{% endif %}
-		{% endfor %}
-		<tr>
-			<td colspan="2" align="right" width="600px">
-				<strong>Total Owed:</strong> ${{ booking.bill.total_owed|floatformat:2 }}
-			</td>
-		</table>
+        <p margin="0 0 1.6em 0">
+            <strong>Invoice Date:</strong> {{ today }}
+        </p>
+        <table border="0" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+            <th style="text-align: left; width:200px">Description</th>
+            <th style="text-align: right;">Amount</th>
+        </tr>
+        {% for line_item in booking.bill.ordered_line_items %}
+            {% if not line_item.paid_by_house %}
+                <tr>
+                    <td align="left" width="200px">{{ line_item.description }}</td>
+                    <td align="right" width="200px">${{ line_item.amount|floatformat:2 }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        <tr>
+            <td colspan="2" align="right" width="600px">
+                <strong>Total Owed:</strong> ${{ booking.bill.total_owed|floatformat:2 }}
+            </td>
+        </table>
 
-		<p margin="0 0 1.6em 0">You can pay via credit card, cash, check, bank transfer, or Dwolla.</p> 
+        <p margin="0 0 1.6em 0">You can pay via credit card, cash, check, bank transfer, or Dwolla.</p> 
 
-		<table border="0" cellspacing="0" cellpadding="0" border="0">
-		<tr><td>Credit card: <a href="https://{{ domain }}{% url 'booking_detail' location.slug booking.id %}">Embassy Network</a></td></tr>
-		<tr><td>Dwolla: <a href="https://www.dwolla.com/hub/embassynetwork">https://www.dwolla.com/hub/embassynetwork</a></td></tr>
-		<tr><td>Bank Details: Bank of America, Account 164108426532 // Routing 121000358</td></tr>
-		</table>
+        <table border="0" cellspacing="0" cellpadding="0" border="0">
+        <tr><td>Credit card: <a href="https://{{ domain }}{% url 'booking_detail' location.slug booking.id %}">Embassy Network</a></td></tr>
+        <tr><td>Dwolla: <a href="https://www.dwolla.com/hub/embassynetwork">https://www.dwolla.com/hub/embassynetwork</a></td></tr>
+        <tr><td>Bank Details: Bank of America, Account 164108426532 // Routing 121000358</td></tr>
+        </table>
 
-		<p margin="0 0 1.6em 0">Thank you from the Embassy!</p>
+        <p margin="0 0 1.6em 0">Thank you from the Embassy!</p>
 
-		<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-		<tr><td align="center">:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::</td></tr>
-		<tr><td align="center">:::: California Benefit Corporation, EIN 45-5386726 ::::</td></tr>
-		</table>
+        <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        <tr><td align="center">:::: Embassy Network Incorporated 399 Webster Street, San Francisco, CA, 94117 ::::</td></tr>
+        <tr><td align="center">:::: California Benefit Corporation, EIN 45-5386726 ::::</td></tr>
+        </table>
 
-	</td></tr>
+    </td></tr>
 </body></table>

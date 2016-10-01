@@ -1,48 +1,48 @@
 <!-- availability calendar -->
 {% with use=r.use %}
 <table id="rooms-available-calendar">
-	<tr>
-	<th>Room</th>
-	{% for date in dates %}
-	<th>{{ date|date:"M d" }}</th>
-	{% endfor %}
-	</tr>
+    <tr>
+    <th>Room</th>
+    {% for date in dates %}
+    <th>{{ date|date:"M d" }}</th>
+    {% endfor %}
+    </tr>
 
-	{% for room_obj, days_list in avail.items %}
-	<tr>
-		<td>
-			{{room_obj.name}}
-		</td>
+    {% for room_obj, days_list in avail.items %}
+    <tr>
+        <td>
+            {{room_obj.name}}
+        </td>
 
-		{% for day_info in days_list %}
-			{% if room_obj == use.resource and room_has_capacity %}
-				<td class="bg-success">
-			{% elif room_obj == use.resource and use.status == 'approved' and day_info.beds_free >= 0 %}
-				<td class="bg-success">
-			{% elif room_obj == use.resource and use.status == 'confirmed' and day_info.beds_free >= 0 %}
-				<td class="bg-success">
-			{% elif room_obj == use.resource and not room_has_capacity %}
-				<td class="bg-danger">
-			{% else %}
-				<td>
-			{% endif %}
+        {% for day_info in days_list %}
+            {% if room_obj == use.resource and room_has_capacity %}
+                <td class="bg-success">
+            {% elif room_obj == use.resource and use.status == 'approved' and day_info.beds_free >= 0 %}
+                <td class="bg-success">
+            {% elif room_obj == use.resource and use.status == 'confirmed' and day_info.beds_free >= 0 %}
+                <td class="bg-success">
+            {% elif room_obj == use.resource and not room_has_capacity %}
+                <td class="bg-danger">
+            {% else %}
+                <td>
+            {% endif %}
 
-			{% comment %} {% if use.status == 'pending' or use.status == 'canceled'%} {% endcomment %}
+            {% comment %} {% if use.status == 'pending' or use.status == 'canceled'%} {% endcomment %}
 
-			{% if use.status == 'approved' and use.resource == room_obj %}
-				<div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
-			{% elif use.status == 'confirmed' and use.resource == room_obj %}
-				<div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
-			{% else %}
-				{% if day_info.beds_free %}
-					<div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{day_info.beds_free}}</div>
-				{% else %}
-					<div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{day_info.beds_free}}</div>
-				{% endif %}
-			{% endif %}
-		</td>
-		{% endfor %}
-	</tr>
-	{% endfor %}
+            {% if use.status == 'approved' and use.resource == room_obj %}
+                <div class="yes-available"><i class="text-caution glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
+            {% elif use.status == 'confirmed' and use.resource == room_obj %}
+                <div class="yes-available"><i class="text-success glyphicon glyphicon-user"></i> {{day_info.beds_free}}</div>
+            {% else %}
+                {% if day_info.beds_free %}
+                    <div class="yes-available"><i class="text-success glyphicon glyphicon-ok"></i> {{day_info.beds_free}}</div>
+                {% else %}
+                    <div class="no-available"><i class="text-danger glyphicon glyphicon-remove"></i> {{day_info.beds_free}}</div>
+                {% endif %}
+            {% endif %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
 </table>
 {% endwith %}
