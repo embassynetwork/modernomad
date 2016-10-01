@@ -380,8 +380,8 @@ class Resource(models.Model):
         avails_between.reverse()
         return avails_between
 
-    def confirmed_bookings_between(self, start, end):
-        return self.booking_set.confirmed_between_dates(start, end)
+    def confirmed_uses_between(self, start, end):
+        return self.use_set.confirmed_between_dates(start, end)
 
     def has_future_availability(self):
         today = timezone.localtime(timezone.now()).date()
@@ -427,14 +427,14 @@ class Resource(models.Model):
 
     def daily_bookabilities_within(self, start, end):
         daily_availabilities = self.daily_availabilities_within(start, end)
-        bookings = self.confirmed_bookings_between(start, end)
+        uses = self.confirmed_uses_between(start, end)
 
         result = []
         for daily_availability in daily_availabilities:
             day = daily_availability[0]
-            booking_quantity = count_range_objects_on_day(bookings, day)
-            bookable_quantity = daily_availability[1] - booking_quantity
-            result.append((day, bookable_quantity))
+            use_quantity = count_range_objects_on_day(uses, day)
+            result_quantity = daily_availability[1] - use_quantity
+            result.append((day, result_quantity))
 
         return result
 
@@ -503,7 +503,7 @@ class UseManager(models.Manager):
         for use in confirmed_this_location:
             try:
                 # use try-except in case the use doesn't have a booking
-                # XXX FIXME. this is a horrible hack. 
+                # XXX FIXME. this is a horrible hack.
                 if not use.booking.bill.is_paid():
                     unpaid_this_location.append(use.booking)
             except:
@@ -1056,7 +1056,7 @@ class Use(models.Model):
 
 
 class Booking(models.Model):
-    ''' a model to handle the payment details related to uses''' 
+    ''' a model to handle the payment details related to uses'''
 
     class ResActionError(Exception):
         def __init__(self, value):
@@ -1083,7 +1083,7 @@ class Booking(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    
+
     # deprecated fields to be deleted soon ("soon")
     location_deprecated = models.ForeignKey(Location, related_name='bookings', null=True)
     status_deprecated = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True, null=True)

@@ -15,19 +15,18 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
     def availability_on(self, date, quantity):
         return Availability.objects.create(resource=self.resource, start_date=date, quantity=quantity)
 
-    def booking_on(self, arrive, depart):
-        return Booking.objects.create(
+    def use_on(self, arrive, depart):
+        return Use.objects.create(
             resource=self.resource, arrive=arrive,
             depart=depart, status="confirmed",
             user=self.booker)
 
-    def booking_on_other_resource(self, arrive, depart):
+    def use_on_other_resource(self, arrive, depart):
         resource = ResourceFactory(location=self.resource.location)
-        return Booking.objects.create(
+        return Use.objects.create(
             resource=resource, arrive=arrive,
             depart=depart, status="confirmed",
             user=self.booker)
-
 
     # With no data
 
@@ -69,16 +68,16 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
             (date(2016, 1, 14), 2)
         ])
 
-    # With bookings too
+    # With uses too
 
-    def test_it_returns_subtracts_confirmed_bookings_from_simple_availability(self):
+    def test_it_returns_subtracts_confirmed_uses_from_simple_availability(self):
         self.availability_on(date(2016, 1, 8), 10)
 
-        self.booking_on(date(2016, 1, 8), date(2016, 1, 10))
-        self.booking_on(date(2016, 1, 9), date(2016, 1, 11))
-        self.booking_on(date(2016, 1, 12), date(2016, 1, 20))
-        self.booking_on(date(2016, 1, 13), date(2016, 1, 14))
-        self.booking_on(date(2016, 1, 15), date(2016, 1, 16))
+        self.use_on(date(2016, 1, 8), date(2016, 1, 10))
+        self.use_on(date(2016, 1, 9), date(2016, 1, 11))
+        self.use_on(date(2016, 1, 12), date(2016, 1, 20))
+        self.use_on(date(2016, 1, 13), date(2016, 1, 14))
+        self.use_on(date(2016, 1, 15), date(2016, 1, 16))
 
         result = self.resource.daily_bookabilities_within(self.start, self.end)
         self.assertEqual(result, [
@@ -94,11 +93,11 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
         self.availability_on(date(2016, 1, 14), 2)
         self.availability_on(date(2016, 1, 15), 6)
 
-        self.booking_on(date(2016, 1, 8), date(2016, 1, 10))
-        self.booking_on(date(2016, 1, 9), date(2016, 1, 11))
-        self.booking_on(date(2016, 1, 12), date(2016, 1, 20))
-        self.booking_on(date(2016, 1, 13), date(2016, 1, 14))
-        self.booking_on(date(2016, 1, 15), date(2016, 1, 16))
+        self.use_on(date(2016, 1, 8), date(2016, 1, 10))
+        self.use_on(date(2016, 1, 9), date(2016, 1, 11))
+        self.use_on(date(2016, 1, 12), date(2016, 1, 20))
+        self.use_on(date(2016, 1, 13), date(2016, 1, 14))
+        self.use_on(date(2016, 1, 15), date(2016, 1, 16))
 
         result = self.resource.daily_bookabilities_within(self.start, self.end)
         self.assertEqual(result, [
@@ -112,7 +111,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
     def test_it_doesnt_subtract_bookings_for_another_resource(self):
         self.availability_on(date(2016, 1, 8), 10)
 
-        self.booking_on_other_resource(date(2016, 1, 11), date(2016, 1, 14))
+        self.use_on_other_resource(date(2016, 1, 11), date(2016, 1, 14))
 
         result = self.resource.daily_bookabilities_within(self.start, self.end)
         self.assertEqual(result, [
