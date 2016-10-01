@@ -10,11 +10,13 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="A Global Housing Layer for the New World">
 		<!-- Le styles -->
+		<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css"> -->
 		<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
 		<link rel="stylesheet" href="{% static 'css/custom.css' %}">
 		<link rel="stylesheet" href="{% static 'css/chosen.min.css' %}"></script>
 		<link rel="stylesheet" href="{% static 'css/cropper.min.css' %}"></script>
 		<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+		<link rel="stylesheet" href="{% static 'css/react-datepicker.css' %}" />
 		<link rel="stylesheet" href="{% static 'fonts/font-awesome-4.6.3/css/font-awesome.min.css' %}">
 		<link rel="shortcut icon" href="/favicon.ico">
 		<link href="https://fonts.googleapis.com/css?family=Dancing+Script" rel="stylesheet">
@@ -115,7 +117,39 @@
 			{% block body %}
 			{% endblock %}
 		</div>
+
+
 		{% block footer %}
+		<div id="network-footer">
+			<div class="container text-center">
+				<div class="row">
+					<h3>Commune with us on</h3>
+					<div id="footer-socialmedia">
+						<a href="https://twitter.com/embassynetwork" target="_blank">
+							<span class="fa-stack fa-3x">
+							  <i class="fa fa-circle-thin fa-stack-2x"></i>
+							  <i class="fa fa-twitter fa-stack-1x"></i>
+							</span>
+						</a>
+						<a href="https://www.facebook.com/embassynetwork" target="_blank">
+							<span class="fa-stack fa-3x">
+							  <i class="fa fa-circle-thin fa-stack-2x"></i>
+							  <i class="fa fa-facebook fa-stack-1x"></i>
+							</span>
+						</a>
+						<a href="https://medium.com/embassy-network" target="_blank">
+							<span class="fa-stack fa-3x">
+							  <i class="fa fa-circle-thin fa-stack-2x"></i>
+							  <i class="fa fa-medium fa-stack-1x"></i>
+							</span>
+						</a>
+					</div>
+					<div class="text-muted">
+		        <h5>© Embassy Network</h5>
+		      </div>
+				</div>
+			</div>
+		</div>
 		{% endblock %}
 
 	<!-- javascript for every page -->

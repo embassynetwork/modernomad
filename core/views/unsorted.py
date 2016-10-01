@@ -647,8 +647,12 @@ def calendar(request, location_slug):
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
     report_date = datetime.date(year, month, 1)
 
-    uses = (Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
-                    .filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
+    uses = (
+        Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
+        .filter(location=location)
+        .exclude(depart__lt=start)
+        .exclude(arrive__gt=end).order_by('arrive')
+    )
 
     rooms = Resource.objects.filter(location=location)
     uses_by_room = []
@@ -835,7 +839,7 @@ def user_email_settings(request, username):
 def user_bookings(request, username):
     ''' TODO: rethink permissions here'''
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    #uses = Use.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
+    # uses = Use.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
     bookings = Booking.objects.filter(use__user=user).exclude(use__status='deleted')
     past_bookings = []
     upcoming_bookings = []
@@ -985,7 +989,7 @@ def BookingSubmit(request, location_slug):
             use = form.save(commit=False)
             use.location = location
             booking = Booking(use=use, comments=comments)
-            # reset_rate also generates the bill. 
+            # reset_rate also generates the bill.
             if request.user.is_authenticated():
                 use.user = request.user
                 use.save()
@@ -1036,6 +1040,10 @@ def BookingSubmit(request, location_slug):
     )
 
 
+def room(request, location_slug, room_id):
+    return render(request, 'booking.html')
+
+
 @login_required
 def BookingDetail(request, booking_id, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
@@ -1067,8 +1075,7 @@ def BookingDetail(request, booking_id, location_slug):
 
         # users that intersect this stay
         users_during_stay = []
-        uses = Use.objects.filter(status="confirmed").filter(location=location) \
-                                  .exclude(depart__lt=booking.use.arrive).exclude(arrive__gt=booking.use.depart)
+        uses = Use.objects.filter(status="confirmed").filter(location=location).exclude(depart__lt=booking.use.arrive).exclude(arrive__gt=booking.use.depart)
         for use in uses:
             if use.user not in users_during_stay:
                 users_during_stay.append(use.user)
@@ -1156,7 +1163,7 @@ def UserAddCard(request, username):
     if booking_id:
         booking = Booking.objects.get(id=booking_id)
         # double checks that the authenticated user (the one trying to add the
-        # card) is the user associated with this booking, or an admin 
+        # card) is the user associated with this booking, or an admin
         if (request.user != user) and (request.user not in booking.use.location.house_admins.all()):
             messages.add_message(
                 request,
@@ -1643,8 +1650,8 @@ def BookingManageList(request, location_slug):
     pending = Booking.objects.filter(use__location=location).filter(use__status="pending").order_by('-id')
     approved = Booking.objects.filter(use__location=location).filter(use__status="approved").order_by('-id')
     confirmed = Booking.objects.filter(use__location=location).filter(use__status="confirmed").order_by('-id')
-    canceled = Booking.objects.filter(use__location=location).exclude(use__status="confirmed") \
-                          .exclude(use__status="approved").exclude(use__status="pending").order_by('-id')
+    canceled = Booking.objects.filter(use__location=location).exclude(use__status="confirmed").exclude(use__status="approved").exclude(use__status="pending").order_by('-id')
+
     if not show_all:
         today = timezone.localtime(timezone.now())
         confirmed = confirmed.filter(use__depart__gt=today)
@@ -2433,7 +2440,7 @@ def payments(request, location_slug, year, month):
     # should make this explicit in some way.
 
     booking_payments_this_month = Payment.objects.booking_payments_by_location(location) \
-                                             .filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
+                                         .filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
     for p in booking_payments_this_month:
         # pull out the values we call multiple times to make this faster
         p_to_house = p.to_house()

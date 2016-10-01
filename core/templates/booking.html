@@ -19,11 +19,16 @@
 </div>
 {% endif %}
 
-{% if location.stay_page %}
+<!-- {% if location.stay_page %}
 	{{ location.stay_page|safe }}
-{% endif %}
+{% endif %} -->
 
-	<div class="row top-spacer">
+<div id="room-container"></div>
+<script type="text/javascript">
+		window.renderReactComponent('room-container', 'RoomBooking', {})
+</script>
+
+	<!-- <div class="row top-spacer">
 		<div class="col-md-12">
 			<div class="booking-dates row top-spacer">
 				<form class="form-inline">
@@ -39,9 +44,9 @@
 		</div>
 		<div class="col-md-4" id="res-detail">
 		</div>
-	</div>
+	</div> -->
 
-	<div class="row">
+	<!-- <div class="row">
 
 		<div id="show-room-availability">
 
@@ -74,7 +79,7 @@
 			</div>
 
 		</div>
-  </div>
+  </div> -->
 {% endblock %}
 
 {% block extrajs %}
@@ -87,7 +92,7 @@
 
 <script>
 
-	$("#sticky-sidebar").waypoint('sticky');
+	/*$("#sticky-sidebar").waypoint('sticky');
 	function set_summary_width(elem) {
 		console.log('setting summary width for ' + elem);
         box_width = $(elem).parent().width();
@@ -126,10 +131,10 @@
 		$("#the-booking-form").show();
 		$("#booking-additional-info").show();
 		$(room_info_div_id).show();
-	});
+	});*/
 
 
-	$("#arrive_date, #depart_date").datepicker({
+	/*$("#arrive_date, #depart_date").datepicker({
 		minDate: 0,
 		onSelect: function( selectedDate ) {
 			if(this.id == 'arrive_date') {
@@ -144,7 +149,7 @@
 			// input or it won't fire on its own!
 			$(this).change();
         }
-	});
+	});*/
 
 	/******************** unlikely to use this but just in case...
 	$(".a_day").click(function(event) {
@@ -164,7 +169,7 @@
 	})
 	***************************** */
 
-	$("#arrive_date, #depart_date").change(function(event) {
+	/*$("#arrive_date, #depart_date").change(function(event) {
 		// Get arrive and depart dates, update value.
 		pollRooms();
 	});
@@ -231,7 +236,7 @@
 		$("#depart_date").val(a[1].split('=')[1]);
 
 		pollRooms();
-	}
+	}*/
 
 </script>
 

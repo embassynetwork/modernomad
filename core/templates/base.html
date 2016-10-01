@@ -13,15 +13,10 @@
     {% endif %}
   </div>
 
-  <div class="row">
-    <div class="col-xs-10 col-xs-offset-1">
-      {% include 'snippets/house_nav.html' %}
+  {% include 'snippets/house_nav.html' %}
 
-      <hr>
+  {% block content %}
+  {% endblock %}
 
-      {% block content %}
-      {% endblock %}
-    </div>
-  </div>
   {% endif %}
 {% endblock %}

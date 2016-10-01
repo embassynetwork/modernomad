@@ -8,5 +8,5 @@ urlpatterns = patterns('core.views.unsorted',
 	url(r'^(?P<booking_id>\d+)/delete/$', 'BookingDelete', name='booking_delete'),
 	url(r'^(?P<booking_id>\d+)/cancel/$', 'BookingCancel', name='booking_cancel'),
 	url(r'^(?P<booking_id>\d+)/receipt/$', 'BookingReceipt', name='booking_receipt'),
-	url(r'^(?P<booking_uuid>[0-9a-f]{32})/payment/$', 'submit_payment', name='booking_payment'),
+	url(r'^(?P<booking_uuid>[0-9a-f\-]+)/payment/$', 'submit_payment', name='booking_payment'),
 )

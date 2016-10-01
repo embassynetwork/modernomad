@@ -5,7 +5,7 @@ from core.models import *
 
 @given(u'there is a location called "{location_name}"')
 def impl(context, location_name):
-    LocationFactory(name=location_name)
+    LocationFactory(name=location_name, slug='someloc')
 
 
 @given(u'"{location_name}" has a room "{room_name}" with {bed_count:d} {beds} available')
