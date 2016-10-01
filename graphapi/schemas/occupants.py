@@ -3,7 +3,7 @@ from graphene import AbstractType, Field, Node
 from graphene_django.types import DjangoObjectType
 from graphene.types import String
 from graphene_django.filter import DjangoFilterConnectionField
-from core.models import Booking, Location
+from core.models import Use, Location
 from django.contrib.auth.models import User
 from django.utils import timezone
 from .users import UserNode
@@ -17,14 +17,14 @@ class OccupantNode(DjangoObjectType):
     type = graphene.String()
 
     class Meta:
-        model = Booking
+        model = Use
         interfaces = (Node, )
         filter_fields = ['arrive', 'location']
         filter_order_by = True
 
     def resolve_occupants_during(self, args, *_):
         query = (
-            Booking.objects
+            Use.objects
             .filter(location=self.location, status="confirmed")
             .exclude(user=self.user)
             .filter(arrive__lte=self.depart)
@@ -57,13 +57,13 @@ class Query(AbstractType):
 
     def resolve_my_occupancies(self, args, context, info):
         if not context.user.is_authenticated():
-            return Booking.objects.none()
+            return Use.objects.none()
         else:
-            return Booking.objects.filter(user=context.user)
+            return Use.objects.filter(user=context.user)
 
     def resolve_my_current_occupancies(self, args, context, info):
         if not context.user.is_authenticated():
-            return Booking.objects.none()
+            return Use.objects.none()
         else:
             today = timezone.now()
-            return Booking.objects.filter(user=context.user, depart__gte=today)
+            return Use.objects.filter(user=context.user, depart__gte=today)
