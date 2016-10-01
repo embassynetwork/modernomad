@@ -87,7 +87,7 @@
 	<div class="col-md-3">
 		<div class="res-actions-secondary"><h2>Manage</h2></div>
 		<ul class="nav nav-pills nav-stacked" role="tablist">
-			<li class="active"><a href="#booking-manage-calendar" data-toggle="pill"><h4>Availability</h4></a></li>
+			<li class="active"><a href="#booking-manage-calendar" data-toggle="pill"><h4>Capacity</h4></a></li>
 			<li><a role="tab" href="#booking-manage-edit" data-toggle="pill"><h4>Edit</h4></a></li>
 			<li><a role="tab" href="#booking-manage-bill" data-toggle="pill"><h4>Bill</h4></a></li>
 			<li><a role="tab" href="#booking-manage-payment" data-toggle="pill"><h4>Payment</h4></a></li>
@@ -100,7 +100,7 @@
 		<div class="tab-content">
 
 			<div role="tabpanel" class="tab-pane active" id="booking-manage-calendar">
-				<h3>Availability</h3>
+				<h3>Capacity</h3>
 				{% include "snippets/res_status_area.html" %}
 				<hr>
 				{% include "snippets/manage-page-availability-calendar.html" %}
@@ -244,8 +244,8 @@ function register_actions() {
 		action_el = this;
 		console.log(action_el);
 		console.log('{{r.use.status}}');
-		console.log('{{room_has_availability}}')
-		if ('{{r.use.status}}' == 'pending' && '{{ room_has_availability }}' == 'False') {
+		console.log('{{room_has_capacity}}')
+		if ('{{r.use.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
 			$("#dialog-warn-full").dialog("open");
 		} else {
 			ajax_call(action_el);

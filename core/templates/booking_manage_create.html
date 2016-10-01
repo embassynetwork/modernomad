@@ -5,7 +5,7 @@
 
 <div id="spinner">
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
-</div>	
+</div>
 
 <div class="row" id="booking-nav">
 	<a href="{% url 'booking_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to bookings</a>
@@ -31,32 +31,32 @@
 		</div>
 	</div>
 
-	<div class="col-md-7">	
+	<div class="col-md-7">
 
 
 		<div id="booking-details-form">
 			<form method="POST" role="form" class="form-horizontal" id="manage-booking-form" action="{% url 'booking_manage_create' location.slug %}">{% csrf_token %}
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">User</label> 
+					<label class="col-sm-2 control-label">User</label>
 					<div class="col-sm-7">
 						<input class="form-control" name="username" id="id_username" value="{{username}}" required/>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Arrive</label> 
+					<label class="col-sm-2 control-label">Arrive</label>
 					<div class="col-sm-2">
 						<input class="form-control listening" id="id_arrive" name="arrive" value="" size="8" required/>
 					</div>
-					<label class="col-sm-2 control-label">Depart</label> 
+					<label class="col-sm-2 control-label">Depart</label>
 					<div class="col-sm-2">
 						<input class="form-control listening" id="id_depart" name="depart" value="" size="8" required/>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Room</label> 
+					<label class="col-sm-2 control-label">Room</label>
 					<div class="col-sm-6">
 						<select class="form-control" id="resource_select" name="resource" required>
 							<option value="">Select Room</option>
@@ -68,14 +68,14 @@
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Purpose</label> 
+					<label class="col-sm-2 control-label">Purpose</label>
 					<div class="col-sm-6">
 						<input class="form-control" id="id_purpose" name="purpose" value="" size="8" required/>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Status</label> 
+					<label class="col-sm-2 control-label">Status</label>
 					<div class="col-sm-4">
 						<select name="status" class="form-control" required>
 							{% for status_tup in booking_statuses %}
@@ -101,7 +101,7 @@
 
 
 	</div> <!-- end col-md-7 -->
-</div> 
+</div>
 
 
 {% endblock %}
@@ -115,14 +115,14 @@
 		username = $("#id_username").val();
 		console.log(username);
 		if (username) {
-			request = $.ajax({ 
+			request = $.ajax({
 				data: {
 					'csrfmiddlewaretoken': '{{ csrf_token }}'
-				}, 
+				},
 				type: "POST",
 				url: '/people/'+username+'/avatar/'
 			});
-		
+
 			request.done(function(url) { // on success..
 				console.log(url);
 				$("#avatar-placeholder").fadeOut(function() {
@@ -135,7 +135,7 @@
 			});
 		}
 	};
-	
+
 
 	//$("#id_username").change(get_avatar);
 	$(function() {
@@ -169,10 +169,10 @@
 			$(this).change();
         }
 	})
-	
+
 	// Check booking dates and room for avilability, warn admin if overbooking room.
 	$(".listening").change(function(event) {
-		// Get arrive and depart dates, update value. 
+		// Get arrive and depart dates, update value.
 		var arrive = $("#id_arrive").val();
 	 	var depart = $("#id_depart").val();
 
@@ -184,7 +184,7 @@
 				room_select = $("#resource_select");
 				room_select.children().remove();
 				room_select.append('<option value="">Select Room</option>');
-				$.each(data.rooms_availability, function(k, v) {
+				$.each(data.rooms_capacity, function(k, v) {
 					console.log(v);
 					avail = "";
 					if (v.available == false) {
@@ -193,17 +193,17 @@
 					}
 					room_select.append('<option value="'+ v.id +'">' + k + avail + '</option>');
 				});
-	       	});	
-		} 
+	       	});
+		}
 
 		// wire up the ajax-y spinning animated GIF to show when an ajax call
-		// is made. 	
+		// is made.
 		$('#spinner').ajaxStart(function () {
 			$(this).fadeIn('fast');
 		}).ajaxStop(function () {
 			$(this).stop().fadeOut('fast');
-		});	
-	
+		});
+
 	});
 
 	$("#resource_select").change(function(event) {

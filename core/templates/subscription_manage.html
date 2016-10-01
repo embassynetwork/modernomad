@@ -5,7 +5,7 @@
 
 <div id="spinner">
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
-</div>	
+</div>
 
 {% include "snippets/manage-email-modal.html" %}
 
@@ -35,7 +35,7 @@
 
 		<div id="booking-details">
 			<h3>
-				Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }} 
+				Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }}
 				<span class="pull-right">Base Value: ${{ s.price }}</span>
 			</h3>
 			{% if s.description %}
@@ -80,7 +80,7 @@
 		</ul>
 	</div>
 
-	<div class="col-md-7">	
+	<div class="col-md-7">
 		<div class="tab-content">
 
 			<div role="tabpanel" class="tab-pane active" id="subscription-manage-summary">
@@ -96,7 +96,7 @@
 
 				<div class="panel panel-default">
 					<div class="panel-heading row-spacer">
-						<h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details (#{{bill.id}}) 
+						<h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details (#{{bill.id}})
 						{% if bill.is_paid %}
 							<form class="subscription-send-receipt manage-button-spacer res-action" method=POST action="{% url 'subscription_send_receipt' location.slug s.id bill.id %}" >
 								{% csrf_token %}
@@ -132,7 +132,7 @@
 		</div>
 
 	</div> <!-- end col-md-7 -->
-</div> 
+</div>
 
 {% include "snippets/manage-page-confirm-dialogs.html" %}
 
@@ -143,7 +143,7 @@
 
 
 
-function UpdateChargeValue(id, val, field_status) { 
+function UpdateChargeValue(id, val, field_status) {
 	elem = "#bill-"+id+"-charge-amount"
 	$(elem).val(val);
 	if (field_status == "readonly") {
@@ -154,9 +154,9 @@ function UpdateChargeValue(id, val, field_status) {
 		$(elem).removeAttr("readonly");
 		$(elem).removeClass("disabled");
 	}
-} 
+}
 
-function UpdateRefundValue(id, val, field_status) { 
+function UpdateRefundValue(id, val, field_status) {
 	$("#refund-amount-"+id).val(val);
 	if (field_status == "readonly") {
 		$("#refund-amount-"+id).attr("readonly", "readonly");
@@ -166,7 +166,7 @@ function UpdateRefundValue(id, val, field_status) {
 		$("#refund-amount-"+id).removeAttr("readonly");
 		$("#refund-amount-"+id).removeClass("disabled");
 	}
-} 
+}
 
 function toggleRefundDetails(id){
 	if($('#refund-details-'+id).is(':hidden')) {
@@ -219,11 +219,11 @@ function ajax_call(el) {
 	console.log('el is');
 	console.log(action_el);
 	res_action = $(el).attr('id')
-	request = $.ajax({ 
+	request = $.ajax({
 		data: {
 			'booking-action': res_action,
 			'csrfmiddlewaretoken': '{{ csrf_token }}'
-		}, 
+		},
 		type: $("#res-action-form").attr('method'), // GET or POST
 		url: $("#res-action-form").attr('action') // the url to hit
 	});
@@ -235,7 +235,7 @@ function ajax_call(el) {
 		}
 		// also need to re-register the ajax calls on the new html divs one
 		// it is injected (or we won't be able to chain multiple calls
-		// together without refreshing the page). 
+		// together without refreshing the page).
 		register_actions();
 	});
 	request.fail(function(msg) {
@@ -246,20 +246,20 @@ function ajax_call(el) {
 
 function register_actions() {
 	// comping a booking reslts in a page reload so we can rely on the
-	// template language here. 
+	// template language here.
 	payment_status = $("#payment-status").html();
-	
+
 	if (payment_status == 'paid') {
 		$("#res-action-toggle-comp").remove();
 	}
 
-	$('.res-manage-action').click(function() { 
+	$('.res-manage-action').click(function() {
 		// action_el gets reset every time res-manage-action is clicked
 		action_el = this;
 		console.log(action_el);
 		console.log('{{r.status}}');
-		console.log('{{room_has_availability}}')
-		if ('{{r.status}}' == 'pending' && '{{ room_has_availability }}' == 'False') {
+		console.log('{{room_has_capacity}}')
+		if ('{{r.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
 			$("#dialog-warn-full").dialog("open");
 		} else {
 			ajax_call(action_el);
@@ -283,7 +283,7 @@ $(document).ready(function() {
 			'<span class="email-form-label">Subject: </span> {{f.subject}} <br>' +
 			'{{f.body|escapejs}}' +
 			'{{f.footer|escapejs}}' +
-			'</div>' + 
+			'</div>' +
 			'<submit value="Send">' +
 			'<div class="modal-footer">' +
 				'<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
@@ -293,12 +293,12 @@ $(document).ready(function() {
 	{% endfor %}
 	console.log($email_templates);
 
-	// wire up the ajax-y spinning animated GIF when an ajax call is made. 	
+	// wire up the ajax-y spinning animated GIF when an ajax call is made.
 	$('#spinner').ajaxStart(function () {
         $(this).fadeIn('fast');
     }).ajaxStop(function () {
         $(this).stop().fadeOut('fast');
-    });	
+    });
 });
 
 

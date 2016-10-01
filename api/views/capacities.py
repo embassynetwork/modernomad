@@ -3,18 +3,18 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 
 from api.utils.http import JSONResponse
-from api.commands.availabilities import *
+from api.commands.capacities import *
 
-from core.models import Availability
-from core.serializers import AvailabilitySerializer
+from core.models import CapacityChange
+from core.serializers import CapacityChangeSerializer
 
 
 @csrf_exempt
-def availabilities(request):
+def capacities(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
 
-        command = UpdateOrAddAvailabilityChange(request.user, **data)
+        command = UpdateOrAddCapacityChange(request.user, **data)
         command.execute()
         return JSONResponse(command.result().serialize(), status=command.result().http_status())
     else:
@@ -22,18 +22,17 @@ def availabilities(request):
 
 
 @csrf_exempt
-def availability_detail(request, availability_id):
-    ''' Retrieve, update or delete an availability.'''
+def capacity_detail(request, capacity_id):
     try:
-        availability = Availability.objects.get(pk=availability_id)
-    except Availability.DoesNotExist:
+        capacity = CapacityChange.objects.get(pk=capacity_id)
+    except CapacityChange.DoesNotExist:
         return HttpResponse(status=404)
 
     if request.method == 'GET':
-        serializer = AvailabilitySerializer(availability)
+        serializer = CapacityChangeSerializer(capacity)
         return JSONResponse(serializer.data)
 
     elif request.method == 'DELETE':
-        command = DeleteAvailabilityChange(request.user, availability=availability)
+        command = DeleteCapacityChange(request.user, capacity=capacity)
         command.execute()
         return JSONResponse(command.result().serialize(), status=command.result().http_status())

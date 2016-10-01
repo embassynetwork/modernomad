@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import AvailabilityContainer from './components/AvailabilityContainer'
+import CapacityContainer from './components/CapacityContainer'
 import RoomBooking from './components/booking/RoomBooking'
 
 var topLevelComponents = {
-  AvailabilityContainer : AvailabilityContainer,
+  CapacityContainer : CapacityContainer,
   RoomBooking : RoomBooking
 }
 

@@ -26,8 +26,8 @@ class GuestCalendar(HTMLCalendar):
                 body = ['<ul>']
                 num_today = len(self.uses[day])
                 this_date = date(self.year, self.month, day)
-                any_availability = self.location.rooms_free(this_date, tomorrow)
-                if not any_availability:
+                any_capacity = self.location.rooms_free(this_date, tomorrow)
+                if not any_capacity:
                     cssclass += ' full-today'
                 for use in self.uses[day]:
                     body.append('<li id="res%d-cal-item">' % use.booking.id)

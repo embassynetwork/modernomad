@@ -335,7 +335,7 @@ class BookingUseForm(forms.ModelForm):
         self.fields['comments'].initial = self.instance.booking.comments
 
         self.location = location
-        self.fields['resource'].choices = self.location.rooms_with_future_availability_choices()
+        self.fields['resource'].choices = self.location.rooms_with_future_capacity_choices()
 
     def clean(self):
         cleaned_data = super(BookingUseForm, self).clean()

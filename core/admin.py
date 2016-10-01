@@ -29,14 +29,14 @@ class EventAdminGroupInline(admin.TabularInline):
     filter_horizontal = ['users']
 
 
-class AvailabilityAdminInline(admin.TabularInline):
-    model = Availability
+class CapacityChangeAdminInline(admin.TabularInline):
+    model = CapacityChange
     ordering = ("start_date",)
 
 
 class ResourceAdmin(admin.ModelAdmin):
     model = Resource
-    inlines = [AvailabilityAdminInline]
+    inlines = [CapacityChangeAdminInline]
     save_as = True
 
 
@@ -285,8 +285,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
     actions= ['generate_bill', 'generate_all_bills']
     exclude = ('bills',)
 
-class AvailabilityAdmin(admin.ModelAdmin):
-    model = Availability
+class CapacityChangeAdmin(admin.ModelAdmin):
+    model = CapacityChange
     list_display=('resource', 'start_date', 'quantity')
 
 admin.site.register(LocationMenu, LocationMenuAdmin)
@@ -300,7 +300,7 @@ admin.site.register(EmailTemplate, EmailTemplateAdmin)
 admin.site.register(LocationEmailTemplate, LocationEmailTemplateAdmin)
 admin.site.register(BillLineItem, BillLineItemAdmin)
 admin.site.register(UserNote, UserNoteAdmin)
-admin.site.register(Availability, AvailabilityAdmin)
+admin.site.register(CapacityChange, CapacityChangeAdmin)
 admin.site.register(Use, UseAdmin)
 
 admin.site.unregister(User)

@@ -1,1 +1,1 @@
-from .resource_availability import *
+from .resource_capacity import *

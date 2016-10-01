@@ -10,18 +10,18 @@
 
 	{% for room_obj, days_list in avail.items %}
 	<tr>
-		<td> 
+		<td>
 			{{room_obj.name}}
 		</td>
 
 		{% for day_info in days_list %}
-			{% if room_obj == use.resource and room_has_availability %}
+			{% if room_obj == use.resource and room_has_capacity %}
 				<td class="bg-success">
 			{% elif room_obj == use.resource and use.status == 'approved' and day_info.beds_free >= 0 %}
 				<td class="bg-success">
 			{% elif room_obj == use.resource and use.status == 'confirmed' and day_info.beds_free >= 0 %}
 				<td class="bg-success">
-			{% elif room_obj == use.resource and not room_has_availability %}
+			{% elif room_obj == use.resource and not room_has_capacity %}
 				<td class="bg-danger">
 			{% else %}
 				<td>
@@ -46,4 +46,3 @@
 	{% endfor %}
 </table>
 {% endwith %}
-

@@ -1,6 +1,6 @@
 {% load staticfiles %}
 
-<form role="form" method="post" class="room-form" enctype="multipart/form-data" 
+<form role="form" method="post" class="room-form" enctype="multipart/form-data"
 		{% if room_id %}
 			action="{% url 'location_edit_room' location.slug room_id %}"
 		{% else %}
@@ -16,10 +16,10 @@
 
 	{% for field in form %}
 
-		{% if not field.is_hidden %} 
+		{% if not field.is_hidden %}
 			<div class="form-group">
 			{{ field.errors }}
-			{{ field.label_tag }} 
+			{{ field.label_tag }}
 			<span class="form-help-text">{{ field.help_text}}</span>
 			{% if field.name == 'default_rate' %}
 				<div class="input-group">
@@ -52,7 +52,7 @@
 <div id="react-app-{{room_id}}"></div>
 <script type="text/javascript">
 	if ({{room_id}} > 0 ) {
-		window.renderReactComponent('react-app-{{room_id}}', 'AvailabilityContainer', {{room_availability|safe}})
+		window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
 	}
 </script>
 
@@ -62,9 +62,9 @@
 <script>
     if ('{{room_id}}' != "None") {
         $("#manage_rooms_edit_room_{{room_id}}").addClass("active");
-        // relies on the DOM structure of bootstraps dropdown menus, fyi. 
+        // relies on the DOM structure of bootstraps dropdown menus, fyi.
         $("#manage_rooms_room_name_{{room_id}}").parent().parent().addClass("active");
-		
+
 	} else {
         $("#manage_rooms_new_room").addClass("active");
 	}
@@ -142,4 +142,3 @@
 	});
 
 </script>
-

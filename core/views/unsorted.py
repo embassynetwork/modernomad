@@ -50,8 +50,8 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import csv
 from django.http import Http404
-from core.data_fetchers import SerializedResourceAvailability
-from core.data_fetchers import SerializedNullResourceAvailability
+from core.data_fetchers import SerializedResourceCapacity
+from core.data_fetchers import SerializedNullResourceCapacity
 import re
 
 logger = logging.getLogger(__name__)
@@ -552,7 +552,7 @@ def occupancy(request, location_slug):
         })
         total_occupied_person_nights += nights_this_month
 
-    rooms_with_availability_this_month = []
+    rooms_with_capacity_this_month = []
     location_rooms = location.resources.all()
     total_reservable_days = 0
     reservable_days_per_room = {}
@@ -662,7 +662,7 @@ def calendar(request, location_slug):
     # should be. it's kind of a hack.
     num_rows_in_chart = 0
     for room in rooms:
-        num_rows_in_chart += room.max_daily_availabilities_between(start, end)
+        num_rows_in_chart += room.max_daily_capacities_between(start, end)
 
     if len(uses) == 0:
         any_uses = False
@@ -676,7 +676,7 @@ def calendar(request, location_slug):
 
         if len(uses_list_this_room) == 0:
             empty_rooms += 1
-            num_rows_in_chart -= room.max_daily_availabilities_between(start, end)
+            num_rows_in_chart -= room.max_daily_capacities_between(start, end)
 
         else:
             for u in uses_list_this_room:
@@ -735,7 +735,7 @@ def room_cal_request(request, location_slug, room_id, month=None, year=None, bro
     except:
         return HttpResponseRedirect('/')
 
-    cal_html = room.availability_calendar_html(month=month, year=year)
+    cal_html = room.capacity_calendar_html(month=month, year=year)
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     link_html = '''
@@ -914,8 +914,8 @@ def user_edit_room(request, username, room_id):
     else:
         has_image = False
 
-    resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
-    room_availability = json.dumps(resource_availability.as_dict())
+    resource_capacity = SerializedResourceCapacity(room, timezone.localtime(timezone.now()))
+    room_capacity = json.dumps(resource_capacity.as_dict())
     location = room.location
     form = LocationRoomForm(instance=room)
 
@@ -929,7 +929,7 @@ def user_edit_room(request, username, room_id):
             'room_name': room.name,
             'location': location,
             'has_image': has_image,
-            'room_availability': room_availability,
+            'room_capacity': room_capacity,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY
         }
     )
@@ -970,13 +970,13 @@ def RoomsAvailableOnDates(request, location_slug):
         arrive = datetime.datetime.strptime(request.POST['arrive'], '%Y-%m-%d').date()
         depart = datetime.datetime.strptime(request.POST['depart'], '%Y-%m-%d').date()
     free_rooms = location.rooms_free(arrive, depart)
-    rooms_availability = {}
-    for room in location.rooms_with_future_availability():
+    rooms_capacity = {}
+    for room in location.rooms_with_future_capacity():
         if room in free_rooms:
-            rooms_availability[room.name] = {'available': True, 'id': room.id}
+            rooms_capacity[room.name] = {'available': True, 'id': room.id}
         else:
-            rooms_availability[room.name] = {'available': False, 'id': room.id}
-    return JsonResponse({'rooms_availability': rooms_availability})
+            rooms_capacity[room.name] = {'available': False, 'id': room.id}
+    return JsonResponse({'rooms_capacity': rooms_capacity})
 
 
 def BookingSubmit(request, location_slug):
@@ -1024,7 +1024,7 @@ def BookingSubmit(request, location_slug):
     month = request.GET.get("month")
     year = request.GET.get("year")
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-    rooms = location.rooms_with_future_availability()
+    rooms = location.rooms_with_future_capacity()
     return render(
         request,
         'booking.html',
@@ -1540,8 +1540,8 @@ def LocationEditRoom(request, location_slug, room_id):
     location = get_object_or_404(Location, slug=location_slug)
     resources = location.resources.all().order_by('name')
     room = Resource.objects.get(pk=room_id)
-    resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
-    resource_availability_as_dict = json.dumps(resource_availability.as_dict())
+    resource_capacity = SerializedResourceCapacity(room, timezone.localtime(timezone.now()))
+    resource_capacity_as_dict = json.dumps(resource_capacity.as_dict())
 
     print request.method
     if request.method == 'POST':
@@ -1569,7 +1569,7 @@ def LocationEditRoom(request, location_slug, room_id):
             'form': form,
             'room_id': room_id,
             'rooms': resources,
-            'room_availability': resource_availability_as_dict
+            'room_capacity': resource_capacity_as_dict
         }
     )
 
@@ -1590,7 +1590,7 @@ def LocationNewRoom(request, location_slug):
             return HttpResponseRedirect(reverse('location_edit_room', args=(location.slug, new_room.id,)))
     else:
         form = LocationRoomForm()
-        resource_availability = SerializedNullResourceAvailability()
+        resource_capacity = SerializedNullResourceCapacity()
 
     return render(
         request,
@@ -1599,7 +1599,7 @@ def LocationNewRoom(request, location_slug):
             'location': location,
             'form': form,
             'rooms': resources,
-            'room_availability': resource_availability
+            'room_capacity': resource_capacity
         }
     )
 
@@ -1739,13 +1739,13 @@ def BookingManage(request, location_slug, booking_id):
         email_forms.append(form)
         email_templates_by_name.append(email_template.name)
 
-    availability = location.availability(booking.use.arrive, booking.use.depart)
+    capacity = location.capacity(booking.use.arrive, booking.use.depart)
     free = location.rooms_free(booking.use.arrive, booking.use.depart)
     date_list = date_range_to_list(booking.use.arrive, booking.use.depart)
     if booking.use.resource in free:
-        room_has_availability = True
+        room_has_capacity = True
     else:
-        room_has_availability = False
+        room_has_capacity = False
 
     # Pull all the booking notes for this person
     if 'note' in request.POST:
@@ -1777,8 +1777,8 @@ def BookingManage(request, location_slug, booking_id):
         "use_statuses": Use.USE_STATUSES,
         "email_templates_by_name": email_templates_by_name,
         "days_before_welcome_email": location.welcome_email_days_ahead,
-        "room_has_availability": room_has_availability,
-        "avail": availability,
+        "room_has_capacity": room_has_capacity,
+        "avail": capacity,
         "dates": date_list,
         "domain": domain,
         'location': location,

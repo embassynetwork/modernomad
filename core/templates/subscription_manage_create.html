@@ -5,7 +5,7 @@
 
 <div id="spinner">
     <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
-</div>	
+</div>
 
 <div class="row" id="booking-nav">
 	<a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
@@ -31,32 +31,32 @@
 		</div>
 	</div>
 
-	<div class="col-md-7">	
+	<div class="col-md-7">
 
 
 		<div id="subscription-details-form">
 			<form method="POST" role="form" class="form-horizontal" id="manage-subscription-form" action="{% url 'subscription_manage_create' location.slug %}">{% csrf_token %}
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">User</label> 
+					<label class="col-sm-2 control-label">User</label>
 					<div class="col-sm-7">
 						<input class="form-control" name="username" id="id_username" value="" required/>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Start Date</label> 
+					<label class="col-sm-2 control-label">Start Date</label>
 					<div class="col-sm-2">
 						<input class="form-control listening" id="id_start_date" name="start_date" value="" size="8" required/>
 					</div>
-					<label class="col-sm-2 control-label">End Date</label> 
+					<label class="col-sm-2 control-label">End Date</label>
 					<div class="col-sm-2">
 						<input class="form-control listening" id="id_end_date" name="end_date" value="" size="8" placeholder="optional"/>
 					</div>
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Price</label> 
+					<label class="col-sm-2 control-label">Price</label>
 					<div class="col-sm-2">
 						<div class="input-group">
 							<div class="input-group-addon">$</div>
@@ -66,7 +66,7 @@
 				</div>
 
 				<div class="form-group">
-					<label class="col-sm-2 control-label">Description</label> 
+					<label class="col-sm-2 control-label">Description</label>
 					<div class="col-sm-6">
 						<input class="form-control" id="id_description" name="description" value="" size="8"/>
 					</div>
@@ -85,7 +85,7 @@
 
 
 	</div> <!-- end col-md-7 -->
-</div> 
+</div>
 
 
 {% endblock %}
@@ -99,14 +99,14 @@
 		username = $("#id_username").val();
 		console.log(username);
 		if (username) {
-			request = $.ajax({ 
+			request = $.ajax({
 				data: {
 					'csrfmiddlewaretoken': '{{ csrf_token }}'
-				}, 
+				},
 				type: "POST",
 				url: '/people/'+username+'/avatar/'
 			});
-		
+
 			request.done(function(url) { // on success..
 				console.log(url);
 				$("#avatar-placeholder").fadeOut(function() {
@@ -119,7 +119,7 @@
 			});
 		}
 	};
-	
+
 	var availableUsers = [
 		{% for user in all_users %}
 		"{{user.username}}",
@@ -146,10 +146,10 @@
 			$(this).change();
         }
 	})
-	
+
 	// Check booking dates and room for avilability, warn admin if overbooking room.
 	$(".listening").change(function(event) {
-		// Get start and end dates, update value. 
+		// Get start and end dates, update value.
 		var start_date = $("#id_start_date").val();
 	 	var end_date = $("#id_end_date").val();
 
@@ -161,7 +161,7 @@
 				room_select = $("#room_select");
 				room_select.children().remove();
 				room_select.append('<option value="">Select Room</option>');
-				$.each(data.rooms_availability, function(k, v) {
+				$.each(data.rooms_capacity, function(k, v) {
 					console.log(v);
 					avail = "";
 					if (v.available == false) {
@@ -170,29 +170,29 @@
 					}
 					room_select.append('<option value="'+ v.id +'">' + k + avail + '</option>');
 				});
-	       	});	
-		} 
+	       	});
+		}
 
 		// wire up the ajax-y spinning animated GIF to show when an ajax call
-		// is made. 	
+		// is made.
 		$('#spinner').ajaxStart(function () {
 			$(this).fadeIn('fast');
 		}).ajaxStop(function () {
 			$(this).stop().fadeOut('fast');
-		});	
-	
+		});
+
 	});
 
 	$.validator.addMethod('positiveNumber',
-    function (value) { 
+    function (value) {
         return Number(value) > 0;
     }, 'Enter a positive number.');
-	
+
 	$.validator.addMethod('usernameExists',
-    function (value) { 
+    function (value) {
         return availableUsers.indexOf(value) >= 0;
     }, 'That username does not exist.');
-	
+
 	$("#manage-subscription-form").validate({
 		rules: {
 			username: {

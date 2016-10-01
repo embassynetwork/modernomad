@@ -143,26 +143,26 @@ class Location(models.Model):
             subscribers.append(s.user)
         return list(list(self.residents.all()) + list(self.house_admins.all()) + list(self.event_admin_group.users.all()) + subscribers)
 
-    def rooms_with_future_availability_choices(self):
+    def rooms_with_future_capacity_choices(self):
         choices = []
-        rooms = self.rooms_with_future_availability()
+        rooms = self.rooms_with_future_capacity()
         for room in rooms:
             choices.append((room.id, room.name))
         return choices
 
-    def rooms_with_future_availability(self):
-        future_availability = []
+    def rooms_with_future_capacity(self):
+        future_capacity = []
         for room in Resource.objects.filter(location=self):
-            if room.has_future_availability():
-                future_availability.append(room)
-        return future_availability
+            if room.has_future_capacity():
+                future_capacity.append(room)
+        return future_capacity
 
     def reservable_rooms_on_day(self, the_day):
         rooms_at_location = self.filter(location=self)
-        return [room for room in rooms_at_location if room.availabilities_on(the_day)]
+        return [room for room in rooms_at_location if room.capacities_on(the_day)]
 
-    def availability(self, start, end):
-        # show availability (occupied and free beds), between start and end
+    def capacity(self, start, end):
+        # show capacity (occupied and free beds), between start and end
         # dates, per location. create a structure queryable by
         # available_beds[room][date] = n, where n is the number of beds free.
         rooms_at_location = self.get_rooms()
@@ -172,7 +172,7 @@ class Location(models.Model):
             available_beds[room] = []
             while the_day < end:
                 uses_today = Use.objects.confirmed_approved_on_date(the_day, self, resource=room)
-                free_beds = room.availabilities_on(the_day) - len(uses_today)
+                free_beds = room.capacities_on(the_day) - len(uses_today)
                 available_beds[room].append({'the_date': the_day, 'beds_free': free_beds})
                 the_day = the_day + datetime.timedelta(1)
         return available_beds
@@ -190,7 +190,7 @@ class Location(models.Model):
                 the_day = the_day + datetime.timedelta(1)
         return available
 
-    def has_availability(self, arrive=None, depart=None):
+    def has_capacity(self, arrive=None, depart=None):
         if not arrive:
             arrive = timezone.localtime(timezone.now())
             depart = arrive + datetime.timedelta(1)
@@ -256,8 +256,8 @@ class Location(models.Model):
     def guests_today(self):
         today = timezone.now()
         uses_today = Use.objects.filter(location=self) \
-                                        .filter(Q(status="confirmed") | Q(status="approved")) \
-                                        .exclude(depart__lt=today).exclude(arrive__gt=today)
+                        .filter(Q(status="confirmed") | Q(status="approved")) \
+                        .exclude(depart__lt=today).exclude(arrive__gt=today)
         guests_today = []
         for r in uses_today:
             if r.user not in guests_today:
@@ -358,18 +358,18 @@ class Resource(models.Model):
         total = 0
         the_day = start
         while the_day < end:
-            total += self.availabilities_on(the_day)
+            total += self.capacities_on(the_day)
             the_day += datetime.timedelta(1)
         return total
 
-    # Returns all the availability change objects that affect the time period
+    # Returns all the capacity change objects that affect the time period
     # described, in chronological order. This includes the immediately before or on
     # the start date, and any others through to and including the end date.
-    def availabilities_within(self, start, end):
-        avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
+    def capacities_within(self, start, end):
+        avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
         avails_between = []
         for a in avails:
-            # since we already filtered out availabilities ahead of our date
+            # since we already filtered out capacities ahead of our date
             # range, we just need to go backwards until the first avail that
             # starts on or before our start date, and then break.
             if a.start_date > start:
@@ -383,64 +383,64 @@ class Resource(models.Model):
     def confirmed_uses_between(self, start, end):
         return self.use_set.confirmed_between_dates(start, end)
 
-    def has_future_availability(self):
+    def has_future_capacity(self):
         today = timezone.localtime(timezone.now()).date()
-        # iterate backwards over time through availabilities. if there's any
-        # non-zero availabilities current or future, then this resource has
-        # SOME 'future' availability.
-        avails = self.availabilities.all().order_by('-start_date')
+        # iterate backwards over time through capacities. if there's any
+        # non-zero capacities current or future, then this resource has
+        # SOME 'future' capacity.
+        avails = self.capacity_changes.all().order_by('-start_date')
         for a in avails:
             if a.start_date >= today and a.quantity > 0:
                 return True
-            # we only ever want to go one availability into the past.
+            # we only ever want to go one capacity into the past.
             elif a.start_date < today:
                 if a.quantity > 0:
                     return True
                 else:
                     return False
 
-    def availabilities_on(self, this_day):
-        return Availability.objects.quantity_on(this_day, self)
+    def capacities_on(self, this_day):
+        return CapacityChange.objects.quantity_on(this_day, self)
 
     def bookable_on(self, this_day):
-        # a resource is bookable if it has availability slots that are not already booked.
-        availabilities = self.availabilities_on(this_day)
-        if not availabilities:
+        # a resource is bookable if it has capacity slots that are not already booked.
+        capacities = self.capacities_on(this_day)
+        if not capacities:
             return False
         uses_on_this_day = Use.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-        if len(uses_on_this_day) < availabilities:
+        if len(uses_on_this_day) < capacities:
             return True
         else:
             return False
 
-    def daily_availabilities_within(self, start, end):
-        availabilities = self.availabilities_within(start, end)
+    def daily_capacities_within(self, start, end):
+        capacities = self.capacities_within(start, end)
 
         quantity = 0
         result = []
         for day in dates_within(start, end):
-            if availabilities and availabilities[0].start_date <= day:
-                quantity = availabilities.pop(0).quantity
+            if capacities and capacities[0].start_date <= day:
+                quantity = capacities.pop(0).quantity
             result.append((day, quantity))
 
         return result
 
     def daily_bookabilities_within(self, start, end):
-        daily_availabilities = self.daily_availabilities_within(start, end)
+        daily_capacities = self.daily_capacities_within(start, end)
         uses = self.confirmed_uses_between(start, end)
 
         result = []
-        for daily_availability in daily_availabilities:
-            day = daily_availability[0]
+        for daily_capacity in daily_capacities:
+            day = daily_capacity[0]
             use_quantity = count_range_objects_on_day(uses, day)
-            result_quantity = daily_availability[1] - use_quantity
+            result_quantity = daily_capacity[1] - use_quantity
             result.append((day, result_quantity))
 
         return result
 
-    def max_daily_availabilities_between(self, start, end):
+    def max_daily_capacities_between(self, start, end):
         max_quantity = 0
-        avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
+        avails = self.capacities.exclude(start_date__gt=end).order_by('-start_date')
         for a in avails:
             if a.quantity > max_quantity:
                 max_quantity = a.quantity
@@ -448,7 +448,7 @@ class Resource(models.Model):
                 break
         return max_quantity
 
-    def availability_calendar_html(self, month=None, year=None):
+    def capacity_calendar_html(self, month=None, year=None):
         if not (month and year):
             today = timezone.localtime(timezone.now())
             month = today.month
@@ -1000,6 +1000,7 @@ class SubscriptionBill(Bill):
 class BookingBill(Bill):
     pass
 
+
 class Use(models.Model):
     ''' record of a use for a specific resource.'''
 
@@ -1052,7 +1053,6 @@ class Use(models.Model):
         elif self.depart > end:
             nights = (end - self.arrive).days
         return nights
-
 
 
 class Booking(models.Model):
@@ -1325,6 +1325,7 @@ class Booking(models.Model):
 
     def non_refund_payments(self):
         return self.bill.payments.filter(paid_amount__gt=0)
+
 
 @receiver(pre_save, sender=Booking)
 def booking_create_bill(sender, instance, **kwargs):
@@ -1711,7 +1712,7 @@ class LocationImage(BaseImage):
     location = models.ForeignKey(Location)
 
 
-class AvailabilityManager(models.Manager):
+class CapacityChangeManager(models.Manager):
     def quantity_on(self, date, resource):
         latest_change = self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
         if latest_change:
@@ -1720,12 +1721,12 @@ class AvailabilityManager(models.Manager):
             return 0
 
 
-class Availability(models.Model):
+class CapacityChange(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    resource = models.ForeignKey(Resource, related_name="availabilities")
+    resource = models.ForeignKey(Resource, related_name="capacity_changes")
     start_date = models.DateField()
     quantity = models.IntegerField()
-    objects = AvailabilityManager()
+    objects = CapacityChangeManager()
 
     class Meta:
         verbose_name_plural = 'Availabilities'

@@ -16,13 +16,13 @@ def CheckRoomAvailability(request, location_slug):
     d_month, d_day, d_year = depart_str.split("/")
     arrive = datetime.date(int(a_year), int(a_month), int(a_day))
     depart = datetime.date(int(d_year), int(d_month), int(d_day))
-    availability = location.availability(arrive, depart)
+    capacity = location.capacity(arrive, depart)
     date_list = date_range_to_list(arrive, depart)
     available_bookings = {}
     free_rooms = location.rooms_free(arrive, depart)
     for room in free_rooms:
         # Create some mock bookings for each available room so we can generate
-        # the bill. These are NOT saved. 
+        # the bill. These are NOT saved.
         mock_use = Use(id=-1, resource=room, arrive=arrive, depart=depart, location=location)
         mock_booking = Booking(id=-1, use=mock_use)
         bill_line_items = mock_booking.generate_bill(delete_old_items=False, save=False)
@@ -49,7 +49,7 @@ def CheckRoomAvailability(request, location_slug):
         request,
         "snippets/availability_calendar.html",
         {
-            'availability_table': availability,
+            'availability_table': capacity,
             'dates': date_list,
             'current_user': current_user,
             'available_bookings': available_bookings,
