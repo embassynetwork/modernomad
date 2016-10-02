@@ -2,8 +2,8 @@ from django.conf.urls import patterns, include, url
 
 per_location_patterns = [
     url(r'^$', 'core.views.unsorted.location', name='location_home'),
-    url(r'^stay/$', 'core.views.unsorted.BookingSubmit', name='location_stay'),
-    url(r'^stay/room/(?P<room_id>\w+)$', 'core.views.unsorted.room', name='room'),
+    url(r'^stay/$', 'core.views.booking.StayComponent', name='location_stay'),
+    url(r'^stay/room/(?P<room_id>\w+)$', 'core.views.booking.StayComponent', name='room'),
     url(r'^community/$', 'core.views.unsorted.community', name='location_community'),
     url(r'^team/$', 'core.views.unsorted.team', name='location_team'),
     url(r'^guests/$', 'core.views.unsorted.guests', name='location_guests'),
