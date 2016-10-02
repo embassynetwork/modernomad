@@ -1,24 +1,24 @@
 import graphene
 
-import graphapi.schemas.occupants
-import graphapi.schemas.locations
-import graphapi.schemas.users
-import graphapi.schemas.resources
-import graphapi.schemas.bookings
+import graphapi.schemas.occupants as occupants
+import graphapi.schemas.locations as locations
+import graphapi.schemas.users as users
+import graphapi.schemas.resources as resources
+import graphapi.schemas.bookings as bookings
 
 
 class Query(
-    graphapi.schemas.occupants.Query,
-    graphapi.schemas.locations.Query,
-    graphapi.schemas.users.Query,
-    graphapi.schemas.resources.Query,
+    occupants.Query,
+    locations.Query,
+    users.Query,
+    resources.Query,
     graphene.ObjectType
 ):
     pass
 
 
 class Mutation(graphene.ObjectType):
-    create_booking = graphapi.schemas.bookings.CreateBooking.Field()
+    request_booking = bookings.RequestBookingMutation.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
