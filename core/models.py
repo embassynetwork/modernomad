@@ -425,7 +425,7 @@ class Resource(models.Model):
 
         return result
 
-    def daily_bookabilities_within(self, start, end):
+    def daily_availabilities_within(self, start, end):
         daily_capacities = self.daily_capacities_within(start, end)
         uses = self.confirmed_uses_between(start, end)
 

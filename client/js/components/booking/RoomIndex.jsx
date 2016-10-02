@@ -34,7 +34,7 @@ export default class RoomIndex extends React.Component {
   displayableRooms() {
     if (this.hasDateQuery()) {
       return _.filter(this.props.rooms, (room) => {
-        return !_.find(room.bookabilities, {quantity: 0})
+        return !_.find(room.availabilities, {quantity: 0})
       })
     } else {
       return this.props.rooms

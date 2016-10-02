@@ -3,18 +3,18 @@ from graphene import AbstractType, Field, Node
 from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-
+import time
 from core.models import Resource
 
 
-class BookabilityNode(graphene.ObjectType):
+class AvailabilityNode(graphene.ObjectType):
     date = DateTime()
     quantity = graphene.Int()
 
 
 class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
-    bookabilities = graphene.List(lambda: BookabilityNode, arrive=DateTime(), depart=DateTime())
+    availabilities = graphene.List(lambda: AvailabilityNode, arrive=DateTime(), depart=DateTime())
 
     class Meta:
         model = Resource
@@ -27,13 +27,13 @@ class ResourceNode(DjangoObjectType):
     def resolve_rid(self, args, *_):
         return self.id
 
-    def resolve_bookabilities(self, args, *stuff):
+    def resolve_availabilities(self, args, *stuff):
         assert args['arrive'], "you must specify arrival date"
         assert args['depart'], "you must specify departure date"
 
-        bookabilities = self.daily_bookabilities_within(args['arrive'].date(), args['depart'].date())
+        availabilities = self.daily_availabilities_within(args['arrive'].date(), args['depart'].date())
 
-        return [BookabilityNode(*bookability) for bookability in bookabilities]
+        return [AvailabilityNode(*availability) for availability in availabilities]
 
 
 class Query(AbstractType):

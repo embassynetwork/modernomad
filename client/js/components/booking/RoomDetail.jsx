@@ -16,9 +16,9 @@ export default class RoomDetail extends React.Component {
 
   roomIsAvailable() {
     if (this.hasDateQuery()) {
-      return !!_.find(this.props.room.bookabilities, {quantity: 0})
+      return !!_.find(this.props.room.availabilities, {quantity: 0})
     } else {
-      return False
+      return false
     }
   }
 

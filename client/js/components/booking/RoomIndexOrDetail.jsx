@@ -19,7 +19,7 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
         summary
         image
         defaultRate
-        bookabilities(arrive: $arrive, depart: $depart) {
+        availabilities(arrive: $arrive, depart: $depart) {
           date
           quantity
         }

@@ -5,7 +5,7 @@ from core.models import *
 from datetime import date
 
 
-class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
+class ResourceDailyAvailabilitiesBetweenTestCase(TestCase):
     def setUp(self):
         self.resource = ResourceFactory()
         self.start = date(2016, 1, 10)
@@ -31,7 +31,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
     # With no data
 
     def test_it_returns_zero_quantities_for_each_date_if_resource_has_no_availabilities(self):
-        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        result = self.resource.daily_availabilities_within(self.start, self.end)
         self.assertEqual(result, [
             (date(2016, 1, 10), 0),
             (date(2016, 1, 11), 0),
@@ -45,7 +45,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
     def test_it_returns_quantity_for_a_preceeding_capacity(self):
         self.capacity_on(date(2015, 1, 1), 2)
 
-        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        result = self.resource.daily_availabilities_within(self.start, self.end)
         self.assertEqual(result, [
             (date(2016, 1, 10), 2),
             (date(2016, 1, 11), 2),
@@ -59,7 +59,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
         self.capacity_on(date(2016, 1, 14), 2)
         self.capacity_on(date(2016, 1, 15), 6)
 
-        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        result = self.resource.daily_availabilities_within(self.start, self.end)
         self.assertEqual(result, [
             (date(2016, 1, 10), 0),
             (date(2016, 1, 11), 0),
@@ -79,7 +79,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
         self.use_on(date(2016, 1, 13), date(2016, 1, 14))
         self.use_on(date(2016, 1, 15), date(2016, 1, 16))
 
-        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        result = self.resource.daily_availabilities_within(self.start, self.end)
         self.assertEqual(result, [
             (date(2016, 1, 10), 9),
             (date(2016, 1, 11), 10),
@@ -99,7 +99,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
         self.use_on(date(2016, 1, 13), date(2016, 1, 14))
         self.use_on(date(2016, 1, 15), date(2016, 1, 16))
 
-        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        result = self.resource.daily_availabilities_within(self.start, self.end)
         self.assertEqual(result, [
             (date(2016, 1, 10), -1),
             (date(2016, 1, 11), 0),
@@ -113,7 +113,7 @@ class ResourceDailyBookabilitiesBetweenTestCase(TestCase):
 
         self.use_on_other_resource(date(2016, 1, 11), date(2016, 1, 14))
 
-        result = self.resource.daily_bookabilities_within(self.start, self.end)
+        result = self.resource.daily_availabilities_within(self.start, self.end)
         self.assertEqual(result, [
             (date(2016, 1, 10), 10),
             (date(2016, 1, 11), 10),
