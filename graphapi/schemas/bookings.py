@@ -5,14 +5,16 @@ from graphene.types import String
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene.types.datetime import *
 
-# from core.models import Booking
-# from core.forms import BookingUseForm
 from api.commands.bookings import RequestBooking
+from graphapi.schemas.resources import ResourceNode
+from core.models import Resource
+
 
 class RequestBookingMutation(graphene.Mutation):
     class Input:
         arrive = DateTime(required=True)
         depart = DateTime(required=True)
+        resource_id = graphene.String(required=True)
 
     name = graphene.String()
 
