@@ -45,7 +45,10 @@ class RequestBooking(FormCommand):
             )
             use.save()
 
-            booking = Booking(use=use, comments=data.get('comments'))
+            booking = Booking(
+                use=use, comments=data.get('comments'),
+                rate=data['resource'].default_rate
+            )
             booking.save()
 
             self.result_data = {

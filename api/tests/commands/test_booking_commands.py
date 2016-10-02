@@ -41,7 +41,7 @@ def on_day(offset, serialized=True):
 class RequestBookingTestCase(TestCase, CommandErrorMatchers):
     def setUp(self):
         self.user = UserFactory()
-        self.resource = ResourceFactory()
+        self.resource = ResourceFactory(default_rate=123.5)
         self.location = self.resource.location
         self.valid_params = {
             'arrive': on_day(5), 'depart': on_day(10), 'resource': self.resource.pk,
@@ -81,14 +81,21 @@ class RequestBookingTestCase(TestCase, CommandErrorMatchers):
         self.assertErrorOn('depart')
 
     def test_that_command_with_valid_data_creates_booking_and_use(self):
-        self.command = RequestBooking(
-            self.user, **self.valid_params)
+        self.command = RequestBooking(self.user, **self.valid_params)
         self.executeCommandSucceeds()
 
-        self.assertModelSaved(self.result.data['booking'], {'comments': "this is a great booking"})
+        self.assertModelSaved(self.result.data['booking'], {
+            'comments': "this is a great booking",
+            'rate': 123.5
+        })
+
         self.assertModelSaved(self.result.data['use'], {
             'arrive': on_day(5, False),
             'depart': on_day(10, False),
             'resource': self.resource,
             'location': self.location
         })
+
+    # TODO: bill creation
+    # TODO: new_booking_notify
+    # TODO: if the user isn't logged in
