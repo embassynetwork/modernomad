@@ -23,9 +23,19 @@ class CommandErrorMatchers:
         error = self.result.errors.get(key)
         self.assertNotEqual(error, None)
 
+    def assertModelSaved(self, model, values={}):
+        self.assertTrue(model)
+        self.assertTrue(model.pk)
+        for key, value in values.iteritems():
+            self.assertEqual(getattr(model, key), value)
 
-def on_day(offset):
-    return (date.today() + timedelta(days=offset)).isoformat()
+
+def on_day(offset, serialized=True):
+    result = (date.today() + timedelta(days=offset))
+    if serialized:
+        return result.isoformat()
+    else:
+        return result
 
 
 class RequestBookingTestCase(TestCase, CommandErrorMatchers):
@@ -33,11 +43,19 @@ class RequestBookingTestCase(TestCase, CommandErrorMatchers):
         self.user = UserFactory()
         self.resource = ResourceFactory()
         self.location = self.resource.location
+        self.valid_params = {
+            'arrive': on_day(5), 'depart': on_day(10), 'resource': self.resource.pk,
+            'comments': "this is a great booking"
+        }
 
     def test_that_depart_is_required(self):
         self.command = RequestBooking(self.user, arrive=on_day(5), resource=self.resource.pk)
         self.executeCommandFails()
         self.assertErrorOn('depart')
+
+    # def test_that_user_is_required(self):
+    #     self.command = RequestBooking(None, **self.valid_params)
+    #     self.executeCommandFails()
 
     def test_that_resource_is_required(self):
         self.command = RequestBooking(self.user, arrive=on_day(5), depart=on_day(10))
@@ -63,7 +81,14 @@ class RequestBookingTestCase(TestCase, CommandErrorMatchers):
         self.assertErrorOn('depart')
 
     def test_that_command_with_valid_data_creates_booking_and_use(self):
-        print str(self.resource)
-        print str(self.resource.pk)
-        self.command = RequestBooking(self.user, arrive=on_day(5), depart=on_day(10), resource=self.resource.pk)
+        self.command = RequestBooking(
+            self.user, **self.valid_params)
         self.executeCommandSucceeds()
+
+        self.assertModelSaved(self.result.data['booking'], {'comments': "this is a great booking"})
+        self.assertModelSaved(self.result.data['use'], {
+            'arrive': on_day(5, False),
+            'depart': on_day(10, False),
+            'resource': self.resource,
+            'location': self.location
+        })

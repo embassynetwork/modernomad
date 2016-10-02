@@ -196,6 +196,7 @@ class FormCommand(Command):
     def _check_if_form_valid(self):
         result = self.form.is_valid()
         self._append_form_errors()
+        self.cleaned_data = self.form.cleaned_data
         return result
 
     def _append_form_errors(self):
