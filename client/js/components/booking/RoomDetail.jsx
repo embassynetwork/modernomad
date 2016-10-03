@@ -41,7 +41,7 @@ export default class RoomDetail extends React.Component {
         <p>{room.summary}</p>
         <div className="row">
           <div className="col-sm-8">
-            <img className="room-image" src={"/media/"+room.image} />
+            <img className="room-image img-responsive" src={"/media/"+room.image} />
             {/*room.img && <ImageCarousel img={room.img} />*/}
           </div>
           <div className="col-sm-4 panel">
