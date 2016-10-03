@@ -6,7 +6,7 @@ import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import _ from 'lodash'
 import moment from 'moment'
-import Loader from 'react-loader-advanced'
+import Loader from '../generic/Loader'
 
 const resourcesQuery = gql`
 query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depart: DateTime!) {
@@ -67,7 +67,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
 
   render() {
     return (
-      <Loader show={this.props.data.loading}>
+      <Loader loading={this.props.data.loading}>
         {this.renderSubComponent()}
       </Loader>
     )
