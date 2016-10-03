@@ -3,26 +3,26 @@
 ========================================================== */
 
 body {
-	font-family:'Open Sans', sans-serif;
-	-webkit-font-smoothing: antialiased;
+  font-family:'Open Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6, #login, .btn, .event .date, .event .date span, .event-date-day, .event-date-separator,.event-date-month, .event-date-time, .event-location  {
-	-webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3 {
-	font-family: 'Raleway', sans-serif;
+  font-family: 'Raleway', sans-serif;
 }
 
 .form-control {
-	background-color: transparent;
-	border-radius: 2px;
+  background-color: transparent;
+  border-radius: 2px;
 }
 
 .btn {
-	border-radius: 2px;
-	text-transform: none;
+  border-radius: 2px;
+  text-transform: none;
 }
 
 .panel {
@@ -33,16 +33,16 @@ h1, h2, h3 {
 }
 
 .fancy-header {
-	-webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* increases line spacing for text that is too tight */
 .easy-reading {
-	line-height:2em;
+  line-height:2em;
 }
 
 span.highlight {
-	color:#D84E33;
+  color:#D84E33;
 }
 
 
@@ -53,17 +53,17 @@ span.highlight {
 /* ======================[Global Navigation]================= */
 
 .curtain {
-	position: fixed;
-	top: 0;
-	left: 0;
-	background: rgba(255,255,255,0.8);
-	width: 100%;
-	height: 100%;
-	z-index: -1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(255,255,255,0.8);
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
 
 #landing-page-event-info {
-	padding-top: 50px;
+  padding-top: 50px;
 }
 
 /* ======================[Global Navigation]================= */
@@ -90,428 +90,428 @@ span.highlight {
 }
 
 .top-nav a {
-	display: block;
-	width: 50px;
-	color: #FFF;
-	text-decoration: none;
-	background: gray;
+  display: block;
+  width: 50px;
+  color: #FFF;
+  text-decoration: none;
+  background: gray;
 
 }
 .top-nav a:hover {
-	background: green;
+  background: green;
 }
 
 
 /* ====================== Home Page ================= */
 
 a {
-	color: #ea6f56;
-	text-decoration: none;
+  color: #ea6f56;
+  text-decoration: none;
 }
 
 a:hover {
-	color: #ea6f56;
-	text-decoration: none;
+  color: #ea6f56;
+  text-decoration: none;
 }
 
 .jumbotron {
-	font-size: 1em;
-	background-image: url(/static/img/embassysf.jpg);
-	background-size: cover;
-	color: white;
+  font-size: 1em;
+  background-image: url(/static/img/embassysf.jpg);
+  background-size: cover;
+  color: white;
 }
 
 .jumbotron .light {
-	font-family: 'Raleway', sans-serif;
-	font-size: 1em;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1em;
 }
 
 .jumbotron .bold {
-	font-family: 'Raleway', sans-serif;
-	font-size: 2em;
+  font-family: 'Raleway', sans-serif;
+  font-size: 2em;
 }
 
 .jumbotron .script {
-	font-family: 'Dancing Script', cursive;
-	font-size: 1.5em;
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5em;
 }
 
 .jumbotron .logo {
-	height: 70px;
+  height: 70px;
 }
 
 .jumbotron .btn-brand {
-	margin-top: 30px;
-	margin-bottom: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .btn-brand {
-	font-family: 'Raleway', sans-serif;
-	background-color: rgb(183, 68, 37);
-	border-color: rgb(183, 68, 37);
+  font-family: 'Raleway', sans-serif;
+  background-color: rgb(183, 68, 37);
+  border-color: rgb(183, 68, 37);
 }
 
 .btn-brand:hover {
-	background-color: rgb(183, 68, 37);
-	border-color: rgb(183, 68, 37);
+  background-color: rgb(183, 68, 37);
+  border-color: rgb(183, 68, 37);
 }
 
 .embassy-logo {
-	margin-top: 5px;
+  margin-top: 5px;
 }
 
 /* Press section */
 
 #press-section {
-	margin: 50px 0;
+  margin: 50px 0;
 }
 
 .press-logo {
-	height: 40px;
-	margin: 30px;
+  height: 40px;
+  margin: 30px;
 }
 
 /* join section */
 
 #join-section {
-	background-color: #f5f5f5;;
-	margin: 50px 0;
-	padding: 50px 0;
+  background-color: #f5f5f5;;
+  margin: 50px 0;
+  padding: 50px 0;
 }
 
 #login {
-	padding:32px 0;
-	border-right:1px solid rgba(0,0,0,0.1);
+  padding:32px 0;
+  border-right:1px solid rgba(0,0,0,0.1);
 }
 
 #login a {
-	color:rgba(0,0,0,0.3);
-	font-size:1.3em;
+  color:rgba(0,0,0,0.3);
+  font-size:1.3em;
 }
 
 #embassy-logo img {
-	float:right;
-	padding-top:17px;
+  float:right;
+  padding-top:17px;
 }
 
 /* location landing page */
 #house {
-	background:#2f2f2f;
-	color:#fff;
-	height:223px;
+  background:#2f2f2f;
+  color:#fff;
+  height:223px;
 }
 
 .house-box {
-	position: relative;
+  position: relative;
 }
 
 .house-image {
-	height:auto;
-	width:100%;
-	padding:0;
+  height:auto;
+  width:100%;
+  padding:0;
 }
 
 .house-name {
-	position:absolute;
-	top:30%;
-	padding: 20px;
-	background-color: rgba(183,68,37,0.9);
-	color: white;
-	left: 50%;
-	margin-left: -225px;
-	width: 450px;
-	/*full height/width black background?*/
-	/*position: absolute;
-	bottom: 0;
-	padding: 20px;
-	background-color: rgba(0,0,0,0.5);
-	color: white;
-	width: 100%;
-	height: 100%;*/
+  position:absolute;
+  top:30%;
+  padding: 20px;
+  background-color: rgba(183,68,37,0.9);
+  color: white;
+  left: 50%;
+  margin-left: -225px;
+  width: 450px;
+  /*full height/width black background?*/
+  /*position: absolute;
+  bottom: 0;
+  padding: 20px;
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  width: 100%;
+  height: 100%;*/
 }
 
 .house-name h1 {
-	padding: 20px 0;
+  padding: 20px 0;
 }
 
 .house-name a {
-	color: white;
+  color: white;
 }
 
 #house-desc {
-	margin: 50px 0;
+  margin: 50px 0;
 }
 
 .book-room {
-		background-color: #f5f5f5;
-		padding: 20px 0;
+    background-color: #f5f5f5;
+    padding: 20px 0;
 }
 
 #actions {
-	background:#ea6f56;
-	padding:30px 0 30px 0;
-	color:#FFF;
+  background:#ea6f56;
+  padding:30px 0 30px 0;
+  color:#FFF;
 }
 
 #participate, #reserve {
-	padding:0 70px;
+  padding:0 70px;
 }
 
 #participate {
-	border-right:1px solid rgba(255,255,255,0.3);
+  border-right:1px solid rgba(255,255,255,0.3);
 }
 
 #eventlist-signup-wrapper {
-	background: #fff;
-	border-radius: 4px;
-	margin:0;
-	padding:3px 0 0 3px;
+  background: #fff;
+  border-radius: 4px;
+  margin:0;
+  padding:3px 0 0 3px;
 }
 
 #list-signup-input {
-	background: rgba(234, 111, 86, 0.5);
-	padding: 10px 0 10px 8px;
-	border-top-left-radius: 4px;
-	border-bottom-left-radius: 4px;
-	border:none;
-	height: 67px;
-	color:rgba(255,255,255,0.8);
-	font-size:0.6em;
+  background: rgba(234, 111, 86, 0.5);
+  padding: 10px 0 10px 8px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border:none;
+  height: 67px;
+  color:rgba(255,255,255,0.8);
+  font-size:0.6em;
 
 }
 
 #list-signup-input:focus {
-	color:#fff;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
+  color:#fff;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(0, 0, 0, 0.6);
 
 }
 
 #map-marker-h1-color, #map-marker-h1-dark {
-	margin: 0px;
-	font-size: 2em;
+  margin: 0px;
+  font-size: 2em;
 }
 
 #map-marker-text {
-	font-size: 1.2em;
-	color: #AAA;
-	margin: 5px;
+  font-size: 1.2em;
+  color: #AAA;
+  margin: 5px;
 }
 
 #map-marker-h1-color {
-	color: #ea6f56;
+  color: #ea6f56;
 }
 
 .leaflet-popup-pane {
-	z-index: 2 !important;
+  z-index: 2 !important;
 }
 
 .leaflet-popup-tip {
-	display: none;
+  display: none;
 }
 
 .leaflet-popup-content-wrapper {
-	border-radius: 0px !important;
+  border-radius: 0px !important;
 }
 
 .placeholder {
-	color:rgba(255,255,255,0.3);
+  color:rgba(255,255,255,0.3);
 
 }
 
 #rsvp-status-yes, #rsvp-status-no {
-	width: 166px;
+  width: 166px;
 }
 
 #eventlist-signup-wrapper .btn {
-	background:#fff;
-	height:70px;
+  background:#fff;
+  height:70px;
 
 }
 
 @media (min-width: 768px) {
-	.modal-md {
-		width: 600px;
-	}
+  .modal-md {
+    width: 600px;
+  }
 }
 
 #content-container {
-	padding: 60px 0px;
+  padding: 60px 0px;
 }
 
 
 #reserve .btn, #participate .btn {
-	background: #fff;
-	padding: 21px 0;
+  background: #fff;
+  padding: 21px 0;
 }
 
 .btn-rouge {
-	background-color: #ea6f56;
-	border-color: #ea6f56;
-	color: #EEE;
+  background-color: #ea6f56;
+  border-color: #ea6f56;
+  color: #EEE;
 }
 
 .rouge {
-	color: #ea6f56;
+  color: #ea6f56;
 }
 
 .enlarged-text {
-	font-size: 1.5em;
+  font-size: 1.5em;
 }
 
 
 .btn-dark {
-	background-color: #666;
-	border-color: #666;
-	color: #EEE;
+  background-color: #666;
+  border-color: #666;
+  color: #EEE;
 }
 
 .cell-breather {
-	padding-right: 25px;
-	padding-bottom: 40px;
+  padding-right: 25px;
+  padding-bottom: 40px;
 }
 
 .cell-right-breather {
-	padding-right: 25px;
+  padding-right: 25px;
 }
 
 .event {
-	padding: 25px 0;
-	border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding: 25px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
 .event-list-time {
-	margin-bottom: 10px;
-	font-size: 1.2em;
+  margin-bottom: 10px;
+  font-size: 1.2em;
 }
 
 .event-detail-img {
-	width: 100%;
+  width: 100%;
 }
 
 .event .date {
-	text-align: center;
-	padding: 0;
-	font-size: 24px;
-	color:rgba(0,0,0,0.3);
+  text-align: center;
+  padding: 0;
+  font-size: 24px;
+  color:rgba(0,0,0,0.3);
 
 }
 
 .event .date span {
-	font-size: 50px;
-	display: block;
-	line-height: 50px;
-	text-align: center;
+  font-size: 50px;
+  display: block;
+  line-height: 50px;
+  text-align: center;
 }
 
 .event-image {
-	height: 200px;h
-	float: left;
+  height: 200px;h
+  float: left;
 
 }
 
 .event-description {
-	max-height: 200px;
-	overflow: hidden;
-	padding-left: 40px;
-	text-align: right;
+  max-height: 200px;
+  overflow: hidden;
+  padding-left: 40px;
+  text-align: right;
 }
 
 .homepage-user-info {
-	height: 140px;
-	overflow: hidden;
+  height: 140px;
+  overflow: hidden;
 }
 
 .homepage-user-text {
-	color: #333;
+  color: #333;
 }
 
 .homepage-user-link {
-	font-family: 'Raleway', sans-serif;
-	margin-top: 10px;
+  font-family: 'Raleway', sans-serif;
+  margin-top: 10px;
 }
 
 #location-map {
-	height: 250px;
-	margin-top: 50px;
+  height: 250px;
+  margin-top: 50px;
 }
 
 .super-size {
-	font-size:35px;
-	font-weight: 200;
-	line-height: 35px;
-	margin-bottom: 30px;
+  font-size:35px;
+  font-weight: 200;
+  line-height: 35px;
+  margin-bottom: 30px;
 }
 
 #list-signup-submit {
-	padding-left: 20px;
-	color: #000;
+  padding-left: 20px;
+  color: #000;
 }
 
 #list-signup-submit {
-	white-space: normal;
+  white-space: normal;
 }
 
 #list-signup-submit:hover {
-	color: #ea6f56;
+  color: #ea6f56;
 }
 
 #stay-button, #events-button {
-	color: #000;
-	white-space: normal;
+  color: #000;
+  white-space: normal;
 }
 
 #stay-button:hover, #events-button:hover {
-	color: #ea6f56;
+  color: #ea6f56;
 }
 
 .btn-large-text {
-	font-size: 20px;
+  font-size: 20px;
 }
 
 #list-signup-input {
-	line-height: 30px;
-	font-size: 25px;
+  line-height: 30px;
+  font-size: 25px;
 }
 
 .values {
-	padding: 10px;
-	border-radius: 7px 7px 7px 7px;
-	-moz-border-radius: 7px 7px 7px 7px;
-	-webkit-border-radius: 7px 7px 7px 7px;
+  padding: 10px;
+  border-radius: 7px 7px 7px 7px;
+  -moz-border-radius: 7px 7px 7px 7px;
+  -webkit-border-radius: 7px 7px 7px 7px;
 }
 
 #eventsignup-response-fail {
-	text-align: center;
-	color: #bd362f;
+  text-align: center;
+  color: #bd362f;
 }
 
 #eventsignup-response-success {
-	text-align: center;
-	color: #51a351;
+  text-align: center;
+  color: #51a351;
 }
 
 .profiles {
-	padding-bottom: 20px;
+  padding-bottom: 20px;
 }
 
 .homepage-header-img {
-	width: 100%;
+  width: 100%;
 }
 
 .homepage-user-img {
-	/*width: 170px;
-	height: 170px;*/
+  /*width: 170px;
+  height: 170px;*/
 }
 
 
 
 .homepage-profile-img {
-	width: 170px;
+  width: 170px;
 }
 
 .footer-logo {
-	float: left;
-	height: 100px;
+  float: left;
+  height: 100px;
 }
 
 /* ==========================================================
@@ -519,53 +519,53 @@ a:hover {
 ========================================================== */
 
 #img-name, #big-img-name, .reverse-emph {
-	background: #333;
+  background: #333;
 }
 
 #img-name-back, #big-img-name-back {
-	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; 	/* IE 5, 6, 7 */
-	filter: alpha(opacity=80); /* IE 8 & 9 */
-	-moz-opacity:0.8; 	/* Older than Firefox 0.9 */
-	-khtml-opacity: 0.8; 	/* Safari 1.x (pre WebKit!) */
-	opacity: 0.8;
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";   /* IE 5, 6, 7 */
+  filter: alpha(opacity=80); /* IE 8 & 9 */
+  -moz-opacity:0.8;   /* Older than Firefox 0.9 */
+  -khtml-opacity: 0.8;   /* Safari 1.x (pre WebKit!) */
+  opacity: 0.8;
 }
 
 #img-name {
-	color: #FFF;
-	position: absolute;
-	margin: 90px 0 0 0px;
-	padding: 0 5px 0 5px;
-	width: 100px;
+  color: #FFF;
+  position: absolute;
+  margin: 90px 0 0 0px;
+  padding: 0 5px 0 5px;
+  width: 100px;
 }
 
 
 /*.item { margin: 0 80px 0 80px; }*/
 
 /*.carousel-control {
-	margin: 0;
+  margin: 0;
 }*/
 
 .big-img {
-	position: static;
-	display: block;
-	float: left;
-	width:400px;
-	height: 400px;
-	margin: 0 25px 25px 0;
-	padding: 4px 4px 4px 4px;
-	background-color: #fff;
-	border: 1px solid #ccc;
-	border: 1px solid rgba(0, 0, 0, 0.2);
-	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: static;
+  display: block;
+  float: left;
+  width:400px;
+  height: 400px;
+  margin: 0 25px 25px 0;
+  padding: 4px 4px 4px 4px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .carousel-img {
-	width: 400px;
-	height: 400px;
-	overflow: hidden;
-	display: block;
+  width: 400px;
+  height: 400px;
+  overflow: hidden;
+  display: block;
 }
 
 
@@ -575,8 +575,8 @@ a:hover {
 ========================================================== */
 
 html, body {
-	height: 100%;
-	/* The html and body elements cannot have any padding or margin. */
+  height: 100%;
+  /* The html and body elements cannot have any padding or margin. */
 }
 
 
@@ -589,44 +589,44 @@ html, body {
 
 /* Wrapper for page content to push down footer */
 #wrap {
-	min-height: 100%;
-	height: auto !important;
-	height: 100%;
-	/* Negative indent footer by it's height */
-	margin: 0 auto -60px;
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -60px;
 }
 
 #wrapbackgroundimg {
-	min-height: 100%;
-	height: auto !important;
-	height: 100%;
-	/* Negative indent footer by it's height */
-	margin: 0 auto -60px;
-	background-image: url(/media/img/dining-retouched-small.jpg);
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -60px;
+  background-image: url(/media/img/dining-retouched-small.jpg);
 }
 
 /* Set the fixed height of the footer here */
 #push, #footer {
-	height: 60px;
+  height: 60px;
 }
 
 /* Lastly, apply responsive CSS fixes as necessary */
 @media (max-width: 767px) {
-	#footer {
-	  margin-left: -20px;
-	  margin-right: -20px;
-	  padding-left: 20px;
-	  padding-right: 20px;
-	}
+  #footer {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
 #wrapper-narrow {
-	width: 700px;
+  width: 700px;
 }
 
 #imageLoader {
-	line-height: 0px;
-	font-size: 16px;
+  line-height: 0px;
+  font-size: 16px;
 }
 
 .cropping_image {
@@ -642,39 +642,39 @@ html, body {
 }
 
 #crop-result {
-	display: none;
+  display: none;
 }
 
 #crop-button {
-	color: green;
+  color: green;
 }
 
 #cropping-area {
-	display: none;
+  display: none;
 }
 
 .button-spacer {
-	padding-top: 30px;
+  padding-top: 30px;
 }
 
 .footer {
-	padding: 30px;
-	background-color: #f5f5f5;
+  padding: 30px;
+  background-color: #f5f5f5;
 }
 
 .embassy-footer {
-	float: right;
-	width: 375px;
-	height: 125px;
-	text-align: right;
+  float: right;
+  width: 375px;
+  height: 125px;
+  text-align: right;
 }
 
 .embassy-footer-text {
-	float:right;
+  float:right;
 }
 
 .hero-unit h1 {
-	padding-bottom: 40px;
+  padding-bottom: 40px;
 }
 
 .hero-unit {
@@ -698,38 +698,38 @@ html, body {
 }
 
 p.notice {
-	color: grey;
-	font-style: italic;
+  color: grey;
+  font-style: italic;
 }
 
 .res-detail {
-	padding-top: 10px;
-	padding-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .res-modify-btn {
-	width: 400px;
-	padding-top:20px;
-	padding-bottom: 20px;
-	margin: auto;
-	text-align: center;
+  width: 400px;
+  padding-top:20px;
+  padding-bottom: 20px;
+  margin: auto;
+  text-align: center;
 }
 
 .res-status-btn {
-	cursor: default;
+  cursor: default;
 }
 
 .timeline-tags {
-	font-style: italic;
-	font-size: 120%;
+  font-style: italic;
+  font-size: 120%;
 }
 
 .new-booking {
-	padding-top: 30px;
+  padding-top: 30px;
 }
 
 .btn-inline {
-	display: inline;
+  display: inline;
 }
 
 div.ui-datepicker{
@@ -737,18 +737,18 @@ div.ui-datepicker{
 }
 
 .btn-red {
-	color: red;
-	border: 1px;
+  color: red;
+  border: 1px;
 }
 
 .btn-red:hover {
-	text-decoration: none;
-	color: red;
+  text-decoration: none;
+  color: red;
 }
 
 .form-help-text {
-	color: #666;
-	font-size: .8em;
+  color: #666;
+  font-size: .8em;
     margin-left: .2em;
 }
 .bg-muted {
@@ -756,118 +756,118 @@ div.ui-datepicker{
 }
 
 .room-subtle {
-	opacity: 1;
+  opacity: 1;
 }
 
 .float-right {
-	float:right;
+  float:right;
 }
 
 .float-left {
-	float:left;
+  float:left;
 }
 
 img.profile-page-img {
-	width: 200px;
-	height: 200px;
+  width: 200px;
+  height: 200px;
 }
 
 img.profile-img-thumb {
-	width: 100px;
-	height: 100px;
+  width: 100px;
+  height: 100px;
 }
 
 .user-links {
-	padding-top: 30px;
-	padding-bottom: 30px;
+  padding-top: 30px;
+  padding-bottom: 30px;
 
 }
 
 .user-link {
-	padding-right: 20px;
+  padding-right: 20px;
 }
 
 .icon-spacer {
-	padding-right: 10px;
+  padding-right: 10px;
 }
 
 .icon-spacer-right {
-	padding-right: 10px;
+  padding-right: 10px;
 }
 
 .icon-spacer-left {
-	padding-left: 10px;
+  padding-left: 10px;
 }
 
 
 .label-inline {
-	display: inline;
+  display: inline;
 }
 
 input#id_cvc {
-	width: 65px;
+  width: 65px;
 }
 
 input#id_expiration_month {
-	width: 65px;
+  width: 65px;
 }
 
 input#id_expiration_year {
-	width: 65px;
+  width: 65px;
 }
 
 .page-text {
-	padding-bottom: 40px;
+  padding-bottom: 40px;
 }
 
 .field-wrapper-tight {
-	width: 475px;
-	padding-bottom: 10px;
+  width: 475px;
+  padding-bottom: 10px;
 }
 
 .profile-snippet {
-	padding-bottom: 20px;
+  padding-bottom: 20px;
 }
 .right-img-spacing {
-	margin-right: 30px;
+  margin-right: 30px;
 }
 
 .clear {
-	clear: both;
+  clear: both;
 }
 
 .bio-container {
-	margin-top: 15px;
+  margin-top: 15px;
 }
 
 .bio-snippet-links {
-	padding-top: 5px;
-	padding-bottom: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 #event-signup-input {
-	margin-right: 15px;
-	margin-left: 15px;
+  margin-right: 15px;
+  margin-left: 15px;
 }
 
 ul.errorlist, u {
-	color: red;
-	font-size: .8em;
+  color: red;
+  font-size: .8em;
     margin-left: .2em;
 }
 
 .booking-list-item {
-	padding-bottom: 30px;
-	border-top: 2px solid #eee;
+  padding-bottom: 30px;
+  border-top: 2px solid #eee;
 }
 
 .profile-peak {
-	padding-left: 120px;
+  padding-left: 120px;
 }
 
 .booking-title {
-	padding-bottom: 10px;
-	padding-top: 25px;
+  padding-bottom: 10px;
+  padding-top: 25px;
 }
 
 @media (min-width: 992px) {
@@ -885,11 +885,11 @@ ul.errorlist, u {
 }
 
 .billing-message {
-	background-color: #d2bc37;
+  background-color: #d2bc37;
 }
 
 #booking-sticky-info {
-	background: #cfedb1;
+  background: #cfedb1;
     padding: 10px;
     position:static;
     right:310px;
@@ -898,163 +898,163 @@ ul.errorlist, u {
 }
 
 #by-month-nav {
-	padding: 50px;
-	margin: auto;
-	width: 300px;
-	text-align: center;
+  padding: 50px;
+  margin: auto;
+  width: 300px;
+  text-align: center;
 }
 
 #guest-calendar table {
-	width: 100%;
-	font-size: 85%;
+  width: 100%;
+  font-size: 85%;
 }
 #guest-calendar li {
-	list-style-type: none;
+  list-style-type: none;
 }
 
 #guest-calendar ul {
-	margin: 10px 20px 10px 20px;
+  margin: 10px 20px 10px 20px;
 }
 
 #guest-calendar td {
-	border: 2px;
-	border-style: solid;
-	border-color: #AAA;
-	padding-left: 5px;
+  border: 2px;
+  border-style: solid;
+  border-color: #AAA;
+  padding-left: 5px;
 }
 
 #guest-calendar tr {
-	height: 60px;
+  height: 60px;
 }
 
 td {
-	padding: 1px;
+  padding: 1px;
 }
 
 #guest-calendar .full-today {
-	background-color: rgba(255, 0, 0, 0.25);
+  background-color: rgba(255, 0, 0, 0.25);
 }
 
 #guest-calendar .today {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 b.dark-red-bold {
-	color: darkred;
+  color: darkred;
 }
 
 .inline {
-	display: inline;
+  display: inline;
 }
 
 .cal-day-total {
-	color: #AAA;
+  color: #AAA;
 }
 
 .red-text {
-	color: red;
+  color: red;
 }
 
 .sm-row-spacer {
-	padding-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 .row-spacer {
-	padding-bottom: 25px;
+  padding-bottom: 25px;
 }
 
 .reverse-emph {
-	color: white;
-	background-color: #999999;
-	padding: 5px;
+  color: white;
+  background-color: #999999;
+  padding: 5px;
 }
 
 .center {
-	text-align: center;
+  text-align: center;
 }
 
 .title-size {
-	font-size: 350%;
-	padding:20px;
-	margin-bottom: 20px;
+  font-size: 350%;
+  padding:20px;
+  margin-bottom: 20px;
 }
 
 .userprofile-card-form {
-	padding-top: 10px;
+  padding-top: 10px;
 }
 
 #edit-profile {
-	padding-top: 20px;
-	text-align: right;
-	width: 200px;
+  padding-top: 20px;
+  text-align: right;
+  width: 200px;
 }
 
 textarea#id_comments, textarea#id_purpose {
-	height: 60px;
+  height: 60px;
 }
 
 #res-status-area {
-	padding-bottom: 15px;
-	padding-top: 15px;
+  padding-bottom: 15px;
+  padding-top: 15px;
 }
 
 .res-value {
-	float: right;
-	padding-right: 40px;
+  float: right;
+  padding-right: 40px;
 }
 
 #res-action-form {
-	margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .res-field, .user-field, {
-	padding-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 #booking-nav {
-	margin-top: 30px;
-	margin-bottom: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 .manage-sidebar {
-	width: 200px;
+  width: 200px;
 }
 
 form.res-action {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .res-value {
-	padding-left: 100px;
+  padding-left: 100px;
 }
 
 .res-manage-btn {
-	width: 450px;
-	white-space: normal;
+  width: 450px;
+  white-space: normal;
 }
 
 .has-availability {
-	color: green;
+  color: green;
 }
 
 .no-availability {
-	color: red;
+  color: red;
 }
 
 .greyed-out {
-	color: #999999;
+  color: #999999;
 }
 
 .greyed-out a {
-	color: #999999;
+  color: #999999;
 }
 
 .greyed-images {
-	opacity: 0.6;
+  opacity: 0.6;
 }
 
 .faded {
-	opacity: 0.6;
+  opacity: 0.6;
 }
 
 div#spinner
@@ -1073,57 +1073,57 @@ div#spinner
 }
 
 .paid-bg-img {
-	background: url(/static/img/watermark-paid.jpg) 50% 50% no-repeat;
-	background-size: 70%;
+  background: url(/static/img/watermark-paid.jpg) 50% 50% no-repeat;
+  background-size: 70%;
 }
 
 .comp-bg-img {
-	background: url(/static/img/watermark-comp.jpg) 50% 50% no-repeat;
-	background-size: 70%;
+  background: url(/static/img/watermark-comp.jpg) 50% 50% no-repeat;
+  background-size: 70%;
 }
 
 #payment-link-button {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 #email-footer {
-	height: 5em;
+  height: 5em;
 }
 
 #form-email-subject {
-	width: 350px;
+  width: 350px;
 }
 
 .email-form-label {
-	width: 100px;
+  width: 100px;
 }
 
 .last-contact {
-	color: #999999;
+  color: #999999;
 }
 
 #res-action-email-user #id_footer {
-	height: 5em;
+  height: 5em;
 }
 
 #id_subject {
-	width: 400px;
+  width: 400px;
 }
 
 .yes-available, .no-available {
-	text-align: center;
-	height: 30px;
-	color: #666;
-	padding-top: 5px;
+  text-align: center;
+  height: 30px;
+  color: #666;
+  padding-top: 5px;
 }
 
 #rooms-available-calendar th {
-	font-size: 90%;
-	border-top: 0px;
+  font-size: 90%;
+  border-top: 0px;
 }
 
 .room-info .alert-warning {
-	color: inherit;
+  color: inherit;
 }
 
 #rooms-available-calendar input[type=radio] {
@@ -1132,400 +1132,400 @@ div#spinner
 }
 
 #mock-invoice-panel-heading, .emphasize .panel-heading {
-	background-color: #ea6f56;
-	color: #FFF;
+  background-color: #ea6f56;
+  color: #FFF;
 }
 
 #room-cal-panel-heading {
-	background-color: #ea6f56;
-	color: #FFF;
+  background-color: #ea6f56;
+  color: #FFF;
 }
 
 .room-list {
-	margin-top: 60px;
+  margin-top: 60px;
 }
 
 .booking-form-dates {
-	padding-right: 15px;
+  padding-right: 15px;
 }
 
 .room-info-area {
-	padding-top: 25px;
+  padding-top: 25px;
 }
 
 #submit-booking {
-	margin-top: 30px;
-	width: 100%;
+  margin-top: 30px;
+  width: 100%;
 }
 
 #id_arrival_time, #id_comments {
-	margin-left: 0px;
+  margin-left: 0px;
 }
 
 #optional-fields .form-group
-	margin-left: 0px;
+  margin-left: 0px;
 }
 
 #id_purpose, #id_comments {
-	height: 35px;
+  height: 35px;
 }
 
 #optional-fields {
-	display: none;
+  display: none;
 }
 
 #optional-fields-header:hover {
-	color: #ea6f56;
+  color: #ea6f56;
 }
 
 #optional-fields-header {
-	font-style: italic;
-	cursor: pointer;
+  font-style: italic;
+  cursor: pointer;
 }
 
 .room-preview-image {
-	width: 200px;
+  width: 200px;
 }
 
 .room-info-image {
-	width: 100%;
-	height: 75%;
+  width: 100%;
+  height: 75%;
 }
 
 .room-info-image-wrapper {
-	padding-left: 40px;
+  padding-left: 40px;
 }
 
 #message-current-form #id_footer {
-	height: 100px;
+  height: 100px;
 }
 
 .link-light-color {
-	color: #CCC;
+  color: #CCC;
 }
 
 #recipient-list {
-	margin-top: 10px;
-	margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .event-preview-img-thumb {
-	width: 200px;
+  width: 200px;
 }
 
 .event a, #more-events-link a {
-	color: inherit;
+  color: inherit;
 }
 
 .event a:hover {
-	color:#ea6f56;
-	text-decoration: none;
+  color:#ea6f56;
+  text-decoration: none;
 }
 
 #more-events-link {
-	margin-right: 30px;
+  margin-right: 30px;
 }
 
 #more-events-link a:hover {
-	color:#ea6f56;
-	text-decoration: none;
+  color:#ea6f56;
+  text-decoration: none;
 }
 
 #event-preamble {
-	padding: 30px 0px 30px 0px;
+  padding: 30px 0px 30px 0px;
 }
 
 .event-status {
-	padding: 10px;
-	font-size: 14px;
-	margin-bottom: 20px;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 
 .event-create-img-inspire {
-	width: 100%;
-	margin: 0 20px 20px 20px;
-	opacity: 0.7;
+  width: 100%;
+  margin: 0 20px 20px 20px;
+  opacity: 0.7;
 }
 
 .event-form-help-text {
-	color: #666;
-	font-size: 90%;
+  color: #666;
+  font-size: 90%;
 }
 
 #our-community-heading {
-	margin-bottom: 70px;
+  margin-bottom: 70px;
 }
 
 #organizer-notes {
-	color: #888;
+  color: #888;
 }
 
 .event-guide-title {
-	color:#ea6f56;
-	margin-top: 60px;
+  color:#ea6f56;
+  margin-top: 60px;
 }
 
 .form-group {
-	margin-bottom: 25px !important;
+  margin-bottom: 25px !important;
 }
 
 #broadcast-explanation {
-	padding: 20px;
-	margin-bottom: 40px;
+  padding: 20px;
+  margin-bottom: 40px;
 }
 
 .people-row, .user-event-row {
-	margin-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 .room-row {
-	margin-top: 0px;
-	margin-bottom: 40px;
+  margin-top: 0px;
+  margin-bottom: 40px;
 }
 
 .user-event-row {
-	padding-bottom: 30px;
+  padding-bottom: 30px;
 }
 
 .user-event-list-img {
-	width: 150px;
+  width: 150px;
 }
 
 h3.no-top-margin {
-	margin-top: 0px;
-	display: inline;
+  margin-top: 0px;
+  display: inline;
 }
 
 #event-list-tabs {
-	margin-bottom: 30px;
-	font-size: 150%;
+  margin-bottom: 30px;
+  font-size: 150%;
 }
 
 .event-list-status {
-	margin-left: 20px;
+  margin-left: 20px;
 }
 
 .title-line {
-	margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 #event-admin-heads-up {
-	margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
 .endorsement-area {
-	margin-right: 50px;
-	color:#ea6f56;
+  margin-right: 50px;
+  color:#ea6f56;
 }
 
 #endorsement-area {
-	font-size: 130%;
-	cursor: hand;
-	cursor: pointer;
+  font-size: 130%;
+  cursor: hand;
+  cursor: pointer;
 }
 
 #endorsers-list-body {
-	cursor: default;
+  cursor: default;
 }
 
 .event-detail-title {
-	display: inline;
+  display: inline;
 }
 
 .thirtypx-spacer-left {
-	margin-left: 30px;
+  margin-left: 30px;
 }
 
 .thirtypx-spacer-right {
-	margin-left: 30px;
+  margin-left: 30px;
 }
 
 .event-time {
-	color: #AAA;
-	margin-bottom: 30px;
-	margin-top: 15px;
+  color: #AAA;
+  margin-bottom: 30px;
+  margin-top: 15px;
 }
 
 #event-attendance-status {
-	margin: 20px 0px;
+  margin: 20px 0px;
 }
 
 #event-attendance-status button, #event-attendance-status a {
-	font-family:'Open Sans', sans-serif;
-	color: #98321C;
+  font-family:'Open Sans', sans-serif;
+  color: #98321C;
 }
 
 .event-date-day {
-	font-size: 25px;
-	line-height: 30px;
-	display: block;
-	text-align: center;
+  font-size: 25px;
+  line-height: 30px;
+  display: block;
+  text-align: center;
 }
 
 .event-date-month, .event-date-time, .event-location {
-	font-size: 20px;
-	line-height: 30px;
+  font-size: 20px;
+  line-height: 30px;
 }
 
 .event-date-month, .event-date-time, .event-date-day {
-	margin-left: 5px;
+  margin-left: 5px;
 }
 
 .event-date-separator {
-	line-height: 30px;
-	font-size: 15px;
-	margin: 0px 10px;
+  line-height: 30px;
+  font-size: 15px;
+  margin: 0px 10px;
 }
 
 .endorser-name-list-item {
-	margin-left: 15px;
-	margin-bottom: 5px;
+  margin-left: 15px;
+  margin-bottom: 5px;
 }
 
 #event-edit-link {
-	color: #98321C;
+  color: #98321C;
 }
 
 .page-spacer {
-	margin-bottom: 30px;
-	margin-top: 30px;
+  margin-bottom: 30px;
+  margin-top: 30px;
 }
 
 #page-spacer {
-	margin-bottom: 30px;
-	margin-top: 30px;
+  margin-bottom: 30px;
+  margin-top: 30px;
 }
 
 #event-actions {
-	margin-top: 20px;
+  margin-top: 20px;
 }
 
 #res-action-email-user #id_body {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .manage-button-spacer {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 #facebook-share-link {
-	text-align: center;
+  text-align: center;
 }
 
 .viewable-area-only {
-	height: 100%;
+  height: 100%;
 }
 
 .navbar-brand {
-	font-family: 'Raleway', sans-serif;
+  font-family: 'Raleway', sans-serif;
 }
 
 .navbar-brand .logo {
-	height: 30px;
-	margin-top: -7px;
+  height: 30px;
+  margin-top: -7px;
 }
 #nav-network {
-	padding-right: 20px;
-	margin-bottom: 1px;
+  padding-right: 20px;
+  margin-bottom: 1px;
 }
 
 #nav-location {
-	background-color: transparent;
-	border-color: transparent;
-	margin-bottom: 0px;
+  background-color: transparent;
+  border-color: transparent;
+  margin-bottom: 0px;
 }
 
 table tr.row-even td { background: #eee; }
 
 #payment-list {
-	width: 100%;
+  width: 100%;
 }
 #payment-list th {
-	text-align: center;
+  text-align: center;
 }
 #payment-list td {
-	text-align: center;
+  text-align: center;
 }
 #booking-header {
-	text-align:center;
-	border-bottom: 1px solid black;
+  text-align:center;
+  border-bottom: 1px solid black;
 }
 
 #community-section {
-	margin: 60px 0;
+  margin: 60px 0;
 }
 
 .money {
-	text-align:right;
+  text-align:right;
 }
 
 .total-row {
-	border-top:thin double black;
+  border-top:thin double black;
 }
 
 #full-page-wrapper {
-	/*margin-bottom: 50px;*/
+  /*margin-bottom: 50px;*/
 }
 
 .bottom-pad-thirty {
-	padding-bottom: 30px;
+  padding-bottom: 30px;
 }
 
 .affix {
 }
 
 .bottom-spacer {
-	margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 
 .top-spacer-xl {
-	margin-top: 70px;
+  margin-top: 70px;
 }
 
 .top-spacer-sm {
-	margin-top: 20px;
+  margin-top: 20px;
 }
 
 .top-spacer {
-	margin-top: 30px;
+  margin-top: 30px;
 }
 
 .top-spacer-large {
-	margin-top: 60px;
+  margin-top: 60px;
 }
 
 .cal_arrive_date {
-	border-left: 1px solid green;
-	border-top: 1px solid green;
-	border-bottom: 1px solid green;
+  border-left: 1px solid green;
+  border-top: 1px solid green;
+  border-bottom: 1px solid green;
 }
 
 .cal_depart_date {
-	border-right: 1px solid green;
-	border-top: 1px solid green;
-	border-bottom: 1px solid green;
+  border-right: 1px solid green;
+  border-top: 1px solid green;
+  border-bottom: 1px solid green;
 }
 
 .recent-events-row {
-	background-color: gray;
-	padding: 30px;
+  background-color: gray;
+  padding: 30px;
 }
 
 /* FAQ
 ------------------------- */
 
 .faq-wrapper {
-	line-height: 2em;
+  line-height: 2em;
 }
 
 .faq-q {
-	list-style: none;
-	font-weight: bold;
+  list-style: none;
+  font-weight: bold;
 }
 
 .faq-a {
-	margin-left: 20px;
-	list-style-position: inside;
+  margin-left: 20px;
+  list-style-position: inside;
 }
 
 
@@ -1537,128 +1537,128 @@ table tr.row-even td { background: #eee; }
 
 /* Thin out the marketing headings */
 .featurette-heading {
-	font-family: 'Raleway', sans-serif;
+  font-family: 'Raleway', sans-serif;
 }
 
 @media (min-width: 768px) {
-	.featurette-heading {
-		font-size: 50px;
+  .featurette-heading {
+    font-size: 50px;
   }
 }
 
 .index-loc-img {
-	width: 170px;
-	height: 170px;
+  width: 170px;
+  height: 170px;
 }
 
 .index-loc-info a {
-	color: #fff;
+  color: #fff;
 }
 
 .index-loc-info {
-	position: absolute;
-	top: 0;
-	left: 0;
-	color: #fff;
-	padding: 5px;
-	height: 170px;
-	line-height: 170px;
-	width: 170px;
-	z-index:1000;
-	text-align: center;
-	font-size: 30px;
-	font-weight: bold;
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #fff;
+  padding: 5px;
+  height: 170px;
+  line-height: 170px;
+  width: 170px;
+  z-index:1000;
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
 }
 
 .index-loc-info span {
-	display: inline-block;
-	vertical-align: middle;
-	line-height: normal;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
 }
 
 .index-intro-text strong, {
-	font-weight: 600;
+  font-weight: 600;
 }
 
 p.lead strong {
-	font-weight: 500;
+  font-weight: 500;
 }
 
 #location-availability-block {
-	text-align: center;
+  text-align: center;
 }
 
 #index-check-availability {
-	width: 100%;
-	font-weight: 600;
+  width: 100%;
+  font-weight: 600;
 }
 
 #index-check-availability h3 {
-	margin-top: 0px;
-	font-weight: bold;
+  margin-top: 0px;
+  font-weight: bold;
 }
 
 #index-check-availability div {
-	display: inline-block;
-	vertical-align: middle;
-	line-height: normal;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
 }
 
 #index-check-availability form {
-	line-height: normal;
+  line-height: normal;
 }
 
 #location-availability-map {
-	height: 400px;
+  height: 400px;
 }
 
 #index-locations-list {
-	margin-top: 30px;
-	margin-bottom: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 #member-collage {
-	width: 500px;
-	height: 500px;
+  width: 500px;
+  height: 500px;
 }
 
 /* Small devices (tablets, 768px and up) */
 @media (max-width: @screen-sm-max) {
-	#member-collage {
-		width: 300px;
-		height: 300px;
-		overflow: hidden;
-	}
+  #member-collage {
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+  }
 }
 
 .member-img-collage-item {
-	width: 50px;
-	height: 50px;
+  width: 50px;
+  height: 50px;
 }
 
 #network-footer {
-	background-color: #333;
-	padding-top: 30px;
-	padding-bottom: 30px;
-	color: #EEE;
+  background-color: #333;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  color: #EEE;
 }
 
 .room-avail-text-success {
-	color: #3c763d !important;
+  color: #3c763d !important;
 }
 
 .room-avail-text-danger {
-	color: #a94442 !important;
+  color: #a94442 !important;
 }
 
 .location-box h2, .location-box h2 em {
-	color: white;
-	font-weight: bold;
+  color: white;
+  font-weight: bold;
 }
 
 .location-box {
-	margin-top: 50px;
-	position: relative;
+  margin-top: 50px;
+  position: relative;
 }
 
 .location-preview .col-md-3 {
@@ -1667,9 +1667,9 @@ p.lead strong {
 }
 
 .location-box .col-md-4 {
-	height: 225px;
-	overflow: hidden;
-	padding: 0;
+  height: 225px;
+  overflow: hidden;
+  padding: 0;
 }
 
 .location-img-preview {
@@ -1678,45 +1678,45 @@ p.lead strong {
 }
 
 .location-name {
-	position:absolute;
-	top:20px;
-	padding: 20px;
+  position:absolute;
+  top:20px;
+  padding: 20px;
 }
 
 .location-name h2 {
-	padding: 40px;
+  padding: 40px;
 }
 
 @media (max-width: 992px) and (min-width: 768px) {
-	.location-name h2 {
-		padding: 40px 190px;
-	}
+  .location-name h2 {
+    padding: 40px 190px;
+  }
 }
 
 .socialmedia-icon {
-	width: 40px;
-	height: 40px;
-	margin-right: 20px;
+  width: 40px;
+  height: 40px;
+  margin-right: 20px;
 }
 
 .small-spacer {
-	margin-top: 30px;
+  margin-top: 30px;
 }
 
 #index-header {
-	background: url(/static/img/EmbassyNetworkHeaderBackground.png);
-	background-repeat: no-repeat;
-	background-position: bottom right;
-	background-color: #eee;
-	padding-right: 200px;
+  background: url(/static/img/EmbassyNetworkHeaderBackground.png);
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  background-color: #eee;
+  padding-right: 200px;
 }
 
 .text-caution {
-	color: rgb(202, 188, 27);
+  color: rgb(202, 188, 27);
 }
 
 .general-pad {
-	padding: 10px;
+  padding: 10px;
 }
 
 
@@ -1726,270 +1726,271 @@ p.lead strong {
 }
 
 .error {
-	color: rgb(228, 73, 73);
-	font-size: 80%;
-	padding: 10px;
-	font-weight: normal;
-	padding: 10px;
-	font-weight: normal;
+  color: rgb(228, 73, 73);
+  font-size: 80%;
+  padding: 10px;
+  font-weight: normal;
+  padding: 10px;
+  font-weight: normal;
 }
 
 .align-right {
-	text-align: right;
+  text-align: right;
 }
 
 #guestcalendar {
-	width: 100%;
+  width: 100%;
 }
 
 .guestinfo-tooltip {
-	padding: 0px 10px 10px 10px;
+  padding: 0px 10px 10px 10px;
 }
 
 .para-padding {
-	padding: 15px;
+  padding: 15px;
 }
 
 #submit-payment-header {
-	margin-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 #id_comment {
-	height: 100px;
+  height: 100px;
 }
 
 #payment-errors {
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 #booking-list-tab-content {
-	margin-top: 40px;
+  margin-top: 40px;
 }
 
 .bill-line-item td {
-	border-top: 0px !important;
+  border-top: 0px !important;
 }
 
 #notes-link:hover {
-	cursor: pointer;
-	color: #ea6f56;
+  cursor: pointer;
+  color: #ea6f56;
 }
 
 .note-pre {
-	background-color: inherit;
-	border: none;
+  background-color: inherit;
+  border: none;
 }
 
 [id^="refund-details-"] {
-	display: none;
+  display: none;
 }
 
 #room-cal-prev, #room-cal-next {
-	display: inline;
+  display: inline;
 }
 
 label.light {
-	font-weight: normal;
+  font-weight: normal;
 }
 
 #availability-area {
-	overflow: scroll;
+  overflow: scroll;
 }
 
 .booking-label {
-	font-weight: normal;
+  font-weight: normal;
 }
 
 .booking-info-tab {
-	font-size: 120%;
+  font-size: 120%;
 }
 
 #booking-tabs > li.active > a, #booking-tabs  > li.active > a:hover, #booking-tabs > li.active > a:focus {
 }
 
 .available-today, .not-available-today {
-	text-align: center;
+  text-align: center;
 }
 
 .available-today {
-	background-color: #dff0d8;
-	cursor: pointer;
+  background-color: #dff0d8;
+  cursor: pointer;
 }
 
 .not-available-today {
-	background-color: #f5f5f5;
-	cursor: default;
+  background-color: #f5f5f5;
+  cursor: default;
 }
 
 #panel-room-calendar table {
-	width: 100%;
+  width: 100%;
 }
 
 #panel-room-calendar td {
-	padding: 5px;
+  padding: 5px;
 }
 
 .fixed {
-	position: fixed;
+  position: fixed;
 }
 
 #the-booking-form {
-	margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 
 #rooms-available-calendar {
-	width: auto;
+  width: auto;
 }
 
 .date-range-row {
-	margin-top: 20px;
-	margin-bottom: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .react-datepicker__input-container {
-	width: 100%;
+  width: 100%;
 }
 
 .room-type-btn {
-	text-transform: none;
-	margin-top: 0;
-	text-align: left;
-	padding-left: 10px;
+  text-transform: none;
+  margin-top: 0;
+  text-align: left;
+  padding-left: 10px;
 }
 
 .room-type-btn input[type="checkbox"] {
-	float: right;
-	margin-right: 10px;
+  float: right;
+  margin-right: 10px;
 }
 
 .room-type-row {
-	margin-top: 20px;
+  margin-top: 20px;
 }
 
 .room-thumbnail {
-	margin: 5px 0;
+  margin: 5px 0;
 }
 
 .room-thumbnail .panel {
-	/*height: 400px;*/
-	height: 330px;
+  /*height: 400px;*/
+  height: 330px;
 }
 
 .room-image {
-	max-width: 100%;
-	max-height: 80%;
+  max-width: 100%;
+  max-height: 80%;
 }
 
 .room-card-container {
-		background-color: #f5f5f5;
+  background-color: #f5f5f5;
+  min-height: 720px;
 }
 
 .availability-table-toggle {
-	margin: 20px 0 10px 0;
+  margin: 20px 0 10px 0;
 }
 
 .availability-area {
-	overflow: scroll;
-	margin: 20px 0 40px 0;
+  overflow: scroll;
+  margin: 20px 0 40px 0;
 }
 
 .availabilities-table {
-	width: auto;
+  width: auto;
 }
 
 .room-cost {
-	color: #777;
-	font-size: 14px;
-	font-family: "Open Sans", sans-serif;
-	background-color: rgba(183,68,37,0.9);
-	color: white;
-	padding: 10px 20px;
-	margin-right: -30px;
-	margin-top: -110px;
+  color: #777;
+  font-size: 14px;
+  font-family: "Open Sans", sans-serif;
+  background-color: rgba(183,68,37,0.9);
+  color: white;
+  padding: 10px 20px;
+  margin-right: -30px;
+  margin-top: -110px;
 }
 
 .room-tags{
-		color: #777;
-		margin-top: 20px;
+    color: #777;
+    margin-top: 20px;
 }
 
 .room-panel, .room-preview {
-	margin-right: 40px;
-	margin-bottom: 40px;
+  margin-right: 40px;
+  margin-bottom: 40px;
 }
 
 .room-summary-panel {
-	margin: 20px 10px;
+  margin: 20px 10px;
 }
 
 #booking-list-table {
-	width: inherit;
+  width: inherit;
 }
 
 input.disabled {
-	color: grey;
-	background-color: #F0F0F0;
+  color: grey;
+  background-color: #F0F0F0;
 }
 
 .word-wrap {
-	word-wrap: break-word;
+  word-wrap: break-word;
 }
 
 #repeat-guest-icon {
-	color: grey;
+  color: grey;
 }
 
 #profilesubmit {
-	width: 100%;
-	padding-left: 0px;
+  width: 100%;
+  padding-left: 0px;
 }
 
 #profilesubmit-wrapper {
-	padding-left: 0px;
-	padding-right: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .row-spacer-top-bottom {
-	margin-top: 25px;
-	margin-bottom: 25px;
+  margin-top: 25px;
+  margin-bottom: 25px;
 }
 
 #image-preview {
-	width: 100%;
-	height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .hidden {
-	display: none;
+  display: none;
 }
 
 .clickable:hover {
-	cursor: pointer;
-	cursor: hand;
+  cursor: pointer;
+  cursor: hand;
 }
 
 .sub-summary-panel td {
-	border: 0px;
+  border: 0px;
 }
 
 #sub-manage-page-wrapper {
-	min-height: 1000px;
+  min-height: 1000px;
 }
 
 .ext-pmt-record {
-	margin-bottom: 10px !important;
+  margin-bottom: 10px !important;
 }
 
 .bill-customize-area {
-	margin-left: 20px;
+  margin-left: 20px;
 }
 
 .subscription-send-receipt {
-	display: inline;
+  display: inline;
 }
 
 .availabilities-table .current {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 @keyframes yellowfade {
