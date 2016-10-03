@@ -1792,10 +1792,6 @@ label.light {
   font-weight: normal;
 }
 
-#availability-area {
-  overflow: scroll;
-}
-
 .booking-label {
   font-weight: normal;
 }
@@ -1890,7 +1886,7 @@ label.light {
 }
 
 .availability-area {
-  overflow: scroll;
+  overflow: auto;
   margin: 20px 0 40px 0;
 }
 

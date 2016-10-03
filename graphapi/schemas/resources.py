@@ -3,7 +3,6 @@ from graphene import AbstractType, Field, Node
 from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
-import time
 from core.models import Resource
 
 
@@ -30,8 +29,6 @@ class ResourceNode(DjangoObjectType):
     def resolve_availabilities(self, args, *stuff):
         assert args['arrive'], "you must specify arrival date"
         assert args['depart'], "you must specify departure date"
-
-        time.sleep(1)
 
         availabilities = self.daily_availabilities_within(args['arrive'].date(), args['depart'].date())
 
