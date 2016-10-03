@@ -34,12 +34,29 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
 `;
 
 class RoomIndexOrDetailWithoutQuery extends React.Component {
+  constructor(props) {
+    super()
+    console.log('RoomIndexOrDetailWithoutQuery constructor')
+  }
+
   renderSubComponent() {
     const routeParams = this.props.routeParams
+    const child = this.props.children
 
-    if (routeParams.id) {
-      return <RoomDetail {...this.props} room={this.oneResource(routeParams.id)} onFilterChange={this.reFilter.bind(this)} query={this.props.location.query} />
+    if (!!child) {
+      console.log('found child', child)
+      const roomID = child.props.routeParams.id
+      const room = this.oneResource(roomID)
+
+      console.log("found room", room)
+
+      if (room) {
+        return <RoomDetail {...this.props} room={room} onFilterChange={this.reFilter.bind(this)} query={this.props.location.query} />
+      } else {
+        return null;
+      }
     } else {
+      console.log('no child', child)
       return <RoomContainer {...this.props} rooms={this.allResources()} />
     }
   }
@@ -76,19 +93,22 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
 
 const RoomIndexOrDetail = graphql(resourcesQuery, {
   options: (props) => {
+    console.log ('get query options', props)
     const formatString = 'Y-MM-DTHH:mm:ss.ms'
     const parseFormat = 'MM/DD/YYYY'
     const query = props.location.query
-    const arrive = query.arrive ? moment(query.arrive, parseFormat) : moment()
+    const arrive = query.arrive ? moment(query.arrive, parseFormat) : moment().startOf('day')
     const depart = query.depart ? moment(query.depart, parseFormat) : arrive.clone().add(7, 'days')
 
-    return {
+    const result = {
       variables: {
         locationSlug: props.routeParams.location,
         arrive: arrive.format(formatString),
         depart: depart.format(formatString)
       }
     }
+    console.log ('result', result)
+    return result
   }
 })(RoomIndexOrDetailWithoutQuery)
 export default RoomIndexOrDetail

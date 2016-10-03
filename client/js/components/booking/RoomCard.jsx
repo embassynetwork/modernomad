@@ -9,12 +9,11 @@ export default class RoomCard extends React.Component {
     name: PropTypes.string.isRequired
   }
 
-  detailUrl() {
-    return `/locations/${this.props.routeParams.location}/stay/room/${this.props.rid}`
-  }
-
   detailLinkDetails() {
-    return {pathname: this.detailUrl(), query: this.props.query}
+    return {
+      pathname: `/locations/${this.props.routeParams.location}/stay/room/${this.props.rid}`,
+      query: this.props.query
+    }
   }
 
   render() {
