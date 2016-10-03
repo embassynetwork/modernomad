@@ -31,6 +31,8 @@ class ResourceNode(DjangoObjectType):
         assert args['arrive'], "you must specify arrival date"
         assert args['depart'], "you must specify departure date"
 
+        time.sleep(1)
+
         availabilities = self.daily_availabilities_within(args['arrive'].date(), args['depart'].date())
 
         return [AvailabilityNode(*availability) for availability in availabilities]

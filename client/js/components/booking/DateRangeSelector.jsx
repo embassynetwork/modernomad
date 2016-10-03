@@ -2,8 +2,8 @@ import React, {PropTypes} from 'react'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 
-function momentUnlessNull(dateString) {
-  return dateString ? moment(dateString) : null
+function momentUnlessNull(dateString, parseFormat = null) {
+  return dateString ? moment(dateString, parseFormat) : null
 }
 
 export default class DateRangeSelector extends React.Component {
@@ -13,7 +13,8 @@ export default class DateRangeSelector extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {arrive: momentUnlessNull(props.arrive), depart: momentUnlessNull(props.depart)}
+    const parseFormat = 'MM/DD/YYYY'
+    this.state = {arrive: momentUnlessNull(props.arrive, parseFormat), depart: momentUnlessNull(props.depart, parseFormat)}
   }
 
   changeHandler(key) {

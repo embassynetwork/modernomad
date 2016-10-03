@@ -6,6 +6,7 @@ import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import _ from 'lodash'
 import moment from 'moment'
+import Loader from 'react-loader-advanced'
 
 const resourcesQuery = gql`
 query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depart: DateTime!) {
@@ -65,24 +66,21 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
   }
 
   render() {
-    const queryResults = this.props.data.allResources
-
-    if (queryResults) {
-      return this.renderSubComponent();
-    } else {
-     return <div>loading</div>
-    }
-
-    return this.renderSubComponent();
+    return (
+      <Loader show={this.props.data.loading}>
+        {this.renderSubComponent()}
+      </Loader>
+    )
   }
 }
 
 const RoomIndexOrDetail = graphql(resourcesQuery, {
   options: (props) => {
     const formatString = 'Y-MM-DTHH:mm:ss.ms'
+    const parseFormat = 'MM/DD/YYYY'
     const query = props.location.query
-    const arrive = query.arrive ? moment(query.arrive) : moment()
-    const depart = query.depart ? moment(query.depart) : arrive.clone().add(7, 'days')
+    const arrive = query.arrive ? moment(query.arrive, parseFormat) : moment()
+    const depart = query.depart ? moment(query.depart, parseFormat) : arrive.clone().add(7, 'days')
 
     return {
       variables: {
