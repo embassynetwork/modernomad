@@ -23,7 +23,7 @@ export default class RoomCard extends React.Component {
           <div className="panel-body">
 
             {/*this.props.image && <ImageCarousel img={this.props.image} />*/}
-            <img className="room-image" src={"/media/"+this.props.image} />
+            <img className="room-image img-responsive" src={"/media/"+this.props.image} />
             <Link className="col-xs-12" to={this.detailLinkDetails()}>
               <h3>{this.props.name}</h3>
               <span className="pull-right room-cost"><b>${this.props.defaultRate} / night</b></span>

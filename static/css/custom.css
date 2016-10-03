@@ -1872,8 +1872,8 @@ label.light {
 }
 
 .room-image {
-  max-width: 100%;
-  max-height: 80%;
+  min-height: 247px;
+  background-color: #999;
 }
 
 .room-card-container {
