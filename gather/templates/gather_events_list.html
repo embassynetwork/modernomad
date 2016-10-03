@@ -3,6 +3,8 @@
 
 {% block content %}
 
+<div class="container">
+
 <div class="row">
     <h1>{{ page_title|title }}</h1>
 </div>
@@ -19,10 +21,10 @@
     <div class="col-md-11 event {% if event.status != 'live' %}greyed-out{% endif %} ">
         <div class="row">
             <div class="col-xs-1 date">
-                <span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}} 
-            </div> 
+                <span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}
+            </div>
             <div class="col-xs-11">
-                <h3 class="event-title" 
+                <h3 class="event-title"
                     {% if event.visibility == 'community' %}
                     title="This event is for {{ event.location.name }} community members only"
                     {% elif event.visibility == 'private' %}
@@ -44,7 +46,7 @@
             <div class="col-md-3 col-md-offset-1">
                 <img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
             </div>
-            <div class="col-md-7"> 
+            <div class="col-md-7">
                 <div class="event-list-time">{{ event.start }} - {{ event.end }}</div>
                 <div>{{ event.description|safe|linebreaks|truncatewords_html:100 }} </div>
             </div>
@@ -54,7 +56,7 @@
 
 {% empty %}
 
-<p class="lead">No upcoming events! Why not <a href="{% url 'gather_create_event' location.slug %}">propose one?</a></p>    
+<p class="lead">No upcoming events! Why not <a href="{% url 'gather_create_event' location.slug %}">propose one?</a></p>
 {% endfor %}
 
 
@@ -62,7 +64,7 @@
     <span class="step-links">
         {% if events.has_previous %}
             <a href="?page={{ events.previous_page_number }}">previous</a>
-        {% endif %}    
+        {% endif %}
 
         <span class="current">
             Page {{ events.number }} of {{ events.paginator.num_pages }}
@@ -73,8 +75,6 @@
         {% endif %}
     </span>
 </div>
+</div>
 
 {% endblock %}
-
-
-

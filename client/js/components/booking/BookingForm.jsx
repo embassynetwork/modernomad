@@ -20,6 +20,7 @@ export default class BookingForm extends React.Component {
   renderCost() {
     const depart = moment(this.props.query.depart, parseFormat)
     const arrive = moment(this.props.query.arrive, parseFormat)
+    const parseFormat = 'MM/DD/YYYY'
 
     if (depart && arrive) {
       const nightRate = this.props.room.defaultRate
@@ -34,13 +35,11 @@ export default class BookingForm extends React.Component {
   indexLinkDetails() {
     console.log(this.props.query.arrive)
     if (this.props.query.arrive) {
-      console.log('with query', this.props.query)
       return {
         pathname: `/locations/${this.props.routeParams.location}/stay/`,
         query: this.props.query
       }
     } else {
-      console.log('in that')
       return {
         pathname: `/locations/${this.props.routeParams.location}/stay/`
       }
@@ -50,13 +49,13 @@ export default class BookingForm extends React.Component {
   render() {
     const room = this.props.room
     const isDetail = true
-    const parseFormat = 'MM/DD/YYYY'
 
     return (
       <div className="room-summary-panel">
         <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} detail={isDetail} query={this.props.query} {...this.props.query} />
         {this.props.datesAvailable || !this.props.query.arrive ?
           <div>
+            {this.renderCost()}
             <p>SF Hotel Taxes <span className="pull-right">$</span></p>
             <hr></hr>
             <p><b>Total<span className="pull-right">$</span></b></p>

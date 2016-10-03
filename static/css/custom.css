@@ -1864,6 +1864,7 @@ label.light {
 
 .room-thumbnail {
   margin: 5px 0;
+	max-width: 389px;
 }
 
 .room-thumbnail .panel {
@@ -1871,8 +1872,12 @@ label.light {
   height: 330px;
 }
 
+.room-summary {
+	margin: 20px 0 40px 0;
+}
+
 .room-image-panel {
-	margin: 20px 40px;
+	margin: 0 40px;
 }
 
 .room-image {

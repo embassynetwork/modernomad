@@ -39,7 +39,7 @@ export default class RoomDetail extends React.Component {
       <div className="container room-detail">
         <Link to={this.indexLinkDetails()}><i className="fa fa-chevron-left"></i> Back to Rooms</Link>
         <h1>{room.name}</h1>
-        <p>{room.summary}</p>
+        <p className="room-summary">{room.summary}</p>
         <div className="row">
           <div className="col-sm-8">
             <div className="panel room-image-panel">

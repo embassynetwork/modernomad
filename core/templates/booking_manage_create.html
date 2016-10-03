@@ -12,97 +12,97 @@
 </div>
 
 {% include 'snippets/messages.html' %}
+<div class="container">
+  <div class="row">
+      <div class="col-md-7">
+          <h2 class="res-field field">Create a New Booking </h2>
+      </div>
+  </div>
 
-<div class="row">
-    <div class="col-md-7">
-        <h2 class="res-field field">Create a New Booking </h2>
-    </div>
+  <!-- new row -->
+  <hr>
+
+
+  <div class="row" class="bottom-pad-thirty">
+
+      <div class="col-md-3">
+          <div class="img-polaroid">
+              <img id="avatar-placeholder" class="profile-page-img" src="{{ STATIC_URL }}img/default.jpg" />
+          </div>
+      </div>
+
+      <div class="col-md-7">
+
+
+          <div id="booking-details-form">
+              <form method="POST" role="form" class="form-horizontal" id="manage-booking-form" action="{% url 'booking_manage_create' location.slug %}">{% csrf_token %}
+
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label">User</label>
+                      <div class="col-sm-7">
+                          <input class="form-control" name="username" id="id_username" value="{{username}}" required/>
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label">Arrive</label>
+                      <div class="col-sm-2">
+                          <input class="form-control listening" id="id_arrive" name="arrive" value="" size="8" required/>
+                      </div>
+                      <label class="col-sm-2 control-label">Depart</label>
+                      <div class="col-sm-2">
+                          <input class="form-control listening" id="id_depart" name="depart" value="" size="8" required/>
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label">Room</label>
+                      <div class="col-sm-6">
+                          <select class="form-control" id="resource_select" name="resource" required>
+                              <option value="">Select Room</option>
+                              {% for room in location.get_rooms %}
+                                  <option value="{{room.id}}">{{ room.name }}</option>
+                              {% endfor %}
+                          </select>
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label">Purpose</label>
+                      <div class="col-sm-6">
+                          <input class="form-control" id="id_purpose" name="purpose" value="" size="8" required/>
+                      </div>
+                  </div>
+
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label">Status</label>
+                      <div class="col-sm-4">
+                          <select name="status" class="form-control" required>
+                              {% for status_tup in booking_statuses %}
+                              <option value="{{status_tup.0}}">{{status_tup.1}}</option>
+                              {% endfor %}
+                          </select>
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <p class="col-sm-offset-2 col-sm-6 small">The confirmed and payment statuses should generally be aligned. Only edit this in special circumstances if you need to override what The Man thinks is right :).</p>
+                  </div>
+
+                  <div class="form-group">
+                      <div class="col-sm-6 col-md-offset-2">
+                          <input type="checkbox" name="email_announce" id="email_announce" > Announce this booking by email?
+                      </div>
+                  </div>
+
+                  <input type="submit" value="Create Booking" class="btn btn-default">
+              </form>
+
+          </div>
+
+
+      </div> <!-- end col-md-7 -->
+  </div>
 </div>
-
-<!-- new row -->
-<hr>
-
-
-<div class="row" class="bottom-pad-thirty">
-
-    <div class="col-md-3">
-        <div class="img-polaroid">
-            <img id="avatar-placeholder" class="profile-page-img" src="{{ STATIC_URL }}img/default.jpg" />
-        </div>
-    </div>
-
-    <div class="col-md-7">
-
-
-        <div id="booking-details-form">
-            <form method="POST" role="form" class="form-horizontal" id="manage-booking-form" action="{% url 'booking_manage_create' location.slug %}">{% csrf_token %}
-
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">User</label>
-                    <div class="col-sm-7">
-                        <input class="form-control" name="username" id="id_username" value="{{username}}" required/>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Arrive</label>
-                    <div class="col-sm-2">
-                        <input class="form-control listening" id="id_arrive" name="arrive" value="" size="8" required/>
-                    </div>
-                    <label class="col-sm-2 control-label">Depart</label>
-                    <div class="col-sm-2">
-                        <input class="form-control listening" id="id_depart" name="depart" value="" size="8" required/>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Room</label>
-                    <div class="col-sm-6">
-                        <select class="form-control" id="resource_select" name="resource" required>
-                            <option value="">Select Room</option>
-                            {% for room in location.get_rooms %}
-                                <option value="{{room.id}}">{{ room.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Purpose</label>
-                    <div class="col-sm-6">
-                        <input class="form-control" id="id_purpose" name="purpose" value="" size="8" required/>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Status</label>
-                    <div class="col-sm-4">
-                        <select name="status" class="form-control" required>
-                            {% for status_tup in booking_statuses %}
-                            <option value="{{status_tup.0}}">{{status_tup.1}}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <p class="col-sm-offset-2 col-sm-6 small">The confirmed and payment statuses should generally be aligned. Only edit this in special circumstances if you need to override what The Man thinks is right :).</p>
-                </div>
-
-                <div class="form-group">
-                    <div class="col-sm-6 col-md-offset-2">
-                        <input type="checkbox" name="email_announce" id="email_announce" > Announce this booking by email?
-                    </div>
-                </div>
-
-                <input type="submit" value="Create Booking" class="btn btn-default">
-            </form>
-
-        </div>
-
-
-    </div> <!-- end col-md-7 -->
-</div>
-
 
 {% endblock %}
 
