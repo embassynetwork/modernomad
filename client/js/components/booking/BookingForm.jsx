@@ -50,7 +50,8 @@ export default class BookingForm extends React.Component {
         <textarea className="form-control"></textarea>
         <p>Arrival time</p>
         <input className="form-control" type="time"></input>
-        <button className="btn btn-primary btn-block">Request</button>
+        <button className="btn btn-primary btn-block">Request to Book</button>
+        <p className="text-center">Your credit card won't be charged</p>
       </div>
     )
 

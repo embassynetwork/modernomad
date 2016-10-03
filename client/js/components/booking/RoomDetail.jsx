@@ -37,15 +37,15 @@ export default class RoomDetail extends React.Component {
 
     return (
       <div className="container room-detail">
-        <Link className="col-xs-12" to={this.indexLinkDetails()}>back to index</Link>
+        <Link to={this.indexLinkDetails()}><i className="fa fa-chevron-left"></i> Back to Rooms</Link>
         <h1>{room.name}</h1>
         <p>{room.summary}</p>
         <div className="row">
-          <div className="col-sm-8">
-            <img className="room-image img-responsive" src={"/media/"+room.image} />
+          <div className="col-sm-7">
+            <img className="room-image img-responsive panel" src={"/media/"+room.image} />
             {/*room.img && <ImageCarousel img={room.img} />*/}
           </div>
-          <div className="col-sm-4 panel">
+          <div className="col-sm-5 panel">
             <BookingForm room={room} datesAvailable={this.roomIsAvailable()} query={this.props.query} onFilterChange={this.props.onFilterChange} />
           </div>
         </div>
