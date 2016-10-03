@@ -48,7 +48,11 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
       const room = this.oneResource(roomID)
 
       if (room) {
-        return <RoomDetail {...this.props} room={room} onFilterChange={this.reFilter.bind(this)} query={this.props.location.query} />
+        return (
+          <RoomDetail {...this.props} room={room} onFilterChange={this.reFilter.bind(this)} query={this.props.location.query}>
+            {this.props.children}
+          </RoomDetail>
+        )
       } else {
         return null;
       }

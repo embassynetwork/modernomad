@@ -15,15 +15,24 @@ export default class BookingForm extends React.Component {
     this.props.onFilterChange({dates: dates})
   }
 
+  renderCost() {
+    const depart = moment(this.props.query.depart, parseFormat)
+    const arrive = moment(this.props.query.arrive, parseFormat)
+
+    if (depart && arrive) {
+      const nightRate = this.props.room.defaultRate
+      const nights = depart.diff(arrive, 'days')
+      const totalCost = nightRate * nights
+      return <p>${nightRate} * {nights} nights<span className="pull-right">${totalCost}</span></p>
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const room = this.props.room
     const isDetail = true
     const parseFormat = 'MM/DD/YYYY'
-    const depart = moment(this.props.query.depart, parseFormat)
-    const arrive = moment(this.props.query.arrive, parseFormat)
-    const nightRate = room.defaultRate
-    const nights = depart.diff(arrive, 'days')
-    const totalCost = nightRate * nights
 
     return (
       <div className="room-summary-panel">
@@ -33,7 +42,6 @@ export default class BookingForm extends React.Component {
           :
           <div className="alert alert-warning">These dates are not available</div>
         }
-        <p>${nightRate} * {nights} nights<span className="pull-right">${totalCost}</span></p>
         <hr></hr>
         <p>SF Hotel Taxes <span className="pull-right">$</span></p>
         <hr></hr>
