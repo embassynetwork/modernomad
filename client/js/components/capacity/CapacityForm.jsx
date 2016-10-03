@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import DatePicker from './DatePicker'
+import DatePicker from '../generic/DatePicker'
 
 export default class CapacityForm extends React.Component {
   static propTypes = {

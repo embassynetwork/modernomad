@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import CapacityManager from './CapacityManager'
-import ErrorDisplay from './ErrorDisplay'
+import ErrorDisplay from '../generic/ErrorDisplay'
 import _ from 'lodash'
 import axios from 'axios'
 import moment from 'moment'

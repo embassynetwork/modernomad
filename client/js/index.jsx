@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import CapacityContainer from './components/CapacityContainer'
+import CapacityContainer from './components/capacity/CapacityContainer'
 import RoomBooking from './components/booking/RoomBooking'
 
 var topLevelComponents = {
