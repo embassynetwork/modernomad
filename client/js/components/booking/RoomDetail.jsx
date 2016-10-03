@@ -4,6 +4,7 @@ import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import BookingForm from './BookingForm'
 import { Link } from 'react-router'
+import _ from 'lodash'
 
 export default class RoomDetail extends React.Component {
   static propTypes = {
@@ -17,7 +18,7 @@ export default class RoomDetail extends React.Component {
 
   roomIsAvailable() {
     if (this.hasDateQuery()) {
-      return !!_.find(this.props.room.availabilities, {quantity: 0})
+      return !_.find(this.props.room.availabilities, {quantity: 0})
     } else {
       return false
     }
@@ -35,7 +36,7 @@ export default class RoomDetail extends React.Component {
     const isDetail = true
 
     return (
-      <div className="container">
+      <div className="container room-detail">
         <Link className="col-xs-12" to={this.indexLinkDetails()}>back to index</Link>
         <h1>{room.name}</h1>
         <p>{room.summary}</p>

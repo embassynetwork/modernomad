@@ -18,8 +18,9 @@ export default class BookingForm extends React.Component {
   render() {
     const room = this.props.room
     const isDetail = true
-    const depart = moment(this.props.query.depart)
-    const arrive = moment(this.props.query.arrive)
+    const parseFormat = 'MM/DD/YYYY'
+    const depart = moment(this.props.query.depart, parseFormat)
+    const arrive = moment(this.props.query.arrive, parseFormat)
     const nightRate = room.defaultRate
     const nights = depart.diff(arrive, 'days')
     const totalCost = nightRate * nights

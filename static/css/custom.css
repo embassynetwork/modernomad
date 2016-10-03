@@ -1919,6 +1919,10 @@ label.light {
   margin: 20px 10px;
 }
 
+.room-detail {
+  margin-bottom: 20px;
+}
+
 #booking-list-table {
   width: inherit;
 }
