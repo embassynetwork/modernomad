@@ -18,6 +18,11 @@ export default class BookingForm extends React.Component {
   render() {
     const room = this.props.room
     const isDetail = true
+    const depart = moment(this.props.query.depart)
+    const arrive = moment(this.props.query.arrive)
+    const nightRate = room.defaultRate
+    const nights = depart.diff(arrive, 'days')
+    const totalCost = nightRate * nights
 
     return (
       <div className="room-summary-panel">
@@ -27,7 +32,7 @@ export default class BookingForm extends React.Component {
           :
           <div className="alert alert-warning">These dates are not available</div>
         }
-        <p>${room.defaultRate} * {moment(this.props.query.depart).diff(moment(this.props.query.arrive), 'days')} nights<span className="pull-right">${room.defaultRate * moment(this.props.query.depart).diff(moment(this.props.query.arrive), 'days')}</span></p>
+        <p>${nightRate} * {nights} nights<span className="pull-right">${totalCost}</span></p>
         <hr></hr>
         <p>SF Hotel Taxes <span className="pull-right">$</span></p>
         <hr></hr>
