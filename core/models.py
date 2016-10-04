@@ -1105,7 +1105,7 @@ class Booking(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('core.views.unsorted.BookingDetail', [str(self.use.location.slug), str(self.id)])
+        return ('core.views.booking.BookingDetail', [str(self.use.location.slug), str(self.id)])
 
     def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
         # during the booking process, we simulate a booking to generate
