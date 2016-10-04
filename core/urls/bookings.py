@@ -8,7 +8,7 @@ urlpatterns = patterns(
 
 urlpatterns += patterns(
     'core.views.booking',
-    url(r'^booking/submit$', 'BookingSubmit', name='booking_submit'),
+    url(r'^submit$', 'BookingSubmit', name='booking_submit'),
     url(r'^(?P<booking_id>\d+)/$', 'BookingDetail', name='booking_detail'),
     url(r'^(?P<booking_id>\d+)/receipt/$', 'BookingReceipt', name='booking_receipt'),
     url(r'^(?P<booking_id>\d+)/edit/$', 'BookingEdit', name='booking_edit'),

@@ -3,6 +3,7 @@ import moment from 'moment'
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import { Link } from 'react-router'
+import DjangoCSRFInput from '../generic/DjangoCSRFInput'
 
 
 export default class BookingForm extends React.Component {
@@ -51,7 +52,8 @@ export default class BookingForm extends React.Component {
     const isDetail = true
 
     return (
-      <div className="room-summary-panel">
+      <form className="room-summary-panel" method="POST" action="/locations/ams/booking/submit">
+        <DjangoCSRFInput />
         <div className="row nightly-price">
           <h3 className="col-xs-9">${this.props.room.defaultRate}</h3>
           <h5 className="col-xs-3">Per Night</h5>
@@ -85,7 +87,7 @@ export default class BookingForm extends React.Component {
             <Link className="btn btn-primary btn-block btn-brand" to={this.indexLinkDetails()}>View other rooms</Link>
           </div>
         }
-      </div>
+      </form>
     )
 
   }
