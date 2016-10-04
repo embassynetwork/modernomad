@@ -45,106 +45,6 @@ span.highlight {
   color:#D84E33;
 }
 
-
-/* ==========================================================
-==========================[NAVIGATION]=======================
-========================================================== */
-
-/* ======================[Global Navigation]================= */
-
-.curtain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: rgba(255,255,255,0.8);
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-#landing-page-event-info {
-  padding-top: 50px;
-}
-
-/* ======================[Global Navigation]================= */
-
-
-
-.top-nav {
-   float:left;
-   width:100%;
-   background:#fff;
-   overflow:hidden;
-   position:relative;
-}
-
-.top-nav ul {
-   clear:left;
-   float:left;
-   list-style:none;
-   margin:0;
-   padding:0;
-   position:relative;
-   left:50%;
-   text-align:center;
-}
-
-.top-nav a {
-  display: block;
-  width: 50px;
-  color: #FFF;
-  text-decoration: none;
-  background: gray;
-
-}
-.top-nav a:hover {
-  background: green;
-}
-
-
-/* ====================== Home Page ================= */
-
-a {
-  color: #ea6f56;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #ea6f56;
-  text-decoration: none;
-}
-
-.jumbotron {
-  font-size: 1em;
-  background-image: url(/static/img/embassysf.jpg);
-  background-size: cover;
-  color: white;
-}
-
-.jumbotron .light {
-  font-family: 'Raleway', sans-serif;
-  font-size: 1em;
-}
-
-.jumbotron .bold {
-  font-family: 'Raleway', sans-serif;
-  font-size: 2em;
-}
-
-.jumbotron .script {
-  font-family: 'Dancing Script', cursive;
-  font-size: 1.5em;
-}
-
-.jumbotron .logo {
-  height: 70px;
-}
-
-.jumbotron .btn-brand {
-  margin-top: 30px;
-  margin-bottom: 30px;
-}
-
 .btn-brand {
   font-family: 'Raleway', sans-serif;
   background-color: rgb(183, 68, 37);
@@ -164,6 +64,82 @@ a:hover {
 .btn-brand:focus {
   background-color: rgb(183, 68, 37);
   border-color: rgb(183, 68, 37);
+}
+
+
+/* ==========================================================
+==========================[NAVIGATION]=======================
+========================================================== */
+
+
+/* ======================[Global Navigation]================= */
+
+
+
+.top-nav {
+   float:left;
+   width:100%;
+   background:#fff;
+   overflow:hidden;
+   position:relative;
+   ul {
+      clear:left;
+      float:left;
+      list-style:none;
+      margin:0;
+      padding:0;
+      position:relative;
+      left:50%;
+      text-align:center;
+   }
+   a {
+     display: block;
+     width: 50px;
+     color: #FFF;
+     text-decoration: none;
+     background: gray;
+   }
+   a:hover {
+     background: green;
+   }
+}
+
+/* ====================== Home Page ================= */
+
+a {
+  color: #ea6f56;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #ea6f56;
+  text-decoration: none;
+}
+
+.jumbotron {
+  font-size: 1em;
+  background-image: url(/static/img/embassysf.jpg);
+  background-size: cover;
+  color: white;
+  .light {
+    font-family: 'Raleway', sans-serif;
+    font-size: 1em;
+  }
+  .bold {
+    font-family: 'Raleway', sans-serif;
+    font-size: 2em;
+  }
+  .script {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5em;
+  }
+  .logo {
+    height: 70px;
+  }
+  .btn-brand {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
 }
 
 .embassy-logo {
@@ -414,7 +390,7 @@ a:hover {
 }
 
 .event-image {
-  height: 200px;h
+  height: 200px;
   float: left;
 
 }
@@ -1172,7 +1148,7 @@ div#spinner
   margin-left: 0px;
 }
 
-#optional-fields .form-group
+#optional-fields .form-group {
   margin-left: 0px;
 }
 
@@ -1504,41 +1480,6 @@ table tr.row-even td { background: #eee; }
   margin-top: 60px;
 }
 
-.cal_arrive_date {
-  border-left: 1px solid green;
-  border-top: 1px solid green;
-  border-bottom: 1px solid green;
-}
-
-.cal_depart_date {
-  border-right: 1px solid green;
-  border-top: 1px solid green;
-  border-bottom: 1px solid green;
-}
-
-.recent-events-row {
-  background-color: gray;
-  padding: 30px;
-}
-
-/* FAQ
-------------------------- */
-
-.faq-wrapper {
-  line-height: 2em;
-}
-
-.faq-q {
-  list-style: none;
-  font-weight: bold;
-}
-
-.faq-a {
-  margin-left: 20px;
-  list-style-position: inside;
-}
-
-
 
 
 
@@ -1556,109 +1497,11 @@ table tr.row-even td { background: #eee; }
   }
 }
 
-.index-loc-img {
-  width: 170px;
-  height: 170px;
-}
-
-.index-loc-info a {
-  color: #fff;
-}
-
-.index-loc-info {
-  position: absolute;
-  top: 0;
-  left: 0;
-  color: #fff;
-  padding: 5px;
-  height: 170px;
-  line-height: 170px;
-  width: 170px;
-  z-index:1000;
-  text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-}
-
-.index-loc-info span {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: normal;
-}
-
-.index-intro-text strong, {
-  font-weight: 600;
-}
-
-p.lead strong {
-  font-weight: 500;
-}
-
-#location-availability-block {
-  text-align: center;
-}
-
-#index-check-availability {
-  width: 100%;
-  font-weight: 600;
-}
-
-#index-check-availability h3 {
-  margin-top: 0px;
-  font-weight: bold;
-}
-
-#index-check-availability div {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: normal;
-}
-
-#index-check-availability form {
-  line-height: normal;
-}
-
-#location-availability-map {
-  height: 400px;
-}
-
-#index-locations-list {
-  margin-top: 30px;
-  margin-bottom: 30px;
-}
-
-#member-collage {
-  width: 500px;
-  height: 500px;
-}
-
-/* Small devices (tablets, 768px and up) */
-@media (max-width: @screen-sm-max) {
-  #member-collage {
-    width: 300px;
-    height: 300px;
-    overflow: hidden;
-  }
-}
-
-.member-img-collage-item {
-  width: 50px;
-  height: 50px;
-}
-
 #network-footer {
   background-color: #333;
   padding-top: 30px;
   padding-bottom: 30px;
   color: #EEE;
-}
-
-.room-avail-text-success {
-  color: #3c763d !important;
-}
-
-.room-avail-text-danger {
-  color: #a94442 !important;
 }
 
 .location-box h2, .location-box h2 em {
@@ -1929,48 +1772,39 @@ label.light {
     margin-top: 20px;
 }
 
-.room-panel, .room-preview {
-  margin-right: 40px;
-  margin-bottom: 40px;
-}
-
-.room-summary-panel {
-  margin: 20px 10px;
-}
-
-.nightly-price {
-	background-color: #333;
-	color: white;
-	margin-top: -20px;
-	margin-right: -25px;
-	margin-left: -25px;
-}
-
-.nightly-price h3 {
-	margin-top: 10px;
-}
-
-.nightly-price h5 {
-	margin-top: 15px;
-}
-
-.room-summary-panel .date-row {
-	padding: 20px 25px;
-	margin-right: -25px;
-	margin-left: -25px;
-	background-color: #f5f5f5;
-}
-
-.room-summary-panel p {
-	margin: 20px 0;
-}
-
-.room-summary-panel .btn-brand {
-	margin-top: 20px;
-}
-
+// room detail page
 .room-detail {
   margin-bottom: 20px;
+  .nightly-price {
+    background-color: #333;
+    color: white;
+    margin-top: -20px;
+    margin-right: -25px;
+    margin-left: -25px;
+    h3 {
+      margin-top: 10px;
+    }
+
+    h5 {
+      margin-top: 15px;
+    }
+  }
+
+  .room-summary-panel {
+    margin: 20px 10px;
+    .date-row {
+      padding: 20px 25px;
+      margin-right: -25px;
+      margin-left: -25px;
+      background-color: #f5f5f5;
+    }
+    p {
+      margin: 20px 0;
+    }
+    .btn-brand {
+      margin-top: 20px;
+    }
+  }
 }
 
 #booking-list-table {
@@ -2010,10 +1844,6 @@ input.disabled {
   height: 100%;
 }
 
-.hidden {
-  display: none;
-}
-
 .clickable:hover {
   cursor: pointer;
   cursor: hand;
@@ -2037,28 +1867,4 @@ input.disabled {
 
 .subscription-send-receipt {
   display: inline;
-}
-
-.availabilities-table .current {
-  font-weight: bold;
-}
-
-@keyframes yellowfade {
-  from { background: yellow; }
-  to { background: transparent; }
-}
-
-@keyframes yellowfadestripe {
-  from { background: yellow; }
-  to { background: #f9f9f9; }
-}
-
-table.availabilities-table > tbody > tr.animrow-enter > td {
-    animation-name: yellowfade;
-    animation-duration: 1s;
-}
-
-table.availabilities-table > tbody > tr.animrow-enter:nth-child(odd) > td {
-    animation-name: yellowfadestripe;
-    animation-duration: 1s;
 }

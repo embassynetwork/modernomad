@@ -1,6 +1,7 @@
 {% load core_tag_extras %}
 {% load staticfiles %}
 {% load render_bundle from webpack_loader %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -10,9 +11,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="A Global Housing Layer for the New World">
         <!-- Le styles -->
-        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/paper/bootstrap.min.css"> -->
         <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
-        <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+        <!-- <link rel="stylesheet" href="{% static 'css/custom.css' %}"> -->
+        {% compress css %}
+        <link rel="stylesheet" type="text/less" media="all" href="{% static 'css/custom.less' %}" />
+        {% endcompress %}
         <link rel="stylesheet" href="{% static 'css/chosen.min.css' %}"></script>
         <link rel="stylesheet" href="{% static 'css/cropper.min.css' %}"></script>
         <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
