@@ -156,6 +156,16 @@ a:hover {
   border-color: rgb(183, 68, 37);
 }
 
+.btn-brand:active {
+  background-color: rgb(183, 68, 37);
+  border-color: rgb(183, 68, 37);
+}
+
+.btn-brand:focus {
+  background-color: rgb(183, 68, 37);
+  border-color: rgb(183, 68, 37);
+}
+
 .embassy-logo {
   margin-top: 5px;
 }
@@ -1926,6 +1936,37 @@ label.light {
 
 .room-summary-panel {
   margin: 20px 10px;
+}
+
+.nightly-price {
+	background-color: #333;
+	color: white;
+	margin-top: -20px;
+	margin-right: -25px;
+	margin-left: -25px;
+}
+
+.nightly-price h3 {
+	margin-top: 10px;
+}
+
+.nightly-price h5 {
+	margin-top: 15px;
+}
+
+.room-summary-panel .date-row {
+	padding: 20px 25px;
+	margin-right: -25px;
+	margin-left: -25px;
+	background-color: #f5f5f5;
+}
+
+.room-summary-panel p {
+	margin: 20px 0;
+}
+
+.room-summary-panel .btn-brand {
+	margin-top: 20px;
 }
 
 .room-detail {
