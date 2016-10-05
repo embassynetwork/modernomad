@@ -75,8 +75,7 @@
     <body>
         <div id="full-page-wrapper">
             <div class="container-fluid">
-              {% if location %}
-              {% else %}
+              {% if not location %}
                 <div class="row">
 
                     <nav class="navbar navbar-default" id="nav-network" role="navigation">
@@ -154,8 +153,8 @@
                 <!-- <h5>© Embassy Network</h5> -->
                 <h5>{{location.name}} is part of the <a href="/">© Embassy Network</a>.</h5>
               </div>
-                </div>
             </div>
+          </div>
         </div>
         {% endblock %}
 
