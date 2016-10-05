@@ -4,12 +4,15 @@
 
 {% block content %}
 
-<div class="container">
+<div class="location-landing-page">
+  <div class="container">
     <div class="row">
         <div class="col-sm-10 col-sm-offset-1"> {% include "snippets/messages.html" %} </div>
     </div>
+  </div>
 
-    <div class="row" id="house-desc">
+  <div class="house-desc">
+    <div class="row">
         <div class="col-sm-7">
             {{ location.short_description|safe }}
         </div>
@@ -33,44 +36,55 @@
             <h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
         </div>
     </div>
+  </div>
 
-    <div class="row">
-            <div class="col-md-4" id="participate">
-                <p class="easy-reading">{{ location.announcement|safe }}</p>
-            </div>
+  <div class="participate">
+    <div class="container">
 
-            <div class="col-md-4" id="participate">
-                <p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
-            </div>
-
-            <div class="col-md-4" id="participate">
-                <p class="easy-reading">{{ location.front_page_participate|safe }}</p>
-                {% ifappexists gather %}
-                {% endifappexists %}
-            </div>
-    </div>
-
-    <div class="row" id="location">
-        <div id="location-map"></div>
-    </div>
-
-    <div class="row" id="community-section">
-        {% for person in location.people_in_coming_month %}
-        <div class="col-sm-3 col-lg-2 text-center">
-            <a href="{% url 'user_detail' person.username %}">
-                {% if person.profile.image %}
-                    <img class="homepage-user-img img-responsive" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
-                {% else %}
-                    <img class="homepage-user-img" src="/static/img/default.jpg" />
-                {% endif %}
-                <div class="homepage-user-info">
-                    <p class="homepage-user-link"> {{ person.first_name|title}} {{person.last_name|title}}</p>
-                    <p class="homepage-user-text">{{person.profile.bio|truncatewords:10 }}</p>
-                </div>
-            </a>
+      <div class="row">
+        <div class="col-md-4" id="participate">
+            <p class="easy-reading">{{ location.announcement|safe }}</p>
         </div>
-        {% endfor %}
+
+        <div class="col-md-4" id="participate">
+            <p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
+        </div>
+
+        <div class="col-md-4" id="participate">
+            <p class="easy-reading">{{ location.front_page_participate|safe }}</p>
+            {% ifappexists gather %}
+            {% endifappexists %}
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div id="community-section">
+    <div class="container">
+
+        <div class="row">
+            {% for person in location.people_in_coming_month %}
+            <div class="col-sm-3 col-lg-2 text-center">
+                <a href="{% url 'user_detail' person.username %}">
+                    {% if person.profile.image %}
+                        <img class="homepage-user-img img-responsive" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
+                    {% else %}
+                        <img class="homepage-user-img" src="/static/img/default.jpg" />
+                    {% endif %}
+                    <div class="homepage-user-info">
+                        <p class="homepage-user-link"> {{ person.first_name|title}} {{person.last_name|title}}</p>
+                        <p class="homepage-user-text">{{person.profile.bio|truncatewords:10 }}</p>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+  </div>
+
+  <div id="location">
+      <div id="location-map"></div>
+  </div>
 </div>
 
 {% endblock %}

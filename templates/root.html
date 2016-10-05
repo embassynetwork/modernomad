@@ -75,6 +75,8 @@
     <body>
         <div id="full-page-wrapper">
             <div class="container-fluid">
+              {% if location %}
+              {% else %}
                 <div class="row">
 
                     <nav class="navbar navbar-default" id="nav-network" role="navigation">
@@ -115,6 +117,7 @@
                     </div> <!-- end navbar-collapse -->
                     </nav>
                 </div> <!-- end row -->
+                {% endif %}
             </div> <!-- end container-fluid -->
 
             {% block body %}
@@ -148,7 +151,8 @@
                         </a>
                     </div>
                     <div class="text-muted">
-                <h5>© Embassy Network</h5>
+                <!-- <h5>© Embassy Network</h5> -->
+                <h5>{{location.name}} is part of the <a href="/">© Embassy Network</a>.</h5>
               </div>
                 </div>
             </div>

@@ -198,22 +198,15 @@ a:hover {
 }
 
 .house-name {
-  position:absolute;
-  top:30%;
-  padding: 20px;
-  background-color: rgba(183,68,37,0.9);
-  color: white;
-  left: 50%;
-  margin-left: -225px;
-  width: 450px;
-  /*full height/width black background?*/
-  /*position: absolute;
+  position: absolute;
   bottom: 0;
   padding: 20px;
-  background-color: rgba(0,0,0,0.5);
-  color: white;
+  background-color: rgba(247, 222, 198, 0.3);
+  color: black;
+  bottom: 0;
+  /* margin-left: -225px; */
   width: 100%;
-  height: 100%;*/
+  height: 100%;
 }
 
 .house-name h1 {
@@ -222,15 +215,38 @@ a:hover {
 
 .house-name a {
   color: white;
+  /* text-transform: uppercase; */
+  font-size: 63px;
+  letter-spacing: 10px;
 }
 
-#house-desc {
-  margin: 50px 0;
-}
+.location-landing-page {
+  .house-desc {
+    .row {
+      margin: 0;
+      .lead {
+        margin-top: 60px;
+      }
+    }
+  }
 
-.book-room {
+  .book-room {
     background-color: #f5f5f5;
     padding: 20px 0;
+  }
+  .participate {
+    background-color: rgb(247, 222, 198);
+    padding-top: 50px;
+    padding-bottom: 50px;
+  }
+  #location-map {
+    height: 250px;
+  }
+
+  #community-section {
+    padding: 60px 0;
+    background-color: #f5f5f5;
+  }
 }
 
 #actions {
@@ -241,10 +257,6 @@ a:hover {
 
 #participate, #reserve {
   padding:0 70px;
-}
-
-#participate {
-  border-right:1px solid rgba(255,255,255,0.3);
 }
 
 #eventlist-signup-wrapper {
@@ -383,11 +395,6 @@ a:hover {
 .homepage-user-link {
   font-family: 'Raleway', sans-serif;
   margin-top: 10px;
-}
-
-#location-map {
-  height: 250px;
-  margin-top: 50px;
 }
 
 .values {
@@ -1286,6 +1293,7 @@ h3.no-top-margin {
   background-color: transparent;
   border-color: transparent;
   margin-bottom: 0px;
+  // display: none;
 }
 
 table tr.row-even td { background: #eee; }
@@ -1302,10 +1310,6 @@ table tr.row-even td { background: #eee; }
 #booking-header {
   text-align:center;
   border-bottom: 1px solid black;
-}
-
-#community-section {
-  margin: 60px 0;
 }
 
 .money {
