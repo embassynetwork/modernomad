@@ -48,11 +48,11 @@ export default class DateRangeSelector extends React.Component {
   render() {
     return (
       <div className="row">
-        <div className="col-md-2 col-sm-4"><h5>Dates</h5></div>
-        <div className={(this.props.detail ? "col-md-5" : "col-md-2 col-sm-4")}>
+        <div className={(this.props.detail ? "col-sm-2" : "col-md-2 col-sm-4")}><h5>Dates</h5></div>
+        <div className={(this.props.detail ? "col-sm-5" : "col-md-2 col-sm-4")}>
           <DatePicker placeholderText="Arrive" className="form-control" selected={this.state.arrive} onChange={this.changeHandler('arrive')} minDate={moment()} />
 				</div>
-				<div className={(this.props.detail ? "col-md-5" : "col-md-2 col-sm-4")}>
+				<div className={(this.props.detail ? "col-sm-5" : "col-md-2 col-sm-4")}>
           <DatePicker placeholderText="Depart" className="form-control" selected={this.state.depart} onChange={this.changeHandler('depart')} minDate={this.minDepart()} />
 				</div>
 			</div>

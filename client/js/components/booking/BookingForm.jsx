@@ -55,8 +55,8 @@ export default class BookingForm extends React.Component {
       <form className="room-summary-panel" method="POST" action="/locations/ams/booking/submit">
         <DjangoCSRFInput />
         <div className="row nightly-price">
-          <h3 className="col-xs-9">${this.props.room.defaultRate}</h3>
-          <h5 className="col-xs-3">Per Night</h5>
+          <h3 className="col-xs-8">${this.props.room.defaultRate}</h3>
+          <div className="col-xs-4"><h5 className="pull-right">Per Night</h5></div>
         </div>
         <div className="date-row">
           <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} detail={isDetail} query={this.props.query} {...this.props.query} />
@@ -84,7 +84,7 @@ export default class BookingForm extends React.Component {
           :
           <div>
             <p className="text-center">Those dates are not available</p>
-            <Link className="btn btn-primary btn-block btn-brand" to={this.indexLinkDetails()}>View other rooms</Link>
+            <Link className="btn btn-default btn-block" to={this.indexLinkDetails()}>View other rooms</Link>
           </div>
         }
       </form>

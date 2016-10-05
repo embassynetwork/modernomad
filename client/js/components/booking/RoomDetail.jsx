@@ -41,14 +41,16 @@ export default class RoomDetail extends React.Component {
         <h1>{room.name}</h1>
         <p className="room-summary">{room.summary}</p>
         <div className="row">
-          <div className="col-sm-8">
+          <div className="col-md-8">
             <div className="panel room-image-panel">
               <img className="room-image img-responsive" src={"/media/"+room.image} />
             {/*room.img && <ImageCarousel img={room.img} />*/}
             </div>
           </div>
-          <div className="col-sm-4 panel">
-            <BookingForm room={room} {...this.props} datesAvailable={this.roomIsAvailable()} query={this.props.query} onFilterChange={this.props.onFilterChange} />
+          <div className="col-md-4">
+            <div className="panel">
+              <BookingForm room={room} {...this.props} datesAvailable={this.roomIsAvailable()} query={this.props.query} onFilterChange={this.props.onFilterChange} />
+            </div>
           </div>
         </div>
       </div>
