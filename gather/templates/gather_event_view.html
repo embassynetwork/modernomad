@@ -20,7 +20,7 @@
 }(document, 'script', 'facebook-jssdk'));</script>
 
 
-<div id="event-view-wrapper">
+<div id="event-view-wrapper" class="container">
     <div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-med">
         <div class="modal-content">
@@ -29,7 +29,7 @@
                 <h3 class="modal-title">Almost There...</h3>
             </div>
             <div class="modal-body">
-                <h4>We need a bit more info to keep you posted on this event. </h4>     
+                <h4>We need a bit more info to keep you posted on this event. </h4>
                 <p><em>Already a member? <a href="{% url 'user_login' %}">Login instead</a></em></p>
                 <div id="new-user-form-errors"></div>
                 <form id="new-user-form" class="form-horizontal">
@@ -126,19 +126,19 @@
         </div>
     {% endif %}
 
-    {% if event.status == 'canceled' %}    
+    {% if event.status == 'canceled' %}
     <div class="greyed-out">
         <h2><i class="text-danger fa fa-warning" ></i> This event has been canceled</h2>
     {% endif %}
 
-    <h1 class="event-detail-title">{{ event.title|title }}</h1> 
+    <h1 class="event-detail-title">{{ event.title|title }}</h1>
 
     {% if event.status != 'canceled' or user_is_organizer or user_is_event_admin %}
 
         {% if user_is_organizer or user_is_event_admin %}
             <a id="event-edit-link" class="thirtypx-spacer-left" href="edit/">edit</a>
         {% endif %}
-        <div class="event-time"> 
+        <div class="event-time">
         {% with event.start|date as start_date %}
         {% with event.end|date as end_date %}
             <span class="event-date-day pull-left"> {{ event.start|date:'D'}}</span>
@@ -161,7 +161,7 @@
             <div class="row"> <img class="event-detail-img img-rounded" src="{{ MEDIA_URL }}{{ event.image }}" /></div>
 
             {% with event.organizers.get_queryset as organizers %}
-            <h3>Organized by 
+            <h3>Organized by
                 {% for o in organizers %}
                 <a href="{% url 'user_detail' o.username %}">{{ o.first_name }} {{o.last_name}}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
@@ -192,10 +192,10 @@
 
 {% if event.status == 'live' and event.visibility == 'public' %}
 <div class="row">
-    <div 
-        id="facebook-share-link" 
-        class="col-md-2 col-md-offset-5 fb-like" 
-        data-href="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}"  
+    <div
+        id="facebook-share-link"
+        class="col-md-2 col-md-offset-5 fb-like"
+        data-href="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}"
         data-action="like"
         data-show-faces="false"
         data-share="true"
@@ -213,8 +213,8 @@
     newUserSubmit = function(form) {
         form_data = $("#new-user-form").serialize();
         form_data = form_data + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
-        request = $.ajax({ 
-            data: form_data,    
+        request = $.ajax({
+            data: form_data,
             type: "POST",
             url: "{% url 'gather_rsvp_new_user' location.slug event.id event.slug %}"
         });
@@ -233,7 +233,7 @@
                     $("#new-user-form-errors").html(error_html);
                 } else {
                     console.log("shouldn't be here...");
-                } 
+                }
             } else {
                 console.log("success");
                 location.reload();
@@ -279,7 +279,7 @@
                     type: "post",
                     data: {'email': function() {return $( "#id_email" ).val()}}
                 }
-            }, 
+            },
             username: {
                 required: true,
                 remote: {
@@ -295,7 +295,7 @@
                 required: true,
                 equalTo: "#id_password1"
             }
-        }    
+        }
     });
 
 </script>
