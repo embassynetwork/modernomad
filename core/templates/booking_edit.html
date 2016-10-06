@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
+<div class="container">
     {% if messages %}
     <div class="messages">
         {% for message in messages %}
@@ -36,6 +37,7 @@
         </div>
     </div>
 
+</div>
 {% endblock %}
 
 {% block extrajs %}

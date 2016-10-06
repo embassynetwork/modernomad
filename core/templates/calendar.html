@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
+<div class="container">
+
 <div id="guestcalendar"></div>
 
 <div id="guest-calendar">
@@ -9,7 +11,7 @@
 
 <div id="by-month-nav">
     <span class="icon-spacer-right"><i class="icon-arrow-left"></i></span>
-    <a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous Month</a> | 
+    <a href="?month={{prev_month.month}}&year={{prev_month.year}}">Previous Month</a> |
     <a href="{% url 'location_calendar' location.slug %}"> Current </a> |
     <a href="?month={{next_month.month}}&year={{next_month.year}}">Next Month</a>
     <span class="icon-spacer-left"><i class="icon-arrow-right"></i></span>
@@ -24,7 +26,7 @@
     <h4 class="inline">
     <a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
     </h4>
-    <a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a> 
+    <a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a>
     {% if r.arrive == today %}
     - <em>today!</em>
     {% endif %}
@@ -34,8 +36,8 @@
     </div>
 
     <div class="img-polaroid float-left">
-        <img class="profile-img-thumb" 
-        src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}" 
+        <img class="profile-img-thumb"
+        src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
         />
     </div>
 
@@ -48,7 +50,7 @@
     <div class="clear"></div>
     </div>
 {% endfor %}
-
+</div>
 {% endblock %}
 
 {% block extrajs %}
@@ -56,7 +58,7 @@
     <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
         'version':'1','packages':['timeline']}]}">
     </script>
-    
+
     <script type="text/javascript">
 
         {% if any_uses %}
@@ -76,12 +78,12 @@
                     {% for room, uses_this_room in uses_by_room %}
                         {% with last_room=forloop.last %}
 
-                        // note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1. 
-                        {% for res_info in uses_this_room %}    
-                            [ 
-                            "{{room.name|safe}}", "{{res_info.use.user.first_name|title}} ({{res_info.use.status}})", 
-                                new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}), 
-                                new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}), 
+                        // note the months need to be offset by 1 here since JS is expecting a 0-based month index while python starts with 1.
+                        {% for res_info in uses_this_room %}
+                            [
+                            "{{room.name|safe}}", "{{res_info.use.user.first_name|title}} ({{res_info.use.status}})",
+                                new Date({{res_info.display_start.year}}, {{res_info.display_start.month}}-1, {{res_info.display_start.day}}),
+                                new Date({{res_info.display_end.year}}, {{res_info.display_end.month}}-1, {{res_info.display_end.day}}),
                                 "<div class='guestinfo-tooltip'><h3>{{res_info.use.user.first_name|title}}</h3><p><em>{{res_info.use.status}}</em></p><p>Arrive: {{ res_info.use.arrive}}</p><p>Depart: {{ res_info.use.depart }}</p><img class='profile-img-thumb' src='{{ MEDIA_URL }}{{ res_info.use.user.profile.image_thumb}}'></div>"
 
                             {% if last_room and forloop.last %}
@@ -98,20 +100,20 @@
 
                 var rowHeight = 35; // this value is from inspection, we are not setting the height here (indeed, there doesn't seem to be a way to do that)
 
-                // getNumberOfRows is calculating the total possible rows, but empty rows are not being displayed, so the value that function returns is off. 
+                // getNumberOfRows is calculating the total possible rows, but empty rows are not being displayed, so the value that function returns is off.
                 chartHeight = {{rows_in_chart}} * rowHeight;
                 console.log(chartHeight);
                 console.log({{rows_in_chart}});
                 var options = {
                     height: chartHeight,
                     timeline: {singleColor: '#EA6F56'}
-                }    
+                }
                 chart.draw(dataTable, options);
 
                 function myMouseOverHandler(e){
                     if(e.row != null){
                         $(".google-visualization-tooltip").html(dataTable.getValue(e.row,4)).css({width:"auto",height:"auto"});
-                    }        
+                    }
                 }
                 function mySelectHandler(e){
                     selection = chart.getSelection()
@@ -119,13 +121,10 @@
                 google.visualization.events.addListener(chart, 'onmouseover', myMouseOverHandler);
                 google.visualization.events.addListener(chart, 'select', mySelectHandler);
             }
-    
+
         {% else %}
             $("#guestcalendar").html('<h4>No bookings yet this month!</h4>');
         {% endif %}
     </script>
 
 {% endblock %}
-
-
-
