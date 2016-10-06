@@ -8,6 +8,7 @@ import logging
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from core.emails import send_booking_receipt, new_booking_notify
 
 from core.models import Booking, Use, Location, Site
 from core.forms import BookingUseForm

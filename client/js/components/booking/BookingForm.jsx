@@ -54,6 +54,7 @@ export default class BookingForm extends React.Component {
     return (
       <form className="room-summary-panel" method="POST" action="/locations/ams/booking/submit">
         <DjangoCSRFInput />
+        <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
           <h3 className="col-xs-8">${this.props.room.defaultRate}</h3>
           <div className="col-xs-4"><h5 className="pull-right">Per Night</h5></div>
@@ -70,9 +71,9 @@ export default class BookingForm extends React.Component {
                 <hr></hr>
                 <p><b>Total<span className="pull-right">$</span></b></p>
                 <p>*Tell us a little about the purpose of your trip</p>
-                <textarea className="form-control"></textarea>
+                <textarea className="form-control" name="purpose" />
                 <p>Arrival time</p>
-                <input className="form-control" type="time"></input>
+                <input className="form-control" type="time" name="arrival_time" />
               </div>
               :
               <div></div>
