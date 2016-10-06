@@ -23,191 +23,193 @@
   </div>
 </div>
 
-<div class="row {% if booking.use.status == 'canceled' %}greyed-out{% endif %}">
+<div class="container">
+  <div class="row {% if booking.use.status == 'canceled' %}greyed-out{% endif %}">
 
-    {% if booking.use.status == 'canceled' %}
-        <div class="col-md-12">
-            <div class="alert alert-danger">
-                <span class="fa fa-ban"></span> This booking is canceled
-            </div>
-        </div>
+      {% if booking.use.status == 'canceled' %}
+          <div class="col-md-12">
+              <div class="alert alert-danger">
+                  <span class="fa fa-ban"></span> This booking is canceled
+              </div>
+          </div>
 
-    {% elif booking.is_paid %}
-        <div class="col-md-12">
-            <div class="alert alert-success">
-                <span class="fa fa-check text-success"></span> Huzzah! Your booking is confirmed. We look forward to having you!
-            </div>
-        </div>
-    {% else %}
-        <div class="col-md-12">
-            <div class="alert alert-warning">
-                {% if booking.use.user.profile.customer_id %}
-                    <span class="fa fa-exclamation-circle"></span>
-                    This booking is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
-                {% else %}
+      {% elif booking.is_paid %}
+          <div class="col-md-12">
+              <div class="alert alert-success">
+                  <span class="fa fa-check text-success"></span> Huzzah! Your booking is confirmed. We look forward to having you!
+              </div>
+          </div>
+      {% else %}
+          <div class="col-md-12">
+              <div class="alert alert-warning">
+                  {% if booking.use.user.profile.customer_id %}
+                      <span class="fa fa-exclamation-circle"></span>
+                      This booking is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
+                  {% else %}
 
-                    <p class="row-spacer">
-                        <span class="fa fa-credit-card"> </span>
-                        Please enter a credit card so that we can confirm this booking.
-                    </p>
+                      <p class="row-spacer">
+                          <span class="fa fa-credit-card"> </span>
+                          Please enter a credit card so that we can confirm this booking.
+                      </p>
 
-                    <div class="col-md-4">
-                        <form action="{% url 'user_add_card' booking.use.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
+                      <div class="col-md-4">
+                          <form action="{% url 'user_add_card' booking.use.user.username %}" class="form-horizontal" method="POST" id="payment-form">{% csrf_token %}
 
-                            <input type="hidden" name="res-id" value="{{booking.id}}">
+                              <input type="hidden" name="res-id" value="{{booking.id}}">
 
-                            <div id="payment-errors text-danger"></div>
+                              <div id="payment-errors text-danger"></div>
 
-                            <div class="row sm-row-spacer">
-                                <div class="col-sm-2">
-                                    <label>
-                                        <span>Card</span>
-                                    </label>
-                                </div>
-                                <div class="col-sm-10">
-                                    <input class="form-control" type="text" data-stripe="number"/>
-                                </div>
-                            </div>
+                              <div class="row sm-row-spacer">
+                                  <div class="col-sm-2">
+                                      <label>
+                                          <span>Card</span>
+                                      </label>
+                                  </div>
+                                  <div class="col-sm-10">
+                                      <input class="form-control" type="text" data-stripe="number"/>
+                                  </div>
+                              </div>
 
-                            <div class="row sm-row-spacer">
-                                <div class="col-sm-2">
-                                    <label> CVC </label>
-                                </div>
-                                <div class="col-sm-3">
-                                    <input class="form-control" type="text" size="4" data-stripe="cvc"/>
-                                </div>
+                              <div class="row sm-row-spacer">
+                                  <div class="col-sm-2">
+                                      <label> CVC </label>
+                                  </div>
+                                  <div class="col-sm-3">
+                                      <input class="form-control" type="text" size="4" data-stripe="cvc"/>
+                                  </div>
 
-                                <div class="col-sm-1">
-                                    <label>
-                                        <span>Exp</span>
-                                    </label>
-                                </div>
-                                <div class="col-sm-6 form-inline">
-                                    <input class="form-control" type="text" size="4" data-stripe="exp-month" placeholder="MM"/> /
-                                    <input class="form-control" type="text" size="6" data-stripe="exp-year" placeholder="YYYY"/>
-                                </div>
-                            </div>
-                            <div class="row sm-row-spacer">
-                                <div class="col-md-4 col-md-offset-2">
-                                    <button type="submit" class="btn btn-default">Add Card</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="clear"></div>
+                                  <div class="col-sm-1">
+                                      <label>
+                                          <span>Exp</span>
+                                      </label>
+                                  </div>
+                                  <div class="col-sm-6 form-inline">
+                                      <input class="form-control" type="text" size="4" data-stripe="exp-month" placeholder="MM"/> /
+                                      <input class="form-control" type="text" size="6" data-stripe="exp-year" placeholder="YYYY"/>
+                                  </div>
+                              </div>
+                              <div class="row sm-row-spacer">
+                                  <div class="col-md-4 col-md-offset-2">
+                                      <button type="submit" class="btn btn-default">Add Card</button>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                      <div class="clear"></div>
 
-                    <p>
-                        Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a> (they will not have to log in).
-                    </p>
+                      <p>
+                          Someone else paying? Send them the <a href="" data-toggle="modal" data-target="#myModal">3rd party payment link</a> (they will not have to log in).
+                      </p>
 
-                    <p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
-                {% endif %}
-            </div>
-        </div>
-    {% endif %}
+                      <p><em><small>We use <a href="http://stripe.com">Stripe's</a> secure credit card processing with SSL encryption. Your card card information is never stored on our servers.</small></em></p>
+                  {% endif %}
+              </div>
+          </div>
+      {% endif %}
+  </div>
+
+  <div class="row">
+      <div class="col-md-4 col-md-push-8">
+          {% if user in location.house_admins.all %}
+              <div class="row">
+              <div class="col-sm-12 align-right">
+                  <a href="{% url 'booking_manage' location.slug booking.id %}">Manage Booking <span class="fa fa-mail-forward"></span></a>
+              </div>
+              </div>
+          {% endif %}
+          <div id="booking-amount-summary-box">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <h3 class="panel-title">Booking Summary</h3>
+                  </div>
+                  {% with booking.bill as bill %}
+                      {% include 'snippets/booking_bill_line_items_and_payments.html' %}
+                  {% endwith %}
+                  <div class="panel-footer text-muted">
+                      <em>Cancellation policy for the {{ booking.use.resource }} is {{booking.use.resource.cancellation_policy}}.</em>
+                  </div>
+              </div>
+          </div>
+          {% if booking.is_paid %}
+          <div class="row">
+              <div class="col-sm-12">
+                  <a class="btn btn-default res-status-btn" type="button" href="{% url 'booking_payment' location.slug booking.uuid %}">View Receipt</a>
+              </div>
+          </div>
+          {% endif %}
+      </div> <!-- end col-md-4 -->
+      <div class="col-md-8 col-md-pull-4">
+          <h3>Booking for
+              <em><a href="{% url 'user_detail' booking.use.user.username %}">{{ booking.use.user.first_name|title }} {{booking.use.user.last_name}}</a></em>
+          </h3>
+          <h4>{{booking.use.arrive }} - {{booking.use.depart}}.</h4>
+          <div class="row">
+              <div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ booking.use.resource.name|title}}</div>
+          </div>
+          <div class="row">
+              <div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ booking.use.purpose}}</div>
+          </div>
+          <div class="row">
+              <div class="col-md-3"><b>Additional Comments</b></div><div class="col-md-9">{{  booking.comments|default:"None" }}</div>
+          </div>
+          <div class="row">
+              <div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ booking.use.arrival_time|default:"Not specified" }}</div>
+          </div>
+
+      </div>
+
+  </div>
+
+  <div class="row top-spacer-xl {% if booking.use.status == 'canceled' %}greyed-images greyed-out {% endif %}">
+          <div class="col-md-12">
+              <h3> Also here during your stay</h3>
+              {% for subset in users_during_stay|subsets_size:12 %}
+                  <div class="row row-spacer">
+                      {% for user in subset %}
+                          <div class="col-md-2 col-sm-3 col-xs-6">
+                <a href="{% url 'user_detail' user.username %}">
+                                <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
+                                <p class="text-center">{{user.first_name}}</p>
+                </a>
+                          </div>
+                      {% endfor %}
+                  </div>
+              {% endfor %}
+          </div>
+      </div>
+
+
+  {% ifequal booking.use.user user %}
+      <div class="res-modify-btn row-spacer">
+          {% if past %}
+              <p class="notice">This booking is in the past and cannot be modified</p>
+          {% elif paid %}
+              <p class="notice">This booking has already been paid for. </p>
+          {% elif booking.use.status == 'canceled' %}
+          {% else %}
+              <div>
+                  <a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify booking</a>
+                  <form id="res-delete" class="btn-inline" method="post" action="{% url 'booking_delete' location.slug booking.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
+              </div>
+
+              <div id="dialog-confirm" title="Delete this Booking?">
+                  <p>
+                  <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+                  This booking will be permanently deleted and cannot be recovered. Are you sure?
+                  </p>
+              </div>
+          {% endif %}
+      </div>
+      <div class="row row-spacer greyed-out">
+          <span>Questions? Contact <a href="mailto:{{contact}}">{{ contact }}</a>.</span>
+          <span class="pull-right"><em>Created {{booking.created}}. Last updated {{booking.updated}}.</em></span>
+      </div>
+
+  {% endifequal %}
+
+  </div> <!-- end col -->
+
 </div>
-
-<div class="row">
-    <div class="col-md-4 col-md-push-8">
-        {% if user in location.house_admins.all %}
-            <div class="row">
-            <div class="col-sm-12 align-right">
-                <a href="{% url 'booking_manage' location.slug booking.id %}">Manage Booking <span class="fa fa-mail-forward"></span></a>
-            </div>
-            </div>
-        {% endif %}
-        <div id="booking-amount-summary-box">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Booking Summary</h3>
-                </div>
-                {% with booking.bill as bill %}
-                    {% include 'snippets/booking_bill_line_items_and_payments.html' %}
-                {% endwith %}
-                <div class="panel-footer text-muted">
-                    <em>Cancellation policy for the {{ booking.use.resource }} is {{booking.use.resource.cancellation_policy}}.</em>
-                </div>
-            </div>
-        </div>
-        {% if booking.is_paid %}
-        <div class="row">
-            <div class="col-sm-12">
-                <a class="btn btn-default res-status-btn" type="button" href="{% url 'booking_payment' location.slug booking.uuid %}">View Receipt</a>
-            </div>
-        </div>
-        {% endif %}
-    </div> <!-- end col-md-4 -->
-    <div class="col-md-8 col-md-pull-4">
-        <h3>Booking for
-            <em><a href="{% url 'user_detail' booking.use.user.username %}">{{ booking.use.user.first_name|title }} {{booking.use.user.last_name}}</a></em>
-        </h3>
-        <h4>{{booking.use.arrive }} - {{booking.use.depart}}.</h4>
-        <div class="row">
-            <div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ booking.use.resource.name|title}}</div>
-        </div>
-        <div class="row">
-            <div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ booking.use.purpose}}</div>
-        </div>
-        <div class="row">
-            <div class="col-md-3"><b>Additional Comments</b></div><div class="col-md-9">{{  booking.comments|default:"None" }}</div>
-        </div>
-        <div class="row">
-            <div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ booking.use.arrival_time|default:"Not specified" }}</div>
-        </div>
-
-    </div>
-
-</div>
-
-<div class="row top-spacer-xl {% if booking.use.status == 'canceled' %}greyed-images greyed-out {% endif %}">
-        <div class="col-md-12">
-            <h3> Also here during your stay</h3>
-            {% for subset in users_during_stay|subsets_size:12 %}
-                <div class="row row-spacer">
-                    {% for user in subset %}
-                        <div class="col-md-2 col-sm-3 col-xs-6">
-              <a href="{% url 'user_detail' user.username %}">
-                              <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
-                              <p class="text-center">{{user.first_name}}</p>
-              </a>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-
-{% ifequal booking.use.user user %}
-    <div class="res-modify-btn row-spacer">
-        {% if past %}
-            <p class="notice">This booking is in the past and cannot be modified</p>
-        {% elif paid %}
-            <p class="notice">This booking has already been paid for. </p>
-        {% elif booking.use.status == 'canceled' %}
-        {% else %}
-            <div>
-                <a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify booking</a>
-                <form id="res-delete" class="btn-inline" method="post" action="{% url 'booking_delete' location.slug booking.id %}">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Delete?"></form>
-            </div>
-
-            <div id="dialog-confirm" title="Delete this Booking?">
-                <p>
-                <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
-                This booking will be permanently deleted and cannot be recovered. Are you sure?
-                </p>
-            </div>
-        {% endif %}
-    </div>
-    <div class="row row-spacer greyed-out">
-        <span>Questions? Contact <a href="mailto:{{contact}}">{{ contact }}</a>.</span>
-        <span class="pull-right"><em>Created {{booking.created}}. Last updated {{booking.updated}}.</em></span>
-    </div>
-
-{% endifequal %}
-
-</div> <!-- end col -->
-
 
 {% endblock %}
 
