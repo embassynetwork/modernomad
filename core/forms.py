@@ -341,9 +341,10 @@ class BookingUseForm(forms.ModelForm):
         super(BookingUseForm, self).__init__(*args, **kwargs)
         if not location:
             raise Exception("No location given!")
-        if not hasattr(Use, 'booking'):
-            raise Exception("This form requires a Booking object to be associated with the Use")
-        self.fields['comments'].initial = self.instance.booking.comments
+        if self.instance.pk:
+            if not hasattr(self.instance, 'booking'):
+                raise Exception("This form requires a Booking object to be associated with the Use")
+            self.fields['comments'].initial = self.instance.booking.comments
 
         self.location = location
         self.fields['resource'].choices = self.location.rooms_with_future_capacity_choices()
