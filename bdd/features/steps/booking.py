@@ -14,7 +14,7 @@ def visit_path(context, path):
 @given(u'a new site visitor is looking at options to stay at "{location_name}"')
 def impl(context, location_name):
     location = Location.objects.get(name=location_name)
-    visit_path(context, '/locations/' + location.slug + '/stay')
+    visit_path(context, '/locations/' + location.slug + '/stay/')
 
 
 @when(u'they want to stay {days_in_future:d} days from now for {nights:d} nights')
@@ -27,23 +27,29 @@ def impl(context, days_in_future, nights):
     context.browser.fill('arrive', arrive.strftime("%m/%d/%Y"))
     context.browser.fill('depart', depart.strftime("%m/%d/%Y"))
     context.browser.find_by_tag('body').click()
-    time.sleep(1)
+    time.sleep(3)
 
 
 @then(u'ensure they are offered {room_count:d} rooms')
 def impl(context, room_count):
-    # JKS: this will need to be written differently when jessy pushes the rooms-migration and res-workflow branches.
-    rooms = context.browser.find_by_css('.room-panel')
+    rooms = context.browser.find_by_css('.room-card')
     expect(len(rooms)).to.eq(room_count)
 
 
 @when(u'they ask to book a bed in "{room_name}"')
 def impl(context, room_name):
-    for room in context.browser.find_by_css('.room-panel h3'):
-        if room.html.startswith(room_name):
-            room.click()
+    for room_link in context.browser.find_by_css('.room-card a.room-link'):
+        heading = room_link.find_by_css('h3')
+        title = heading.html
+        if title.startswith(room_name):
+            room_link.click()
+            break
+
+    time.sleep(1)
+    form = context.browser.find_by_css('.booking-request-form')
+    print(form.html)
     context.browser.fill("purpose", "I want to have a great stay")
-    context.browser.find_by_id('submit-booking').first.click()
+    context.browser.find_by_id('submit-booking-request').first.click()
 
 
 @when(u'they create a valid profile')

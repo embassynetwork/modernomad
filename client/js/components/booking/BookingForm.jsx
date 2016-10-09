@@ -52,7 +52,7 @@ export default class BookingForm extends React.Component {
     const isDetail = true
 
     return (
-      <form className="room-summary-panel" method="POST" action="/locations/ams/booking/submit">
+      <form className="booking-request-form" method="POST" action="/locations/ams/booking/submit">
         <DjangoCSRFInput />
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
@@ -80,7 +80,7 @@ export default class BookingForm extends React.Component {
               :
               <div></div>
             }
-            <button className="btn btn-primary btn-block btn-brand">Request to Book</button>
+            <button className="btn btn-primary btn-block btn-brand" id="submit-booking-request">Request to Book</button>
             <p className="text-center">Your credit card won't be charged</p>
 
           </div>
