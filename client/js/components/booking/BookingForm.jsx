@@ -71,7 +71,7 @@ export default class BookingForm extends React.Component {
                 <hr></hr>
                 <p><b>Total<span className="pull-right">$</span></b></p>
                 <p>*Tell us a little about the purpose of your trip</p>
-                <textarea className="form-control" name="purpose" />
+                <textarea className="form-control" name="purpose" required="true" />
                 <p>Arrival time</p>
                 <input className="form-control" type="time" name="arrival_time" />
                 <p>Comments</p>

@@ -59,6 +59,7 @@ def BookingSubmit(request, location_slug):
         print 'form was not valid'
         logger.debug(request.POST)
         logger.debug(form.errors)
+        raise Exception(str(form.errors.as_data()))
 
     # pass the rate for each room to the template so we can update the cost of
     # a booking in real time.
