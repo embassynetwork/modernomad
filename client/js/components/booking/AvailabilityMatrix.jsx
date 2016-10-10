@@ -43,7 +43,7 @@ export default class AvailabilityMatrix extends React.Component {
 
     return (
       <div className="availability-area">
-        <Table className="panel table-responsive availabilities-table">
+        <Table className="table-responsive availabilities-table">
           <thead>
             <tr>
               <th>Room Name</th>
