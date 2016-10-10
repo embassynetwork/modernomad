@@ -4,9 +4,8 @@ from django.core import management
 
 
 def before_all(context):
-    remote_server_url = "dfdf"
-    username = "craigambrose"
-    access_key = "c2c883bd-eee2-408c-905b-ef500694b928"
+    username = os.environ["SAUCE_USERNAME"]
+    access_key = os.environ["SAUCE_ACCESS_KEY"]
     hub_url = 'http://%s:%s@ondemand.saucelabs.com:80/wd/hub' % (username, access_key)
 
     context.browser = Browser(

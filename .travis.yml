@@ -22,3 +22,7 @@ notifications:
       - jessy@jessykate.com
     on_success: change
     on_failure: always
+addons:
+  sauce_connect:
+    username: "Your Sauce Labs username"
+    access_key: "Your Sauce Labs access key"
