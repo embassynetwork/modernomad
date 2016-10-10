@@ -34,7 +34,6 @@ export default class BookingForm extends React.Component {
   }
 
   indexLinkDetails() {
-    console.log(this.props.query.arrive)
     if (this.props.query.arrive) {
       return {
         pathname: `/locations/${this.props.routeParams.location}/stay/`,
@@ -50,9 +49,10 @@ export default class BookingForm extends React.Component {
   render() {
     const room = this.props.room
     const isDetail = true
+    const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
 
     return (
-      <form className="room-summary-panel" method="POST" action="/locations/ams/booking/submit">
+      <form className="booking-request-form" method="POST" action={submitUrl}>
         <DjangoCSRFInput />
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
@@ -71,7 +71,7 @@ export default class BookingForm extends React.Component {
                 <hr></hr>
                 <p><b>Total<span className="pull-right">$</span></b></p>
                 <p>*Tell us a little about the purpose of your trip</p>
-                <textarea className="form-control" name="purpose" />
+                <textarea className="form-control" name="purpose" required="true" />
                 <p>Arrival time</p>
                 <input className="form-control" type="time" name="arrival_time" />
                 <p>Comments</p>
@@ -80,7 +80,7 @@ export default class BookingForm extends React.Component {
               :
               <div></div>
             }
-            <button className="btn btn-primary btn-block btn-brand">Request to Book</button>
+            <button className="btn btn-primary btn-block btn-brand" id="submit-booking-request">Request to Book</button>
             <p className="text-center">Your credit card won't be charged</p>
 
           </div>
