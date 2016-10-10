@@ -81,7 +81,6 @@ export default class BookingForm extends React.Component {
               <div></div>
             }
             <button className="btn btn-primary btn-block btn-brand" id="submit-booking-request">Request to Book</button>
-            <p className="text-center">Your credit card won't be charged</p>
 
           </div>
           :

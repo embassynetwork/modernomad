@@ -39,13 +39,13 @@ export default class RoomDetail extends React.Component {
       <div className="container room-detail">
         <Link to={this.indexLinkDetails()}><i className="fa fa-chevron-left"></i> Back to Rooms</Link>
         <h1>{room.name}</h1>
-        <p className="room-summary">{room.description}</p>
         <div className="row">
           <div className="col-md-8">
-            <div className="panel room-image-panel">
+            <div className="room-image-panel">
               <img className="room-image img-responsive" src={"/media/"+room.image} />
             {/*room.img && <ImageCarousel img={room.img} />*/}
             </div>
+            <p className="room-summary">{room.description}</p>
           </div>
           <div className="col-md-4">
             <div className="panel">
