@@ -1,15 +1,28 @@
 from behave import *
 from splinter.browser import Browser
 from django.core import management
-from selenium.webdriver import Firefox
 
 
 def before_all(context):
+    remote_server_url = "dfdf"
+    username = "craigambrose"
+    access_key = "c2c883bd-eee2-408c-905b-ef500694b928"
+    hub_url = 'http://%s:%s@ondemand.saucelabs.com:80/wd/hub' % (username, access_key)
+
+    context.browser = Browser(
+        driver_name="remote",
+        url=hub_url,
+        browser='chrome',
+        platform="Mac OS X 10.9",
+        version="31",
+        name="Test of Chrome on Mac")
+
     # Unless we tell our test runner otherwise, set our default browser to PhantomJS
-    context.browser = Browser()
+    # context.browser = Browser('firefox')
+    # context.browser = Browser()
 
     # if context.config.browser:
-        # context.browser = Browser(context.config.browser)
+    #     context.browser = Browser(context.config.browser)
     # else:
     #     context.browser = Browser('phantomjs')
     # context.browser = Browser('phantomjs')
