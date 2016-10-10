@@ -8,6 +8,8 @@ install:
   - "pip install -r requirements.txt"
   - "pip install -r requirements.test.txt"
 before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
   - "cd client && npm install && cd .."
   - "cd client && webpack --config webpack.prod.config.js && cd .."
   - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
@@ -24,5 +26,5 @@ notifications:
     on_failure: always
 addons:
   sauce_connect:
-    username: "Your Sauce Labs username"
-    access_key: "Your Sauce Labs access key"
+    username: "craigambrose"
+    access_key: "c2c883bd-eee2-408c-905b-ef500694b928"

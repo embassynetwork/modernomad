@@ -4,20 +4,20 @@ from django.core import management
 
 
 def before_all(context):
-    username = "craigambrose"
-    access_key = "c2c883bd-eee2-408c-905b-ef500694b928"
-    hub_url = 'http://%s:%s@ondemand.saucelabs.com:80/wd/hub' % (username, access_key)
-
-    context.browser = Browser(
-        driver_name="remote",
-        url=hub_url,
-        browser='chrome',
-        platform="Mac OS X 10.9",
-        version="31",
-        name="Test of Chrome on Mac")
+    # username = "craigambrose"
+    # access_key = "c2c883bd-eee2-408c-905b-ef500694b928"
+    # hub_url = 'http://%s:%s@ondemand.saucelabs.com:80/wd/hub' % (username, access_key)
+    #
+    # context.browser = Browser(
+    #     driver_name="remote",
+    #     url=hub_url,
+    #     browser='chrome',
+    #     platform="Mac OS X 10.9",
+    #     version="31",
+    #     name="Test of Chrome on Mac")
 
     # Unless we tell our test runner otherwise, set our default browser to PhantomJS
-    # context.browser = Browser('firefox')
+    context.browser = Browser('firefox')
     # context.browser = Browser()
 
     # if context.config.browser:
