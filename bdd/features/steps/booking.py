@@ -46,6 +46,7 @@ def impl(context, room_name):
             break
 
     time.sleep(1)
+
     form = context.browser.find_by_css('.booking-request-form')
     print(form.html)
     context.browser.fill("purpose", "I want to have a great stay")

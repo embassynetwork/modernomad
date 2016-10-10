@@ -36,7 +36,6 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
 class RoomIndexOrDetailWithoutQuery extends React.Component {
   constructor(props) {
     super()
-    console.log('RoomIndexOrDetailWithoutQuery constructor')
   }
 
   renderSubComponent() {

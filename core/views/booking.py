@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from core.emails import send_booking_receipt, new_booking_notify
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from core.models import Booking, Use, Location, Site
 from core.forms import BookingUseForm
@@ -16,6 +17,7 @@ from core.forms import BookingUseForm
 logger = logging.getLogger(__name__)
 
 
+@ensure_csrf_cookie
 def StayComponent(request, location_slug, room_id=None):
     return render(request, 'booking.html')
 

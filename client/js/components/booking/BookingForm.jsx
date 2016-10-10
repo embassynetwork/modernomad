@@ -34,7 +34,6 @@ export default class BookingForm extends React.Component {
   }
 
   indexLinkDetails() {
-    console.log(this.props.query.arrive)
     if (this.props.query.arrive) {
       return {
         pathname: `/locations/${this.props.routeParams.location}/stay/`,
@@ -50,9 +49,10 @@ export default class BookingForm extends React.Component {
   render() {
     const room = this.props.room
     const isDetail = true
+    const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
 
     return (
-      <form className="booking-request-form" method="POST" action="/locations/ams/booking/submit">
+      <form className="booking-request-form" method="POST" action={submitUrl}>
         <DjangoCSRFInput />
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
