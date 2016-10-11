@@ -34,13 +34,13 @@
     "graphql-tag": "^0.1.14",
     "humanize-string": "^1.0.1",
     "js-cookie": "^2.1.3",
-    "lodash": "^4.16.2",
+    "lodash": "^4.16.4",
     "material-ui": "^0.16.0",
     "moment": "^2.15.1",
     "react": "^15.3.2",
     "react-addons-css-transition-group": "^15.3.2",
-    "react-apollo": "^0.5.7",
-    "react-bootstrap": "^0.30.3",
+    "react-apollo": "^0.5.8",
+    "react-bootstrap": "^0.30.5",
     "react-datepicker": "^0.30.0",
     "react-dom": "^15.3.2",
     "react-hot-loader": "^3.0.0-beta.5",
@@ -52,6 +52,6 @@
     "snakeize": "^0.1.0",
     "webpack": "^1.13.2",
     "webpack-bundle-tracker": "0.0.93",
-    "webpack-dev-server": "^1.16.1"
+    "webpack-dev-server": "^1.16.2"
   }
 }
