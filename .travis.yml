@@ -19,6 +19,5 @@ notifications:
   email:
     recipients:
       - craig@enspiral.com
-      - jessy@jessykate.com
     on_success: change
     on_failure: always
