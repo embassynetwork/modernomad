@@ -19,9 +19,9 @@ export default class BookingForm extends React.Component {
   }
 
   renderCost() {
+    const parseFormat = 'MM/DD/YYYY'
     const depart = moment(this.props.query.depart, parseFormat)
     const arrive = moment(this.props.query.arrive, parseFormat)
-    const parseFormat = 'MM/DD/YYYY'
 
     if (depart && arrive) {
       const nightRate = this.props.room.defaultRate
@@ -50,6 +50,8 @@ export default class BookingForm extends React.Component {
     const room = this.props.room
     const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
 
+    if (!this.props.networkLocation) return null;
+
     return (
       <form className="booking-request-form" method="POST" action={submitUrl}>
         <DjangoCSRFInput />
@@ -59,7 +61,10 @@ export default class BookingForm extends React.Component {
           <div className="col-xs-4"><h5 className="pull-right">Per Night</h5></div>
         </div>
         <div className="date-row">
-          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
+          <DateRangeSelector
+            onChange={this.onDateRangeChange.bind(this)}
+            maxLength={this.props.networkLocation.maxBookingDays}
+            detail={true} {...this.props.query} />
         </div>
         {this.props.datesAvailable || !this.props.query.arrive ?
           <div>

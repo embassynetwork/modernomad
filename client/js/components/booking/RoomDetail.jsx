@@ -9,7 +9,8 @@ import _ from 'lodash'
 export default class RoomDetail extends React.Component {
   static propTypes = {
     room: PropTypes.object.isRequired,
-    onFilterChange: PropTypes.func.isRequired
+    onFilterChange: PropTypes.func.isRequired,
+    networkLocation: PropTypes.object
   }
 
   hasDateQuery() {
@@ -49,7 +50,7 @@ export default class RoomDetail extends React.Component {
           </div>
           <div className="col-md-4">
             <div className="panel">
-              <BookingForm room={room} {...this.props} datesAvailable={this.roomIsAvailable()} query={this.props.query} onFilterChange={this.props.onFilterChange} />
+              <BookingForm networkLocation={this.networkLocation} room={room} {...this.props} datesAvailable={this.roomIsAvailable()} query={this.props.query} onFilterChange={this.props.onFilterChange} />
             </div>
           </div>
         </div>

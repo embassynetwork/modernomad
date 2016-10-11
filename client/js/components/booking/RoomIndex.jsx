@@ -54,7 +54,6 @@ export default class RoomIndex extends React.Component {
             onChange={this.onDateRangeChange.bind(this)}
             maxLength={this.props.networkLocation ? this.props.networkLocation.maxBookingDays : null}
             inputClass='input-lg'
-            query={this.props.query}
             {...this.props.query} />
           {/*}<div className="row room-type-row">
             <div className="col-md-2 col-sm-4"><h5>Room Type</h5></div>
