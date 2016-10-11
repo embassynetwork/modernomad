@@ -49,7 +49,7 @@ export default class RoomIndex extends React.Component {
     return (
       <div>
         <div className="date-range-row container">
-          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
+          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} maxLength={14} inputClass='input-lg' query={this.props.query} {...this.props.query} />
           {/*}<div className="row room-type-row">
             <div className="col-md-2 col-sm-4"><h5>Room Type</h5></div>
             <div className="col-md-2 col-sm-4">

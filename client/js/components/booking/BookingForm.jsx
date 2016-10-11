@@ -48,7 +48,6 @@ export default class BookingForm extends React.Component {
 
   render() {
     const room = this.props.room
-    const isDetail = true
     const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
 
     return (
@@ -60,7 +59,7 @@ export default class BookingForm extends React.Component {
           <div className="col-xs-4"><h5 className="pull-right">Per Night</h5></div>
         </div>
         <div className="date-row">
-          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} detail={isDetail} query={this.props.query} {...this.props.query} />
+          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} query={this.props.query} {...this.props.query} />
         </div>
         {this.props.datesAvailable || !this.props.query.arrive ?
           <div>
