@@ -21,7 +21,7 @@ export default class DateRangeSelector extends React.Component {
     const arrive = momentUnlessNull(props.arrive, parseFormat)
     const depart = momentUnlessNull(props.depart, parseFormat)
     const dates = {arrive: arrive, depart: depart}
-    this.state = this.constrainDateRangeByStart(dates)
+    this.state = this.constrainDateRangeByStart(dates, props.maxLength)
     if (dates.depart != depart && props.onChange) {
       setTimeout(() => {
         props.onChange(dates)
@@ -29,12 +29,27 @@ export default class DateRangeSelector extends React.Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.maxLength != nextProps.maxLength) {
+      const currentDates = this.currentDates()
+      const newDates = this.constrainDateRangeByStart(currentDates, nextProps.maxLength)
+      if (newDates != currentDates) {
+        this.setState(newDates)
+        this.props.onChange(newDates)
+      }
+    }
+  }
+
+  currentDates() {
+    return {arrive: this.state.arrive, depart: this.state.depart}
+  }
+
   changeHandler(key) {
     return (value) => {
       let newState = {}
       newState[key] = value
 
-      newState.depart = this.constrainedDepartDate(newState.arrive, newState.depart || this.state.depart)
+      newState.depart = this.constrainedDepartDate(newState.arrive, newState.depart || this.state.depart, this.props.maxLength)
 
       const combinedState = {...this.state, ...newState}
 
@@ -46,15 +61,26 @@ export default class DateRangeSelector extends React.Component {
     }
   }
 
-  constrainDateRangeByStart(dates) {
-    dates.depart = this.constrainedDepartDate(dates.arrive, dates.depart)
-    return dates
+  constrainDateRangeByStart(dates, maxLength) {
+    const newArrive = this.constrainArriveDate(dates.arrive)
+    const newDepart = this.constrainedDepartDate(newArrive, dates.depart, maxLength)
+    return {arrive: newArrive, depart: newDepart}
   }
 
-  constrainedDepartDate(newArrive, existingDepart) {
+  constrainArriveDate(arrive) {
+    if (arrive) {
+      const today = moment()
+      if (arrive < today) {
+        return today
+      }
+    }
+    return arrive
+  }
+
+  constrainedDepartDate(newArrive, existingDepart, maxLength) {
     if (newArrive) {
       const minDepartValue = this.minDepart(newArrive)
-      const maxDepartValue = this.maxDepart(newArrive)
+      const maxDepartValue = this.maxDepart(newArrive, maxLength)
 
       return this.constrainDate(existingDepart, minDepartValue, maxDepartValue)
     } else {
@@ -64,8 +90,8 @@ export default class DateRangeSelector extends React.Component {
 
   constrainDate(value, min, max) {
     if (value) {
-      if (value < min) value = min
-      if (value > max) value = max
+      if (min && value < min) value = min
+      if (max && value > max) value = max
     }
     return value
   }
@@ -75,11 +101,11 @@ export default class DateRangeSelector extends React.Component {
     return bestArrive.clone().add(1, 'days')
   }
 
-  maxDepart(currentArrive) {
-    if (!this.props.maxLength) return null
+  maxDepart(currentArrive, maxLength) {
+    if (!maxLength) return null
 
     const bestArrive = currentArrive || this.state.arrive || moment()
-    return bestArrive.clone().add(this.props.maxLength, 'days')
+    return bestArrive.clone().add(maxLength, 'days')
   }
 
   render() {
@@ -109,7 +135,7 @@ export default class DateRangeSelector extends React.Component {
             endDate={this.state.depart}
             onChange={this.changeHandler('depart')}
             minDate={this.minDepart()}
-            maxDate={this.maxDepart()}
+            maxDate={this.maxDepart(null, this.props.maxLength)}
             />
         </div>
       </div>
