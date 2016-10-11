@@ -20,7 +20,6 @@ import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.flatpages.models import FlatPage
-from uuidfield import UUIDField
 import pytz
 
 # imports for signals
@@ -1014,7 +1013,7 @@ class Booking(models.Model):
     comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
     last_msg = models.DateTimeField(blank=True, null=True)
     rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
-    uuid = UUIDField(auto=True, blank=True, null=True)  # the blank and null = True are artifacts of the migration JKS
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)  # the blank and null = True are artifacts of the migration JKS
     bill = models.OneToOneField(BookingBill, null=True, related_name="booking")
     suppressed_fees = models.ManyToManyField(Fee, blank=True)
 

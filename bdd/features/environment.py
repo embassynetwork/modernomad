@@ -2,6 +2,7 @@ from behave import *
 from splinter.browser import Browser
 from django.core import management
 
+
 def before_all(context):
     # Unless we tell our test runner otherwise, set our default browser to PhantomJS
     # if context.config.browser:
@@ -16,6 +17,7 @@ def before_all(context):
     if context.browser.driver_name == 'PhantomJS':
         context.browser.driver.set_window_size(1280, 1024)
 
+
 def before_scenario(context, scenario):
     # Reset the database before each scenario
     # This means we can create, delete and edit objects within an
@@ -26,6 +28,7 @@ def before_scenario(context, scenario):
     # At this stage we can (optionally) mock additional data to setup in the database.
     # For example, if we know that all of our tests require a 'SiteConfig' object,
     # we could create it here.
+
 
 def after_all(context):
     # Quit our browser once we're done!
