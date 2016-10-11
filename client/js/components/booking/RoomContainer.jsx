@@ -21,6 +21,7 @@ export default class RoomContainer extends React.Component {
       rooms={this.props.rooms}
       routeParams={this.props.routeParams}
       query={this.props.location.query}
+      networkLocation={this.props.networkLocation}
       onFilterChange={this.reFilter.bind(this)} />
   }
 }

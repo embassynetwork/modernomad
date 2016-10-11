@@ -6,6 +6,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from core.models import Use, Location
 from django.contrib.auth.models import User
 from django.utils import timezone
+
 from .users import UserNode
 from .events import EventNode
 from gather.models import Event

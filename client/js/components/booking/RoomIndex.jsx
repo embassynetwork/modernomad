@@ -7,7 +7,8 @@ import { FormGroup, Checkbox, Button, Nav, NavItem } from 'react-bootstrap';
 export default class RoomIndex extends React.Component {
   static propTypes = {
     rooms: PropTypes.array.isRequired,
-    onFilterChange: PropTypes.func.isRequired
+    onFilterChange: PropTypes.func.isRequired,
+    networkLocation: PropTypes.object
   }
 
   constructor(props) {
@@ -49,7 +50,12 @@ export default class RoomIndex extends React.Component {
     return (
       <div>
         <div className="date-range-row container">
-          <DateRangeSelector onChange={this.onDateRangeChange.bind(this)} maxLength={14} inputClass='input-lg' query={this.props.query} {...this.props.query} />
+          <DateRangeSelector
+            onChange={this.onDateRangeChange.bind(this)}
+            maxLength={this.props.networkLocation ? this.props.networkLocation.maxBookingDays : null}
+            inputClass='input-lg'
+            query={this.props.query}
+            {...this.props.query} />
           {/*}<div className="row room-type-row">
             <div className="col-md-2 col-sm-4"><h5>Room Type</h5></div>
             <div className="col-md-2 col-sm-4">

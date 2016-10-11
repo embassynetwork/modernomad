@@ -10,22 +10,29 @@ import Loader from '../generic/Loader'
 
 const resourcesQuery = gql`
 query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depart: DateTime!) {
-  allResources(location_Slug: $locationSlug) {
+  allLocations(slug: $locationSlug) {
     edges {
       node {
-        id
-        rid
-        name
-        description
-        summary
-        image
-        defaultRate
-        availabilities(arrive: $arrive, depart: $depart) {
-          date
-          quantity
-        }
-        location {
-          id
+        maxBookingDays
+        resources {
+          edges {
+            node {
+              id
+              rid
+              name
+              description
+              summary
+              image
+              defaultRate
+              availabilities(arrive: $arrive, depart: $depart) {
+                date
+                quantity
+              }
+              location {
+                id
+              }
+            }
+          }
         }
       }
     }
@@ -56,7 +63,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
         return null;
       }
     } else {
-      return <RoomContainer {...this.props} rooms={this.allResources()} />
+      return <RoomContainer {...this.props} networkLocation={this.locationData()} rooms={this.allResources()} />
     }
   }
 
@@ -68,10 +75,19 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
     })
   }
 
+  locationData() {
+    const queryResults = this.props.data.allLocations
+    if (queryResults && queryResults.edges.length > 0) {
+      return queryResults.edges[0].node
+    } else {
+      return null
+    }
+  }
+
   allResources() {
-    const queryResults = this.props.data.allResources
-    if (queryResults) {
-      return _.map(queryResults.edges, 'node')
+    const location = this.locationData()
+    if (location && location.resources) {
+      return _.map(location.resources.edges, 'node')
     } else {
       return []
     }
