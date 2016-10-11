@@ -17,7 +17,11 @@ export default class DateRangeSelector extends React.Component {
   constructor(props) {
     super(props)
     const parseFormat = 'MM/DD/YYYY'
-    this.state = {arrive: momentUnlessNull(props.arrive, parseFormat), depart: momentUnlessNull(props.depart, parseFormat)}
+
+    const arrive = momentUnlessNull(props.arrive, parseFormat)
+    const depart = momentUnlessNull(props.depart, parseFormat)
+    const dates = {arrive: arrive, depart: depart}
+    this.state = this.constrainDateRangeByStart(dates)
   }
 
   changeHandler(key) {
@@ -25,13 +29,7 @@ export default class DateRangeSelector extends React.Component {
       let newState = {}
       newState[key] = value
 
-      if (newState.arrive && this.state.depart) {
-        const minDepartValue = this.minDepart(newState.arrive)
-        const maxDepartValue = this.maxDepart(newState.arrive)
-
-        if (this.state.depart < minDepartValue) newState.depart = minDepartValue
-        if (this.state.depart > maxDepartValue) newState.depart = maxDepartValue
-      }
+      newState.depart = this.constrainedDepartDate(newState.arrive, newState.depart || this.state.depart)
 
       const combinedState = {...this.state, ...newState}
 
@@ -41,6 +39,30 @@ export default class DateRangeSelector extends React.Component {
         this.props.onChange(combinedState)
       }
     }
+  }
+
+  constrainDateRangeByStart(dates) {
+    dates.depart = this.constrainedDepartDate(dates.arrive, dates.depart)
+    return dates
+  }
+
+  constrainedDepartDate(newArrive, existingDepart) {
+    if (newArrive) {
+      const minDepartValue = this.minDepart(newArrive)
+      const maxDepartValue = this.maxDepart(newArrive)
+
+      return this.constrainDate(existingDepart, minDepartValue, maxDepartValue)
+    } else {
+      return existingDepart
+    }
+  }
+
+  constrainDate(value, min, max) {
+    if (value) {
+      if (value < min) value = min
+      if (value > max) value = max
+    }
+    return value
   }
 
   minDepart(currentArrive) {
@@ -89,6 +111,3 @@ export default class DateRangeSelector extends React.Component {
     )
   }
 }
-
-// minDate={this.minDepart()}
-// maxDate={this.maxDepart()}
