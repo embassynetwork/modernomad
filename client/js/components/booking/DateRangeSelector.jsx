@@ -22,6 +22,11 @@ export default class DateRangeSelector extends React.Component {
     const depart = momentUnlessNull(props.depart, parseFormat)
     const dates = {arrive: arrive, depart: depart}
     this.state = this.constrainDateRangeByStart(dates)
+    if (dates.depart != depart && props.onChange) {
+      setTimeout(() => {
+        props.onChange(dates)
+      }, 0)
+    }
   }
 
   changeHandler(key) {
