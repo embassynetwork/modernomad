@@ -5,6 +5,8 @@ import ImageCarousel from './ImageCarousel'
 import { Link } from 'react-router'
 import { Panel } from 'react-bootstrap';
 import DjangoCSRFInput from '../generic/DjangoCSRFInput'
+import BookingDisplay from './BookingDisplay'
+import { Booking } from '../../models/Booking'
 
 
 export default class BookingForm extends React.Component {
@@ -30,10 +32,12 @@ export default class BookingForm extends React.Component {
     const arrive = moment(this.props.query.arrive, parseFormat)
 
     if (depart && arrive) {
-      const nightRate = this.props.room.defaultRate
-      const nights = depart.diff(arrive, 'days')
-      const totalCost = nightRate * nights
-      return <p>${nightRate} * {nights} nights<span className="pull-right">${totalCost}</span></p>
+      const booking = new Booking({
+        nightRate: this.props.room.defaultRate,
+        arrive: arrive,
+        depart: depart
+      })
+      return <BookingDisplay booking={booking} />
     } else {
       return null;
     }
@@ -81,9 +85,6 @@ export default class BookingForm extends React.Component {
             {this.props.datesAvailable ?
               <div>
                 {this.renderCost()}
-                <p>SF Hotel Taxes <span className="pull-right">$</span></p>
-                <hr></hr>
-                <p><b>Total<span className="pull-right">$</span></b></p>
                 <p>*Tell us a little about the purpose of your trip</p>
                 <textarea className="form-control" name="purpose" required="true" />
                 <p>
