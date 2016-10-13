@@ -1,7 +1,7 @@
 import React from 'react'
 import _ from 'lodash'
 import { Booking } from '../../models/Booking'
-import Money from 'react-money-component';
+import MoneyDisplay from 'react-money-component';
 
 function LineItemDisplay(props) {
   const lineItem = props.lineItem
@@ -10,7 +10,7 @@ function LineItemDisplay(props) {
     <p>
       {lineItem.description()}
       <span className="pull-right">
-        <Money cents={lineItem.amount() * 100} currency="USD" />
+        <MoneyDisplay cents={lineItem.amount() * 100} currency="USD" />
       </span>
     </p>
   )

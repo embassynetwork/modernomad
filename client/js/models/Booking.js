@@ -1,3 +1,5 @@
+import Money from 'js-money'
+
 function roundToTwo(num) {
   return +(Math.round(num + "e+2")  + "e-2");
 }
@@ -11,16 +13,16 @@ export class LineItem {
 export class BaseLineItem extends LineItem {
   constructor(props) {
     super(props)
-    this.nightRate = props.nightRate
+    this.nightRate = Money.fromDecimal(props.nightRate, 'USD')
     this.nights = props.nights
   }
 
   description() {
-    return `${this.nightRate} * ${this.nights} nights`
+    return `$${this.nightRate} * ${this.nights} nights`
   }
 
   amount() {
-    return roundToTwo(this.nightRate * this.nights)
+    return this.nightRate.multiply(this.nights)
   }
 }
 
