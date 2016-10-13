@@ -3,6 +3,7 @@ import moment from 'moment'
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import { Link } from 'react-router'
+import { Panel } from 'react-bootstrap';
 import DjangoCSRFInput from '../generic/DjangoCSRFInput'
 
 
@@ -12,6 +13,11 @@ export default class BookingForm extends React.Component {
     room: PropTypes.object.isRequired,
     datesAvailable: PropTypes.bool.isRequired,
     onFilterChange: PropTypes.func.isRequired
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = {open: false}
   }
 
   onDateRangeChange(dates) {
@@ -46,6 +52,10 @@ export default class BookingForm extends React.Component {
     }
   }
 
+  handlePanel() {
+     this.setState({ open: !this.state.open })
+  }
+
   render() {
     const room = this.props.room
     const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
@@ -76,10 +86,17 @@ export default class BookingForm extends React.Component {
                 <p><b>Total<span className="pull-right">$</span></b></p>
                 <p>*Tell us a little about the purpose of your trip</p>
                 <textarea className="form-control" name="purpose" required="true" />
-                <p>Arrival time</p>
-                <input className="form-control" name="arrival_time" />
-                <p>Comments</p>
-                <textarea className="form-control" name="comments" />
+                <p>
+                  <a className="btn-link" onClick={this.handlePanel.bind(this)}>
+                    <span className={(this.state.open ? "fa fa-chevron-down" : "fa fa-chevron-right")}></span> Optional fields
+                  </a>
+                </p>
+                <Panel collapsible expanded={this.state.open} className="optional-fields">
+                  <p>Arrival time</p>
+                  <input className="form-control" name="arrival_time" />
+                  <p>Comments</p>
+                  <textarea className="form-control" name="comments" />
+                </Panel>
               </div>
               :
               <div></div>
