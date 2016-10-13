@@ -1596,15 +1596,15 @@ label.light {
 .room-card {
   margin: auto;
 	max-width: 389px;
-}
+  .panel {
+    /*height: 400px;*/
+    height: 330px;
 
-.room-card .panel {
-  /*height: 400px;*/
-  height: 330px;
-}
-
-.room-summary {
-	margin: 20px 0 40px 0;
+    h3 {
+      height: 26px;
+      overflow: hidden;
+    }
+  }
 }
 
 .room-image {
@@ -1613,6 +1613,9 @@ label.light {
   border: 1px solid #ddd;
 }
 
+.room-summary {
+  margin: 20px 0 40px 0;
+}
 .room-card-container {
   background-color: #f5f5f5;
   min-height: 720px;
