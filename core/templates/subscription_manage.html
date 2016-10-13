@@ -3,139 +3,140 @@
 
 {% block content %}
 
-<div id="spinner">
-    <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
+<div class="container">
+  <div id="spinner">
+      <img src="{% static 'img/ajax-loader-drip.gif' %}" alt="Loading..."/>
+  </div>
+
+  {% include "snippets/manage-email-modal.html" %}
+
+  <div class="row" id="booking-nav">
+      <a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
+  </div>
+
+  <div class="row">
+
+      <div class="col-md-3">
+          {% if s.user.profile.image %}
+          <div class="img-polaroid">
+              <img class="profile-page-img" src="{{ MEDIA_URL }}{{ s.user.profile.image|default:'data/avatars/default.jpg' }}" />
+          </div>
+          {% endif %}
+      </div>
+
+
+      <div class="col-md-7">
+
+          {% include "snippets/messages.html" %}
+
+          <h1 class="res-field field">
+              {{ s.user.first_name|title }} {{s.user.last_name|title }}
+              <button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
+          </h1>
+
+          <div id="booking-details">
+              <h3>
+                  Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }}
+                  <span class="pull-right">Base Value: ${{ s.price }}</span>
+              </h3>
+              {% if s.description %}
+              <div class="row">
+                  <div class="col-sm-2"><strong>Description</strong></div><div class="col-sm-10">{{ s.description }}</div>
+              </div>
+              {% endif %}
+          </div>
+
+      </div>
+
+  </div>
+
+  <!-- new row -->
+  <hr>
+
+
+  <div class="row" id="sub-manage-page-wrapper" class="bottom-pad-thirty">
+
+      <div class="col-md-3">
+          <ul class="nav nav-pills nav-stacked" role="tablist">
+              <li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h5>Summary</h5></a></li>
+              <li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h5>Edit</h5></a></li>
+              <hr>
+              {% if s.bills.all %}
+                  {% for bill in s.bills.all %}
+                  <li> <a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill">
+                      <h5>
+                          {% if bill.is_paid %}
+                              <i class="text-success fa fa-check-circle-o"></i>
+                          {% elif bill.total_paid > 0 %}
+                              <i class="text-warning fa fa-exclamation-circle"></i>
+                          {% else %}
+                              <i class="text-danger fa fa-exclamation-circle"></i>
+                          {% endif %}
+                          Bill {{ bill.period_start}}
+                      </h5>
+                  </a>
+                  {% endfor %}
+              {% endif %}
+
+          </ul>
+      </div>
+
+      <div class="col-md-7">
+          <div class="tab-content">
+
+              <div role="tabpanel" class="tab-pane active" id="subscription-manage-summary">
+                  {% include "snippets/manage-subscription-summary.html" %}
+              </div>
+
+              <div role="tabpanel" class="tab-pane" id="subscription-manage-edit">
+                  {% include "snippets/subscription-manage-edit.html" %}
+              </div>
+
+              {% for bill in s.bills.all %}
+              <div role="tabpanel" class="tab-pane" id="subscription-bill-details-{{ bill.id}}">
+
+                  <div class="panel panel-default">
+                      <div class="panel-heading row-spacer">
+                          <h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details (#{{bill.id}})
+                          {% if bill.is_paid %}
+                              <form class="subscription-send-receipt manage-button-spacer res-action" method=POST action="{% url 'subscription_send_receipt' location.slug s.id bill.id %}" >
+                                  {% csrf_token %}
+                                  <input class="btn-default btn" type="submit" value="Email Receipt">
+                              </form>
+                          {% endif %}
+                          </h3>
+                          <div>
+                              {% if not bill.is_paid %}
+                                  {% include "snippets/manage-charge-bill.html" %}
+                              {% endif %}
+                          </div>
+
+                      </div>
+                      <div class="panel-body">
+                          {% include "snippets/manage-page-bill-details.html" %}
+                      </div>
+                  </div>
+
+                  <h3 class="row-spacer clickable text-muted" onclick="toggleBillCustomize({{bill.id}}); return false;" id="bill-customize-link-{{bill.id}}"><i class="fa fa-caret-right" aria-hidden="true"></i> Manage Payments and Custom Fees</h3>
+                  <div id="bill-customize-area-{{bill.id}}" class="hidden bill-customize-area">
+                      {% include "snippets/manage-page-payment-details.html" %}
+                      {% if bill.is_paid %}
+                          <p>This bill has been paid and cannot be modified</p>
+                      {% else %}
+                          {% include "snippets/add-bill-line-items.html" %}
+                      {% endif %}
+                  </div>
+              </div>
+
+              {% endfor %}
+
+          </div>
+
+      </div> <!-- end col-md-7 -->
+  </div>
+
+  {% include "snippets/manage-page-confirm-dialogs.html" %}
 </div>
-
-{% include "snippets/manage-email-modal.html" %}
-
-<div class="row" id="booking-nav">
-    <a href="{% url 'subscriptions_manage_list' location.slug %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to Subscriptions</a>
-</div>
-
-<div class="row">
-
-    <div class="col-md-3">
-        {% if s.user.profile.image %}
-        <div class="img-polaroid">
-            <img class="profile-page-img" src="{{ MEDIA_URL }}{{ s.user.profile.image|default:'data/avatars/default.jpg' }}" />
-        </div>
-        {% endif %}
-    </div>
-
-
-    <div class="col-md-7">
-
-        {% include "snippets/messages.html" %}
-
-        <h1 class="res-field field">
-            {{ s.user.first_name|title }} {{s.user.last_name|title }}
-            <button id="email-user-button" class="btn btn-default" type="button" data-target="#emailModal" data-toggle="modal">Email this User</button>
-        </h1>
-
-        <div id="booking-details">
-            <h3>
-                Subscription {{ s.start_date }} - {{ s.end_date|default:"ongoing" }}
-                <span class="pull-right">Base Value: ${{ s.price }}</span>
-            </h3>
-            {% if s.description %}
-            <div class="row">
-                <div class="col-sm-2"><strong>Description</strong></div><div class="col-sm-10">{{ s.description }}</div>
-            </div>
-            {% endif %}
-        </div>
-
-    </div>
-
-</div>
-
-<!-- new row -->
-<hr>
-
-
-<div class="row" id="sub-manage-page-wrapper" class="bottom-pad-thirty">
-
-    <div class="col-md-3">
-        <ul class="nav nav-pills nav-stacked" role="tablist">
-            <li class="active"><a role="tab" href="#subscription-manage-summary" data-toggle="pill"><h5>Summary</h5></a></li>
-            <li><a role="tab" href="#subscription-manage-edit" data-toggle="pill"><h5>Edit</h5></a></li>
-            <hr>
-            {% if s.bills.all %}
-                {% for bill in s.bills.all %}
-                <li> <a role="tab" href="#subscription-bill-details-{{bill.id}}" data-toggle="pill">
-                    <h5>
-                        {% if bill.is_paid %}
-                            <i class="text-success fa fa-check-circle-o"></i>
-                        {% elif bill.total_paid > 0 %}
-                            <i class="text-warning fa fa-exclamation-circle"></i>
-                        {% else %}
-                            <i class="text-danger fa fa-exclamation-circle"></i>
-                        {% endif %}
-                        Bill {{ bill.period_start}}
-                    </h5>
-                </a>
-                {% endfor %}
-            {% endif %}
-
-        </ul>
-    </div>
-
-    <div class="col-md-7">
-        <div class="tab-content">
-
-            <div role="tabpanel" class="tab-pane active" id="subscription-manage-summary">
-                {% include "snippets/manage-subscription-summary.html" %}
-            </div>
-
-            <div role="tabpanel" class="tab-pane" id="subscription-manage-edit">
-                {% include "snippets/subscription-manage-edit.html" %}
-            </div>
-
-            {% for bill in s.bills.all %}
-            <div role="tabpanel" class="tab-pane" id="subscription-bill-details-{{ bill.id}}">
-
-                <div class="panel panel-default">
-                    <div class="panel-heading row-spacer">
-                        <h3 class="panel-title row-spacer">{{ bill.period_start }} Bill Details (#{{bill.id}})
-                        {% if bill.is_paid %}
-                            <form class="subscription-send-receipt manage-button-spacer res-action" method=POST action="{% url 'subscription_send_receipt' location.slug s.id bill.id %}" >
-                                {% csrf_token %}
-                                <input class="btn-default btn" type="submit" value="Email Receipt">
-                            </form>
-                        {% endif %}
-                        </h3>
-                        <div>
-                            {% if not bill.is_paid %}
-                                {% include "snippets/manage-charge-bill.html" %}
-                            {% endif %}
-                        </div>
-
-                    </div>
-                    <div class="panel-body">
-                        {% include "snippets/manage-page-bill-details.html" %}
-                    </div>
-                </div>
-
-                <h3 class="row-spacer clickable text-muted" onclick="toggleBillCustomize({{bill.id}}); return false;" id="bill-customize-link-{{bill.id}}"><i class="fa fa-caret-right" aria-hidden="true"></i> Manage Payments and Custom Fees</h3>
-                <div id="bill-customize-area-{{bill.id}}" class="hidden bill-customize-area">
-                    {% include "snippets/manage-page-payment-details.html" %}
-                    {% if bill.is_paid %}
-                        <p>This bill has been paid and cannot be modified</p>
-                    {% else %}
-                        {% include "snippets/add-bill-line-items.html" %}
-                    {% endif %}
-                </div>
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-    </div> <!-- end col-md-7 -->
-</div>
-
-{% include "snippets/manage-page-confirm-dialogs.html" %}
-
 {% endblock %}
 
 {% block extrajs %}

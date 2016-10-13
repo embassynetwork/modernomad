@@ -4,26 +4,26 @@
 
 {% block content %}
 
-{% include "snippets/messages.html" %}
+<div class="container">
+  {% include "snippets/messages.html" %}
 
 
-<!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-body center">
-        <p class="para-padding">
-            Share this link with a 3rd party if they are submitting payment for you.
-        </p>
-        <p class="bg-warning para-padding">
-        <a target="_blank" href="https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}">https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}</a>
-        </p>
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-body center">
+          <p class="para-padding">
+              Share this link with a 3rd party if they are submitting payment for you.
+          </p>
+          <p class="bg-warning para-padding">
+          <a target="_blank" href="https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}">https://{{domain}}{% url 'booking_payment' location.slug booking.uuid %}</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="container">
   <div class="row {% if booking.use.status == 'canceled' %}greyed-out{% endif %}">
 
       {% if booking.use.status == 'canceled' %}
