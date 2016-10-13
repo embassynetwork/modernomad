@@ -1,11 +1,19 @@
 import React from 'react'
 import _ from 'lodash'
-import { Booking } from '../..//models/Booking'
+import { Booking } from '../../models/Booking'
+import Money from 'react-money-component';
 
 function LineItemDisplay(props) {
   const lineItem = props.lineItem
 
-  return <p>{lineItem.description()}<span className="pull-right">${lineItem.amount()}</span></p>
+  return (
+    <p>
+      {lineItem.description()}
+      <span className="pull-right">
+        <Money cents={lineItem.amount() * 100} currency="USD" />
+      </span>
+    </p>
+  )
 }
 
 export default function BookingDisplay(props) {

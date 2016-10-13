@@ -39,4 +39,8 @@ export class Booking {
       this.baseItem
     ]
   }
+
+  totalAmount() {
+    this.baseItem.amount()
+  }
 }
