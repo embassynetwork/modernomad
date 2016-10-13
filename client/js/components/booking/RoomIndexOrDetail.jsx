@@ -14,7 +14,7 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
     edges {
       node {
         maxBookingDays
-        fees(paidByHouse: true) {
+        fees(paidByHouse: false) {
           id
           description
           percentage

@@ -33,9 +33,15 @@ export default function BookingDisplay(props) {
   return (
     <div>
       {lines}
-      <p>SF Hotel Taxes <span className="pull-right">$</span></p>
       <hr></hr>
-      <p><b>Total<span className="pull-right">$</span></b></p>
+      <p>
+        <b>
+          Total
+          <span className="pull-right">
+            <MoneyDisplay money={booking.totalAmount()} />
+          </span>
+        </b>
+      </p>
     </div>
   )
 }

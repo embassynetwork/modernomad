@@ -8,6 +8,14 @@ export class LineItem {
   constructor(props) {
     this.id = props.id
   }
+
+  description() {
+    return 'unknown'
+  }
+
+  amount() {
+    return Money.fromDecimal(0.0, 'USD')
+  }
 }
 
 export class BaseLineItem extends LineItem {
@@ -27,6 +35,24 @@ export class BaseLineItem extends LineItem {
 }
 
 
+export class FeeLineItem extends LineItem {
+  constructor(props) {
+    super(props)
+    this.fee = props.fee
+    this.previousTotal = props.previousTotal
+    this.id = props.fee.id
+  }
+
+  description() {
+    return this.fee.description
+  }
+
+  amount() {
+    return this.previousTotal.multiply(this.fee.percentage)
+  }
+}
+
+
 export class Booking {
   constructor(props) {
     this.baseItem = new BaseLineItem({
@@ -34,15 +60,36 @@ export class Booking {
       nightRate: props.nightRate,
       nights: props.depart.diff(props.arrive, 'days')
     })
+    this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
   }
 
   lineItems() {
     return [
-      this.baseItem
+      this.baseItem,
+      ...this.feeItems
     ]
   }
 
   totalAmount() {
-    this.baseItem.amount()
+    return this._sumAmounts(this.lineItems())
+  }
+
+  _sumAmounts(lineItems) {
+    var result = null
+    lineItems.forEach((item) => {
+      const itemAmount = item.amount()
+      result = result ? result.add(itemAmount) : itemAmount
+    })
+    return result
+  }
+
+  _buildFeeItems(fees, baseAmount) {
+    var runningTotal = baseAmount
+
+    return _.map(fees, (fee) => {
+      var item = new FeeLineItem({fee: fee, previousTotal: runningTotal})
+      runningTotal = runningTotal.add(item.amount())
+      return item
+    })
   }
 }

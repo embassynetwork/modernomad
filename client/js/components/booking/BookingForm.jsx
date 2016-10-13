@@ -35,7 +35,8 @@ export default class BookingForm extends React.Component {
       const booking = new Booking({
         nightRate: this.props.room.defaultRate,
         arrive: arrive,
-        depart: depart
+        depart: depart,
+        fees: this.props.networkLocation.fees
       })
       return <BookingDisplay booking={booking} />
     } else {
