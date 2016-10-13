@@ -1,17 +1,30 @@
-from graphene import AbstractType, Field, Node, List
+from graphene import AbstractType, Field, Node, List, Boolean
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.models import Location
+from core.models import Location, Fee, LocationFee
 from .resources import ResourceNode
 
+
+class FeeNode(DjangoObjectType):
+    class Meta:
+        model = Fee
+        interfaces = (Node, )
+
+
 class LocationNode(DjangoObjectType):
-    # resources = List(lambda: ResourceNode)
+    fees = List(lambda: FeeNode, paid_by_house=Boolean())
 
     class Meta:
         model = Location
         interfaces = (Node, )
         filter_fields = ['slug']
+
+    def resolve_fees(self, args, *_):
+        query = Fee.objects.filter(locationfee__location=self)
+        query = query.filter(**args)
+
+        return query
 
 
 class Query(AbstractType):

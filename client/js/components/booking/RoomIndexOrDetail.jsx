@@ -14,6 +14,12 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
     edges {
       node {
         maxBookingDays
+        fees(paidByHouse: true) {
+          id
+          description
+          percentage
+          paidByHouse
+        }
         resources {
           edges {
             node {
