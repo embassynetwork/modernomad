@@ -33,7 +33,7 @@ export default class DateRangeSelector extends React.Component {
     if (this.props.maxLength != nextProps.maxLength) {
       const currentDates = this.currentDates()
       const newDates = this.constrainDateRangeByStart(currentDates, nextProps.maxLength)
-      if (newDates != currentDates) {
+      if (newDates.arrive != currentDates.arrive || newDates.depart != currentDates.depart) {
         this.setState(newDates)
         this.props.onChange(newDates)
       }

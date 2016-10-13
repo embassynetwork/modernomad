@@ -39,7 +39,7 @@
     "moment": "^2.15.1",
     "react": "^15.3.2",
     "react-addons-css-transition-group": "^15.3.2",
-    "react-apollo": "^0.5.8",
+    "react-apollo": "^0.5.9",
     "react-bootstrap": "^0.30.5",
     "react-datepicker": "^0.30.0",
     "react-dom": "^15.3.2",
