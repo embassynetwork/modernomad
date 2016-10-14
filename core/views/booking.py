@@ -166,7 +166,7 @@ def BookingDetail(request, booking_id, location_slug):
 def BookingReceipt(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = get_object_or_404(Booking, id=booking_id)
-    if request.user != booking.user or location != booking.use.location:
+    if request.user != booking.use.user or location != booking.use.location:
         if not request.user.is_staff:
             return HttpResponseRedirect("/404")
 
@@ -174,7 +174,7 @@ def BookingReceipt(request, location_slug, booking_id):
     htmltext = get_template('emails/receipt.html')
     c = Context({
         'today': timezone.localtime(timezone.now()),
-        'user': booking.user,
+        'user': booking.use.user,
         'location': booking.use.location,
         'booking': booking,
         'booking_url': "https://" + Site.objects.get_current().domain + booking.get_absolute_url()
@@ -271,13 +271,13 @@ def BookingConfirm(request, booking_id, location_slug):
     booking = Booking.objects.get(id=booking_id)
     if not (
         request.user.is_authenticated() and
-        request.user == booking.user and
+        request.user == booking.use.user and
         request.method == "POST" and
         booking.is_approved()
     ):
         return HttpResponseRedirect("/")
 
-    if not booking.user.profile.customer_id:
+    if not booking.use.user.profile.customer_id:
         messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your booking.')
     else:
         try:
@@ -293,13 +293,13 @@ def BookingConfirm(request, booking_id, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                'Thank you! Your payment has been received and a receipt emailed to you at %s' % booking.user.email)
+                'Thank you! Your payment has been received and a receipt emailed to you at %s' % booking.use.user.email)
         except stripe.CardError, e:
             messages.add_message(
                 request,
                 messages.WARNING,
                 'Drat, it looks like there was a problem with your card: %s. Please add a different card on your ' +
-                '<a href="/people/%s/edit/">profile</a>.' % (booking.user.username, e)
+                '<a href="/people/%s/edit/">profile</a>.' % (booking.use.user.username, e)
             )
 
     return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking.id)))
@@ -310,13 +310,13 @@ def BookingDelete(request, booking_id, location_slug):
     booking = Booking.objects.get(id=booking_id)
     if (
         request.user.is_authenticated() and
-        request.user == booking.user and
+        request.user == booking.use.user and
         request.method == "POST"
     ):
         booking.cancel()
 
         messages.add_message(request, messages.INFO, 'Your booking has been cancelled.')
-        username = booking.user.username
+        username = booking.use.user.username
         return HttpResponseRedirect("/people/%s" % username)
 
     else:
