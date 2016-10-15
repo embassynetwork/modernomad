@@ -541,7 +541,7 @@ def occupancy(request, location_slug):
                     total_owed = u.booking.bill.total_owed()
 
         person_nights_data.append({
-            'booking': u,
+            'booking': u.booking,
             'nights_this_month': nights_this_month,
             'room': u.resource.name,
             'rate': rate,

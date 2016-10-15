@@ -101,8 +101,8 @@
   {% for item in data %}
       <div>
       <p>
-          {{ item.booking.user.first_name|title }} {{ item.booking.user.last_name|title }},
-          <a href="{{item.booking.get_absolute_url}}">{{item.booking.arrive}} - {{item.booking.depart}}</a>.
+          {{ item.booking.use.user.first_name|title }} {{ item.booking.use.user.last_name|title }},
+          <a href="{{item.booking.get_absolute_url}}">{{item.booking.use.arrive}} - {{item.booking.use.depart}}</a>.
           {{ item.nights_this_month }} nights during this month @ ${{item.rate|floatformat:2|intcomma }} ({{item.room}}) =
           {% if item.unpaid %}
               <span class="red-text">
