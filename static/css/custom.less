@@ -16,7 +16,6 @@ h1, h2, h3 {
 }
 
 .form-control {
-  background-color: transparent;
   border-radius: 2px;
 }
 
@@ -1605,6 +1604,8 @@ label.light {
     h3 {
       height: 26px;
       overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }
@@ -1685,6 +1686,7 @@ label.light {
       background-color: #f5f5f5;
       input {
         margin-bottom: 4px;
+        background-color: transparent;
       }
     }
     p {
