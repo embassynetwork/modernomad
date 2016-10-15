@@ -44,7 +44,7 @@ export class FeeLineItem extends LineItem {
   }
 
   description() {
-    return this.fee.description
+    return `${this.fee.description} (${this.fee.percentage*100}%)`
   }
 
   amount() {
