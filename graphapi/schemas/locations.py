@@ -14,6 +14,7 @@ class FeeNode(DjangoObjectType):
 
 class LocationNode(DjangoObjectType):
     fees = List(lambda: FeeNode, paid_by_house=Boolean())
+    resources = List(lambda: ResourceNode, has_future_capacity=Boolean())
 
     class Meta:
         model = Location
@@ -25,6 +26,15 @@ class LocationNode(DjangoObjectType):
         query = query.filter(**args)
 
         return query
+
+    def resolve_resources(self, args, *_):
+        if args.get('has_future_capacity', False):
+            resources = self.rooms_with_future_capacity()
+        else:
+            resources = self.resources.all()
+        return resources
+            
+        
 
 
 class Query(AbstractType):

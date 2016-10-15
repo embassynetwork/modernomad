@@ -20,24 +20,20 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
           percentage
           paidByHouse
         }
-        resources {
-          edges {
-            node {
-              id
-              rid
-              name
-              description
-              summary
-              image
-              defaultRate
-              availabilities(arrive: $arrive, depart: $depart) {
-                date
-                quantity
-              }
-              location {
-                id
-              }
-            }
+        resources(hasFutureCapacity: true) {
+          id
+          rid
+          name
+          description
+          summary
+          image
+          defaultRate
+          availabilities(arrive: $arrive, depart: $depart) {
+            date
+            quantity
+          }
+          location {
+            id
           }
         }
       }
@@ -93,7 +89,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
   allResources() {
     const location = this.locationData()
     if (location && location.resources) {
-      return _.map(location.resources.edges, 'node')
+      return location.resources
     } else {
       return []
     }
