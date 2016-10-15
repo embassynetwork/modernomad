@@ -47,6 +47,7 @@
     "react-hot-loader": "^3.0.0-beta.6",
     "react-loader-advanced": "^1.4.1",
     "react-money-component": "^1.4.6",
+    "react-nl2br": "^0.2.0",
     "react-redux": "^4.4.5",
     "react-router": "^2.8.1",
     "react-tap-event-plugin": "^1.0.0",

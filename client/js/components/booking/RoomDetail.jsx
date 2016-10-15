@@ -5,6 +5,7 @@ import ImageCarousel from './ImageCarousel'
 import BookingForm from './BookingForm'
 import { Link } from 'react-router'
 import _ from 'lodash'
+import nl2br from 'react-nl2br'
 
 export default class RoomDetail extends React.Component {
   static propTypes = {
@@ -46,7 +47,7 @@ export default class RoomDetail extends React.Component {
               <img className="room-image img-responsive" src={"/media/"+room.image} />
             {/*room.img && <ImageCarousel img={room.img} />*/}
             </div>
-            <p className="room-summary">{room.description}</p>
+            <p className="room-summary">{nl2br(room.description)}</p>
           </div>
           <div className="col-md-4">
             <div className="panel">
