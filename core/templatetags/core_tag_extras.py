@@ -9,18 +9,18 @@ register = template.Library()
 @register.filter(name='split')
 @stringfilter
 def split(value, arg):
-	''' split the string 'value' on all occurences of 'arg' '''
-	return value.split(arg) 
+    ''' split the string 'value' on all occurences of 'arg' '''
+    return value.split(arg) 
 
 
 @register.filter
 def subsets_size(value, set_size):
     ''' Breaks up a list into subsets (lists) of size <set_size>, with the last set
-	containing the remainder if less than set_size. use like so:
-		{% for subset in coming_month|subsets_size: 6 %}
-		...
-		{% endfor %} 
-	'''
+    containing the remainder if less than set_size. use like so:
+        {% for subset in coming_month|subsets_size: 6 %}
+        ...
+        {% endfor %} 
+    '''
 
     set_len = int(set_size)
     i = iter(value)

@@ -2,16 +2,18 @@ from django.contrib.auth.models import User
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
-import os, datetime
+import os
+import datetime
 from django.conf import settings
 from django.template import Template, Context
-from core.models import UserProfile, Booking, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
+from core.models import UserProfile, Use, Booking, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
 from django.contrib.sites.models import Site
 import re
 import base64
 import uuid
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
 
 def save_cropped_image(raw_img_data, upload_path):
     # Decode the image data
@@ -42,12 +44,12 @@ class UserProfileForm(forms.ModelForm):
         'password_mismatch': _("The two password fields didn't match."),
     }
 
-    #username = forms.CharField(widget=forms.HiddenInput(attrs={'required': 'false'}))
-    first_name = forms.CharField(label=_('First Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'first name'}))
-    last_name = forms.CharField(label=_('Last Name'), widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'last name'}))
-    email = forms.EmailField(label=_("E-mail"), max_length=75, widget= forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'email'}))
-    password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password'}), label=_("New Password"))
-    password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'required': 'true', 'placeholder': 'password (again)'}), label=_("New Password (again)"))
+    # username = forms.CharField(widget=forms.HiddenInput(attrs={'required': 'false'}))
+    first_name = forms.CharField(label=_('First Name'), widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'first name'}))
+    last_name = forms.CharField(label=_('Last Name'), widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'last name'}))
+    email = forms.EmailField(label=_("E-mail"), max_length=75, widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'email'}))
+    password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'password'}), label=_("New Password"))
+    password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'password (again)'}), label=_("New Password (again)"))
     cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
@@ -55,14 +57,14 @@ class UserProfileForm(forms.ModelForm):
         exclude = ['user', 'status', 'image_thumb', 'customer_id', 'last4']
         # fields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2', 'image', 'bio', 'links']
         widgets = {
-            'bio': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
-            'links': forms.TextInput(attrs={'class':'form-control'}),
-            'projects': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
-            'sharing': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
-            'discussion': forms.Textarea(attrs={'class':'form-control', 'rows': '2', 'required': 'true'}),
-            'referral': forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'referral'}),
-            'city': forms.TextInput(attrs={'class':'form-control', 'required': 'true', 'placeholder': 'city'}),
-            'phone': forms.TextInput(attrs={'class':'form-control', 'placeholder': 'phone'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': '2', 'required': 'true'}),
+            'links': forms.TextInput(attrs={'class': 'form-control'}),
+            'projects': forms.Textarea(attrs={'class': 'form-control', 'rows': '2', 'required': 'true'}),
+            'sharing': forms.Textarea(attrs={'class': 'form-control', 'rows': '2', 'required': 'true'}),
+            'discussion': forms.Textarea(attrs={'class': 'form-control', 'rows': '2', 'required': 'true'}),
+            'referral': forms.TextInput(attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'referral'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'city'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'phone'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -75,15 +77,15 @@ class UserProfileForm(forms.ModelForm):
             self.fields['first_name'].initial = self.instance.user.first_name
             self.fields['last_name'].initial = self.instance.user.last_name
 
-            #self.fields['username'].initial = self.instance.user.username
+            # self.fields['username'].initial = self.instance.user.username
             # Since validation isn't working, make this readonly for now -JLS
-            #self.fields['email'] = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control', 'readonly':True}))
+            # self.fields['email'] = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control', 'readonly':True}))
             self.fields['email'].initial = self.instance.user.email
             self.fields['cropped_image_data'].required = False
 
-            self.fields['password1'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'placeholder':'password'}), label=_("New Password"))
+            self.fields['password1'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'placeholder': 'password'}), label=_("New Password"))
             self.fields['password1'].required = False
-            self.fields['password2'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class':'form-control', 'placeholder':'password'}), label=_("New Password (again)"))
+            self.fields['password2'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'placeholder': 'password'}), label=_("New Password (again)"))
             self.fields['password2'].required = False
 
     def clean_password2(self):
@@ -116,7 +118,7 @@ class UserProfileForm(forms.ModelForm):
 
     def clean(self):
         # Generate a (unique) username, if one is needed (ie, if the user is new)
-        if not 'username' in self.cleaned_data:
+        if 'username' not in self.cleaned_data:
             tries = 1
             username = self.create_username()
             while User.objects.filter(username=username).count() > 0:
@@ -128,7 +130,7 @@ class UserProfileForm(forms.ModelForm):
         try:
             img_data = self.cleaned_data['cropped_image_data']
             # If none or len 0, means illegal image data
-            if (img_data == False or img_data == None or len(img_data) == 0):
+            if (not img_data) or img_data is None or len(img_data) == 0:
                 # Image data on creation is ensured by the javascript validator.
                 # If we don't have image data here it's because we don't need to
                 # update the image.  Doing nothing -- JLS
@@ -208,44 +210,48 @@ class UserProfileForm(forms.ModelForm):
         profile.save()
         return user
 
+
 class LocationSettingsForm(forms.ModelForm):
     class Meta:
         model = Location
         # Not sure about Timezones and Bank Information.  Not including for now - JLS
         fields = ['name', 'slug', 'address', 'latitude', 'longitude',  'max_booking_days', 'welcome_email_days_ahead', 'house_access_code',
-                    'ssid', 'ssid_password', 'email_subject_prefix', 'check_out', 'check_in', 'visibility']
+                  'ssid', 'ssid_password', 'email_subject_prefix', 'check_out', 'check_in', 'visibility']
         widgets = {
-            'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
-            'slug': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
-            'address': forms.TextInput(attrs={'class':'form-control', 'size': '64'}),
-            'latitude': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
-            'longitude': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
-            'max_booking_days': forms.TextInput(attrs={'class':'form-control', 'size': '16'}),
-            'welcome_email_days_ahead': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
-            'house_access_code': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
-            'ssid': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
-            'ssid_password': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
-            'email_subject_prefix': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
-            'check_out': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
-            'check_in': forms.TextInput(attrs={'class':'form-control', 'size': '8'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'size': '32'}),
+            'slug': forms.TextInput(attrs={'class': 'form-control', 'size': '16'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'size': '64'}),
+            'latitude': forms.TextInput(attrs={'class': 'form-control', 'size': '16'}),
+            'longitude': forms.TextInput(attrs={'class': 'form-control', 'size': '16'}),
+            'max_booking_days': forms.TextInput(attrs={'class': 'form-control', 'size': '16'}),
+            'welcome_email_days_ahead': forms.TextInput(attrs={'class': 'form-control', 'size': '8'}),
+            'house_access_code': forms.TextInput(attrs={'class': 'form-control', 'size': '32'}),
+            'ssid': forms.TextInput(attrs={'class': 'form-control', 'size': '32'}),
+            'ssid_password': forms.TextInput(attrs={'class': 'form-control', 'size': '32'}),
+            'email_subject_prefix': forms.TextInput(attrs={'class': 'form-control', 'size': '32'}),
+            'check_out': forms.TextInput(attrs={'class': 'form-control', 'size': '8'}),
+            'check_in': forms.TextInput(attrs={'class': 'form-control', 'size': '8'}),
         }
+
 
 class LocationUsersForm(forms.ModelForm):
     class Meta:
         model = Location
         fields = ['house_admins', ]
 
+
 class LocationContentForm(forms.ModelForm):
     class Meta:
         model = Location
         fields = ['short_description', 'stay_page', 'announcement', 'front_page_stay', 'front_page_participate', 'image']
         widgets = {
-            'short_description': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
-            'stay_page': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
-            'announcement': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
-            'front_page_stay': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
-            'front_page_participate': forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+            'short_description': forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+            'stay_page': forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+            'announcement': forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+            'front_page_stay': forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
+            'front_page_participate': forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '100', 'required': 'true'}),
         }
+
 
 class BootstrapModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -253,13 +259,15 @@ class BootstrapModelForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
 
+
 class LocationMenuForm(BootstrapModelForm):
     class Meta:
         model = LocationMenu
-        exclude = ['location',]
+        exclude = ['location']
         widgets = {
-            'name': forms.TextInput(attrs={'class':'form-control', 'size': '32'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'size': '32'}),
         }
+
 
 class LocationPageForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -269,15 +277,17 @@ class LocationPageForm(forms.Form):
             self.fields['menu'].queryset = LocationMenu.objects.filter(location=location)
 
     menu = forms.ModelChoiceField(queryset=None, empty_label=None)
-    slug = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
-    title = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control', 'size': '32'}))
-    content = forms.CharField(widget=forms.Textarea(attrs={'class':'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
+    slug = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'size': '32'}))
+    title = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'size': '32'}))
+    content = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
+
 
 class LocationRoomForm(forms.ModelForm):
     cropped_image_data = forms.CharField(widget=forms.HiddenInput())
+
     class Meta:
         model = Resource
-        exclude = ['location',]
+        exclude = ['location']
         widgets = {
             'description': forms.Textarea(attrs={'rows': '3'}),
         }
@@ -298,7 +308,7 @@ class LocationRoomForm(forms.ModelForm):
             try:
                 img_data = self.cleaned_data['cropped_image_data']
                 # If none or len 0, means illegal image data
-                if (img_data == False or img_data == None or len(img_data) == 0):
+                if (img_data is False or img_data is None or len(img_data) == 0):
                     # Image data on creation is ensured by the javascript validator.
                     # If we don't have image data here it's because we don't need to
                     # update the image.  Doing nothing -- JLS
@@ -310,55 +320,63 @@ class LocationRoomForm(forms.ModelForm):
             self.cleaned_data['image'] = relative_file_name
 
 
-class BookingForm(forms.ModelForm):
+class BookingUseForm(forms.ModelForm):
+    '''Form for Use model with comment field added in (assumes an associated booking).'''
+    comments = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control form-group"}), required=False)
+
     class Meta:
-        model = Booking
-        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
+        model = Use
+        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location']
         widgets = {
-            'arrive': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
-            'depart': forms.DateInput(attrs={'class':'datepicker form-control form-group'}),
-            'arrival_time': forms.TextInput(attrs={'class':'form-control form-group'}),
-            'resource': forms.Select(attrs={'class':'form-control form-group'}),
-            'purpose': forms.TextInput(attrs={'class':'form-control form-group'}),
-            'comments': forms.Textarea(attrs={'class':'form-control form-group'}),
+            'arrive': forms.DateInput(attrs={'class': 'datepicker form-control form-group'}),
+            'depart': forms.DateInput(attrs={'class': 'datepicker form-control form-group'}),
+            'arrival_time': forms.TextInput(attrs={'class': 'form-control form-group'}),
+            'resource': forms.Select(attrs={'class': 'form-control form-group'}),
+            'purpose': forms.TextInput(attrs={'class': 'form-control form-group'}),
+            'comments': forms.Textarea(attrs={'class': 'form-control form-group'}),
         }
         labels = {'resource': 'Room'}
 
     def __init__(self, location, *args, **kwargs):
-        super(BookingForm, self).__init__(*args, **kwargs)
+        super(BookingUseForm, self).__init__(*args, **kwargs)
         if not location:
             raise Exception("No location given!")
+        if self.instance.pk:
+            if not hasattr(self.instance, 'booking'):
+                raise Exception("This form requires a Booking object to be associated with the Use")
+            self.fields['comments'].initial = self.instance.booking.comments
+
         self.location = location
-        self.fields['resource'].choices = self.location.rooms_with_future_availability_choices()
+        self.fields['resource'].choices = self.location.rooms_with_future_capacity_choices()
 
     def clean(self):
-        cleaned_data = super(BookingForm, self).clean()
+        cleaned_data = super(BookingUseForm, self).clean()
         arrive = cleaned_data.get('arrive')
         depart = cleaned_data.get('depart')
         if (depart - arrive).days > self.location.max_booking_days:
-            self._errors["depart"] = self.error_class(['Sorry! We only accept booking requests greater than 2 weeks in special circumstances. Please limit your request to two weeks.'])
+            self._errors["depart"] = self.error_class(
+                ['Sorry! We only accept booking requests greater than %s in special circumstances. Please limit your request to %s or shorter, and add a comment if you would like to be consdered for a longer stay.' % (self.location.max_booking_days, self.location.max_booking_days)]
+            )
         return cleaned_data
 
-    # XXX TODO
-    # make sure depart is at least one day after arrive.
 
 class AdminBookingForm(forms.ModelForm):
     class Meta:
-        model = Booking
-        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'tags', 'rate', 'suppressed_fees', 'bill']
+        model = Use
+        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location']
 
 
 class PaymentForm(forms.Form):
-    name = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
-    email = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'email'}))
-    card_number = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
-    cvc = forms.IntegerField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
-    expiration_month = forms.IntegerField(label='(MM)', widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
-    expiration_year = forms.IntegerField(label='(YYYY)', widget=forms.TextInput(attrs={'class':"form-control", 'type': 'number'}))
-    amount = forms.FloatField(label="Amount", widget=forms.TextInput(attrs={'class':"form-control inline", 'type': 'number', 'min': '0', 'step': '0.01'}))
-    comment = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}), required=False)
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}))
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class': "form-control", 'type': 'email'}))
+    card_number = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}))
+    cvc = forms.IntegerField(widget=forms.TextInput(attrs={'class': "form-control", 'type': 'number'}))
+    expiration_month = forms.IntegerField(label='(MM)', widget=forms.TextInput(attrs={'class': "form-control", 'type': 'number'}))
+    expiration_year = forms.IntegerField(label='(YYYY)', widget=forms.TextInput(attrs={'class': "form-control", 'type': 'number'}))
+    amount = forms.FloatField(label="Amount", widget=forms.TextInput(attrs={'class': "form-control inline", 'type': 'number', 'min': '0', 'step': '0.01'}))
+    comment = forms.CharField(widget=forms.Textarea(attrs={'class': "form-control"}), required=False)
 
-    def __init__ (self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         # have to call super first, which initializes the 'fields' dictionary
 
         try:
@@ -378,15 +396,16 @@ class StripeCustomerCreationForm(forms.Form):
     expiration_month = forms.IntegerField(label='(MM)')
     expiration_year = forms.IntegerField(label='(YYYY)')
 
+
 class EmailTemplateForm(forms.Form):
     ''' We don't actually make this a model form because it's a derivative
     function of a model but not directly constructed from the model fields
     itself.'''
-    sender = forms.EmailField(widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control"}))
-    recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control"}))
-    footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
-    subject = forms.CharField(widget=forms.TextInput(attrs={'class':"form-control"}))
-    body = forms.CharField(widget=forms.Textarea(attrs={'class':"form-control"}))
+    sender = forms.EmailField(widget=forms.TextInput(attrs={'readonly': 'readonly', 'class': "form-control"}))
+    recipient = forms.EmailField(widget=forms.TextInput(attrs={'class': "form-control"}))
+    footer = forms.CharField(widget=forms.Textarea(attrs={'readonly': 'readonly', 'class': "form-control"}))
+    subject = forms.CharField(widget=forms.TextInput(attrs={'class': "form-control"}))
+    body = forms.CharField(widget=forms.Textarea(attrs={'class': "form-control"}))
 
 
 class BookingEmailTemplateForm(EmailTemplateForm):
@@ -400,11 +419,11 @@ class BookingEmailTemplateForm(EmailTemplateForm):
 
         # add in the extra fields
         self.fields['sender'].initial = location.from_email()
-        self.fields['recipient'].initial = "%s, %s" % (booking.user.email, location.from_email())
+        self.fields['recipient'].initial = "%s, %s" % (booking.use.user.email, location.from_email())
         self.fields['footer'].initial = forms.CharField(
-                widget=forms.Textarea(attrs={'readonly':'readonly'})
+                widget=forms.Textarea(attrs={'readonly': 'readonly'})
             )
-        self.fields['footer'].initial = '''--------------------------------\nYour booking is from %s to %s.\nManage your booking at https://%s%s.''' % (booking.arrive, booking.depart, domain, booking.get_absolute_url())
+        self.fields['footer'].initial = '''--------------------------------\nYour booking is from %s to %s.\nManage your booking at https://%s%s.''' % (booking.use.arrive, booking.use.depart, domain, booking.get_absolute_url())
 
         # both the subject and body fields expect to have access to all fields
         # associated with a booking, so all booking model fields are
@@ -415,21 +434,22 @@ class BookingEmailTemplateForm(EmailTemplateForm):
         template_variables = {
             'created': booking.created,
             'updated': booking.updated,
-            'status': booking.status,
-            'user': booking.user,
-            'arrive': booking.arrive,
-            'depart': booking.depart,
-            'arrival_time': booking.arrival_time,
-            'room': booking.resource,
-            'num_nights': booking.total_nights(),
-            'purpose': booking.purpose,
+            'status': booking.use.status,
+            'user': booking.use.user,
+            'arrive': booking.use.arrive,
+            'depart': booking.use.depart,
+            'arrival_time': booking.use.arrival_time,
+            'room': booking.use.resource,
+            'num_nights': booking.use.total_nights(),
+            'purpose': booking.use.purpose,
             'comments': booking.comments,
             'welcome_email_days_ahead': location.welcome_email_days_ahead,
-            'booking_url': "https://"+domain+booking.get_absolute_url()
+            'reservation_url': "https://"+domain+booking.get_absolute_url()
         }
 
         self.fields['subject'].initial = '['+location.email_subject_prefix+'] ' + Template(tpl.subject).render(Context(template_variables)) + ' (#' + str(booking.id) + ')'
         self.fields['body'].initial = Template(tpl.body).render(Context(template_variables))
+
 
 class SubscriptionEmailTemplateForm(EmailTemplateForm):
 
@@ -443,9 +463,7 @@ class SubscriptionEmailTemplateForm(EmailTemplateForm):
         # add in the extra fields
         self.fields['sender'].initial = location.from_email()
         self.fields['recipient'].initial = "%s, %s" % (subscription.user.email, location.from_email())
-        self.fields['footer'].initial = forms.CharField(
-                widget=forms.Textarea(attrs={'readonly':'readonly'})
-            )
+        self.fields['footer'].initial = forms.CharField(widget=forms.Textarea(attrs={'readonly': 'readonly'}))
         self.fields['footer'].initial = '''--------------------------------\nYour membership id is %d. Manage your membership from your profile page https://%s/people/%s.''' % (subscription.id, domain, subscription.user.username)
 
         # both the subject and body fields expect to have access to all fields

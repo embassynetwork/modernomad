@@ -3,58 +3,60 @@
 
 {% block content %}
 
+<div class="container">
+
 <div class="row">
-	<h1>{{ page_title|title }}</h1>
+    <h1>{{ page_title|title }}</h1>
 </div>
 
 {% block createlink %}
 <div id="event_create_link">
-	[ <a href="{% url 'gather_create_event' location.slug %}">Add Event</a> ]
+    [ <a href="{% url 'gather_create_event' location.slug %}">Add Event</a> ]
 </div>
 {% endblock %}
 
 {% for event in events %}
 
 <div class="row">
-	<div class="col-md-11 event {% if event.status != 'live' %}greyed-out{% endif %} ">
-		<div class="row">
-			<div class="col-xs-1 date">
-				<span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}} 
-			</div> 
-			<div class="col-xs-11">
-				<h3 class="event-title" 
-					{% if event.visibility == 'community' %}
-					title="This event is for {{ event.location.name }} community members only"
-					{% elif event.visibility == 'private' %}
-					title="This event is private"
-					{% endif %}
-				>
-				<a href="{% url 'gather_view_event' location.slug event.id event.slug %}">
-					{% if event.visibility == 'community' %}
-					<i class="fa fa-eye" title="This event is for {{ event.location.name }} community members only"></i>
-					{% elif event.visibility == 'private' %}
-					<i class="fa fa-lock" title="This event is private"></i>
-					{% endif %}
-					{{ event.title}}
-				</a>
-				</h3>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-3 col-md-offset-1">
-				<img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
-			</div>
-			<div class="col-md-7"> 
-				<div class="event-list-time">{{ event.start }} - {{ event.end }}</div>
-				<div>{{ event.description|safe|linebreaks|truncatewords_html:100 }} </div>
-			</div>
-		</div>
-	</div>
+    <div class="col-md-11 event {% if event.status != 'live' %}greyed-out{% endif %} ">
+        <div class="row">
+            <div class="col-xs-1 date">
+                <span class="day">{{ event.start|date:'j'}}</span>{{ event.start|date:'b'|title}}
+            </div>
+            <div class="col-xs-11">
+                <h3 class="event-title"
+                    {% if event.visibility == 'community' %}
+                    title="This event is for {{ event.location.name }} community members only"
+                    {% elif event.visibility == 'private' %}
+                    title="This event is private"
+                    {% endif %}
+                >
+                <a href="{% url 'gather_view_event' location.slug event.id event.slug %}">
+                    {% if event.visibility == 'community' %}
+                    <i class="fa fa-eye" title="This event is for {{ event.location.name }} community members only"></i>
+                    {% elif event.visibility == 'private' %}
+                    <i class="fa fa-lock" title="This event is private"></i>
+                    {% endif %}
+                    {{ event.title}}
+                </a>
+                </h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-md-offset-1">
+                <img class="event-preview-img-thumb" src="{{ event.image.url }}"/>
+            </div>
+            <div class="col-md-7">
+                <div class="event-list-time">{{ event.start }} - {{ event.end }}</div>
+                <div>{{ event.description|safe|linebreaks|truncatewords_html:100 }} </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {% empty %}
 
-<p class="lead">No upcoming events! Why not <a href="{% url 'gather_create_event' location.slug %}">propose one?</a></p>	
+<p class="lead">No upcoming events! Why not <a href="{% url 'gather_create_event' location.slug %}">propose one?</a></p>
 {% endfor %}
 
 
@@ -62,7 +64,7 @@
     <span class="step-links">
         {% if events.has_previous %}
             <a href="?page={{ events.previous_page_number }}">previous</a>
-        {% endif %}	
+        {% endif %}
 
         <span class="current">
             Page {{ events.number }} of {{ events.paginator.num_pages }}
@@ -73,8 +75,6 @@
         {% endif %}
     </span>
 </div>
+</div>
 
 {% endblock %}
-
-
-

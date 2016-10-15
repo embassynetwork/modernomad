@@ -5,36 +5,36 @@
 
 <div class="row">
 
-	<div class="col-md-3">
-		<ul class="nav nav-pills nav-stacked" role="tablist">
-			<li class="active"><a href="#help" data-toggle="pill"><h5>Help</h5></a></li>
-			{% for name in room_names %}
-				<li><a href="#{{name|slugify}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
-				{% if forloop.counter == 1 %}<hr>{% endif %}
-			{% endfor %}
-		</ul>
-	</div>
+    <div class="col-md-3">
+        <ul class="nav nav-pills nav-stacked" role="tablist">
+            <li class="active"><a href="#help" data-toggle="pill"><h5>Help</h5></a></li>
+            {% for name in room_names %}
+                <li><a href="#{{name|slugify}}" data-toggle="pill"><h5>{{name}}</h5></a></li>
+                {% if forloop.counter == 1 %}<hr>{% endif %}
+            {% endfor %}
+        </ul>
+    </div>
 
-	<div class="col-md-6">
-		<div class="tab-content">
-			<div role="tabpanel" class="tab-pane active" id="help">
-				<h3>Editing Rooms</h3>
-				<p>
-				<ul>
-					<li>Room descriptions do not support HTML. 
-					<li>If you mark a room as a hostel/shared accommodation, then it will show up with a shared room flag on the stay page.
-					<li>If you mark a room as having multiple beds, bookings will be available per bed, rather than per-room. This is true <em>regardless</em> of whether the shared room flag is checked (this behaviour is slightly confusing and should be improved in the future).
-					<li>All rooms require a photo. 
-				</ul>
-				</p>
-			</div>
+    <div class="col-md-6">
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="help">
+                <h3>Editing Rooms</h3>
+                <p>
+                <ul>
+                    <li>Room descriptions do not support HTML. 
+                    <li>If you mark a room as a hostel/shared accommodation, then it will show up with a shared room flag on the stay page.
+                    <li>If you mark a room as having multiple beds, bookings will be available per bed, rather than per-room. This is true <em>regardless</em> of whether the shared room flag is checked (this behaviour is slightly confusing and should be improved in the future).
+                    <li>All rooms require a photo. 
+                </ul>
+                </p>
+            </div>
 
-			{% with page='location_edit_rooms' %}
-				{% include 'snippets/room_edit_forms.html' %}
-			{% endwith %}
+            {% with page='location_edit_rooms' %}
+                {% include 'snippets/room_edit_forms.html' %}
+            {% endwith %}
 
-		</div>		
-	</div>		
+        </div>        
+    </div>        
 
 </div>
 
@@ -44,17 +44,17 @@
 
 <script>
 
-	$(document).ready(function() {
-		var hash = window.location.hash;
-		hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+    $(document).ready(function() {
+        var hash = window.location.hash;
+        hash && $('ul.nav a[href="' + hash + '"]').tab('show');
 
-		$('.nav-pills a').click(function (e) {
-			$(this).tab('show');
-			var scrollmem = $('body').scrollTop();
-			window.location.hash = this.hash;
-			$('html,body').scrollTop(scrollmem);
-		});
-	});
+        $('.nav-pills a').click(function (e) {
+            $(this).tab('show');
+            var scrollmem = $('body').scrollTop();
+            window.location.hash = this.hash;
+            $('html,body').scrollTop(scrollmem);
+        });
+    });
 
 </script>
 

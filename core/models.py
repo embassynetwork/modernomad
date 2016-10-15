@@ -20,6 +20,7 @@ import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.flatpages.models import FlatPage
+from core.libs.dates import dates_within, count_range_objects_on_day
 import pytz
 
 # imports for signals
@@ -142,26 +143,26 @@ class Location(models.Model):
             subscribers.append(s.user)
         return list(list(self.residents.all()) + list(self.house_admins.all()) + list(self.event_admin_group.users.all()) + subscribers)
 
-    def rooms_with_future_availability_choices(self):
+    def rooms_with_future_capacity_choices(self):
         choices = []
-        rooms = self.rooms_with_future_availability()
+        rooms = self.rooms_with_future_capacity()
         for room in rooms:
             choices.append((room.id, room.name))
         return choices
 
-    def rooms_with_future_availability(self):
-        future_availability = []
+    def rooms_with_future_capacity(self):
+        future_capacity = []
         for room in Resource.objects.filter(location=self):
-            if room.has_future_availability():
-                future_availability.append(room)
-        return future_availability
+            if room.has_future_capacity():
+                future_capacity.append(room)
+        return future_capacity
 
     def reservable_rooms_on_day(self, the_day):
         rooms_at_location = self.filter(location=self)
-        return [room for room in rooms_at_location if room.availabilities_on(the_day)]
+        return [room for room in rooms_at_location if room.capacities_on(the_day)]
 
-    def availability(self, start, end):
-        # show availability (occupied and free beds), between start and end
+    def capacity(self, start, end):
+        # show capacity (occupied and free beds), between start and end
         # dates, per location. create a structure queryable by
         # available_beds[room][date] = n, where n is the number of beds free.
         rooms_at_location = self.get_rooms()
@@ -170,8 +171,8 @@ class Location(models.Model):
             the_day = start
             available_beds[room] = []
             while the_day < end:
-                bookings_today = Booking.objects.confirmed_approved_on_date(the_day, self, resource=room)
-                free_beds = room.availabilities_on(the_day) - len(bookings_today)
+                uses_today = Use.objects.confirmed_approved_on_date(the_day, self, resource=room)
+                free_beds = room.capacities_on(the_day) - len(uses_today)
                 available_beds[room].append({'the_date': the_day, 'beds_free': free_beds})
                 the_day = the_day + datetime.timedelta(1)
         return available_beds
@@ -189,7 +190,7 @@ class Location(models.Model):
                 the_day = the_day + datetime.timedelta(1)
         return available
 
-    def has_availability(self, arrive=None, depart=None):
+    def has_capacity(self, arrive=None, depart=None):
         if not arrive:
             arrive = timezone.localtime(timezone.now())
             depart = arrive + datetime.timedelta(1)
@@ -212,14 +213,14 @@ class Location(models.Model):
                         .exclude(start__gte=today+datetime.timedelta(days=days))
         return None
 
-    def coming_month_bookings(self, days=30):
+    def coming_month_uses(self, days=30):
         today = timezone.localtime(timezone.now())
-        return Booking.objects.filter(
+        return Use.objects.filter(
                 Q(status="confirmed") | Q(status="approved")
                 ).filter(location=self).exclude(depart__lt=today).exclude(arrive__gt=today+datetime.timedelta(days=days))
 
-        def people_today(self):
-            guests = self.guests_today()
+    def people_today(self):
+        guests = self.guests_today()
         residents = list(self.residents.all())
         active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
         members = []
@@ -230,9 +231,9 @@ class Location(models.Model):
     def people_in_coming_month(self):
         # pull out all bookings in the coming month
         people = []
-        for r in self.coming_month_bookings():
-            if r.user not in people:
-                people.append(r.user)
+        for use in self.coming_month_uses():
+            if use.user not in people:
+                people.append(use.user)
 
         # add residents to the list of people in the house in the coming month.
         for r in self.residents.all():
@@ -254,11 +255,11 @@ class Location(models.Model):
 
     def guests_today(self):
         today = timezone.now()
-        bookings_today = Booking.objects.filter(location=self) \
-                                        .filter(Q(status="confirmed") | Q(status="approved")) \
-                                        .exclude(depart__lt=today).exclude(arrive__gt=today)
+        uses_today = Use.objects.filter(location=self) \
+                        .filter(Q(status="confirmed") | Q(status="approved")) \
+                        .exclude(depart__lt=today).exclude(arrive__gt=today)
         guests_today = []
-        for r in bookings_today:
+        for r in uses_today:
             if r.user not in guests_today:
                 guests_today.append(r.user)
         return guests_today
@@ -357,15 +358,18 @@ class Resource(models.Model):
         total = 0
         the_day = start
         while the_day < end:
-            total += self.availabilities_on(the_day)
+            total += self.capacities_on(the_day)
             the_day += datetime.timedelta(1)
         return total
 
-    def availabilities_between(self, start, end):
-        avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
+    # Returns all the capacity change objects that affect the time period
+    # described, in chronological order. This includes the immediately before or on
+    # the start date, and any others through to and including the end date.
+    def capacities_within(self, start, end):
+        avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
         avails_between = []
         for a in avails:
-            # since we already filtered out availabilities ahead of our date
+            # since we already filtered out capacities ahead of our date
             # range, we just need to go backwards until the first avail that
             # starts on or before our start date, and then break.
             if a.start_date > start:
@@ -373,55 +377,70 @@ class Resource(models.Model):
             else:
                 avails_between.append(a)
                 break
+        avails_between.reverse()
         return avails_between
 
-    def availabilities_today_forward(self):
-        today = timezone.localtime(timezone.now()).date()
-        all_avails = self.availabilities.all().order_by('-start_date')
-        select_avails = []
-        for a in all_avails:
-            if a.start_date > today:
-                select_avails.append(a)
-            else:
-                select_avails.append(a)
-                # we want only the first availability that does not start in
-                # the future, if it exists
-                break
-        return select_avails
+    def confirmed_uses_between(self, start, end):
+        return self.use_set.confirmed_between_dates(start, end)
 
-    def has_future_availability(self):
+    def has_future_capacity(self):
         today = timezone.localtime(timezone.now()).date()
-        # iterate backwards over time through availabilities. if there's any
-        # non-zero availabilities current or future, then this resource has
-        # SOME 'future' availability.
-        avails = self.availabilities.all().order_by('-start_date')
+        # iterate backwards over time through capacities. if there's any
+        # non-zero capacities current or future, then this resource has
+        # SOME 'future' capacity.
+        avails = self.capacity_changes.all().order_by('-start_date')
         for a in avails:
             if a.start_date >= today and a.quantity > 0:
                 return True
-            # we only ever want to go one availability into the past.
+            # we only ever want to go one capacity into the past.
             elif a.start_date < today:
                 if a.quantity > 0:
                     return True
                 else:
                     return False
 
-    def availabilities_on(self, this_day):
-        return Availability.objects.quantity_on(this_day, self)
+    def capacities_on(self, this_day):
+        return CapacityChange.objects.quantity_on(this_day, self)
 
     def bookable_on(self, this_day):
-        # a resource is bookable if it has availability slots that are not already booked.
-        availabilities = self.availabilities_on(this_day)
-        if not availabilities:
+        # a resource is bookable if it has capacity slots that are not already booked.
+        capacities = self.capacities_on(this_day)
+        if not capacities:
             return False
-        bookings_on_this_day = Booking.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-        if len(bookings_on_this_day) < availabilities:
+        uses_on_this_day = Use.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
+        if len(uses_on_this_day) < capacities:
             return True
         else:
             return False
 
-    def max_daily_availabilities_between(self, start, end):
+    def daily_capacities_within(self, start, end):
+        capacities = self.capacities_within(start, end)
+
+        quantity = 0
+        result = []
+        for day in dates_within(start, end):
+            if capacities and capacities[0].start_date <= day:
+                quantity = capacities.pop(0).quantity
+            result.append((day, quantity))
+
+        return result
+
+    def daily_availabilities_within(self, start, end):
+        daily_capacities = self.daily_capacities_within(start, end)
+        uses = self.confirmed_uses_between(start, end)
+
+        result = []
+        for daily_capacity in daily_capacities:
+            day = daily_capacity[0]
+            use_quantity = count_range_objects_on_day(uses, day)
+            result_quantity = daily_capacity[1] - use_quantity
+            result.append((day, result_quantity))
+
+        return result
+
+    def max_daily_capacities_between(self, start, end):
         max_quantity = 0
-        avails = self.availabilities.exclude(start_date__gt=end).order_by('-start_date')
+        avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
         for a in avails:
             if a.quantity > max_quantity:
                 max_quantity = a.quantity
@@ -429,7 +448,7 @@ class Resource(models.Model):
                 break
         return max_quantity
 
-    def availability_calendar_html(self, month=None, year=None):
+    def capacity_calendar_html(self, month=None, year=None):
         if not (month and year):
             today = timezone.localtime(timezone.now())
             month = today.month
@@ -453,12 +472,15 @@ class Fee(models.Model):
         return self.description
 
 
-class BookingManager(models.Manager):
+class UseManager(models.Manager):
 
     def on_date(self, the_day, status, location):
         # return the bookings that intersect this day, of any status
-        all_on_date = super(BookingManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
+        all_on_date = super(UseManager, self).get_queryset().filter(location=location).filter(arrive__lte=the_day).filter(depart__gt=the_day)
         return all_on_date.filter(status=status)
+
+    def confirmed_between_dates(self, start, end):
+        return self.filter(depart__gte=start, arrive__lte=end).filter(status__in=["approved", "confirmed"])
 
     def confirmed_approved_on_date(self, the_day, location, resource=None):
         # return the approved or confirmed bookings that intersect this day
@@ -476,11 +498,16 @@ class BookingManager(models.Manager):
         return list(confirmed_bookings)
 
     def confirmed_but_unpaid(self, location):
-        confirmed_this_location = super(BookingManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
+        confirmed_this_location = super(UseManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
         unpaid_this_location = []
-        for res in confirmed_this_location:
-            if not res.bill.is_paid():
-                unpaid_this_location.append(res)
+        for use in confirmed_this_location:
+            try:
+                # use try-except in case the use doesn't have a booking
+                # XXX FIXME. this is a horrible hack.
+                if not use.booking.bill.is_paid():
+                    unpaid_this_location.append(use.booking)
+            except:
+                pass
         return unpaid_this_location
 
 
@@ -974,7 +1001,62 @@ class BookingBill(Bill):
     pass
 
 
+class Use(models.Model):
+    ''' record of a use for a specific resource.'''
+
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    CONFIRMED = 'confirmed'
+    HOUSE_DECLINED = 'house declined'
+    USER_DECLINED = 'user declined'
+    CANCELED = 'canceled'
+
+    USE_STATUSES = (
+            (PENDING, 'Pending'),
+            (APPROVED, 'Approved'),
+            (CONFIRMED, 'Confirmed'),
+            (HOUSE_DECLINED, 'House Declined'),
+            (USER_DECLINED, 'User Declined'),
+            (CANCELED, 'Canceled'),
+        )
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    location = models.ForeignKey(Location, related_name='uses', null=True)
+    status = models.CharField(max_length=200, choices=USE_STATUSES, default=PENDING, blank=True)
+    user = models.ForeignKey(User, related_name='uses')
+    arrive = models.DateField(verbose_name='Arrival Date')
+    depart = models.DateField(verbose_name='Departure Date')
+    arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
+    resource = models.ForeignKey(Resource, null=True)
+    purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
+    last_msg = models.DateTimeField(blank=True, null=True)
+
+    objects = UseManager()
+
+    def __str__(self):
+        return "%d" % self.id
+
+    def total_nights(self):
+        return (self.depart - self.arrive).days
+    total_nights.short_description = "Nights"
+
+    def nights_between(self, start, end):
+        ''' return the number of nights of this booking that occur between start and end '''
+        nights = 0
+        if self.arrive >= start and self.depart <= end:
+            nights = (self.depart - self.arrive).days
+        elif self.arrive <= start and self.depart >= end:
+            nights = (end - start).days
+        elif self.arrive < start:
+            nights = (self.depart - start).days
+        elif self.depart > end:
+            nights = (end - self.arrive).days
+        return nights
+
+
 class Booking(models.Model):
+    ''' a model to handle the payment details related to uses'''
 
     class ResActionError(Exception):
         def __init__(self, value):
@@ -999,29 +1081,31 @@ class Booking(models.Model):
             (CANCELED, 'Canceled'),
         )
 
-    location = models.ForeignKey(Location, related_name='bookings', null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True)
-    user = models.ForeignKey(User, related_name='bookings')
-    arrive = models.DateField(verbose_name='Arrival Date')
-    depart = models.DateField(verbose_name='Departure Date')
-    arrival_time = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-    resource = models.ForeignKey(Resource, null=True)
-    tags = models.CharField(max_length=200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
-    purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
+
+    # deprecated fields to be deleted soon ("soon")
+    location_deprecated = models.ForeignKey(Location, related_name='bookings', null=True)
+    status_deprecated = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True, null=True)
+    user_deprecated = models.ForeignKey(User, related_name='bookings', null=True)
+    arrive_deprecated = models.DateField(verbose_name='Arrival Date', null=True)
+    depart_deprecated = models.DateField(verbose_name='Departure Date', null=True)
+    arrival_time_deprecated = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
+    resource_deprecated = models.ForeignKey(Resource, null=True)
+    tags_deprecated = models.CharField(max_length=200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
+    purpose_deprecated = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay', null=True)
+    last_msg_deprecated = models.DateTimeField(blank=True, null=True)
+
     comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
-    last_msg = models.DateTimeField(blank=True, null=True)
     rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)  # the blank and null = True are artifacts of the migration JKS
     bill = models.OneToOneField(BookingBill, null=True, related_name="booking")
     suppressed_fees = models.ManyToManyField(Fee, blank=True)
-
-    objects = BookingManager()
+    use = models.OneToOneField(Use, null=False, related_name="booking")
 
     @models.permalink
     def get_absolute_url(self):
-        return ('core.views.unsorted.BookingDetail', [str(self.location.slug), str(self.id)])
+        return ('core.views.booking.BookingDetail', [str(self.use.location.slug), str(self.id)])
 
     def generate_bill(self, delete_old_items=True, save=True, reset_suppressed=False):
         # during the booking process, we simulate a booking to generate
@@ -1046,7 +1130,7 @@ class Booking(models.Model):
         line_items = []
 
         # The first line item is for the resource charge
-        resource_charge_desc = "%s (%d * $%s)" % (self.resource.name, self.total_nights(), self.get_rate())
+        resource_charge_desc = "%s (%d * $%s)" % (self.use.resource.name, self.use.total_nights(), self.get_rate())
         resource_charge = self.base_value()
         resource_line_item = BillLineItem(bill=booking_bill, description=resource_charge_desc, amount=resource_charge, paid_by_house=False)
         line_items.append(resource_line_item)
@@ -1060,9 +1144,7 @@ class Booking(models.Model):
         # A line item for every fee that applies to this location
         if reset_suppressed:
             self.suppressed_fees.clear()
-        for location_fee in LocationFee.objects.filter(location=self.location):
-            # print location_fee.fee.description
-            # print location_fee.fee not in self.suppressed_fees.all()
+        for location_fee in LocationFee.objects.filter(location=self.use.location):
             if location_fee.fee not in self.suppressed_fees.all():
                 desc = "%s (%s%c)" % (location_fee.fee.description, (location_fee.fee.percentage * 100), '%')
                 amount = float(effective_resource_charge) * location_fee.fee.percentage
@@ -1085,15 +1167,15 @@ class Booking(models.Model):
             self.id = -1
 
         res_info = {
-                'arrive': {'year': self.arrive.year, 'month': self.arrive.month, 'day': self.arrive.day},
-                'depart': {'year': self.depart.year, 'month': self.depart.month, 'day': self.depart.day},
-                'location': {'id': self.location.id, 'short_description': self.location.short_description, 'slug': self.location.slug},
+                'arrive': {'year': self.use.arrive.year, 'month': self.use.arrive.month, 'day': self.use.arrive.day},
+                'depart': {'year': self.use.depart.year, 'month': self.use.depart.month, 'day': self.use.depart.day},
+                'location': {'id': self.use.location.id, 'short_description': self.use.location.short_description, 'slug': self.use.location.slug},
                 'resource': {
-                    'id': self.resource.id, 'name': self.resource.name, 'description': self.resource.description,
-                    'cancellation_policy': self.resource.cancellation_policy
+                    'id': self.use.resource.id, 'name': self.use.resource.name, 'description': self.use.resource.description,
+                    'cancellation_policy': self.use.resource.cancellation_policy
                 },
-                'purpose': self.purpose,
-                'arrival_time': self.arrival_time,
+                'purpose': self.use.purpose,
+                'arrival_time': self.use.arrival_time,
                 'comments': self.comments,
             }
 
@@ -1138,14 +1220,10 @@ class Booking(models.Model):
         self.suppressed_fees.add(line_item.fee)
         self.save()
 
-    def total_nights(self):
-        return (self.depart - self.arrive).days
-    total_nights.short_description = "Nights"
-
     def default_rate(self):
         # default_rate always returns the default rate regardless of comps or
         # custom rates.
-        return self.resource.default_rate
+        return self.use.resource.default_rate
 
     def get_rate(self):
         if self.rate is None:
@@ -1155,7 +1233,7 @@ class Booking(models.Model):
     def base_value(self):
         # value of the booking, regardless of what has been paid
         # get_rate checks for comps and custom rates.
-        return self.total_nights() * self.get_rate()
+        return self.use.total_nights() * self.get_rate()
 
     def calc_non_house_fees(self):
         # Calculate the amount of fees not paid by the house
@@ -1193,34 +1271,36 @@ class Booking(models.Model):
         self.generate_bill()
 
     def reset_rate(self):
-        self.set_rate(self.resource.default_rate)
+        self.set_rate(self.use.resource.default_rate)
 
     def mark_last_msg(self):
-        self.last_msg = datetime.datetime.now()
-        self.save()
+        self.use.last_msg = datetime.datetime.now()
+        self.use.save()
 
     def pending(self):
-        self.status = Booking.PENDING
-        self.save()
+        self.use.status = Booking.PENDING
+        self.use.save()
 
     def approve(self):
-        self.status = Booking.APPROVED
-        self.save()
+        self.use.status = Booking.APPROVED
+        self.use.save()
 
     def confirm(self):
-        self.status = Booking.CONFIRMED
-        self.save()
+        self.use.status = Booking.CONFIRMED
+        self.use.save()
 
     def cancel(self):
         # cancel this booking.
         # JKS note: we *don't* delete the bill here, because if there was a
         # refund, we want to keep it around to know how much to refund from the
         # associated fees.
-        self.status = Booking.CANCELED
-        self.save()
+        self.use.status = Booking.CANCELED
+        self.use.save()
 
     def comp(self):
         self.set_rate(0)
+        self.generate_bill()
+        self.save()
 
     def is_paid(self):
         return self.bill.total_owed() <= 0
@@ -1229,35 +1309,22 @@ class Booking(models.Model):
         return self.rate == 0
 
     def is_pending(self):
-        return self.status == Booking.PENDING
+        return self.use.status == Booking.PENDING
 
     def is_approved(self):
-        return self.status == Booking.APPROVED
+        return self.use.status == Booking.APPROVED
 
     def is_confirmed(self):
-        return self.status == Booking.CONFIRMED
+        return self.use.status == Booking.CONFIRMED
 
     def is_canceled(self):
-        return self.status == Booking.CANCELED
+        return self.use.status == Booking.CANCELED
 
     def payments(self):
         return self.bill.payments.all()
 
     def non_refund_payments(self):
         return self.bill.payments.filter(paid_amount__gt=0)
-
-    def nights_between(self, start, end):
-        ''' return the number of nights of this booking that occur between start and end '''
-        nights = 0
-        if self.arrive >= start and self.depart <= end:
-            nights = (self.depart - self.arrive).days
-        elif self.arrive <= start and self.depart >= end:
-            nights = (end - start).days
-        elif self.arrive < start:
-            nights = (self.depart - start).days
-        elif self.depart > end:
-            nights = (end - self.arrive).days
-        return nights
 
 
 @receiver(pre_save, sender=Booking)
@@ -1270,7 +1337,7 @@ def booking_create_bill(sender, instance, **kwargs):
 
 class PaymentManager(models.Manager):
     def booking_payments_by_location(self, location):
-        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__location=location))
+        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__use__location=location))
         return booking_payments
 
     def subscription_payments_by_location(self, location):
@@ -1278,7 +1345,7 @@ class PaymentManager(models.Manager):
         return subscription_payments
 
     def booking_payments_by_resource(self, resource):
-        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__resource=resource))
+        booking_payments = Payment.objects.filter(bill__in=BookingBill.objects.filter(booking__use__resource=resource))
         return booking_payments
 
 
@@ -1608,10 +1675,11 @@ class UserNote(models.Model):
         return '%s - %s: %s' % (self.created.date(), self.user.username, self.note)
 
 
-class BookingNote(models.Model):
+class UseNote(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, null=True)
-    booking = models.ForeignKey(Booking, blank=False, null=False, related_name="booking_notes")
+    booking_deprecated = models.ForeignKey(Booking, blank=True, null=True, related_name="booking_notes")
+    use = models.ForeignKey(Use, blank=False, null=False, related_name="use_notes")
     note = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -1644,7 +1712,7 @@ class LocationImage(BaseImage):
     location = models.ForeignKey(Location)
 
 
-class AvailabilityManager(models.Manager):
+class CapacityChangeManager(models.Manager):
     def quantity_on(self, date, resource):
         latest_change = self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
         if latest_change:
@@ -1653,12 +1721,12 @@ class AvailabilityManager(models.Manager):
             return 0
 
 
-class Availability(models.Model):
+class CapacityChange(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    resource = models.ForeignKey(Resource, related_name="availabilities")
+    resource = models.ForeignKey(Resource, related_name="capacity_changes")
     start_date = models.DateField()
     quantity = models.IntegerField()
-    objects = AvailabilityManager()
+    objects = CapacityChangeManager()
 
     class Meta:
         verbose_name_plural = 'Availabilities'

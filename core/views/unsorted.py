@@ -8,7 +8,7 @@ from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
-from core.forms import BookingForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
+from core.forms import BookingUseForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
 from core.forms import BookingEmailTemplateForm, PaymentForm, AdminSubscriptionForm, LocationSettingsForm
 from core.forms import LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm
 from django.core import urlresolvers
@@ -50,9 +50,10 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import csv
 from django.http import Http404
-from core.data_fetchers import SerializedResourceAvailability
-from core.data_fetchers import SerializedNullResourceAvailability
+from core.data_fetchers import SerializedResourceCapacity
+from core.data_fetchers import SerializedNullResourceCapacity
 import re
+from .view_helpers import _get_user_and_perms
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +181,7 @@ def room_occupancy_month(room, month, year):
 
     # note the day parameter is meaningless
     report_date = datetime.date(year, month, 1)
-    bookings = Booking.objects.filter(resource=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+    uses = Use.objects.filter(resource=room).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
     # payments *received* this month for this room
     payments_for_room = Payment.objects.booking_payments_by_resource(room).filter(payment_date__gte=start).filter(payment_date__lte=end)
@@ -205,20 +206,20 @@ def room_occupancy_month(room, month, year):
     externalized_fees = Decimal(0.0)
     internal_fees = Decimal(0.0)
     # occupancy for room this month
-    for r in bookings:
+    for u in uses:
         comp = False
         partial_payment = False
 
         # in case this Booking crossed a month boundary, first calculate
         # nights of this Booking that took place this month
-        if r.arrive >= start and r.depart <= end:
-            nights_this_month = (r.depart - r.arrive).days
-        elif r.arrive <= start and r.depart >= end:
+        if u.arrive >= start and u.depart <= end:
+            nights_this_month = (u.depart - u.arrive).days
+        elif u.arrive <= start and u.depart >= end:
             nights_this_month = (end - start).days
-        elif r.arrive < start:
-            nights_this_month = (r.depart - start).days
-        elif r.depart > end:
-            nights_this_month = (end - r.arrive).days
+        elif u.arrive < start:
+            nights_this_month = (u.depart - start).days
+        elif u.depart > end:
+            nights_this_month = (end - u.arrive).days
 
         # if it's the first of the month and the person left on the 1st, then
         # that's actually 0 days this month which we don't need to include.
@@ -227,26 +228,26 @@ def room_occupancy_month(room, month, year):
 
         nights_occupied += nights_this_month
 
-        if r.is_comped():
+        if u.booking.is_comped():
             total_comped_nights += nights_this_month
-            total_comped_value += nights_this_month*r.default_rate()
+            total_comped_value += nights_this_month*u.booking.default_rate()
             comp = True
             unpaid = False
         else:
 
-            total_user_value += (r.bill.amount()/r.total_nights())*nights_this_month
-            net_to_house += (r.bill.to_house()/r.total_nights())*nights_this_month
-            externalized_fees += (r.bill.non_house_fees()/r.total_nights())*nights_this_month
-            internal_fees += (r.bill.house_fees()/r.total_nights())*nights_this_month
+            total_user_value += (u.booking.bill.amount()/u.total_nights())*nights_this_month
+            net_to_house += (u.booking.bill.to_house()/u.total_nights())*nights_this_month
+            externalized_fees += (u.booking.bill.non_house_fees()/u.total_nights())*nights_this_month
+            internal_fees += (u.booking.bill.house_fees()/u.total_nights())*nights_this_month
 
-            if r.payments():
-                paid_rate = r.bill.to_house() / r.total_nights()
+            if u.booking.payments():
+                paid_rate = u.booking.bill.to_house() / u.total_nights()
                 payments_accrual += nights_this_month*paid_rate
 
             # if a Booking rate is set to 0 is automatically gets counted as a comp
-            if r.bill.total_owed() > 0:
-                outstanding_value += r.bill.total_owed()
-                partial_paid_bookings.append(r.id)
+            if u.booking.bill.total_owed() > 0:
+                outstanding_value += u.booking.bill.total_owed()
+                partial_paid_bookings.append(u.booking.id)
 
     params = [
         month,
@@ -320,7 +321,7 @@ def monthly_occupant_report(location_slug, year, month):
 
     bookings = Booking.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
     for r in bookings:
-        nights_this_month = r.nights_between(start, end)
+        nights_this_month = r.use.nights_between(start, end)
         u = r.user
         comped_nights_this_month = 0
         owing = []
@@ -414,7 +415,7 @@ def occupancy(request, location_slug):
 
     # note the day parameter is meaningless
     report_date = datetime.date(year, month, 1)
-    bookings = Booking.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+    uses = Use.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
 
     person_nights_data = []
     total_occupied_person_nights = 0
@@ -440,54 +441,54 @@ def occupancy(request, location_slug):
     # JKS note: this section breaks down income by whether it is income for this
     # month, for future months, from past months, for past months, for this
     # month, etc... but it turns out that this gets almost impossible to track
-    # because there's many edge cases causd by bookings being edited,
+    # because there's many edge cases causd by uses being edited,
     # appended to, partial refunds, etc. so, it's kind of fuzzy. if you try and
     # work on it, don't say i didn't warn you :).
 
     payments_this_month = Payment.objects.booking_payments_by_location(location).filter(payment_date__gte=start).filter(payment_date__lte=end)
     for p in payments_this_month:
-        r = p.bill.bookingbill.booking
+        u = p.bill.bookingbill.booking.use
         nights_before_this_month = datetime.timedelta(0)
         nights_after_this_month = datetime.timedelta(0)
-        if r.arrive < start and r.depart < start:
+        if u.arrive < start and u.depart < start:
             # all nights for this booking were in a previous month
-            nights_before_this_month = (r.depart - r.arrive)
+            nights_before_this_month = (u.depart - u.arrive)
 
-        elif r.arrive < start and r.depart <= end:
+        elif u.arrive < start and u.depart <= end:
             # only nights before and during this month, but night for this
             # month are calculated below so only tally the nights for before
             # this month here.
-            nights_before_this_month = (start - r.arrive)
+            nights_before_this_month = (start - u.arrive)
 
-        elif r.arrive >= start and r.depart <= end:
+        elif u.arrive >= start and u.depart <= end:
             # only nights this month, don't need to calculate this here because
             # it's calculated below.
             continue
 
-        elif r.arrive >= start and r.arrive <= end and r.depart > end:
+        elif u.arrive >= start and u.arrive <= end and u.depart > end:
             # some nights are after this month
-            nights_after_this_month = (r.depart - end)
+            nights_after_this_month = (u.depart - end)
 
-        elif r.arrive > end:
+        elif u.arrive > end:
             # all nights are after this month
-            nights_after_this_month = (r.depart - r.arrive)
+            nights_after_this_month = (u.depart - u.arrive)
 
-        elif r.arrive < start and r.depart > end:
+        elif u.arrive < start and u.depart > end:
             # there are some days paid for this month that belong to the previous month
-            nights_before_this_month = (start - r.arrive)
-            nights_after_this_month = (r.depart - end)
+            nights_before_this_month = (start - u.arrive)
+            nights_after_this_month = (u.depart - end)
 
         # in the event that there are multiple payments for a booking, this
         # will basically amortize each payment across all nights
-        income_for_future_months += nights_after_this_month.days*(p.to_house()/(r.depart - r.arrive).days)
-        income_for_past_months += nights_before_this_month.days*(p.to_house()/(r.depart - r.arrive).days)
+        income_for_future_months += nights_after_this_month.days*(p.to_house()/(u.depart - u.arrive).days)
+        income_for_past_months += nights_before_this_month.days*(p.to_house()/(u.depart - u.arrive).days)
 
-    for r in bookings:
+    for u in uses:
         comp = False
         partial_payment = False
         total_owed = 0.0
 
-        nights_this_month = r.nights_between(start, end)
+        nights_this_month = u.nights_between(start, end)
         # if it's the first of the month and the person left on the 1st, then
         # that's actually 0 days this month which we don't need to include.
         if nights_this_month == 0:
@@ -495,54 +496,54 @@ def occupancy(request, location_slug):
 
         # XXX Note! get_rate() returns the base rate, but does not incorporate
         # any discounts. so we use subtotal_amount here.
-        rate = r.bill.subtotal_amount()/r.total_nights()
+        rate = u.booking.bill.subtotal_amount()/u.total_nights()
 
-        room_occupancy[r.resource] = room_occupancy.get(r.resource, 0) + nights_this_month
+        room_occupancy[u.resource] = room_occupancy.get(u.resource, 0) + nights_this_month
 
-        if r.is_comped():
+        if u.booking.is_comped():
             total_comped_nights += nights_this_month
-            total_comped_income += nights_this_month*r.default_rate()
+            total_comped_income += nights_this_month*u.booking.default_rate()
             comp = True
             unpaid = False
         else:
             # the bill has the amount that goes to the house after fees
-            to_house_per_night = r.bill.to_house()/r.total_nights()
+            to_house_per_night = u.booking.bill.to_house()/u.total_nights()
             total_income += nights_this_month*to_house_per_night
-            this_room_income = room_income.get(r.resource, 0)
+            this_room_income = room_income.get(u.resource, 0)
             this_room_income += nights_this_month*to_house_per_night
-            room_income[r.resource] = this_room_income
+            room_income[u.resource] = this_room_income
 
             # If there are payments, calculate the payment rate
-            if r.payments():
-                paid_rate = (r.bill.total_paid() - r.bill.non_house_fees()) / r.total_nights()
+            if u.booking.payments():
+                paid_rate = (u.booking.bill.total_paid() - u.booking.bill.non_house_fees()) / u.total_nights()
                 if paid_rate != rate:
-                    logger.debug("booking %d has paid rate = $%d and rate set to $%d" % (r.id, paid_rate, rate))
+                    logger.debug("booking %d has paid rate = $%d and rate set to $%d" % (u.booking.id, paid_rate, rate))
                     paid_rate_discrepancy += nights_this_month * (paid_rate - rate)
-                    payment_discrepancies.append(r.id)
+                    payment_discrepancies.append(u.booking.id)
 
             # JKS this section tracks whether payment for this booking
             # were made in a prior month or in this month.
-            if r.is_paid():
-                for p in r.payments():
+            if u.booking.is_paid():
+                for p in u.booking.payments():
                     if p.payment_date.date() < start:
-                        income_from_past_months += nights_this_month*(p.to_house()/(r.depart - r.arrive).days)
+                        income_from_past_months += nights_this_month*(p.to_house()/(u.depart - u.arrive).days)
                     # if the payment was sometime this month, we account for
                     # it. if it was in a future month, we'll show it as "income
                     # for previous months" in that month. we skip it here.
                     elif p.payment_date.date() < end:
-                        income_for_this_month += nights_this_month*(p.to_house()/(r.depart - r.arrive).days)
+                        income_for_this_month += nights_this_month*(p.to_house()/(u.depart - u.arrive).days)
                     unpaid = False
             else:
                 unpaid_total += (to_house_per_night*nights_this_month)
                 unpaid = True
-                if r.bill.total_owed() < r.bill.amount():
+                if u.booking.bill.total_owed() < u.booking.bill.amount():
                     partial_payment = True
-                    total_owed = r.bill.total_owed()
+                    total_owed = u.booking.bill.total_owed()
 
         person_nights_data.append({
-            'booking': r,
+            'booking': u.booking,
             'nights_this_month': nights_this_month,
-            'room': r.resource.name,
+            'room': u.resource.name,
             'rate': rate,
             'partial_payment': partial_payment,
             'total_owed': total_owed,
@@ -552,7 +553,7 @@ def occupancy(request, location_slug):
         })
         total_occupied_person_nights += nights_this_month
 
-    rooms_with_availability_this_month = []
+    rooms_with_capacity_this_month = []
     location_rooms = location.resources.all()
     total_reservable_days = 0
     reservable_days_per_room = {}
@@ -647,59 +648,63 @@ def calendar(request, location_slug):
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
     report_date = datetime.date(year, month, 1)
 
-    bookings = (Booking.objects.filter(Q(status="confirmed") | Q(status="approved"))
-                    .filter(location=location).exclude(depart__lt=start).exclude(arrive__gt=end).order_by('arrive'))
+    uses = (
+        Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
+        .filter(location=location)
+        .exclude(depart__lt=start)
+        .exclude(arrive__gt=end).order_by('arrive')
+    )
 
     rooms = Resource.objects.filter(location=location)
-    bookings_by_room = []
+    uses_by_room = []
     empty_rooms = 0
 
     # this is tracked here to help us determine what height the timeline div
     # should be. it's kind of a hack.
     num_rows_in_chart = 0
     for room in rooms:
-        num_rows_in_chart += room.max_daily_availabilities_between(start, end)
+        num_rows_in_chart += room.max_daily_capacities_between(start, end)
 
-    if len(bookings) == 0:
-        any_bookings = False
+    if len(uses) == 0:
+        any_uses = False
     else:
-        any_bookings = True
+        any_uses = True
 
     for room in rooms:
-        bookings_this_room = []
+        uses_this_room = []
 
-        bookings_list_this_room = list(bookings.filter(resource=room))
+        uses_list_this_room = list(uses.filter(resource=room))
 
-        if len(bookings_list_this_room) == 0:
+        if len(uses_list_this_room) == 0:
             empty_rooms += 1
-            num_rows_in_chart -= room.max_daily_availabilities_between(start, end)
+            num_rows_in_chart -= room.max_daily_capacities_between(start, end)
 
         else:
-            for r in bookings_list_this_room:
-                if r.arrive < start:
+            for u in uses_list_this_room:
+                if u.arrive < start:
                     display_start = start
                 else:
-                    display_start = r.arrive
-                if r.depart > end:
+                    display_start = u.arrive
+                if u.depart > end:
                     display_end = end
                 else:
-                    display_end = r.depart
-                bookings_this_room.append({'booking': r, 'display_start': display_start, 'display_end': display_end})
+                    display_end = u.depart
+                uses_this_room.append({'use': u, 'display_start': display_start, 'display_end': display_end})
 
-            bookings_by_room.append((room, bookings_this_room))
+            uses_by_room.append((room, uses_this_room))
 
-    logger.debug("Bookings by Room for calendar view:")
-    logger.debug(bookings_by_room)
+    logger.debug("Uses by Room for calendar view:")
+    logger.debug(uses_by_room)
 
     # create the calendar object
-    guest_calendar = GuestCalendar(bookings, year, month, location).formatmonth(year, month)
+    guest_calendar = GuestCalendar(uses, year, month, location).formatmonth(year, month)
 
     return render(
         request,
         "calendar.html",
         {
-            'bookings': bookings,
-            'bookings_by_room': bookings_by_room,
+            'uses': uses,
+            'uses_by_room': uses_by_room,
             'month_start': start,
             'month_end': end,
             "next_month": next_month,
@@ -708,7 +713,7 @@ def calendar(request, location_slug):
             "report_date": report_date,
             'location': location,
             'empty_rooms': empty_rooms,
-            'any_bookings': any_bookings,
+            'any_uses': any_uses,
             'calendar': mark_safe(guest_calendar)
         }
     )
@@ -731,7 +736,7 @@ def room_cal_request(request, location_slug, room_id, month=None, year=None, bro
     except:
         return HttpResponseRedirect('/')
 
-    cal_html = room.availability_calendar_html(month=month, year=year)
+    cal_html = room.capacity_calendar_html(month=month, year=year)
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     link_html = '''
@@ -785,21 +790,6 @@ def ListUsers(request):
     return render(request, "user_list.html", {"users": users})
 
 
-def _get_user_and_perms(request, username):
-    try:
-        user = User.objects.get(username=username)
-    except:
-        messages.add_message(request, messages.INFO, 'There is no user with that username.')
-        return HttpResponseRedirect('/404')
-
-    user_is_house_admin_somewhere = False
-    for location in Location.objects.filter(visibility='public'):
-        if request.user in location.house_admins.all():
-            user_is_house_admin_somewhere = True
-            break
-    return user, user_is_house_admin_somewhere
-
-
 @login_required
 def UserDetail(request, username):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
@@ -826,32 +816,6 @@ def user_email_settings(request, username):
         {
             "u": user,
             'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY
-        }
-    )
-
-
-@login_required
-def user_bookings(request, username):
-    ''' TODO: rethink permissions here'''
-    user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    bookings = Booking.objects.filter(user=user).exclude(status='deleted').order_by('arrive')
-    past_bookings = []
-    upcoming_bookings = []
-    for booking in bookings:
-        if booking.arrive >= datetime.date.today():
-            upcoming_bookings.append(booking)
-        else:
-            past_bookings.append(booking)
-
-    return render(
-        request,
-        "user_bookings.html",
-        {
-            "u": user,
-            'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-            'past_bookings': past_bookings,
-            'upcoming_bookings': upcoming_bookings,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY
         }
     )
@@ -909,8 +873,8 @@ def user_edit_room(request, username, room_id):
     else:
         has_image = False
 
-    resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
-    room_availability = json.dumps(resource_availability.as_dict())
+    resource_capacity = SerializedResourceCapacity(room, timezone.localtime(timezone.now()))
+    room_capacity = json.dumps(resource_capacity.as_dict())
     location = room.location
     form = LocationRoomForm(instance=room)
 
@@ -924,7 +888,7 @@ def user_edit_room(request, username, room_id):
             'room_name': room.name,
             'location': location,
             'has_image': has_image,
-            'room_availability': room_availability,
+            'room_capacity': room_capacity,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY
         }
     )
@@ -965,136 +929,13 @@ def RoomsAvailableOnDates(request, location_slug):
         arrive = datetime.datetime.strptime(request.POST['arrive'], '%Y-%m-%d').date()
         depart = datetime.datetime.strptime(request.POST['depart'], '%Y-%m-%d').date()
     free_rooms = location.rooms_free(arrive, depart)
-    rooms_availability = {}
-    for room in location.rooms_with_future_availability():
+    rooms_capacity = {}
+    for room in location.rooms_with_future_capacity():
         if room in free_rooms:
-            rooms_availability[room.name] = {'available': True, 'id': room.id}
+            rooms_capacity[room.name] = {'available': True, 'id': room.id}
         else:
-            rooms_availability[room.name] = {'available': False, 'id': room.id}
-    return JsonResponse({'rooms_availability': rooms_availability})
-
-
-def BookingSubmit(request, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
-    if request.method == 'POST':
-        form = BookingForm(location, request.POST)
-        if form.is_valid():
-            booking = form.save(commit=False)
-            booking.location = location
-            if request.user.is_authenticated():
-                booking.user = request.user
-                booking.save()
-                # Make sure the rate is set and then generate a bill
-                booking.reset_rate()
-                new_booking_notify(booking)
-                messages.add_message(
-                    request,
-                    messages.INFO,
-                    'Thanks! Your booking was submitted. You will receive an email when it has been reviewed. You may wish to <a href="/people/%s/edit/">update your profile</a> if your projects or ideas have changed since your last visit.' % booking.user.username
-                )
-                return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking.id)))
-            else:
-                res_info = booking.serialize()
-                request.session['booking'] = res_info
-                messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your booking request.')
-                return HttpResponseRedirect(reverse('registration_register'))
-        else:
-            logger.debug(request.POST)
-            logger.debug(form.errors)
-    # GET request
-    else:
-        form = BookingForm(location)
-    # pass the rate for each room to the template so we can update the cost of
-    # a booking in real time.
-    today = timezone.localtime(timezone.now())
-    month = request.GET.get("month")
-    year = request.GET.get("year")
-    start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-    rooms = location.rooms_with_future_availability()
-    return render(
-        request,
-        'booking.html',
-        {
-            'form': form,
-            'max_days': location.max_booking_days,
-            'location': location,
-            'rooms': rooms,
-            'prev_month': prev_month,
-            'next_month': next_month,
-            'month': month
-        }
-    )
-
-
-@login_required
-def BookingDetail(request, booking_id, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
-    try:
-        booking = Booking.objects.get(id=booking_id)
-        if not booking:
-            raise Booking.DoesNotExist
-    except Booking.DoesNotExist:
-        msg = 'The booking you requested do not exist'
-        messages.add_message(request, messages.ERROR, msg)
-        return HttpResponseRedirect('/404')
-    # make sure the user is either an admin, resident or the booking holder
-    # (we can't use the decorator here because the user themselves also has to
-    # be able to see the page).
-    if ((request.user == booking.user) or
-            (request.user in location.house_admins.all()) or
-            (request.user in location.readonly_admins.all()) or
-            (request.user in location.residents.all())):
-        if booking.arrive >= datetime.date.today():
-            past = False
-        else:
-            past = True
-        if booking.is_paid():
-            paid = True
-        else:
-            paid = False
-
-        domain = Site.objects.get_current().domain
-
-        # users that intersect this stay
-        users_during_stay = []
-        bookings = Booking.objects.filter(status="confirmed").filter(location=location) \
-                                  .exclude(depart__lt=booking.arrive).exclude(arrive__gt=booking.depart)
-        for res in bookings:
-            if res.user not in users_during_stay:
-                users_during_stay.append(res.user)
-        for member in location.residents.all():
-            if member not in users_during_stay:
-                users_during_stay.append(member)
-
-        # events that intersected your stay
-        # events_during_stay = []
-        # all_events = Event.objects.filter(location=location).exclude(end__lt=booking.arrive).exclude( start__gt=booking.depart)
-        # events_during_stay += list(all_events.filter(status="public"))
-        # if they are a member, include the community-only events
-        # if request.user in location.residents.all():
-        #    events_during_stay += list(all_events.filter(status="community"))
-        # if they RSVPed for any private events, include those
-        # private = all_events.filter(status="private").filter(attendees__in=[request.user,])
-        # if len(private) > 0:
-        #    events_during_stay += list(private)
-
-        return render(
-            request,
-            "booking_detail.html",
-            {
-                "booking": booking,
-                "past": past,
-                'location': location,
-                "domain": domain,
-                "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
-                "paid": paid,
-                "contact": location.from_email(),
-                'users_during_stay': users_during_stay
-            }
-        )
-    else:
-        messages.add_message(request, messages.INFO, "You do not have permission to view that booking")
-        return HttpResponseRedirect('/404')
+            rooms_capacity[room.name] = {'available': False, 'id': room.id}
+    return JsonResponse({'rooms_capacity': rooms_capacity})
 
 
 @csrf_exempt
@@ -1158,25 +999,18 @@ def UserAddCard(request, username):
     if booking_id:
         booking = Booking.objects.get(id=booking_id)
         # double checks that the authenticated user (the one trying to add the
-        # card) is the user associated with this booking, or an admin (i am
-        # not sure this is necessary since you need to be the booking user
-        # or a house admin to view the booking in the first place!).
-        if (request.user != user) and (request.user not in booking.location.house_admins.all()):
-            print 'there was an error adding the user\'s card: authenticated user is not the booking user'
-            print request.POST
-            print request.user
+        # card) is the user associated with this booking, or an admin
+        if (request.user != user) and (request.user not in booking.use.location.house_admins.all()):
             messages.add_message(
                 request,
-                messages.INFO,
-                "You are not authorized to add a credit card to this page. Please log in or use the 3rd party"
-            )
+                messages.INFO, "You are not authorized to add a credit card to this page. Please log in or use the 3rd party")
             return HttpResponseRedirect('/404')
 
     token = request.POST.get('stripeToken')
     if not token:
         messages.add_message(request, messages.INFO, "No credit card information was given.")
         if booking_id:
-            return HttpResponseRedirect(reverse('booking_detail', args=(booking.location.slug, booking.id)))
+            return HttpResponseRedirect(reverse('booking_detail', args=(booking.use.location.slug, booking.id)))
         return HttpResponseRedirect("/people/%s" % username)
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -1191,13 +1025,13 @@ def UserAddCard(request, username):
         # assumes the user has only one card stored with their profile.
         profile.last4 = customer.sources.data[0].last4
         profile.save()
-        if booking_id and booking.status == Booking.APPROVED:
+        if booking_id and booking.use.status == Use.APPROVED:
             updated_booking_notify(booking)
         messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
     except Exception, e:
         messages.add_message(request, messages.INFO, '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>' % e)
     if booking_id:
-        return HttpResponseRedirect(reverse('booking_detail', args=(booking.location.slug, booking.id)))
+        return HttpResponseRedirect(reverse('booking_detail', args=(booking.use.location.slug, booking.id)))
     return HttpResponseRedirect("/people/%s" % username)
 
 
@@ -1212,168 +1046,6 @@ def UserDeleteCard(request, username):
 
     messages.add_message(request, messages.INFO, "Card deleted.")
     return HttpResponseRedirect("/people/%s" % profile.user.username)
-
-
-@login_required
-def BookingEdit(request, booking_id, location_slug):
-    logger.debug("Entering BookingEdit")
-
-    location = get_object_or_404(Location, slug=location_slug)
-    booking = Booking.objects.get(id=booking_id)
-    # need to pull these dates out before we pass the instance into
-    # the BookingForm, since it (apparently) updates the instance
-    # immediately (which is weird, since it hasn't validated the form
-    # yet!)
-    original_arrive = booking.arrive
-    original_depart = booking.depart
-    original_room = booking.resource
-    if request.user.is_authenticated() and request.user == booking.user:
-        logger.debug("BookingEdit: Authenticated and same user")
-        if request.user in booking.location.house_admins.all():
-            is_house_admin = True
-        else:
-            is_house_admin = False
-
-        if request.method == "POST":
-            logger.debug("BookingEdit: POST")
-            # don't forget to specify the "instance" argument or a new object will get created!
-            # form = get_booking_form_for_perms(request, post=True, instance=booking)
-            form = BookingForm(location, request.POST, instance=booking)
-            if form.is_valid():
-                logger.debug("BookingEdit: Valid Form")
-
-                # if the dates have been changed, and the booking isn't
-                # still pending to begin with, notify an admin and go back to
-                # pending.
-                logger.debug("is_pending: %s" % booking.is_pending())
-                logger.debug("arrive: %s, original: %s" % (booking.arrive, original_arrive))
-                logger.debug("depart: %s, original: %s" % (booking.depart, original_depart))
-                logger.debug("room: %s, original: %s" % (booking.resource, original_room))
-                if (
-                    not booking.is_pending() and
-                    (
-                        booking.arrive != original_arrive or
-                        booking.depart != original_depart or
-                        booking.room != original_room
-                    )
-                ):
-                    logger.debug("booking room or date was changed. updating status.")
-                    booking.pending()
-                    # notify house_admins by email
-                    try:
-                        updated_booking_notify(booking)
-                    except:
-                        logger.debug("Booking %d was updated but admin notification failed to send" % booking.id)
-                    client_msg = 'The booking was updated and the new information will be reviewed for availability.'
-                else:
-                    client_msg = 'The booking was updated.'
-                # save the instance *after* the status has been updated as needed.
-                form.save()
-                messages.add_message(request, messages.INFO, client_msg)
-                return HttpResponseRedirect(reverse("booking_detail", args=(location.slug, booking_id)))
-        else:
-            # form = get_booking_form_for_perms(request, post=False, instance=booking)
-            form = BookingForm(location, instance=booking)
-
-        return render(
-            request,
-            'booking_edit.html',
-            {
-                'form': form,
-                'booking_id': booking_id,
-                'arrive': booking.arrive,
-                'depart': booking.depart,
-                'is_house_admin': is_house_admin,
-                'max_days': location.max_booking_days,
-                'location': location
-            }
-        )
-    else:
-        return HttpResponseRedirect("/")
-
-
-@login_required
-def BookingConfirm(request, booking_id, location_slug):
-    booking = Booking.objects.get(id=booking_id)
-    if not (
-        request.user.is_authenticated() and
-        request.user == booking.user and
-        request.method == "POST" and
-        booking.is_approved()
-    ):
-        return HttpResponseRedirect("/")
-
-    if not booking.user.profile.customer_id:
-        messages.add_message(request, messages.INFO, 'Please enter payment information to confirm your booking.')
-    else:
-        try:
-            payment_gateway.charge_booking(booking)
-            booking.confirm()
-            send_booking_receipt(booking)
-            # if booking start date is sooner than WELCOME_EMAIL_DAYS_AHEAD,
-            # need to send them house info manually.
-            days_until_arrival = (booking.arrive - datetime.date.today()).days
-            if days_until_arrival <= booking.location.welcome_email_days_ahead:
-                guest_welcome(booking)
-
-            messages.add_message(
-                request,
-                messages.INFO,
-                'Thank you! Your payment has been received and a receipt emailed to you at %s' % booking.user.email)
-        except stripe.CardError, e:
-            messages.add_message(
-                request,
-                messages.WARNING,
-                'Drat, it looks like there was a problem with your card: %s. Please add a different card on your ' +
-                '<a href="/people/%s/edit/">profile</a>.' % (booking.user.username, e)
-            )
-
-    return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking.id)))
-
-
-@login_required
-def BookingCancel(request, booking_id, location_slug):
-    if not request.method == "POST":
-        return HttpResponseRedirect("/404")
-
-    location = get_object_or_404(Location, slug=location_slug)
-    booking = Booking.objects.get(id=booking_id)
-    if (
-        not (
-            request.user.is_authenticated() and
-            request.user == booking.user
-        ) and
-        request.user not in location.house_admins.all()
-    ):
-        return HttpResponseRedirect("/404")
-
-    redirect = request.POST.get("redirect")
-
-    booking.cancel()
-    messages.add_message(request, messages.INFO, 'The booking has been cancelled.')
-    username = booking.user.username
-    return HttpResponseRedirect(redirect)
-
-
-@login_required
-def BookingDelete(request, booking_id, location_slug):
-    booking = Booking.objects.get(id=booking_id)
-    if (
-        request.user.is_authenticated() and
-        request.user == booking.user and
-        request.method == "POST"
-    ):
-        booking.cancel()
-
-        messages.add_message(request, messages.INFO, 'Your booking has been cancelled.')
-        username = booking.user.username
-        return HttpResponseRedirect("/people/%s" % username)
-
-    else:
-        return HttpResponseRedirect("/")
-
-    html += "</div>"
-    return HttpResponse(html)
 
 
 @house_admin_required
@@ -1554,8 +1226,8 @@ def LocationEditRoom(request, location_slug, room_id):
     location = get_object_or_404(Location, slug=location_slug)
     resources = location.resources.all().order_by('name')
     room = Resource.objects.get(pk=room_id)
-    resource_availability = SerializedResourceAvailability(room, timezone.localtime(timezone.now()))
-    resource_availability_as_dict = json.dumps(resource_availability.as_dict())
+    resource_capacity = SerializedResourceCapacity(room, timezone.localtime(timezone.now()))
+    resource_capacity_as_dict = json.dumps(resource_capacity.as_dict())
 
     print request.method
     if request.method == 'POST':
@@ -1583,7 +1255,7 @@ def LocationEditRoom(request, location_slug, room_id):
             'form': form,
             'room_id': room_id,
             'rooms': resources,
-            'room_availability': resource_availability_as_dict
+            'room_capacity': resource_capacity_as_dict
         }
     )
 
@@ -1604,7 +1276,7 @@ def LocationNewRoom(request, location_slug):
             return HttpResponseRedirect(reverse('location_edit_room', args=(location.slug, new_room.id,)))
     else:
         form = LocationRoomForm()
-        resource_availability = SerializedNullResourceAvailability()
+        resource_capacity = SerializedNullResourceCapacity()
 
     return render(
         request,
@@ -1613,7 +1285,7 @@ def LocationNewRoom(request, location_slug):
             'location': location,
             'form': form,
             'rooms': resources,
-            'room_availability': resource_availability
+            'room_capacity': resource_capacity
         }
     )
 
@@ -1645,7 +1317,7 @@ def BookingManageList(request, location_slug):
     if request.method == "POST":
         booking_id = request.POST.get('booking_id')
         booking = get_object_or_404(Booking, id=booking_id)
-        return HttpResponseRedirect(reverse('booking_manage', args=(booking.location.slug, booking.id)))
+        return HttpResponseRedirect(reverse('booking_manage', args=(booking.use.location.slug, booking.id)))
 
     location = get_object_or_404(Location, slug=location_slug)
 
@@ -1653,16 +1325,16 @@ def BookingManageList(request, location_slug):
     if 'show_all' in request.GET and request.GET.get('show_all') == "True":
         show_all = True
 
-    pending = Booking.objects.filter(location=location).filter(status="pending").order_by('-id')
-    approved = Booking.objects.filter(location=location).filter(status="approved").order_by('-id')
-    confirmed = Booking.objects.filter(location=location).filter(status="confirmed").order_by('-id')
-    canceled = Booking.objects.filter(location=location).exclude(status="confirmed") \
-                          .exclude(status="approved").exclude(status="pending").order_by('-id')
+    pending = Booking.objects.filter(use__location=location).filter(use__status="pending").order_by('-id')
+    approved = Booking.objects.filter(use__location=location).filter(use__status="approved").order_by('-id')
+    confirmed = Booking.objects.filter(use__location=location).filter(use__status="confirmed").order_by('-id')
+    canceled = Booking.objects.filter(use__location=location).exclude(use__status="confirmed").exclude(use__status="approved").exclude(use__status="pending").order_by('-id')
+
     if not show_all:
         today = timezone.localtime(timezone.now())
-        confirmed = confirmed.filter(depart__gt=today)
-        canceled = canceled.filter(depart__gt=today)
-    owing = Booking.objects.confirmed_but_unpaid(location=location)
+        confirmed = confirmed.filter(use__depart__gt=today)
+        canceled = canceled.filter(use__depart__gt=today)
+    owing = Use.objects.confirmed_but_unpaid(location=location)
 
     return render(
         request,
@@ -1696,12 +1368,13 @@ def BookingManageCreate(request, location_slug):
 
         form = AdminBookingForm(request.POST)
         if form.is_valid():
-            booking = form.save(commit=False)
-            booking.location = location
-            booking.user = the_user
-            booking.status = request.POST.get('status')
-            booking.save()
+            use = form.save(commit=False)
+            use.location = location
+            use.user = the_user
+            use.status = request.POST.get('status')
+            use.save()
             # Make sure the rate is set and then generate a bill
+            booking = Booking(use=use)
             booking.reset_rate()
             if notify:
                 new_booking_notify(booking)
@@ -1709,7 +1382,7 @@ def BookingManageCreate(request, location_slug):
             messages.add_message(
                 request,
                 messages.INFO,
-                "The booking for %s %s was created." % (booking.user.first_name, booking.user.last_name)
+                "The booking for %s %s was created." % (use.user.first_name, use.user.last_name)
             )
             return HttpResponseRedirect(reverse('booking_manage', args=(location.slug, booking.id)))
         else:
@@ -1734,15 +1407,15 @@ def BookingManageCreate(request, location_slug):
 def BookingManage(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = get_object_or_404(Booking, id=booking_id)
-    user = User.objects.get(username=booking.user.username)
-    other_bookings = Booking.objects.filter(user=user).exclude(status='deleted').exclude(id=booking_id)
+    user = User.objects.get(username=booking.use.user.username)
+    other_bookings = Booking.objects.filter(use__user=user).exclude(use__status='canceled').exclude(id=booking_id)
     past_bookings = []
     upcoming_bookings = []
-    for res in other_bookings:
-        if res.arrive >= datetime.date.today():
-            upcoming_bookings.append(res)
+    for b in other_bookings:
+        if b.use.arrive >= datetime.date.today():
+            upcoming_bookings.append(b)
         else:
-            past_bookings.append(res)
+            past_bookings.append(b)
     domain = Site.objects.get_current().domain
     emails = EmailTemplate.objects.filter(context='booking').filter(Q(shared=True) | Q(creator=request.user))
     email_forms = []
@@ -1752,24 +1425,24 @@ def BookingManage(request, location_slug, booking_id):
         email_forms.append(form)
         email_templates_by_name.append(email_template.name)
 
-    availability = location.availability(booking.arrive, booking.depart)
-    free = location.rooms_free(booking.arrive, booking.depart)
-    date_list = date_range_to_list(booking.arrive, booking.depart)
-    if booking.resource in free:
-        room_has_availability = True
+    capacity = location.capacity(booking.use.arrive, booking.use.depart)
+    free = location.rooms_free(booking.use.arrive, booking.use.depart)
+    date_list = date_range_to_list(booking.use.arrive, booking.use.depart)
+    if booking.use.resource in free:
+        room_has_capacity = True
     else:
-        room_has_availability = False
+        room_has_capacity = False
 
     # Pull all the booking notes for this person
     if 'note' in request.POST:
         note = request.POST['note']
         if note:
-            BookingNote.objects.create(booking=booking, created_by=request.user, note=note)
+            UseNote.objects.create(use=booking.use, created_by=request.user, note=note)
             # The Right Thing is to do an HttpResponseRedirect after a form
             # submission, which clears the POST request data (even though we
             # are redirecting to the same view)
             return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
-    booking_notes = BookingNote.objects.filter(booking=booking)
+    use_notes = UseNote.objects.filter(use=booking.use)
 
     # Pull all the user notes for this person
     if 'user_note' in request.POST:
@@ -1785,13 +1458,13 @@ def BookingManage(request, location_slug, booking_id):
         "past_bookings": past_bookings,
         "upcoming_bookings": upcoming_bookings,
         "user_notes": user_notes,
-        "booking_notes": booking_notes,
+        "use_notes": use_notes,
         "email_forms": email_forms,
-        "booking_statuses": Booking.BOOKING_STATUSES,
+        "use_statuses": Use.USE_STATUSES,
         "email_templates_by_name": email_templates_by_name,
         "days_before_welcome_email": location.welcome_email_days_ahead,
-        "room_has_availability": room_has_availability,
-        "avail": availability,
+        "room_has_capacity": room_has_capacity,
+        "avail": capacity,
         "dates": date_list,
         "domain": domain,
         'location': location,
@@ -1811,7 +1484,7 @@ def BookingManageAction(request, location_slug, booking_id):
         booking.approve()
     elif booking_action == 'set-confirm':
         booking.confirm()
-        days_until_arrival = (booking.arrive - datetime.date.today()).days
+        days_until_arrival = (booking.use.arrive - datetime.date.today()).days
         if days_until_arrival <= location.welcome_email_days_ahead:
             guest_welcome(booking)
     elif booking_action == 'set-comp':
@@ -1821,7 +1494,7 @@ def BookingManageAction(request, location_slug, booking_id):
             payment_gateway.charge_booking(booking)
             booking.confirm()
             send_booking_receipt(booking)
-            days_until_arrival = (booking.arrive - datetime.date.today()).days
+            days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
                 guest_welcome(booking)
         except stripe.CardError, e:
@@ -1846,8 +1519,8 @@ def BookingManageEdit(request, location_slug, booking_id):
     if 'username' in request.POST:
         try:
             new_user = User.objects.get(username=request.POST.get("username"))
-            booking.user = new_user
-            booking.save()
+            booking.use.user = new_user
+            booking.use.save()
             messages.add_message(request, messages.INFO, "User changed.")
         except:
             messages.add_message(request, messages.INFO, "Invalid user given!")
@@ -1858,9 +1531,9 @@ def BookingManageEdit(request, location_slug, booking_id):
             if arrive >= depart:
                 messages.add_message(request, messages.INFO, "Arrival must be at least 1 day before Departure.")
             else:
-                booking.arrive = arrive
-                booking.depart = depart
-                booking.save()
+                booking.use.arrive = arrive
+                booking.use.depart = depart
+                booking.use.save()
                 booking.generate_bill()
                 messages.add_message(request, messages.INFO, "Dates changed.")
         except:
@@ -1869,8 +1542,8 @@ def BookingManageEdit(request, location_slug, booking_id):
     elif 'status' in request.POST:
         try:
             status = request.POST.get("status")
-            booking.status = status
-            booking.save()
+            booking.use.status = status
+            booking.use.save()
             if status == "confirmed":
                 messages.add_message(request, messages.INFO, "Status changed. You must manually send a confirmation email if desired.")
             else:
@@ -1880,8 +1553,8 @@ def BookingManageEdit(request, location_slug, booking_id):
     elif 'room_id' in request.POST:
         try:
             new_room = Resource.objects.get(pk=request.POST.get("room_id"))
-            booking.resource = new_room
-            booking.save()
+            booking.use.resource = new_room
+            booking.use.save()
             booking.reset_rate()
             messages.add_message(request, messages.INFO, "Room changed.")
         except:
@@ -2283,36 +1956,6 @@ def PeopleDaterangeQuery(request, location_slug):
     html = html.strip(", ")
 
 
-@login_required
-def BookingReceipt(request, location_slug, booking_id):
-    location = get_object_or_404(Location, slug=location_slug)
-    booking = get_object_or_404(Booking, id=booking_id)
-    if request.user != booking.user or location != booking.location:
-        if not request.user.is_staff:
-            return HttpResponseRedirect("/404")
-
-    # I want to render the receipt exactly like we do in the email
-    htmltext = get_template('emails/receipt.html')
-    c = Context({
-        'today': timezone.localtime(timezone.now()),
-        'user': booking.user,
-        'location': booking.location,
-        'booking': booking,
-        'booking_url': "https://" + Site.objects.get_current().domain + booking.get_absolute_url()
-        })
-    receipt_html = htmltext.render(c)
-
-    return render(
-        request,
-        'booking_receipt.html',
-        {
-            'receipt_html': receipt_html,
-            'booking': booking,
-            'location': location
-        }
-    )
-
-
 def submit_payment(request, booking_uuid, location_slug):
     booking = Booking.objects.get(uuid=booking_uuid)
     location = get_object_or_404(Location, slug=location_slug)
@@ -2360,8 +2003,8 @@ def submit_payment(request, booking_uuid, location_slug):
                     send_booking_receipt(booking, send_to=pay_email)
 
                     # XXX TODO need a way to check if this has already been sent :/
-                    days_until_arrival = (booking.arrive - datetime.date.today()).days
-                    if days_until_arrival <= booking.location.welcome_email_days_ahead:
+                    days_until_arrival = (booking.use.arrive - datetime.date.today()).days
+                    if days_until_arrival <= booking.use.location.welcome_email_days_ahead:
                         guest_welcome(booking)
                     messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)
                 else:
@@ -2445,7 +2088,7 @@ def payments(request, location_slug, year, month):
     # should make this explicit in some way.
 
     booking_payments_this_month = Payment.objects.booking_payments_by_location(location) \
-                                             .filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
+                                         .filter(payment_date__gte=start, payment_date__lte=end).order_by('payment_date').reverse()
     for p in booking_payments_this_month:
         # pull out the values we call multiple times to make this faster
         p_to_house = p.to_house()
@@ -2567,24 +2210,27 @@ def process_unsaved_booking(request):
         logger.debug('found booking')
         logger.debug(request.session['booking'])
         details = request.session.pop('booking')
-        new_res = Booking(
+        use = Use(
             arrive=datetime.date(details['arrive']['year'], details['arrive']['month'], details['arrive']['day']),
             depart=datetime.date(details['depart']['year'], details['depart']['month'], details['depart']['day']),
             location=Location.objects.get(id=details['location']['id']),
             resource=Resource.objects.get(id=details['resource']['id']),
             purpose=details['purpose'],
             arrival_time=details['arrival_time'],
-            comments=details['comments'],
             user=request.user,
         )
-        new_res.save()
-        new_res.reset_rate()
-        new_res.generate_bill()
-        logger.debug('new booking %d saved.' % new_res.id)
-        new_booking_notify(new_res)
+        use.save()
+        comment = details['comments']
+        booking = Booking(use=use, comments=comment)
+        # reset rate calls set_rate which calls generate_bill
+        booking.reset_rate()
+        booking.save()
+
+        logger.debug('new booking %d saved.' % booking.id)
+        new_booking_notify(booking)
         # we can't just redirect here because the user doesn't get logged
         # in. so save the reservaton ID and redirect below.
-        request.session['new_res_redirect'] = {'res_id': new_res.id, 'location_slug': new_res.location.slug}
+        request.session['new_booking_redirect'] = {'booking_id': booking.id, 'location_slug': booking.use.location.slug}
     else:
         logger.debug("no booking found")
     return
@@ -2616,15 +2262,15 @@ def user_login(request):
 
             process_unsaved_booking(request)
             # if there was a pending booking redirect to the booking page
-            if request.session.get('new_res_redirect'):
-                res_id = request.session['new_res_redirect']['res_id']
-                location_slug = request.session['new_res_redirect']['location_slug']
-                request.session.pop('new_res_redirect')
+            if request.session.get('new_booking_redirect'):
+                booking_id = request.session['new_booking_redirect']['booking_id']
+                location_slug = request.session['new_booking_redirect']['location_slug']
+                request.session.pop('new_booking_redirect')
                 messages.add_message(
                     request, messages.INFO,
                     'Thank you! Your booking has been submitted. Please allow us up to 24 hours to respond.'
                 )
-                return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, res_id)))
+                return HttpResponseRedirect(reverse('booking_detail', args=(location_slug, booking_id)))
 
             # this is where they go on successful login if there is not pending booking
             if not next_page or len(next_page) == 0 or "logout" in next_page:

@@ -2,15 +2,15 @@ import React, {PropTypes} from 'react'
 import QuantityIndicator from './QuantityIndicator'
 var moment = require('moment');
 
-export default class CurrentAvailability extends React.Component {
+export default class CurrentCapacity extends React.Component {
   static propTypes = {
-    availability: PropTypes.shape({
+    capacity: PropTypes.shape({
       quantity: PropTypes.number.isRequired
     })
   }
 
   quantity() {
-    return this.props.availability ? this.props.availability.quantity : 0
+    return this.props.capacity ? this.props.capacity.quantity : 0
   }
 
   renderQuantityIndicator(quantity) {
@@ -20,16 +20,16 @@ export default class CurrentAvailability extends React.Component {
   renderDescription() {
     const quantity = this.quantity();
 
-    return <p>
+    return (<p>
       Currently accepts {this.renderQuantityIndicator(quantity)} bookings
       at a time
-    </p>
+    </p>)
   }
 
   render() {
     return (
       <div style={{fontSize: "150%"}}>
-        <h3>Availability</h3>
+        <h3>Capacity</h3>
         {this.renderDescription()}
       </div>
     )

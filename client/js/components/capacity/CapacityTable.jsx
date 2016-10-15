@@ -2,7 +2,7 @@ import React, {PropTypes} from 'react'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group'
 var moment = require('moment');
 
-export default class AvailabilityTable extends React.Component {
+export default class CapacityTable extends React.Component {
   static propTypes = {
     onDelete: PropTypes.func.isRequired
   }
@@ -19,17 +19,17 @@ export default class AvailabilityTable extends React.Component {
   }
 
   render() {
-    const availabilities = this.props.availabilities;
+    const capacities = this.props.capacities;
 
-    const rows = availabilities.map((availiability) => {
-      const desc = `${availiability.quantity}`
+    const rows = capacities.map((capacity) => {
+      const desc = `${capacity.quantity}`
       const onDelete = (event) => {
         event.preventDefault();
-        this.props.onDelete(availiability.id);
+        this.props.onDelete(capacity.id);
       }
       return (
-        <tr key={availiability.id}>
-          <td>{this.formatDate(availiability.start_date)}</td>
+        <tr key={capacity.id}>
+          <td>{this.formatDate(capacity.start_date)}</td>
           <td><span className="text-success" style={{backgroundColor: "#DDDDDD", border: "1px solid #3c763d", display: "inline-block", padding: "0 6px", borderRadius: "4px"}}>{desc}</span></td>
           <td><a onClick={onDelete} href="#"><i className="fa fa-trash pull-right" /></a></td>
         </tr>
@@ -41,11 +41,11 @@ export default class AvailabilityTable extends React.Component {
         <div className="panel-heading">
           <h4>Upcoming changes</h4>
         </div>
-        <table className="table table-striped availabilities-table">
+        <table className="table table-striped capacities-table">
           <thead>
             <tr>
               <th>On</th>
-              <th>Availability changes to</th>
+              <th>Capacity changes to</th>
               <th></th>
             </tr>
           </thead>

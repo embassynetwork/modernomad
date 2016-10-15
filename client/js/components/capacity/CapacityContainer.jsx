@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
-import AvailabilityManager from './AvailabilityManager'
-import ErrorDisplay from './ErrorDisplay'
+import CapacityManager from './CapacityManager'
+import ErrorDisplay from '../generic/ErrorDisplay'
 import _ from 'lodash'
 import axios from 'axios'
 import moment from 'moment'
@@ -8,12 +8,12 @@ import moment from 'moment'
 axios.defaults.xsrfCookieName = "csrftoken"
 axios.defaults.xsrfHeaderName = "X-CSRFToken"
 
-export default class AvailabilityContainer extends React.Component {
+export default class CapacityContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       ...props,
-      upcomingAvailabilities: this.sortedAvailabilities(props.upcomingAvailabilities),
+      upcomingCapacities: this.sortedCapacities(props.upcomingCapacities),
       formLoading: false
     }
   }
@@ -22,10 +22,10 @@ export default class AvailabilityContainer extends React.Component {
     resourceId: PropTypes.number.isRequired
   }
 
-  addAvailability(values) {
+  addCapacity(values) {
     this.setState({formLoading: true})
 
-    axios.post(`/api/availabilities/`, {
+    axios.post(`/api/capacities/`, {
         start_date: moment(values.start_date).format("Y-MM-DD"),
         quantity: values.quantity,
         resource: this.props.resourceId
@@ -33,7 +33,7 @@ export default class AvailabilityContainer extends React.Component {
       .then((response) => {
         this.setState({formLoading: false, errors: null, warnings: response.data.warnings})
         if (response.data.data) {
-          this.insertAvailability(response.data.data)
+          this.insertCapacity(response.data.data)
         }
       })
       .catch((error) => {
@@ -54,34 +54,34 @@ export default class AvailabilityContainer extends React.Component {
     this.setState({warnings: warnings})
   }
 
-  triggerDelete(availabilityId) {
-    axios.delete(`/api/availability/${availabilityId}`)
+  triggerDelete(capacityId) {
+    axios.delete(`/api/capacity/${capacityId}`)
       .then((response) => {
-        this.deleteAvailability(response.data.data.deleted.availabilities)
+        this.deleteCapacity(response.data.data.deleted.capacities)
       })
       .catch((error) => {
         console.log("error occured in delete", error);
       });
   }
 
-  sortedAvailabilities(availabilities) {
-    return _.sortBy(availabilities, (availability) => {
-      return moment(availability.start_date)
+  sortedCapacities(capacities) {
+    return _.sortBy(capacities, (capacity) => {
+      return moment(capacity.start_date)
     })
   }
 
-  insertAvailability(availability) {
-    const withoutExisting = _.reject(this.state.upcomingAvailabilities, {id: availability.id})
-    const newCollection = this.sortedAvailabilities([...withoutExisting, availability])
+  insertCapacity(capacity) {
+    const withoutExisting = _.reject(this.state.upcomingCapacities, {id: capacity.id})
+    const newCollection = this.sortedCapacities([...withoutExisting, capacity])
     this.setState({
-      upcomingAvailabilities: newCollection
+      upcomingCapacities: newCollection
     })
   }
 
-  deleteAvailability(deleted_availabilities) {
+  deleteCapacity(deleted_capacities) {
     this.setState({
-        upcomingAvailabilities: _.reject(this.state.upcomingAvailabilities, (availability) => {
-          return _.includes(deleted_availabilities, availability.id)
+        upcomingCapacities: _.reject(this.state.upcomingCapacities, (capacity) => {
+          return _.includes(deleted_capacities, capacity.id)
         })
     })
   }
@@ -89,11 +89,11 @@ export default class AvailabilityContainer extends React.Component {
   render() {
     return (
       <div>
-        <AvailabilityManager
-          currentAvailability={this.state.currentAvailability}
-          upcomingAvailabilities={this.state.upcomingAvailabilities}
+        <CapacityManager
+          currentCapacity={this.state.currentCapacity}
+          upcomingCapacities={this.state.upcomingCapacities}
           formLoading={this.state.formLoading}
-          onSubmitNew={this.addAvailability.bind(this)}
+          onSubmitNew={this.addCapacity.bind(this)}
           onDelete={this.triggerDelete.bind(this)} />
         {this.state.errors && <ErrorDisplay errors={this.state.errors} category="danger" />}
         {this.state.warnings && <ErrorDisplay errors={this.state.warnings} category="warning" />}

@@ -1,37 +1,37 @@
 <table class="dataTable table table-striped booking-list">
-	<thead>
-		<tr>
-			<th></th>
-			<th>User</th>
-			<th>Start Date</th>
-			<th>End Date</th>
-			<th>Rate</th>
-			<th>Next Billing Cycle</th>
-			<th>Current</th>
-		</tr>
-	</thead>
-	<tbody>
-			{% for s in subscriptions %}
-				<tr class="{% cycle 'row-even' 'row-odd' %}">
-					<td>
-						<a href="{% url 'subscription_manage_detail' location.slug s.id %}">Detail</a>
-					</td>
-					<td>
-						<a href="{% url 'user_detail' s.user.username %}">{{ s.user.get_full_name|truncatechars:16 }}</a> 
-					</td>
-					<td>{{s.start_date}}</td>
-					<td>{{s.end_date}}</td>
-					<td>{{s.price}}</td>
-					<td>{{s.get_next_period_start}}</td>
-					<td>
-						{% if s.has_unpaid_bills %}
-							<span class="text-danger glyphicon glyphicon-exclamation-sign"></span>
-						{% else %}
-							<span class="text-success glyphicon glyphicon-ok"></span>
-						{% endif %}
-					</td>
-				</tr>
-			{% endfor %}
-	</tbody>
+    <thead>
+        <tr>
+            <th></th>
+            <th>User</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Rate</th>
+            <th>Next Billing Cycle</th>
+            <th>Current</th>
+        </tr>
+    </thead>
+    <tbody>
+            {% for s in subscriptions %}
+                <tr class="{% cycle 'row-even' 'row-odd' %}">
+                    <td>
+                        <a href="{% url 'subscription_manage_detail' location.slug s.id %}">Detail</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'user_detail' s.user.username %}">{{ s.user.get_full_name|truncatechars:16 }}</a> 
+                    </td>
+                    <td>{{s.start_date}}</td>
+                    <td>{{s.end_date}}</td>
+                    <td>{{s.price}}</td>
+                    <td>{{s.get_next_period_start}}</td>
+                    <td>
+                        {% if s.has_unpaid_bills %}
+                            <span class="text-danger glyphicon glyphicon-exclamation-sign"></span>
+                        {% else %}
+                            <span class="text-success glyphicon glyphicon-ok"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+    </tbody>
 </table>
 

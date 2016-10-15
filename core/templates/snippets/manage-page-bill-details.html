@@ -1,82 +1,82 @@
-	<table id="bill-details" class="table">
-		<thead>
-			<th>Description</th>
-			<th class="money">Paid by<br>House</th>
-			<th class="money">Paid by<br>User&nbsp;&nbsp;</th>
-		</thead>
-		{% for item in bill.subtotal_items %}
-			<tr class="bill-line-item">
-				<td>
-					{% if item.custom %}
-						<form method="post" id="remove-line-item-{{item.id}}" action="{% url 'delete_bill_item' location.slug bill.id %}"> {% csrf_token %}
-							<a class="remove-line-item" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
-							<input type="hidden" name="payment_id" value="{{item.id}}">
-							{{ item.description }}
-						</form>
-					{% else %}
-						{{ item.description }}
-					{% endif %} 
-				</td>
-				<td></td>
-				<td class="money">${{ item.amount|floatformat:2 }}</td>
-			</tr>
-		{% endfor %}
-		<tr class="total-row">
-			<td></td>
-			<td class="money">Subtotal</td>
-			<td class="money">${{ bill.subtotal_amount|floatformat:2 }}</td>
-		</tr>
-		{% for item in bill.fees %}
-			{% if not item.paid_by_house %}
-				<tr class="bill-line-item">
-					<td>
-						<form method="post" id="remove-line-item-{{item.id}}" action="{% url 'delete_bill_item' location.slug bill.id %}"> {% csrf_token %}
-							<a class="remove-fee" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
-							<input type="hidden" name="payment_id" value="{{item.id}}">
-							{{ item.description }}
-						</form>
-					</td>
-					<td>{{ item.description }}</td>
-					<td class="money">${{ item.amount|floatformat:2 }}</td>
-				</tr>
-			{% endif %}
-		{% endfor %}
-		<tr class="total-row">
-			<td></td>
-			<td class="money">Total</td>
-			<td class="money">${{ bill.amount|floatformat:2 }}</td>
-		</tr>
-		{% for item in bill.fees %}
-			{% if item.paid_by_house %}
-				<tr class="bill-line-item">
-					<td class="paid-by-house text-danger"><em>{{ item.description }} Fee</em></td>
-					<td class="money"><span class="text-danger"><em>${{ item.amount|floatformat:2 }}</em></span></td>
-				</tr>
-			{% endif %}
-		{% endfor %}
+    <table id="bill-details" class="table">
+        <thead>
+            <th>Description</th>
+            <th class="money">Paid by<br>House</th>
+            <th class="money">Paid by<br>User&nbsp;&nbsp;</th>
+        </thead>
+        {% for item in bill.subtotal_items %}
+            <tr class="bill-line-item">
+                <td>
+                    {% if item.custom %}
+                        <form method="post" id="remove-line-item-{{item.id}}" action="{% url 'delete_bill_item' location.slug bill.id %}"> {% csrf_token %}
+                            <a class="remove-line-item" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
+                            <input type="hidden" name="payment_id" value="{{item.id}}">
+                            {{ item.description }}
+                        </form>
+                    {% else %}
+                        {{ item.description }}
+                    {% endif %} 
+                </td>
+                <td></td>
+                <td class="money">${{ item.amount|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+        <tr class="total-row">
+            <td></td>
+            <td class="money">Subtotal</td>
+            <td class="money">${{ bill.subtotal_amount|floatformat:2 }}</td>
+        </tr>
+        {% for item in bill.fees %}
+            {% if not item.paid_by_house %}
+                <tr class="bill-line-item">
+                    <td>
+                        <form method="post" id="remove-line-item-{{item.id}}" action="{% url 'delete_bill_item' location.slug bill.id %}"> {% csrf_token %}
+                            <a class="remove-fee" href="" type="submit"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a> 
+                            <input type="hidden" name="payment_id" value="{{item.id}}">
+                            {{ item.description }}
+                        </form>
+                    </td>
+                    <td>{{ item.description }}</td>
+                    <td class="money">${{ item.amount|floatformat:2 }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        <tr class="total-row">
+            <td></td>
+            <td class="money">Total</td>
+            <td class="money">${{ bill.amount|floatformat:2 }}</td>
+        </tr>
+        {% for item in bill.fees %}
+            {% if item.paid_by_house %}
+                <tr class="bill-line-item">
+                    <td class="paid-by-house text-danger"><em>{{ item.description }} Fee</em></td>
+                    <td class="money"><span class="text-danger"><em>${{ item.amount|floatformat:2 }}</em></span></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
 
-		{% for payment in bill.time_ordered_payments %}
-		<tr class="a-room-fee">
-			<td>
-				{% if payment.paid_amount > 0 %}
-					Payment: 
-				{% else %}
-					Refund: 
-				{% endif %}
-				{{ payment.payment_date }} 
-				{% if payment.last4 %}(***{{payment.last4}}){% elif payment.payment_method %}({{payment.payment_method}}){% endif %}
-			</td>
-			<td></td>
-			<td class="money">-${{ payment.paid_amount|floatformat:2 }}</td> 
-		</tr>
-		{% endfor %}
-		
-		<tr class="a-room-fee">
-			<td><strong>Total Owed</strong></td>
-			<td></td>
-			<td><strong><span id="booking-total" class="{{total_owed_color}} pull-right">${{bill.total_owed}} </span></strong></td>
-		</tr>
+        {% for payment in bill.time_ordered_payments %}
+        <tr class="a-room-fee">
+            <td>
+                {% if payment.paid_amount > 0 %}
+                    Payment: 
+                {% else %}
+                    Refund: 
+                {% endif %}
+                {{ payment.payment_date }} 
+                {% if payment.last4 %}(***{{payment.last4}}){% elif payment.payment_method %}({{payment.payment_method}}){% endif %}
+            </td>
+            <td></td>
+            <td class="money">-${{ payment.paid_amount|floatformat:2 }}</td> 
+        </tr>
+        {% endfor %}
+        
+        <tr class="a-room-fee">
+            <td><strong>Total Owed</strong></td>
+            <td></td>
+            <td><strong><span id="booking-total" class="{{total_owed_color}} pull-right">${{bill.total_owed}} </span></strong></td>
+        </tr>
 
-	</table>
+    </table>
 
 

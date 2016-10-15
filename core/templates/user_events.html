@@ -2,11 +2,11 @@
 
 {% block user_content_area %}
 
-	{% if u == user or user_is_house_admin_somewhere %}
-	
-		<h3>Recent Events</h3>
-		{% include "snippets/user_events_list.html" %}
+    {% if u == user or user_is_house_admin_somewhere %}
+    
+        <h3>Recent Events</h3>
+        {% include "snippets/user_events_list.html" %}
 
-	{% endif %}
+    {% endif %}
 
 {% endblock %}

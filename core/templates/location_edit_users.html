@@ -3,139 +3,139 @@
 {% block sub-content %}
 
 <div class="top-spacer">
-	<strong>Add New Admin</strong>
-	<form method="post" action=".">
-		{% csrf_token %}
-		<div class="row ui-widget">
-			<div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="admin-username" name="admin_username"/></div>
-			<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
-		</div>
-	</form>
+    <strong>Add New Admin</strong>
+    <form method="post" action=".">
+        {% csrf_token %}
+        <div class="row ui-widget">
+            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="admin-username" name="admin_username"/></div>
+            <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
+        </div>
+    </form>
 </div>
 
 <div class="top-spacer">
-	<strong>Current Admins</strong>
-	{% for u in location.house_admins.all %}
-		<form method="post" action=".">
-			<input type="hidden" name="admin_username" value="{{ u.username }}"/>
-			<div class="row sm-row-spacer">
-				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
-				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
-			</div>
-			{% csrf_token %}
-		</form>
-	{% endfor %}
+    <strong>Current Admins</strong>
+    {% for u in location.house_admins.all %}
+        <form method="post" action=".">
+            <input type="hidden" name="admin_username" value="{{ u.username }}"/>
+            <div class="row sm-row-spacer">
+                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
+            </div>
+            {% csrf_token %}
+        </form>
+    {% endfor %}
 </div>
 
 <hr>
 
 <div>
-	<strong>Add New Resident</strong>
-	<form method="post" action=".">
-		{% csrf_token %}
-		<div class="row ui-widget">
-			<div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="resident-username" name="resident_username"/></div>
-			<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
-		</div>
-	</form>
+    <strong>Add New Resident</strong>
+    <form method="post" action=".">
+        {% csrf_token %}
+        <div class="row ui-widget">
+            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="resident-username" name="resident_username"/></div>
+            <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
+        </div>
+    </form>
 </div>
 
 <div class="top-spacer">
-	<strong>Current Residents</strong>
-	{% for u in location.residents.all %}
-		<form method="post" action=".">
-			<input type="hidden" name="resident_username" value="{{ u.username }}"/>
-			<div class="row sm-row-spacer">
-				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
-				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
-			</div>
-			{% csrf_token %}
-		</form>
-	{% endfor %}
+    <strong>Current Residents</strong>
+    {% for u in location.residents.all %}
+        <form method="post" action=".">
+            <input type="hidden" name="resident_username" value="{{ u.username }}"/>
+            <div class="row sm-row-spacer">
+                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
+            </div>
+            {% csrf_token %}
+        </form>
+    {% endfor %}
 </div>
 
 <hr>
 
 <div>
-	<strong>Add New Event Admin</strong>
-	<form method="post" action=".">
-		{% csrf_token %}
-		<div class="row ui-widget">
-			<div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="event-admin-username" name="event_admin_username"/></div>
-			<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
-		</div>
-	</form>
+    <strong>Add New Event Admin</strong>
+    <form method="post" action=".">
+        {% csrf_token %}
+        <div class="row ui-widget">
+            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="event-admin-username" name="event_admin_username"/></div>
+            <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
+        </div>
+    </form>
 </div>
 
 <div class="top-spacer">
-	<strong>Current Event Admins</strong>
-	{% for u in location.event_admin_group.users.all %}
-		<form method="post" action=".">
-			<input type="hidden" name="event_admin_username" value="{{ u.username }}"/>
-			<div class="row sm-row-spacer">
-				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
-				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
-			</div>
-			{% csrf_token %}
-		</form>
-	{% endfor %}
+    <strong>Current Event Admins</strong>
+    {% for u in location.event_admin_group.users.all %}
+        <form method="post" action=".">
+            <input type="hidden" name="event_admin_username" value="{{ u.username }}"/>
+            <div class="row sm-row-spacer">
+                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
+            </div>
+            {% csrf_token %}
+        </form>
+    {% endfor %}
 </div>
 
 <hr>
 
 <div>
-	<strong>Add New Readonly Admin</strong>
-	<p>Readonly admins do not show up as residents or admins, and do not receive emails. They can view the payments, occupancy, calendar, and booking detail (not manage) pages.</p>
-	<form method="post" action=".">
-		{% csrf_token %}
-		<div class="row ui-widget">
-			<div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="readonly-admin-username" name="readonly_admin_username"/></div>
-			<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
-		</div>
-	</form>
+    <strong>Add New Readonly Admin</strong>
+    <p>Readonly admins do not show up as residents or admins, and do not receive emails. They can view the payments, occupancy, calendar, and booking detail (not manage) pages.</p>
+    <form method="post" action=".">
+        {% csrf_token %}
+        <div class="row ui-widget">
+            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="readonly-admin-username" name="readonly_admin_username"/></div>
+            <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
+        </div>
+    </form>
 </div>
 
 <div class="top-spacer">
-	<strong>Current Readonly Admins</strong>
-	{% for u in location.readonly_admins.all %}
-		<form method="post" action=".">
-			<input type="hidden" name="readonly_admin_username" value="{{ u.username }}"/>
-			<div class="row sm-row-spacer">
-				<div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
-				<div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
-			</div>
-			{% csrf_token %}
-		</form>
-	{% endfor %}
+    <strong>Current Readonly Admins</strong>
+    {% for u in location.readonly_admins.all %}
+        <form method="post" action=".">
+            <input type="hidden" name="readonly_admin_username" value="{{ u.username }}"/>
+            <div class="row sm-row-spacer">
+                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
+            </div>
+            {% csrf_token %}
+        </form>
+    {% endfor %}
 </div>
 
 {% endblock %}
 
 {% block extrajs %}
-	<script>
-	$(function() {
-	  var availableUsers = [
-	    {% for user in all_users %}
-	       "{{user.username}}",
-	    {% endfor %}
-	  ];
+    <script>
+    $(function() {
+      var availableUsers = [
+        {% for user in all_users %}
+           "{{user.username}}",
+        {% endfor %}
+      ];
 
-	  $( "#admin-username" ).autocomplete({
-	    source: availableUsers
-	  });
-	  
-	  $( "#resident-username" ).autocomplete({
-	    source: availableUsers
-	  });
+      $( "#admin-username" ).autocomplete({
+        source: availableUsers
+      });
+      
+      $( "#resident-username" ).autocomplete({
+        source: availableUsers
+      });
 
-	  $( "#event-admin-username" ).autocomplete({
-	    source: availableUsers
-	  });
+      $( "#event-admin-username" ).autocomplete({
+        source: availableUsers
+      });
 
-	  $( "#readonly-admin-username" ).autocomplete({
-	    source: availableUsers
-	  });
+      $( "#readonly-admin-username" ).autocomplete({
+        source: availableUsers
+      });
 
-	});
-	</script>
+    });
+    </script>
 {% endblock %}

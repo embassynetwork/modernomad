@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
-import DatePicker from './DatePicker'
+import DatePicker from '../generic/DatePicker'
 
-export default class AvailabilityForm extends React.Component {
+export default class CapacityForm extends React.Component {
   static propTypes = {
     onCancel: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired
@@ -27,7 +27,7 @@ export default class AvailabilityForm extends React.Component {
               <DatePicker name="start_date" className="form-control" ref="start_date" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
             <div className="form-group col-xs-4">
-              <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Availability</label>
+              <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Capacity</label>
               <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
           </div>

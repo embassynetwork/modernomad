@@ -1,11 +1,11 @@
 <div class="row user-event-row">
-	<div class="col-md-2">
-		<img class="user-event-list-img" src="{{ MEDIA_URL }}{{ event.image }}" />
-	</div>
-	<div class="col-md-10">
-		<div class="title-line"><h3 class="no-top-margin"><a href="{% url 'gather_view_event' event.location.slug event.id event.slug %}">{{ event.title|title }}</a></h3> <em class="text-info event-list-status">{{ event.status }}</em></div>
-		<div class="event-list-time">{{ event.start }} - {{ event.end }}</div>
-		<div>{{ event.description|striptags }}</div>
-	</div>
+    <div class="col-md-2">
+        <img class="user-event-list-img" src="{{ MEDIA_URL }}{{ event.image }}" />
+    </div>
+    <div class="col-md-10">
+        <div class="title-line"><h3 class="no-top-margin"><a href="{% url 'gather_view_event' event.location.slug event.id event.slug %}">{{ event.title|title }}</a></h3> <em class="text-info event-list-status">{{ event.status }}</em></div>
+        <div class="event-list-time">{{ event.start }} - {{ event.end }}</div>
+        <div>{{ event.description|striptags }}</div>
+    </div>
 </div>
 

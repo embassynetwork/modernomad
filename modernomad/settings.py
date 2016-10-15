@@ -68,6 +68,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -156,8 +157,13 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.admindocs',
     'django.contrib.humanize',
-    'webpack_loader'
+    'webpack_loader',
+    'compressor'
     # 'debug_toolbar',
+)
+
+COMPRESS_PRECOMPILERS = (
+    ('text/less', 'lessc {infile} {outfile}'),
 )
 
 TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'

@@ -1,11 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import AvailabilityContainer from './components/AvailabilityContainer'
+import App from './components/App'
+import CapacityContainer from './components/capacity/CapacityContainer'
+import RoomBooking from './components/booking/RoomBooking'
 
-var topLevelComponents = {}
-topLevelComponents.AvailabilityContainer = AvailabilityContainer;
+var topLevelComponents = {
+  CapacityContainer : CapacityContainer,
+  RoomBooking : RoomBooking
+}
 
 window.renderReactComponent = function(id, componentName, props) {
   var component = topLevelComponents[componentName];
-  ReactDOM.render(React.createElement(component, props), document.getElementById(id));
+  var componentInstance = React.createElement(component, props || {})
+  var appComponent = React.createElement(App, {}, componentInstance)
+  ReactDOM.render(appComponent, document.getElementById(id));
 }

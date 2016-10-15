@@ -16,26 +16,26 @@
     {% if forloop.first %}
     <div class="active item">
     {% else %}
-	<div class="item">
+    <div class="item">
     {% endif %}
 
-		<div class="big-img">
-			<div>
-			<img class="carousel-img" 
-			src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'avatars/default.thumb.jpg'}}" 
-			/>
-			</div>
-		</div>
+        <div class="big-img">
+            <div>
+            <img class="carousel-img" 
+            src="{{ MEDIA_URL }}{{ p.profile.image_thumb|default:'avatars/default.thumb.jpg'}}" 
+            />
+            </div>
+        </div>
 
-		<div class="profile-peak">
-			<p class="lead"><h1>{{ p.first_name }} {{ p.last_name}}</h1></p>
-			<p class="lead"><span class="reverse-emph">Projects:</span> {{ p.profile.projects}}</p>
-			<p class="lead"><span class="reverse-emph">Sharing interests:</span> {{ p.profile.sharing}}</p>
-			<p class="lead"><span class="reverse-emph">Discussion topics:</span> {{ p.profile.discussion}}</p>
-		</div>
+        <div class="profile-peak">
+            <p class="lead"><h1>{{ p.first_name }} {{ p.last_name}}</h1></p>
+            <p class="lead"><span class="reverse-emph">Projects:</span> {{ p.profile.projects}}</p>
+            <p class="lead"><span class="reverse-emph">Sharing interests:</span> {{ p.profile.sharing}}</p>
+            <p class="lead"><span class="reverse-emph">Discussion topics:</span> {{ p.profile.discussion}}</p>
+        </div>
 
-	</div><!-- end carousel item div -->   
-  	{% endfor %}
+    </div><!-- end carousel item div -->   
+      {% endfor %}
 
   </div><!-- end carousel-inner -->
   <!-- Carousel nav -->
@@ -49,19 +49,19 @@
 <div class="row-fluid row-spacer"> 
 
 {% for person in subset %}
-	<div class="span2">
-		<div id="img-name-back"><div id="img-name">{{ person.first_name }}</div></div>
-		
-		<div class="img-polaroid float-left">
-			<!-- THIS IS BROKEN - clicking the link does not advance the slide to the specific slide position -->
-			<!-- <a href="#profileCarousel" data-slide-to="{{ forloop.counter0 }}"> -->
-			<img 
-				class="profile-img-thumb" 
-				src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'avatars/default.thumb.jpg'}}"
-			/>
-			<!-- </a> -->
-		</div>
-	</div>
+    <div class="span2">
+        <div id="img-name-back"><div id="img-name">{{ person.first_name }}</div></div>
+        
+        <div class="img-polaroid float-left">
+            <!-- THIS IS BROKEN - clicking the link does not advance the slide to the specific slide position -->
+            <!-- <a href="#profileCarousel" data-slide-to="{{ forloop.counter0 }}"> -->
+            <img 
+                class="profile-img-thumb" 
+                src="{{ MEDIA_URL }}{{ person.profile.image_thumb|default:'avatars/default.thumb.jpg'}}"
+            />
+            <!-- </a> -->
+        </div>
+    </div>
 {% endfor %}
 
 </div>

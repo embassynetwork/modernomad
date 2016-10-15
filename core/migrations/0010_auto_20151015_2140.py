@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 
 def forward(apps, schema_editor):
-	Room = apps.get_model("core", "Room")
-	rooms = Room.objects.all()
-	for r in rooms:
-		r.summary = r.description[0:140]
-		r.save()
+    Room = apps.get_model("core", "Room")
+    rooms = Room.objects.all()
+    for r in rooms:
+        r.summary = r.description[0:140]
+        r.save()
 
 class Migration(migrations.Migration):
 
