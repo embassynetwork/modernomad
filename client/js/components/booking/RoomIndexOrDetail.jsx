@@ -32,9 +32,6 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
             date
             quantity
           }
-          location {
-            id
-          }
         }
       }
     }
