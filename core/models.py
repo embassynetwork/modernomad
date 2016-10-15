@@ -440,7 +440,7 @@ class Resource(models.Model):
 
     def max_daily_capacities_between(self, start, end):
         max_quantity = 0
-        avails = self.capacities.exclude(start_date__gt=end).order_by('-start_date')
+        avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
         for a in avails:
             if a.quantity > max_quantity:
                 max_quantity = a.quantity
