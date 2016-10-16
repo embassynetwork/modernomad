@@ -618,10 +618,10 @@ def manage_today(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     today = timezone.localtime(timezone.now())
 
-    departing_today = (Booking.objects.filter(Q(status="confirmed") | Q(status="approved"))
+    departing_today = (Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
                        .filter(location=location).filter(depart=today))
 
-    arriving_today = (Booking.objects.filter(Q(status="confirmed") | Q(status="approved"))
+    arriving_today = (Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
                       .filter(location=location).filter(arrive=today))
 
     events_today = published_events_today_local(location)
