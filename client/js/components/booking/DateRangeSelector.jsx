@@ -123,7 +123,8 @@ export default class DateRangeSelector extends React.Component {
             startDate={this.state.arrive}
             endDate={this.state.depart}
             onChange={this.changeHandler('arrive')}
-            minDate={moment()} />
+            minDate={moment()}
+            autoComplete="off" />
         </div>
         <div className={(this.props.detail ? "col-sm-5" : "col-md-2 col-sm-4")}>
           <DatePicker name="depart"
@@ -136,6 +137,7 @@ export default class DateRangeSelector extends React.Component {
             onChange={this.changeHandler('depart')}
             minDate={this.minDepart()}
             maxDate={this.maxDepart(null, this.props.maxLength)}
+            autoComplete="off"
             />
         </div>
       </div>
