@@ -3,6 +3,7 @@ from graphene import AbstractType, Field, Node
 from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
+from datetime import timedelta
 from core.models import Resource
 
 
@@ -30,7 +31,10 @@ class ResourceNode(DjangoObjectType):
         assert args['arrive'], "you must specify arrival date"
         assert args['depart'], "you must specify departure date"
 
-        availabilities = self.daily_availabilities_within(args['arrive'].date(), args['depart'].date())
+        start_date = args['arrive'].date()
+        end_date = args['depart'].date() - timedelta(days=1)
+
+        availabilities = self.daily_availabilities_within(start_date, end_date)
 
         return [AvailabilityNode(*availability) for availability in availabilities]
 
