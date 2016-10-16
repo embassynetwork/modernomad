@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import { browserHistory } from 'react-router'
-import RoomContainer from './RoomContainer'
+import RoomIndex from './RoomIndex'
 import RoomDetail from './RoomDetail'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
@@ -47,6 +47,12 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
   renderSubComponent() {
     const routeParams = this.props.routeParams
     const child = this.props.children
+    const sharedProps = {
+      ...this.props,
+      networkLocation: this.locationData(),
+      onFilterChange: this.reFilter.bind(this),
+      query: this.props.location.query
+    }
 
     if (!!child) {
       const roomID = child.props.routeParams.id
@@ -54,7 +60,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
 
       if (room) {
         return (
-          <RoomDetail {...this.props} networkLocation={this.locationData()} room={room} onFilterChange={this.reFilter.bind(this)} query={this.props.location.query}>
+          <RoomDetail {...sharedProps} room={room}>
             {this.props.children}
           </RoomDetail>
         )
@@ -62,14 +68,20 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
         return null;
       }
     } else {
-      return <RoomContainer {...this.props} networkLocation={this.locationData()} rooms={this.allResources()} />
+      return <RoomIndex {...sharedProps} rooms={this.allResources()} />
     }
   }
 
   reFilter(filters) {
     const formattedDates = {arrive: filters.dates.arrive.format('MM/DD/YYYY'), depart: filters.dates.depart.format('MM/DD/YYYY')}
+    var path = '/locations/' + this.props.routeParams.location + '/stay/'
+
+    if (this.props.params.id) {
+      path = path + 'room/' + this.props.params.id
+    }
+
     browserHistory.push({
-      pathname: '/locations/'+this.props.routeParams.location+'/stay/room/'+this.props.params.id,
+      pathname: path,
       query: formattedDates
     })
   }

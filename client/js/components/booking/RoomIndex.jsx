@@ -38,7 +38,6 @@ export default class RoomIndex extends React.Component {
         return !_.find(room.availabilities, {quantity: 0})
       })
     } else {
-      console.log('no query')
       return this.props.rooms
     }
   }
