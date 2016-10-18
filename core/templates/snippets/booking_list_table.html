@@ -1,0 +1,45 @@
+<table class="dataTable table table-striped booking-list">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <!--<th>Status</th>-->
+            <th>Arrival</th>
+            <th>Departure</th>
+            <th>Room</th>
+            <th style="width:3em;">Nights</th>
+            <th>Rate</th>
+            <th>Value</th>
+            <th>Paid</th>
+        </tr>
+    </thead>
+    <tbody>
+            {% for r in bookings %}
+                <tr class="{% cycle 'row-even' 'row-odd' %}">
+                    <td>
+                        <a href="{% url 'booking_manage' location.slug r.id %}">{{ r.id }}</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'user_detail' r.use.user.username %}">{{ r.use.user.get_full_name|truncatechars:16 }}</a> 
+                        <!-- ({{r.use.user.username}})-->
+                    </td>
+                    <td>{{r.use.arrive}}</td>
+                    <td>{{r.use.depart}}</td>
+                    <td>{{r.use.resource}}</td>
+                    <td style="text-align:center;">{{r.use.total_nights}}</td>
+                    <td>${{r.rate}}</td>
+                    <td>${{r.bill.amount}}</td>
+                    <td>
+                        {% if r.is_comped %}
+                            <span class="text-danger glyphicon glyphicon-heart"></span>
+                        {% elif r.is_paid %}
+                            <span class="text-success glyphicon glyphicon-ok"></span>
+                        {% else %}
+                            <span class="text-danger glyphicon glyphicon-remove"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+    </tbody>
+</table>
+

@@ -5,32 +5,32 @@ from django.db import models, migrations
 from django.conf import settings
 
 def forward(apps, schema_editor):
-	Reservation = apps.get_model("core", "Reservation")
-	BillLineItem = apps.get_model("core", "BillLineItem")
-	Payment = apps.get_model("core", "Payment")
-	Bill = apps.get_model("core", "Bill")
+    Reservation = apps.get_model("core", "Reservation")
+    BillLineItem = apps.get_model("core", "BillLineItem")
+    Payment = apps.get_model("core", "Payment")
+    Bill = apps.get_model("core", "Bill")
 
-	# make a bill item for each reservation, then update the associated
-	# billLineItem and Payment objects to link to the bill instead of the
-	# reservation. 
-	reservations = Reservation.objects.all()
-	for r in reservations:
-		bill = Bill.objects.create()
-		r.bill = bill
-		r.save()
-		payments = Payment.objects.filter(reservation =r)
-		for p in payments:
-			p.bill = bill
-			p.user = r.user
-			p.save()
-		lineitems = BillLineItem.objects.filter(reservation=r)
-		for l in lineitems:
-			l.bill = bill
-			l.save()
-		# finally, update the creation date of the bill so that it matches the
-		# reservation creation date.
-		bill.created_on = r.created
-		bill.save()
+    # make a bill item for each reservation, then update the associated
+    # billLineItem and Payment objects to link to the bill instead of the
+    # reservation. 
+    reservations = Reservation.objects.all()
+    for r in reservations:
+        bill = Bill.objects.create()
+        r.bill = bill
+        r.save()
+        payments = Payment.objects.filter(reservation =r)
+        for p in payments:
+            p.bill = bill
+            p.user = r.user
+            p.save()
+        lineitems = BillLineItem.objects.filter(reservation=r)
+        for l in lineitems:
+            l.bill = bill
+            l.save()
+        # finally, update the creation date of the bill so that it matches the
+        # reservation creation date.
+        bill.created_on = r.created
+        bill.save()
 
 class Migration(migrations.Migration):
 

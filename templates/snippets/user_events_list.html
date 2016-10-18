@@ -1,23 +1,23 @@
 {% load core_tag_extras %}
 {% if events|length > 0 %}
-	<table class="table" id="reservation-list-table">
-		<thead>
-			<td>Event</td>
-			<td>Location</td>
-			<td>Date</td>
-		</thead>
-		{% for e in events %}
-			<tr>
-				<td><a href="{% url 'gather_view_event' e.location.slug e.id e.slug %}">{{ e.title }}</a></td>
-				<td>{{e.location.name}}</td>
-				<td>{{e.start}} - {{e.end}}</td>
-			</tr>
-		{% endfor %}
-	</table>
+    <table class="table" id="booking-list-table">
+        <thead>
+            <td>Event</td>
+            <td>Location</td>
+            <td>Date</td>
+        </thead>
+        {% for e in events %}
+            <tr>
+                <td><a href="{% url 'gather_view_event' e.location.slug e.id e.slug %}">{{ e.title }}</a></td>
+                <td>{{e.location.name}}</td>
+                <td>{{e.start}} - {{e.end}}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
 {% else %}
 
-	<p>No subscriptions. </p>
+    <p>No subscriptions. </p>
 
 {% endif %}
 

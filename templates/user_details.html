@@ -7,80 +7,80 @@
 
 
 <div class="col-md-12" id="page-spacer">
-	<h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1>
-	{% if u.profile.city != "" %}
-	<em> based in {{ u.profile.city }}</em>
-	{% else %}
-		{% ifequal u user %}
-			<span class="alert bg-danger">Important! Please <a href="{% url 'user_edit' user.username%}">update your home city</a></span>
-		{% endifequal %}
-	{% endif %}
+    <h1 class="inline">{{ u.first_name|title }} {{ u.last_name|title }}</h1>
+    {% if u.profile.city != "" %}
+    <em> based in {{ u.profile.city }}</em>
+    {% else %}
+        {% ifequal u user %}
+            <span class="alert bg-danger">Important! Please <a href="{% url 'user_edit' user.username%}">update your home city</a></span>
+        {% endifequal %}
+    {% endif %}
 </div>
 
 <div class="col-md-3">
-	<div class="img-polaroid">
-		{% if u.profile.image %}
-			<img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image }}" />
-		{% else %}
-			<img class="profile-page-img" src="/static/img/default.jpg" />
-		{% endif %}
+    <div class="img-polaroid">
+        {% if u.profile.image %}
+            <img class="profile-page-img" src="{{ MEDIA_URL }}{{ u.profile.image }}" />
+        {% else %}
+            <img class="profile-page-img" src="/static/img/default.jpg" />
+        {% endif %}
 
-		{% if u == user or user_is_house_admin_somewhere %}
-			<div><a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a></div>
-			<div>phone: {{u.profile.phone|default:'None provided'}}</div>
-		{% endif %}
-	</div>
+        {% if u == user or user_is_house_admin_somewhere %}
+            <div><a class="word-wrap" href="mailto: {{u.email}}">{{u.email}}</a></div>
+            <div>phone: {{u.profile.phone|default:'None provided'}}</div>
+        {% endif %}
+    </div>
 
-	<div id="edit-profile">
-		{% ifequal u user %}
-		<div>
-			<a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
-			{% if user.profile.customer_id %}
-				<form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
-					<input type="submit" class="btn btn-danger btn-small" value="Delete saved card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %}">
-				</form>
-			{% else %}
-				<div>
-					<form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
-						{% csrf_token %}
-						<input type="submit" id="pay-button" class="btn btn-success res-status-btn"
-							value="Add Credit Card" >
-						<div>
-							<p><em><small>We use <a href="http://stripe.com">Stripe's</a>
-								secure credit card processing with SSL encryption. Your card card
-							information is never stored on our servers.</small></em></p>
-						</div>
-					</form>
-				</div>
-			{% endif %}
-		</div>
-		{% endifequal %}
+    <div id="edit-profile">
+        {% ifequal u user %}
+        <div>
+            <a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
+            {% if user.profile.customer_id %}
+                <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
+                    <input type="submit" class="btn btn-danger btn-small" value="Delete saved card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %}">
+                </form>
+            {% else %}
+                <div>
+                    <form class="userprofile-card-form" action="{% url 'user_add_card' user.username %}" method="POST" id="payform">
+                        {% csrf_token %}
+                        <input type="submit" id="pay-button" class="btn btn-success res-status-btn"
+                            value="Add Credit Card" >
+                        <div>
+                            <p><em><small>We use <a href="http://stripe.com">Stripe's</a>
+                                secure credit card processing with SSL encryption. Your card card
+                            information is never stored on our servers.</small></em></p>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+        {% endifequal %}
 
-		{% if user_is_house_admin_somewhere %}
-			<div class="dropdown top-spacer-sm">
-				<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-					New Reservation<span class="caret"></span>
-				</button>
-				<ul class="dropdown-menu">
-					{% for l in user.house_admin.all %}
-					<li><a href="{% url 'reservation_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
-					{% endfor %}
-				</ul>
-			</div>
-		{% endif %}
+        {% if user_is_house_admin_somewhere %}
+            <div class="dropdown top-spacer-sm">
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    New Booking<span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    {% for l in user.house_admin.all %}
+                    <li><a href="{% url 'booking_manage_create' l.slug %}?username={{u.username}}">At {{l.name}}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
 
-		{% if u == user or user_is_house_admin_somewhere %}
-			{% include "snippets/user_edit_nav.html" %}
-		{% endif %}
-	</div>
+        {% if u == user or user_is_house_admin_somewhere %}
+            {% include "snippets/user_edit_nav.html" %}
+        {% endif %}
+    </div>
 
 
 
 </div>
 
 <div class="col-md-9">
-	{% block user_content_area %}
-	{% endblock %}
+    {% block user_content_area %}
+    {% endblock %}
 </div>
 
 {% endblock %}
@@ -89,34 +89,34 @@
 <script src="https://checkout.stripe.com/v2/checkout.js"></script>
 
 <script>
-	$(document).ready(function() {
-		$customer_id = "{{ reservation.user.profile.customer_id }}";
-		$('#pay-button').click(function(event){
-			event.preventDefault();
-			// if the user has a saved card, go straight to the
-			// payment processing page. (note: this shouldn't happen for new
-			// reservations but might for legacy reservations)
-			$customer_id = "{{ reservation.user.profile.customer_id }}";
-			console.log($customer_id);
+    $(document).ready(function() {
+        $customer_id = "{{ booking.user.profile.customer_id }}";
+        $('#pay-button').click(function(event){
+            event.preventDefault();
+            // if the user has a saved card, go straight to the
+            // payment processing page. (note: this shouldn't happen for new
+            // bookings but might for legacy bookings)
+            $customer_id = "{{ booking.user.profile.customer_id }}";
+            console.log($customer_id);
 
-			if ($customer_id == "None" || $customer_id == "") {
-				var token = function(res){
-					var $input = $('<input type=hidden name=stripeToken />').val(res.id);
-					$('#payform').append($input).submit();
-				};
+            if ($customer_id == "None" || $customer_id == "") {
+                var token = function(res){
+                    var $input = $('<input type=hidden name=stripeToken />').val(res.id);
+                    $('#payform').append($input).submit();
+                };
 
-				StripeCheckout.open({
-					key: "{{ stripe_publishable_key }}",
-					name: "The Embassy Network",
-					panelLabel:"Save Card",
-					image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
-					token: token
-				});
-			} else {
-				$('#payform').submit();
-			}
-		});
-	});
+                StripeCheckout.open({
+                    key: "{{ stripe_publishable_key }}",
+                    name: "The Embassy Network",
+                    panelLabel:"Save Card",
+                    image: "{% static 'img/embassy-front-1-128x128.jpg' %}",
+                    token: token
+                });
+            } else {
+                $('#payform').submit();
+            }
+        });
+    });
 </script>
 
 {% endblock %}

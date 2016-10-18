@@ -4,17 +4,17 @@
 <h1 class="row-spacer">The {{ location.name|title}} Community</h1>
 
 <div class="row">
-	{% for user in residents %}
-	<div class="row people-row">
-		<div class="col-md-3">
-			<img class="resident-listing-page-img" src="{{ MEDIA_URL }}{{ user.profile.image|default:'data/avatars/default.jpg'}}" />
-		</div>
-		<div class="col-md-9">
-			<h2><a href="/people/{{user.username}}">{{ user.first_name }} {{ user.last_name }}</a></h2>
-			<div>{{ user.profile.bio }}</div>
-		</div>
-	</div>
-	{% endfor %}
+    {% for user in residents %}
+    <div class="row people-row">
+        <div class="col-md-3">
+            <img class="resident-listing-page-img" src="{{ MEDIA_URL }}{{ user.profile.image|default:'data/avatars/default.jpg'}}" />
+        </div>
+        <div class="col-md-9">
+            <h2><a href="/people/{{user.username}}">{{ user.first_name }} {{ user.last_name }}</a></h2>
+            <div>{{ user.profile.bio }}</div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}

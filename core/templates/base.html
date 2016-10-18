@@ -6,18 +6,15 @@
   {% if location %}
   <div class="house-box">
     <img src="{{ MEDIA_URL }}{{ location.image }}" class="house-image">
-    {% if location.slug != "redvic" %}
-      <div class="house-name hidden-xs">
-        <h1 class="bold text-center"><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h1>
-      </div>
-    {% endif %}
+    <div class="house-name hidden-xs">
+      <h1 class="bold text-center"><a href="{% url 'location_home' location.slug %}">{{ location.name }}</a></h1>
+    </div>
   </div>
 
-  <div class="col-xs-10 col-xs-offset-1">
-    {% include 'snippets/house_nav.html' %}
+  {% include 'snippets/house_nav.html' %}
 
-    {% block content %}
-    {% endblock %}
-  </div>
+  {% block content %}
+  {% endblock %}
+
   {% endif %}
 {% endblock %}

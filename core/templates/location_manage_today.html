@@ -3,57 +3,65 @@
 
 {% block content %}
 
-<div>
-	{% if arriving_today %}
-		<h1 class="row-spacer">Arriving Today</h1>
-		{% for subset in arriving_today|subsets_size:6 %}
-			<div class="row row-spacer">	
-				{% for r in subset %}
-					<div class="col-md-2">
-						<img src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}">
-						<p>
-							<a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a> in {{r.resource.name}} for <a href="{% url 'reservation_detail' r.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
-						</p>
-						{% if not r.is_paid %}
-						<p><span class="text-danger"> <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Unpaid</span></p>
-						{% endif %}
+<div class="container">
+    {% if arriving_today %}
+        <h1 class="row-spacer">Arriving Today</h1>
+        {% for subset in arriving_today|subsets_size:6 %}
+            <div class="row row-spacer">    
+                {% for r in subset %}
+                    <div class="col-md-2">
+                        <img src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}">
+                        <p>
+                            <a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a> in {{r.resource.name}} for <a href="{% url 'booking_detail' r.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
+                        </p>
+                        {% if not r.booking.is_paid %}
+                        <p><span class="text-danger"> <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Unpaid</span></p>
+                        {% endif %}
 
-					</div>
-				{% endfor %}
-			</div>
-		{% endfor %}
-	{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No arrivals today</p>
+    {% endif %}
+   
 
-	<div class="clear"></div>
-	
-	{% if departing_today %}
-		<h1 class="row-spacer">Departing Today</h1>
-		{% for subset in departing_today|subsets_size:6 %}
-			<div class="row row-spacer">	
-				{% for r in subset %}
-					<div class="col-md-2">
-						<img src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}">
-						<p><a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a></p>
-						<p>In {{r.resource.name}} for <a href="{% url 'reservation_detail' r.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
-					</div>
-				{% endfor %}
-			</div>
-		{% endfor %}
-	{% endif %}
+    <div class="clear"></div>
+    
+    {% if departing_today %}
+        <h1 class="row-spacer">Departing Today</h1>
+        {% for subset in departing_today|subsets_size:6 %}
+            <div class="row row-spacer">    
+                {% for r in subset %}
+                    <div class="col-md-2">
+                        <img src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}">
+                        <p><a href="{% url 'user_detail' r.user.username %}">{{r.user.first_name}} {{r.user.last_name}}</a></p>
+                        <p>In {{r.resource.name}} for <a href="{% url 'booking_detail' r.location.slug r.id %}">{{r.total_nights}} night{{r.total_nights|pluralize}}</a></p>
+                        {% if not r.booking.is_paid %}
+                        <p><span class="text-danger"> <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> Unpaid</span></p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% endif %}
 
-	{% if events_today %}
-		<h1 class="row-spacer">Events Today</h1>
-		{% for subset in events_today|subsets_size:4 %}
-			<div class="row row-spacer">	
-				{% for e in subset %}
-					<div class="col-md-3">
-						<img class="event-preview-img-thumb" src="{{ e.image.url }}"/>
-						<a href="{% url 'gather_view_event' location.slug e.id e.slug %}"> <h3 class="event-title">{{ e.title }}</h3></a>
-					</div>
-				{% endfor %}
-			</div>
-		{% endfor %}
-	{% endif %}
+    {% if events_today %}
+        <h1 class="row-spacer">Events Today</h1>
+        {% for subset in events_today|subsets_size:4 %}
+            <div class="row row-spacer">    
+                {% for e in subset %}
+                    <div class="col-md-3">
+                        <img class="event-preview-img-thumb" src="{{ e.image.url }}"/>
+                        <a href="{% url 'gather_view_event' location.slug e.id e.slug %}"> <h3 class="event-title">{{ e.title }}</h3></a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No departures today</p>
+    {% endif %}
 </div>
 
 {% endblock %}

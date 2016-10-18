@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div id="room-container"></div>
+<script type="text/javascript">
+    window.renderReactComponent('room-container', 'RoomBooking', {})
+</script>
+
+{% endblock %}

@@ -2,11 +2,11 @@
 
 {% block user_content_area %}
 
-	{% if u == user or user_is_house_admin_somewhere %}
+    {% if u == user or user_is_house_admin_somewhere %}
 
-		<h3>Subscriptions</h3>
-		{% include "snippets/user_subscriptions_list.html" %}
+        <h3>Subscriptions</h3>
+        {% include "snippets/user_subscriptions_list.html" %}
 
-	{% endif %}
+    {% endif %}
 
 {% endblock %}

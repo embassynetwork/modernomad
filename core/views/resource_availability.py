@@ -16,20 +16,22 @@ def CheckRoomAvailability(request, location_slug):
     d_month, d_day, d_year = depart_str.split("/")
     arrive = datetime.date(int(a_year), int(a_month), int(a_day))
     depart = datetime.date(int(d_year), int(d_month), int(d_day))
-    availability = location.availability(arrive, depart)
+    capacity = location.capacity(arrive, depart)
     date_list = date_range_to_list(arrive, depart)
-    available_reservations = {}
-    # Create some mock reservations for each available room so we can generate the bill
+    available_bookings = {}
     free_rooms = location.rooms_free(arrive, depart)
     for room in free_rooms:
-        reservation = Reservation(id=-1, resource=room, arrive=arrive, depart=depart, location=location)
-        bill_line_items = reservation.generate_bill(delete_old_items=False, save=False)
+        # Create some mock bookings for each available room so we can generate
+        # the bill. These are NOT saved.
+        mock_use = Use(id=-1, resource=room, arrive=arrive, depart=depart, location=location)
+        mock_booking = Booking(id=-1, use=mock_use)
+        bill_line_items = mock_booking.generate_bill(delete_old_items=False, save=False)
         total = Decimal(0.0)
         for item in bill_line_items:
             if not item.paid_by_house:
                 total = Decimal(total) + Decimal(item.amount)
-        nights = reservation.total_nights()
-        available_reservations[room] = {'reservation': reservation, 'bill_line_items': bill_line_items, 'nights': nights, 'total': total}
+        nights = mock_booking.use.total_nights()
+        available_bookings[room] = {'bill_line_items': bill_line_items, 'nights': nights, 'total': total}
 
     new_profile_form = UserProfileForm()
     if request.user.is_authenticated():
@@ -47,10 +49,10 @@ def CheckRoomAvailability(request, location_slug):
         request,
         "snippets/availability_calendar.html",
         {
-            'availability_table': availability,
+            'availability_table': capacity,
             'dates': date_list,
             'current_user': current_user,
-            'available_reservations': available_reservations,
+            'available_bookings': available_bookings,
             'arrive_date': arrive_str,
             'depart_date': depart_str,
             'arrive': arrive,

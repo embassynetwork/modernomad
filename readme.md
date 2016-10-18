@@ -5,7 +5,7 @@ facilitate democratic management, empower people with information, and enable
 meaningful connections for groups that value openness, collaboration and
 participation. 
 
-Main features include profiles, mailing lists, guest and reservation
+Main features include profiles, mailing lists, guest and booking
 management, events, static content, and community management. A [detailed
 feature list](docs/features.md) is also available. 
 

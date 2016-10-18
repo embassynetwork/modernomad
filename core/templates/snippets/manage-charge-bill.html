@@ -1,30 +1,30 @@
 <form id="bill-charge" method="POST" class="form-horizontal" action="{% url 'bill_charge' location.slug bill.id %}"> {% csrf_token %}
-	<div class="form-group">
+    <div class="form-group">
 
-		<div class="col-md-2">
-			<label class="control-label">Charge User: </label>
-		</div>
+        <div class="col-md-2">
+            <label class="control-label">Charge User: </label>
+        </div>
 
-		<div class="col-md-2">
-			<label class="radio-inline"> 
-				<input type="radio" name="charge-options" id="bill-{{bill.id}}-full-charge" onclick="UpdateChargeValue({{bill.id}}, {{bill.total_owed}}, 'readonly')" value="charge-full-amount" checked> Amount Outstanding
-			</label>
-		</div>
-			
-		<div class="col-md-2">
-			<label class="radio-inline pull-right">
-				<input type="radio" name="charge-options" id="bill-{{bill.id}}-partial-charge" onclick="UpdateChargeValue({{bill.id}}, '', 'readwrite')" value="partial-charge"> Partial
-			</label>
-		</div>
+        <div class="col-md-2">
+            <label class="radio-inline"> 
+                <input type="radio" name="charge-options" id="bill-{{bill.id}}-full-charge" onclick="UpdateChargeValue({{bill.id}}, {{bill.total_owed}}, 'readonly')" value="charge-full-amount" checked> Amount Outstanding
+            </label>
+        </div>
+            
+        <div class="col-md-2">
+            <label class="radio-inline pull-right">
+                <input type="radio" name="charge-options" id="bill-{{bill.id}}-partial-charge" onclick="UpdateChargeValue({{bill.id}}, '', 'readwrite')" value="partial-charge"> Partial
+            </label>
+        </div>
 
-		<div class="col-md-2">
-			<input class="form-control" type="number" min="0" max="{{bill.total_owed}}" min="0" name="charge-amount" id="bill-{{bill.id}}-charge-amount" value="{{bill.total_owed}}" class="disabled" readonly="readonly">
-		</div>
+        <div class="col-md-2">
+            <input class="form-control" type="number" min="0" max="{{bill.total_owed}}" min="0" name="charge-amount" id="bill-{{bill.id}}-charge-amount" value="{{bill.total_owed}}" class="disabled" readonly="readonly">
+        </div>
 
-		<div class="col-md-2">
-			<input class="button-to-charge-card form-control btn btn-default" name="action" type="submit" value="Submit">
-		</div>
+        <div class="col-md-2">
+            <input class="button-to-charge-card form-control btn btn-default" name="action" type="submit" value="Submit">
+        </div>
 
-	</div>
+    </div>
 </form>
 

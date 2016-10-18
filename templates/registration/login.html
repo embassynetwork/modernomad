@@ -3,52 +3,52 @@
 {% block body %}
 
 {% if messages %}
-	<div class="row top-spacer">
-		<div class="col-xs-6">
-		<div class="messages">
-			{% for message in messages %}
-			<div class="alert alert-info">
-				<button type="button" class="close" data-dismiss="alert">×</button>
-				<div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-			</div>
-			{% endfor %}
-		</div>
-		</div>
-	</div>
+    <div class="row top-spacer">
+        <div class="col-xs-6">
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-info">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    </div>
 {% endif %}
 
 <div class="row">
-	<div class="col-md-1"></div>
-	<div class="col-md-6">
-		<h2>Log in to your account</h2>
-		<p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
-		<form enctype="multipart/form-data" method="post">{% csrf_token %}
+    <div class="col-md-1"></div>
+    <div class="col-md-6">
+        <h2>Log in to your account</h2>
+        <p>If you have not already, you need to <a href="{% url 'registration_register' %}">create an account</a>.</p>
+        <form enctype="multipart/form-data" method="post">{% csrf_token %}
 
-			{% if next %}
-					<input type="hidden" name="next" value="{{ next }}" />
-				{% endif %}
-				<div class="control-group">
-					<label class="control-label" for="username">Email Address</label>
-					<div class="controls">
-						<input type="text" id="username" name="username" placeholder="Email Address" size="32">
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label" for="password">Password</label>
-					<div class="controls">
-						<input type="password" name="password" id="password" placeholder="Password" size="32">
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-						<button type="submit" class="btn">Login</button>
-					</div>
-				</div>
-		</form>
+            {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}" />
+                {% endif %}
+                <div class="control-group">
+                    <label class="control-label" for="username">Email Address</label>
+                    <div class="controls">
+                        <input type="text" id="username" name="username" placeholder="Email Address" size="32">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="password">Password</label>
+                    <div class="controls">
+                        <input type="password" name="password" id="password" placeholder="Password" size="32">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn">Login</button>
+                    </div>
+                </div>
+        </form>
 
-		<p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
-	</div>
-	<div class="col-md-5"></div>
+        <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+    </div>
+    <div class="col-md-5"></div>
 </div>
 
 {% endblock %}

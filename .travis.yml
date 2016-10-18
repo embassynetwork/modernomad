@@ -11,7 +11,7 @@ before_script:
   - "cd client && npm install && cd .."
   - "cd client && webpack --config webpack.prod.config.js && cd .."
   - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
-script: ./manage.py test modernomad core bdd
+script: ./manage.py test modernomad core
 notifications:
   slack:
     rooms:
@@ -19,6 +19,5 @@ notifications:
   email:
     recipients:
       - craig@enspiral.com
-      - jessy@jessykate.com
     on_success: change
     on_failure: always

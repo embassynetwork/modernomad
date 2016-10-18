@@ -68,6 +68,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -140,6 +141,9 @@ INSTALLED_APPS = (
     'gather',
     'modernomad',
     'api',
+    'django_graphiql',
+    'graphene_django',
+    'graphapi',
     'django_behave',
     'bdd',
     'rest_framework',
@@ -153,8 +157,13 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.admindocs',
     'django.contrib.humanize',
-    'webpack_loader'
+    'webpack_loader',
+    'compressor'
     # 'debug_toolbar',
+)
+
+COMPRESS_PRECOMPILERS = (
+    ('text/less', 'lessc {infile} {outfile}'),
 )
 
 TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
@@ -202,3 +211,5 @@ NOSE_ARGS = [
     '--nocapture',
     '--nologcapture'
 ]
+
+os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = "localhost:8000-8010,8080,9200-9300"

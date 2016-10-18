@@ -1,21 +1,21 @@
 <div>
 <ul class="nav nav-stacked page-spacer">
-	<li role="presentation" class="active"><a href="{% url 'user_detail' u.username %}" aria-controls="profile" role="tab">Profile</a></li>
-	<li role="presentation"><a href="{% url 'user_email_settings' u.username %}" aria-controls="email" role="tab">Email</a></li>
-	<li role="presentation"><a href="{% url 'user_reservations' u.username %}" aria-controls="reservations" role="tab">Reservations</a></li>
-	<li role="presentation"><a href="{% url 'user_subscriptions' u.username %}" aria-controls="subscriptions" role="tab">Subscriptions</a></li>
-	<li role="presentation"><a href="{% url 'user_events' u.username %}" aria-controls="events" role="tab">Events</a></li>
-	{% if u.resources.count and u == user %}
-	<li role="presentation" class="dropdown">
-		<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-			Rooms <span class="caret"></span>
-		</a>
-		<ul class="dropdown-menu">
-			{% for r in u.resources.all %}
-			<li><a href="{% url 'user_edit_room' u.username r.id %}" aria-controls="events" role="tab">{{r.name}}</a></li>
-			{% endfor %}
-		</ul>
-	</li>
-	{% endif %}
+    <li role="presentation" class="active"><a href="{% url 'user_detail' u.username %}" aria-controls="profile" role="tab">Profile</a></li>
+    <li role="presentation"><a href="{% url 'user_email_settings' u.username %}" aria-controls="email" role="tab">Email</a></li>
+    <li role="presentation"><a href="{% url 'user_bookings' u.username %}" aria-controls="bookings" role="tab">Bookings</a></li>
+    <li role="presentation"><a href="{% url 'user_subscriptions' u.username %}" aria-controls="subscriptions" role="tab">Subscriptions</a></li>
+    <li role="presentation"><a href="{% url 'user_events' u.username %}" aria-controls="events" role="tab">Events</a></li>
+    {% if u.resources.count and u == user %}
+    <li role="presentation" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Rooms <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            {% for r in u.resources.all %}
+            <li><a href="{% url 'user_edit_room' u.username r.id %}" aria-controls="events" role="tab">{{r.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endif %}
 </ul>
 </div>

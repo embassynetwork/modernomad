@@ -33,7 +33,7 @@ hello, post requests, share a cool event, see who's around for dinner, or
 who's up for a drink!) 
 
 You can always add or edit information associated with your own profile at {{ profile_url }}. 
-To view your reservation details: {{ reservation_url }}
+To view your booking details: {{ booking_url }}
 
 Thanks and see you soon!
 {{ location.name }}

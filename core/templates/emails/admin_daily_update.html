@@ -32,7 +32,7 @@
     {% for r in arriving %}
 
           <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
+          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
           </td></tr>
          <tr>
           <td width="600px"><img src="https://{{domain}}/media/{{ r.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ r.user.profile.bio}}</p></td>
@@ -50,7 +50,7 @@
     {% for r in departing %}
 
           <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
+          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
           </td></tr>
          <tr>
           <td width="600px"><img src="https://{{domain}}/media/{{ r.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ r.user.profile.bio}}</p></td>
@@ -64,12 +64,12 @@
 {% if maybe_arriving %}
 <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">
-      Heads up! The following reservations are approved and show an arrival date of today but are not confirmed. May need to check in with the person.
+      Heads up! The following bookings are approved and show an arrival date of today but are not confirmed. May need to check in with the person.
 </p></td></tr>
     {% for r in maybe_arriving %}
          <tr><td width="600px"><p margin="0 0 1.6em 0">
           {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-        <br>https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+        <br>https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
          </p></td></tr>
     {% endfor %}
 </table>
@@ -79,18 +79,18 @@
 {% if pending_now or approved_now %}
 <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 <tr><td width="600px"><p margin="0 0 1.6em 0"  style="font-size:140%;">
-The following reservations are awaiting action:
+The following bookings are awaiting action:
 </p></td></tr>
     {% for r in pending_now %}
         <tr><td width="600px"><p margin="0 0 1.6em 0">
         * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-        <br>https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+        <br>https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
          </p></td></tr>
     {% endfor %}
     {% for r in approved_now %}
          <tr><td width="600px"><p margin="0 0 1.6em 0">
         {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-        https://{{ domain }}{% url 'reservation_manage' r.location.slug r.id %}
+        https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
         </p></td></tr>
     {% endfor %}
 </table>

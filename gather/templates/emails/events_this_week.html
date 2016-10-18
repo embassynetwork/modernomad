@@ -2,51 +2,51 @@
 
 <table cellspacing="0" cellpadding="0" border="0">
 
-	<tr><td width="600px">
+    <tr><td width="600px">
 
-	<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
 
-		<tr><td width="600px"><p margin="0 0 1.6em 0">Howdy,</p></td></tr> 
-		<tr><td width="600px"><p margin="0 0 1.6em 0">Here are the public upcoming events in the {{location_name}} community for the week of {{ week_name }}.</p></td></tr> 
-	</table>
+        <tr><td width="600px"><p margin="0 0 1.6em 0">Howdy,</p></td></tr> 
+        <tr><td width="600px"><p margin="0 0 1.6em 0">Here are the public upcoming events in the {{location_name}} community for the week of {{ week_name }}.</p></td></tr> 
+    </table>
 
-	<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-		{% for event in events %}
-		<tr>
-			<td width="300px" style="font-size:140%;">
-				<p>
-				<a href="https://{{domain}}{% url 'gather_view_event' location.slug event.id event.slug %}">{{ event.title|title }}</a>
-				<br> 
-				Organized by
-				{% for organizer in event.organizers.all %}
-					{% if forloop.last %}
-						{{ organizer.first_name}} {{ organizer.last_name }}
-					{% else %}
-						{{ organizer.first_name}} {{ organizer.last_name }}, 
-					{% endif %}
-				{% endfor %}
-				<br> 
-				{{ event.start|date:"F j" }} at {{ event.start|time:"h A"}} to {{ event.end|date:"F j" }} at {{ event.end|time:"h A"}}
-				</p>
-				<p style="font-size:80%;">
-				{{ event.description|striptags|truncatechars:300 }}
-				</p>
-			</td> 
-			<td width="300px" align="right"><p margin="0 0 1.6em 0"><img src="https://{{domain}}/media/{{ event.image }}" style="border: solid 1px #AAAAAA; padding: 7px; width: 150px;"></p></td>
-		</tr>
-		{% endfor %}
-	</table>
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        {% for event in events %}
+        <tr>
+            <td width="300px" style="font-size:140%;">
+                <p>
+                <a href="https://{{domain}}{% url 'gather_view_event' location.slug event.id event.slug %}">{{ event.title|title }}</a>
+                <br> 
+                Organized by
+                {% for organizer in event.organizers.all %}
+                    {% if forloop.last %}
+                        {{ organizer.first_name}} {{ organizer.last_name }}
+                    {% else %}
+                        {{ organizer.first_name}} {{ organizer.last_name }}, 
+                    {% endif %}
+                {% endfor %}
+                <br> 
+                {{ event.start|date:"F j" }} at {{ event.start|time:"h A"}} to {{ event.end|date:"F j" }} at {{ event.end|time:"h A"}}
+                </p>
+                <p style="font-size:80%;">
+                {{ event.description|striptags|truncatechars:300 }}
+                </p>
+            </td> 
+            <td width="300px" align="right"><p margin="0 0 1.6em 0"><img src="https://{{domain}}/media/{{ event.image }}" style="border: solid 1px #AAAAAA; padding: 7px; width: 150px;"></p></td>
+        </tr>
+        {% endfor %}
+    </table>
 
-	<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-		<tr><td width="600px"><p margin="0 0 1.6em 0">Browse more events <a href="https://{{domain}}{% url 'gather_upcoming_events' location.slug %}">online</a>.</p></td></tr> 
-		<tr><td width="600px"><p margin="0 0 1.6em 0">Want to host your own event? <a href="https://{{domain}}{% url 'gather_create_event' location.slug %}">Propose one!</a></p></td></tr> 
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        <tr><td width="600px"><p margin="0 0 1.6em 0">Browse more events <a href="https://{{domain}}{% url 'gather_upcoming_events' location.slug %}">online</a>.</p></td></tr> 
+        <tr><td width="600px"><p margin="0 0 1.6em 0">Want to host your own event? <a href="https://{{domain}}{% url 'gather_create_event' location.slug %}">Propose one!</a></p></td></tr> 
 
-		<tr><td width="600px"><p margin="0 0 1.6em 0">We hope that you will join us and we look forward to seeing you soon!</p></td></tr> 
-	</table>
+        <tr><td width="600px"><p margin="0 0 1.6em 0">We hope that you will join us and we look forward to seeing you soon!</p></td></tr> 
+    </table>
 
-	<table style="border-top: solid 1px #AAAAAA;" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-		<tr><td width="600px"><p margin="0 0 1.6em 0">{{ footer }}</p></td></tr> 
-	</table>
+    <table style="border-top: solid 1px #AAAAAA;" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        <tr><td width="600px"><p margin="0 0 1.6em 0">{{ footer }}</p></td></tr> 
+    </table>
 
 
 </body>

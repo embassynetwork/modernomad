@@ -4,119 +4,120 @@
 
 {% block content %}
 
-<div class="row">
-	<div class="col-sm-10 col-sm-offset-1"> {% include "snippets/messages.html" %} </div>
-</div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1"> {% include "snippets/messages.html" %} </div>
+    </div>
 
+    <div class="row" id="house-desc">
+        <div class="col-sm-7">
+            {{ location.short_description|safe }}
+        </div>
 
-<div class="row" id="house-desc">
-	<div class="col-sm-7">
-		{{ location.short_description|safe }}
-	</div>
+        <div class="col-sm-5 text-center book-room">
+            <h3>BOOK A ROOM</h3>
+            <div class="booking-dates top-spacer">
+                <form class="form-inline" id="searchRoomForm" action="stay">
+                    <div class="form-group">
+                        <input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-brand">Search</button>
+                    </div>
+                </form>
+            </div>
+            <h4>-OR-</h4>
+            <h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
+        </div>
+    </div>
 
-	<div class="col-sm-5 text-center book-room">
-		<h3>BOOK A ROOM</h3>
-		<div class="reservation-dates top-spacer">
-			<form class="form-inline" id="searchRoomForm" action="stay">
-				<div class="form-group">
-					<input class="form-control" id="arrive_date" name="arrive" type="text" placeholder="Arrive" autocomplete="off">
-				</div>
-				<div class="form-group">
-					<input class="form-control" id="depart_date" name="depart" type="text" placeholder="Depart" autocomplete="off">
-				</div>
-				<div class="form-group">
-					<button type="submit" class="btn btn-primary btn-brand">Search</button>
-				</div>
-			</form>
-		</div>
-		<h4>-OR-</h4>
-		<h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
-	</div>
-</div>
+    <div class="row">
+            <div class="col-md-4" id="participate">
+                <p class="easy-reading">{{ location.announcement|safe }}</p>
+            </div>
 
-<div class="row">
-		<div class="col-md-4" id="participate">
-			<p class="easy-reading">{{ location.announcement|safe }}</p>
-		</div>
+            <div class="col-md-4" id="participate">
+                <p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
+            </div>
 
-		<div class="col-md-4" id="participate">
-			<p class="easy-reading"> {{ location.front_page_stay|safe }} </p>
-		</div>
+            <div class="col-md-4" id="participate">
+                <p class="easy-reading">{{ location.front_page_participate|safe }}</p>
+                {% ifappexists gather %}
+                {% endifappexists %}
+            </div>
+    </div>
 
-		<div class="col-md-4" id="participate">
-			<p class="easy-reading">{{ location.front_page_participate|safe }}</p>
-			{% ifappexists gather %}
-			{% endifappexists %}
-		</div>
-</div>
+    <div class="row" id="location">
+        <div id="location-map"></div>
+    </div>
 
-<div class="row" id="location">
-	<div id="location-map"></div>
-</div>
-
-<div class="row" id="community-section">
-	{% for person in location.people_in_coming_month %}
-	<div class="col-sm-3 col-lg-2 text-center">
-		<a href="{% url 'user_detail' person.username %}">
-			{% if person.profile.image %}
-				<img class="homepage-user-img img-responsive" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
-			{% else %}
-				<img class="homepage-user-img" src="/static/img/default.jpg" />
-			{% endif %}
-			<div class="homepage-user-info">
-				<p class="homepage-user-link"> {{ person.first_name|title}} {{person.last_name|title}}</p>
-				<p class="homepage-user-text">{{person.profile.bio|truncatewords:10 }}</p>
-			</div>
-		</a>
-	</div>
-	{% endfor %}
+    <div class="row" id="community-section">
+        {% for person in location.people_in_coming_month %}
+        <div class="col-sm-3 col-lg-2 text-center">
+            <a href="{% url 'user_detail' person.username %}">
+                {% if person.profile.image %}
+                    <img class="homepage-user-img img-responsive" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
+                {% else %}
+                    <img class="homepage-user-img" src="/static/img/default.jpg" />
+                {% endif %}
+                <div class="homepage-user-info">
+                    <p class="homepage-user-link"> {{ person.first_name|title}} {{person.last_name|title}}</p>
+                    <p class="homepage-user-text">{{person.profile.bio|truncatewords:10 }}</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% endblock %}
 
 {% block extrajs %}
 
-	<script language="JavaScript">
-		$(document).ready(function() {
-			var map = L.map('location-map').setView([{{location.latitude}}, {{location.longitude}}], 15);
-			L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
-				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
-				maxZoom: 18
-			}).addTo(map);
-			map.scrollWheelZoom.disable();
-			var RougeIcon = L.Icon.extend({
-				options: {
-					iconUrl: '{% static 'img/droplet.png'%}',
-					iconSize: [100,170],
-					popupAnchor: [220,60]
-				}
-			});
-			var rougeIcon = new RougeIcon();
-			var marker = L.marker([{{location.latitude}}, {{location.longitude}}], {icon: rougeIcon}).addTo(map);
-			var popup = L.popup({closeButton: false});
-			popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
-			marker.bindPopup(popup).openPopup();
+    <script language="JavaScript">
+        $(document).ready(function() {
+            var map = L.map('location-map').setView([{{location.latitude}}, {{location.longitude}}], 15);
+            L.tileLayer('http://a.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png', {
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+                maxZoom: 18
+            }).addTo(map);
+            map.scrollWheelZoom.disable();
+            var RougeIcon = L.Icon.extend({
+                options: {
+                    iconUrl: '{% static 'img/droplet.png'%}',
+                    iconSize: [100,170],
+                    popupAnchor: [220,60]
+                }
+            });
+            var rougeIcon = new RougeIcon();
+            var marker = L.marker([{{location.latitude}}, {{location.longitude}}], {icon: rougeIcon}).addTo(map);
+            var popup = L.popup({closeButton: false});
+            popup.setContent('<h1 id="map-marker-h1-color">{{location.name}}</h1><p id="map-marker-text">{{location.address}}</p>');
+            marker.bindPopup(popup).openPopup();
 
-			$("#arrive_date, #depart_date").datepicker({
-				minDate: 0,
-				onSelect: function( selectedDate ) {
-					if(this.id == 'arrive_date') {
-						startDate = $('#arrive_date').datepicker("getDate");
-			          	var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
-			          	var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
-			          	console.log(rMax);
-			          	$('#depart_date').datepicker("option","minDate",rMin);
-			          	$('#depart_date').datepicker("option","maxDate",rMax);
-					}
-					// we need to explicitly fire the change event on the underlying
-					// input or it won't fire on its own!
-					$(this).change();
-		        }
-			});
+            $("#arrive_date, #depart_date").datepicker({
+                minDate: 0,
+                onSelect: function( selectedDate ) {
+                    if(this.id == 'arrive_date') {
+                        startDate = $('#arrive_date').datepicker("getDate");
+                          var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
+                          var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
+                          console.log(rMax);
+                          $('#depart_date').datepicker("option","minDate",rMin);
+                          $('#depart_date').datepicker("option","maxDate",rMax);
+                    }
+                    // we need to explicitly fire the change event on the underlying
+                    // input or it won't fire on its own!
+                    $(this).change();
+                }
+            });
 
-		});
+        });
 
 
-	</script>
+    </script>
 
 {% endblock %}

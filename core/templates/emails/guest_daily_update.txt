@@ -3,27 +3,27 @@ Good Morning!
 Here is what's happening at {{ location.name }} today:
 
 {% if events_today %}
-	Events happening today:
-	{% for event in events_today %}
-		* {{ event.title|title }} at {{ event.start|date:'f A' }}
-		  More details at https://{{ domain }}{% url 'gather_view_event' event.location.slug event.id event.slug %} 
-	{% endfor %}
+    Events happening today:
+    {% for event in events_today %}
+        * {{ event.title|title }} at {{ event.start|date:'f A' }}
+          More details at https://{{ domain }}{% url 'gather_view_event' event.location.slug event.id event.slug %} 
+    {% endfor %}
 
 {% endif %}
 {% if arriving %}
-	People arriving - welcome!
-	{% for r in arriving %}
-		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} 
-		https://{{ domain }}{% url 'reservation_detail' r.location.slug r.id %}
-	{% endfor %}
+    People arriving - welcome!
+    {% for r in arriving %}
+        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} 
+        https://{{ domain }}{% url 'booking_detail' r.use.location.slug r.id %}
+    {% endfor %}
 
 {% endif %}
 {% if departing %}
-	People departing - fare forward and wonderful journeys!
-	{% for r in departing %}
-		* {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.resource|safe }} 
-		https://{{ domain }}{% url 'reservation_detail' r.location.slug r.id %}
-	{% endfor %}
+    People departing - fare forward and wonderful journeys!
+    {% for r in departing %}
+        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.resource|safe }} 
+        https://{{ domain }}{% url 'booking_detail' r.use.location.slug r.id %}
+    {% endfor %}
 {% endif %}
 
 Thank you!

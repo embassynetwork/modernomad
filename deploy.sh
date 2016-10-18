@@ -18,12 +18,12 @@ ssh embassynetwork@embassynetwork.com <<-'ENDSSH'
   ./manage.py migrate core
 
   echo "COLLECTING STATIC ASSETS"
-  ./manage.py collectstatic  -i client --noinput
+  ./manage.py collectstatic  -i client/node_modules --noinput
 ENDSSH
 
 # For this to work, you must have sudo access and your username on your
 # localmachine must match your username on embassynetwork.com (alfred)
-echo "RESERTING SERVICES"
+echo "RESTARTING SERVICES"
 echo "(You will be asked for your password twice, that's normal)"
 ssh -t embassynetwork.com "sudo supervisorctl restart gunicorn"
 ssh -t embassynetwork.com "sudo supervisorctl restart celery"

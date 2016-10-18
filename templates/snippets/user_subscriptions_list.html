@@ -1,21 +1,21 @@
 {% load core_tag_extras %}
 {% if subscriptions|length > 0 %}
-	<p>If you need to update or cancel a subscription, please use the inquiries link by the individual subscription.</p>
-	<table class="table" id="reservation-list-table">
-		{% for s in subscriptions %}
-			<tr>
-				<td> {{ s.location }} </td>
-				<td>{{s.start_date}} - {{s.end_date|default:"ongoing"}}.  </td>
-				<td> <i class="fa fa-repeat text-success"></i> ${{s.price}} on the {{s.start_date|date:"jS"}}.  </td>
-				<td> <a href="mailto:{{ s.location.from_email }}"><i class="fa fa-envelope"></i> Inquiries</a> </td>
-				
-			</tr>
-		{% endfor %}
-	</table>
+    <p>If you need to update or cancel a subscription, please use the inquiries link by the individual subscription.</p>
+    <table class="table" id="booking-list-table">
+        {% for s in subscriptions %}
+            <tr>
+                <td> {{ s.location }} </td>
+                <td>{{s.start_date}} - {{s.end_date|default:"ongoing"}}.  </td>
+                <td> <i class="fa fa-repeat text-success"></i> ${{s.price}} on the {{s.start_date|date:"jS"}}.  </td>
+                <td> <a href="mailto:{{ s.location.from_email }}"><i class="fa fa-envelope"></i> Inquiries</a> </td>
+                
+            </tr>
+        {% endfor %}
+    </table>
 
 {% else %}
 
-	<p>No subscriptions. </p>
+    <p>No subscriptions. </p>
 
 {% endif %}
 

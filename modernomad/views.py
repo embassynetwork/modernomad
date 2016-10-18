@@ -11,31 +11,31 @@ import json
 from django.utils.html import strip_tags
 
 def index(request):
-	recent_events = Event.objects.order_by('-start')[:10]
-	locations = Location.objects.filter(visibility='public')
+    recent_events = Event.objects.order_by('-start')[:10]
+    locations = Location.objects.filter(visibility='public')
 
-	return render(request, "index.html", {'locations': locations, 'recent_events': recent_events})
+    return render(request, "index.html", {'locations': locations, 'recent_events': recent_events})
 
 def about(request):
-	return render(request, "about.html")
+    return render(request, "about.html")
 
 def host(request):
-	return render(request, "host.html")
+    return render(request, "host.html")
 
 def membership(request):
-	return render(request, "membership.html")
+    return render(request, "membership.html")
 
 def stay(request):
-	return render(request, "stay.html")
+    return render(request, "stay.html")
 
 def ErrorView(request):
-	return render(request, '404.html')
+    return render(request, '404.html')
 
 def robots(request):
-	content = "User-agent: *\n"
-	for l in Location.objects.all():
-		content += "Disallow: /locations/%s/team/\n" % l.slug
-		content += "Disallow: /locations/%s/community/\n" % l.slug
-		content += "Disallow: /locations/%s/reservation/create/\n" % l.slug
-		content += "Disallow: /locations/%s/events/create/\n" % l.slug
-	return HttpResponse(content, content_type="text/plain")
+    content = "User-agent: *\n"
+    for l in Location.objects.all():
+        content += "Disallow: /locations/%s/team/\n" % l.slug
+        content += "Disallow: /locations/%s/community/\n" % l.slug
+        content += "Disallow: /locations/%s/booking/create/\n" % l.slug
+        content += "Disallow: /locations/%s/events/create/\n" % l.slug
+    return HttpResponse(content, content_type="text/plain")
