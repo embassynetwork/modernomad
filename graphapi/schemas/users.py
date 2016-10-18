@@ -20,6 +20,7 @@ class UserNode(DjangoObjectType):
     class Meta:
         model = User
         interfaces = (Node, )
+        filter_fields = ['id']
 
     def resolve_name(self, args, *_):
         return " ".join([self.first_name, self.last_name])
