@@ -78,18 +78,18 @@ def generate_subscription_bills():
             s.generate_bill(target_date=today)
 
 
-def _format_attachment(r, color):
+def _format_attachment(use, color):
     domain = "https://" + Site.objects.get_current().domain
-    if r.user.profile.image:
-        profile_img_url = domain+r.user.profile.image.url
+    if use.user.profile.image:
+        profile_img_url = domain+use.user.profile.image.url
     else:
         profile_img_url = domain+"/static/img/default.jpg"
-    booking_url = '<%s%s|%s - %s in %s>\n%s' % (domain, r.get_absolute_url(), r.arrive.strftime("%B %d"), r.depart.strftime("%B %d"), r.resource.name, r.user.profile.bio)
-    profile_url = domain + urlresolvers.reverse('user_detail', args=(r.user.username,)),
+    booking_url = '<%s%s|%s - %s in %s>\n%s' % (domain, use.booking.get_absolute_url(), use.arrive.strftime("%B %d"), use.depart.strftime("%B %d"), use.resource.name, use.user.profile.bio)
+    profile_url = domain + urlresolvers.reverse('user_detail', args=(use.user.username,)),
     item = {
             'color': color,
-            'fallback' : r.user.get_full_name(),
-            'title': r.user.get_full_name(),
+            'fallback' : use.user.get_full_name(),
+            'title': use.user.get_full_name(),
             'title_link': profile_url[0], 
             'text': booking_url, 
             'thumb_url': profile_img_url,
