@@ -6,6 +6,7 @@ import BookingForm from './BookingForm'
 import { Link } from 'react-router'
 import _ from 'lodash'
 import nl2br from 'react-nl2br'
+import { isFullyAvailable } from '../../models/Availabilities'
 
 export default class RoomDetail extends React.Component {
   static propTypes = {
@@ -20,7 +21,7 @@ export default class RoomDetail extends React.Component {
 
   roomIsAvailable() {
     if (this.hasDateQuery()) {
-      return !_.find(this.props.room.availabilities, {quantity: 0})
+      return isFullyAvailable(this.props.room.availabilities)
     } else {
       return false
     }

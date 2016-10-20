@@ -3,6 +3,8 @@ import RoomCard from './RoomCard'
 import DateRangeSelector from './DateRangeSelector'
 import AvailabilityMatrix from './AvailabilityMatrix'
 import { FormGroup, Checkbox, Button, Nav, NavItem } from 'react-bootstrap';
+import { isFullyAvailable } from '../../models/Availabilities'
+import RoomCards from './RoomCards'
 
 export default class RoomIndex extends React.Component {
   static propTypes = {
@@ -35,7 +37,7 @@ export default class RoomIndex extends React.Component {
   displayableRooms() {
     if (this.hasDateQuery()) {
       return _.filter(this.props.rooms, (room) => {
-        return !_.find(room.availabilities, {quantity: 0})
+        return isFullyAvailable(room.availabilities)
       })
     } else {
       return this.props.rooms
@@ -43,10 +45,6 @@ export default class RoomIndex extends React.Component {
   }
 
   render() {
-    const roomCards = this.displayableRooms().map((room) => {
-      return <RoomCard key={room.id} routeParams={this.props.routeParams} query={this.props.query} {...room} />
-    })
-
     return (
       <div>
         <div className="date-range-row container">
@@ -77,9 +75,9 @@ export default class RoomIndex extends React.Component {
                 <NavItem eventKey={2} title="Availability Matrix"><i className="fa fa-list"></i></NavItem>
               </Nav>
             </div>
-            {!this.state.showAvailabilityTable ?
-              <div className="row" id="room-cards">{roomCards}</div>
-            :
+            {
+              !this.state.showAvailabilityTable ?
+              <RoomCards loading={this.props.loading} rooms={this.displayableRooms()} routeParams={this.props.routeParams} query={this.props.query} /> :
               <AvailabilityMatrix rooms={this.props.rooms} routeParams={this.props.routeParams} query={this.props.query}></AvailabilityMatrix>
             }
           </div>

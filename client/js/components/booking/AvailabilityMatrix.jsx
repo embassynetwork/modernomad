@@ -29,7 +29,7 @@ export default class AvailabilityMatrix extends React.Component {
         <tr key={room.id}>
           <td><Link key={room.id} to={this.detailLinkDetails(room.rid)}>{room.name}</Link></td>
           {room.availabilities.map(function(availability) {
-            return <td key={availability.date} className={(availability.quantity ? "success" : "")}>{availability.quantity}</td>
+            return <td key={availability.date} className={(availability.quantity > 0 ? "success" : "")}>{availability.quantity}</td>
           })}
         </tr>
       )
