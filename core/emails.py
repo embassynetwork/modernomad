@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from core.models import Booking, Subscription
+from core.models import Booking, Subscription, Use
 from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -158,11 +158,6 @@ def send_invoice(booking):
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.INVOICE)
     return send_from_location_address(subject, text_content, html_content, recipient, location)
 
-def send_comp_invoice(booking):
-    # XXX TODO eventually send an email for COMPs too, but a
-    # different once, with thanks/asking for feedback.
-    return
-
 def new_booking_notify(booking):
     house_admins = booking.use.location.house_admins.all()
     domain = Site.objects.get_current().domain
@@ -255,24 +250,24 @@ def updated_booking_notify(booking):
     }
     return mailgun_send(mailgun_data)
 
-def goodbye_email(booking):
-    ''' Send guest a welcome email'''
+def goodbye_email(use):
+    ''' Send guest a departure email'''
     # this is split out by location because each location has a timezone that affects the value of 'today'
     domain = Site.objects.get_current().domain
-    location = booking.use.location
+    location = use.location
     
     c = Context({
-        'first_name': booking.use.user.first_name,
-        'location': booking.use.location,
-        'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, booking.id,)),
-        'new_booking_url' : "https://" + domain + urlresolvers.reverse('booking_create', args=(location.slug,)),
+        'first_name': use.user.first_name,
+        'location': use.location,
+        'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, use.booking.id,)),
+        'new_booking_url' : "https://" + domain + urlresolvers.reverse('location_stay', args=(location.slug,)),
     })
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.DEPARTURE)
     
     subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
     mailgun_data={
-            "from": booking.use.location.from_email(),
-            "to": [booking.use.user.email,],
+            "from": use.location.from_email(),
+            "to": [use.user.email,],
             "subject": subject,
             "text": text_content,
         }
@@ -281,27 +276,27 @@ def goodbye_email(booking):
     
     return mailgun_send(mailgun_data)
 
-def guest_welcome(booking):
+def guest_welcome(use):
     ''' Send guest a welcome email'''
     # this is split out by location because each location has a timezone that affects the value of 'today'
     domain = Site.objects.get_current().domain
-    location = booking.use.location
-    intersecting_uses = Use.objects.filter(arrive__gte=booking.use.arrive).filter(depart__lte=booking.use.depart)
+    location = use.location
+    intersecting_uses = Use.objects.filter(arrive__gte=use.arrive).filter(depart__lte=use.depart)
     residents = location.residents.all()
-    intersecting_events = Event.objects.filter(location=location).filter(start__gte=booking.use.arrive).filter(end__lte=booking.use.depart)
+    intersecting_events = Event.objects.filter(location=location).filter(start__gte=use.arrive).filter(end__lte=use.depart)
     profiles = None
-    day_of_week = weekday_number_to_name[booking.use.arrive.weekday()]
+    day_of_week = weekday_number_to_name[use.arrive.weekday()]
     
     c = Context({
-        'first_name': booking.use.user.first_name,
+        'first_name': use.user.first_name,
         'day_of_week' : day_of_week,
-        'location': booking.use.location,
-        'booking': booking,
+        'location': use.location,
+        'use': use,
         'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
         'site_url': "https://" + domain + urlresolvers.reverse('location_home', args=(location.slug,)),
         'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
-        'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(booking.use.user.username,)),
-        'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, booking.id,)),
+        'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(use.user.username,)),
+        'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, use.booking.id,)),
         'intersecting_bookings': intersecting_uses,
         'intersecting_events': intersecting_events,
         'residents': residents,
@@ -309,9 +304,9 @@ def guest_welcome(booking):
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.WELCOME)
     
     mailgun_data={
-            "from": booking.use.location.from_email(),
-            "to": [booking.use.user.email,],
-            "subject": "[%s] See you on %s" % (booking.use.location.email_subject_prefix, day_of_week),
+            "from": use.location.from_email(),
+            "to": [use.user.email,],
+            "subject": "[%s] See you on %s" % (use.location.email_subject_prefix, day_of_week),
             "text": text_content,
         }
     if html_content:

@@ -47,9 +47,9 @@ def send_departure_email():
     for location in locations:
         today = timezone.localtime(timezone.now())
         departing = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
-        for booking in departing:
+        for use in departing:
             print 'sending goodbye email to %s' % booking.user.email
-            goodbye_email(booking)
+            goodbye_email(use)
 
 @periodic_task(run_every=crontab(hour=2, minute=0))
 def make_backup():
