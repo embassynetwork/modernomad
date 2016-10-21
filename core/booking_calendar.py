@@ -32,9 +32,10 @@ class GuestCalendar(HTMLCalendar):
                 for use in self.uses[day]:
                     body.append('<li id="res%d-cal-item">' % use.booking.id)
                     if use.booking.is_approved():
-                        body.append('<a href="#booking%d" class="greyed-out">' % use.booking.id)
+                        body.append('<a href="../manage/booking/%d" class="greyed-out">' % use.booking.id)
                     else:
-                        body.append('<a href="#booking%d">' % use.booking.id)
+                        body.append('<a href="../manage/booking/%d">' % use.booking.id)
+                        # body.append('<a href="#booking%d">' % use.booking.id)
                     body.append(esc("%s (%s)" % (use.user.first_name.title(), use.resource.name)))
                     body.append('</a>')
                     if use.arrive.day == day:

@@ -51,7 +51,8 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
       ...this.props,
       networkLocation: this.locationData(),
       onFilterChange: this.reFilter.bind(this),
-      query: this.props.location.query
+      query: this.props.location.query,
+      loading: this.props.data.loading
     }
 
     if (!!child) {
