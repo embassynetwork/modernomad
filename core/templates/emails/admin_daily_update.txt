@@ -16,37 +16,37 @@
 
 {% if arriving %}
     People arriving today:
-    {% for r in arriving %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-        https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
+    {% for use in arriving %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
+        https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
     {% endfor %}
 {% endif %}
 
 {% if departing %}
     People departing today:
-    {% for r in departing %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-        https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
+    {% for use in departing %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
+        https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
     {% endfor %}
 {% endif %}
 
 {% if maybe_arriving %}
 Heads up! The following bookings are approved and show an arrival date of today but are not confirmed. May need to check in with the person. 
-    {% for r in maybe_arriving %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-        https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
+    {% for use in maybe_arriving %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
+        https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
     {% endfor %}
 {% endif %}
 
 {% if pending_now or approved_now %}
 The following bookings are awaiting action:
-    {% for r in pending_now %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-        https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
+    {% for use in pending_now %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} ({{use.status}})
+        https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
     {% endfor %}
-    {% for r in approved_now %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-        https://{{ domain }}{% url 'booking_manage' r.use.location.slug r.id %}
+    {% for use in approved_now %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} ({{use.status}})
+        https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
     {% endfor %}
 {% endif %}
 

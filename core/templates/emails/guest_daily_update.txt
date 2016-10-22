@@ -12,17 +12,17 @@ Here is what's happening at {{ location.name }} today:
 {% endif %}
 {% if arriving %}
     People arriving - welcome!
-    {% for r in arriving %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} 
-        https://{{ domain }}{% url 'booking_detail' r.use.location.slug r.id %}
+    {% for use in arriving %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} 
+        https://{{ domain }}{% url 'booking_detail' use.location.slug use.booking.id %}
     {% endfor %}
 
 {% endif %}
 {% if departing %}
     People departing - fare forward and wonderful journeys!
-    {% for r in departing %}
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} from {{ r.resource|safe }} 
-        https://{{ domain }}{% url 'booking_detail' r.use.location.slug r.id %}
+    {% for use in departing %}
+        * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} from {{ use.resource|safe }} 
+        https://{{ domain }}{% url 'booking_detail' use.location.slug use.booking.id %}
     {% endfor %}
 {% endif %}
 

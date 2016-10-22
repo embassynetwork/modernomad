@@ -10,6 +10,7 @@ class LocationFactory(factory.DjangoModelFactory):
     slug = "someloc"
     latitude = 1.0
     longitude = 2.0
+    welcome_email_days_ahead=2
 
 
 class ResourceFactory(factory.DjangoModelFactory):
