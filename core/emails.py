@@ -336,8 +336,6 @@ def guests_residents_daily_update(location):
         if not admin.email in admin_emails:
             admin_emails.append(admin.email)
     
-    print admin_emails
-
     to_emails = []
     for r in Use.objects.confirmed_on_date(today, location):
         if (not r.user.email in admin_emails) and (not r.user.email in to_emails):
@@ -350,6 +348,8 @@ def guests_residents_daily_update(location):
             to_emails.append(r.email)
     
     if len(to_emails) == 0:
+        logger.debug("No non-admins to send daily update to")
+        print '%s: No residents or guests to send to' % location.slug
         return None
     
     c = Context({
@@ -377,10 +377,20 @@ def admin_daily_update(location):
     # this is split out by location because each location has a timezone that affects the value of 'today'
     today = timezone.localtime(timezone.now()).date()
     arriving_today = Use.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
+    print 'arriving_today'
+    print arriving_today
     maybe_arriving_today = Use.objects.filter(location=location).filter(arrive=today).filter(status='approved')
+    print 'maybe_arriving_today'
+    print maybe_arriving_today
     pending_now = Use.objects.filter(location=location).filter(status='pending')
+    print 'pending_now'
+    print pending_now
     approved_now = Use.objects.filter(location=location).filter(status='approved')
+    print 'approved_now'
+    print approved_now
     departing_today = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
+    print 'departing_today'
+    print departing_today
     events_today = published_events_today_local(location=location)
     pending_or_feedback = events_pending(location=location)
     # if there are subscriptions ready for billing, the bills should have been
@@ -399,6 +409,7 @@ def admin_daily_update(location):
         if not admin.email in admins_emails:
             admins_emails.append(admin.email)
     if len(admins_emails) == 0:
+        print '%s: No admins to send to' % location.slug
         return None
 
     c = Context({

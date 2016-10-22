@@ -17,13 +17,13 @@
 
 <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
     <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">People arriving today</p></td></tr>
-    {% for r in arriving %}
+    {% for use in arriving %}
 
           <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_detail' r.use.location.slug r.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }}
+          {{ use.user.first_name }} {{ use.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_detail' use.location.slug use.booking.id %}">{{ use.arrive }} - {{ use.depart }}</a> in {{ use.resource|safe }}
           </td></tr>
          <tr>
-          <td width="600px"><img src="https://{{domain}}/media/{{ r.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ r.user.profile.bio}}</p></td>
+          <td width="600px"><img src="https://{{domain}}/media/{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
          </tr>
          
     {% endfor %}
@@ -35,13 +35,13 @@
 
 <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
     <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">People departing today</p></td></tr>
-    {% for r in departing %}
+    {% for use in departing %}
 
           <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_detail' r.use.location.slug r.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }}
+          {{ use.user.first_name }} {{ use.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_detail' use.location.slug use.booking.id %}">{{ use.arrive }} - {{ use.depart }}</a> in {{ use.resource|safe }}
           </td></tr>
          <tr>
-          <td width="600px"><img src="https://{{domain}}/media/{{ r.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ r.user.profile.bio}}</p></td>
+          <td width="600px"><img src="https://{{domain}}/media/{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
          </tr>
          
     {% endfor %}

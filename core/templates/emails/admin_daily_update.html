@@ -15,85 +15,91 @@
 {% endif %}
 
 {% if subscriptions_ready %}
-<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-    <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">Subscriptions with new bills</p></td></tr>
-    {% for s in subscriptions_ready %}
-         <tr><td width="600px"><p margin="0 0 1.6em 0">
-          {{ s.user.get_full_name|title }}, ${{ s.price }}. https://{{ domain }}{% url 'subscription_manage_detail' location.slug s.id %}
-           </p></td></tr>
-    {% endfor %}
-</table>
+
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">Subscriptions with new bills</p></td></tr>
+        {% for s in subscriptions_ready %}
+            <tr><td width="600px"><p margin="0 0 1.6em 0">
+            {{ s.user.get_full_name|title }}, ${{ s.price }}. https://{{ domain }}{% url 'subscription_manage_detail' location.slug s.id %}
+            </p></td></tr>
+        {% endfor %}
+    </table>
+
 {% endif %}
 
 {% if arriving %}
 
-<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-    <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">People arriving today</p></td></tr>
-    {% for r in arriving %}
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">People arriving today</p></td></tr>
+        {% for use in arriving %}
 
-          <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' r.location.slug r.booking.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }} {% if not r.is_paid %} (unpaid) {% endif %}
-          </td></tr>
-         <tr>
-          <td width="600px"><img src="https://{{domain}}/media/{{ r.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ r.user.profile.bio}}</p></td>
-         </tr>
-         
-    {% endfor %}
-</table>
+            <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
+            {{ use.user.first_name }} {{ use.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}">{{ use.arrive }} - {{ use.depart }}</a> in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
+            </td></tr>
+            <tr>
+            <td width="600px"><img src="https://{{domain}}/media/{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
+            </tr>
+            
+        {% endfor %}
+    </table>
 
 {% endif %}
 
 {% if departing %}
 
-<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-    <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">People departing today</p></td></tr>
-    {% for r in departing %}
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+        <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">People departing today</p></td></tr>
+        {% for use in departing %}
 
-          <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' r.location.slug r.booking.id %}">{{ r.arrive }} - {{ r.depart }}</a> in {{ r.resource|safe }} {% if not r.booking.is_paid %} (unpaid) {% endif %}
-          </td></tr>
-         <tr>
-          <td width="600px"><img src="https://{{domain}}/media/{{ r.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ r.user.profile.bio}}</p></td>
-         </tr>
-         
-    {% endfor %}
-</table>
+            <tr><td width="600px" style="font-size:110%;"><p margin="0 0 1.6em 0">
+            {{ use.user.first_name }} {{ use.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}">{{ use.arrive }} - {{ use.depart }}</a> in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
+            </td></tr>
+            <tr>
+            <td width="600px"><img src="https://{{domain}}/media/{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
+            </tr>
+            
+        {% endfor %}
+    </table>
 
 {% endif %}
 
 {% if maybe_arriving %}
-<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-<tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">
-      Heads up! The following bookings are approved and show an arrival date of today but are not confirmed. May need to check in with the person.
-</p></td></tr>
-    {% for r in maybe_arriving %}
-         <tr><td width="600px"><p margin="0 0 1.6em 0">
-          {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} {% if not r.booking.is_paid %} (unpaid) {% endif %}
-        <br>https://{{ domain }}{% url 'booking_manage' r.location.slug r.booking.id %}
-         </p></td></tr>
-    {% endfor %}
-</table>
+
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+    <tr><td width="600px"><p margin="0 0 1.6em 0" style="font-size:140%;">
+        Heads up! The following bookings are approved and show an arrival date of today but are not confirmed. May need to check in with the person.
+    </p></td></tr>
+        {% for use in maybe_arriving %}
+            <tr><td width="600px"><p margin="0 0 1.6em 0">
+            {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
+            <br>https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
+            </p></td></tr>
+        {% endfor %}
+    </table>
+
 {% endif %}
 
 
 {% if pending_now or approved_now %}
-<table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
-<tr><td width="600px"><p margin="0 0 1.6em 0"  style="font-size:140%;">
-The following bookings are awaiting action:
-</p></td></tr>
-    {% for r in pending_now %}
-        <tr><td width="600px"><p margin="0 0 1.6em 0">
-        * {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-        <br>https://{{ domain }}{% url 'booking_manage' r.location.slug r.booking.id %}
-         </p></td></tr>
-    {% endfor %}
-    {% for r in approved_now %}
-         <tr><td width="600px"><p margin="0 0 1.6em 0">
-        {{ r.user.first_name }} {{ r.user.last_name }}, {{ r.arrive }} - {{ r.depart }} in {{ r.resource|safe }} ({{r.status}})
-        https://{{ domain }}{% url 'booking_manage' r.location.slug r.booking.id %}
-        </p></td></tr>
-    {% endfor %}
-</table>
+
+    <table border="0" cellspacing="0" cellpadding="0" border="0" margin="0 0 2em 0">
+    <tr><td width="600px"><p margin="0 0 1.6em 0"  style="font-size:140%;">
+    The following bookings are awaiting action:
+    </p></td></tr>
+        {% for use in pending_now %}
+            <tr><td width="600px"><p margin="0 0 1.6em 0">
+            * {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} ({{use.status}})
+            <br>https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
+            </p></td></tr>
+        {% endfor %}
+        {% for use in approved_now %}
+            <tr><td width="600px"><p margin="0 0 1.6em 0">
+            {{ use.user.first_name }} {{ use.user.last_name }}, {{ use.arrive }} - {{ use.depart }} in {{ use.resource|safe }} ({{use.status}})
+            https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}
+            </p></td></tr>
+        {% endfor %}
+    </table>
+
 {% endif %}
 
 </td>
