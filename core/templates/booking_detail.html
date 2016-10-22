@@ -133,7 +133,10 @@
           {% if booking.is_paid %}
           <div class="row">
               <div class="col-sm-12">
-                  <a class="btn btn-default res-status-btn" type="button" href="{% url 'booking_payment' location.slug booking.uuid %}">View Receipt</a>
+                <form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug booking.id %}" >
+                    {% csrf_token %}
+                    <input class="btn-default btn" type="submit" value="Email Receipt">
+                </form>
               </div>
           </div>
           {% endif %}

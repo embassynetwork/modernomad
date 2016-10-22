@@ -1679,7 +1679,10 @@ def BookingSendReceipt(request, location_slug, booking_id):
             messages.add_message(request, messages.INFO, "Hmm, there was a problem and the receipt was not sent. Please contact an administrator.")
     else:
         messages.add_message(request, messages.INFO, "This booking has not been paid, so the receipt was not sent.")
-    return HttpResponseRedirect(reverse('booking_manage', args=(location.slug, booking_id)))
+    if 'manage' in request.META.get('HTTP_REFERER'):
+        return HttpResponseRedirect(reverse('booking_manage', args=(location.slug, booking_id)))
+    else:
+        return HttpResponseRedirect(reverse('booking_detail', args=(location.slug, booking_id)))
 
 
 @house_admin_required
