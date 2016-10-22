@@ -19,32 +19,32 @@
 
 <h3>Booking Details</h3>
 
-{% for r in uses %}
+{% for use in uses %}
     <div class="booking-list-item">
     <div class="booking-title">
-    <a id="booking{{r.id}}"></a>
+    <a id="booking{{use.booking.id}}"></a>
     <h4 class="inline">
-    <a href="/people/{{r.user.username}}">{{ r.user.first_name|title }} {{ r.user.last_name|title }}</a>
+    <a href="/people/{{use.user.username}}">{{ use.user.first_name|title }} {{ use.user.last_name|title }}</a>
     </h4>
-    <a href="{{ r.get_absolute_url}}">{{r.arrive}} to {{ r.depart }} </a>
-    {% if r.arrive == today %}
+    <a href="{{ use.booking.get_absolute_url}}">{{use.arrive}} to {{ use.depart }} </a>
+    {% if use.arrive == today %}
     - <em>today!</em>
     {% endif %}
-    {% if r.is_approved %}
+    {% if use.is_approved %}
         (pending confirmation from guest)
     {% endif %}
     </div>
 
     <div class="img-polaroid float-left">
         <img class="profile-img-thumb"
-        src="{{ MEDIA_URL }}{{ r.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
+        src="{{ MEDIA_URL }}{{ use.user.profile.image_thumb|default:'data/avatars/default.thumb.jpg'}}"
         />
     </div>
 
     <div class="profile-peak">
-        <p><em>Projects:</em> {{ r.user.profile.projects}}</p>
-        <p><em>Sharing interests:</em> {{ r.user.profile.sharing}}</p>
-        <p><em>Discussion topics:</em> {{ r.user.profile.discussion}}</p>
+        <p><em>Projects:</em> {{ use.user.profile.projects}}</p>
+        <p><em>Sharing interests:</em> {{ use.user.profile.sharing}}</p>
+        <p><em>Discussion topics:</em> {{ use.user.profile.discussion}}</p>
     </div>
 
     <div class="clear"></div>
