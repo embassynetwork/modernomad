@@ -1486,7 +1486,7 @@ def BookingManageAction(request, location_slug, booking_id):
         booking.confirm()
         days_until_arrival = (booking.use.arrive - datetime.date.today()).days
         if days_until_arrival <= location.welcome_email_days_ahead:
-            guest_welcome(booking)
+            guest_welcome(booking.use)
     elif booking_action == 'set-comp':
         booking.comp()
     elif booking_action == 'res-charge-card':
@@ -1496,7 +1496,7 @@ def BookingManageAction(request, location_slug, booking_id):
             send_booking_receipt(booking)
             days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
-                guest_welcome(booking)
+                guest_welcome(booking.use)
         except stripe.CardError, e:
             # raise Booking.ResActionError(e)
             # messages.add_message(request, messages.INFO, "There was an error: %s" % e)
@@ -1640,7 +1640,7 @@ def BookingSendWelcomeEmail(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     if booking.is_confirmed():
-        guest_welcome(booking)
+        guest_welcome(booking.use)
         messages.add_message(request, messages.INFO, "The welcome email was sent.")
     else:
         messages.add_message(request, messages.INFO, "The booking is not comfirmed, so the welcome email was not sent.")
@@ -2008,7 +2008,7 @@ def submit_payment(request, booking_uuid, location_slug):
                     # XXX TODO need a way to check if this has already been sent :/
                     days_until_arrival = (booking.use.arrive - datetime.date.today()).days
                     if days_until_arrival <= booking.use.location.welcome_email_days_ahead:
-                        guest_welcome(booking)
+                        guest_welcome(booking.use)
                     messages.add_message(request, messages.INFO, 'Thanks you for your payment! A receipt is being emailed to you at %s' % pay_email)
                 else:
                     messages.add_message(
