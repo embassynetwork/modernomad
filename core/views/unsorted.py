@@ -319,18 +319,18 @@ def monthly_occupant_report(location_slug, year, month):
         else:
             occupants['residents'][user] = {'name': user.get_full_name(), 'email': user.email, 'total_nights': (end - start).days}
 
-    bookings = Booking.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
-    for r in bookings:
-        nights_this_month = r.use.nights_between(start, end)
-        u = r.user
+    uses = Use.objects.filter(location=location).filter(status="confirmed").exclude(depart__lt=start).exclude(arrive__gt=end)
+    for use in uses:
+        nights_this_month = use.nights_between(start, end)
+        u = use.user
         comped_nights_this_month = 0
         owing = []
-        effective_rate = r.bill.subtotal_amount()/r.total_nights()
+        effective_rate = use.booking.bill.subtotal_amount()/use.total_nights()
         value_this_month = nights_this_month*effective_rate
-        if r.is_comped():
+        if use.booking.is_comped():
             comped_nights_this_month = nights_this_month
-        if r.bill.total_owed() > 0:
-            owing.append(r.id)
+        if use.booking.bill.total_owed() > 0:
+            owing.append(use.booking.id)
 
         # now assemble it all
         if u not in occupants['guests'].keys():
@@ -341,7 +341,7 @@ def monthly_occupant_report(location_slug, year, month):
                 'total_value': value_this_month,
                 'total_comped': comped_nights_this_month,
                 'owing': owing,
-                'ids': [r.id]
+                'ids': [use.booking.id]
             }
         else:
             occupants['guests'][u]['total_nights'] += nights_this_month
@@ -349,7 +349,7 @@ def monthly_occupant_report(location_slug, year, month):
             occupants['guests'][u]['total_comped'] += comped_nights_this_month
             if owing:
                 occupants['guests'][u]['owing'].append(owing)
-            occupants['guests'][u]['ids'].append(r.id)
+            occupants['guests'][u]['ids'].append(use.booking.id)
 
     # check for subscriptions that were active for any days this month.
     subscriptions = list(Subscription.objects.active_subscriptions_between(start, end).filter(location=location))
@@ -362,10 +362,15 @@ def monthly_occupant_report(location_slug, year, month):
         # associated with the days of the bill(s) that occurred this month.
         bills_between = s.bills_between(start, end)
         value_this_month = 0
+        print "subscription %d" % s.id
         for b in bills_between:
-            effective_rate = b.subtotal_amount() / (b.period_end - b.period_start).days
-            value_this_bill_this_month = effective_rate*b.days_between(start, end)
-            value_this_month += value_this_bill_this_month
+            print b.subtotal_amount()
+            print b.period_end 
+            print b.period_start
+            if (b.period_end - b.period_start).days > 0:
+                effective_rate = b.subtotal_amount() / (b.period_end - b.period_start).days
+                value_this_bill_this_month = effective_rate*b.days_between(start, end)
+                value_this_month += value_this_bill_this_month
 
             # also make a note if this subscription has any bills that have an
             # outstanding balance. we store the subscription not the bill,
