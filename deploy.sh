@@ -18,7 +18,7 @@ ssh embassynetwork@embassynetwork.com <<-'ENDSSH'
   ./manage.py migrate core
 
   echo "COLLECTING STATIC ASSETS"
-  ./manage.py collectstatic  -i client/node_modules --noinput
+  ./manage.py collectstatic  -i node_modules --noinput
 ENDSSH
 
 # For this to work, you must have sudo access and your username on your
