@@ -26,6 +26,8 @@ django-filter
 graphene-django>=1.0.dev
 django-graphiql
 django-compressor
+icalendar
+django-ical
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command
