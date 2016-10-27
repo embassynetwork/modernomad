@@ -3,11 +3,10 @@ import moment from 'moment'
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import { Link } from 'react-router'
-import { Panel } from 'react-bootstrap';
+import { Panel, FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 import DjangoCSRFInput from '../generic/DjangoCSRFInput'
 import BookingDisplay from './BookingDisplay'
 import { Booking } from '../../models/Booking'
-
 
 export default class BookingForm extends React.Component {
   static propTypes = {
@@ -19,7 +18,7 @@ export default class BookingForm extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {open: false}
+    this.state = {open: false, showValidation: false}
   }
 
   onDateRangeChange(dates) {
@@ -61,6 +60,27 @@ export default class BookingForm extends React.Component {
      this.setState({ open: !this.state.open })
   }
 
+  checkValid(event) {
+    if (!this.valid()) {
+      event.preventDefault();
+      this.setState({showValidation: true})
+    }
+  }
+
+  valid() {
+    return !!this.state.purpose
+  }
+
+  validationState() {
+    if (this.state.showValidation) {
+      return this.valid() ? 'success' : 'error'
+    }
+  }
+
+  changePurpose(event) {
+    this.setState({purpose: event.target.value})
+  }
+
   render() {
     const room = this.props.room
     const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
@@ -68,7 +88,7 @@ export default class BookingForm extends React.Component {
     if (!this.props.networkLocation) return null;
 
     return (
-      <form className="booking-request-form" method="POST" action={submitUrl}>
+      <form className="booking-request-form" method="POST" action={submitUrl} onSubmit={this.checkValid.bind(this)}>
         <DjangoCSRFInput />
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
@@ -86,8 +106,13 @@ export default class BookingForm extends React.Component {
             {this.props.datesAvailable ?
               <div>
                 {this.renderCost()}
-                <p>*Tell us a little about the purpose of your trip</p>
-                <textarea className="form-control" name="purpose" required="true" />
+
+                <FormGroup validationState={this.validationState()} controlId="formControlsTextarea">
+                  <p>*Tell us a little about the purpose of your trip</p>
+                  {this.validationState() == 'error' && <ControlLabel>You must write a purpose for your stay</ControlLabel>}
+                  <FormControl componentClass="textarea" name="purpose" onChange={this.changePurpose.bind(this)} />
+                </FormGroup>
+
                 <p>
                   <a className="btn-link" onClick={this.handlePanel.bind(this)}>
                     <span className={(this.state.open ? "fa fa-chevron-down" : "fa fa-chevron-right")}></span> Optional fields
