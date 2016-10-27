@@ -5,7 +5,7 @@ from core.models import Location
 from django.shortcuts import get_object_or_404
 
 class PublicEventsFeed(ICalFeed):
-    product_id = '-//embassynetwork.com//redvic//publicevents'
+    product_id = '-//embassynetwork.com//events'
     timezone = 'PST'
     file_name = "events.ics"
 
@@ -14,7 +14,7 @@ class PublicEventsFeed(ICalFeed):
 
     def items(self, obj):
         rv = Location.objects.get(slug="redvic")
-        return Event.objects.filter(location=obj).filter(status=Event.CONFIRMED).filter(visibility=Event.PUBLIC).order_by('-start')
+        return Event.objects.filter(location=obj).filter(status=Event.LIVE).filter(visibility=Event.PUBLIC).order_by('-start')
 
     def item_title(self, obj):
         return obj.title
