@@ -130,7 +130,9 @@
             </div>
 
             <div role="tabpanel" class="tab-pane" id="booking-manage-user-info">
-                {% include "snippets/manage-page-user-details.html" %}
+                {% with user=r.use.user %}
+                    {% include "snippets/manage-page-user-details.html" %}
+                {% endwith %}
             </div>
 
         </div>

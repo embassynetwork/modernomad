@@ -1,18 +1,18 @@
 <h3>User Details</h3>
 <div class="row">
-    <div class="col-sm-2"><strong>Referral</strong></div><div class="col-sm-10">{{ r.user.profile.referral }}</div>
+    <div class="col-sm-2"><strong>Referral</strong></div><div class="col-sm-10">{{ user.profile.referral }}</div>
 </div>
 <div class="row">
-    <div class="col-sm-2"><strong>About them</strong></div><div class="col-sm-10">{{ r.user.profile.bio }}</div>
+    <div class="col-sm-2"><strong>About them</strong></div><div class="col-sm-10">{{ user.profile.bio }}</div>
 </div>
 <div class="row">
-    <div class="col-sm-2"><strong>Projects</strong></div><div class="col-sm-10">{{ r.user.profile.projects }}</div>
+    <div class="col-sm-2"><strong>Projects</strong></div><div class="col-sm-10">{{ user.profile.projects }}</div>
 </div>
 <div class="row">
-    <div class="col-sm-2"><strong>Sharing Interests</strong></div><div class="col-sm-10">{{ r.user.profile.sharing }}</div>
+    <div class="col-sm-2"><strong>Sharing Interests</strong></div><div class="col-sm-10">{{ user.profile.sharing }}</div>
 </div>
 <div class="row">
-    <div class="col-sm-2"><strong>Discussion Interests</strong></div><div class="col-sm-10">{{ r.user.profile.discussion }}</div>
+    <div class="col-sm-2"><strong>Discussion Interests</strong></div><div class="col-sm-10">{{ user.profile.discussion }}</div>
 </div>
 
 <h3>User Notes</h3>
@@ -24,11 +24,11 @@
     <input class="btn" style="width:100px; margin-top:1em;" type="submit" value="Add Note"/>
 </form>
 
-{% with u=r.user %}
-{% include "snippets/profile_links.html" %}
+{% with u=user %}
+    {% include "snippets/profile_links.html" %}
 
-<h3>Other Bookings</h3>
-{% include "snippets/user_bookings_list.html" %}
+    <h3>Other Bookings</h3>
+    {% include "snippets/user_bookings_list.html" %}
 {% endwith %}
 
 
