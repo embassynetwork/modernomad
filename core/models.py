@@ -1731,3 +1731,35 @@ class CapacityChange(models.Model):
     class Meta:
         verbose_name_plural = 'Availabilities'
         unique_together = ('start_date', 'resource',)
+
+class Account(models.Model):
+    CURRENCIES = (
+            # first value stored in db, second value is what is shown to user
+            ('usd', 'USD'),
+            ('euro', 'Euro'),
+            ('drft', 'DRFT'),
+        )
+
+    currency = models.CharField(max_length=32, choices=CURRENCIES)
+    admins = models.ManyToManyField(User, related_name='accounts_administered', blank=True, help_text="May be blank")
+    owner = models.ForeignKey(User, related_name='accounts_owned', null=True, blank=True, help_text="May be blank for group accounts")
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        if self.owner:
+            return "%s %s (%s)" % ( self.owner.first_name, self.owner.last_name, self.currency)
+        else:
+            return "Group account (%s)" % (self.currency)
+
+    
+class Transaction(models.Model):
+    reason = models.CharField
+    created = models.DateTimeField(auto_now_add=True)
+    approver = models.ForeignKey(User, related_name="approved_transactions", blank=True, null=True)
+
+class Entry(models.Model):
+    account = models.ForeignKey(Account, related_name="entries")
+    amount = models.IntegerField()
+    transaction = models.ForeignKey(Transaction)
+
+

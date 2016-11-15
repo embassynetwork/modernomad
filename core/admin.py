@@ -248,6 +248,21 @@ class UserProfileAdmin(UserAdmin):
     inlines = [UserProfileInline]
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
 
+
+class EntryInline(admin.StackedInline):
+    model = Entry
+    extra = 2
+
+class AccountAdmin(admin.ModelAdmin):
+    model = Account
+    raw_id_fields = ("owner", "admins")
+
+class TransactionAdmin(admin.ModelAdmin):
+    model = Transaction
+    inlines = [EntryInline,]
+    raw_id_fields = ("approver",)
+
+
 class LocationFlatPageInline(admin.StackedInline):
     model = LocationFlatPage
 
@@ -302,6 +317,8 @@ admin.site.register(BillLineItem, BillLineItemAdmin)
 admin.site.register(UserNote, UserNoteAdmin)
 admin.site.register(CapacityChange, CapacityChangeAdmin)
 admin.site.register(Use, UseAdmin)
+admin.site.register(Account, AccountAdmin)
+admin.site.register(Transaction, TransactionAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
