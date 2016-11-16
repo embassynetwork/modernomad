@@ -10,7 +10,10 @@ class AccountAdmin(admin.ModelAdmin):
     model = Account
     raw_id_fields = ("owner", "admins")
     list_filter = ('type',)
-    list_display = ('__unicode__', 'type')
+    list_display = ('__unicode__', 'account_admins', 'type')
+
+    def account_admins(self, obj):
+        return ", ".join(["%s %s" % (a.first_name, a.last_name) for a in obj.admins.all()])
 
 class TransactionAdmin(admin.ModelAdmin):
     model = Transaction
