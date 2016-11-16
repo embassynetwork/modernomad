@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.db.models import Q, Sum
 
 class Currency(models.Model):
     class Meta:
@@ -31,6 +32,12 @@ class Account(models.Model):
     def __unicode__(self):
         if self.owner:
             return "%s %s (%s)" % ( self.owner.first_name, self.owner.last_name, self.currency)
+        elif self.type == Account.SYSTEM:
+            # if a system account, is this a debit account or a credit account?
+            if hasattr(self, 'systemaccount_credit'):
+                return "%s SYSTEM CREDITS" % self.currency
+            else:
+                return "%s SYSTEM DEBITS" % self.currency
         else:
             return "No owner (%s)" % (self.currency)
 
@@ -40,6 +47,7 @@ class Account(models.Model):
         return self.entries.all().aggregate(
             total_amount = Sum('amount')
         )['total_amount']
+
 
 
 class SystemAccount(models.Model):

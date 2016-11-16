@@ -11,6 +11,7 @@ class AccountAdmin(admin.ModelAdmin):
     raw_id_fields = ("owner", "admins")
     list_filter = ('type',)
     list_display = ('__unicode__', 'account_admins', 'type')
+    inlines = [EntryInline,]
 
     def account_admins(self, obj):
         return ", ".join(["%s %s" % (a.first_name, a.last_name) for a in obj.admins.all()])
