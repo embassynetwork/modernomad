@@ -256,12 +256,20 @@ class EntryInline(admin.StackedInline):
 class AccountAdmin(admin.ModelAdmin):
     model = Account
     raw_id_fields = ("owner", "admins")
+    list_filter = ('type',)
 
 class TransactionAdmin(admin.ModelAdmin):
     model = Transaction
     inlines = [EntryInline,]
     raw_id_fields = ("approver",)
 
+class SystemAccountInline(admin.StackedInline):
+    model = SystemAccount
+    readonly_fields = ('debits', 'credits')
+
+class CurrencyAdmin(admin.ModelAdmin):
+    model = Currency
+    inlines = [SystemAccountInline,]
 
 class LocationFlatPageInline(admin.StackedInline):
     model = LocationFlatPage
@@ -318,6 +326,7 @@ admin.site.register(UserNote, UserNoteAdmin)
 admin.site.register(CapacityChange, CapacityChangeAdmin)
 admin.site.register(Use, UseAdmin)
 admin.site.register(Account, AccountAdmin)
+admin.site.register(Currency, CurrencyAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 
 admin.site.unregister(User)
