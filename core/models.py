@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 import uuid
 import stripe
-from django.db.models import Q
+from django.db.models import Q, Sum
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 import calendar
@@ -1774,7 +1774,15 @@ def currency_post_save(sender, instance, **kwargs):
         debit_account.save()
         SystemAccount.objects.create(currency=instance,debits=debit_account, credits=credit_account)
 
-    
+    def get_total(self):
+        # get all the entries for this account
+        # add them up
+        return self.entries.all().aggregate(
+            total_amount = Sum('amount')
+        )['total_amount']
+
+
+
 class Transaction(models.Model):
     reason = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add=True)
@@ -1784,5 +1792,3 @@ class Entry(models.Model):
     account = models.ForeignKey(Account, related_name="entries")
     amount = models.IntegerField()
     transaction = models.ForeignKey(Transaction)
-
-
