@@ -53,9 +53,9 @@
                     </form>
                 </div>
             {% endif %}
-            {% if u.accounts_owned %}
-              <h1>{{ u.accounts_owned.first.get_total.total_amount }} {{ u.accounts_owned.first.currency }}</h1>
-            {% endif %}
+            {% for account in u.accounts_owned.all %}
+              <h1>{{ account.get_total.total_amount }} {{ account.currency }}</h1>
+            {% endfor %}
         </div>
         {% endifequal %}
 
