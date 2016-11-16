@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 import uuid
 import stripe
-from django.db.models import Q
+from django.db.models import Q, Sum
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 import calendar
@@ -1751,7 +1751,14 @@ class Account(models.Model):
         else:
             return "Group account (%s)" % (self.currency)
 
-    
+    def get_total(self):
+        # get all the entries for this account
+        # add them up
+        return self.entries.all().aggregate(
+            total_amount = Sum('amount')
+        )
+
+
 class Transaction(models.Model):
     reason = models.CharField
     created = models.DateTimeField(auto_now_add=True)
@@ -1761,5 +1768,3 @@ class Entry(models.Model):
     account = models.ForeignKey(Account, related_name="entries")
     amount = models.IntegerField()
     transaction = models.ForeignKey(Transaction)
-
-
