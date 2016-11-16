@@ -1756,7 +1756,8 @@ class Account(models.Model):
         # add them up
         return self.entries.all().aggregate(
             total_amount = Sum('amount')
-        )
+        )['total_amount']
+
 
 
 class Transaction(models.Model):
