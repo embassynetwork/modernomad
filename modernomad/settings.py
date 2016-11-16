@@ -137,6 +137,7 @@ WEBPACK_LOADER = {
 
 INSTALLED_APPS = (
     'core',
+    'bank',
     'djcelery',
     'gather',
     'modernomad',
