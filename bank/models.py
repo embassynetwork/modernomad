@@ -41,10 +41,10 @@ class Account(models.Model):
         else:
             return "No owner (%s)" % (self.currency)
 
-    def get_total(self):
-        # get all the entries for this account
+    def get_balance(self):
+        # get all valid entries for this account
         # add them up
-        return self.entries.all().aggregate(
+        return self.entries.filter(valid=True).aggregate(
             total_amount = Sum('amount')
         )['total_amount']
 

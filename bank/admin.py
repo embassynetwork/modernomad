@@ -17,7 +17,7 @@ class AccountAdmin(admin.ModelAdmin):
     model = Account
     raw_id_fields = ("owner", "admins")
     list_filter = ('type',)
-    list_display = ('__unicode__', 'account_admins', 'type')
+    list_display = ('__unicode__', 'get_balance', 'account_admins', 'type')
     inlines = [EntryReadOnlyInline,]
 
     def account_admins(self, obj):
