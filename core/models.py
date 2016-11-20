@@ -33,6 +33,9 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 
+# bank app imports
+from bank.models import Account
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -1731,3 +1734,17 @@ class CapacityChange(models.Model):
         verbose_name_plural = 'Availabilities'
         unique_together = ('start_date', 'resource',)
 
+
+class Backing(models.Model):
+    resource = models.OneToOneField(Resource)
+    money_account = models.ForeignKey(Account, related_name='+')
+    drft_account = models.ForeignKey(Account, related_name='+')
+    subscription = models.ForeignKey(Subscription, blank=True, null=True)
+    accept_drft = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return "Backing for %s" % self.resource
+
+class HouseAccount(models.Model):
+    location = models.ForeignKey(Location)
+    account = models.ForeignKey(Account)

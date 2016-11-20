@@ -54,7 +54,7 @@
                 </div>
             {% endif %}
             {% for account in u.accounts_owned.all %}
-              <h1>{{ account.get_total }} {{ account.currency }}</h1>
+              <h1>{{ account.get_balance }} {{ account.currency }}</h1>
             {% endfor %}
         </div>
         {% endifequal %}

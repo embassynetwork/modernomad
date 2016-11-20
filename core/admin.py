@@ -6,10 +6,6 @@ from core.models import *
 from gather.models import EventAdminGroup
 from core.emails import *
 
-# TODO - Needs to be locked down based on location.
-# http://reinout.vanrees.org/weblog/2011/09/30/django-admin-filtering.html
-
-
 class EmailTemplateAdmin(admin.ModelAdmin):
     model = EmailTemplate
     exclude = ('creator',)
@@ -289,6 +285,12 @@ class CapacityChangeAdmin(admin.ModelAdmin):
     model = CapacityChange
     list_display=('resource', 'start_date', 'quantity')
 
+class HouseAccountAdmin(admin.ModelAdmin):
+    model = HouseAccount
+
+class BackingAdmin(admin.ModelAdmin):
+    model = Backing
+
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Booking, BookingAdmin)
 admin.site.register(Resource, ResourceAdmin)
@@ -302,6 +304,8 @@ admin.site.register(BillLineItem, BillLineItemAdmin)
 admin.site.register(UserNote, UserNoteAdmin)
 admin.site.register(CapacityChange, CapacityChangeAdmin)
 admin.site.register(Use, UseAdmin)
+admin.site.register(HouseAccount, HouseAccountAdmin)
+admin.site.register(Backing, BackingAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, UserProfileAdmin)
