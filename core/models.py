@@ -1084,18 +1084,6 @@ class Booking(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    # deprecated fields to be deleted soon ("soon")
-    location_deprecated = models.ForeignKey(Location, related_name='bookings', null=True)
-    status_deprecated = models.CharField(max_length=200, choices=BOOKING_STATUSES, default=PENDING, blank=True, null=True)
-    user_deprecated = models.ForeignKey(User, related_name='bookings', null=True)
-    arrive_deprecated = models.DateField(verbose_name='Arrival Date', null=True)
-    depart_deprecated = models.DateField(verbose_name='Departure Date', null=True)
-    arrival_time_deprecated = models.CharField(help_text='Optional, if known', max_length=200, blank=True, null=True)
-    resource_deprecated = models.ForeignKey(Resource, null=True)
-    tags_deprecated = models.CharField(max_length=200, help_text='What are 2 or 3 tags that characterize this trip?', blank=True, null=True)
-    purpose_deprecated = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay', null=True)
-    last_msg_deprecated = models.DateTimeField(blank=True, null=True)
-
     comments = models.TextField(blank=True, null=True, verbose_name='Any additional comments. (Optional)')
     rate = models.DecimalField(max_digits=9, decimal_places=2, null=True, blank=True, help_text="Uses the default rate unless otherwise specified.")
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)  # the blank and null = True are artifacts of the migration JKS
@@ -1719,7 +1707,6 @@ class CapacityChangeManager(models.Manager):
             return latest_change.quantity
         else:
             return 0
-
 
 class CapacityChange(models.Model):
     created = models.DateTimeField(auto_now_add=True)
