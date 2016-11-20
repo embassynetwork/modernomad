@@ -15,7 +15,7 @@ class EntryInline(admin.TabularInline):
 
 class AccountAdmin(admin.ModelAdmin):
     model = Account
-    raw_id_fields = ("owner", "admins")
+    raw_id_fields = ("owners", "admins")
     list_filter = ('type',)
     list_display = ('__unicode__', 'get_balance', 'account_admins', 'type')
     inlines = [EntryReadOnlyInline,]

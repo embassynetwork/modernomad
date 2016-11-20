@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models import Q, Sum
+from django.utils import timezone
 
 class Currency(models.Model):
     class Meta:
@@ -25,13 +26,15 @@ class Account(models.Model):
         )
     currency = models.ForeignKey(Currency, related_name="accounts")
     admins = models.ManyToManyField(User, related_name='accounts_administered', blank=True, help_text="May be blank")
-    owner = models.ForeignKey(User, related_name='accounts_owned', null=True, blank=True, help_text="May be blank for group accounts")
+    owners = models.ManyToManyField(User, related_name='accounts_owned', blank=True, help_text="May be blank for group accounts")
     created = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=50, blank=True, null=True, help_text="Give this account a nickname (optional)")
     type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=STANDARD)
 
     def __unicode__(self):
-        if self.owner:
-            return "%s %s (%s)" % ( self.owner.first_name, self.owner.last_name, self.currency)
+        if self.owners.all():
+            owner_list = ", ".join(["%s %s" % (o.first_name, o.last_name) for o in self.owners.all()])
+            return owner_list + " (%s)" % (self.currency)
         elif self.type == Account.SYSTEM:
             # if a system account, is this a debit account or a credit account?
             if hasattr(self, 'systemaccount_credit'):
@@ -42,8 +45,7 @@ class Account(models.Model):
             return "No owner (%s)" % (self.currency)
 
     def get_balance(self):
-        # get all valid entries for this account
-        # add them up
+        # sum all valid entries for this account
         return self.entries.filter(valid=True).aggregate(
             total_amount = Sum('amount')
         )['total_amount']
@@ -68,6 +70,8 @@ def currency_post_save(sender, instance, **kwargs):
 class Transaction(models.Model):
     reason = models.CharField(max_length=200)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(default=timezone.now)
     approver = models.ForeignKey(User, related_name="approved_transactions", blank=True, null=True)
     valid = models.BooleanField(default=False)
 
