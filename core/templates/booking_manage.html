@@ -203,7 +203,8 @@ var action_el;
 function ajax_call(el) {
     console.log('el is');
     console.log(action_el);
-    res_action = $(el).attr('id')
+    res_action = $(el).attr('id');
+    console.log(res_action);
     request = $.ajax({
         data: {
             'booking-action': res_action,
@@ -244,8 +245,6 @@ function register_actions() {
         // action_el gets reset every time res-manage-action is clicked
         action_el = this;
         console.log(action_el);
-        console.log('{{r.use.status}}');
-        console.log('{{room_has_capacity}}')
         if ('{{r.use.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
             $("#dialog-warn-full").dialog("open");
         } else {

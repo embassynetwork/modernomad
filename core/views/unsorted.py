@@ -54,6 +54,7 @@ from core.data_fetchers import SerializedResourceCapacity
 from core.data_fetchers import SerializedNullResourceCapacity
 import re
 from .view_helpers import _get_user_and_perms
+from bank.models import Account, Currency, Transaction, Entry
 
 logger = logging.getLogger(__name__)
 
@@ -1458,6 +1459,8 @@ def BookingManage(request, location_slug, booking_id):
             return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
     user_notes = UserNote.objects.filter(user=user)
 
+    user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=user)
+
     return render(request, 'booking_manage.html', {
         "r": booking,
         "past_bookings": past_bookings,
@@ -1473,8 +1476,48 @@ def BookingManage(request, location_slug, booking_id):
         "dates": date_list,
         "domain": domain,
         'location': location,
+        'user_drft_balance': user_drft_balance
     })
 
+@house_admin_required
+def BookingManagePayWithDrft(request, location_slug, booking_id):
+    # check that request.user is an admin at the house in question
+    location = get_object_or_404(Location, slug=location_slug)
+    booking = Booking.objects.get(id=booking_id)
+
+    if not request.user in location.house_admins.all():
+        messages.add_message(request, messages.INFO, "Request not allowed")
+        return HttpResponseRedirect('/404')
+
+    drft = Currency.objects.get(name="DRFT")
+    user_drft_account = Account.objects.user_primary(user=booking.use.user, currency=drft)
+    room_drft_account = booking.use.resource.backing.drft_account
+    if not user_drft_account.get_balance() > 1:
+        messages.add_message(request, messages.INFO, "Oops. Insufficient Balance")
+    elif not booking.use.resource.backing.accepts_drft:
+        messages.add_message(request, messages.INFO, "Oops. Room does not accept DRFT")
+    else:
+        t = Transaction.objects.create(
+                reason="",
+                approver = request.user,
+            )
+        Entry.objects.create(account=user_drft_account, amount=-1, transaction=t)
+        Entry.objects.create(account=room_drft_account, amount=1, transaction=t)
+
+        if not t.valid:
+            messages.add_message(request, messages.INFO, "Hmm, something went wrong. Please check with an admin")
+        else:
+            booking.comp()
+            booking.confirm()
+            days_until_arrival = (booking.use.arrive - datetime.date.today()).days
+            if days_until_arrival <= location.welcome_email_days_ahead:
+                try:
+                    guest_welcome(booking.use)
+                except:
+                    messages.add_message(request, messages.INFO, "Could not connect to MailGun to send welcome email. Please try again manually.")
+    
+    messages.add_message(request, messages.INFO, "DRFT request")
+    return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
 
 @house_admin_required
 def BookingManageAction(request, location_slug, booking_id):
@@ -1484,6 +1527,8 @@ def BookingManageAction(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     booking_action = request.POST.get('booking-action')
+    print 'booking action'
+    print booking_action
 
     if booking_action == 'set-tentative':
         booking.approve()

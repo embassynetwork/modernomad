@@ -1740,7 +1740,7 @@ class Backing(models.Model):
     money_account = models.ForeignKey(Account, related_name='+')
     drft_account = models.ForeignKey(Account, related_name='+')
     subscription = models.ForeignKey(Subscription, blank=True, null=True)
-    accept_drft = models.BooleanField(default=True)
+    accepts_drft = models.BooleanField(default=True)
 
     def __unicode__(self):
         return "Backing for %s" % self.resource

@@ -6,14 +6,27 @@ from django.db.models import Q, Sum
 from django.utils import timezone
 
 class Currency(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    symbol = models.CharField(max_length=5, unique=True)
+
     class Meta:
         verbose_name_plural = "Currencies"
 
-    name = models.CharField(max_length=200)
-    symbol = models.CharField(max_length=5)
-
     def __unicode__(self):
         return self.name
+
+class AccountManager(models.Manager): 
+    def get_queryset(self):
+        # default queryset
+        return super(AccountManager, self).get_queryset()
+
+    def user_balance(self, user, currency):
+        accounts = self.get_queryset().filter(currency=currency).filter(owners=user)
+        return sum([a.get_balance() for a in accounts])
+
+    def user_primary(self, user, currency):
+        accounts = self.get_queryset().filter(currency=currency).filter(owners=user)
+        return accounts[0]
 
 class Account(models.Model):
     SYSTEM = 'system'
@@ -30,6 +43,7 @@ class Account(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=50, blank=True, null=True, help_text="Give this account a nickname (optional)")
     type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=STANDARD)
+    objects = AccountManager()
 
     def __unicode__(self):
         if self.owners.all():

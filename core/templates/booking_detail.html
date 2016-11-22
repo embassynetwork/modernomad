@@ -42,9 +42,16 @@
       {% else %}
           <div class="col-md-12">
               <div class="alert alert-warning">
-                  {% if booking.use.user.profile.customer_id %}
+                  {% if drft_balance and room_accepts_drft %}
+                    <div>
+                    <span class="fa fa-exclamation-circle"></span>
+                    This booking is awaiting confirmation. You have a balance of Ɖ{{ drft_balance }}, and this room accepts DRFT. This booking will be paid with DRFT unless otherwise requested.
+                    </div>
+                  {% elif booking.use.user.profile.customer_id %}
+                    <div>
                       <span class="fa fa-exclamation-circle"></span>
                       This booking is awaiting confirmation and you will receive an email when your card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %} has been charged.
+                    </div>
                   {% else %}
 
                       <p class="row-spacer">
@@ -117,28 +124,31 @@
               </div>
               </div>
           {% endif %}
-          <div id="booking-amount-summary-box">
-              <div class="panel panel-default">
-                  <div class="panel-heading">
-                      <h3 class="panel-title">Booking Summary</h3>
-                  </div>
-                  {% with booking.bill as bill %}
-                      {% include 'snippets/booking_bill_line_items_and_payments.html' %}
-                  {% endwith %}
-                  <div class="panel-footer text-muted">
-                      <em>Cancellation policy for the {{ booking.use.resource }} is {{booking.use.resource.cancellation_policy}}.</em>
-                  </div>
-              </div>
-          </div>
-          {% if booking.is_paid %}
-          <div class="row">
-              <div class="col-sm-12">
-                <form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug booking.id %}" >
-                    {% csrf_token %}
-                    <input class="btn-default btn" type="submit" value="Email Receipt">
-                </form>
-              </div>
-          </div>
+
+          {% if not drft_balance or not room_accepts_drft %}
+            <div id="booking-amount-summary-box">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Booking Summary</h3>
+                    </div>
+                    {% with booking.bill as bill %}
+                        {% include 'snippets/booking_bill_line_items_and_payments.html' %}
+                    {% endwith %}
+                    <div class="panel-footer text-muted">
+                        <em>Cancellation policy for the {{ booking.use.resource }} is {{booking.use.resource.cancellation_policy}}.</em>
+                    </div>
+                </div>
+            </div>
+            {% if booking.is_paid %}
+            <div class="row">
+                <div class="col-sm-12">
+                    <form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug booking.id %}" >
+                        {% csrf_token %}
+                        <input class="btn-default btn" type="submit" value="Email Receipt">
+                    </form>
+                </div>
+            </div>
+            {% endif %}
           {% endif %}
       </div> <!-- end col-md-4 -->
       <div class="col-md-8 col-md-pull-4">

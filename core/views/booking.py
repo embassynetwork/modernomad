@@ -13,6 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from core.models import Booking, Use, Location, Site
 from core.forms import BookingUseForm
+from bank.models import Currency, Account
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +144,24 @@ def BookingDetail(request, booking_id, location_slug):
             if member not in users_during_stay:
                 users_during_stay.append(member)
 
+        room_accepts_drft = False
+        drft_balance = 0
+        try:
+            drft = Currency.objects.get(name="DRFT")
+            accounts = Account.objects.filter(owners=booking.use.user).filter(currency = drft)
+            for a in accounts:
+                if a.get_balance() > 0:
+                    drft_balance += a.get_balance()
+
+            if booking.use.resource.backing and booking.use.resource.backing.accepts_drft:
+                room_accepts_drft = True
+        except:
+            # continues silently if no DRFT and room backing have not been
+            # setup. 
+            pass
+
+        
+
         return render(
             request,
             "booking_detail.html",
@@ -154,7 +173,9 @@ def BookingDetail(request, booking_id, location_slug):
                 "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
                 "paid": paid,
                 "contact": location.from_email(),
-                'users_during_stay': users_during_stay
+                'users_during_stay': users_during_stay,
+                'drft_balance': drft_balance,
+                'room_accepts_drft': room_accepts_drft,
             }
         )
     else:
