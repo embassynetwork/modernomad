@@ -9,7 +9,11 @@ def user_can_administer_a_resource(user, resource):
         user and
         resource and
         resource.location and
-        user in resource.location.house_admins.all()
+        (
+            user in resource.residents.all() 
+            or 
+            user in resource.location.house_admins.all()
+        )
     )
 
 
