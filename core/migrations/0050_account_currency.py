@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='account',
             name='currency',
-            field=models.ForeignKey(related_name='accounts', default=3, to='core.Currency'),
+            field=models.ForeignKey(related_name='accounts', default=1, to='bank.Currency'),
             preserve_default=False,
         ),
     ]
