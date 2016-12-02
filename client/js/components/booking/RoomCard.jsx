@@ -27,6 +27,11 @@ export default class RoomCard extends React.Component {
               <img className="room-image img-responsive" src={"/media/"+this.props.image} />
               <div className="col-xs-12">
                 <h3>{this.props.name}</h3>
+                {this.props.backing && this.props.backing.acceptsDrft ?
+                  <span className="pull-left accepts-drft"><b>Accepts Ɖ</b></span>
+                  :
+                  <span></span>
+                }
                 <span className="pull-right room-cost"><b>${this.props.defaultRate} / night</b></span>
                 {/*}<div className="row text-center room-tags">
                   { this.props.type == "Shared Room" ?
