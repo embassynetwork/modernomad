@@ -1,5 +1,3 @@
-behave
-django-behave
 factory_boy
 splinter
 selenium

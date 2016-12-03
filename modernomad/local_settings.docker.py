@@ -1,6 +1,12 @@
 # copy this file to local_settings.py. it should be exluded from the repo
 # (ensure local_settings.py is in .gitignore)
 
+import os
+
+# Make filepaths relative to settings.
+ROOT = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.normpath(ROOT + '/..')
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'secret'
 
@@ -25,7 +31,7 @@ BACKUP_ROOT= "/var/lib/modernomad/backups/"
 BACKUP_COUNT = 30
 
 # use XS_SHARING_ALLOWED_ORIGINS = '*' for all domains
-XS_SHARING_ALLOWED_ORIGINS = "http://localhost:8989/"
+XS_SHARING_ALLOWED_ORIGINS = "http://localhost/"
 XS_SHARING_ALLOWED_METHODS = ['POST','GET', 'PUT', 'OPTIONS', 'DELETE']
 XS_SHARING_ALLOWED_HEADERS = ["Content-Type"]
 
@@ -84,6 +90,13 @@ CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'client/dist/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats-prod.json'),
+    }
+}
 
 # Logging
 LOGGING = {

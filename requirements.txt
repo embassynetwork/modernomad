@@ -28,6 +28,7 @@ django-graphiql
 django-compressor
 icalendar
 django-ical
+django-behave
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command

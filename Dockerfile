@@ -10,7 +10,9 @@ ENV LIBRARY_PATH /lib:/usr/lib
 
 RUN pip install -r requirements.txt && \
     pip install --index-url https://code.stripe.com --upgrade stripe && \
-    mkdir logs
+    npm install -g less && \
+    cd client && npm install && \
+    node_modules/.bin/webpack --config webpack.prod.config.js
 
 EXPOSE 80
 
