@@ -4,18 +4,23 @@ from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from datetime import timedelta
-from core.models import Resource
+from core.models import Resource, Backing
 
 
 class AvailabilityNode(graphene.ObjectType):
     date = DateTime()
     quantity = graphene.Int()
 
+class BackingNode(DjangoObjectType):
+    class Meta:
+        model = Backing
+        interfaces = (Node, )
 
 class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
     availabilities = graphene.List(lambda: AvailabilityNode, arrive=DateTime(), depart=DateTime())
-
+    backing = graphene.Field(BackingNode)
+    
     class Meta:
         model = Resource
         interfaces = (Node, )
@@ -37,7 +42,6 @@ class ResourceNode(DjangoObjectType):
         availabilities = self.daily_availabilities_within(start_date, end_date)
 
         return [AvailabilityNode(*availability) for availability in availabilities]
-
 
 class Query(AbstractType):
     all_resources = DjangoFilterConnectionField(ResourceNode)

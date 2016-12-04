@@ -92,7 +92,13 @@ export default class BookingForm extends React.Component {
         <DjangoCSRFInput />
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
-          <h3 className="col-xs-8">${this.props.room.defaultRate}</h3>
+          <h3 className="col-xs-8">${this.props.room.defaultRate}
+            {this.props.room.backing && this.props.room.backing.acceptsDrft ?
+              <span><span className="h5"> or </span>Ɖ1</span>
+              :
+              <span></span>
+            }
+          </h3>
           <div className="col-xs-4"><h5 className="pull-right">Per Night</h5></div>
         </div>
         <div className="date-row">
