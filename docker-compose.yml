@@ -1,0 +1,20 @@
+version: '2'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: modernomadb
+    volumes:
+    - /var/lib/modernomad-postgres:/var/lib/postgres
+  mq:
+    image: rabbitmq
+  web:
+    build: .
+    ports:
+    - "${MODERNOMAD_PORT}:80"
+    command: ./docker-entrypoint.sh
+    volumes:
+    - /var/lib/modernomad:/var/lib/modernomad
+    depends_on:
+    - db
+    - mq
