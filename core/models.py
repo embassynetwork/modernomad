@@ -34,7 +34,7 @@ from django.template.loader import get_template
 from django.template import Context
 
 # bank app imports
-from bank.models import Account
+from bank.models import Account, Transaction
 
 import logging
 
@@ -1023,6 +1023,18 @@ class Use(models.Model):
             (CANCELED, 'Canceled'),
         )
 
+    FIAT = "fiat"
+    FIATDRFT = "fiatdrft"
+    DRFT = "drft"
+    BACKING = "backing"
+
+    USE_ACCOUNTING = (
+            (FIAT, "Fiat"),
+            (FIATDRFT, "Fiat & DRFT"),
+            (DRFT, "DRFT"),
+            (BACKING, "Backing")
+        )
+
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     location = models.ForeignKey(Location, related_name='uses', null=True)
@@ -1034,6 +1046,7 @@ class Use(models.Model):
     resource = models.ForeignKey(Resource, null=True)
     purpose = models.TextField(verbose_name='Tell us a bit about the reason for your trip/stay')
     last_msg = models.DateTimeField(blank=True, null=True)
+    accounted_by = models.CharField(max_length=200, choices=USE_ACCOUNTING, default=FIAT, blank=True)
 
     objects = UseManager()
 
@@ -1748,3 +1761,10 @@ class Backing(models.Model):
 class HouseAccount(models.Model):
     location = models.ForeignKey(Location)
     account = models.ForeignKey(Account)
+
+class UseTransaction(models.Model):
+    use = models.ForeignKey(Use)
+    transaction = models.ForeignKey(Transaction)
+
+    def __unicode__(self):
+        return "Transaction %d <> Use %d" % (self.transaction.id, self.use.id)

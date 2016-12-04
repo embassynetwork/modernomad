@@ -1492,13 +1492,13 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
     drft = Currency.objects.get(name="DRFT")
     user_drft_account = Account.objects.user_primary(user=booking.use.user, currency=drft)
     room_drft_account = booking.use.resource.backing.drft_account
-    if not user_drft_account.get_balance() > 1:
+    if not (user_drft_account and user_drft_account.get_balance() >= 1):
         messages.add_message(request, messages.INFO, "Oops. Insufficient Balance")
-    elif not booking.use.resource.backing.accepts_drft:
+    elif not (booking.use.resource.backing and booking.use.resource.backing.accepts_drft):
         messages.add_message(request, messages.INFO, "Oops. Room does not accept DRFT")
     else:
         t = Transaction.objects.create(
-                reason="",
+                reason="use %d" % booking.use.id,
                 approver = request.user,
             )
         Entry.objects.create(account=user_drft_account, amount=-1, transaction=t)
@@ -1509,6 +1509,9 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
         else:
             booking.comp()
             booking.confirm()
+            booking.use.accounted_by = Use.DRFT
+            booking.use.save()
+            UseTransaction.objects.create(use = booking.use, transaction=t)
             days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
                 try:
@@ -1516,7 +1519,6 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
                 except:
                     messages.add_message(request, messages.INFO, "Could not connect to MailGun to send welcome email. Please try again manually.")
     
-    messages.add_message(request, messages.INFO, "DRFT request")
     return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
 
 @house_admin_required
