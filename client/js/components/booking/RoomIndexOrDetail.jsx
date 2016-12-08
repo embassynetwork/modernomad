@@ -39,6 +39,22 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
       }
     }
   }
+  currentUser {
+    edges {
+      node {
+        accountsOwned {
+          edges {
+            node {
+              balance
+              currency {
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 `;
 
