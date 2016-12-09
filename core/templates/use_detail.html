@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load core_tag_extras %}
+
+{% block content %}
+
+<div class="container">
+  {% include "snippets/messages.html" %}
+
+  <div class="row">
+      <div class="col-md-4 col-md-push-8">
+          {% if user in location.house_admins.all %}
+              <div class="row">
+              <div class="col-sm-12 align-right">
+                  <a href="{% url 'booking_manage' location.slug use.booking.id %}">Manage <span class="fa fa-mail-forward"></span></a>
+              </div>
+              </div>
+          {% endif %}
+
+          <h3>{{use.accounted_by}}</h3>
+      </div> <!-- end col-md-4 -->
+
+      <div class="col-md-8 col-md-pull-4">
+          <h3>Use for
+              <em><a href="{% url 'user_detail' use.user.username %}">{{ use.user.first_name|title }} {{use.user.last_name}}</a></em>
+          </h3>
+          <h4>{{use.arrive }} - {{use.depart}}.</h4>
+          <div class="row">
+              <div class="col-md-3"><b>Room</b></div><div class="col-md-9">{{ use.resource.name|title}}</div>
+          </div>
+          <div class="row">
+              <div class="col-md-3"><b>Purpose of trip</b></div><div class="col-md-9">{{ use.purpose}}</div>
+          </div>
+          <div class="row">
+              <div class="col-md-3"><b>Approximate arrival Time</b></div><div class="col-md-9">{{ use.arrival_time|default:"Not specified" }}</div>
+          </div>
+
+      </div>
+
+  </div>
+
+  <div class="row top-spacer-xl {% if use.status == 'canceled' %}greyed-images greyed-out {% endif %}">
+          <div class="col-md-12">
+              <h3> Also here during your stay</h3>
+              {% for subset in users_during_stay|subsets_size:12 %}
+                  <div class="row row-spacer">
+                      {% for user in subset %}
+                          <div class="col-md-2 col-sm-3 col-xs-6">
+                <a href="{% url 'user_detail' user.username %}">
+                                <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb|default:'static/img/default.jpg'}}" class="small-profile-pic">
+                                <p class="text-center">{{user.first_name}}</p>
+                </a>
+                          </div>
+                      {% endfor %}
+                  </div>
+              {% endfor %}
+          </div>
+      </div>
+
+
+  {% ifequal use.user user %}
+      <div class="res-modify-btn row-spacer">
+          {% if past %}
+              <p class="notice">This use is in the past and cannot be modified</p>
+          {% elif paid %}
+              <p class="notice">This use has already been paid for. </p>
+          {% elif use.status == 'canceled' %}
+          {% else %}
+              <div>
+                  <a class="btn-inline btn btn-info" href="{{ request.get_full_path }}edit">Modify Use</a>
+                  <form id="res-delete" class="btn-inline" method="post" action="">{% csrf_token %} <input type="submit" class="btn-inline btn-red btn btn-link" value="Cancel?"></form>
+              </div>
+
+              <div id="dialog-confirm" title="Cancel this Use?">
+                  <p>
+                  <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+                  This use will be permanently deleted and cannot be recovered. Are you sure?
+                  </p>
+              </div>
+          {% endif %}
+      </div>
+      <div class="row row-spacer greyed-out">
+          <span>Questions? Contact <a href="mailto:{{contact}}">{{ contact }}</a>.</span>
+          <span class="pull-right"><em>Created {{use.created}}. Last updated {{use.updated}}.</em></span>
+      </div>
+
+  {% endifequal %}
+
+  </div> <!-- end col -->
+
+</div>
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+$("#dialog-confirm").dialog({
+    autoOpen: false,
+    modal: true,
+    buttons: {
+        "Yes, Delete": function () {
+            $("#res-delete").submit();
+         },
+        "Cancel": function () {
+            $(this).dialog("close");
+        }
+    }
+});
+
+$("#res-delete").click(function (e) {
+    $("#dialog-confirm").dialog("open");
+    e.preventDefault();
+});
+</script>
+
+
+{% endblock %}

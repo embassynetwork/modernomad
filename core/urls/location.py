@@ -33,6 +33,7 @@ per_location_patterns = [
     url(r'^rooms_availabile_on_dates/$', 'core.views.unsorted.RoomsAvailableOnDates', name='rooms_available_on_dates'),
 
     url(r'^booking/', include('core.urls.bookings')),
+    url(r'^use/', include('core.urls.uses')),
     url(r'^manage/', include('core.urls.manage')),
     url(r'^room/', include('core.urls.room')),
 
