@@ -58,7 +58,7 @@ class LocationAdmin(admin.ModelAdmin):
     save_as = True
     list_display = ('name', 'address')
     list_filter = ('name', )
-    filter_horizontal = ['residents', 'house_admins', 'readonly_admins']
+    filter_horizontal = ['house_admins', 'readonly_admins']
     actions = ['send_admin_daily_update', 'send_guests_residents_daily_update']
 
     inlines = [ResourceAdminInline]
@@ -119,6 +119,9 @@ def gen_message(queryset, noun, pl_noun, suffix):
         prefix = "%d %s were" % (len(queryset), pl_noun)
     msg = prefix + " " + suffix + "."
     return msg
+
+class UseTransactionAdmin(admin.ModelAdmin):
+    model = UseTransaction
 
 class UseAdmin(admin.ModelAdmin):
     model = Use
@@ -291,6 +294,7 @@ class HouseAccountAdmin(admin.ModelAdmin):
 class BackingAdmin(admin.ModelAdmin):
     model = Backing
 
+
 admin.site.register(LocationMenu, LocationMenuAdmin)
 admin.site.register(Booking, BookingAdmin)
 admin.site.register(Resource, ResourceAdmin)
@@ -304,6 +308,7 @@ admin.site.register(BillLineItem, BillLineItemAdmin)
 admin.site.register(UserNote, UserNoteAdmin)
 admin.site.register(CapacityChange, CapacityChangeAdmin)
 admin.site.register(Use, UseAdmin)
+admin.site.register(UseTransaction, UseTransactionAdmin)
 admin.site.register(HouseAccount, HouseAccountAdmin)
 admin.site.register(Backing, BackingAdmin)
 

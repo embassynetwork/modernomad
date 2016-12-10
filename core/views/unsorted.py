@@ -100,7 +100,7 @@ def view_room(request, location_slug, room_id):
 
 def community(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
-    residents = location.residents.all()
+    residents = location.residents()
     return render(request, "location_community.html", {'residents': residents, 'location': location})
 
 
@@ -169,7 +169,7 @@ def today(request, location_slug):
     guests_today = []
     for r in bookings_today:
         guests_today.append(r.user)
-    residents = location.residents.all()
+    residents = location.residents()
     people_today = guests_today + list(residents)
 
     events_today = published_events_today_local(location)
@@ -311,7 +311,7 @@ def monthly_occupant_report(location_slug, year, month):
     messages = []
 
     # calculate datas for people this month (as relevant), including: name, email, total_nights, total_value, total_comped, owing, and reference ids
-    for user in location.residents.all():
+    for user in location.residents():
         if user in occupants['residents'].keys():
             messages.append(
                 "user %d (%s %s) showed up in residents list twice. this shouldn't happen. the second instance was skipped."
@@ -871,7 +871,7 @@ def user_edit_room(request, username, room_id):
     room = Resource.objects.get(id=room_id)
 
     # make sure this user has permissions on the room
-    if room not in user.resources.all():
+    if room not in Resource.objects.backed_by(user):
         return HttpResponseRedirect('/404')
 
     if room.image:
@@ -1097,18 +1097,6 @@ def LocationEditUsers(request, location_slug):
                 location.house_admins.add(admin_user)
                 location.save()
                 messages.add_message(request, messages.INFO, "User '%s' added to house admin group." % admin_username)
-        elif resident_user:
-            action = request.POST.get('action')
-            if action == "Remove":
-                # Remove user
-                location.residents.remove(resident_user)
-                location.save()
-                messages.add_message(request, messages.INFO, "User '%s' removed from residents group." % resident_username)
-            elif action == "Add":
-                # Add user
-                location.residents.add(resident_user)
-                location.save()
-                messages.add_message(request, messages.INFO, "User '%s' added to residents group." % resident_username)
         elif readonly_admin_user:
             action = request.POST.get('action')
             if action == "Remove":
@@ -1492,13 +1480,13 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
     drft = Currency.objects.get(name="DRFT")
     user_drft_account = Account.objects.user_primary(user=booking.use.user, currency=drft)
     room_drft_account = booking.use.resource.backing.drft_account
-    if not user_drft_account.get_balance() > 1:
+    if not (user_drft_account and user_drft_account.get_balance() >= 1):
         messages.add_message(request, messages.INFO, "Oops. Insufficient Balance")
-    elif not booking.use.resource.backing.accepts_drft:
+    elif not (booking.use.resource.backing and booking.use.resource.backing.accepts_drft):
         messages.add_message(request, messages.INFO, "Oops. Room does not accept DRFT")
     else:
         t = Transaction.objects.create(
-                reason="",
+                reason="use %d" % booking.use.id,
                 approver = request.user,
             )
         Entry.objects.create(account=user_drft_account, amount=-1, transaction=t)
@@ -1509,6 +1497,9 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
         else:
             booking.comp()
             booking.confirm()
+            booking.use.accounted_by = Use.DRFT
+            booking.use.save()
+            UseTransaction.objects.create(use = booking.use, transaction=t)
             days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
                 try:
@@ -1516,7 +1507,6 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
                 except:
                     messages.add_message(request, messages.INFO, "Could not connect to MailGun to send welcome email. Please try again manually.")
     
-    messages.add_message(request, messages.INFO, "DRFT request")
     return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
 
 @house_admin_required
@@ -1999,7 +1989,7 @@ def PeopleDaterangeQuery(request, location_slug):
     recipients = []
     for r in bookings_for_daterange:
         recipients.append(r.user)
-    residents = location.residents.all()
+    residents = location.residents()
     recipients = recipients + list(residents)
     html = "<div class='btn btn-info disabled' id='recipient-list'>Your message will go to these people: "
     for person in recipients:
