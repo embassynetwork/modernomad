@@ -15,12 +15,20 @@ from core.models import Booking, Use, Location, Site
 from core.forms import BookingUseForm
 from bank.models import Currency, Account
 
+
 logger = logging.getLogger(__name__)
 
 
 @ensure_csrf_cookie
 def StayComponent(request, location_slug, room_id=None):
-    return render(request, 'booking.html')
+    drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
+    drft_balance = sum([a.get_balance() for a in drft_accounts])
+
+    return render(request,
+        'booking.html',
+        {
+            "drft_balance": drft_balance
+        })
 
 
 def BookingSubmit(request, location_slug):
@@ -157,10 +165,10 @@ def BookingDetail(request, booking_id, location_slug):
                 room_accepts_drft = True
         except:
             # continues silently if no DRFT and room backing have not been
-            # setup. 
+            # setup.
             pass
 
-        
+
 
         return render(
             request,

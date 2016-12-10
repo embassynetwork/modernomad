@@ -17,7 +17,7 @@ class RoomBookingRoutes extends React.Component {
   render() {
     return (
       <Router history={browserHistory}>
-        <Route path="/locations/:location/stay/" component={RoomIndexOrDetail}>
+        <Route path="/locations/:location/stay/" component={RoomIndexOrDetail} drftBalance={this.props.drftBalance}>
           <Route path="room/:id" component={DummyRoomDetail} />
         </Route>
       </Router>
@@ -29,7 +29,7 @@ export default class RoomBooking extends React.Component {
   render() {
     return (
       <ApolloProvider client={client}>
-        <RoomBookingRoutes />
+        <RoomBookingRoutes drftBalance={this.props.drft_balance}/>
       </ApolloProvider>
     )
   }

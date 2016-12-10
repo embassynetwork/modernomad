@@ -2,10 +2,9 @@
 {% load staticfiles %}
 
 {% block content %}
-
 <div id="room-container"></div>
 <script type="text/javascript">
-    window.renderReactComponent('room-container', 'RoomBooking', {})
+    window.renderReactComponent('room-container', 'RoomBooking', {drft_balance: {{drft_balance}}})
 </script>
 
 {% endblock %}

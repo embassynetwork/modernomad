@@ -34,6 +34,44 @@ export class BaseLineItem extends LineItem {
   }
 }
 
+export class DrftMoney {
+    constructor(props) {
+      this.amount = props.amount
+      this.currency = props.currency
+    }
+
+    getAmount() {
+      return this.amount
+    }
+
+    getCurrency() {
+      return 'drft'
+    }
+}
+
+export class DrftLineItem extends LineItem {
+  constructor(props) {
+    super(props)
+    this.nightRate = new DrftMoney ({
+      amount: 1,
+      currency: 'DRFT'
+    })
+    this.nights = props.nights
+  }
+
+  description() {
+    return `Ɖ1 * ${this.nights} nights`
+  }
+
+  amount() {
+    this.nightRate = new DrftMoney({
+      amount: 1*this.nights,
+      currency: 'DRFT'
+    })
+    return this.nightRate
+  }
+}
+
 
 export class FeeLineItem extends LineItem {
   constructor(props) {
@@ -55,17 +93,28 @@ export class FeeLineItem extends LineItem {
 
 export class Booking {
   constructor(props) {
-    this.baseItem = new BaseLineItem({
-      id: 'base',
-      nightRate: props.nightRate,
-      nights: props.depart.diff(props.arrive, 'days')
-    })
-    this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
+    const nights = props.depart.diff(props.arrive, 'days')
+    if (props.acceptsDrft && (props.drftBalance >= nights)) {
+      this.drftItem = new DrftLineItem({
+        id: 'base',
+        nightRate: 1,
+        nights: nights
+      })
+      this.feeItems = []
+    }
+    else {
+      this.baseItem = new BaseLineItem({
+        id: 'base',
+        nightRate: props.nightRate,
+        nights: nights
+      })
+      this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
+    }
   }
 
   lineItems() {
     return [
-      this.baseItem,
+      this.baseItem || this.drftItem,
       ...this.feeItems
     ]
   }
