@@ -9,10 +9,12 @@
     >{% csrf_token %}
 
     {% if form.instance.pk %}
-        <h4 class="row-spacer">Editing {{ form.instance.name|title }}</h4>
+        <h4>Editing {{ form.instance.name|title }}</h4>
     {% else %}
-        <h4 class="row-spacer">New Room</h4>
+        <h4>New Room</h4>
     {% endif %}
+
+    <h5 class="row-spacer">Backed by {{form.instance.backers|join:", "|default:"no one"}}</h5>
 
     {% for field in form %}
 

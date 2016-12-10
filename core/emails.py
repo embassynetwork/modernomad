@@ -282,7 +282,7 @@ def guest_welcome(use):
     domain = Site.objects.get_current().domain
     location = use.location
     intersecting_uses = Use.objects.filter(arrive__gte=use.arrive).filter(depart__lte=use.depart)
-    residents = location.residents.all()
+    residents = location.residents()
     intersecting_events = Event.objects.filter(location=location).filter(start__gte=use.arrive).filter(end__lte=use.depart)
     profiles = None
     day_of_week = weekday_number_to_name[use.arrive.weekday()]
@@ -343,7 +343,7 @@ def guests_residents_daily_update(location):
 
     # Add all the non-admin residents at this location (admins get a different
     # email)
-    for r in location.residents.all():
+    for r in location.residents():
         if (not r.email in admin_emails) and (not r.email in to_emails):
             to_emails.append(r.email)
     
@@ -478,7 +478,7 @@ def current(request, location_slug):
         current_emails.append(r.user.email)
 
     # Add all the residents at this location
-    for r in location.residents.all():
+    for r in location.residents():
         current_emails.append(r.email)
 
     # Add the house admins
@@ -800,7 +800,7 @@ def residents(request, location_slug):
 
     # Add all the residents at this location
     resident_emails = [] 
-    for r in location.residents.all():
+    for r in location.residents():
         resident_emails.append(r.email)
 
     # Now loop through all the emails and build the bcc list we will use.

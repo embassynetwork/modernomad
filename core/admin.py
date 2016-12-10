@@ -58,7 +58,7 @@ class LocationAdmin(admin.ModelAdmin):
     save_as = True
     list_display = ('name', 'address')
     list_filter = ('name', )
-    filter_horizontal = ['residents', 'house_admins', 'readonly_admins']
+    filter_horizontal = ['house_admins', 'readonly_admins']
     actions = ['send_admin_daily_update', 'send_guests_residents_daily_update']
 
     inlines = [ResourceAdminInline]

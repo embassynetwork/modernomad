@@ -41,7 +41,7 @@ def resident_or_admin_required(original_func):
             user.is_authenticated() and
             location and
             (
-                user in location.residents.all() or
+                user in location.residents() or
                 user in location.house_admins.all() or
                 user in location.readonly_admins.all()
             )

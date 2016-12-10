@@ -31,7 +31,7 @@
             {% for form, room_id, room_name, location, has_image, room_capacity in room_forms %}
                 {% with page='user_detail' username=u.username %}
                     <div role="tabpanel" class="tab-pane" id="{{room_name|slugify}}">
-                        {% include 'snippets/room_edit_form.html' %}
+                        {% include 'snippets/ooom_edit_form.html' %}
                     </div> <!-- end events tab -->
                 {% endwith %}
             {% endfor %}

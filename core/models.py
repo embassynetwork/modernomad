@@ -115,7 +115,6 @@ class Location(models.Model):
             User, related_name='readonly_admin',
             help_text="Readonly admins do not show up as part of the community. Useful for eg. external bookkeepers, etc."
             )
-    residents = models.ManyToManyField(User, related_name='residences', blank=True)
     check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
     check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
 
@@ -144,7 +143,7 @@ class Location(models.Model):
         subscribers = []
         for s in active_subscriptions:
             subscribers.append(s.user)
-        return list(list(self.residents.all()) + list(self.house_admins.all()) + list(self.event_admin_group.users.all()) + subscribers)
+        return list(list(self.residents()) + list(self.house_admins.all()) + list(self.event_admin_group.users.all()) + subscribers)
 
     def rooms_with_future_capacity_choices(self):
         choices = []
@@ -224,7 +223,7 @@ class Location(models.Model):
 
     def people_today(self):
         guests = self.guests_today()
-        residents = list(self.residents.all())
+        residents = list(self.residents())
         active_subscriptions = Subscription.objects.active_subscriptions().filter(location=self)
         members = []
         for s in active_subscriptions:
@@ -239,7 +238,7 @@ class Location(models.Model):
                 people.append(use.user)
 
         # add residents to the list of people in the house in the coming month.
-        for r in self.residents.all():
+        for r in self.residents():
             if r not in people:
                 people.append(r)
 
@@ -275,6 +274,14 @@ class Location(models.Model):
             return pytz.timezone(self.timezone)
         else:
             return None
+    
+    def residents(self):
+        all_residents = []
+        for resource in self.resources.all():
+            for resident in resource.backers():
+                all_residents.append(resident)
+        print all_residents
+        return all_residents
 
 
 class LocationNotUniqueException(Exception):
@@ -340,6 +347,12 @@ class RoomCalendar(calendar.HTMLCalendar):
                 return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 
 
+class ResourceManager(models.Manager):
+    def backed_by(self, user):
+        resources = self.get_queryset().filter(backing__money_account__owners = user)
+        print resources
+        return resources
+
 class Resource(models.Model):
     name = models.CharField(max_length=200)
     location = models.ForeignKey(Location, related_name='resources', null=True)
@@ -347,12 +360,8 @@ class Resource(models.Model):
     description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
     summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
     cancellation_policy = models.CharField(max_length=400, default="24 hours")
-    residents = models.ManyToManyField(
-            User, related_name="resources", blank=True,
-            help_text="Residents have the ability to edit the room and its reservable data ranges. Adding multiple people " +
-            "will give them all permission to edit the room. If a user removes themselves, they will no longer be able to edit the room."
-            )  # a room may have many residents and a resident may have many rooms
     image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
+    objects = ResourceManager()
 
     def __unicode__(self):
         return self.name
@@ -465,6 +474,10 @@ class Resource(models.Model):
         assert self.location, "You can't fetch a timezone on a resource without a location"
         return self.location.tz()
 
+    def backers(self):
+        # money_account and drft_account should have the same owners (famous
+        # last words) so just pick one
+        return list(self.backing.money_account.owners.all())
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -1509,6 +1522,7 @@ class UserProfile(models.Model):
         return (self.user.__unicode__())
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+User.rooms_backed = (lambda u: Resource.objects.backed_by(user=u))
 
 User._meta.ordering = ['username']
 
@@ -1748,12 +1762,20 @@ class CapacityChange(models.Model):
         unique_together = ('start_date', 'resource',)
 
 
+class BackingManager(models.Manager):
+    def by_user(self, user):
+        return self.get_queryset().filter(money_account__owners = user)
+
+
 class Backing(models.Model):
     resource = models.OneToOneField(Resource)
     money_account = models.ForeignKey(Account, related_name='+')
     drft_account = models.ForeignKey(Account, related_name='+')
     subscription = models.ForeignKey(Subscription, blank=True, null=True)
     accepts_drft = models.BooleanField(default=True)
+    start = models.DateField(default=django.utils.timezone.now)
+    end = models.DateField(blank=True, null=True)
+    objects = BackingManager()
 
     def __unicode__(self):
         return "Backing for %s" % self.resource
