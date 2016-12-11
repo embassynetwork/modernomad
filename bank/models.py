@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models import Q, Sum
 from django.utils import timezone
+from django.db.models.functions import Coalesce
 
 class Currency(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -64,7 +65,7 @@ class Account(models.Model):
     def get_balance(self):
         # sum all valid entries for this account
         return self.entries.filter(valid=True).aggregate(
-            total_amount = Sum('amount')
+            total_amount = Coalesce(Sum('amount'), 0)
         )['total_amount']
 
 
