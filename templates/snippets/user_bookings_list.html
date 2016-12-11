@@ -7,6 +7,7 @@
         <tr {% if booking.use.status == 'canceled' %} class="faded" {% endif %} >
             <td>
             <a href="{% url 'booking_detail' booking.use.location.slug booking.id %}">{{booking.use.arrive}} - {{booking.use.depart}}</a> 
+            in {{ booking.use.resource.name }} 
             at <a href="{% url 'location_home' booking.use.location.slug %}">{{booking.use.location.name}}</a>
         </td>
         <td><em>{{booking.use.status}}</em></td>
@@ -22,6 +23,7 @@
         <tr {% if booking.use.status == 'canceled' %} class="faded" {% endif %} >
         <td>
             <a href="{% url 'booking_detail' booking.use.location.slug booking.id %}">{{booking.use.arrive}} - {{booking.use.depart}}</a> 
+            in {{ booking.use.resource.name }} 
             at <a href="{% url 'location_home' booking.use.location.slug %}">{{booking.use.location.name}}</a>
         </td>
         <td><em>{{booking.use.status}}</em></td>
