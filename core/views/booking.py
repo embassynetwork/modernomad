@@ -21,13 +21,13 @@ logger = logging.getLogger(__name__)
 
 @ensure_csrf_cookie
 def StayComponent(request, location_slug, room_id=None):
-    drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
-    drft_balance = sum([a.get_balance() for a in drft_accounts])
+    user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
+    user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
 
     return render(request,
         'booking.html',
         {
-            "drft_balance": drft_balance
+            "request_user_drft_balance": user_drft_balance
         })
 
 
@@ -148,25 +148,26 @@ def BookingDetail(request, booking_id, location_slug):
         for use in uses:
             if use.user not in users_during_stay:
                 users_during_stay.append(use.user)
-        for member in location.residents.all():
+        for member in location.residents():
             if member not in users_during_stay:
                 users_during_stay.append(member)
 
         room_accepts_drft = False
         drft_balance = 0
-        try:
-            drft = Currency.objects.get(name="DRFT")
-            accounts = Account.objects.filter(owners=booking.use.user).filter(currency = drft)
-            for a in accounts:
-                if a.get_balance() > 0:
-                    drft_balance += a.get_balance()
 
-            if booking.use.resource.backing and booking.use.resource.backing.accepts_drft:
-                room_accepts_drft = True
-        except:
+        # try
+        drft = Currency.objects.get(name="DRFT")
+        accounts = Account.objects.filter(owners=booking.use.user).filter(currency = drft)
+        for a in accounts:
+            if a.get_balance() > 0:
+                drft_balance += a.get_balance()
+
+        if booking.use.resource.backing and booking.use.resource.backing.accepts_drft:
+            room_accepts_drft = True
+        # except:
             # continues silently if no DRFT and room backing have not been
             # setup.
-            pass
+        #    pass
 
 
 
