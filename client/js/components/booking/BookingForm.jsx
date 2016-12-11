@@ -29,13 +29,17 @@ export default class BookingForm extends React.Component {
     const parseFormat = 'MM/DD/YYYY'
     const depart = moment(this.props.query.depart, parseFormat)
     const arrive = moment(this.props.query.arrive, parseFormat)
+    const drftBalance = this.props.route.drftBalance
+    const acceptsDrft = this.props.room.backing && this.props.room.backing.acceptsDrft
 
     if (depart && arrive) {
       const booking = new Booking({
         nightRate: this.props.room.defaultRate,
         arrive: arrive,
         depart: depart,
-        fees: this.props.networkLocation.fees
+        fees: this.props.networkLocation.fees,
+        drftBalance: drftBalance,
+        acceptsDrft: acceptsDrft
       })
       return <BookingDisplay booking={booking} />
     } else {
@@ -80,6 +84,7 @@ export default class BookingForm extends React.Component {
   changePurpose(event) {
     this.setState({purpose: event.target.value})
   }
+
 
   render() {
     const room = this.props.room
