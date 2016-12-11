@@ -50,6 +50,8 @@ class Account(models.Model):
     objects = AccountManager()
 
     def __unicode__(self):
+        if self.name:
+            return self.name + " (%s)" % (self.currency)
         if self.owners.all():
             owner_list = ", ".join(["%s %s" % (o.first_name, o.last_name) for o in self.owners.all()])
             return owner_list + " (%s)" % (self.currency)
