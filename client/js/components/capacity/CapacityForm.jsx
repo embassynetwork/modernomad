@@ -9,8 +9,9 @@ export default class CapacityForm extends React.Component {
 
   submit(event) {
     const values = {
-		start_date: this.refs.start_date.value(),
-      quantity: parseInt(this.refs.quantity.value) || 0
+	  start_date: this.refs.start_date.value(),
+      quantity: parseInt(this.refs.quantity.value) || 0,
+      accepts_drft: this.refs.accept_drft.value
     }
     event.preventDefault()
     this.props.onSubmit(values);
@@ -26,9 +27,13 @@ export default class CapacityForm extends React.Component {
               <label htmlFor="date" className="control-label" style={{display: 'block'}}>Start date</label>
               <DatePicker name="start_date" className="form-control" ref="start_date" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
-            <div className="form-group col-xs-4">
+            <div className="form-group col-xs-2">
               <label htmlFor="quantity" className="control-label" style={{display: 'block'}}>Capacity</label>
               <input name="quantity" type="number" className="form-control" min="0" max="100" ref="quantity" required={true} style={inputStyles} disabled={this.props.loading} />
+            </div>
+            <div className="form-group col-xs-2">
+              <label htmlFor="accept_drft" className="control-label" style={{display: 'block'}}>DRFT?</label>
+              <input name="accept_drft" type="checkbox" className="form-control" ref="accept_drft" required={true} style={inputStyles} disabled={this.props.loading} />
             </div>
           </div>
           <div>

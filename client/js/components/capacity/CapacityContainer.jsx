@@ -28,6 +28,7 @@ export default class CapacityContainer extends React.Component {
     axios.post(`/api/capacities/`, {
         start_date: moment(values.start_date).format("Y-MM-DD"),
         quantity: values.quantity,
+        accepts_drft: values.accepts_drft,
         resource: this.props.resourceId
       })
       .then((response) => {

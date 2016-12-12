@@ -14,6 +14,7 @@ def capacities(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
 
+        print data
         command = UpdateOrAddCapacityChange(request.user, **data)
         command.execute()
         return JSONResponse(command.result().serialize(), status=command.result().http_status())

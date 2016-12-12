@@ -56,7 +56,7 @@ class UpdateOrAddCapacityChange(DecoratorCommand, CapacityCommandHelpers):
     def _determine_inner(self):
         existing = self._fetch_existing_capacity_for_date(self.start_date())
         if existing:
-            self.inner_command = UpdateCapacityChange(self.issuing_user, capacity=existing, quantity=self.input_data.get('quantity'))
+            self.inner_command = UpdateCapacityChange(self.issuing_user, capacity=existing, quantity=self.input_data.get('quantity'), accept_drft=self.input_data.get('accept_drft'))
         else:
             self.inner_command = AddCapacityChange(self.issuing_user, **self.input_data)
 

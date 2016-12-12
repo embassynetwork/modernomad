@@ -1755,12 +1755,11 @@ class CapacityChange(models.Model):
     resource = models.ForeignKey(Resource, related_name="capacity_changes")
     start_date = models.DateField()
     quantity = models.IntegerField()
+    accept_drft = models.BooleanField(default=False)
     objects = CapacityChangeManager()
 
     class Meta:
-        verbose_name_plural = 'Availabilities'
         unique_together = ('start_date', 'resource',)
-
 
 class BackingManager(models.Manager):
     def by_user(self, user):

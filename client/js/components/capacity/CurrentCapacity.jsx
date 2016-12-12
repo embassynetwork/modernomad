@@ -5,7 +5,8 @@ var moment = require('moment');
 export default class CurrentCapacity extends React.Component {
   static propTypes = {
     capacity: PropTypes.shape({
-      quantity: PropTypes.number.isRequired
+    quantity: PropTypes.number.isRequired,
+    accept_drft: PropTypes.bool.isRequired
     })
   }
 

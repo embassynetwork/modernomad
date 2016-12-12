@@ -6,7 +6,8 @@ import CapacityTable from './CapacityTable'
 const capacitySchema = PropTypes.shape({
   id: PropTypes.number.isRequired,
   start_date: PropTypes.string,
-  quantity: PropTypes.number.isRequired
+  quantity: PropTypes.number.isRequired,
+  accept_drft: PropTypes.bool.isRequired
 })
 
 export default class CapacityManager extends React.Component {

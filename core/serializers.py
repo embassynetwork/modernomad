@@ -9,4 +9,4 @@ class CapacityChangeSerializer(serializers.ModelSerializer):
     '''Includes simple default implementations for the create() and update() methods.'''
     class Meta:
         model = CapacityChange
-        fields = ('id', 'start_date', 'resource', 'quantity')
+        fields = ('id', 'start_date', 'resource', 'quantity', 'accept_drft')
