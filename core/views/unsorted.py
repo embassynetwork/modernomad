@@ -799,8 +799,8 @@ def ListUsers(request):
 @login_required
 def UserDetail(request, username):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
-    user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
+    user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=request.user)
+
 
     return render(
         request,

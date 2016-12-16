@@ -274,7 +274,7 @@ class Location(models.Model):
             return pytz.timezone(self.timezone)
         else:
             return None
-    
+
     def residents(self):
         all_residents = []
         for resource in self.resources.all():
