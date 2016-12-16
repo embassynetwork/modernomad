@@ -366,7 +366,7 @@ def monthly_occupant_report(location_slug, year, month):
         print "subscription %d" % s.id
         for b in bills_between:
             print b.subtotal_amount()
-            print b.period_end 
+            print b.period_end
             print b.period_start
             if (b.period_end - b.period_start).days > 0:
                 effective_rate = b.subtotal_amount() / (b.period_end - b.period_start).days
@@ -799,6 +799,8 @@ def ListUsers(request):
 @login_required
 def UserDetail(request, username):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
+    user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=request.user)
+
 
     return render(
         request,
@@ -806,7 +808,8 @@ def UserDetail(request, username):
         {
             "u": user,
             'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
-            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY
+            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
+            "drft_balance": user_drft_balance
         }
     )
 
@@ -1479,8 +1482,10 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
 
     drft = Currency.objects.get(name="DRFT")
     user_drft_account = Account.objects.user_primary(user=booking.use.user, currency=drft)
+    user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
+    user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
     room_drft_account = booking.use.resource.backing.drft_account
-    if not (user_drft_account and user_drft_account.get_balance() >= 1):
+    if not (user_drft_accounts and user_drft_balance >= 1):
         messages.add_message(request, messages.INFO, "Oops. Insufficient Balance")
     elif not (booking.use.resource.backing and booking.use.resource.backing.accepts_drft):
         messages.add_message(request, messages.INFO, "Oops. Room does not accept DRFT")
@@ -1506,7 +1511,7 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
                     guest_welcome(booking.use)
                 except:
                     messages.add_message(request, messages.INFO, "Could not connect to MailGun to send welcome email. Please try again manually.")
-    
+
     return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
 
 @house_admin_required
