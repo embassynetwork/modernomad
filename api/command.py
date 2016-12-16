@@ -125,7 +125,6 @@ class DecoratorCommand(Command):
             return False
 
     def _execute_on_valid(self):
-        print "execute inner"
         return self.inner_command._execute_on_valid()
 
     def result(self):
@@ -174,9 +173,8 @@ class ModelCommand(Command):
         try:
             self.model().full_clean()
             return True
-        except ValidationError as e:
-            e.message_dict
-            for field_name, messages in e.message_dict:
+        except Exception as e:
+            for field_name, messages in e.message_dict.iteritems():
                 for message in messages:
                     self.add_error(field_name, message)
             return False

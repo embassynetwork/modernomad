@@ -7,7 +7,7 @@ const capacitySchema = PropTypes.shape({
   id: PropTypes.number.isRequired,
   start_date: PropTypes.string,
   quantity: PropTypes.number.isRequired,
-  accept_drft: PropTypes.bool.isRequired
+  accept_drft: PropTypes.bool
 })
 
 export default class CapacityManager extends React.Component {

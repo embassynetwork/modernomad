@@ -48,6 +48,9 @@ class SerializedCapacityCommand(SerializedModelCommand):
     def resource(self):
         return self.validated_data('resource')
 
+    def accept_drft(self):
+        return self.validated_data('accept_drft')
+
     def start_date(self):
         return self.validated_data('start_date')
 
@@ -78,6 +81,7 @@ class UpdateCapacityChange(ModelCommand, CapacityCommandHelpers):
             return self.unauthorized()
 
         self.model().quantity = self.input_data['quantity']
+        self.model().accept_drft = self.input_data['accept_drft']
 
         self._validate_not_in_past()
         self._is_model_valid()
@@ -120,13 +124,24 @@ class AddCapacityChange(SerializedCapacityCommand, CapacityCommandHelpers):
         self._save_deserialized_model()
 
     def _would_not_change_previous_quantity(self):
-        return self._previous_quantity() == self.validated_data('quantity')
+        return (self._previous_quantity() == self.validated_data('quantity') and self._previous_drft() == self.validated_data('accept_drft'))
 
     def _delete_next_quantity(self):
         self._next_capacity().delete()
 
     def _same_as_next_quantity(self):
-        return self._next_quantity() == self.validated_data('quantity')
+        print 'same?'
+        print self._next_capacity().quantity
+        print self.validated_data('quantity') 
+        print self._next_capacity().accept_drft
+        print self.validated_data('accept_drft') 
+        if (self._next_capacity() and 
+            ( self._next_capacity().quantity == self.validated_data('quantity') )
+            and 
+            ( self._next_capacity().accept_drft == self.validated_data('accept_drft') )
+        ):
+            return True
+        return False
 
     def _next_quantity(self):
         capacity = self._next_capacity()
@@ -134,6 +149,10 @@ class AddCapacityChange(SerializedCapacityCommand, CapacityCommandHelpers):
 
     def _previous_quantity(self):
         return CapacityChange.objects.quantity_on(self.start_date(), self.resource())
+
+    def _previous_drft(self):
+        return CapacityChange.objects.drft_on(self.start_date(), self.resource())
+        
 
 
 class DeleteCapacityChange(Command, CapacityCommandHelpers):

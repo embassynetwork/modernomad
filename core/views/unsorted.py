@@ -1225,6 +1225,8 @@ def LocationEditRoom(request, location_slug, room_id):
     room = Resource.objects.get(pk=room_id)
     resource_capacity = SerializedResourceCapacity(room, timezone.localtime(timezone.now()))
     resource_capacity_as_dict = json.dumps(resource_capacity.as_dict())
+    print 'resource capacity'
+    print resource_capacity_as_dict
 
     print request.method
     if request.method == 'POST':
