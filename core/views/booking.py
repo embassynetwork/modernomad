@@ -156,11 +156,8 @@ def BookingDetail(request, booking_id, location_slug):
         drft_balance = 0
 
         # try
-        drft = Currency.objects.get(name="DRFT")
-        accounts = Account.objects.filter(owners=booking.use.user).filter(currency = drft)
-        for a in accounts:
-            if a.get_balance() > 0:
-                drft_balance += a.get_balance()
+        user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
+        user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
 
         if booking.use.resource.backing and booking.use.resource.backing.accepts_drft:
             room_accepts_drft = True
@@ -183,7 +180,7 @@ def BookingDetail(request, booking_id, location_slug):
                 "paid": paid,
                 "contact": location.from_email(),
                 'users_during_stay': users_during_stay,
-                'drft_balance': drft_balance,
+                'drft_balance': user_drft_balance,
                 'room_accepts_drft': room_accepts_drft,
             }
         )
