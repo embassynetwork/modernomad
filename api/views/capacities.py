@@ -13,7 +13,7 @@ from core.serializers import CapacityChangeSerializer
 def capacities(request):
     if request.method == 'POST':
         data = JSONParser().parse(request)
-
+        print 'in /api/capacities/'
         print data
         command = UpdateOrAddCapacityChange(request.user, **data)
         command.execute()

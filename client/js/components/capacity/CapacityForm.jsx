@@ -8,6 +8,7 @@ export default class CapacityForm extends React.Component {
   }
 
   submit(event) {
+    console.log(this.refs);
     const values = {
 	  start_date: this.refs.start_date.value(),
       quantity: parseInt(this.refs.quantity.value) || 0,
