@@ -1746,6 +1746,15 @@ class CapacityChangeManager(models.Manager):
     def _latest_change(self, date, resource):
         latest_change = self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
 
+    def _next_capacity(self, capacity):
+        return self.get_queryset().filter(resource=capacity.resource).filter(start_date__gt=capacity.start_date).order_by('start_date').first()
+
+    def _previous_capacity(self, capacity):
+        return self.get_queryset().filter(resource=capacity.resource).filter(start_date__lt=capacity.start_date).order_by('-start_date').first()
+
+    def delete_next_quantity(self, capacity):
+        self._next_capacity(capacity).delete()
+
     def drft_on(self, date, resource):
         latest_change = self._latest_change(date, resource)
         if latest_change:
@@ -1759,6 +1768,31 @@ class CapacityChangeManager(models.Manager):
             return latest_change.quantity
         else:
             return 0
+
+    def would_not_change_previous_quantity(self, capacity):
+        previous_capacity = self._previous_capacity(capacity)
+        return (previous_capacity and 
+            ( previous_capacity.quantity == capacity.quantity )
+            and 
+            (previous_capacity.accept_drft == capacity.accept_drft)
+        )
+
+    def same_as_next_quantity(self, capacity):
+        print 'same_as_next_quantity'
+        next_capacity = self._next_capacity(capacity)
+        print next_capacity
+        if next_capacity:
+            print next_capacity.quantity
+            print next_capacity.accept_drft
+        print capacity.quantity
+        print capacity.accept_drft
+
+        return (next_capacity and 
+            ( next_capacity.quantity == capacity.quantity)
+            and 
+            ( next_capacity.accept_drft == capacity.accept_drft)
+        )
+
 
 class CapacityChange(models.Model):
     created = models.DateTimeField(auto_now_add=True)

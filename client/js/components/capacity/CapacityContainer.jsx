@@ -32,12 +32,15 @@ export default class CapacityContainer extends React.Component {
         resource: this.props.resourceId
       })
       .then((response) => {
+        console.log('response from capacities was');
+        console.log(response.data);
         this.setState({formLoading: false, errors: null, warnings: response.data.warnings})
-        if (response.data.data) {
-          this.insertCapacity(response.data.data)
+        if (response.data.data.upcomingCapacities) {
+          this.updateCapacities(response.data.data.upcomingCapacities)
         }
       })
       .catch((error) => {
+        console.log("error occured in post", error);
         this.setState({formLoading: false})
         if (error.response.status == '400' && error.response.data.errors) {
           this.displayErrors(error.response.data.errors);
@@ -71,6 +74,13 @@ export default class CapacityContainer extends React.Component {
     })
   }
 
+  updateCapacities(capacities) {
+    this.setState({
+      upcomingCapacities: this.sortedCapacities(capacities)
+    })
+  }
+
+  /*
   insertCapacity(capacity) {
     const withoutExisting = _.reject(this.state.upcomingCapacities, {id: capacity.id})
     const newCollection = this.sortedCapacities([...withoutExisting, capacity])
@@ -78,6 +88,7 @@ export default class CapacityContainer extends React.Component {
       upcomingCapacities: newCollection
     })
   }
+  */
 
   deleteCapacity(deleted_capacities) {
     this.setState({

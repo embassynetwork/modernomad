@@ -2,7 +2,7 @@ from api.command import *
 from datetime import datetime
 from core.models import Resource
 from django.core.exceptions import ValidationError
-
+from core.models import CapacityChange
 
 def user_can_administer_a_resource(user, resource):
     return (
@@ -16,6 +16,49 @@ def user_can_administer_a_resource(user, resource):
         )
     )
 
+def in_the_past(capacity):
+    tz = capacity.resource.tz()
+    now = datetime.now(tz).date()
+    print type(now)
+    print type(capacity.start_date)
+    return capacity.start_date < now
+
+def get_or_create_unsaved_capacity(data):
+    # if there is an existing capacity change for this date, then we're updating. otherwise we're adding. 
+    capacity = CapacityChange.objects.filter(start_date=data['start_date'], resource=data['resource']).first()
+    if capacity:
+        capacity.quantity = data['quantity']
+        capacity.accept_drft = data['accept_drft']
+    else:
+        start_date = datetime.strptime(data['start_date'], "%Y-%m-%d").date()
+        capacity = CapacityChange(
+                start_date=start_date, 
+                resource=Resource.objects.get(id=data['resource']),
+                accept_drft=data['accept_drft'],
+                quantity=data['quantity'] 
+            )
+    return capacity
+
+def update_capacities_as_appropriate(capacity):
+    ''' checks various policiies about neighboring capacities and updates (or
+    not) as appropriate.'''
+    warnings = {}
+    errors = {}
+    if in_the_past(capacity):
+        errors['start_date'] = u'The start date must not be in the past'
+
+    elif CapacityChange.objects.would_not_change_previous_quantity(capacity):
+        warnings['Oops'] = u'This is not a change from the previous capacity'
+
+    elif CapacityChange.objects.same_as_next_quantity(capacity):
+        CapacityChange.objects.delete_next_quantity(capacity)
+        capacity.save()
+        warnings['FYI'] = u'The capacity change was combined with the one following it, which was the same.'
+
+    else:
+        capacity.save()
+
+    return (errors, warnings)
 
 class CapacityCommandHelpers:
     def tz(self):
@@ -31,132 +74,8 @@ class CapacityCommandHelpers:
         if self.start_date() < self.current_date_for_tz():
             self.add_error('start_date', u'The start date must not be in the past')
 
-    def _resource_capacities(self, order='start_date'):
-        return CapacityChange.objects.filter(resource=self.resource()).order_by(order)
-
-    def _next_capacity(self):
-        return self._resource_capacities('start_date').filter(start_date__gt=self.start_date()).first()
-
-    def _previous_capacity(self):
-        return self._resource_capacities('-start_date').filter(start_date__lt=self.start_date()).first()
-
-    def _would_not_change_previous_quantity(self):
-        return self._previous_capacity() and (self._previous_capacity().quantity == self.validated_data('quantity') and self._previous_capacity().accept_drft == self.validated_data('accept_drft'))
-
-    def _delete_next_quantity(self):
-        self._next_capacity().delete()
-        # update self.result_data in Command() class
-
-    def _same_as_next_quantity(self):
-        print 'same_as_next_quantity'
-        print self._next_capacity()
-        if self._next_capacity():
-            print self._next_capacity().quantity
-            print self._next_capacity().accept_drft
-        print self.validated_data('quantity')
-        print self.validated_data('accept_drft')
-
-        if (self._next_capacity() and 
-            ( self._next_capacity().quantity == self.validated_data('quantity') )
-            and 
-            ( self._next_capacity().accept_drft == self.validated_data('accept_drft') )
-        ):
-            return True
-        return False
-
-    def _check_next_and_previous(self):
-        # NB: I was hoping to be able to use this in UpdateCapacityChange as
-        # well as AddCapacityChange, but the former doesn't use a
-        # self.validated_data() method, so aborting but leaving here
-        # aspiratonally. 
-        if self._would_not_change_previous_quantity():
-            self.add_warning('Oops', u'This is not a change from the previous capacity')
-            return
-        if self._same_as_next_quantity():
-            self.add_warning('FYI', u'The capacity change was combined with the one following it, which was the same.')
-            self._delete_next_quantity()
-
-class SerializedCapacityCommand(SerializedModelCommand):
-    def _model_class(self):
-        return CapacityChangeSerializer
-
-    def resource(self):
-        return self.validated_data('resource')
-
-    def accept_drft(self):
-        return self.validated_data('accept_drft')
-
-    def start_date(self):
-        return self.validated_data('start_date')
-
-
-class UpdateOrAddCapacityChange(DecoratorCommand, CapacityCommandHelpers):
-    def _determine_inner(self):
-        existing = self._fetch_existing_capacity_for_date(self.start_date())
-        if existing:
-            self.inner_command = UpdateCapacityChange(self.issuing_user, capacity=existing, quantity=self.input_data.get('quantity'), accept_drft=self.input_data.get('accept_drft'))
-        else:
-            self.inner_command = AddCapacityChange(self.issuing_user, **self.input_data)
-
-    def resource(self):
-        return Resource.objects.get(pk=self.input_data['resource'])
-
-    def start_date(self):
-        date_string = self.input_data.get('start_date')
-        if date_string:
-            return datetime.strptime(date_string, "%Y-%m-%d").date()
-
-    def _fetch_existing_capacity_for_date(self, start_date):
-        return self._resource_capacities().filter(start_date=start_date).first()
-
-
-class UpdateCapacityChange(ModelCommand, CapacityCommandHelpers):
-    def _check_if_valid(self):
-        if not self.can_administer_resource():
-            return self.unauthorized()
-
-        self.model().quantity = self.input_data['quantity']
-        self.model().accept_drft = self.input_data['accept_drft']
-
-        self._validate_not_in_past()
-        self._is_model_valid()
-
-        return not self.has_errors()
-
-    def model(self):
-        return self.input_data['capacity']
-
-    def resource(self):
-        return self.model().resource
-
-    def start_date(self):
-        return self.model().start_date
-
-    def _serialize_model(self):
-        return CapacityChangeSerializer(self.model()).data
-
-    def _execute_on_valid(self):
-        #self._check_next_and_previous()
-        super(UpdateCapacityChange, self)._execute_on_valid()
-
-class AddCapacityChange(SerializedCapacityCommand, CapacityCommandHelpers):
-    def _check_if_valid(self):
-        if not self._check_if_model_valid():
-            return False
-
-        if not self.can_administer_resource():
-            return self.unauthorized()
-
-        self._validate_not_in_past()
-
-        return not self.has_errors()
-
-    def _execute_on_valid(self):
-        self._check_next_and_previous()
-        self._save_deserialized_model()
-
-
 class DeleteCapacityChange(Command, CapacityCommandHelpers):
+    ''' this is being used in views/capacities.py.'''
     def capacity(self):
         return self.input_data['capacity']
 
@@ -184,10 +103,10 @@ class DeleteCapacityChange(Command, CapacityCommandHelpers):
 
     def _to_delete(self):
         result = [self.capacity()]
-        next_avail = self._next_capacity()
+        next_avail = CapacityChange.objects._next_capacity(self.capacity())
 
         if next_avail:
-            previous_avail = self._previous_capacity()
+            previous_avail = CapacityChange.objects._previous_capacity(self.capacity())
             if (previous_avail and previous_avail.quantity == next_avail.quantity):
                 result.append(next_avail)
         return result

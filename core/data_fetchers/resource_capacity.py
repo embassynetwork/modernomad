@@ -28,7 +28,6 @@ class SerializedNullResourceCapacity:
             'upcomingCapacities': []
         }
 
-
 class SerializedResourceCapacity:
     def __init__(self, resource, date):
         self.resource_capacity = ResourceCapacity(resource, date)
