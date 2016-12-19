@@ -30,7 +30,7 @@ export default class BookingForm extends React.Component {
     const depart = moment(this.props.query.depart, parseFormat)
     const arrive = moment(this.props.query.arrive, parseFormat)
     const drftBalance = this.props.route.drftBalance
-    const acceptsDrft = this.props.room.backing && this.props.room.backing.acceptsDrft
+    const acceptsDrft = this.props.room.backing && this.props.room.has_future_drft_capacity
 
     if (depart && arrive) {
       const booking = new Booking({
@@ -98,7 +98,7 @@ export default class BookingForm extends React.Component {
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
           <h3 className="col-xs-8">${this.props.room.defaultRate}
-            {this.props.room.backing && this.props.room.backing.acceptsDrft ?
+            {this.props.room.backing && this.props.room.has_future_drft_capacity ?
               <span><span className="h5"> or </span>Ɖ1</span>
               :
               <span></span>

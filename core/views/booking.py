@@ -152,21 +152,14 @@ def BookingDetail(request, booking_id, location_slug):
             if member not in users_during_stay:
                 users_during_stay.append(member)
 
-        room_accepts_drft = False
+        has_future_drft_capacity = False
         drft_balance = 0
 
-        # try
         user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=request.user)
 
-
-        if booking.use.resource.backing and booking.use.resource.backing.accepts_drft:
-            room_accepts_drft = True
-        # except:
-            # continues silently if no DRFT and room backing have not been
-            # setup.
-        #    pass
-
-
+        use = booking.use
+        if use.resource.drftable_between(use.arrive, use.depart):
+            has_future_drft_capacity = True
 
         return render(
             request,
@@ -181,7 +174,7 @@ def BookingDetail(request, booking_id, location_slug):
                 "contact": location.from_email(),
                 'users_during_stay': users_during_stay,
                 'drft_balance': user_drft_balance,
-                'room_accepts_drft': room_accepts_drft,
+                'has_future_drft_capacity': has_future_drft_capacity,
             }
         )
     else:

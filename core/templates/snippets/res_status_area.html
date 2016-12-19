@@ -22,7 +22,7 @@
         
     {% if not r.is_comped %}
         {% if r.is_pending %}
-            {% if user_drft_balance > 0 and r.use.resource.backing.accepts_drft %}
+            {% if user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
                 <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
             {% endif %}
             {% if r.use.user.profile.customer_id %}
@@ -35,7 +35,7 @@
             {% endif %}
 
         {% elif r.is_approved %}
-            {% if user_drft_balance > 0 and r.use.resource.backing.accepts_drft %}
+            {% if user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
                 <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
             {% endif %}
             {% if r.use.user.profile.customer_id %}
