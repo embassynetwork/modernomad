@@ -20,6 +20,7 @@ class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
     availabilities = graphene.List(lambda: AvailabilityNode, arrive=DateTime(), depart=DateTime())
     backing = graphene.Field(BackingNode)
+    has_future_drft_capacity = graphene.Boolean()
     
     class Meta:
         model = Resource
@@ -28,6 +29,10 @@ class ResourceNode(DjangoObjectType):
             'location': ['exact'],
             'location__slug': ['exact'],
         }
+
+    def resolve_has_future_drft_capacity(self, args, *kwargs):
+        return self.has_future_drft_capacity()
+
 
     def resolve_rid(self, args, *_):
         return self.id

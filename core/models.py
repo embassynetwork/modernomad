@@ -405,7 +405,7 @@ class Resource(models.Model):
         # SOME 'future' capacity.
         avails = self.capacity_changes.all().order_by('-start_date')
         if accept_drft:
-            avails.filter(accept_drft=True)
+            avails = avails.filter(accept_drft=True)
         for a in avails:
             if a.start_date >= today and a.quantity > 0:
                 return True
