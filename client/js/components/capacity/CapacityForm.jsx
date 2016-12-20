@@ -8,11 +8,10 @@ export default class CapacityForm extends React.Component {
   }
 
   submit(event) {
-    console.log(this.refs);
     const values = {
 	  start_date: this.refs.start_date.value(),
       quantity: parseInt(this.refs.quantity.value) || 0,
-      accepts_drft: this.refs.accept_drft.value
+      accept_drft: this.refs.accept_drft.checked
     }
     event.preventDefault()
     this.props.onSubmit(values);
@@ -34,7 +33,7 @@ export default class CapacityForm extends React.Component {
             </div>
             <div className="form-group col-xs-2">
               <label htmlFor="accept_drft" className="control-label" style={{display: 'block'}}>DRFT?</label>
-              <input name="accept_drft" type="checkbox" className="form-control" ref="accept_drft" required={true} style={inputStyles} disabled={this.props.loading} />
+              <input name="accept_drft" type="checkbox" className="form-control" ref="accept_drft" style={inputStyles} disabled={this.props.loading} />
             </div>
           </div>
           <div>

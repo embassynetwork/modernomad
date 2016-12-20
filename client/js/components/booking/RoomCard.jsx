@@ -27,7 +27,7 @@ export default class RoomCard extends React.Component {
               <img className="room-image img-responsive" src={"/media/"+this.props.image} />
               <div className="col-xs-12">
                 <h3>{this.props.name}</h3>
-                {this.props.backing && this.props.backing.acceptsDrft ?
+                {this.props.hasFutureDrftCapacity ?
                   <span className="pull-left accepts-drft"><b>Accepts Ɖ</b></span>
                   :
                   <span></span>

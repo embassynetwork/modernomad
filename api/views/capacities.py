@@ -5,19 +5,28 @@ from rest_framework.parsers import JSONParser
 from api.utils.http import JSONResponse
 from api.commands.capacities import *
 
-from core.models import CapacityChange
+from core.models import CapacityChange, Resource
 from core.serializers import CapacityChangeSerializer
-
+from core.data_fetchers import SerializedResourceCapacity
+from django.utils import timezone
+import json
 
 @csrf_exempt
 def capacities(request):
+    ''' handles adding and updating capacities; deleting is handled by the
+    capacity_detail method.'''
     if request.method == 'POST':
         data = JSONParser().parse(request)
-        print 'in /api/capacities/'
-        print data
-        command = UpdateOrAddCapacityChange(request.user, **data)
-        command.execute()
-        return JSONResponse(command.result().serialize(), status=command.result().http_status())
+        if not user_can_administer_a_resource(request.user, Resource.objects.get(id=data['resource'])):
+            return HttpResponseNotFound("404 not found")
+
+        capacity = get_or_create_unsaved_capacity(data)
+        errors, warnings = update_capacities_as_appropriate(capacity)
+
+        capacities = SerializedResourceCapacity(capacity.resource, timezone.localtime(timezone.now()))
+        command = CommandResult(capacities.as_dict(), errors, warnings)
+        output = command.serialize()
+        return JSONResponse(output, status=200)
     else:
         return HttpResponseNotFound("404 not found")
 

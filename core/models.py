@@ -377,7 +377,7 @@ class Resource(models.Model):
     # Returns all the capacity change objects that affect the time period
     # described, in chronological order. This includes the immediately before or on
     # the start date, and any others through to and including the end date.
-    def capacities_within(self, start, end):
+    def capacities_between(self, start, end):
         avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
         avails_between = []
         for a in avails:
@@ -395,12 +395,17 @@ class Resource(models.Model):
     def confirmed_uses_between(self, start, end):
         return self.use_set.confirmed_between_dates(start, end)
 
-    def has_future_capacity(self):
+    def has_future_drft_capacity(self):
+        return self.has_future_capacity(accept_drft=True)
+
+    def has_future_capacity(self, accept_drft=False):
         today = timezone.localtime(timezone.now()).date()
         # iterate backwards over time through capacities. if there's any
         # non-zero capacities current or future, then this resource has
         # SOME 'future' capacity.
         avails = self.capacity_changes.all().order_by('-start_date')
+        if accept_drft:
+            avails = avails.filter(accept_drft=True)
         for a in avails:
             if a.start_date >= today and a.quantity > 0:
                 return True
@@ -412,10 +417,23 @@ class Resource(models.Model):
                     return False
 
     def capacities_on(self, this_day):
+        # returns quantity (an integer). 
         return CapacityChange.objects.quantity_on(this_day, self)
 
+    def drftable_on(self, this_day):
+        return CapacityChange.objects.drft_on(this_day, self)
+
+    def drftable_between(self, start, end):
+        # note this just checks if the resource has drftable capacity, not
+        # whether it has _availability_. (ie, it migt be drftable but booked). 
+        for day in dates_within(start, end):
+            if not self.drftable_on(day):
+                return False
+        return True
+
     def bookable_on(self, this_day):
-        # a resource is bookable if it has capacity slots that are not already booked.
+        # a resource is bookable if it has capacity slots that are not already
+        # booked.
         capacities = self.capacities_on(this_day)
         if not capacities:
             return False
@@ -426,7 +444,9 @@ class Resource(models.Model):
             return False
 
     def daily_capacities_within(self, start, end):
-        capacities = self.capacities_within(start, end)
+        # creates a list of (day, quantity) tuples. No capacity objects are
+        # returned. 
+        capacities = self.capacities_between(start, end)
 
         quantity = 0
         result = []
@@ -1743,12 +1763,56 @@ class LocationImage(BaseImage):
 
 
 class CapacityChangeManager(models.Manager):
+    def _latest_change(self, date, resource):
+        return self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
+
+    def _next_capacity(self, capacity):
+        return self.get_queryset().filter(resource=capacity.resource).filter(start_date__gt=capacity.start_date).order_by('start_date').first()
+
+    def _previous_capacity(self, capacity):
+        return self.get_queryset().filter(resource=capacity.resource).filter(start_date__lt=capacity.start_date).order_by('-start_date').first()
+
+    def delete_next_quantity(self, capacity):
+        self._next_capacity(capacity).delete()
+
+    def drft_on(self, date, resource):
+        latest_change = self._latest_change(date, resource)
+        if latest_change:
+            return latest_change.accept_drft
+        else:
+            return False
+
     def quantity_on(self, date, resource):
-        latest_change = self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
+        latest_change = self._latest_change(date, resource)
         if latest_change:
             return latest_change.quantity
         else:
             return 0
+
+    def would_not_change_previous_quantity(self, capacity):
+        previous_capacity = self._previous_capacity(capacity)
+        return (previous_capacity and 
+            ( previous_capacity.quantity == capacity.quantity )
+            and 
+            (previous_capacity.accept_drft == capacity.accept_drft)
+        )
+
+    def same_as_next_quantity(self, capacity):
+        print 'same_as_next_quantity'
+        next_capacity = self._next_capacity(capacity)
+        print next_capacity
+        if next_capacity:
+            print next_capacity.quantity
+            print next_capacity.accept_drft
+        print capacity.quantity
+        print capacity.accept_drft
+
+        return (next_capacity and 
+            ( next_capacity.quantity == capacity.quantity)
+            and 
+            ( next_capacity.accept_drft == capacity.accept_drft)
+        )
+
 
 class CapacityChange(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -1771,7 +1835,6 @@ class Backing(models.Model):
     money_account = models.ForeignKey(Account, related_name='+')
     drft_account = models.ForeignKey(Account, related_name='+')
     subscription = models.ForeignKey(Subscription, blank=True, null=True)
-    accepts_drft = models.BooleanField(default=True)
     start = models.DateField(default=django.utils.timezone.now)
     end = models.DateField(blank=True, null=True)
     objects = BackingManager()
