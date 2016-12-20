@@ -1764,7 +1764,7 @@ class LocationImage(BaseImage):
 
 class CapacityChangeManager(models.Manager):
     def _latest_change(self, date, resource):
-        latest_change = self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
+        return self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
 
     def _next_capacity(self, capacity):
         return self.get_queryset().filter(resource=capacity.resource).filter(start_date__gt=capacity.start_date).order_by('start_date').first()
@@ -1780,7 +1780,7 @@ class CapacityChangeManager(models.Manager):
         if latest_change:
             return latest_change.accept_drft
         else:
-            return 0
+            return False
 
     def quantity_on(self, date, resource):
         latest_change = self._latest_change(date, resource)

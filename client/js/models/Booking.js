@@ -93,8 +93,10 @@ export class FeeLineItem extends LineItem {
 
 export class Booking {
   constructor(props) {
+    console.log('what have we here...');
+    console.log(props.acceptDrftTheseDates);
     const nights = props.depart.diff(props.arrive, 'days')
-    if (props.acceptsDrft && (props.drftBalance >= nights)) {
+    if (props.acceptDrftTheseDates && (props.drftBalance >= nights)) {
       this.drftItem = new DrftLineItem({
         id: 'base',
         nightRate: 1,

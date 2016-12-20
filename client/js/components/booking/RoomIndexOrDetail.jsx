@@ -29,6 +29,7 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
           image
           defaultRate
           hasFutureDrftCapacity
+          acceptDrftTheseDates(arrive: $arrive, depart: $depart) 
           availabilities(arrive: $arrive, depart: $depart) {
             date
             quantity

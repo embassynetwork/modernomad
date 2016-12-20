@@ -21,6 +21,7 @@ class ResourceNode(DjangoObjectType):
     availabilities = graphene.List(lambda: AvailabilityNode, arrive=DateTime(), depart=DateTime())
     backing = graphene.Field(BackingNode)
     has_future_drft_capacity = graphene.Boolean()
+    accept_drft_these_dates = graphene.Boolean(arrive=DateTime(), depart=DateTime())
     
     class Meta:
         model = Resource
@@ -36,6 +37,17 @@ class ResourceNode(DjangoObjectType):
 
     def resolve_rid(self, args, *_):
         return self.id
+
+    def resolve_accept_drft_these_dates(self, args, *stuff):
+        assert args['arrive'], "you must specify arrival date"
+        assert args['depart'], "you must specify departure date"
+
+        start_date = args['arrive'].date()
+        end_date = args['depart'].date() - timedelta(days=1)
+
+        print '%s drftable between? ' % self.name
+        print self.drftable_between(start_date, end_date)
+        return self.drftable_between(start_date, end_date)
 
     def resolve_availabilities(self, args, *stuff):
         assert args['arrive'], "you must specify arrival date"
