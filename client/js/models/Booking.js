@@ -111,8 +111,8 @@ export class Booking {
         nights: nights
       })
       this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
-      if (props.acceptsDrft && (props.drftBalance < nights)) {
-        this.desc = 'You only have Ɖ'+`${props.drftBalance}`
+      if (props.acceptDrftTheseDates && (props.drftBalance < nights)) {
+        this.desc = 'You have Ɖ'+`${props.drftBalance}`+', not enough to cover this length of time'
       }
     }
   }
