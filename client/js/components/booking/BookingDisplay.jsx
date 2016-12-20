@@ -19,6 +19,8 @@ function LineItemDisplay(props) {
 export default function BookingDisplay(props) {
   const booking = props.booking
   const lineItems = booking.lineItems()
+  const drftDescription = booking.drftDescription()
+
 
   var lines = []
 
@@ -41,6 +43,9 @@ export default function BookingDisplay(props) {
             <MoneyDisplay money={booking.totalAmount()} />
           </span>
         </b>
+      </p>
+      <p className="text-center">
+        <em>{drftDescription}</em>
       </p>
     </div>
   )

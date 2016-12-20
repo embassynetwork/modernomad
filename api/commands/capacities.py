@@ -10,8 +10,8 @@ def user_can_administer_a_resource(user, resource):
         resource and
         resource.location and
         (
-            user in resource.backers() 
-            or 
+            user in resource.backers()
+            or
             user in resource.location.house_admins.all()
         )
     )

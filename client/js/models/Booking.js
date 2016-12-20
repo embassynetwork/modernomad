@@ -109,6 +109,9 @@ export class Booking {
         nights: nights
       })
       this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
+      if (props.acceptsDrft && (props.drftBalance < nights)) {
+        this.desc = 'You only have Ɖ'+`${props.drftBalance}`
+      }
     }
   }
 
@@ -121,6 +124,10 @@ export class Booking {
 
   totalAmount() {
     return this._sumAmounts(this.lineItems())
+  }
+
+  drftDescription() {
+    return this.desc
   }
 
   _sumAmounts(lineItems) {
