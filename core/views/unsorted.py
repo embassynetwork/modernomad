@@ -1477,6 +1477,8 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
     # check that request.user is an admin at the house in question
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
+    use = booking.use
+    requested_nights = use.total_nights()
 
     if not request.user in location.house_admins.all():
         messages.add_message(request, messages.INFO, "Request not allowed")
@@ -1487,21 +1489,24 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
     user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
     user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
     room_drft_account = booking.use.resource.backing.drft_account
-    if not (user_drft_accounts and user_drft_balance >= 1):
+
+    if not (user_drft_accounts and user_drft_balance >= requested_nights):
         messages.add_message(request, messages.INFO, "Oops. Insufficient Balance")
-    elif not (booking.use.resource.backing and booking.use.resource.backing.accepts_drft):
+    elif not (use.resource.backing and use.resource.drftable_between(use.arrive, use.depart)):
         messages.add_message(request, messages.INFO, "Oops. Room does not accept DRFT")
+    elif not (use.resource.available_between(use.arrive, use.depart)):
+        messages.add_message(request, messages.INFO, "This room appears to be full or unavailable")
     else:
         t = Transaction.objects.create(
                 reason="use %d" % booking.use.id,
                 approver = request.user,
             )
-        Entry.objects.create(account=user_drft_account, amount=-1, transaction=t)
-        Entry.objects.create(account=room_drft_account, amount=1, transaction=t)
+        Entry.objects.create(account=user_drft_account, amount=-requested_nights, transaction=t)
+        Entry.objects.create(account=room_drft_account, amount=requested_nights, transaction=t)
 
-        if not t.valid:
-            messages.add_message(request, messages.INFO, "Hmm, something went wrong. Please check with an admin")
-        else:
+        if t.valid:
+            # this is a hack because ideally we don't even WANT a booking
+            # object for DRFT uses. we'll get there...
             booking.comp()
             booking.confirm()
             booking.use.accounted_by = Use.DRFT
@@ -1513,6 +1518,8 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
                     guest_welcome(booking.use)
                 except:
                     messages.add_message(request, messages.INFO, "Could not connect to MailGun to send welcome email. Please try again manually.")
+        else:
+            messages.add_message(request, messages.INFO, "Hmm, something went wrong. Please check with an admin")
 
     return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
 

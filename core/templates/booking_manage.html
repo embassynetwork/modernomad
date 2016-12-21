@@ -60,7 +60,13 @@
         <div id="booking-details">
             <h3>
                 {{ r.use.arrive }} - {{ r.use.depart }} {% if r.use.arrival_time %} around {{r.use.arrival_time}} {% endif %}
-                <span class="pull-right">Value: ${{ r.bill.amount }}</span>
+                <span class="pull-right">Value: 
+                    {% if r.use.accounted_by == 'drft' %}
+                        Ɖ{{r.use.drft_value}}
+                    {% else %}
+                        ${{ r.bill.amount }}
+                    {% endif %}
+                </span>
             </h3>
             <div class="row">
                 <div class="col-sm-2"><strong>Room</strong></div><div class="col-sm-10">{{ r.use.resource }}</div>
@@ -117,16 +123,32 @@
             </div>
 
             <div role="tabpanel" class="tab-pane" id="booking-manage-payment">
-                <button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
-                {% with bill=r.bill %}
-                    {% if bill.is_paid %}
-                    <form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug r.id %}" >
-                        {% csrf_token %}
-                        <input class="btn-default btn" type="submit" value="Send Receipt">
-                    </form>
-                    {% endif %}
-                    {% include "snippets/manage-page-payment-details.html" %}
-                {% endwith %}
+
+                {% if r.use.accounted_by == 'drft' %}
+                    <table class="table">
+                        <tr><td><strong>Account</strong></td><td><strong>Amount</strong></td></tr>
+                        {% for ut in r.use.usetransaction_set.all %}
+                            {% with entries=ut.transaction.entries.all %}
+                                {% for e in entries %}
+                                <tr><td>{{e.account}}</td><td>{{e.amount}}</td></tr>
+                                {% endfor %}
+                            {% endwith %}
+                        {% endfor %}
+                    </table>
+                {% else %}
+
+                    <button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>
+                    {% with bill=r.bill %}
+                        {% if bill.is_paid %}
+                        <form id="res-action-send-receipt" class="manage-button-spacer res-action" method=POST action="{% url 'booking_send_receipt' location.slug r.id %}" >
+                            {% csrf_token %}
+                            <input class="btn-default btn" type="submit" value="Send Receipt">
+                        </form>
+                        {% endif %}
+                        {% include "snippets/manage-page-payment-details.html" %}
+                    {% endwith %}
+
+                {% endif %}
             </div>
 
             <div role="tabpanel" class="tab-pane" id="booking-manage-user-info">

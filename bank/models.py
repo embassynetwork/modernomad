@@ -129,6 +129,13 @@ class Transaction(models.Model):
             Entry.objects.filter(transaction=self).update(valid=False)
 
         super(Transaction, self).save(*args, **kwargs)
+    
+    def magnitude(self):
+        # the magnitude value of a transaction is the total amount it sums to
+        # in either the positive or negative direction. It's required to be
+        # symmetric, so we just pick one direction to sum over. 
+        resp = self.entries.filter(amount__gt=0).aggregate(Sum('amount'))
+        return resp['amount__sum']
 
 class Entry(models.Model):
     account = models.ForeignKey(Account, related_name="entries")

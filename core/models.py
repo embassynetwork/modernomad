@@ -161,7 +161,7 @@ class Location(models.Model):
 
     def reservable_rooms_on_day(self, the_day):
         rooms_at_location = self.filter(location=self)
-        return [room for room in rooms_at_location if room.capacities_on(the_day)]
+        return [room for room in rooms_at_location if room.capacity_on(the_day)]
 
     def capacity(self, start, end):
         # show capacity (occupied and free beds), between start and end
@@ -174,7 +174,7 @@ class Location(models.Model):
             available_beds[room] = []
             while the_day < end:
                 uses_today = Use.objects.confirmed_approved_on_date(the_day, self, resource=room)
-                free_beds = room.capacities_on(the_day) - len(uses_today)
+                free_beds = room.capacity_on(the_day) - len(uses_today)
                 available_beds[room].append({'the_date': the_day, 'beds_free': free_beds})
                 the_day = the_day + datetime.timedelta(1)
         return available_beds
@@ -186,7 +186,7 @@ class Location(models.Model):
             while the_day < depart:
                 # if there is any day the room isn't available, then the room
                 # isn't free the whole time
-                if not room.bookable_on(the_day):
+                if not room.available_on(the_day):
                     available.remove(room)
                     break
                 the_day = the_day + datetime.timedelta(1)
@@ -341,7 +341,7 @@ class RoomCalendar(calendar.HTMLCalendar):
             else:
                 cssclasses = self.cssclasses[weekday]
             the_day = datetime.date(self.year, self.month, day)
-            if self.room.bookable_on(the_day):
+            if self.room.available_on(the_day):
                 return '<td class="a_day available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
             else:
                 return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
@@ -370,7 +370,7 @@ class Resource(models.Model):
         total = 0
         the_day = start
         while the_day < end:
-            total += self.capacities_on(the_day)
+            total += self.capacity_on(the_day)
             the_day += datetime.timedelta(1)
         return total
 
@@ -378,19 +378,19 @@ class Resource(models.Model):
     # described, in chronological order. This includes the immediately before or on
     # the start date, and any others through to and including the end date.
     def capacities_between(self, start, end):
-        avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
-        avails_between = []
-        for a in avails:
+        capacities = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
+        capacities_between = []
+        for a in capacities:
             # since we already filtered out capacities ahead of our date
             # range, we just need to go backwards until the first avail that
             # starts on or before our start date, and then break.
             if a.start_date > start:
-                avails_between.append(a)
+                capacities_between.append(a)
             else:
-                avails_between.append(a)
+                capacities_between.append(a)
                 break
-        avails_between.reverse()
-        return avails_between
+        capacities_between.reverse()
+        return capacities_between
 
     def confirmed_uses_between(self, start, end):
         return self.use_set.confirmed_between_dates(start, end)
@@ -416,12 +416,25 @@ class Resource(models.Model):
                 else:
                     return False
 
-    def capacities_on(self, this_day):
+    def capacity_on(self, this_day):
         # returns quantity (an integer). 
         return CapacityChange.objects.quantity_on(this_day, self)
 
     def drftable_on(self, this_day):
+        # returns True or False
         return CapacityChange.objects.drft_on(this_day, self)
+
+    def available_on(self, this_day):
+        # a resource is available if it has capacity that is not already
+        # used. returns True or False. 
+        capacities = self.capacity_on(this_day)
+        if not capacities:
+            return False
+        uses_on_this_day = Use.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
+        if len(uses_on_this_day) < capacities:
+            return True
+        else:
+            return False
 
     def drftable_between(self, start, end):
         # note this just checks if the resource has drftable capacity, not
@@ -431,17 +444,13 @@ class Resource(models.Model):
                 return False
         return True
 
-    def bookable_on(self, this_day):
-        # a resource is bookable if it has capacity slots that are not already
-        # booked.
-        capacities = self.capacities_on(this_day)
-        if not capacities:
-            return False
-        uses_on_this_day = Use.objects.confirmed_approved_on_date(this_day, self.location, resource=self)
-        if len(uses_on_this_day) < capacities:
-            return True
-        else:
-            return False
+    def available_between(self, start, end):
+        # note this just checks if the resource has drftable capacity, not
+        # whether it has _availability_. (ie, it migt be drftable but booked). 
+        for day in dates_within(start, end):
+            if not self.available_on(day):
+                return False
+        return True
 
     def daily_capacities_within(self, start, end):
         # creates a list of (day, quantity) tuples. No capacity objects are
@@ -1089,6 +1098,15 @@ class Use(models.Model):
     def total_nights(self):
         return (self.depart - self.arrive).days
     total_nights.short_description = "Nights"
+
+    def drft_value(self):
+        drft_val = 0
+        if self.accounted_by == self.DRFT:
+            uts = self.usetransaction_set.all()
+            for ut in uts:
+                drft_val += ut.transaction.magnitude()
+                print drft_val
+        return drft_val
 
     def nights_between(self, start, end):
         ''' return the number of nights of this booking that occur between start and end '''
