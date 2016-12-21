@@ -1109,7 +1109,9 @@ class Use(models.Model):
         return drft_val
 
     def nights_between(self, start, end):
-        ''' return the number of nights of this booking that occur between start and end '''
+        ''' return the number of nights of this booking that occur between
+        start and end (different from total nights because the date range may
+        be longer or shorter than arrive and depart dates).'''
         nights = 0
         if self.arrive >= start and self.depart <= end:
             nights = (self.depart - self.arrive).days
@@ -1120,6 +1122,11 @@ class Use(models.Model):
         elif self.depart > end:
             nights = (end - self.arrive).days
         return nights
+
+    def suggest_drft(self):
+        # suggest DRFT if the user has sufficient DRFT balance and the room
+        # accept DRFT on these nights. 
+        return self.resource.drftable_between(self.arrive, self.depart) and self.user.profile.drft_spending_balance() > self.total_nights()
 
 
 class Booking(models.Model):

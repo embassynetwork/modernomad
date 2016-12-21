@@ -42,6 +42,9 @@ def BookingSubmit(request, location_slug):
         comments = request.POST.get('comments')
         use = form.save(commit=False)
         use.location = location
+        if use.suggest_drft():
+            use.accounted_by == 'drft'
+            use.save()
         booking = Booking(use=use, comments=comments)
         # reset_rate also generates the bill.
         if request.user.is_authenticated():
@@ -152,13 +155,7 @@ def BookingDetail(request, booking_id, location_slug):
             if member not in users_during_stay:
                 users_during_stay.append(member)
 
-        # check whether to default to DRFT
-        drftable = use.resource.drftable_between(use.arrive, use.depart)
         user_drft_balance = request.user.profile.drft_spending_balance()
-        if drftable and user_drft_balance > use.total_nights():
-            default_to_drft = True
-        else:
-            default_to_drft = False
 
         return render(
             request,
@@ -173,7 +170,7 @@ def BookingDetail(request, booking_id, location_slug):
                 "contact": location.from_email(),
                 'users_during_stay': users_during_stay,
                 'drft_balance': user_drft_balance,
-                'default_to_drft': default_to_drft,
+                'default_to_drft': use.suggest_drft(),
             }
         )
     else:
