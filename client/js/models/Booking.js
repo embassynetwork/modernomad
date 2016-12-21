@@ -93,8 +93,6 @@ export class FeeLineItem extends LineItem {
 
 export class Booking {
   constructor(props) {
-    console.log('what have we here...');
-    console.log(props.acceptDrftTheseDates);
     const nights = props.depart.diff(props.arrive, 'days')
     if (props.acceptDrftTheseDates && (props.drftBalance >= nights)) {
       this.drftItem = new DrftLineItem({
@@ -112,7 +110,7 @@ export class Booking {
       })
       this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
       if (props.acceptDrftTheseDates && (props.drftBalance < nights)) {
-        this.desc = 'You have Ɖ'+`${props.drftBalance}`+', not enough to cover this length of time'
+        this.desc = 'You have Ɖ'+`${props.drftBalance}`+', enough for '+`${props.drftBalance}`+ ' nights'
       }
     }
   }
