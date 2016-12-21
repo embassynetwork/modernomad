@@ -34,9 +34,11 @@
     <div id="edit-profile">
         {% ifequal u user %}
         <div>
+            {% if drft_balance > 0 %}
             <h4>
               DRFT balance: Ɖ{{drft_balance}}
             </h4>
+            {% endif %}
             <a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
             {% if user.profile.customer_id %}
                 <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
