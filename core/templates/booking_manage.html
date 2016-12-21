@@ -61,7 +61,7 @@
             <h3>
                 {{ r.use.arrive }} - {{ r.use.depart }} {% if r.use.arrival_time %} around {{r.use.arrival_time}} {% endif %}
                 <span class="pull-right">Value: 
-                    {% if r.use.accounted_by == 'drft' %}
+                    {% if r.use.suggest_drft %}
                         Ɖ{{r.use.drft_value}}
                     {% else %}
                         ${{ r.bill.amount }}
@@ -124,17 +124,21 @@
 
             <div role="tabpanel" class="tab-pane" id="booking-manage-payment">
 
-                {% if r.use.accounted_by == 'drft' %}
-                    <table class="table">
-                        <tr><td><strong>Account</strong></td><td><strong>Amount</strong></td></tr>
-                        {% for ut in r.use.usetransaction_set.all %}
-                            {% with entries=ut.transaction.entries.all %}
-                                {% for e in entries %}
-                                <tr><td>{{e.account}}</td><td>{{e.amount}}</td></tr>
-                                {% endfor %}
-                            {% endwith %}
-                        {% endfor %}
-                    </table>
+                {% if r.use.suggest_drft %}
+                    {% if r.use.accounted_by == 'drft' %}
+                        <table class="table">
+                            <tr><td><strong>Account</strong></td><td><strong>Amount</strong></td></tr>
+                            {% for ut in r.use.usetransaction_set.all %}
+                                {% with entries=ut.transaction.entries.all %}
+                                    {% for e in entries %}
+                                    <tr><td>{{e.account}}</td><td>{{e.amount}}</td></tr>
+                                    {% endfor %}
+                                {% endwith %}
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        No payments made. 
+                    {% endif %}
                 {% else %}
 
                     <button id="payment-link-button" class="btn btn-default" type="button"  data-toggle="modal" data-target="#paymentlinkModal"> Get 3rd party payment link </button>

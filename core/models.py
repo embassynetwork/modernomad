@@ -1100,13 +1100,8 @@ class Use(models.Model):
     total_nights.short_description = "Nights"
 
     def drft_value(self):
-        drft_val = 0
-        if self.accounted_by == self.DRFT:
-            uts = self.usetransaction_set.all()
-            for ut in uts:
-                drft_val += ut.transaction.magnitude()
-                print drft_val
-        return drft_val
+        # the value of this booking in DRFT
+        return self.total_nights()
 
     def nights_between(self, start, end):
         ''' return the number of nights of this booking that occur between
