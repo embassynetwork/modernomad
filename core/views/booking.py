@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 @ensure_csrf_cookie
 def StayComponent(request, location_slug, room_id=None):
-    user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=request.user)
-
+    user_drft_balance = request.user.profile.drft_spending_balance()
 
     return render(request,
         'booking.html',
@@ -155,7 +154,7 @@ def BookingDetail(request, booking_id, location_slug):
         has_future_drft_capacity = False
         drft_balance = 0
 
-        user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=request.user)
+        user_drft_balance = request.user.profile.drft_spending_balance()
 
         use = booking.use
         if use.resource.drftable_between(use.arrive, use.depart):

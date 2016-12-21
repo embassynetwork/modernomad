@@ -16,22 +16,6 @@ class Currency(models.Model):
     def __unicode__(self):
         return self.name
 
-class AccountManager(models.Manager): 
-    def get_queryset(self):
-        # default queryset
-        return super(AccountManager, self).get_queryset()
-
-    def user_balance(self, user, currency):
-        accounts = self.get_queryset().filter(currency=currency).filter(owners=user)
-        return sum([a.get_balance() for a in accounts])
-
-    def user_primary(self, user, currency):
-        accounts = self.get_queryset().filter(currency=currency).filter(owners=user)
-        if accounts:
-            return accounts[0]
-        else:
-            return None
-
 class Account(models.Model):
     SYSTEM = 'system'
     STANDARD = 'standard'
@@ -47,7 +31,6 @@ class Account(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=50, blank=True, null=True, help_text="Give this account a nickname (optional)")
     type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=STANDARD)
-    objects = AccountManager()
 
     def __unicode__(self):
         if self.name:

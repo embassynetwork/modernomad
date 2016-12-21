@@ -26,7 +26,7 @@ import pytz
 # imports for signals
 import django.dispatch
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, m2m_changed
 
 # mail imports
 from django.core.mail import EmailMultiAlternatives
@@ -34,7 +34,7 @@ from django.template.loader import get_template
 from django.template import Context
 
 # bank app imports
-from bank.models import Account, Transaction
+from bank.models import Account, Transaction, Currency
 
 import logging
 
@@ -1555,16 +1555,67 @@ class UserProfile(models.Model):
     customer_id = models.CharField(max_length=200, blank=True, null=True)
     # JKS TODO between last4 and the customer_id, payment methods should really be their own model.
     last4 = models.IntegerField(null=True, blank=True, help_text="Last 4 digits of the user's card on file, if any")
+    primary_accounts = models.ManyToManyField(Account, help_text="one for each currency", related_name="primary_for")
 
     def __unicode__(self):
         return (self.user.__unicode__())
 
+    def primary_account(self, currency):
+        # the prumary account should be unique for each currency (enforced by
+        # the m2m_changed receiver), but it migh tbe None, and get() throws an
+        # error if that's the case. Hence filter().first(). 
+        print 'checking for primary account...'
+        primary = self.primary_accounts.filter(currency=currency).first()
+        print "found: %s (id %d)" % (primary, primary.id)
+        if not primary:
+            primary = Account(currency=currency, name="%s %s Account (primary)" % (self.user.first_name, currency.name))
+            primary.save()
+            primary.owners.add(self.user)
+            print 'saving new primary account'
+            print primary.id
+            self.primary_accounts.add(primary)
+        return primary
+
+    def drft_spending_balance(self):
+        # returns balance from primary account only. the thesis is that users
+        # should move balances INTO their primary account to spend it. 
+        account = self.primary_account(currency=Currency.objects.get(name="DRFT"))
+        return account.get_balance() 
+
+
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 User.rooms_backed = (lambda u: Resource.objects.backed_by(user=u))
-
 User._meta.ordering = ['username']
 
+# Note: primary.accounts.'through' is django's name for the M2M class
+@receiver(m2m_changed, sender=UserProfile.primary_accounts.through)
+def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs):
+    print 'p2p_changed signal'
+    print action
+    if action == "pre_add":
+        print instance # should be a UserProfile unless reversed
 
+        # since the sender is defined as UserProfile in the @receiver line,
+        # UserProfile is the forward relation and Account is the reverse relation
+        if reverse: # Account.primary_for.add(...)
+            account = instance
+        else: # UserProfile.primary_accounts.add(...)
+            user_profile = instance
+
+        for pk in pk_set:
+            # multiple objects can be add()-ed at once, and those objects will be
+            # of type Account or UserProfile depending on whether this is a forward
+            # or reverse relationship. 
+            if reverse:
+                user_profile = UserProfile.objects.get(pk)
+            else:
+                account = Account.objects.get(pk=pk)
+
+            # uniqueness constraint: one primary account per currency
+            assert not user_profile.primary_accounts.filter(currency=account.currency)
+            # ensure user is an owner of primary account
+            assert user_profile.user in account.owners.all()
+        
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):
     try:

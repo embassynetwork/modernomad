@@ -799,8 +799,7 @@ def ListUsers(request):
 @login_required
 def UserDetail(request, username):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=request.user)
-
+    drft_balance = user.profile.drft_spending_balance()
 
     return render(
         request,
@@ -809,7 +808,7 @@ def UserDetail(request, username):
             "u": user,
             'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
-            "drft_balance": user_drft_balance
+            "drft_balance": drft_balance
         }
     )
 
@@ -1452,7 +1451,7 @@ def BookingManage(request, location_slug, booking_id):
             return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, booking_id)))
     user_notes = UserNote.objects.filter(user=user)
 
-    user_drft_balance = Account.objects.user_balance(currency=Currency.objects.get(name='DRFT'), user=user)
+    user_drft_balance = user.profile.drft_spending_balance()
 
     return render(request, 'booking_manage.html', {
         "r": booking,
@@ -1485,7 +1484,7 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
         return HttpResponseRedirect('/404')
 
     drft = Currency.objects.get(name="DRFT")
-    user_drft_account = Account.objects.user_primary(user=booking.use.user, currency=drft)
+    user_drft_account = Account.objects.user_primary(user=use.user, currency=drft)
     user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
     user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
     room_drft_account = booking.use.resource.backing.drft_account
