@@ -150,6 +150,32 @@
             </div>
             {% endif %}
           {% endif %}
+          {% if drft_balance or has_future_drft_capacity %}
+          <div id="booking-amount-summary-box">
+              <div class="panel panel-default">
+                  <div class="panel-heading">
+                      <h3 class="panel-title">Booking Summary</h3>
+                  </div>
+                    <table class="table">
+                        <tbody id="booking-items">
+                        </tbody>
+                        <tbody>
+                            <tr class="a-room-fee">
+                                <td>{{ booking.use.resource.name|title}} (Ɖ1 * {{booking.use.total_nights}} nights)</td>
+                                <td><span class="pull-right">Ɖ{{booking.use.total_nights}}</span></td>
+                            </tr>
+                            <tr class="a-room-fee">
+                                <td><strong>Total</strong></td>
+                                <td><strong><span id="booking-total" class="pull-right">Ɖ{{booking.use.total_nights}} </span></strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                  <div class="panel-footer text-muted">
+                      <em>Cancellation policy for the {{ booking.use.resource }} is {{booking.use.resource.cancellation_policy}}.</em>
+                  </div>
+              </div>
+          </div>
+          {% endif %}
       </div> <!-- end col-md-4 -->
       <div class="col-md-8 col-md-pull-4">
           <h3>Booking for
