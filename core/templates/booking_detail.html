@@ -42,7 +42,7 @@
       {% else %}
           <div class="col-md-12">
               <div class="alert alert-warning">
-                  {% if drft_balance and has_future_drft_capacity %}
+                  {% if drft_balance and default_to_drft %}
                     <div>
                     <span class="fa fa-exclamation-circle"></span>
                     This booking is awaiting confirmation. You have a balance of Ɖ{{ drft_balance }}, and this room accepts DRFT. This booking will be paid with DRFT unless otherwise requested.
@@ -125,7 +125,7 @@
               </div>
           {% endif %}
 
-          {% if not drft_balance or not has_future_drft_capacity %}
+          {% if not drft_balance or not default_to_drft %}
             <div id="booking-amount-summary-box">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -150,7 +150,7 @@
             </div>
             {% endif %}
           {% endif %}
-          {% if drft_balance or has_future_drft_capacity %}
+          {% if drft_balance or default_to_drft %}
           <div id="booking-amount-summary-box">
               <div class="panel panel-default">
                   <div class="panel-heading">

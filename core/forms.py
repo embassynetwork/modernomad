@@ -326,7 +326,7 @@ class BookingUseForm(forms.ModelForm):
 
     class Meta:
         model = Use
-        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location']
+        exclude = ['created', 'updated', 'user', 'last_msg', 'status', 'location', 'accounted_by']
         widgets = {
             'arrive': forms.DateInput(attrs={'class': 'datepicker form-control form-group'}),
             'depart': forms.DateInput(attrs={'class': 'datepicker form-control form-group'}),

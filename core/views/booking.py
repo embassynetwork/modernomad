@@ -117,6 +117,7 @@ def BookingDetail(request, booking_id, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     try:
         booking = Booking.objects.get(id=booking_id)
+        use = booking.use
         if not booking:
             raise Booking.DoesNotExist
     except Booking.DoesNotExist:
@@ -130,7 +131,7 @@ def BookingDetail(request, booking_id, location_slug):
             (request.user in location.house_admins.all()) or
             (request.user in location.readonly_admins.all()) or
             (request.user in location.residents.all())):
-        if booking.use.arrive >= datetime.date.today():
+        if use.arrive >= datetime.date.today():
             past = False
         else:
             past = True
@@ -143,7 +144,7 @@ def BookingDetail(request, booking_id, location_slug):
 
         # users that intersect this stay
         users_during_stay = []
-        uses = Use.objects.filter(status="confirmed").filter(location=location).exclude(depart__lt=booking.use.arrive).exclude(arrive__gt=booking.use.depart)
+        uses = Use.objects.filter(status="confirmed").filter(location=location).exclude(depart__lt=use.arrive).exclude(arrive__gt=use.depart)
         for use in uses:
             if use.user not in users_during_stay:
                 users_during_stay.append(use.user)
@@ -151,14 +152,13 @@ def BookingDetail(request, booking_id, location_slug):
             if member not in users_during_stay:
                 users_during_stay.append(member)
 
-        has_future_drft_capacity = False
-        drft_balance = 0
-
+        # check whether to default to DRFT
+        drftable = use.resource.drftable_between(use.arrive, use.depart)
         user_drft_balance = request.user.profile.drft_spending_balance()
-
-        use = booking.use
-        if use.resource.drftable_between(use.arrive, use.depart):
-            has_future_drft_capacity = True
+        if drftable and user_drft_balance > use.total_nights():
+            default_to_drft = True
+        else:
+            default_to_drft = False
 
         return render(
             request,
@@ -173,7 +173,7 @@ def BookingDetail(request, booking_id, location_slug):
                 "contact": location.from_email(),
                 'users_during_stay': users_during_stay,
                 'drft_balance': user_drft_balance,
-                'has_future_drft_capacity': has_future_drft_capacity,
+                'default_to_drft': default_to_drft,
             }
         )
     else:
