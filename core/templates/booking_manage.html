@@ -61,7 +61,7 @@
             <h3>
                 {{ r.use.arrive }} - {{ r.use.depart }} {% if r.use.arrival_time %} around {{r.use.arrival_time}} {% endif %}
                 <span class="pull-right">Value: 
-                    {% if r.use.suggest_drft %}
+                    {% if r.use.suggest_drft or r.use.accounted_by == 'drft' %}
                         Ɖ{{r.use.drft_value}}
                     {% else %}
                         ${{ r.bill.amount }}
@@ -124,7 +124,7 @@
 
             <div role="tabpanel" class="tab-pane" id="booking-manage-payment">
 
-                {% if r.use.suggest_drft %}
+                {% if r.use.suggest_drft or r.use.accounted_by == 'drft' %}
                     {% if r.use.accounted_by == 'drft' %}
                         <table class="table">
                             <tr><td><strong>Account</strong></td><td><strong>Amount</strong></td></tr>

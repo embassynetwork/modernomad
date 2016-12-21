@@ -1578,6 +1578,9 @@ class UserProfile(models.Model):
             self.primary_accounts.add(primary)
         return primary
 
+    def primary_drft_account(self):
+        return self.primary_account(currency=Currency.objects.get(name="DRFT"))
+
     def drft_spending_balance(self):
         # returns balance from primary account only. the thesis is that users
         # should move balances INTO their primary account to spend it. 

@@ -1484,12 +1484,11 @@ def BookingManagePayWithDrft(request, location_slug, booking_id):
         return HttpResponseRedirect('/404')
 
     drft = Currency.objects.get(name="DRFT")
-    user_drft_account = Account.objects.user_primary(user=use.user, currency=drft)
-    user_drft_accounts = Account.objects.filter(currency__name="DRFT", owners=request.user)
-    user_drft_balance = sum([a.get_balance() for a in user_drft_accounts])
+    user_drft_account = use.user.profile.primary_drft_account()
+    user_drft_balance = use.user.profile.drft_spending_balance()
     room_drft_account = booking.use.resource.backing.drft_account
 
-    if not (user_drft_accounts and user_drft_balance >= requested_nights):
+    if not (user_drft_balance >= requested_nights):
         messages.add_message(request, messages.INFO, "Oops. Insufficient Balance")
     elif not (use.resource.backing and use.resource.drftable_between(use.arrive, use.depart)):
         messages.add_message(request, messages.INFO, "Oops. Room does not accept DRFT")
