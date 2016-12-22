@@ -1568,7 +1568,8 @@ class UserProfile(models.Model):
         # error if that's the case. Hence filter().first(). 
         print 'checking for primary account...'
         primary = self.primary_accounts.filter(currency=currency).first()
-        print "found: %s (id %d)" % (primary, primary.id)
+        if primary:
+            print "found: %s (id %d)" % (primary, primary.id)
         if not primary:
             primary = Account(currency=currency, name="%s %s Account (primary)" % (self.user.first_name, currency.name))
             primary.save()

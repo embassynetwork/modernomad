@@ -1,0 +1,41 @@
+{% extends "accounts_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="top-spacer">
+    <a href="{% url 'account_list' %}"> <i class="fa fa-long-arrow-left"></i> back </a>
+</div>
+
+<h1>
+    {% if request.user.profile in account.primary_for.all %} <i class="fa fa-star text-warning"></i>{% endif %} 
+    {{account.name}}
+    <span class="small">({{account.currency.name}})</span>
+</h1>
+<div class="row">
+    {% for user in account.owners.all %}
+    <div class="col-md-1">
+        <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb}}" tooltip="{{user.first_name}}"  alt="{{user.first_name}}" class="img-rounded img-responsive">
+    </div>
+    {% endfor %}
+</div>
+<h3>Balance: {{account.currency.symbol}}{{account.get_balance }}</h3>
+
+<h2 class="text-muted">Transaction History</h2>
+{% if account.entries %}
+<table class="table">
+    <tr>
+        <th><i class="fa fa-sort-desc"></i> Date </th><th>With account</th><th>Amount</th><th>Balance</th>
+    </tr>
+    {% for entry in account.entries.all %}
+    <tr>
+        <td>{{ entry.transaction.date }}</td>
+        <td>{{ entry.with_account|default:"INVALID" }}</td>
+        <td>{{ entry.amount}}</td>
+        <td>{{ entry.balance_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% endblock %}

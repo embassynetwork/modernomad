@@ -1,4 +1,6 @@
-Django>=1.8.8,<1.9
+#Django>=1.10,<1.11
+Django>=1.9.12,<1.10
+# Django>=1.8.8,<1.9
 amqp==1.4.9
 anyjson==0.3.3
 billiard==3.3.0.23
@@ -28,6 +30,8 @@ django-graphiql
 django-compressor
 icalendar
 django-ical
+django-extensions
+Werkzeug
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command

@@ -53,6 +53,16 @@ class Account(models.Model):
             total_amount = Coalesce(Sum('amount'), 0)
         )['total_amount']
 
+    def balance_at_entry(self, entry):
+        # return the balance of the account after the entry was recorded
+        return self.entries.filter(valid=True).filter(
+            transaction__date__lte=entry.transaction.date).aggregate(
+            total_amount = Coalesce(Sum('amount'), 0)
+        )['total_amount']
+
+
+    def owner_names(self):
+        return [o.first_name for o in self.owners.all()]
 
 class SystemAccount(models.Model):
     currency = models.OneToOneField(Currency)
@@ -128,6 +138,7 @@ class Entry(models.Model):
 
     class Meta:
         verbose_name_plural = "Entries"
+        ordering=['transaction__date']
 
     def __unicode__(self):
         return "Entry: account %s for %d" % (self.account, self.amount)
@@ -144,8 +155,20 @@ class Entry(models.Model):
             else:
                 Entry.objects.filter(transaction=self.transaction).update(valid=False)
         self.transaction.save()
-        
 
+    def with_account(self):
+        if self.valid:
+            # what account was this transaction _from_?
+            print self.transaction.entries.all()
+            other_entry = self.transaction.entries.exclude(id=self.id).first()
+            return other_entry.account
+        else:
+            print 'Warning! found invalid transaction id=%d' % self.transaction.id
+            print self.transaction.entries.all()
+            return None
+
+    def balance_at(self):
+        return self.account.balance_at_entry(self)
 
 ''' check that transaction entries sum to 0
     that the spending user will have an allowable balance after the transaction is completed. 

@@ -159,7 +159,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'django.contrib.humanize',
     'webpack_loader',
-    'compressor'
+    'compressor',
+    'django_extensions',
     # 'debug_toolbar',
 )
 

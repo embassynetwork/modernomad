@@ -1,0 +1,44 @@
+{% extends "accounts_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h1 class="top-spacer-large">{{request.user.first_name}}'s Accounts</h1>
+
+{% regroup accounts by currency as accounts_by_currency %}
+
+{% for account in accounts_by_currency %}
+<h3>{{account.grouper}} <span class="smaller">({{account.grouper.symbol}})</span></h3>
+    <table class="table table-striped">
+        <tr class="row">
+            <th class="col-md-1">Primary</th>
+            <th class="col-md-6">Name</th>
+            <th class="col-md-4">Owners</th>
+            <th class="col-md-1">Balance</th>
+        </tr>
+        {% for a in account.list %}
+        <tr class="row">
+            <td class="col-md-1">
+                {% if request.user.profile in a.primary_for.all %} <i class="fa fa-star text-warning"></i>{% endif %} 
+            </td>
+            <td class="col-md-6">
+                <a href="{% url 'account_detail' a.id %}">{{a.name}}</a>
+            </td>
+            <td class="col-md-4">
+                {{ a.owner_names|join:", "|default:"--"  }}
+            </td>
+            <td class="col-md-1">
+                {% if a.get_balance > 0 %}
+                    <span>{{a.currency.symbol}}{{ a.get_balance }}</span>
+                {% else %}
+                    <span class="text-muted">{{a.currency.symbol}}{{ a.get_balance }}</span>
+                {% endif %} 
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endfor %}
+
+
+{% endblock %}
+
