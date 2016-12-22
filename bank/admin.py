@@ -30,13 +30,8 @@ class TransactionAdmin(admin.ModelAdmin):
     save_as = True
     readonly_fields = ('valid',)
 
-class SystemAccountInline(admin.StackedInline):
-    model = SystemAccount
-    readonly_fields = ('debits', 'credits')
-
 class CurrencyAdmin(admin.ModelAdmin):
     model = Currency
-    inlines = [SystemAccountInline,]
 
 
 admin.site.register(Account, AccountAdmin)

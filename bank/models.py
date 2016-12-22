@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save
 from django.db.models import Q, Sum
 from django.utils import timezone
 from django.db.models.functions import Coalesce
@@ -17,35 +17,35 @@ class Currency(models.Model):
         return self.name
 
 class Account(models.Model):
-    SYSTEM = 'system'
-    STANDARD = 'standard'
+    CREDIT = 'credit'
+    DEBIT = 'debit'
 
     ACCOUNT_TYPES = (
             # first value stored in db, second value is what is shown to user
-            (SYSTEM, 'System'),
-            (STANDARD, 'Standard'),
+            (CREDIT, 'Credit'),
+            (DEBIT, 'Debit'),
         )
     currency = models.ForeignKey(Currency, related_name="accounts")
-    admins = models.ManyToManyField(User, verbose_name="Admins (optional)", related_name='accounts_administered', blank=True, help_text="May be blank")
-    owners = models.ManyToManyField(User, related_name='accounts_owned', blank=True, help_text="May be blank for group accounts")
+    admins = models.ManyToManyField(User, verbose_name="Admins (optional)", 
+            related_name='accounts_administered', blank=True, help_text="May be blank"
+        )
+    owners = models.ManyToManyField(User, related_name='accounts_owned', 
+            blank=True, help_text="May be blank for group accounts"
+        )
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=50)
-    type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=STANDARD)
+    type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=CREDIT, 
+            help_text="A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful."
+        )
 
     def __unicode__(self):
-        if self.name:
-            return self.name + " (%s)" % (self.currency)
-        if self.owners.all():
-            owner_list = ", ".join(["%s %s" % (o.first_name, o.last_name) for o in self.owners.all()])
-            return owner_list + " (%s)" % (self.currency)
-        elif self.type == Account.SYSTEM:
-            # if a system account, is this a debit account or a credit account?
-            if hasattr(self, 'systemaccount_credit'):
-                return "%s SYSTEM CREDITS" % self.currency
-            else:
-                return "%s SYSTEM DEBITS" % self.currency
-        else:
-            return "No owner (%s)" % (self.currency)
+        return self.name + " (%s)" % (self.currency)
+
+    def is_credit(self):
+        return (self.type == Account.CREDIT)
+
+    def is_debit(self):
+        return (self.type == Account.DEBIT)
 
     def get_balance(self):
         # sum all valid entries for this account
@@ -63,22 +63,6 @@ class Account(models.Model):
 
     def owner_names(self):
         return [o.first_name for o in self.owners.all()]
-
-class SystemAccount(models.Model):
-    currency = models.OneToOneField(Currency)
-    debits = models.OneToOneField(Account, related_name='systemaccount_debit')
-    credits = models.OneToOneField(Account, related_name='systemaccount_credit')
-
-@receiver(post_save, sender=Currency)
-def currency_post_save(sender, instance, **kwargs):
-    ''' JKS this needs to be post save because the currency object needs to
-    exist in the database for the accounts to link to it'''
-    if not hasattr(instance, 'systemaccount'):
-        credit_account = Account(currency=instance, type=Account.SYSTEM)
-        credit_account.save()
-        debit_account = Account(currency=instance, type=Account.SYSTEM)
-        debit_account.save()
-        SystemAccount.objects.create(currency=instance,debits=debit_account, credits=credit_account)
 
 class Transaction(models.Model):
     reason = models.CharField(max_length=200)
@@ -174,6 +158,17 @@ class Entry(models.Model):
 
     def balance_at(self):
         return self.account.balance_at_entry(self)
+
+@receiver(pre_save, sender=Entry)
+def entry_pre_save(sender, instance, **kwargs):
+    # enforce hard balance limits for debit and credit accounts.
+    current_balance = instance.account.get_balance()
+    if instance.account.is_debit() and (current_balance + instance.amount > 0):
+        raise Exception("Error: insufficient balance for transaction. Debit account %d must retain a balance less than 0." % instance.account.id)
+    elif (current_balance + instance.amount < 0):
+        raise Exception("Error: insufficient balance for transaction. Credit account %d must retain a balance greater than 0." % instance.account.id)
+
+
 
 ''' check that transaction entries sum to 0
     that the spending user will have an allowable balance after the transaction is completed. 
