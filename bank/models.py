@@ -29,7 +29,7 @@ class Account(models.Model):
     admins = models.ManyToManyField(User, verbose_name="Admins (optional)", related_name='accounts_administered', blank=True, help_text="May be blank")
     owners = models.ManyToManyField(User, related_name='accounts_owned', blank=True, help_text="May be blank for group accounts")
     created = models.DateTimeField(auto_now_add=True)
-    name = models.CharField(max_length=50, blank=True, null=True, help_text="Give this account a nickname (optional)")
+    name = models.CharField(max_length=50)
     type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=STANDARD)
 
     def __unicode__(self):
