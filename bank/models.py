@@ -92,34 +92,36 @@ class Transaction(models.Model):
         return "Transaction %s" % self.pk
 
     def save(self, *args, **kwargs):
-        # We can check validity through checking if the balance is 0, OR if any
-        # of the entries are invalid... seems redundant (possibilities for
-        # incongruency?) but I think we want the 'valid' flag on entry as well
-        # as on transaction, for easy filtering. 
-        validity_requirements_met = False
         entries = self.entries.all()
+        if len(entries) < 2:
+            # this is a fresh transaction, or only the first entry
+            self.valid = False
+            
+        else: # only if there are 2 transactions
+            if len(entries) != 2:
+                # the transaction object needs to be saved first without *any*
+                # entries before the entries can themselves link to the transaction
+                # as a foreign key. 
+                raise Exception("Transactions must have 2 entries")
 
-        # check that all entries balance out
-        balance = sum([e.amount for e in entries])
-        if len(entries) > 1 and balance == 0:
-            validity_requirements_met = True
-        else:
-            validity_requirements_met = False
+            # check that all entries balance out
+            balance = sum([e.amount for e in entries])
+            print "BALANCE"
+            print balance
+            if balance != 0:
+                # Note that this effectively prevents us from editing a
+                # transaction as well, since one entry will get updated before
+                # the other, and cause this error. 
+                raise Exception("Transaction entries must balance out and there must be only 2")
 
-        # only need to make the second check if the first passes
-        if validity_requirements_met == True:
             # check that all entries are between accounts of the same type
             if len(set([e.account.currency for e in entries])) > 1:
-                validity_requirements_met = False
-            else:
-                validity_requirements_met = True
+                raise Exception("Transaction entries must be between accounts of the same currency")
 
-        if validity_requirements_met == True:
             self.valid = True
+            # call update instead of save() so we don't end up in an infinite
+            # loop of save()'s calling each other. 
             Entry.objects.filter(transaction=self).update(valid=True)
-        else:
-            self.valid = False
-            Entry.objects.filter(transaction=self).update(valid=False)
 
         super(Transaction, self).save(*args, **kwargs)
     
@@ -134,6 +136,9 @@ class Entry(models.Model):
     account = models.ForeignKey(Account, related_name="entries")
     amount = models.IntegerField()
     transaction = models.ForeignKey(Transaction, related_name="entries")
+    # a transaction will always be invalid until it is linked to a second one
+    # through a transaction. because the objects get saved in serial, we can't
+    # avoid a temporary invalid state. 
     valid = models.BooleanField(default=False)
 
     class Meta:
@@ -147,13 +152,13 @@ class Entry(models.Model):
         # save the entry first so that we can validate any changes (since we're
         # pulling them from the DB)
         super(Entry, self).save(*args, **kwargs)
-        if self.transaction:
-            entries = self.transaction.entries.all()
-            balance = sum([e.amount for e in entries])
-            if balance == 0:
-                Entry.objects.filter(transaction=self.transaction).update(valid=True)
-            else:
-                Entry.objects.filter(transaction=self.transaction).update(valid=False)
+        #if self.transaction:
+        entries = self.transaction.entries.all()
+        balance = sum([e.amount for e in entries])
+        if balance == 0:
+            Entry.objects.filter(transaction=self.transaction).update(valid=True)
+        else:
+            Entry.objects.filter(transaction=self.transaction).update(valid=False)
         self.transaction.save()
 
     def with_account(self):
