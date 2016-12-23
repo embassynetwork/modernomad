@@ -16,9 +16,15 @@ class EntryInline(admin.TabularInline):
 class AccountAdmin(admin.ModelAdmin):
     model = Account
     raw_id_fields = ("owners", "admins")
-    list_filter = ('type',)
-    list_display = ('__unicode__', 'get_balance', 'account_admins', 'type')
+    list_filter = ('type', 'owners')
+    list_display = ('__unicode__', 'balance', 'account_owners', 'account_admins', 'type')
     inlines = [EntryReadOnlyInline,]
+
+    def balance(self, obj):
+        return obj.get_balance()
+
+    def account_owners(self, obj):
+        return ", ".join(["%s %s" % (a.first_name, a.last_name) for a in obj.owners.all()])
 
     def account_admins(self, obj):
         return ", ".join(["%s %s" % (a.first_name, a.last_name) for a in obj.admins.all()])

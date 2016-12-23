@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from bank.models import *
 from django.db.models import Q
+from bank.forms import *
 
 # Create your views here.
 class AccountDetail(View):
@@ -23,5 +24,5 @@ class AccountList(View):
     template_name = 'accounts_list.html'
     def get(self, request):
         accounts = Account.objects.filter(owners=request.user).order_by('currency')
-        print accounts
-        return render(request, self.template_name, {'accounts': accounts})
+        transaction_form = TransactionForm()
+        return render(request, self.template_name, {'accounts': accounts, 'transaction_form': transaction_form})

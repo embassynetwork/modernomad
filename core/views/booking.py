@@ -14,14 +14,17 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from core.models import Booking, Use, Location, Site
 from core.forms import BookingUseForm
 from bank.models import Currency, Account
-
+from django.contrib.auth.models import AnonymousUser
 
 logger = logging.getLogger(__name__)
 
 
 @ensure_csrf_cookie
 def StayComponent(request, location_slug, room_id=None):
-    user_drft_balance = request.user.profile.drft_spending_balance()
+    if request.user.is_authenticated():
+        user_drft_balance = request.user.profile.drft_spending_balance()
+    else:
+        user_drft_balance = 0
 
     return render(request,
         'booking.html',

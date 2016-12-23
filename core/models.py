@@ -1121,7 +1121,10 @@ class Use(models.Model):
     def suggest_drft(self):
         # suggest DRFT if the user has sufficient DRFT balance and the room
         # accept DRFT on these nights. 
-        return self.resource.drftable_between(self.arrive, self.depart) and self.user.profile.drft_spending_balance() > self.total_nights()
+        try:
+            return self.resource.drftable_between(self.arrive, self.depart) and self.user.profile.drft_spending_balance() > self.total_nights()
+        except:
+            return False
 
 
 class Booking(models.Model):

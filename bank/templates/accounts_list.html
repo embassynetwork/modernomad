@@ -6,7 +6,6 @@
 <h1 class="top-spacer-large">{{request.user.first_name}}'s Accounts</h1>
 
 {% regroup accounts by currency as accounts_by_currency %}
-
 {% for account in accounts_by_currency %}
 <h3>{{account.grouper}} <span class="smaller">({{account.grouper.symbol}})</span></h3>
     <table class="table">
@@ -38,6 +37,10 @@
         {% endfor %}
     </table>
 {% endfor %}
+
+<form class="form form-horizontal">
+    {{transaction_form.as_p}}
+</form>
 
 
 {% endblock %}
