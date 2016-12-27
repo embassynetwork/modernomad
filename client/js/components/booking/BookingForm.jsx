@@ -3,7 +3,7 @@ import moment from 'moment'
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import { Link } from 'react-router'
-import { Panel, FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
+import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import DjangoCSRFInput from '../generic/DjangoCSRFInput'
 import BookingDisplay from './BookingDisplay'
 import { Booking } from '../../models/Booking'
@@ -89,6 +89,9 @@ export default class BookingForm extends React.Component {
   render() {
     const room = this.props.room
     const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
+    const drftTooltip = (
+      <Tooltip id="tooltip">Ɖ or DRFT is a housing currency currently in beta mode.</Tooltip>
+    );
 
     if (!this.props.networkLocation) return null;
 
@@ -99,7 +102,11 @@ export default class BookingForm extends React.Component {
         <div className="row nightly-price">
           <h3 className="col-xs-8">${this.props.room.defaultRate}
             {this.props.room.acceptDrftTheseDates?
-              <span><span className="h5"> or </span>Ɖ1</span>
+              <span><span className="h5"> or </span>Ɖ1
+                <OverlayTrigger placement="top" overlay={drftTooltip}>
+                  <span className="fa fa-info-circle drft-info"></span>
+                </OverlayTrigger>
+              </span>
               :
               <span></span>
             }
