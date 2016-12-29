@@ -417,7 +417,7 @@ class Resource(models.Model):
                     return False
 
     def capacity_on(self, this_day):
-        # returns quantity (an integer). 
+        # returns quantity (an integer).
         return CapacityChange.objects.quantity_on(this_day, self)
 
     def drftable_on(self, this_day):
@@ -426,7 +426,7 @@ class Resource(models.Model):
 
     def available_on(self, this_day):
         # a resource is available if it has capacity that is not already
-        # used. returns True or False. 
+        # used. returns True or False.
         capacities = self.capacity_on(this_day)
         if not capacities:
             return False
@@ -438,7 +438,7 @@ class Resource(models.Model):
 
     def drftable_between(self, start, end):
         # note this just checks if the resource has drftable capacity, not
-        # whether it has _availability_. (ie, it migt be drftable but booked). 
+        # whether it has _availability_. (ie, it migt be drftable but booked).
         for day in dates_within(start, end):
             if not self.drftable_on(day):
                 return False
@@ -446,7 +446,7 @@ class Resource(models.Model):
 
     def available_between(self, start, end):
         # note this just checks if the resource has drftable capacity, not
-        # whether it has _availability_. (ie, it migt be drftable but booked). 
+        # whether it has _availability_. (ie, it migt be drftable but booked).
         for day in dates_within(start, end):
             if not self.available_on(day):
                 return False
@@ -454,7 +454,7 @@ class Resource(models.Model):
 
     def daily_capacities_within(self, start, end):
         # creates a list of (day, quantity) tuples. No capacity objects are
-        # returned. 
+        # returned.
         capacities = self.capacities_between(start, end)
 
         quantity = 0
@@ -1120,9 +1120,9 @@ class Use(models.Model):
 
     def suggest_drft(self):
         # suggest DRFT if the user has sufficient DRFT balance and the room
-        # accept DRFT on these nights. 
+        # accept DRFT on these nights.
         try:
-            return self.resource.drftable_between(self.arrive, self.depart) and self.user.profile.drft_spending_balance() > self.total_nights()
+            return self.resource.drftable_between(self.arrive, self.depart) and self.user.profile.drft_spending_balance() >= self.total_nights()
         except:
             return False
 
@@ -1568,7 +1568,7 @@ class UserProfile(models.Model):
     def primary_account(self, currency):
         # the prumary account should be unique for each currency (enforced by
         # the m2m_changed receiver), but it migh tbe None, and get() throws an
-        # error if that's the case. Hence filter().first(). 
+        # error if that's the case. Hence filter().first().
         print 'checking for primary account...'
         primary = self.primary_accounts.filter(currency=currency).first()
         if primary:
@@ -1587,9 +1587,9 @@ class UserProfile(models.Model):
 
     def drft_spending_balance(self):
         # returns balance from primary account only. the thesis is that users
-        # should move balances INTO their primary account to spend it. 
+        # should move balances INTO their primary account to spend it.
         account = self.primary_account(currency=Currency.objects.get(name="DRFT"))
-        return account.get_balance() 
+        return account.get_balance()
 
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
@@ -1614,7 +1614,7 @@ def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs
         for pk in pk_set:
             # multiple objects can be add()-ed at once, and those objects will be
             # of type Account or UserProfile depending on whether this is a forward
-            # or reverse relationship. 
+            # or reverse relationship.
             if reverse:
                 user_profile = UserProfile.objects.get(pk)
             else:
@@ -1624,7 +1624,7 @@ def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs
             assert not user_profile.primary_accounts.filter(currency=account.currency)
             # ensure user is an owner of primary account
             assert user_profile.user in account.owners.all()
-        
+
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):
     try:
@@ -1869,9 +1869,9 @@ class CapacityChangeManager(models.Manager):
 
     def would_not_change_previous_quantity(self, capacity):
         previous_capacity = self._previous_capacity(capacity)
-        return (previous_capacity and 
+        return (previous_capacity and
             ( previous_capacity.quantity == capacity.quantity )
-            and 
+            and
             (previous_capacity.accept_drft == capacity.accept_drft)
         )
 
@@ -1885,9 +1885,9 @@ class CapacityChangeManager(models.Manager):
         print capacity.quantity
         print capacity.accept_drft
 
-        return (next_capacity and 
+        return (next_capacity and
             ( next_capacity.quantity == capacity.quantity)
-            and 
+            and
             ( next_capacity.accept_drft == capacity.accept_drft)
         )
 
