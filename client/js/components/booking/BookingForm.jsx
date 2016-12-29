@@ -90,7 +90,7 @@ export default class BookingForm extends React.Component {
     const room = this.props.room
     const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
     const drftTooltip = (
-      <Tooltip id="tooltip">Ɖ or DRFT is a housing currency currently in beta mode.</Tooltip>
+      <Tooltip id="tooltip">DRFT (Ɖ) is an internal, housing-backed currency currently in beta. Contact us for more info.</Tooltip>
     );
 
     if (!this.props.networkLocation) return null;
