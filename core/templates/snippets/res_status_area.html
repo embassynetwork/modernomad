@@ -13,7 +13,7 @@
         {% if r.use.user.profile.customer_id %}
         <p class="text-success"><i class="icon-ok"i></i> This user has valid payment credentials and a DRFT balance of Ɖ{{user_drft_balance}}.</p>
         {% else %}
-            <p class="text-error"><i class="icon-warning-sign"i></i> This user does not have valid payment credentials but has a DRFT balance of Ɖ{{user_drft_balance}}.</p>
+            <p class="text-error"><i class="icon-warning-sign"i></i> This user does not have valid payment credentials. The user has a DRFT balance of Ɖ{{user_drft_balance}}.</p>
         {% endif %}
     {% endif %}
 
@@ -22,7 +22,7 @@
         
     {% if not r.is_comped %}
         {% if r.is_pending %}
-            {% if user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
+            {% if r.use.accounted_by == 'drft' and user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
                 <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
             {% endif %}
             {% if r.use.user.profile.customer_id %}
@@ -35,7 +35,7 @@
             {% endif %}
 
         {% elif r.is_approved %}
-            {% if user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
+            {% if r.use.accounted_by == 'drft' and user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
                 <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
             {% endif %}
             {% if r.use.user.profile.customer_id %}
@@ -53,7 +53,7 @@
                 {% if r.is_paid %}
                     <p>This booking is confirmed and paid. No action needed.</p>  
                 {% else %}
-                    {% if user_drft_balance > 0 and r.use.resource.backing.accepts_drft %}
+                    {% if r.use.accounted_by == 'drft' and user_drft_balance > 0 and r.use.resource.backing.accepts_drft %}
                         <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
                     {% endif %}
                     <p>The booking is confirmed, although unpaid.</p>
