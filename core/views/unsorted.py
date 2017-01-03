@@ -1367,6 +1367,9 @@ def BookingManageCreate(request, location_slug):
             use = form.save(commit=False)
             use.location = location
             use.user = the_user
+            if use.suggest_drft():
+                use.accounted_by = Use.DRFT
+                use.save()
             use.status = request.POST.get('status')
             use.save()
             # Make sure the rate is set and then generate a bill
