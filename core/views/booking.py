@@ -173,7 +173,6 @@ def BookingDetail(request, booking_id, location_slug):
                 "contact": location.from_email(),
                 'users_during_stay': users_during_stay,
                 'drft_balance': user_drft_balance,
-                'default_to_drft': use.suggest_drft(),
             }
         )
     else:
