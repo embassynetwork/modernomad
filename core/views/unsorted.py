@@ -799,7 +799,6 @@ def ListUsers(request):
 @login_required
 def UserDetail(request, username):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
-    drft_balance = user.profile.drft_spending_balance()
 
     return render(
         request,
@@ -808,7 +807,6 @@ def UserDetail(request, username):
             "u": user,
             'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
-            "drft_balance": drft_balance
         }
     )
 
