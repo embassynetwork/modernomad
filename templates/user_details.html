@@ -34,12 +34,12 @@
     <div id="edit-profile">
         {% ifequal u user %}
         <div>
-            <a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
             {% if u.profile.drft_spending_balance > 0 %}
                 <h4>
                     DRFT balance: Ɖ{{u.profile.drft_spending_balance}}
                 </h4>
             {% endif %}
+            <a class="btn btn-dark btn-small" href="{% url 'user_edit' user.username%}">Edit Profile</a>
             {% if user.profile.customer_id %}
                 <form class="userprofile-card-form" method="post" action="{% url 'user_delete_card' user.username %}">{% csrf_token %}
                     <input type="submit" class="btn btn-danger btn-small" value="Delete saved card {%if user.profile.last4 %}(**{{user.profile.last4}}){% endif %}">
