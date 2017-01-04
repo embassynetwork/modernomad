@@ -10,10 +10,12 @@
     {% endif %}
 
     {% if not r.is_canceled %}
-        {% if r.use.user.profile.customer_id %}
-        <p class="text-success"><i class="icon-ok"i></i> This user has valid payment credentials and a DRFT balance of Ɖ{{user_drft_balance}}.</p>
+        {% if r.use.accounted_by == 'drft' %}
+            <p class="text-success"><i class="icon-ok"i></i> This user has a DRFT balance of Ɖ{{user_drft_balance}}.</p>
+        {% elif r.use.user.profile.customer_id %}
+            <p class="text-success"><i class="icon-ok"i></i> This user has valid payment credentials.</p>
         {% else %}
-            <p class="text-error"><i class="icon-warning-sign"i></i> This user does not have valid payment credentials. The user has a DRFT balance of Ɖ{{user_drft_balance}}.</p>
+            <p class="text-error"><i class="icon-warning-sign"i></i> This user does not have valid payment credentials.</p>
         {% endif %}
     {% endif %}
 
@@ -22,23 +24,30 @@
         
     {% if not r.is_comped %}
         {% if r.is_pending %}
-            {% if r.use.accounted_by == 'drft' and user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
-                <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
-            {% endif %}
-            {% if r.use.user.profile.customer_id %}
+            {% if r.use.accounted_by == 'drft' %}
+                {% if user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %} 
+                    <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
+                {% else %}
+                    <div>This was requested as a DRFT booking but either the user's balance is insufficient or the availability is not longer there.</div>
+                {% endif %}
+            {% elif r.use.user.profile.customer_id %}
                 <a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
                 Charge the user's card ${{r.bill.total_owed}} and notify them via email
-                </a> to confirm this booking. (A receipt will be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away)
+                </a> to confirm this booking. (A receipt will be sent automatically. The welcome email will be sent 
+                immediately if this booking is less than {{days_before_welcome_email}} days away)
             {% else %}
-            You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
+                You may <a href="#" id="set-tentative" class="res-manage-action res-manage-btn">
                 tentatively confirm this booking</a> and prompt the user to confirm with payment.
             {% endif %}
 
         {% elif r.is_approved %}
-            {% if r.use.accounted_by == 'drft' and user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %}
-                <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
-            {% endif %}
-            {% if r.use.user.profile.customer_id %}
+            {% if r.use.accounted_by == 'drft' %}
+                {% if user_drft_balance > 0 and r.use.resource.has_future_drft_capacity %} 
+                    <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
+                {% else %}
+                    <div>This was requested as a DRFT booking but either the user's balance is insufficient or the availability is not longer there.</div>
+                {% endif %}
+            {% elif r.use.user.profile.customer_id %}
                 The booking is approved and the user has valid payment details. 
                 <a href="#" id="res-charge-card" class="res-manage-action res-manage-btn"> Charge the user's card </a> to confirm this booking.  (A receipt will always be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away) They will have the
                 opportunity to cancel if desired. 
@@ -49,17 +58,17 @@
             {% endif %}
 
         {% elif r.is_confirmed %}
-            {% if r.use.user.profile.customer_id %}
+            {% if r.use.accounted_by == 'drft' %}
+                <p>The booking has been paid with DRFT.</p>
+            {% elif r.use.user.profile.customer_id %}
                 {% if r.is_paid %}
                     <p>This booking is confirmed and paid. No action needed.</p>  
                 {% else %}
-                    {% if r.use.accounted_by == 'drft' and user_drft_balance > 0 and r.use.resource.backing.accepts_drft %}
-                        <div><a href="{% url 'booking_manage_pay_drft' location.slug r.id  %}" class="btn btn-default">CONFIRM WITH DRFT</a></div>
-                    {% endif %}
                     <p>The booking is confirmed, although unpaid.</p>
                     <p><a href="#" id="res-charge-card" class="res-manage-action res-manage-btn">
                     Charge the user's card ${{r.bill.total_owed}}</a>.</p>
-                    <p>(A receipt will always be sent automatically. The welcome email will be sent immediately if this booking is less than {{days_before_welcome_email}} days away)</p>
+                    <p>(A receipt will always be sent automatically. The welcome email will be sent immediately if this 
+                    booking is less than {{days_before_welcome_email}} days away)</p>
                 {% endif %}
             {% else %}
                 This user is confirmed but has not entered payment info. You can always remind them 
