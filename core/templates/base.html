@@ -1,6 +1,11 @@
 {% extends 'root.html' %}
 {% load staticfiles %}
 
+{% block extrahead %}
+    <meta property="og:image" content="https://embassynetwork.com{{ MEDIA_URL }}{{ location.image }}"/>
+    <meta property="og:title" content="{{location.name}}"/>
+{% endblock %}
+
 <!-- block body -->
 {% block body %}
   {% if location %}
