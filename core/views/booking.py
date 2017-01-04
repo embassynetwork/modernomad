@@ -50,7 +50,7 @@ def BookingSubmit(request, location_slug):
             use.user = request.user
             if use.suggest_drft():
                 use.accounted_by = Use.DRFT
-                use.save()
+            use.save()
             # we already set the value of 'use' when creating the Booking,
             # but it wasn't saved at that point, and Django complains about
             # a missing primary key here otherwise, so re-setting.
