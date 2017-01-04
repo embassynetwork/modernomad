@@ -1560,7 +1560,7 @@ class UserProfile(models.Model):
     customer_id = models.CharField(max_length=200, blank=True, null=True)
     # JKS TODO between last4 and the customer_id, payment methods should really be their own model.
     last4 = models.IntegerField(null=True, blank=True, help_text="Last 4 digits of the user's card on file, if any")
-    primary_accounts = models.ManyToManyField(Account, help_text="one for each currency", related_name="primary_for")
+    primary_accounts = models.ManyToManyField(Account, help_text="one for each currency", related_name="primary_for", blank=True)
 
     def __unicode__(self):
         return (self.user.__unicode__())
