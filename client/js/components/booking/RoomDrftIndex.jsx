@@ -50,7 +50,7 @@ export default class RoomDrftIndex extends React.Component {
   renderLocationRoomCards() {
     return this.props.rooms.map((room) => {
       if (room.node.resources.length) {
-        return <div key={room.node.name}><a href={'/locations/'+room.node.slug}><h3>{room.node.name}</h3></a><RoomCards loading={this.props.loading} rooms={this.displayableRooms(room.node.resources)} routeParams={this.routeParams(room.node)} query={this.props.query} /></div>
+        return <div key={room.node.name}><a href={'/locations/'+room.node.slug}><h2>{room.node.name}</h2></a><RoomCards loading={this.props.loading} rooms={this.displayableRooms(room.node.resources)} routeParams={this.routeParams(room.node)} query={this.props.query} /></div>
       }
     })
   }
@@ -58,7 +58,7 @@ export default class RoomDrftIndex extends React.Component {
   renderLocationAvailabilities() {
     return this.props.rooms.map((room) => {
       if (room.node.resources.length) {
-        return <div key={room.node.name}><h3>{room.node.name}</h3><AvailabilityMatrix rooms={room.node.resources} routeParams={this.routeParams(room.node)} query={this.props.query}></AvailabilityMatrix></div>
+        return <div key={room.node.name}><a href={'/locations/'+room.node.slug}><h2>{room.node.name}</h2></a><AvailabilityMatrix rooms={room.node.resources} routeParams={this.routeParams(room.node)} query={this.props.query}></AvailabilityMatrix></div>
       }
     })
   }
