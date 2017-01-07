@@ -1,0 +1,12 @@
+{% extends "root.html" %}
+
+{% block body %}
+
+<h2 class="featurette-heading text-center">DRFT (Ɖ) Rooms</h2>
+
+<div id="room-container"></div>
+<script type="text/javascript">
+    window.renderReactComponent('room-container', 'RoomBooking', {request_user_drft_balance: 3, location: 'ams'})
+</script>
+
+{% endblock %}

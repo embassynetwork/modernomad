@@ -14,7 +14,7 @@ class FeeNode(DjangoObjectType):
 
 class LocationNode(DjangoObjectType):
     fees = List(lambda: FeeNode, paid_by_house=Boolean())
-    resources = List(lambda: ResourceNode, has_future_capacity=Boolean())
+    resources = List(lambda: ResourceNode, has_future_capacity=Boolean(), has_future_drft_capacity=Boolean())
 
     class Meta:
         model = Location
@@ -30,11 +30,13 @@ class LocationNode(DjangoObjectType):
     def resolve_resources(self, args, *_):
         if args.get('has_future_capacity', False):
             resources = self.rooms_with_future_capacity()
+        elif args.get('has_future_drft_capacity', False):
+            resources = self.rooms_with_future_drft_capacity()
         else:
             resources = self.resources.all()
         return resources
-            
-        
+
+
 
 
 class Query(AbstractType):
