@@ -94,7 +94,6 @@ class RoomDrftIndexOrDetailWithoutQuery extends React.Component {
 
   allResources() {
     const location = this.locationData()
-    console.log(location)
     if (location) {
       return location
     } else {
