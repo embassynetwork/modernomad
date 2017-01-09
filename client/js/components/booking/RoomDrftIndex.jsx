@@ -50,7 +50,7 @@ export default class RoomDrftIndex extends React.Component {
   renderLocationRoomCards() {
     return this.props.rooms.map((room) => {
       if (room.node.resources.length) {
-        return <div key={room.node.name}><a href={'/locations/'+room.node.slug} target='_blank'><h2>{room.node.name}</h2></a><RoomCards loading={this.props.loading} rooms={this.displayableRooms(room.node.resources)} routeParams={this.routeParams(room.node)} query={this.props.query} /></div>
+        return <div key={room.node.name}><a href={'/locations/'+room.node.slug} target='_blank'><h2 className="location-heading">{room.node.name}</h2></a><RoomCards loading={this.props.loading} rooms={this.displayableRooms(room.node.resources)} routeParams={this.routeParams(room.node)} query={this.props.query} /></div>
       }
     })
   }

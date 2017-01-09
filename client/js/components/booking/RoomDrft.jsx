@@ -19,8 +19,6 @@ query AllResourcesForLocation($arrive: DateTime!, $depart: DateTime!) {
           id
           rid
           name
-          description
-          summary
           image
           defaultRate
           hasFutureDrftCapacity
