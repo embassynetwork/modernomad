@@ -30,5 +30,7 @@ class TransactionForm(forms.Form):
     to_account = forms.ChoiceField(required=True, choices=recipient_accounts)
     amount = forms.IntegerField()
 
-
-    
+    def __init__(self, *args, **kwargs):
+        super(TransactionForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
