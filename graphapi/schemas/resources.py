@@ -22,7 +22,7 @@ class ResourceNode(DjangoObjectType):
     backing = graphene.Field(BackingNode)
     has_future_drft_capacity = graphene.Boolean()
     accept_drft_these_dates = graphene.Boolean(arrive=DateTime(), depart=DateTime())
-    
+
     class Meta:
         model = Resource
         interfaces = (Node, )
@@ -33,7 +33,6 @@ class ResourceNode(DjangoObjectType):
 
     def resolve_has_future_drft_capacity(self, args, *kwargs):
         return self.has_future_drft_capacity()
-
 
     def resolve_rid(self, args, *_):
         return self.id
@@ -62,3 +61,7 @@ class ResourceNode(DjangoObjectType):
 
 class Query(AbstractType):
     all_resources = DjangoFilterConnectionField(ResourceNode)
+    all_drft_resources = DjangoFilterConnectionField(ResourceNode)
+
+    def resolve_all_drft_resources(self, args, context, info):
+        return Resource.objects.filter(hasFutureDrftCapacity=True)

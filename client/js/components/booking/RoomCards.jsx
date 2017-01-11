@@ -27,7 +27,7 @@ export default class RoomCards extends React.Component {
       if (this.props.loading) {
         return null
       } else {
-        return <div className="no-data" style={{marginTop: '100px'}}>Sorry, no rooms match your search</div>
+        return <div className="no-data">Sorry, no rooms match your search</div>
       }
     }
   }

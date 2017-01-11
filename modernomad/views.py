@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.shortcuts import render
-from core.models import Location, UserProfile
+from core.models import Location, UserProfile, Resource
 from gather.models import Event
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,6 +18,10 @@ def index(request):
 
 def about(request):
     return render(request, "about.html")
+
+def drft(request):
+    rooms = Resource.objects.all
+    return render(request, "drft.html", {'rooms': rooms})
 
 def host(request):
     return render(request, "host.html")

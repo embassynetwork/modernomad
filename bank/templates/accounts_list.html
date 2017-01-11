@@ -18,7 +18,7 @@
         {% for a in account.list %}
         <tr class="row">
             <td class="col-md-1">
-                {% if request.user.profile in a.primary_for.all %} <i class="fa fa-star text-warning"></i>{% endif %} 
+                {% if request.user.profile in a.primary_for.all %} <i class="fa fa-star text-warning"></i>{% endif %}
             </td>
             <td class="col-md-6">
                 <a href="{% url 'account_detail' a.id %}">{{a.name}}</a>
@@ -31,17 +31,26 @@
                     <span>{{a.currency.symbol}}{{ a.get_balance }}</span>
                 {% else %}
                     <span class="text-muted">{{a.currency.symbol}}{{ a.get_balance }}</span>
-                {% endif %} 
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
     </table>
 {% endfor %}
 
-<form class="form form-horizontal">
-    {{transaction_form.as_p}}
-</form>
+<div class="well">
+  <h3>Transfer DRFT (Ɖ)</h3>
+  <form class="form">
+    {% for field in transaction_form %}
+      <div class="form-group">
+        {{ field.errors }}
+        {{ field.label_tag }}
+        <span class="form-help-text">{{ field.help_text}}</span>
+        {{ field }}
+      </div>
+    {% endfor %}
+  </form>
+</div>
 
 
 {% endblock %}
-

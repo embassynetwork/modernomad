@@ -19,7 +19,7 @@ export default class RoomCard extends React.Component {
   render() {
     return (
       <div className="col-lg-4 col-sm-6 room-card">
-        <Link to={this.detailLinkDetails()} className="room-link">
+        <Link to={this.detailLinkDetails()} target="_blank" className="room-link">
           <div className="panel panel-default">
             <div className="panel-body">
 

@@ -159,6 +159,13 @@ class Location(models.Model):
                 future_capacity.append(room)
         return future_capacity
 
+    def rooms_with_future_drft_capacity(self):
+        future_capacity = []
+        for room in Resource.objects.filter(location=self):
+            if (room.has_future_capacity() and room.has_future_drft_capacity()):
+                future_capacity.append(room)
+        return future_capacity
+
     def reservable_rooms_on_day(self, the_day):
         rooms_at_location = self.filter(location=self)
         return [room for room in rooms_at_location if room.capacity_on(the_day)]

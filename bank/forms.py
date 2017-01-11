@@ -36,6 +36,8 @@ class TransactionForm(forms.Form):
         accounts = Account.objects.filter(Q(owners=user.pk) | Q(admins=user.pk)) 
         self.fields['from_account'].queryset = accounts 
         self.fields['to_account'].queryset = accounts 
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
 
 
     
