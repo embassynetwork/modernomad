@@ -1591,6 +1591,10 @@ class UserProfile(models.Model):
         account = self.primary_account(currency=Currency.objects.get(name="DRFT"))
         return account.get_balance()
 
+    def accounts(self):
+        #return Account.objects.filter(Q(owners=user) | Q(admins=user))
+        return list(self.user.accounts_owned.all()) + list(self.user.accounts_administered.all())
+
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 User.rooms_backed = (lambda u: Resource.objects.backed_by(user=u))

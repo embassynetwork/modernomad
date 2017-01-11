@@ -24,5 +24,7 @@ class AccountList(View):
     template_name = 'accounts_list.html'
     def get(self, request):
         accounts = Account.objects.filter(owners=request.user).order_by('currency')
-        transaction_form = TransactionForm()
+        transaction_form = TransactionForm(request.user)
         return render(request, self.template_name, {'accounts': accounts, 'transaction_form': transaction_form})
+
+
