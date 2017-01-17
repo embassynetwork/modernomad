@@ -26,9 +26,9 @@ def recipient_accounts():
     return choices
 
 class TransactionForm(forms.Form):
-    reason = forms.CharField(label='Reason', max_length=200, required=True)
     from_account = forms.ModelChoiceField(required=True, queryset=None)
     to_account = forms.ModelChoiceField(required=True, queryset=None)
+    reason = forms.CharField(label='Reason', max_length=200, required=True)
     amount = forms.IntegerField()
 
     def __init__(self, user, *args, **kwargs):

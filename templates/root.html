@@ -101,8 +101,11 @@
                             <ul id="menu2" class="dropdown-menu" role="menu" aria-labelledby="drop2">
                                 <li><a tabindex="-1" href="/people/{{user.username}}">View Profile</a></li>
                                 <li><a tabindex="-1" href="/people/{{user.username}}/events/">My Events</a></li>
+                                {% if user.profile.accounts %}
+                                    <li><a tabindex="-1" href="{% url 'account_list' %}">Accounts</a></li>
+                                {% endif %}
                                 {% if user.is_superuser %}
-                                <li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
+                                    <li><a tabindex="-1" href="{% url 'admin:index' %}">Django Admin</a></li>
                                 {% endif %}
                                 <li><a tabindex="-1" href="/people/logout/">Logout</a></li>
                             </ul>
