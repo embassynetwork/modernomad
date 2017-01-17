@@ -165,7 +165,7 @@ def entry_pre_save(sender, instance, **kwargs):
     current_balance = instance.account.get_balance()
     if instance.account.is_debit() and (current_balance + instance.amount > 0):
         raise Exception("Error: insufficient balance for transaction. Debit account %d must retain a balance less than 0." % instance.account.id)
-    elif (current_balance + instance.amount < 0):
+    elif instance.account.is_credit() and (current_balance + instance.amount < 0):
         raise Exception("Error: insufficient balance for transaction. Credit account %d must retain a balance greater than 0." % instance.account.id)
 
 
