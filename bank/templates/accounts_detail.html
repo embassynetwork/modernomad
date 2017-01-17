@@ -23,7 +23,7 @@
 
 <div class="well">
   <h3>Transaction History</h3>
-  {% if account.entries.length > 0 %}
+  {% if account.entries.all|length > 0 %}
   <table class="table">
       <tr>
           <th><i class="fa fa-sort-desc"></i> Date </th><th>With account</th><th>Amount</th><th>Balance</th>
@@ -43,7 +43,7 @@
           <th><i class="fa fa-sort-desc"></i> Date </th><th>With account</th><th>Amount</th><th>Balance</th>
       </tr>
       <tr>
-        <td>No entries for this account.</td>
+        <td>No transactions for this account.</td>
         <td></td>
         <td></td>
         <td></td>
