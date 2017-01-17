@@ -6,6 +6,8 @@ from django.views.generic import View
 from bank.models import *
 from django.db.models import Q
 from bank.forms import *
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 class AccountDetail(View):
@@ -22,6 +24,7 @@ class AccountDetail(View):
 
 class AccountList(View):
     template_name = 'accounts_list.html'
+    @method_decorator(login_required)
     def get(self, request):
         accounts = Account.objects.filter(owners=request.user).order_by('currency')
         transaction_form = TransactionForm(request.user)
