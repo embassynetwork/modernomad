@@ -513,7 +513,10 @@ class Resource(models.Model):
     def backers(self):
         # money_account and drft_account should have the same owners (famous
         # last words) so just pick one
-        return list(self.backing.money_account.owners.all())
+        if hasattr(self, 'backing'):
+            return list(self.backing.money_account.owners.all())
+        else:
+            return []
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
