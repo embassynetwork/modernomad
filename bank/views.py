@@ -8,19 +8,25 @@ from django.db.models import Q
 from bank.forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.contrib import messages
 
 # Create your views here.
 class AccountDetail(View):
     template_name = 'accounts_detail.html'
 
     def get(self, request, account_id):
-        account = Account.objects.get(id=account_id)
-        # ensure user has permissions
-        assert (request.user in account.owners.all()
-                or
-                request.user in account.admins.all()
-            )
-        return render(request, self.template_name, {'account': account})
+        try:
+            account = Account.objects.get(id=account_id)
+            # ensure user has permissions
+            assert (request.user in account.owners.all()
+                    or
+                    request.user in account.admins.all()
+                )
+            return render(request, self.template_name, {'account': account})
+        except:
+            messages.add_message(request, messages.INFO, "The account does not exist or you are not authorized.")
+            return HttpResponseRedirect('/404')
+
 
 class AccountList(View):
     template_name = 'accounts_list.html'
