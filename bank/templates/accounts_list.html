@@ -38,8 +38,9 @@
     </table>
 {% endfor %}
 
-<div class="well">
-  <h3>Transfer DRFT (Ɖ)</h3>
+<div class="top-spacer-large">
+<h3>Transfer DRFT (Ɖ)</h3>
+<div class="col-sm-6 well">
   <form class="form">
     {% for field in transaction_form %}
       <div class="form-group">
@@ -49,7 +50,9 @@
         {{ field }}
       </div>
     {% endfor %}
+    <button type="submit" class="btn btn-default">Submit</button>
   </form>
+</div>
 </div>
 
 
