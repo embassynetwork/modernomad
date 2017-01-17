@@ -2,16 +2,9 @@
 
 {% block body %}
 
-<h1>Oops!</h1> 
-<h3>Something's Gone Wrong :(</h3>
-{% if messages %}
-    <div class="messages">
-        {% autoescape off %}
-            {% for message in messages %}
-                <div {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-            {% endfor %}
-        {% endautoescape %}
-    </div>
-{% endif %}
-
+<div class="container">
+    <h1>Oops!</h1> 
+    <h3>Something's Gone Wrong :(</h3>
+    {% include 'snippets/messages.html' %}
+</div>
 {% endblock %}
