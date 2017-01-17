@@ -27,7 +27,11 @@ export default class RoomCards extends React.Component {
       if (this.props.loading) {
         return null
       } else {
-        return <div className="no-data">Sorry, no rooms match your search</div>
+        if (this.props.drft){
+          return <div className="no-data">Sorry, this location has rooms that accept Ɖ but none of those rooms match your search</div>
+        } else {
+          return <div className="no-data">Sorry, no rooms match your search</div>
+        }
       }
     }
   }

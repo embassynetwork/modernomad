@@ -6,7 +6,7 @@
 <h1 class="top-spacer-large">{{request.user.first_name}}'s Accounts</h1>
 
 {% regroup accounts by currency as accounts_by_currency %}
-{% if accounts_by_currency.length < 1 %}
+{% if accounts_by_currency|length == 0 %}
   <h4>You have no accounts.</h4>
 {% endif %}
 {% for account in accounts_by_currency %}
