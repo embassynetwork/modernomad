@@ -8,7 +8,7 @@
 </div>
 
 <h1>
-    {% if request.user.profile in account.primary_for.all %} <i class="fa fa-star text-warning"></i>{% endif %} 
+    {% if request.user.profile in account.primary_for.all %} <i class="fa fa-star text-warning"></i>{% endif %}
     {{account.name}}
     <span class="small">({{account.currency.name}})</span>
 </h1>
@@ -21,21 +21,23 @@
 </div>
 <h3>Balance: {{account.currency.symbol}}{{account.get_balance }}</h3>
 
-<h2 class="text-muted">Transaction History</h2>
-{% if account.entries %}
-<table class="table">
-    <tr>
-        <th><i class="fa fa-sort-desc"></i> Date </th><th>With account</th><th>Amount</th><th>Balance</th>
-    </tr>
-    {% for entry in account.entries.all %}
-    <tr>
-        <td>{{ entry.transaction.date }}</td>
-        <td>{{ entry.with_account|default:"INVALID" }}</td>
-        <td>{{ entry.amount}}</td>
-        <td>{{ entry.balance_at }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% endif %}
+<div class="well">
+  <h3>Transaction History</h3>
+  {% if account.entries %}
+  <table class="table">
+      <tr>
+          <th><i class="fa fa-sort-desc"></i> Date </th><th>With account</th><th>Amount</th><th>Balance</th>
+      </tr>
+      {% for entry in account.entries.all %}
+      <tr>
+          <td>{{ entry.transaction.date }}</td>
+          <td>{{ entry.with_account|default:"INVALID" }}</td>
+          <td>{{account.currency.symbol}}{{ entry.amount}}</td>
+          <td>{{account.currency.symbol}}{{ entry.balance_at }}</td>
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+</div>
 
 {% endblock %}
