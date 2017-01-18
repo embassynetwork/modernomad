@@ -13,13 +13,19 @@
     <span class="small">({{account.currency.name}})</span>
 </h1>
 <div class="row">
+    <div class="col-md-4">
+      <div class="well">
+        <h3>Summary</h3>
+        <p>Balance (as of today): <b>{{account.currency.symbol}}{{account.get_balance }}</b></p>
+      </div>
+    </div>
     {% for user in account.owners.all %}
-    <div class="col-md-1">
+    <div class="col-md-1 pull-right">
         <img src="{{ MEDIA_URL }}{{ user.profile.image_thumb}}" tooltip="{{user.first_name}}"  alt="{{user.first_name}}" class="img-rounded img-responsive">
     </div>
     {% endfor %}
 </div>
-<h3>Balance: {{account.currency.symbol}}{{account.get_balance }}</h3>
+
 
 <div class="well">
   <h3>Transaction History</h3>
