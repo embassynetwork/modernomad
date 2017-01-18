@@ -32,8 +32,13 @@
       <tr>
           <td>{{ entry.transaction.date }}</td>
           <td>{{ entry.with_account|default:"INVALID" }}</td>
+          {% if entry.amount == -1 %}
+          <td>-{{account.currency.symbol}}{{ entry.amount|stringformat:"+d"|slice:"1:"}}</td>
+          <td>{{account.currency.symbol}}{{ entry.balance_at }}</td>
+          {% else %}
           <td>{{account.currency.symbol}}{{ entry.amount}}</td>
           <td>{{account.currency.symbol}}{{ entry.balance_at }}</td>
+          {% endif %}
       </tr>
       {% endfor %}
   </table>
