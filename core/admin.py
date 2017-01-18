@@ -23,6 +23,7 @@ class LocationEmailTemplateAdmin(admin.ModelAdmin):
 class EventAdminGroupInline(admin.TabularInline):
     model = EventAdminGroup
     filter_horizontal = ['users']
+    raw_id_fields = ("users", )
 
 
 class CapacityChangeAdminInline(admin.TabularInline):
@@ -60,6 +61,7 @@ class LocationAdmin(admin.ModelAdmin):
     list_filter = ('name', )
     filter_horizontal = ['house_admins', 'readonly_admins']
     actions = ['send_admin_daily_update', 'send_guests_residents_daily_update']
+    raw_id_fields = ("house_admins", "readonly_admins")
 
     inlines = [ResourceAdminInline]
     if 'gather' in settings.INSTALLED_APPS:
