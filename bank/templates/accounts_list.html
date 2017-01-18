@@ -3,7 +3,12 @@
 
 {% block content %}
 
-<h1 class="top-spacer-large">{{request.user.first_name}}'s Accounts</h1>
+<div class="top-spacer-large">
+{% include 'snippets/messages.html' %}
+
+<h1>{{request.user.first_name}}'s Accounts</h1>
+</div>
+
 
 {% regroup accounts by currency as accounts_by_currency %}
 {% if accounts_by_currency|length == 0 %}
@@ -44,7 +49,8 @@
 <div class="top-spacer-large">
 <h3>Transfer DRFT (Ɖ)</h3>
 <div class="col-sm-6 well">
-  <form class="form">
+  <form class="form" method="post">
+    {% csrf_token %}
     {% for field in transaction_form %}
       <div class="form-group">
         {{ field.errors }}

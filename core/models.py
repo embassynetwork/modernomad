@@ -1602,8 +1602,11 @@ class UserProfile(models.Model):
         return account.get_balance()
 
     def accounts(self):
-        #return Account.objects.filter(Q(owners=user) | Q(admins=user))
         return list(self.user.accounts_owned.all()) + list(self.user.accounts_administered.all())
+
+    def accounts_in_currency(self, currency):
+        return list(self.user.accounts_owned.filter(currency=currency)) + list(self.user.accounts_administered.filter(currency=currency))
+
 
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
