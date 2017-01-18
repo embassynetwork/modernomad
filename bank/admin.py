@@ -13,6 +13,11 @@ class EntryInline(admin.TabularInline):
     extra = 0
     readonly_fields = ('valid',)
 
+class SystemAccountsInline(admin.TabularInline):
+    model = SystemAccounts
+    readonly_fields = ('credit', 'debit')
+    can_delete = False
+
 class AccountAdmin(admin.ModelAdmin):
     model = Account
     raw_id_fields = ("owners", "admins")
@@ -38,6 +43,7 @@ class TransactionAdmin(admin.ModelAdmin):
 
 class CurrencyAdmin(admin.ModelAdmin):
     model = Currency
+    inlines = [SystemAccountsInline,]
 
 
 admin.site.register(Account, AccountAdmin)

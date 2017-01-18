@@ -16,15 +16,22 @@ class Currency(models.Model):
     def __unicode__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        super(Currency, self).save(*args, **kwargs)
+        if not hasattr(self, 'systemaccounts'):
+            credit_account = Account.objects.create(currency=self, name="%s SYSTEM CREDIT" % self.name, type = Account.CREDIT)
+            debit_account = Account.objects.create(currency=self, name="%s SYSTEM DEBIT" % self.name, type = Account.DEBIT)
+            SystemAccounts.objects.create(currency=self, credit=credit_account, debit=debit_account)
+
 class Account(models.Model):
     CREDIT = 'credit'
     DEBIT = 'debit'
-
     ACCOUNT_TYPES = (
             # first value stored in db, second value is what is shown to user
             (CREDIT, 'Credit'),
             (DEBIT, 'Debit'),
         )
+
     currency = models.ForeignKey(Currency, related_name="accounts")
     admins = models.ManyToManyField(User, verbose_name="Admins (optional)",
             related_name='accounts_administered', blank=True, help_text="May be blank"
@@ -60,9 +67,17 @@ class Account(models.Model):
             total_amount = Coalesce(Sum('amount'), 0)
         )['total_amount']
 
-
     def owner_names(self):
         return [o.first_name for o in self.owners.all()]
+
+
+class SystemAccounts(models.Model):
+    # money coming into or out of the system (either due to real transfers or
+    # minting) is recorded in these accounts. 
+    currency = models.OneToOneField(Currency)
+    credit = models.OneToOneField(Account, related_name="+")
+    debit = models.OneToOneField(Account, related_name="+")
+
 
 class Transaction(models.Model):
     reason = models.CharField(max_length=200)
