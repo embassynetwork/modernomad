@@ -43,7 +43,8 @@ class TransactionForm(forms.Form):
         self.fields['from_account'].queryset = accounts 
         self.fields['to_account'].queryset = accounts 
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
-
-
-    
+            print field_name
+            if field_name == 'from_account' or field_name == 'to_account':
+                field.widget.attrs['class'] = 'form-control chosen-select'
+            else:
+                field.widget.attrs['class'] = 'form-control'
