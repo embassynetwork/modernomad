@@ -35,7 +35,7 @@ class TransactionForm(forms.Form):
     from_account = forms.ModelChoiceField(required=True, queryset=None)
     to_account = forms.ModelChoiceField(required=True, queryset=None)
     reason = forms.CharField(label='Reason', max_length=200, required=True)
-    amount = forms.IntegerField()
+    amount = forms.IntegerField(required=True)
 
     def __init__(self, user, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
