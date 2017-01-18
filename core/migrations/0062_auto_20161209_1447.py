@@ -24,23 +24,24 @@ class Migration(migrations.Migration):
         for resource in Resource.objects.all():
             residents_this_room = list(resource.residents.all())
             
-            ma = Account.objects.create(
-                    currency=Currency.objects.get(name="USD"), 
-                    type="standard", 
-                    name="USD Account for %s" % resource.name[:20]
-                )
-            ma.owners = residents_this_room
-            ma.save()
+            if len(residents_this_room) > 0:
+                ma = Account.objects.create(
+                        currency=Currency.objects.get(name="USD"), 
+                        type="credit", 
+                        name="USD Account for %s" % resource.name[:20]
+                    )
+                ma.owners = residents_this_room
+                ma.save()
 
-            da = Account.objects.create(
-                    currency=Currency.objects.get(name="DRFT"), 
-                    type="standard", 
-                    name="DRFT Account for %s" % resource.name[:20]
-                )
-            da.owners = residents_this_room
-            da.save()
-            
-            Backing.objects.create(resource=resource, money_account=ma, drft_account=da, accepts_drft=False)
+                da = Account.objects.create(
+                        currency=Currency.objects.get(name="DRFT"), 
+                        type="credit", 
+                        name="DRFT Account for %s" % resource.name[:20]
+                    )
+                da.owners = residents_this_room
+                da.save()
+                
+                Backing.objects.create(resource=resource, money_account=ma, drft_account=da, accepts_drft=False)
 
     dependencies = [
         ('core', '0061_usetransaction'),
