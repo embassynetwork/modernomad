@@ -26,15 +26,15 @@ class Account(models.Model):
             (DEBIT, 'Debit'),
         )
     currency = models.ForeignKey(Currency, related_name="accounts")
-    admins = models.ManyToManyField(User, verbose_name="Admins (optional)", 
+    admins = models.ManyToManyField(User, verbose_name="Admins (optional)",
             related_name='accounts_administered', blank=True, help_text="May be blank"
         )
-    owners = models.ManyToManyField(User, related_name='accounts_owned', 
+    owners = models.ManyToManyField(User, related_name='accounts_owned',
             blank=True, help_text="May be blank for group accounts"
         )
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=50)
-    type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=CREDIT, 
+    type = models.CharField(max_length=32, choices=ACCOUNT_TYPES, default=CREDIT,
             help_text="A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful."
         )
 
@@ -80,12 +80,12 @@ class Transaction(models.Model):
         if len(entries) < 2:
             # this is a fresh transaction, or only the first entry
             self.valid = False
-            
+
         else: # only if there are 2 transactions
             if len(entries) != 2:
                 # the transaction object needs to be saved first without *any*
                 # entries before the entries can themselves link to the transaction
-                # as a foreign key. 
+                # as a foreign key.
                 raise Exception("Transactions must have 2 entries")
 
             # check that all entries balance out
@@ -95,7 +95,7 @@ class Transaction(models.Model):
             if balance != 0:
                 # Note that this effectively prevents us from editing a
                 # transaction as well, since one entry will get updated before
-                # the other, and cause this error. 
+                # the other, and cause this error.
                 raise Exception("Transaction entries must balance out and there must be only 2")
 
             # check that all entries are between accounts of the same type
@@ -104,15 +104,15 @@ class Transaction(models.Model):
 
             self.valid = True
             # call update instead of save() so we don't end up in an infinite
-            # loop of save()'s calling each other. 
+            # loop of save()'s calling each other.
             Entry.objects.filter(transaction=self).update(valid=True)
 
         super(Transaction, self).save(*args, **kwargs)
-    
+
     def magnitude(self):
         # the magnitude value of a transaction is the total amount it sums to
         # in either the positive or negative direction. It's required to be
-        # symmetric, so we just pick one direction to sum over. 
+        # symmetric, so we just pick one direction to sum over.
         resp = self.entries.filter(amount__gt=0).aggregate(Sum('amount'))
         return resp['amount__sum']
 
@@ -122,12 +122,12 @@ class Entry(models.Model):
     transaction = models.ForeignKey(Transaction, related_name="entries")
     # a transaction will always be invalid until it is linked to a second one
     # through a transaction. because the objects get saved in serial, we can't
-    # avoid a temporary invalid state. 
+    # avoid a temporary invalid state.
     valid = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = "Entries"
-        ordering=['transaction__date']
+        ordering=['-transaction__date']
 
     def __unicode__(self):
         return "Entry: account %s for %d" % (self.account, self.amount)
@@ -171,8 +171,8 @@ def entry_pre_save(sender, instance, **kwargs):
 
 
 ''' check that transaction entries sum to 0
-    that the spending user will have an allowable balance after the transaction is completed. 
+    that the spending user will have an allowable balance after the transaction is completed.
     that the correct permissions are in place for both accounts
     transfer only between accounts of the same currency
-    if entry is updated, update transaction: if entry is valid, then transaction is valid. 
+    if entry is updated, update transaction: if entry is valid, then transaction is valid.
 '''
