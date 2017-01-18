@@ -136,7 +136,7 @@ class Event(models.Model):
         else:
             is_event_admin = False
         
-        if current_user and current_user in self.location.residents.all():
+        if current_user and current_user in self.location.residents():
             is_community_member = True
         else:
             is_community_member = False

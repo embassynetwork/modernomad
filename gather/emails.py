@@ -137,7 +137,7 @@ def event_published_notification(event, location):
         except:
             logger.error('There was an error retrieving the user associated with email address %s, likely because the email is not unique. Skipping this notification.' % subscriber)
             return
-        if (event.visibility == Event.PUBLIC) or (event.visibility == Event.COMMUNITY and u in location.residents.all()):
+        if (event.visibility == Event.PUBLIC) or (event.visibility == Event.COMMUNITY and u in location.residents()):
             mailgun_data={"from": from_address,
                 "to": subscriber,
                 "subject": subject,
