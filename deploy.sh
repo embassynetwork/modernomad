@@ -15,7 +15,7 @@ ssh embassynetwork@embassynetwork.com <<-'ENDSSH'
   echo "INSTALLING PYTHON PACKAGES"
   source ../bin/activate
   pip install -r requirements.txt
-  ./manage.py migrate core
+  ./manage.py migrate
 
   echo "COLLECTING STATIC ASSETS"
   ./manage.py collectstatic  -i node_modules --noinput
