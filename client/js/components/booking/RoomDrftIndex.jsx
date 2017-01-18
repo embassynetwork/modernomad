@@ -69,7 +69,7 @@ export default class RoomDrftIndex extends React.Component {
             <a href={'/locations/'+room.node.slug} target='_blank'>
               <h2>{room.node.name}</h2>
             </a>
-            <AvailabilityMatrix rooms={room.node.resources} routeParams={this.routeParams(room.node)} query={this.props.query}></AvailabilityMatrix>
+            <AvailabilityMatrix rooms={room.node.resources} drft={true} routeParams={this.routeParams(room.node)} query={this.props.query}></AvailabilityMatrix>
           </div>
         )
       }
