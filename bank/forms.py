@@ -33,11 +33,12 @@ class TransactionForm(forms.Form):
 
     def __init__(self, user, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
-        accounts = Account.objects.filter(Q(owners=user.pk) | Q(admins=user.pk)) 
-        self.fields['from_account'].queryset = accounts 
-        self.fields['to_account'].queryset = accounts 
+        accounts = Account.objects.filter(Q(owners=user.pk) | Q(admins=user.pk))
+        self.fields['from_account'].queryset = accounts
+        self.fields['to_account'].queryset = accounts
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
-
-
-    
+            print field_name
+            if field_name == 'from_account' or field_name == 'to_account':
+                field.widget.attrs['class'] = 'form-control chosen-select'
+            else:
+                field.widget.attrs['class'] = 'form-control'
