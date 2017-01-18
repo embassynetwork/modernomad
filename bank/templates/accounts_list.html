@@ -68,7 +68,10 @@
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script>
   $(".chosen-select").chosen();
-
+  // jQuery validate ignores the hidden element, and the Chosen plugin adds
+  // visibility:hidden. need to tell validate not to ignore hidden select
+  // elements. 
+  $.validator.setDefaults({ ignore: ":hidden:not(select)" }) 
   $.validator.addMethod('positiveInteger',
     function (str) { 
         var n = Math.floor(Number(str));
