@@ -61,7 +61,7 @@
                 {% if person.profile.image %}
                     <img class="homepage-user-img img-responsive" src="{{ MEDIA_URL }}{{ person.profile.image}}" />
                 {% else %}
-                    <img class="homepage-user-img" src="/static/img/default.jpg" />
+                    <img class="homepage-user-img img-responsive" src="/static/img/default.jpg" />
                 {% endif %}
                 <div class="homepage-user-info">
                     <p class="homepage-user-link"> {{ person.first_name|title}} {{person.last_name|title}}</p>
