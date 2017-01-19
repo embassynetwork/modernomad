@@ -77,7 +77,7 @@ class Location(models.Model):
     image = models.ImageField(upload_to=location_img_upload_to, help_text="Requires an image with proportions 800px wide x 225px high")
     profile_image = models.ImageField(
             upload_to=location_img_upload_to,
-            help_text="A shiny high profile image for the location", null=True, blank=True
+            help_text="A shiny high profile image for the location. Must be 336x344px.", null=True, blank=True
             )
     stay_page = models.TextField(
             default="This is the page which has some descriptive text at the top (this text), and then lists the " +
