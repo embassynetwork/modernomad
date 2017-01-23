@@ -287,7 +287,8 @@ def all_users():
 
 class LocationRoomForm(forms.ModelForm):
     cropped_image_data = forms.CharField(widget=forms.HiddenInput())
-    backed_by = forms.MultipleChoiceField(choices=all_users)
+    change_backer = forms.MultipleChoiceField(choices=all_users)
+    new_backing_date = forms.DateField()
 
     class Meta:
         model = Resource
@@ -302,7 +303,7 @@ class LocationRoomForm(forms.ModelForm):
             self.fields['cropped_image_data'].required = False
             #self.fields['backed_by'].initial = [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in self.instance.backers()]
         for field_name, field in self.fields.items():
-            if field_name == 'backed_by':
+            if field_name == 'change_backer':
                 field.widget.attrs['class'] = 'chosen-select'
             else:
                 field.widget.attrs['class'] = 'form-control'

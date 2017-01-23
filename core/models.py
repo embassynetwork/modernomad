@@ -511,12 +511,41 @@ class Resource(models.Model):
         return self.location.tz()
 
     def backers(self):
-        # money_account and drft_account should have the same owners (famous
-        # last words) so just pick one
-        if hasattr(self, 'backing'):
-            return list(self.backing.money_account.owners.all())
+        b = self.current_backing()
+        if b:
+            return b.users.all()
         else:
             return []
+
+    def backings_this_room(self):
+        return self.backings.all()
+
+    def current_backing(self):
+        today = timezone.now().date()
+        latest = self.latest_backing(today)
+        if latest and latest.end and latest.end < today:
+            return None
+        else: 
+            return latest
+
+    def latest_backing(self, date): 
+        # latest start date *could* be in the past, or the future. 
+        print self.backings_this_room()
+        return self.backings_this_room().filter(start__lte=date).order_by('start').last()
+
+    def new_backing(self, backers):
+        # end any current backing
+        today = timezone.now().date()
+        if hasattr(self, 'backings'):
+            print 'ending current backing %d' % self.backing.id
+            old_backing = self.latest_backing()
+            if not old_backing.end:
+                # hmm this doesn't prevent old backing from being actually in the future.
+                old_backing.end = today
+            old_backing.save()
+        # create a new backing
+        new_backing = Backing(resource=self, start=today)
+        new_backing.save(users=backers)
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -1926,16 +1955,53 @@ class BackingManager(models.Manager):
 
 
 class Backing(models.Model):
-    resource = models.OneToOneField(Resource)
+    resource = models.ForeignKey(Resource, related_name='backings')
     money_account = models.ForeignKey(Account, related_name='+')
     drft_account = models.ForeignKey(Account, related_name='+')
     subscription = models.ForeignKey(Subscription, blank=True, null=True)
+    users = models.ManyToManyField(User, related_name="backings")
     start = models.DateField(default=django.utils.timezone.now)
     end = models.DateField(blank=True, null=True)
     objects = BackingManager()
 
     def __unicode__(self):
         return "Backing for %s" % self.resource
+
+    def next_backing(self):
+        return Backing.objects.filter(resource=self.resource).filter(start__gt=self.start).order_by('start').first()
+
+    def previous_backing(self):
+        return Backing.objects.filter(resource=self.resource).filter(start__lt=self.start).order_by('-start').first()
+
+    def save(self, users=None, **kwargs):
+        # check that users list is not being changed (do not allow editing of users)
+
+        # ensure start date is >= end date of latest backing
+        # JKS - should probably be more nuanced than this - what if you want to
+        # insert a finite backing between two others?
+        try:
+            if self.resource.latest_backing():
+                assert self.resource.latest_backing().end and self.start >= self.resource.latest_backing().end
+            super(Backing, self).save(*args, **kwargs)
+        except AssertionError, e:
+            print "ERROR"
+            return
+
+        # create accounts for this backing
+        usd = Currency.objects.get(name="USD")
+        ma = Account.objects.create(currency=usd, 
+                name="%s USD Backing Account" % self.resource, 
+                owners = users, type = Account.CREDIT)
+
+        drft = Currency.objects.get(name="DRFT")
+        da = Account.objects.create(currency=drft, 
+                name="%s DRFT Backing Account" % self.resource, 
+                owners = users, type = Account.CREDIT)
+
+        # use update() method which speaks directly to the database, so that
+        # save() is not called (which would be a recursion issue)
+        Backing.objects.get(pk=self.pk).update(money_account-ma, drft_account=da, users=users) 
+
 
 class HouseAccount(models.Model):
     location = models.ForeignKey(Location)

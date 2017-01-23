@@ -295,6 +295,7 @@ class HouseAccountAdmin(admin.ModelAdmin):
 
 class BackingAdmin(admin.ModelAdmin):
     model = Backing
+    raw_id_fields = ("users",)
 
 
 admin.site.register(LocationMenu, LocationMenuAdmin)

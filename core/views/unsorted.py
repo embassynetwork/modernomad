@@ -1230,7 +1230,12 @@ def LocationEditRoom(request, location_slug, room_id):
         page = request.POST.get('page')
         form = LocationRoomForm(request.POST, request.FILES, instance=Resource.objects.get(id=room_id))
         if form.is_valid():
+            backer_ids = request.POST.getlist('backed_by')
+            backers = [User.objects.get(pk=i) for i in backer_ids]
             resource = form.save()
+            if backers != form.instance.backers():
+                print 'update backing with new'
+                resource.new_backing(backers)
             messages.add_message(request, messages.INFO, "%s updated." % resource.name)
         else:
             print 'form was not valid'
