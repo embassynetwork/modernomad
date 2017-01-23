@@ -112,7 +112,7 @@ class Location(models.Model):
     email_subject_prefix = models.CharField(max_length=200, help_text="Your prefix will be wrapped in square brackets automatically.")
     house_admins = models.ManyToManyField(User, related_name='house_admin')
     readonly_admins = models.ManyToManyField(
-            User, related_name='readonly_admin',
+            User, related_name='readonly_admin', blank=True,
             help_text="Readonly admins do not show up as part of the community. Useful for eg. external bookkeepers, etc."
             )
     check_out = models.CharField(max_length=20, help_text="When your guests should be out of their bed/room.")
