@@ -152,7 +152,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
         new_user_form = None
         login_form = None
         location_event_admin = EventAdminGroup.objects.get(location=location)
-        if request.user in location_event_admin.users.all():
+        if request.user in location_event_admin.users.all() or request.user in location.house_admins.all():
             user_is_event_admin = True
         else:
             user_is_event_admin = False
@@ -380,14 +380,17 @@ def event_approve(request, event_id, event_slug, location_slug=None):
 
     return HttpResponseRedirect(reverse('gather_view_event', args=(location.slug, event.id, event.slug)))
 
+@login_required
 def event_publish(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
     location_event_admin = EventAdminGroup.objects.get(location=location)
-    if request.user not in location_event_admin.users.all():
-        return HttpResponseRedirect('/404')
+
     event = Event.objects.get(id=event_id)
-    if not (request.user.is_authenticated() and (request.user in event.organizers.all() or request.user in event.location.house_admins.all())):
-        return HttpResponseRedirect("/")
+    if (request.user not in location_event_admin.users.all() and
+        request.user not in event.location.house_admins.all() and
+        request.user not in event.organizers.all()):
+        print 'user does not have correct permissions to publish event'
+        return HttpResponseRedirect('/404')
 
     print request.POST
     event.status = Event.LIVE
