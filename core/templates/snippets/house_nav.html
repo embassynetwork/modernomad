@@ -50,9 +50,7 @@
             <ul id="menu4" class="dropdown-menu" role="menu" aria-labelledby="drop4">
                 <li><a href="{% url 'gather_upcoming_events' location.slug %}">Upcoming</a></li>
                 <li><a href="{% url 'gather_create_event' location.slug %}">New Event</a></li>
-                {% if user.is_authenticated %}
                 <li><a href="{% url 'gather_past_events' location.slug %}">Past Events</a></li>
-                {% endif %}
             </ul>
             </li>
             {% endifappexists %}
