@@ -282,8 +282,12 @@ class LocationPageForm(forms.Form):
     content = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '16', 'cols': '72', 'required': 'true'}))
 
 
+def all_users():
+    return [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in User.objects.all()]
+
 class LocationRoomForm(forms.ModelForm):
     cropped_image_data = forms.CharField(widget=forms.HiddenInput())
+    backed_by = forms.MultipleChoiceField(choices=all_users)
 
     class Meta:
         model = Resource
@@ -296,8 +300,9 @@ class LocationRoomForm(forms.ModelForm):
         super(LocationRoomForm, self).__init__(*args, **kwargs)
         if self.instance.id is not None:
             self.fields['cropped_image_data'].required = False
+            #self.fields['backed_by'].initial = [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in self.instance.backers()]
         for field_name, field in self.fields.items():
-            if field_name == 'residents':
+            if field_name == 'backed_by':
                 field.widget.attrs['class'] = 'chosen-select'
             else:
                 field.widget.attrs['class'] = 'form-control'
