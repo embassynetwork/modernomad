@@ -543,6 +543,11 @@ class Resource(models.Model):
     def current_backers_for_display(self):
         return ["%s %s" % (u.first_name, u.last_name) for u in self.current_backers()]
 
+    def scheduled_future_backings(self):
+        today = timezone.localtime(timezone.now()).date()
+        future = self.backings_this_room().filter(start__gt=today)
+        return future
+
     def latest_backing(self):
         # latest backing *may* be in the past or the future...
         return self.backings_this_room().order_by('start').last()
@@ -2003,6 +2008,10 @@ class BackingManager(models.Manager):
         b._setup_accounts(backers)
         b.save()
         b.users.add(*backers)
+        b.money_account.name = "%s USD Account: Backing %d " % (b.resource, b.pk)
+        b.money_account.save()
+        b.drft_account.name = "%s DRFT Account: Backing %d " % (b.resource, b.pk)
+        b.drft_account.save()
         return b
 
 class Backing(models.Model):
@@ -2050,14 +2059,14 @@ class Backing(models.Model):
         # create accounts for this backing
         usd = Currency.objects.get(name="USD")
         ma = Account.objects.create(currency=usd,
-                name="%s USD Backing Account" % self.resource,
+                name="%s Backing USD Account" % self.resource,
                 type = Account.CREDIT)
         ma.owners.add(*backers)
         self.money_account = ma
 
         drft = Currency.objects.get(name="DRFT")
         da = Account.objects.create(currency=drft,
-                name="%s DRFT Backing Account" % self.resource,
+                name="%s Backing DRFT Account" % self.resource,
                 type = Account.CREDIT)
         da.owners.add(*backers)
         self.drft_account = da
