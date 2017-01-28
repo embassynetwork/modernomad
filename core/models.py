@@ -521,43 +521,75 @@ class Resource(models.Model):
         return self.backings.all()
 
     def current_backing(self):
-        today = timezone.now().date()
-        latest = self.latest_backing(today)
-        if latest and latest.end and latest.end < today:
+        today = timezone.localtime(timezone.now()).date()
+        soonest_backing = self.current_and_future_backings().first()
+        print soonest_backing
+        if (not soonest_backing) or (soonest_backing and soonest_backing.start > today):
+            print 'no soonest backing'
             return None
         else:
-            return latest
+            print 'found soonest backing'
+            print soonest_backing
+            return soonest_backing
 
     def current_backers(self):
+        print 'current backers'
         if self.current_backing():
-            print 'current backers'
             print self.current_backing().users.all()
             return self.current_backing().users.all()
         else:
-            return None
+            return []
 
     def current_backers_for_display(self):
         return ["%s %s" % (u.first_name, u.last_name) for u in self.current_backers()]
 
-    def latest_backing(self, date=None):
-        if not date:
-            date = timezone.localtime(timezone.now())
-        # latest start date *could* be in the past, or the future.
-        return self.backings_this_room().filter(start__lte=date).order_by('start').last()
+    def latest_backing(self):
+        # latest backing *may* be in the past or the future...
+        return self.backings_this_room().order_by('start').last()
 
-    def new_backing(self, backers):
-        # end any current backing
-        today = timezone.now().date()
+    def current_and_future_backings(self, date=None):
+        if not date:
+            date = timezone.localtime(timezone.now()).date()
+        # most recent *could* be in the past OR future.
+        most_recent = self.backings_this_room().filter(start__lte=date).order_by('start').last()
+        print 'most recent'
+        print most_recent
+
+        # if there was no most_recent, or if most_recent backing ended in
+        # the past, then only look for future backings. 
+        if (not most_recent) or (hasattr(most_recent, 'end') and most_recent.end and most_recent.end <= date):
+            # checking if most_recent.end is less than OR equal to 'date' means
+            # that if the backing ended today then it is NOT current (much like
+            # a departure date of a booking). 
+            return self.backings_this_room().filter(start__gt=date)
+        else:
+            # (will include most_recent)
+            return self.backings_this_room().filter(start__gte=most_recent.start)
+
+    def set_next_backing(self, backers, new_backing_date):
+        # this method only supports having a single backing in the future.
+        # remove all future backigns, if any, and then setup the new backing.
+        today = timezone.localtime(timezone.now()).date()
+        print 'in set_next_backing'
         if hasattr(self, 'backings'):
-            print 'ending current backing %d' % self.backing.id
-            old_backing = self.latest_backing()
-            if not old_backing.end:
-                # hmm this doesn't prevent old backing from being actually in the future.
-                old_backing.end = today
-            old_backing.save()
+            print 'will end/delete current and future backings'
+            print self.current_and_future_backings(new_backing_date)
+            for b in self.current_and_future_backings(new_backing_date):
+                # if the backing started in the past, then there are likely
+                # credits that will need to be reflected to this backer. so
+                # don't delete the backing, just end it. but if the backing
+                # hasn't even started yet, then just kill it and replace it
+                # with the new one.
+                if (b.start > today) or (b.start == new_backing_date):
+                    print 'deleting backing %d' % b.id
+                    b.delete()
+                else:
+                    print 'ending backing %d' % b.id
+                    b.end = new_backing_date
+                    b.save()
         # create a new backing
-        new_backing = Backing(resource=self, start=today)
-        new_backing.save(users=backers)
+        new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
+        print 'created new backing %d' % new_backing.id
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -1965,6 +1997,13 @@ class BackingManager(models.Manager):
     def by_user(self, user):
         return self.get_queryset().filter(money_account__owners = user)
 
+    def setup_new(self, resource, backers, start):
+        b = Backing(resource=resource, start=start)
+        assert b.comes_after_others() 
+        b._setup_accounts(backers)
+        b.save()
+        b.users.add(*backers)
+        return b
 
 class Backing(models.Model):
     resource = models.ForeignKey(Resource, related_name='backings')
@@ -1977,7 +2016,7 @@ class Backing(models.Model):
     objects = BackingManager()
 
     def __unicode__(self):
-        return "Backing for %s" % self.resource
+        return "Backing %d for %s" % (self.pk, self.resource)
 
     def next_backing(self):
         return Backing.objects.filter(resource=self.resource).filter(start__gt=self.start).order_by('start').first()
@@ -1985,35 +2024,44 @@ class Backing(models.Model):
     def previous_backing(self):
         return Backing.objects.filter(resource=self.resource).filter(start__lt=self.start).order_by('-start').first()
 
-    def save(self, users=None, **kwargs):
-        # check that users list is not being changed (do not allow editing of users)
+    def comes_after_others(self):
+        ''' checks that this backing comes strictly after any other for this
+        resource. '''
 
-        # ensure start date is >= end date of latest backing
-        # JKS - should probably be more nuanced than this - what if you want to
-        # insert a finite backing between two others?
-        try:
-            if self.resource.latest_backing():
-                assert self.resource.latest_backing().end and self.start >= self.resource.latest_backing().end
-            super(Backing, self).save(*args, **kwargs)
-        except AssertionError, e:
-            print "ERROR"
-            return
+        # any other backing for this resource without an end date, period
+        if Backing.objects.filter(resource=self.resource, end=None).exclude(pk=self.pk):
+            print 'backing without end date'
+            return False
+        # start date in past, end date after self.start
+        if Backing.objects.filter(resource=self.resource, start__lte=self.start, end__gt=self.start).exclude(pk=self.pk):
+            print 'start date in past, end date after start:'
+            print self.start
+            print Backing.objects.filter(resource=self.resource, start__lte=self.start, end__gt=self.start).exclude(pk=self.pk)
+            return False
+        # any backing for this resource with a start date in the future
+        if Backing.objects.filter(resource=self.resource, start__gt=self.start):
+            print 'another backing has a start date in the future'
+            return False
+        return True
 
+    def _setup_accounts(self, backers):
+        # ensure we are not overwriting existing accounts
+        assert not hasattr(self, 'money_account') and not hasattr(self, 'drft_account')
         # create accounts for this backing
         usd = Currency.objects.get(name="USD")
         ma = Account.objects.create(currency=usd,
                 name="%s USD Backing Account" % self.resource,
-                owners = users, type = Account.CREDIT)
+                type = Account.CREDIT)
+        ma.owners.add(*backers)
+        self.money_account = ma
 
         drft = Currency.objects.get(name="DRFT")
         da = Account.objects.create(currency=drft,
                 name="%s DRFT Backing Account" % self.resource,
-                owners = users, type = Account.CREDIT)
-
-        # use update() to link money and drft accounts, so that
-        # save() is not called again (which would be a recursion issue)
-        Backing.objects.get(pk=self.pk).update(money_account-ma, drft_account=da, users=users)
-
+                type = Account.CREDIT)
+        da.owners.add(*backers)
+        self.drft_account = da
+    
 
 class HouseAccount(models.Model):
     location = models.ForeignKey(Location)

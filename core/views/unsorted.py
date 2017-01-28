@@ -1230,16 +1230,21 @@ def LocationEditRoom(request, location_slug, room_id):
         page = request.POST.get('page')
         form = LocationRoomForm(request.POST, request.FILES, instance=Resource.objects.get(id=room_id))
         if form.is_valid():
-            backer_ids = request.POST.getlist('backed_by')
+            backer_ids = form.cleaned_data['change_backers']
+            new_backing_date = form.cleaned_data['new_backing_date']
+            print 'backer id(s) and new date'
+            print backer_ids
+            print new_backing_date
             backers = [User.objects.get(pk=i) for i in backer_ids]
             resource = form.save()
             if backers != form.instance.backers():
                 print 'update backing with new'
-                resource.new_backing(backers)
-            messages.add_message(request, messages.INFO, "%s updated." % resource.name)
+                resource.set_next_backing(backers, new_backing_date)
+                messages.add_message(request, messages.INFO, "%s updated." % resource.name)
+            else:
+                messages.add_message(request, messages.INFO, "The new room backers must be different from the current room backers")
         else:
-            print 'form was not valid'
-            print form.errors
+            messages.add_message(request, messages.INFO, "There was an error in your form, please see below.")
 
         if request.META['HTTP_REFERER'] and 'people' in request.META['HTTP_REFERER']:
             # return to the user page we came from
