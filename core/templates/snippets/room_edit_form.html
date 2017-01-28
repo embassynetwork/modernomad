@@ -14,7 +14,7 @@
         <h4>New Room</h4>
     {% endif %}
 
-    <h5 class="row-spacer">Backed by {{form.instance.backers|join:", "|default:"no one"}}</h5>
+    <h5 class="row-spacer">Backed by {{form.instance.current_backers_for_display|join:", "|default:"no one"}}</h5>
 
     {% for field in form %}
 

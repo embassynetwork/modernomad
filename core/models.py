@@ -525,12 +525,24 @@ class Resource(models.Model):
         latest = self.latest_backing(today)
         if latest and latest.end and latest.end < today:
             return None
-        else: 
+        else:
             return latest
 
-    def latest_backing(self, date): 
-        # latest start date *could* be in the past, or the future. 
-        print self.backings_this_room()
+    def current_backers(self):
+        if self.current_backing():
+            print 'current backers'
+            print self.current_backing().users.all()
+            return self.current_backing().users.all()
+        else:
+            return None
+
+    def current_backers_for_display(self):
+        return ["%s %s" % (u.first_name, u.last_name) for u in self.current_backers()]
+
+    def latest_backing(self, date=None):
+        if not date:
+            date = timezone.localtime(timezone.now())
+        # latest start date *could* be in the past, or the future.
         return self.backings_this_room().filter(start__lte=date).order_by('start').last()
 
     def new_backing(self, backers):
@@ -1989,18 +2001,18 @@ class Backing(models.Model):
 
         # create accounts for this backing
         usd = Currency.objects.get(name="USD")
-        ma = Account.objects.create(currency=usd, 
-                name="%s USD Backing Account" % self.resource, 
+        ma = Account.objects.create(currency=usd,
+                name="%s USD Backing Account" % self.resource,
                 owners = users, type = Account.CREDIT)
 
         drft = Currency.objects.get(name="DRFT")
-        da = Account.objects.create(currency=drft, 
-                name="%s DRFT Backing Account" % self.resource, 
+        da = Account.objects.create(currency=drft,
+                name="%s DRFT Backing Account" % self.resource,
                 owners = users, type = Account.CREDIT)
 
-        # use update() method which speaks directly to the database, so that
-        # save() is not called (which would be a recursion issue)
-        Backing.objects.get(pk=self.pk).update(money_account-ma, drft_account=da, users=users) 
+        # use update() to link money and drft accounts, so that
+        # save() is not called again (which would be a recursion issue)
+        Backing.objects.get(pk=self.pk).update(money_account-ma, drft_account=da, users=users)
 
 
 class HouseAccount(models.Model):
