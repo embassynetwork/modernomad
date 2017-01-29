@@ -59,9 +59,10 @@ export default class RoomDetail extends React.Component {
             <div className="panel">
               <BookingForm 
                 networkLocation={this.networkLocation}
-                room={room} {...this.props}
+                room={room}
                 datesAvailable={this.roomIsAvailable()}
-                query={query}
+                {...this.props}
+                query={query} {/* this might be redundent because of the object-spread on the line above*/}
                 onFilterChange={onFilterChange}
               />
             </div>
