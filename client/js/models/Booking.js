@@ -111,6 +111,8 @@ export class Booking {
       this.feeItems = this._buildFeeItems(props.fees || [], this.baseItem.amount())
       if (props.acceptDrftTheseDates && (props.drftBalance > 0) && (props.drftBalance < nights)) {
         this.desc = 'You have Ɖ'+`${props.drftBalance}`+', enough for '+`${props.drftBalance}`+ ' nights'
+      } else if (props.hasFutureDrftCapacity && !props.acceptDrftTheseDates) {
+        this.desc = 'This room accepts Ɖ, but not for these days'
       }
     }
   }
