@@ -596,6 +596,11 @@ class Resource(models.Model):
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
         print 'created new backing %d' % new_backing.id
 
+    def save(*args, **kwargs):
+        super(Resource, self).save(*args, **kwargs)
+        today = timezone.localtime(timezone.now()).date()
+        self.set_next_backing([], today)
+
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
     percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
@@ -1654,8 +1659,8 @@ class UserProfile(models.Model):
         return (self.user.__unicode__())
 
     def primary_account(self, currency):
-        # the prumary account should be unique for each currency (enforced by
-        # the m2m_changed receiver), but it migh tbe None, and get() throws an
+        # the primary account should be unique for each currency (enforced by
+        # the m2m_changed receiver), but it might be None, and get() throws an
         # error if that's the case. Hence filter().first().
         print 'checking for primary account...'
         primary = self.primary_accounts.filter(currency=currency).first()

@@ -1282,8 +1282,8 @@ def LocationNewRoom(request, location_slug):
             return HttpResponseRedirect(reverse('location_edit_room', args=(location.slug, new_room.id,)))
     else:
         form = LocationRoomForm()
-        resource_capacity = SerializedNullResourceCapacity()
 
+    resource_capacity = SerializedNullResourceCapacity()
     return render(
         request,
         'location_edit_room.html',
