@@ -32,7 +32,7 @@ export default class RoomBooking extends React.Component {
   render() {
     return (
       <ApolloProvider client={client}>
-        <RoomBookingRoutes drftBalance={this.props.request_user_drft_balance} isAdmin={this.props.is_user_admin}/>
+        <RoomBookingRoutes drftBalance={this.props.request_user_drft_balance} isAdmin={this.props.is_house_admin}/>
       </ApolloProvider>
     )
   }
