@@ -77,7 +77,7 @@ export default class RoomIndex extends React.Component {
             </div>
             {
               !this.state.showAvailabilityTable ?
-              <RoomCards loading={this.props.loading} rooms={this.displayableRooms()} routeParams={this.props.routeParams} query={this.props.query} /> :
+              <RoomCards loading={this.props.loading} rooms={this.displayableRooms()} routeParams={this.props.routeParams} query={this.props.query} route={this.props.route}/> :
               <AvailabilityMatrix rooms={this.props.rooms} routeParams={this.props.routeParams} query={this.props.query}></AvailabilityMatrix>
             }
           </div>
