@@ -47,7 +47,7 @@ export default class RoomDrftIndex extends React.Component {
   }
 
   renderLocationRoomCards() {
-    return this.props.rooms.map((room) => {
+    return this.props.rooms.reverse().map((room) => {
       if (room.node.resources.length) {
         return (
           <div key={room.node.name}>
