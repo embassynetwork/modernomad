@@ -29,6 +29,8 @@ export default class RoomCards extends React.Component {
       } else {
         if (this.props.drft){
           return <div className="no-data">Sorry, this location has rooms that accept Ɖ but none of those rooms match your search</div>
+        } else if (this.props.route.isAdmin){
+          return <div className="no-data">Sorry, no rooms match your search. <br></br>Let people stay with you! <a href={"/locations/"+this.props.routeParams.location+"/edit/rooms/new"}>Add a new room</a> to your location.</div>
         } else {
           return <div className="no-data">Sorry, no rooms match your search</div>
         }
