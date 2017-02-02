@@ -354,12 +354,6 @@ class RoomCalendar(calendar.HTMLCalendar):
                 return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
 
 
-class ResourceManager(models.Manager):
-    def backed_by(self, user):
-        resources = self.get_queryset().filter(backing__money_account__owners = user)
-        print resources
-        return resources
-
 class Resource(models.Model):
     name = models.CharField(max_length=200)
     location = models.ForeignKey(Location, related_name='resources', null=True)
@@ -368,7 +362,6 @@ class Resource(models.Model):
     summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
     cancellation_policy = models.CharField(max_length=400, default="24 hours")
     image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
-    objects = ResourceManager()
 
     def __unicode__(self):
         return self.name
@@ -1691,9 +1684,7 @@ class UserProfile(models.Model):
         return list(self.user.accounts_owned.filter(currency=currency)) + list(self.user.accounts_administered.filter(currency=currency))
 
 
-
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
-User.rooms_backed = (lambda u: Resource.objects.backed_by(user=u))
 User._meta.ordering = ['username']
 
 # Note: primary.accounts.'through' is django's name for the M2M class
@@ -2006,6 +1997,10 @@ class CapacityChange(models.Model):
 class BackingManager(models.Manager):
     def by_user(self, user):
         return self.get_queryset().filter(money_account__owners = user)
+
+    def current_for_user(self, user):
+        today = timezone.localtime(timezone.now())
+        return Backing.objects.filter(users=user).filter(start__lte=today).filter(Q(end=None) | Q(end__gt=today))
 
     def setup_new(self, resource, backers, start):
         b = Backing(resource=resource, start=start)

@@ -800,11 +800,15 @@ def ListUsers(request):
 def UserDetail(request, username):
     user, user_is_house_admin_somewhere = _get_user_and_perms(request, username)
 
+    user_backings = Backing.objects.current_for_user(user=user)
+    print user_backings
+
     return render(
         request,
         "user_profile.html",
         {
             "u": user,
+            "user_backings": user_backings,
             'user_is_house_admin_somewhere': user_is_house_admin_somewhere,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
         }
@@ -871,7 +875,7 @@ def user_edit_room(request, username, room_id):
     room = Resource.objects.get(id=room_id)
 
     # make sure this user has permissions on the room
-    if room not in Resource.objects.backed_by(user):
+    if user not in room.current_backers():
         return HttpResponseRedirect('/404')
 
     if room.image:

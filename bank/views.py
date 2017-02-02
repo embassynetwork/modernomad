@@ -46,6 +46,8 @@ class AccountList(View):
     form_class = TransactionForm
     @method_decorator(login_required)
     def get(self, request):
+        # always make sure the user has at least a DRFT account
+        request.user.profile.get_or_create_primary_account(currency=Currency.objects.get(name="DRFT"))
         accounts = Account.objects.filter(owners=request.user).order_by('currency')
         transaction_form = self.form_class(request.user)
         return render(request, self.template_name, {'accounts': accounts, 'transaction_form': transaction_form})
