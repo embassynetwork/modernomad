@@ -1,25 +1,58 @@
 import React, {PropTypes} from 'react'
+import { graphql } from 'react-apollo'
+import ScheduledBackingsTable from './ScheduledBackingsTable'
+import gql from 'graphql-tag'
+import _ from 'lodash'
+import moment from 'moment'
+import Loader from '../generic/Loader'
 
-export default class ScheduledBackings extends React.Component {
-  // defines required arguments
-  static propTypes = {
-    backings: PropTypes.array.isRequired
+const backingsQuery = gql`
+query AllBackings {
+  allBackings(first:10) {
+    edges {
+      node {
+        resourceId
+        id
+      }
+    }
+  }
+}
+`;
+
+class ScheduledBackingsWithoutQuery extends React.Component {
+  constructor(props) {
+    super()
+  }
+
+  renderSubComponent() {
+    if (this.props.data.loading) {
+      return null
+    } else {
+      return (
+        <ScheduledBackingsTable backings={this.backingData()}/>
+      )
+    }
+  }
+
+  backingData() {
+    const queryResults = this.props.data.allBackings
+    if (queryResults && queryResults.edges.length > 0) {
+      return queryResults.edges
+    } else {
+      return null
+    }
   }
 
   render() {
-
-    const {backings} = this.props
-    
-    const rows = backings.map((backing) => {
-        return <div key={backing.toString()}>{backing}</div>
-    })
-
     return (
-      <div className="row">
-        <div className="col-md-12">
-            {rows}
-        </div>
-      </div>
+      <Loader loading={this.props.data.loading}>
+        {this.renderSubComponent()}
+      </Loader>
     )
   }
 }
+
+const ScheduledBackings = graphql(backingsQuery, {
+  // defines required arguments
+})(ScheduledBackingsWithoutQuery)
+export default ScheduledBackings

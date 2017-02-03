@@ -29,7 +29,7 @@ query AllResourcesForLocation($locationSlug: String!, $arrive: DateTime!, $depar
           image
           defaultRate
           hasFutureDrftCapacity
-          acceptDrftTheseDates(arrive: $arrive, depart: $depart) 
+          acceptDrftTheseDates(arrive: $arrive, depart: $depart)
           availabilities(arrive: $arrive, depart: $depart) {
             date
             quantity
@@ -56,7 +56,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
       query: this.props.location.query,
       loading: this.props.data.loading
     }
-
+    
     if (!!child) {
       const roomID = child.props.routeParams.id
       const room = this.oneResource(roomID)

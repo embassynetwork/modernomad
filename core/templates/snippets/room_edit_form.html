@@ -68,7 +68,7 @@
 <div id="react-app-{{room_id}}"></div>
 
 <script type="text/javascript">
-    window.renderReactComponent('react-app-backings', 'ScheduledBackings', {'backings':[1,2,3]})
+    window.renderReactComponent('react-app-backings', 'Backings')
     if ({{room_id}} > 0 ) {
         window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
     }
