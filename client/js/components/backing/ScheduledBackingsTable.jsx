@@ -16,7 +16,6 @@ export default class ScheduledBackingsTable extends React.Component {
   }
 
   render() {
-    console.log('yes',this.props.backings)
     return (
       <div>{this.renderBackings()}</div>
     )
