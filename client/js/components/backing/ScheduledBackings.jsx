@@ -7,21 +7,30 @@ import moment from 'moment'
 import Loader from '../generic/Loader'
 
 const backingsQuery = gql`
-query AllBackings {
-  allBackings(first:10) {
-    edges {
-      node {
-        resourceId
-        id
-      }
+query ScheduledFutureBackings($rid: ID!) {
+  resource(id:$rid) {
+    name,
+    scheduledFutureBackings {
+      id,
+      users {
+        edges {
+          node {
+            id,
+            firstName,
+            lastName,
+            username
+          }
+        }
+      },
+      start
     }
   }
 }
 `;
 
 class ScheduledBackingsWithoutQuery extends React.Component {
-  constructor(props) {
-    super()
+  static propTypes = {
+      rid: PropTypes.number.isRequired
   }
 
   renderSubComponent() {
@@ -35,11 +44,12 @@ class ScheduledBackingsWithoutQuery extends React.Component {
   }
 
   backingData() {
-    const queryResults = this.props.data.allBackings
-    if (queryResults && queryResults.edges.length > 0) {
-      return queryResults.edges
+    const queryResults = this.props.data.resource
+
+    if (queryResults && queryResults.scheduledFutureBackings.length > 0) {
+        return queryResults.scheduledFutureBackings
     } else {
-      return null
+        return []
     }
   }
 
@@ -53,6 +63,9 @@ class ScheduledBackingsWithoutQuery extends React.Component {
 }
 
 const ScheduledBackings = graphql(backingsQuery, {
-  // defines required arguments
+  // defines required arguments - but by default graphql will look at the props
+    // of the parent component, which, here, directly has a prop called rid already. 
+  // options: { variables: { rid: rid } },
 })(ScheduledBackingsWithoutQuery)
+
 export default ScheduledBackings

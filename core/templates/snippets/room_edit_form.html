@@ -8,17 +8,9 @@
 
 <div class="row-spacer">
     <h5>Backed by {{form.instance.current_backers_for_display|join:", "|default:"no one"}}</h5>
-    {% for b in form.instance.scheduled_future_backings %}
-    <p><b>Scheduled backing changes</b>:
-        {% for u in b.users.all %}
-        <span>{{ u.first_name }} {{ u.last_name}}</span>, on {{b.start}}
-        {% endfor %}
-    {% empty %}
-        <span>No scheduled backing changes</span>
-    {% endfor %}
+    <div id="react-app-backings"></div>
 </div>
 
-<div id="react-app-backings"></div>
 
 <form role="form" method="post" class="room-form" enctype="multipart/form-data"
         {% if room_id %}
@@ -68,7 +60,7 @@
 <div id="react-app-{{room_id}}"></div>
 
 <script type="text/javascript">
-    window.renderReactComponent('react-app-backings', 'Backings')
+    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}})
     if ({{room_id}} > 0 ) {
         window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
     }

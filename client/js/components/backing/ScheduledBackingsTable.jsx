@@ -1,23 +1,47 @@
 import React, {PropTypes} from 'react'
+var moment = require('moment');
 
 export default class ScheduledBackingsTable extends React.Component {
-  // static propTypes = {
-  //   backings: PropTypes.array.isRequired
-  // }
+  static propTypes = {
+    backings: PropTypes.array.isRequired
+    }
 
-  constructor(props) {
-    super(props)
+  formatDate(date) {
+    const momentDate = moment(date);
+    const formatString = (momentDate.year() == moment().year()) ? "Do MMM" : "Do MMM, Y"
+    return momentDate.format(formatString)
+  }
+
+  renderDetails(backing) {
+    var backers = backing.users.edges.map((u) => {
+        return (
+            <a key={u.node.id} href={`/people/${u.node.username}`}>
+                {`${u.node.firstName} ${u.node.lastName}, `} 
+            </a>
+        )
+    })
+
+    return (
+        <div key={backing.id}>
+            <strong>Scheduled backing changes: </strong>
+            {backers} on {this.formatDate(backing.start)}
+        </div>
+    ) 
   }
 
   renderBackings() {
-    return this.props.backings.map((backing) => {
-      return <div key={backing.node.id}>{backing.node.resourceId}</div>
+    const {backings} = this.props
+
+    return backings.map((backing) => {
+        return this.renderDetails(backing)
     })
+
   }
 
   render() {
-    return (
-      <div>{this.renderBackings()}</div>
-    )
+    const html = this.props.backings.length > 0
+    ? this.renderBackings()
+    : "No scheduled backing changes"
+    return <div>{html}</div>
   }
 }
