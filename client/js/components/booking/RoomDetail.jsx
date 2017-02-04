@@ -38,6 +38,11 @@ export default class RoomDetail extends React.Component {
     const room = this.props.room
     const isDetail = true
 
+    // destructuring
+    const { query, onFilterChange } = this.props
+    // const query = this.props.query
+    // const onFilterChange = this.props.onFilterChange
+
     return (
       <div className="container room-detail">
         <Link to={this.indexLinkDetails()}><i className="fa fa-chevron-left"></i> Back to Rooms</Link>
@@ -52,7 +57,14 @@ export default class RoomDetail extends React.Component {
           </div>
           <div className="col-md-4">
             <div className="panel">
-              <BookingForm networkLocation={this.networkLocation} room={room} {...this.props} datesAvailable={this.roomIsAvailable()} query={this.props.query} onFilterChange={this.props.onFilterChange} />
+              <BookingForm 
+                networkLocation={this.networkLocation}
+                room={room}
+                datesAvailable={this.roomIsAvailable()}
+                {...this.props}
+                query={query} {/* this might be redundent because of the object-spread on the line above*/}
+                onFilterChange={onFilterChange}
+              />
             </div>
           </div>
         </div>

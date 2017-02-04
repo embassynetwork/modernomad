@@ -10,29 +10,26 @@ export default class RoomCards extends React.Component {
     rooms: PropTypes.array.isRequired
   }
 
-  renderRoomCards() {
-    return this.props.rooms.map((room) => {
-      return <RoomCard key={room.id} drft={this.props.drft} routeParams={this.props.routeParams} query={this.props.query} {...room} />
-    })
-  }
-
   render() {
-    if (this.props.rooms.length > 0) {
+    const { rooms, drft, routeParams, query, loading } = this.props
+
+    if (rooms.length > 0) {
       return (
         <div className="row" id="room-cards">
-          {this.renderRoomCards()}
+          {rooms.map(room => <RoomCard key={room.id} drft={drft} routeParams={routeParams} query={query} {...room} /> )}
         </div>
       )
-    } else {
-      if (this.props.loading) {
-        return null
-      } else {
-        if (this.props.drft){
-          return <div className="no-data">Sorry, this location has rooms that accept Ɖ but none of those rooms match your search</div>
-        } else {
-          return <div className="no-data">Sorry, no rooms match your search</div>
-        }
-      }
-    }
+    } 
+    
+    if (loading) return null 
+    
+    const msg = drft
+      ? "Sorry, this location has rooms that accept Ɖ but none of those rooms match your search"
+      : "Sorry, no rooms match your search"
+    
+    return (
+      <div className="no-data">{msg}</div>
+    )
   }
 }
+
