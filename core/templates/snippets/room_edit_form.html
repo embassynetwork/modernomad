@@ -61,7 +61,7 @@
 
 <script type="text/javascript">
     window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}})
-    if ({{room_id}} > 0 ) {
+    if ({{room_id|default:-1}} > 0 ) {
         window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
     }
 </script>

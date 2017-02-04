@@ -589,11 +589,6 @@ class Resource(models.Model):
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
         print 'created new backing %d' % new_backing.id
 
-    def save(*args, **kwargs):
-        super(Resource, self).save(*args, **kwargs)
-        today = timezone.localtime(timezone.now()).date()
-        self.set_next_backing([], today)
-
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
     percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
