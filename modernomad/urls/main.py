@@ -30,5 +30,6 @@ urlpatterns = [
     url(r'^api-token-auth/', jwt_auth.views.obtain_jwt_token),
     url(r'^api/', include('api.urls')),
     url(r'^', include('graphapi.urls')),
+
     url(r'^%s/(?P<path>.*)$' % media_url, django.views.static.serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
 ]
