@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
                 ('comments', models.TextField(null=True, verbose_name=b'Any additional comments. (Optional)', blank=True)),
                 ('last_msg', models.DateTimeField(null=True, blank=True)),
                 ('rate', models.DecimalField(help_text=b'Uses the default rate unless otherwise specified.', null=True, max_digits=9, decimal_places=2, blank=True)),
-                #('uuid', uuidfield.fields.UUIDField(max_length=32, unique=True, null=True, editable=False, blank=True)),
+                ('uuid', models.UUIDField(max_length=32, unique=True, null=True, editable=False, blank=True)),
                 ('location', models.ForeignKey(related_name='reservations', to='core.Location', null=True)),
             ],
             options={
