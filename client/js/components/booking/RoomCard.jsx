@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react'
 import { Link } from 'react-router'
 import ImageCarousel from './ImageCarousel'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import _ from 'lodash'
 
 
@@ -17,10 +18,19 @@ export default class RoomCard extends React.Component {
   }
 
   render() {
+
+    const editTooltip = (
+      <Tooltip id="tooltip">Edit {this.props.name}</Tooltip>
+    );
+
     return (
       <div className="col-lg-4 col-sm-6 room-card">
         {this.props.route.isAdmin ?
-          <a href={"/locations/"+this.props.routeParams.location+"/edit/rooms/"+this.props.rid} className="edit-room btn btn-default">Edit</a>
+          <a href={"/locations/"+this.props.routeParams.location+"/edit/rooms/"+this.props.rid} target="_blank" className="edit-room">
+            <OverlayTrigger placement="top" overlay={editTooltip}>
+              <span className="fa fa-cog fa-2x"></span>
+            </OverlayTrigger>
+          </a>
           :
           <span></span>
         }
