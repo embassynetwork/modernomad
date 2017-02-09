@@ -12,7 +12,7 @@ export default class RoomCards extends React.Component {
 
   renderRoomCards() {
     return this.props.rooms.map((room) => {
-      return <RoomCard key={room.id} drft={this.props.drft} routeParams={this.props.routeParams} query={this.props.query} {...room} />
+      return <RoomCard key={room.id} drft={this.props.drft} routeParams={this.props.routeParams} query={this.props.query} route={this.props.route} {...room} />
     })
   }
 

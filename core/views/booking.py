@@ -26,10 +26,17 @@ def StayComponent(request, location_slug, room_id=None):
     else:
         user_drft_balance = 0
 
+    location = get_object_or_404(Location, slug=location_slug)
+    if request.user in location.house_admins.all():
+        is_house_admin = "true"
+    else:
+        is_house_admin = "false"
+
     return render(request,
         'booking.html',
         {
-            "request_user_drft_balance": user_drft_balance
+            "request_user_drft_balance": user_drft_balance,
+            "is_house_admin": is_house_admin
         })
 
 

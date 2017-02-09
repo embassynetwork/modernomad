@@ -78,13 +78,6 @@ AUTHENTICATION_BACKENDS = (
 
 EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -97,21 +90,6 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-# default template context processors
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.core.context_processors.request",
-    "django.contrib.messages.context_processors.messages",
-    "core.context_processors.location.location_variables",
-    "core.context_processors.location.network_locations",
-    "core.context_processors.analytics.google_analytics",
-)
-
 # other JWT options available at https://github.com/jpadilla/django-jwt-auth
 JWT_EXPIRATION_DELTA = datetime.timedelta(days=1000)
 
@@ -120,13 +98,6 @@ ROOT_URLCONF = 'modernomad.urls.main'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'modernomad.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    path("../templates/"),
-    path("core/templates/"),
-)
 
 WEBPACK_LOADER = {
     'DEFAULT': {
@@ -209,3 +180,34 @@ NOSE_ARGS = [
 ]
 
 os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = "localhost:8000-8010,8080,9200-9300"
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'OPTIONS': {
+            # default template context processors
+            'context_processors' : [
+                "django.contrib.auth.context_processors.auth",
+                "django.core.context_processors.debug",
+                "django.core.context_processors.i18n",
+                "django.core.context_processors.media",
+                "django.core.context_processors.static",
+                "django.core.context_processors.tz",
+                "django.core.context_processors.request",
+                "django.contrib.messages.context_processors.messages",
+                "core.context_processors.location.location_variables",
+                "core.context_processors.location.network_locations",
+                "core.context_processors.analytics.google_analytics",
+            ],
+            # List of callables that know how to import templates from various
+            # sources.
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
+
+
+        },
+    },
+]
