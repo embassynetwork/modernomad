@@ -525,17 +525,13 @@ class Resource(models.Model):
         soonest_backing = self.current_and_future_backings().first()
         print soonest_backing
         if (not soonest_backing) or (soonest_backing and soonest_backing.start > today):
-            print 'no soonest backing'
             return None
         else:
-            print 'found soonest backing'
-            print soonest_backing
             return soonest_backing
 
     def current_backers(self):
         print 'current backers'
         if self.current_backing():
-            print self.current_backing().users.all()
             return self.current_backing().users.all()
         else:
             return []
@@ -557,8 +553,6 @@ class Resource(models.Model):
             date = timezone.localtime(timezone.now()).date()
         # most recent *could* be in the past OR future.
         most_recent = self.backings_this_room().filter(start__lte=date).order_by('start').last()
-        print 'most recent'
-        print most_recent
 
         # if there was no most_recent, or if most_recent backing ended in
         # the past, then only look for future backings. 

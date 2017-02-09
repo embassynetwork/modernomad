@@ -287,8 +287,8 @@ def all_users():
 
 class LocationRoomForm(forms.ModelForm):
     cropped_image_data = forms.CharField(widget=forms.HiddenInput())
-    change_backers = forms.MultipleChoiceField(choices=all_users)
-    new_backing_date = forms.DateField()
+    change_backers = forms.MultipleChoiceField(choices=all_users, required=False)
+    new_backing_date = forms.DateField(required=False)
 
     class Meta:
         model = Resource
