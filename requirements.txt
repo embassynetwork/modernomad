@@ -1,6 +1,5 @@
-#Django>=1.10,<1.11
-Django>=1.9.12,<1.10
-# Django>=1.8.8,<1.9
+Django>=1.10,<1.11
+#Django>=1.9.12,<1.10
 amqp==1.4.9
 anyjson==0.3.3
 billiard==3.3.0.23
@@ -8,7 +7,6 @@ celery==3.1.20
 django-celery==3.1.17
 django-flatpages-tinymce==0.1.1
 django-debug-toolbar==1.4
-django-uuidfield==0.5.0
 eventbrite==3.3.3
 kombu==3.0.34
 lxml==3.5.0
