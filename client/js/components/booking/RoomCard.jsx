@@ -28,7 +28,7 @@ export default class RoomCard extends React.Component {
         {this.props.route.isAdmin ?
           <a href={"/locations/"+this.props.routeParams.location+"/edit/rooms/"+this.props.rid} target="_blank" className="edit-room">
             <OverlayTrigger placement="top" overlay={editTooltip}>
-              <span className="fa fa-cog fa-2x"></span>
+              <span className="fa fa-pencil fa-2x"></span>
             </OverlayTrigger>
           </a>
           :
