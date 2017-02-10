@@ -554,11 +554,11 @@ class Resource(models.Model):
         print most_recent
 
         # if there was no most_recent, or if most_recent backing ended in
-        # the past, then only look for future backings. 
+        # the past, then only look for future backings.
         if (not most_recent) or (hasattr(most_recent, 'end') and most_recent.end and most_recent.end <= date):
             # checking if most_recent.end is less than OR equal to 'date' means
             # that if the backing ended today then it is NOT current (much like
-            # a departure date of a booking). 
+            # a departure date of a booking).
             return self.backings_this_room().filter(start__gt=date)
         else:
             # (will include most_recent)
@@ -588,6 +588,7 @@ class Resource(models.Model):
         # create a new backing
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
         print 'created new backing %d' % new_backing.id
+        return new_backing
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -2002,7 +2003,7 @@ class BackingManager(models.Manager):
 
     def setup_new(self, resource, backers, start):
         b = Backing(resource=resource, start=start)
-        assert b.comes_after_others() 
+        assert b.comes_after_others()
         b._setup_accounts(backers)
         b.save()
         b.users.add(*backers)
@@ -2068,7 +2069,7 @@ class Backing(models.Model):
                 type = Account.CREDIT)
         da.owners.add(*backers)
         self.drft_account = da
-    
+
 
 class HouseAccount(models.Model):
     location = models.ForeignKey(Location)
