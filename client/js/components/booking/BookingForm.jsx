@@ -39,7 +39,8 @@ export default class BookingForm extends React.Component {
         depart: depart,
         fees: this.props.networkLocation.fees,
         drftBalance: drftBalance,
-        acceptDrftTheseDates: acceptDrftTheseDates
+        acceptDrftTheseDates: acceptDrftTheseDates,
+        hasFutureDrftCapacity: this.props.room.hasFutureDrftCapacity
       })
       return <BookingDisplay booking={booking} />
     } else {
@@ -101,7 +102,7 @@ export default class BookingForm extends React.Component {
         <input type="hidden" name="resource" value={room.rid} />
         <div className="row nightly-price">
           <h3 className="col-xs-8">${this.props.room.defaultRate}
-            {this.props.room.acceptDrftTheseDates?
+            {this.props.room.hasFutureDrftCapacity?
               <span><span className="h5"> or </span>Ɖ1
                 <OverlayTrigger placement="top" overlay={drftTooltip}>
                   <span className="fa fa-info-circle drft-info"></span>

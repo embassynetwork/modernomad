@@ -54,7 +54,7 @@ export default class RoomDrftIndex extends React.Component {
             <a href={'/locations/'+room.node.slug} target='_blank'>
               <h2 className="location-heading">{room.node.name}</h2>
             </a>
-            <RoomCards loading={this.props.loading} rooms={this.displayableRooms(room.node.resources)} drft={true} routeParams={this.routeParams(room.node)} query={this.props.query} />
+            <RoomCards loading={this.props.loading} rooms={this.displayableRooms(room.node.resources)} drft={true} routeParams={this.routeParams(room.node)} query={this.props.query} route={this.props.route} />
           </div>
         )
       }

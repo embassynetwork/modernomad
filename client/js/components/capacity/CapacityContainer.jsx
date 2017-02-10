@@ -38,6 +38,7 @@ export default class CapacityContainer extends React.Component {
         if (response.data.data.upcomingCapacities) {
           this.updateCapacities(response.data.data.upcomingCapacities)
         }
+        this.setState({currentCapacity: response.data.data.currentCapacity})
       })
       .catch((error) => {
         console.log("error occured in post", error);

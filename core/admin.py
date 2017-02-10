@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 from core.models import *
 from gather.models import EventAdminGroup
@@ -246,6 +247,21 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
 
 class UserProfileAdmin(UserAdmin):
+    actions = ['create_primary_drft_account']
+
+    def create_primary_drft_account(self, request, queryset):
+        for user in queryset:
+            try:
+                drft_account = user.profile._has_primary_drft_account()
+                if not drft_account:
+                    drft_account = user.profile.primary_drft_account()
+                    self.message_user(request, "Primary DRFT Account (id %d) created for %s %s" % (drft_account.pk, user.first_name, user.last_name))
+                else:
+                    self.message_user(request, "User %s %s already had a primary DRFT account (id %d)" % (user.first_name, user.last_name, drft_account.pk), level=messages.WARNING )
+            except Exception as e:
+                self.message_user(request, e, level=messages.ERROR)
+    create_primary_drft_account.short_description = "Create primary DRFT account for seleted users"
+
     inlines = [UserProfileInline]
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined', 'last_login')
 

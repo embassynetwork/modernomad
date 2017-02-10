@@ -1,4 +1,5 @@
 {% extends "location_edit.html" %}
+{% load staticfiles %}
 
 {% block sub-content %}
 
@@ -7,7 +8,14 @@
     <form method="post" action=".">
         {% csrf_token %}
         <div class="row ui-widget">
-            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="admin-username" name="admin_username"/></div>
+            <div class="col-sm-2 col-sm-offset-1">
+                <select class="form-control chosen-select" id="admin-username" name="admin_username"/>
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for u in all_users %}
+                        <option value="{{u.username}}">{{u.first_name}} {{u.last_name}}</option> 
+                    {% endfor %}
+                </select>
+            </div>
             <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
         </div>
     </form>
@@ -19,7 +27,7 @@
         <form method="post" action=".">
             <input type="hidden" name="admin_username" value="{{ u.username }}"/>
             <div class="row sm-row-spacer">
-                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2 col-sm-offset-1">{{ u.first_name }} {{u.last_name}}</div>
                 <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
             </div>
             {% csrf_token %}
@@ -33,14 +41,14 @@
     <strong>Current Residents with Backings</strong>
     {% for u in location.residents %}
             <div class="row sm-row-spacer">
-                <div class="col-sm-2 col-sm-offset-1"><a href="{% url 'user_detail' u.username %}">{{ u.username }}</a></div>
+                <div class="col-sm-2 col-sm-offset-1"><a href="{% url 'user_detail' u.username %}">{{ u.first_name }} {{u.last_name}}</a></div>
             </div>
             {% csrf_token %}
         </form>
     {% endfor %}
 </div>
 <div>
-    <strong>* Add New Residents by creating a backing for them</strong>
+    * Add New Residents by creating a backing for them.
 </div>
 
 
@@ -51,7 +59,14 @@
     <form method="post" action=".">
         {% csrf_token %}
         <div class="row ui-widget">
-            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="event-admin-username" name="event_admin_username"/></div>
+            <div class="col-sm-2 col-sm-offset-1">
+                <select class="form-control chosen-select" id="event-admin-username" name="event_admin_username"/>
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for u in all_users %}
+                        <option value="{{u.username}}">{{u.first_name}} {{u.last_name}}</option> 
+                    {% endfor %}
+                </select>
+            </div>
             <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
         </div>
     </form>
@@ -63,7 +78,7 @@
         <form method="post" action=".">
             <input type="hidden" name="event_admin_username" value="{{ u.username }}"/>
             <div class="row sm-row-spacer">
-                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2 col-sm-offset-1">{{ u.first_name }} {{u.last_name}}</div>
                 <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
             </div>
             {% csrf_token %}
@@ -79,7 +94,14 @@
     <form method="post" action=".">
         {% csrf_token %}
         <div class="row ui-widget">
-            <div class="col-sm-2 col-sm-offset-1"><input class="form-control" id="readonly-admin-username" name="readonly_admin_username"/></div>
+            <div class="col-sm-2 col-sm-offset-1">
+                <select class="form-control chosen-select" id="readonly-admin-username" name="readonly_admin_username"/>
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for u in all_users %}
+                        <option value="{{u.username}}">{{u.first_name}} {{u.last_name}}</option> 
+                    {% endfor %}
+                </select>
+            </div>
             <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Add"></div>
         </div>
     </form>
@@ -91,7 +113,7 @@
         <form method="post" action=".">
             <input type="hidden" name="readonly_admin_username" value="{{ u.username }}"/>
             <div class="row sm-row-spacer">
-                <div class="col-sm-2 col-sm-offset-1">{{ u.username }}</div>
+                <div class="col-sm-2 col-sm-offset-1">{{ u.first_name }} {{u.last_name}}</div>
                 <div class="col-sm-2"><input class="form-control" name="action" type="submit" value="Remove"></div>
             </div>
             {% csrf_token %}
@@ -102,30 +124,15 @@
 {% endblock %}
 
 {% block extrajs %}
+    <script src="{% static 'js/chosen.jquery.min.js' %}"></script>
     <script>
-    $(function() {
-      var availableUsers = [
-        {% for user in all_users %}
-           "{{user.username}}",
-        {% endfor %}
-      ];
 
-      $( "#admin-username" ).autocomplete({
-        source: availableUsers
-      });
-      
-      $( "#resident-username" ).autocomplete({
-        source: availableUsers
-      });
-
-      $( "#event-admin-username" ).autocomplete({
-        source: availableUsers
-      });
-
-      $( "#readonly-admin-username" ).autocomplete({
-        source: availableUsers
-      });
-
+    $(".chosen-select").chosen({
+        no_results_text: "No user with that name.",
+        width: "95%",
+        placeholder_text: "Search by name."
     });
+
+
     </script>
 {% endblock %}

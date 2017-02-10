@@ -19,6 +19,11 @@ export default class RoomCard extends React.Component {
   render() {
     return (
       <div className="col-lg-4 col-sm-6 room-card">
+        {this.props.route.isAdmin ?
+          <a href={"/locations/"+this.props.routeParams.location+"/edit/rooms/"+this.props.rid} className="edit-room btn btn-default">Edit</a>
+          :
+          <span></span>
+        }
         <Link to={this.detailLinkDetails()} target={(this.props.drft ? "_blank" : "")} className="room-link">
           <div className="panel panel-default">
             <div className="panel-body">

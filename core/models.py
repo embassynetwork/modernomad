@@ -1647,9 +1647,9 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return (self.user.__unicode__())
 
-    def primary_account(self, currency):
-        # the primary account should be unique for each currency (enforced by
-        # the m2m_changed receiver), but it might be None, and get() throws an
+    def get_or_create_primary_account(self, currency):
+        # the prumary account should be unique for each currency (enforced by
+        # the m2m_changed receiver), but it migh tbe None, and get() throws an
         # error if that's the case. Hence filter().first().
         print 'checking for primary account...'
         primary = self.primary_accounts.filter(currency=currency).first()
@@ -1664,13 +1664,16 @@ class UserProfile(models.Model):
             self.primary_accounts.add(primary)
         return primary
 
+    def _has_primary_drft_account(self):
+        return self.primary_accounts.filter(currency=Currency.objects.get(name="DRFT")).first()
+
     def primary_drft_account(self):
-        return self.primary_account(currency=Currency.objects.get(name="DRFT"))
+        return self.get_or_create_primary_account(currency=Currency.objects.get(name="DRFT"))
 
     def drft_spending_balance(self):
         # returns balance from primary account only. the thesis is that users
         # should move balances INTO their primary account to spend it.
-        account = self.primary_account(currency=Currency.objects.get(name="DRFT"))
+        account = self.get_or_create_primary_account(currency=Currency.objects.get(name="DRFT"))
         return account.get_balance()
 
     def accounts(self):
