@@ -19,11 +19,8 @@ class Query(
 ):
     pass
 
-
 class Mutation(graphene.ObjectType):
     request_booking = bookings.RequestBookingMutation.Field()
     backing = backings.BackingMutation.Field()
-
-
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

@@ -18,6 +18,7 @@ class ResourceNode(DjangoObjectType):
     has_future_drft_capacity = graphene.Boolean()
     accept_drft_these_dates = graphene.Boolean(arrive=DateTime(), depart=DateTime())
     scheduled_future_backings = graphene.List(lambda: BackingNode)
+    current_backers_for_display = graphene.List(lambda:graphene.String)
 
     class Meta:
         model = Resource
@@ -58,6 +59,9 @@ class ResourceNode(DjangoObjectType):
 
     def resolve_scheduled_future_backings(self, *args, **kwargs):
         return self.scheduled_future_backings()
+
+    def resolve_current_backers_for_display(self, *args, **kwargs):
+        return self.current_backers_for_display()
 
 
 class Query(AbstractType):
