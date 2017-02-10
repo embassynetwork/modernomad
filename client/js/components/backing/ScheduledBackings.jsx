@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react'
 import { graphql } from 'react-apollo'
 import ScheduledBackingsTable from './ScheduledBackingsTable'
+import BackingForm from './BackingForm'
 import gql from 'graphql-tag'
 import _ from 'lodash'
 import moment from 'moment'
@@ -38,7 +39,10 @@ class ScheduledBackingsWithoutQuery extends React.Component {
       return null
     } else {
       return (
-        <ScheduledBackingsTable backings={this.backingData()}/>
+        <div>
+          <ScheduledBackingsTable backings={this.backingData()}/>
+          <BackingForm mutate={this.props.client.mutate}/>
+        </div>
       )
     }
   }
@@ -64,7 +68,7 @@ class ScheduledBackingsWithoutQuery extends React.Component {
 
 const ScheduledBackings = graphql(backingsQuery, {
   // defines required arguments - but by default graphql will look at the props
-    // of the parent component, which, here, directly has a prop called rid already. 
+    // of the parent component, which, here, directly has a prop called rid already.
   // options: { variables: { rid: rid } },
 })(ScheduledBackingsWithoutQuery)
 
