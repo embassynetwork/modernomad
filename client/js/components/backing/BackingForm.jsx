@@ -5,15 +5,7 @@ import gql from 'graphql-tag'
 import { Link } from 'react-router'
 import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-export default class BackingForm extends React.Component {
-  static propTypes = {
-
-  }
-
-  constructor(props) {
-    super(props)
-  }
-
+class BackingForm extends React.Component {
   onSubmit() {
     this.props.mutate({ variables: { start:"2017-02-20", resource:8, backers:[1] } })
       .then(({ data }) => {
@@ -24,13 +16,11 @@ export default class BackingForm extends React.Component {
   }
 
   render() {
-
     return (
       <a className="backing-change-form" onClick={this.onSubmit.bind(this)}>
         click me
       </a>
     )
-
   }
 }
 
@@ -54,14 +44,5 @@ const submitBacking = gql`
   }
 `;
 
-const BackingFormWithData = graphql(submitBacking, {
-  // props: ({ mutate }) => ({
-  //   submit: (start, resource, backers) => mutate({ variables: { start, resource, backers } }),
-  // }),
-})(BackingForm);
-
-// const NewEntryWithData = graphql(submitRepository, {
-//   props: ({ mutate }) => ({
-//     submit: (repoFullName) => mutate({ variables: { repoFullName } }),
-//   }),
-// })(NewEntry);
+const BackingFormWithData = graphql(submitBacking)(BackingForm); 
+export default BackingFormWithData

@@ -14,10 +14,9 @@ export default class Backings extends React.Component {
   render() {
 
     const {resourceID} = this.props
-
     return (
       <ApolloProvider client={client}>
-        <ScheduledBackings rid={resourceID} client={client} />
+        <ScheduledBackings rid={resourceID} />
       </ApolloProvider>
     )
   }

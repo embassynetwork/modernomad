@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import { graphql } from 'react-apollo'
 import ScheduledBackingsTable from './ScheduledBackingsTable'
-import BackingForm from './BackingForm'
+import BackingFormWithData from './BackingForm'
 import gql from 'graphql-tag'
 import _ from 'lodash'
 import moment from 'moment'
@@ -41,7 +41,7 @@ class ScheduledBackingsWithoutQuery extends React.Component {
       return (
         <div>
           <ScheduledBackingsTable backings={this.backingData()}/>
-          <BackingForm mutate={this.props.client.mutate}/>
+          <BackingFormWithData />
         </div>
       )
     }
