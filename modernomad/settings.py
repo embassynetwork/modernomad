@@ -184,7 +184,8 @@ os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = "localhost:8000-8010,8080,9200-9
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'APP_DIRS': True,
         'OPTIONS': {
             # default template context processors
             'context_processors' : [
@@ -202,10 +203,10 @@ TEMPLATES = [
             ],
             # List of callables that know how to import templates from various
             # sources.
-            'loaders': [
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ]
+            #'loaders': [
+            #    'django.template.loaders.filesystem.Loader',
+            #    'django.template.loaders.app_directories.Loader',
+            #]
 
 
         },
