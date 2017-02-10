@@ -4,13 +4,15 @@ import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import { Link } from 'react-router'
 import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import DatePicker from 'react-datepicker'
 
 class BackingForm extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {backers: "", start: ""}
+    this.state = {backers: [], start: moment()}
 
     this.handleChange = this.handleChange.bind(this)
+    this.handleDateChange = this.handleDateChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
   }
 
@@ -21,9 +23,13 @@ class BackingForm extends React.Component {
       }
   }
 
+  handleDateChange(event) {
+    this.setState({start: event})
+  }
+
   onSubmit(event) {
     event.preventDefault()
-    this.props.mutate({ variables: { start:this.state.start, resource:this.props.resource, backers:this.state.backers } })
+    this.props.mutate({ variables: { start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"), resource:this.props.resource, backers:this.state.backers.split(",") } })
       .then(({ data }) => {
         console.log('got data', data);
       }).catch((error) => {
@@ -35,10 +41,10 @@ class BackingForm extends React.Component {
 // 2017-02-20T21:34:11.721016
   render() {
     return (
-      <form className="backing-change-form" onSubmit={this.onSubmit.bind(this)}>
-        <input type="input" name="start" onChange={this.handleChange('start')} />
-        <input type="input" name="backers" />
-        <input type="submit" className="btn btn-primary" value="schedule" />
+      <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
+        <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
+        <input className="form-control" type="input" name="backers" onChange={this.handleChange('backers')} />
+        <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
       </form>
     )
   }
@@ -49,12 +55,21 @@ BackingForm.propTypes = {
 };
 
 const submitBacking = gql`
-  mutation submitBacking($start: DateTime!, $resource: Int!, $backers: [Int!]) {
+  mutation submitBacking($start: DateTime!, $resource: Int!, $backers: [Int]) {
     backing (start:$start, resource:$resource, backers:$backers) {
       ok
       backing {
         id
         start
+        end
+        users {
+          edges {
+            node {
+              username
+              id
+            }
+          }
+        }
         resource {
           id
           name
