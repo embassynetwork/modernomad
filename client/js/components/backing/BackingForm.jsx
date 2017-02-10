@@ -6,8 +6,24 @@ import { Link } from 'react-router'
 import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 class BackingForm extends React.Component {
-  onSubmit() {
-    this.props.mutate({ variables: { start:"2017-02-20", resource:8, backers:[1] } })
+  constructor(props) {
+    super(props)
+    this.state = {backers: "", start: ""}
+
+    this.handleChange = this.handleChange.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
+  }
+
+  handleChange(name) {
+      return (event) => {
+        const value = event.target.value
+        this.setState({[name]:value})
+      }
+  }
+
+  onSubmit(event) {
+    event.preventDefault()
+    this.props.mutate({ variables: { start:this.state.start, resource:this.props.resource, backers:this.state.backers } })
       .then(({ data }) => {
         console.log('got data', data);
       }).catch((error) => {
@@ -15,11 +31,15 @@ class BackingForm extends React.Component {
       });
   }
 
+
+// 2017-02-20T21:34:11.721016
   render() {
     return (
-      <a className="backing-change-form" onClick={this.onSubmit.bind(this)}>
-        click me
-      </a>
+      <form className="backing-change-form" onSubmit={this.onSubmit.bind(this)}>
+        <input type="input" name="start" onChange={this.handleChange('start')} />
+        <input type="input" name="backers" />
+        <input type="submit" className="btn btn-primary" value="schedule" />
+      </form>
     )
   }
 }
@@ -29,8 +49,8 @@ BackingForm.propTypes = {
 };
 
 const submitBacking = gql`
-  mutation submitBacking {
-    backing (start:"2017-02-20", resource:8, backers:[1]) {
+  mutation submitBacking($start: DateTime!, $resource: Int!, $backers: [Int!]) {
+    backing (start:$start, resource:$resource, backers:$backers) {
       ok
       backing {
         id
@@ -44,5 +64,5 @@ const submitBacking = gql`
   }
 `;
 
-const BackingFormWithData = graphql(submitBacking)(BackingForm); 
+const BackingFormWithData = graphql(submitBacking)(BackingForm);
 export default BackingFormWithData

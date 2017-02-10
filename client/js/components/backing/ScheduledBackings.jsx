@@ -41,7 +41,7 @@ class ScheduledBackingsWithoutQuery extends React.Component {
       return (
         <div>
           <ScheduledBackingsTable backings={this.backingData()}/>
-          <BackingFormWithData />
+          <BackingFormWithData resource={this.props.rid}/>
         </div>
       )
     }
