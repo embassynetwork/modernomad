@@ -10,9 +10,17 @@
 
     <div class="col-md-6">
         {% include 'snippets/room_edit_form.html' %}
+        <div class="row-spacer">
+            <div id="react-app-backings"></div>
+        </div>
+
     </div>        
 
 </div>
+
+<script type="text/javascript">
+    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}})
+</script>
 
 {% endblock %}
 
