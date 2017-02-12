@@ -29,9 +29,17 @@ class BackingForm extends React.Component {
 
   onSubmit(event) {
     event.preventDefault()
-    this.props.mutate({ variables: { start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"), resource:this.props.resource, backers:this.state.backers.split(",") } })
-      .then(({ data }) => {
-        console.log('got data', data);
+    const {mutate, resource, parent} = this.props
+
+    mutate({ 
+        variables: { 
+            start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"), 
+            resource:resource, 
+            backers:this.state.backers.split(",") 
+        }
+      }).then(({ data }) => {
+        console.log('got data', data)
+        parent.props.data.refetch();
       }).catch((error) => {
         console.log('there was an error sending the query', error);
       });
@@ -78,6 +86,7 @@ const submitBacking = gql`
     }
   }
 `;
+
 
 const BackingFormWithData = graphql(submitBacking)(BackingForm);
 export default BackingFormWithData
