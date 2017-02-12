@@ -526,15 +526,10 @@ class Resource(models.Model):
             return soonest_backing
 
     def current_backers(self):
-        print 'current backers'
         if self.current_backing():
-            print self.current_backing().users.all()
             return self.current_backing().users.all()
         else:
             return []
-
-    def current_backers_for_display(self):
-        return ["%s %s" % (u.first_name, u.last_name) for u in self.current_backers()]
 
     def scheduled_future_backings(self):
         today = timezone.localtime(timezone.now()).date()
@@ -569,6 +564,7 @@ class Resource(models.Model):
         # remove all future backigns, if any, and then setup the new backing.
         today = timezone.localtime(timezone.now()).date()
         print 'in set_next_backing'
+        print new_backing_date
         if hasattr(self, 'backings'):
             print 'will end/delete current and future backings'
             print self.current_and_future_backings(new_backing_date)
@@ -2002,6 +1998,8 @@ class BackingManager(models.Manager):
         return Backing.objects.filter(users=user).filter(start__lte=today).filter(Q(end=None) | Q(end__gt=today))
 
     def setup_new(self, resource, backers, start):
+        print 'start is'
+        print start
         b = Backing(resource=resource, start=start)
         assert b.comes_after_others()
         b._setup_accounts(backers)
@@ -2013,13 +2011,14 @@ class BackingManager(models.Manager):
         b.drft_account.save()
         return b
 
+
 class Backing(models.Model):
     resource = models.ForeignKey(Resource, related_name='backings')
     money_account = models.ForeignKey(Account, related_name='+')
     drft_account = models.ForeignKey(Account, related_name='+')
     subscription = models.ForeignKey(Subscription, blank=True, null=True)
     users = models.ManyToManyField(User, related_name="backings")
-    start = models.DateField(default=django.utils.timezone.now)
+    start = models.DateField()
     end = models.DateField(blank=True, null=True)
     objects = BackingManager()
 
