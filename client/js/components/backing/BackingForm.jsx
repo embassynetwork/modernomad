@@ -7,6 +7,13 @@ import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } 
 import DatePicker from 'react-datepicker'
 
 class BackingForm extends React.Component {
+  static propTypes = {
+    mutate: PropTypes.func.isRequired,
+    parent: PropTypes.object.isRequired,
+    resource: PropTypes.number.isRequired
+
+  }
+
   constructor(props) {
     super(props)
     this.state = {backers: [], start: moment()}
@@ -39,7 +46,8 @@ class BackingForm extends React.Component {
         }
       }).then(({ data }) => {
         console.log('got data', data)
-        parent.props.data.refetch();
+        //parent.props.data.refetch();
+        parent.refetch();
       }).catch((error) => {
         console.log('there was an error sending the query', error);
       });
@@ -57,10 +65,6 @@ class BackingForm extends React.Component {
     )
   }
 }
-
-BackingForm.propTypes = {
-  mutate: PropTypes.func.isRequired,
-};
 
 const submitBacking = gql`
   mutation submitBacking($start: DateTime!, $resource: Int!, $backers: [Int]) {

@@ -31,18 +31,21 @@ query ScheduledFutureBackings($rid: ID!) {
 
 class ScheduledBackingsWithoutQuery extends React.Component {
   static propTypes = {
-      rid: PropTypes.number.isRequired
+      rid: PropTypes.number.isRequired,
+      parent: PropTypes.object.isRequired
   }
 
   renderSubComponent() {
-    const {rid, data} = this.props
+    const {rid, data, parent} = this.props
+    parent.state.scheduledBackingsData = this.props.data
+    console.log('parent.state', parent.state) 
+
     if (data.loading) {
       return null
     } else {
       return (
         <div>
           <ScheduledBackingsTable backings={this.backingData()}/>
-          <BackingFormWithData resource={rid} parent={this}/>
         </div>
       )
     }
