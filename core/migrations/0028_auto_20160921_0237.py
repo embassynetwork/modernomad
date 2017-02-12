@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 from django.conf import settings
-import uuidfield.fields
+
+# this is deprecated in later versions of django,
+#import uuidfield.fields
 
 
 class Migration(migrations.Migration):

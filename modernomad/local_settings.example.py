@@ -67,15 +67,6 @@ else:
     EMAIL_HOST_PASSWORD = 'password'
     DEBUG = False
 
-TEMPLATE_DEBUG = DEBUG
-
-# fill in any local template directories. any templates with the same name WILL
-# OVERRIDE included templates. don't forget the trailing slash in the path, and
-# a comma at the end of the tuple item if there is only one path.
-LOCAL_TEMPLATE_DIRS = (
-                       # eg, "../local_templates/",
-                       )
-
 # celery configuration options
 BROKER_URL = 'amqp://'
 CELERY_RESULT_BACKEND = 'amqp://'

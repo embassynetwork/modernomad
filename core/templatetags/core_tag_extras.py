@@ -1,7 +1,7 @@
 from django import template
 from django.template.defaultfilters import stringfilter
 import itertools
-from django.template import resolve_variable, NodeList
+from django.template import NodeList, Variable
 from django.contrib.auth.models import Group
 
 register = template.Library()
@@ -65,7 +65,7 @@ class GroupCheckNode(template.Node):
         self.nodelist_true = nodelist_true
         self.nodelist_false = nodelist_false
     def render(self, context):
-        user = resolve_variable('user', context)
+        user = Variable('user').resolve(context)
         
         if user is None or not user.is_authenticated():
             return self.nodelist_false.render(context)

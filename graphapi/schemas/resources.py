@@ -1,20 +1,16 @@
 import graphene
-from graphene import AbstractType, Field, Node
+from graphene import relay, AbstractType, Field, Node
 from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from datetime import timedelta
 from core.models import Resource, Backing
-
+from graphapi.schemas.backings import BackingNode
+from graphapi.schemas.users import UserNode
 
 class AvailabilityNode(graphene.ObjectType):
     date = DateTime()
     quantity = graphene.Int()
-
-class BackingNode(DjangoObjectType):
-    class Meta:
-        model = Backing
-        interfaces = (Node, )
 
 class ResourceNode(DjangoObjectType):
     rid = graphene.Int()
@@ -22,11 +18,14 @@ class ResourceNode(DjangoObjectType):
     backing = graphene.Field(BackingNode)
     has_future_drft_capacity = graphene.Boolean()
     accept_drft_these_dates = graphene.Boolean(arrive=DateTime(), depart=DateTime())
+    scheduled_future_backings = graphene.List(lambda: BackingNode)
+    current_backers = graphene.List(lambda: UserNode)
 
     class Meta:
         model = Resource
-        interfaces = (Node, )
+        interfaces = (relay.Node, )
         filter_fields = {
+            'id': ['exact'],
             'location': ['exact'],
             'location__slug': ['exact'],
         }
@@ -59,9 +58,25 @@ class ResourceNode(DjangoObjectType):
 
         return [AvailabilityNode(*availability) for availability in availabilities]
 
+    def resolve_scheduled_future_backings(self, *args, **kwargs):
+        return self.scheduled_future_backings()
+
+    def resolve_current_backers(self, *args, **kwargs):
+        return self.current_backers()
+
+
 class Query(AbstractType):
     all_resources = DjangoFilterConnectionField(ResourceNode)
     all_drft_resources = DjangoFilterConnectionField(ResourceNode)
+    resource = graphene.Field(ResourceNode, id=graphene.ID(), description="single resource") 
 
     def resolve_all_drft_resources(self, args, context, info):
         return Resource.objects.filter(hasFutureDrftCapacity=True)
+
+    def resolve_resource(self, args, context, info):
+        id = args.get('id')
+        return Resource.objects.get(pk=id)
+
+
+
+

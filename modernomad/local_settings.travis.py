@@ -59,8 +59,6 @@ LIST_DOMAIN = "somedomain.com"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEBUG = True
 
-TEMPLATE_DEBUG = DEBUG
-
 # fill in any local template directories. any templates with the same name WILL
 # OVERRIDE included templates. don't forget the trailing slash in the path, and
 # a comma at the end of the tuple item if there is only one path.

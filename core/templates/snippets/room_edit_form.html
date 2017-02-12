@@ -1,5 +1,16 @@
 {% load staticfiles %}
 
+{% if form.instance.pk %}
+    <h4>Editing {{ form.instance.name|title }}</h4>
+{% else %}
+    <h4>New Room</h4>
+{% endif %}
+
+<div class="row-spacer">
+    <div id="react-app-backings"></div>
+</div>
+
+
 <form role="form" method="post" class="room-form" enctype="multipart/form-data"
         {% if room_id %}
             action="{% url 'location_edit_room' location.slug room_id %}"
@@ -7,24 +18,6 @@
             action="{% url 'location_new_room' location.slug %}"
         {% endif %}
     >{% csrf_token %}
-
-    {% if form.instance.pk %}
-        <h4>Editing {{ form.instance.name|title }}</h4>
-    {% else %}
-        <h4>New Room</h4>
-    {% endif %}
-
-    <div class="row-spacer">
-        <h5>Backed by {{form.instance.current_backers_for_display|join:", "|default:"no one"}}</h5>
-        {% for b in form.instance.scheduled_future_backings %}
-        <p><b>Scheduled backing changes</b>:
-            {% for u in b.users.all %}
-            <span>{{ u.first_name }} {{ u.last_name}}</span>, on {{b.start}}
-            {% endfor %}
-        {% empty %}
-            <span>No scheduled backing changes</span>
-        {% endfor %}
-    </div>
 
     {% for field in form %}
 
@@ -58,12 +51,16 @@
     {% endfor %}
     <input type="hidden" name="page" value="{{page}}">
     <input type="hidden" name="username" value="{{username}}">
-    <button type="submit" class="top-spacer btn btn-default">Submit</button>
+    <button type="submit" class="top-spacer btn btn-default btn-lg">Submit</button>
 </form>
 
+<hr>
+
 <div id="react-app-{{room_id}}"></div>
+
 <script type="text/javascript">
-    if ({{room_id}} > 0 ) {
+    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}})
+    if ({{room_id|default:-1}} > 0 ) {
         window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
     }
 </script>

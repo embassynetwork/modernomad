@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom'
 import App from './components/App'
 import CapacityContainer from './components/capacity/CapacityContainer'
 import RoomBooking from './components/booking/RoomBooking'
+import Backings from './components/backing/Backings'
 
 var topLevelComponents = {
   CapacityContainer : CapacityContainer,
-  RoomBooking : RoomBooking
+  RoomBooking : RoomBooking,
+  Backings: Backings, 
 }
 
 window.renderReactComponent = function(id, componentName, props) {
