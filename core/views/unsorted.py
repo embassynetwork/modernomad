@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.signals import user_logged_in
 from django.shortcuts import render
 from django.db import transaction
+from django.core import serializers
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
@@ -1265,7 +1266,8 @@ def LocationEditRoom(request, location_slug, room_id):
             'form': form,
             'room_id': room_id,
             'rooms': resources,
-            'room_capacity': resource_capacity_as_dict
+            'room_capacity': resource_capacity_as_dict,
+            'allUsers': serializers.serialize('json', User.objects.all(), fields=('id','first_name','last_name'))
         }
     )
 

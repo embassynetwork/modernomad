@@ -61,12 +61,13 @@
 
 <script type="text/javascript">
     window.renderReactComponent('react-app-current-backing', 'CurrentBacking', {'resourceID':{{form.instance.id}}})
-    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}})
+    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}, 'allUsers': {{allUsers|safe}}})
     if ({{room_id|default:-1}} > 0 ) {
         window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
     }
 </script>
 
+<link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css">
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script src="{% static 'js/cropper.min.js' %}"></script>
 <script src="{% static 'js/chosen.jquery.min.js' %}"></script>

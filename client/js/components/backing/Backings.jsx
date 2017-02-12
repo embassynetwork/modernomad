@@ -8,15 +8,16 @@ const client = new ApolloClient();
 
 export default class Backings extends React.Component {
   static propTypes = {
-      resourceID: PropTypes.number.isRequired
+      resourceID: PropTypes.number.isRequired,
+      allUsers: PropTypes.array.isRequired
   }
 
   render() {
 
-    const {resourceID} = this.props
+    const {resourceID, allUsers} = this.props
     return (
       <ApolloProvider client={client}>
-        <ScheduledBackings rid={resourceID} />
+        <ScheduledBackings rid={resourceID} allUsers={allUsers} />
       </ApolloProvider>
     )
   }
