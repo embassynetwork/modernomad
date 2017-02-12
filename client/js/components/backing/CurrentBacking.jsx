@@ -17,12 +17,12 @@ static propTypes = {
     return (
       <div>
         <h5>
-        Backed by 
+        Backed by
           { currentBackers.map((u) => {
-              return <span> {u.firstName} {u.lastName}</span>
+              return <span key={u.id}> {u.firstName} {u.lastName}</span>
             })
           }
-        </h5> 
+        </h5>
       </div>
     )
   }
@@ -32,7 +32,7 @@ static propTypes = {
 class CurrentBackingWithoutData extends React.Component {
 
   render() {
-    
+
     console.log('this.props.data', this.props.data)
     const {resource, loading} = this.props.data
     if (loading) {
