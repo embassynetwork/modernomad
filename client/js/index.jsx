@@ -4,13 +4,11 @@ import App from './components/App'
 import CapacityContainer from './components/capacity/CapacityContainer'
 import RoomBooking from './components/booking/RoomBooking'
 import Backings from './components/backing/Backings'
-import CurrentBacking from './components/backing/CurrentBacking'
 
 var topLevelComponents = {
   CapacityContainer : CapacityContainer,
   RoomBooking : RoomBooking,
   Backings: Backings, 
-  CurrentBacking: CurrentBacking
 }
 
 window.renderReactComponent = function(id, componentName, props) {

@@ -1,15 +1,14 @@
 import React, {PropTypes} from 'react'
 import { graphql } from 'react-apollo'
 import ScheduledBackingsTable from './ScheduledBackingsTable'
-import BackingFormWithData from './BackingForm'
 import gql from 'graphql-tag'
 import _ from 'lodash'
 import moment from 'moment'
 import Loader from '../generic/Loader'
 
 const backingsQuery = gql`
-query ScheduledFutureBackings($rid: ID!) {
-  resource(id:$rid) {
+query ScheduledFutureBackings($resourceID: ID!) {
+  resource(id:$resourceID) {
     name,
     scheduledFutureBackings {
       id,
@@ -29,14 +28,14 @@ query ScheduledFutureBackings($rid: ID!) {
 }
 `;
 
-class ScheduledBackingsWithoutQuery extends React.Component {
+class ScheduledBackingsWithoutData extends React.Component {
   static propTypes = {
-      rid: PropTypes.number.isRequired,
+      resourceID: PropTypes.number.isRequired,
       parent: PropTypes.object.isRequired
   }
 
   renderSubComponent() {
-    const {rid, data, parent} = this.props
+    const {resourceID, data, parent} = this.props
     parent.state.scheduledBackingsData = this.props.data
     console.log('parent.state', parent.state) 
 
@@ -70,10 +69,5 @@ class ScheduledBackingsWithoutQuery extends React.Component {
   }
 }
 
-const ScheduledBackings = graphql(backingsQuery, {
-  // defines required arguments - but by default graphql will look at the props
-    // of the parent component, which, here, directly has a prop called rid already.
-  // options: { variables: { rid: rid } },
-})(ScheduledBackingsWithoutQuery)
-
+const ScheduledBackings = graphql(backingsQuery)(ScheduledBackingsWithoutData) 
 export default ScheduledBackings

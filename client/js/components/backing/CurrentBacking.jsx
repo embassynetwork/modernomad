@@ -30,11 +30,16 @@ static propTypes = {
 }
 
 class CurrentBackingWithoutData extends React.Component {
+  static propTypes = {
+      resourceID: PropTypes.number.isRequired,
+      parent: PropTypes.object.isRequired
+  }
+
 
   render() {
-
-    console.log('this.props.data', this.props.data)
-    const {resource, loading} = this.props.data
+    const {parent, data} = this.props
+    parent.state.currentBackersData = data
+    const {resource, loading} = data
     if (loading) {
       return null
     } else {
@@ -44,8 +49,8 @@ class CurrentBackingWithoutData extends React.Component {
 }
 
 const currentBackingQuery = gql`
-  query getCurrentBackers($rid: ID!) {
-    resource(id:$rid) {
+  query getCurrentBackers($resourceID: ID!) {
+    resource(id:$resourceID) {
       currentBackers {
         id
         username
@@ -56,19 +61,5 @@ const currentBackingQuery = gql`
   }
 `;
 
-const CurrentBackingWithData = graphql(currentBackingQuery)(CurrentBackingWithoutData)
-
-export default class CurrentBacking extends React.Component {
-  static propTypes = {
-      resourceID: PropTypes.number.isRequired
-  }
-
-  render() {
-      const {resourceID} = this.props
-      return (
-        <ApolloProvider client={client}>
-          <CurrentBackingWithData rid={resourceID} />
-        </ApolloProvider>
-      )
-  }
-}
+const CurrentBacking = graphql(currentBackingQuery)(CurrentBackingWithoutData)
+export default CurrentBacking 
