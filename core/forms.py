@@ -287,8 +287,6 @@ def all_users():
 
 class LocationRoomForm(forms.ModelForm):
     cropped_image_data = forms.CharField(widget=forms.HiddenInput())
-    change_backers = forms.MultipleChoiceField(choices=all_users)
-    new_backing_date = forms.DateField()
 
     class Meta:
         model = Resource
@@ -301,13 +299,8 @@ class LocationRoomForm(forms.ModelForm):
         super(LocationRoomForm, self).__init__(*args, **kwargs)
         if self.instance.id is not None:
             self.fields['cropped_image_data'].required = False
-            #self.fields['backed_by'].initial = [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in self.instance.backers()]
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
-            if field_name == 'change_backers':
-                field.widget.attrs['class'] += ' chosen-select'
-            elif field_name == 'new_backing_date':
-                field.widget.attrs['class'] += ' datepicker'
 
 
     def clean(self):

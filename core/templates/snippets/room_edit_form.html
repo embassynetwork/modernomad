@@ -1,16 +1,10 @@
 {% load staticfiles %}
 
 {% if form.instance.pk %}
-    <h4>Editing {{ form.instance.name|title }}</h4>
+    <h2>Editing {{ form.instance.name|title }}</h2>
 {% else %}
     <h4>New Room</h4>
 {% endif %}
-
-<div class="row-spacer">
-    <div id="react-app-current-backing"></div>
-    <div id="react-app-backings"></div>
-</div>
-
 
 <form role="form" method="post" class="room-form" enctype="multipart/form-data"
         {% if room_id %}
@@ -60,14 +54,11 @@
 <div id="react-app-{{room_id}}"></div>
 
 <script type="text/javascript">
-    window.renderReactComponent('react-app-current-backing', 'CurrentBacking', {'resourceID':{{form.instance.id}}})
-    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}, 'allUsers': {{allUsers|safe}}})
     if ({{room_id|default:-1}} > 0 ) {
         window.renderReactComponent('react-app-{{room_id}}', 'CapacityContainer', {{room_capacity|safe}})
     }
 </script>
 
-<link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css">
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
 <script src="{% static 'js/cropper.min.js' %}"></script>
 <script src="{% static 'js/chosen.jquery.min.js' %}"></script>

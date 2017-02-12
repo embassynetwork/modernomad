@@ -3,6 +3,8 @@ import { Router, Route, browserHistory, IndexRoute } from 'react-router'
 import ScheduledBackings from './ScheduledBackings'
 import ApolloClient from 'apollo-client'
 import { ApolloProvider } from 'react-apollo'
+import BackingFormWithData from './BackingForm'
+import CurrentBacking from './CurrentBacking'
 
 const client = new ApolloClient();
 
@@ -12,12 +14,29 @@ export default class Backings extends React.Component {
       allUsers: PropTypes.array.isRequired
   }
 
+  constructor(props) {
+    super(props)
+    // gets set when graphql queries execute
+    this.state = {scheduledBackingsData: {}, currentBackersData: {}}
+  }
+
+  refetch() {
+      this.state.scheduledBackingsData.refetch()
+      this.state.currentBackersData.refetch()
+  }
+
   render() {
 
     const {resourceID, allUsers} = this.props
     return (
       <ApolloProvider client={client}>
-        <ScheduledBackings rid={resourceID} allUsers={allUsers} />
+        <div>
+          <hr />
+          <h3>Backings</h3>
+          <CurrentBacking resourceID={resourceID} parent={this}/>
+          <ScheduledBackings resourceID={resourceID} parent={this} allUsers={allUsers}/>
+          <BackingFormWithData resource={resourceID} parent={this}/>
+        </div>
       </ApolloProvider>
     )
   }
