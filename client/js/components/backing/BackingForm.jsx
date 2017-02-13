@@ -18,19 +18,11 @@ class BackingForm extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {backers: [], start: moment()}
+    this.state = {backers: [], start: moment(), errors: null}
 
-    this.handleChange = this.handleChange.bind(this)
     this.handleDateChange = this.handleDateChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
     this.handleUserChange = this.handleUserChange.bind(this)
-  }
-
-  handleChange(name) {
-      return (event) => {
-        const value = event.target.value
-        this.setState({[name]:value})
-      }
   }
 
   handleUserChange(value) {
@@ -68,10 +60,11 @@ class BackingForm extends React.Component {
         console.log('got data', data)
         parent.refetch()
         this.setState({start: moment(), backers: []})
+        this.setState({errors: null})
       }).catch((error) => {
         console.log('there was an error sending the query');
         console.log(error)
-
+        this.setState({errors: error.message})
         this.setState({formLoading: false})
         });
   }
@@ -101,20 +94,35 @@ class BackingForm extends React.Component {
   render() {
     return (
       <div className="top-spacer-sm">
+        {this.state.errors &&
+        <div className="alert alert-danger">
+          <ul className="error-list">
+            There was a problem submitting your request. Make sure your new backing doesn't overlap with an existing backing.
+          </ul>
+        </div>}
         <div className="bottom-spacer-xs">
           <strong>Update Scheduled Changes</strong> <em>(these will overwrite any existing scheduled changes)</em>
         </div>
         <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
-            Start Date: <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
-            Who: <Select.Async
-              name="backers"
-              loadOptions={this.getOptions.bind(this)}
-              matchPos="start"
-              value={this.state.backers}
-              onChange={this.handleUserChange}
-            multi={true}
-            />
-            <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
+          <div className="row">
+            <div className="form-group col-xs-4">
+              <label htmlFor="start" className="control-label">Start date</label>
+              <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
+            </div>
+            <div className="form-group col-xs-8">
+              <label htmlFor="backers" className="control-label">Backer(s)</label>
+              <Select.Async
+                name="backers"
+                loadOptions={this.getOptions.bind(this)}
+                matchPos="start"
+                value={this.state.backers}
+                onChange={this.handleUserChange}
+              multi={true}
+              />
+            </div>
+
+          </div>
+          <input className="form-control" type="submit" className="btn btn-default" value="Schedule Backing" />
         </form>
       </div>
     )
