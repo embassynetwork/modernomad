@@ -52,12 +52,17 @@ class BackingForm extends React.Component {
   onSubmit(event) {
     event.preventDefault()
     const {mutate, resource, parent} = this.props
+    const backersArr = []
+
+    for (let i = 0; i < this.state.backers.length; i++) {
+      backersArr.push(this.state.backers[i].value);
+    }
 
     mutate({
         variables: {
             start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"),
             resource:resource,
-            backers:this.state.backers.value
+            backers:backersArr
         }
       }).then(({ data }) => {
         console.log('got data', data)
@@ -66,12 +71,6 @@ class BackingForm extends React.Component {
       }).catch((error) => {
         console.log('there was an error sending the query', error);
       });
-  }
-
-  renderOptions() {
-    return this.props.allUsers.map((user) => {
-        return <option key={user.pk}>{user.fields.first_name}</option>
-    })
   }
 
   allOptions() {
