@@ -66,8 +66,8 @@ class BackingForm extends React.Component {
         }
       }).then(({ data }) => {
         console.log('got data', data)
-        //parent.props.data.refetch();
-        parent.refetch();
+        parent.refetch()
+        this.setState({start: moment(), backers: []})
       }).catch((error) => {
         console.log('there was an error sending the query');
         console.log(error)
@@ -100,18 +100,23 @@ class BackingForm extends React.Component {
 
   render() {
     return (
-      <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
-        <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
-        <Select.Async
-          name="backers"
-          loadOptions={this.getOptions.bind(this)}
-          matchPos="start"
-          value={this.state.backers}
-          onChange={this.handleUserChange}
-          multi={true}
-        />
-      <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
-    </form>
+      <div className="top-spacer-sm">
+        <div className="bottom-spacer-xs">
+          <strong>Update Scheduled Changes</strong> <em>(these will overwrite any existing scheduled changes)</em>
+        </div>
+        <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
+            Start Date: <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
+            Who: <Select.Async
+              name="backers"
+              loadOptions={this.getOptions.bind(this)}
+              matchPos="start"
+              value={this.state.backers}
+              onChange={this.handleUserChange}
+            multi={true}
+            />
+            <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
+        </form>
+      </div>
     )
   }
 }

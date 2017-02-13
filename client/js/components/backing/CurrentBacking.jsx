@@ -14,7 +14,8 @@ static propTypes = {
 
   render() {
     const {currentBackers} = this.props
-    var backers = currentBackers.map((u, i, arr) => {
+
+    const backers = currentBackers.map((u, i, arr) => {
       const { id, username, firstName, lastName } = u
       return (
         <a key={id} href={`/people/${username}`}>
@@ -22,10 +23,13 @@ static propTypes = {
         </a>
       )
     })
+    
+    const html = currentBackers.length > 0 ? backers : "no one."
     return (
       <div>
-        <h5> Backed by {backers} </h5>
+        <h5> Currently backed by {html} </h5>
       </div>
+      
     )
   }
 
