@@ -34,8 +34,8 @@ export default class Backings extends React.Component {
           <hr />
           <h3>Backings</h3>
           <CurrentBacking resourceID={resourceID} parent={this}/>
-          <ScheduledBackings resourceID={resourceID} parent={this} allUsers={allUsers}/>
-          <BackingFormWithData resource={resourceID} parent={this}/>
+          <ScheduledBackings resourceID={resourceID} parent={this}/>
+          <BackingFormWithData resource={resourceID} parent={this} allUsers={allUsers}/>
         </div>
       </ApolloProvider>
     )

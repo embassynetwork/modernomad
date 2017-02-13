@@ -46,6 +46,7 @@ from core.models import get_location
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.template import Context
+from django.core import serializers
 from django.core.serializers.json import DateTimeAwareJSONEncoder
 import logging
 from django.views.decorators.csrf import csrf_exempt

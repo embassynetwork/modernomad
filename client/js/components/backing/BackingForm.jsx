@@ -38,11 +38,11 @@ class BackingForm extends React.Component {
     event.preventDefault()
     const {mutate, resource, parent} = this.props
 
-    mutate({ 
-        variables: { 
-            start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"), 
-            resource:resource, 
-            backers:this.state.backers.split(",") 
+    mutate({
+        variables: {
+            start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"),
+            resource:resource,
+            backers:this.state.backers.split(",")
         }
       }).then(({ data }) => {
         console.log('got data', data)
@@ -53,6 +53,12 @@ class BackingForm extends React.Component {
       });
   }
 
+  renderOptions() {
+    return this.props.allUsers.map((user) => {
+        return <option key={user.pk}>{user.fields.first_name}</option>
+    })
+  }
+
 
 // 2017-02-20T21:34:11.721016
   render() {
@@ -61,7 +67,10 @@ class BackingForm extends React.Component {
         <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
         <input className="form-control" type="input" name="backers" onChange={this.handleChange('backers')} />
         <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
-      </form>
+        <select>
+          {this.renderOptions()}
+        </select>
+    </form>
     )
   }
 }
