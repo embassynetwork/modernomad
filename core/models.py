@@ -563,8 +563,6 @@ class Resource(models.Model):
         # this method only supports having a single backing in the future.
         # remove all future backigns, if any, and then setup the new backing.
         today = timezone.localtime(timezone.now()).date()
-        print 'in set_next_backing'
-        print new_backing_date
         if hasattr(self, 'backings'):
             print 'will end/delete current and future backings'
             print self.current_and_future_backings(new_backing_date)

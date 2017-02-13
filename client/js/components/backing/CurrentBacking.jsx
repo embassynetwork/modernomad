@@ -14,15 +14,17 @@ static propTypes = {
 
   render() {
     const {currentBackers} = this.props
+    var backers = currentBackers.map((u, i, arr) => {
+      const { id, username, firstName, lastName } = u
+      return (
+        <a key={id} href={`/people/${username}`}>
+          {firstName} {lastName}{(i !== arr.length -1)?', ':''}
+        </a>
+      )
+    })
     return (
       <div>
-        <h5>
-        Backed by
-          { currentBackers.map((u) => {
-              return <span key={u.id}> {u.firstName} {u.lastName}</span>
-            })
-          }
-        </h5>
+        <h5> Backed by {backers} </h5>
       </div>
     )
   }

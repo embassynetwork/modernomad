@@ -49,8 +49,11 @@ class BackingForm extends React.Component {
         //parent.props.data.refetch();
         parent.refetch();
       }).catch((error) => {
-        console.log('there was an error sending the query', error);
-      });
+        console.log('there was an error sending the query');
+        console.log(error)
+
+        this.setState({formLoading: false})
+        });
   }
 
   renderOptions() {
@@ -63,14 +66,17 @@ class BackingForm extends React.Component {
 // 2017-02-20T21:34:11.721016
   render() {
     return (
-      <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
-        <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
-        <input className="form-control" type="input" name="backers" onChange={this.handleChange('backers')} />
-        <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
-        <select>
-          {this.renderOptions()}
-        </select>
-    </form>
+      <div>
+        <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
+            <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
+            <input className="form-control" type="input" name="backers" onChange={this.handleChange('backers')} />
+            <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
+            <select>
+            {this.renderOptions()}
+            </select>
+        </form>
+      </div>
+
     )
   }
 }

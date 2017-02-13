@@ -13,12 +13,14 @@ export default class ScheduledBackingsTable extends React.Component {
   }
 
   renderDetails(backing) {
-    var backers = backing.users.edges.map((u) => {
-        return (
-            <a key={u.node.id} href={`/people/${u.node.username}`}>
-                {`${u.node.firstName} ${u.node.lastName}, `} 
-            </a>
-        )
+
+    var backers = backing.users.edges.map((u, i, arr) => {
+      var { id, username, firstName, lastName } = u.node
+      return (
+        <a key={id} href={`/people/${username}`}>
+          {firstName} {lastName}{(i !== arr.length -1)?', ':''}
+        </a>
+      )
     })
 
     return (
