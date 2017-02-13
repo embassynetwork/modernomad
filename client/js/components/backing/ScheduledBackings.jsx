@@ -37,7 +37,7 @@ class ScheduledBackingsWithoutData extends React.Component {
   renderSubComponent() {
     const {resourceID, data, parent} = this.props
     parent.state.scheduledBackingsData = this.props.data
-    console.log('parent.state', parent.state) 
+    console.log('parent.state', parent.state)
 
     if (data.loading) {
       return null
@@ -69,5 +69,5 @@ class ScheduledBackingsWithoutData extends React.Component {
   }
 }
 
-const ScheduledBackings = graphql(backingsQuery)(ScheduledBackingsWithoutData) 
+const ScheduledBackings = graphql(backingsQuery)(ScheduledBackingsWithoutData)
 export default ScheduledBackings

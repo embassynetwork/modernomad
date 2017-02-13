@@ -14,13 +14,12 @@
             <div id="react-app-backings"></div>
         </div>
 
-    </div>        
+    </div>
 
 </div>
 
 <script type="text/javascript">
-    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}})
+    window.renderReactComponent('react-app-backings', 'Backings', {'resourceID':{{form.instance.id}}, 'allUsers':{{allUsers|safe}}})
 </script>
 
 {% endblock %}
-

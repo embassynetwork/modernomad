@@ -10,7 +10,8 @@ const client = new ApolloClient();
 
 export default class Backings extends React.Component {
   static propTypes = {
-      resourceID: PropTypes.number.isRequired
+      resourceID: PropTypes.number.isRequired,
+      allUsers: PropTypes.array.isRequired
   }
 
   constructor(props) {
@@ -18,7 +19,7 @@ export default class Backings extends React.Component {
     // gets set when graphql queries execute
     this.state = {scheduledBackingsData: {}, currentBackersData: {}}
   }
-  
+
   refetch() {
       this.state.scheduledBackingsData.refetch()
       this.state.currentBackersData.refetch()
@@ -26,7 +27,7 @@ export default class Backings extends React.Component {
 
   render() {
 
-    const {resourceID} = this.props
+    const {resourceID, allUsers} = this.props
     return (
       <ApolloProvider client={client}>
         <div>
@@ -34,7 +35,7 @@ export default class Backings extends React.Component {
           <h3>Backings</h3>
           <CurrentBacking resourceID={resourceID} parent={this}/>
           <ScheduledBackings resourceID={resourceID} parent={this}/>
-          <BackingFormWithData resource={resourceID} parent={this}/>
+          <BackingFormWithData resource={resourceID} parent={this} allUsers={allUsers}/>
         </div>
       </ApolloProvider>
     )
