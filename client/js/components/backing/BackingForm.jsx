@@ -5,6 +5,8 @@ import gql from 'graphql-tag'
 import { Link } from 'react-router'
 import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import DatePicker from 'react-datepicker'
+import Select from 'react-select'
+
 
 class BackingForm extends React.Component {
   static propTypes = {
@@ -21,12 +23,25 @@ class BackingForm extends React.Component {
     this.handleChange = this.handleChange.bind(this)
     this.handleDateChange = this.handleDateChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
+    this.handleUserChange = this.handleUserChange.bind(this)
   }
 
   handleChange(name) {
       return (event) => {
         const value = event.target.value
         this.setState({[name]:value})
+      }
+  }
+
+  handleUserChange(value) {
+    console.log(value)
+    console.log('before',this.state)
+    this.setState({backers:value})
+    console.log('after',this.state)
+      return (event) => {
+        const value = event.value
+        // this.setState({[name]:value})
+
       }
   }
 
@@ -42,7 +57,7 @@ class BackingForm extends React.Component {
         variables: {
             start:this.state.start.format("YYYY-MM-DDTHH:mm:ss.SSSSSS"),
             resource:resource,
-            backers:this.state.backers.split(",")
+            backers:this.state.backers.value
         }
       }).then(({ data }) => {
         console.log('got data', data)
@@ -59,17 +74,41 @@ class BackingForm extends React.Component {
     })
   }
 
+  allOptions() {
+    const users = [];
 
-// 2017-02-20T21:34:11.721016
+    for (let i = 0; i < this.props.allUsers.length; i++) {
+      users.push({
+        value: this.props.allUsers[i].pk,
+        label: `${this.props.allUsers[i].fields.first_name} ${this.props.allUsers[i].fields.last_name}`
+      });
+    }
+    return users
+  }
+
+  getOptions = function(input, callback) {
+    const options = this.allOptions()
+    setTimeout(function() {
+      callback(null, {
+        options: options,
+        complete: true
+      });
+    }, 200);
+  };
+
   render() {
     return (
       <form className="backing-change-form form-inline" onSubmit={this.onSubmit.bind(this)}>
         <DatePicker className="form-control" name="start" selected={this.state.start} onChange={this.handleDateChange} />
-        <input className="form-control" type="input" name="backers" onChange={this.handleChange('backers')} />
-        <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
-        <select>
-          {this.renderOptions()}
-        </select>
+        <Select.Async
+          name="backers"
+          loadOptions={this.getOptions.bind(this)}
+          matchPos="start"
+          value={this.state.backers}
+          onChange={this.handleUserChange}
+          multi={true}
+        />
+      <input className="form-control" type="submit" className="btn btn-primary" value="schedule" />
     </form>
     )
   }
