@@ -12,6 +12,8 @@ from graphapi.schemas.users import UserNode
 
 class BackingNode(DjangoObjectType):
     resource_id = graphene.Int()
+    backers = graphene.List(graphene.Int)
+    start = DateTime()
 
     class Meta:
         model = Backing
@@ -37,6 +39,7 @@ class BackingMutation(graphene.Mutation):
         id = data['resource']
         resource = Resource.objects.get(pk=id)
         backers = [User.objects.get(pk=i) for i in data['backers']]
-        new_backing = resource.set_next_backing(backers, data['start'])
+        start = data['start'].date()
+        new_backing = resource.set_next_backing(backers, start)
         if new_backing:
             return BackingMutation(ok=True, backing=new_backing)
