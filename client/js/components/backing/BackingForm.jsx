@@ -18,11 +18,12 @@ class BackingForm extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state = {backers: [], start: moment(), errors: null}
+    this.state = {backers: [], start: moment(), errors: null, backerCondition: false}
 
     this.handleDateChange = this.handleDateChange.bind(this)
     this.onSubmit = this.onSubmit.bind(this)
     this.handleUserChange = this.handleUserChange.bind(this)
+    this.toggleClick = this.toggleClick.bind(this)
   }
 
   handleUserChange(value) {
@@ -46,8 +47,13 @@ class BackingForm extends React.Component {
     const {mutate, resource, parent} = this.props
     const backersArr = []
 
+
     for (let i = 0; i < this.state.backers.length; i++) {
       backersArr.push(this.state.backers[i].value);
+    }
+
+    if (this.state.backerCondition) {
+      const backersArr = [-1]
     }
 
     mutate({
@@ -91,6 +97,10 @@ class BackingForm extends React.Component {
     }, 200);
   };
 
+  toggleClick() {
+    this.setState({backerCondition: !this.state.backerCondition})
+  }
+
   render() {
     return (
       <div className="top-spacer-sm">
@@ -111,14 +121,20 @@ class BackingForm extends React.Component {
             </div>
             <div className="form-group col-xs-8">
               <label htmlFor="backers" className="control-label">Backer(s)</label>
-              <Select.Async
-                name="backers"
-                loadOptions={this.getOptions.bind(this)}
-                matchPos="start"
-                value={this.state.backers}
-                onChange={this.handleUserChange}
-              multi={true}
-              />
+              <div className={ this.state.backerCondition ? "backer-type-wrapper toggled" : "backer-type-wrapper"}>
+                <label><input onChange={this.toggleClick} type="radio" checked={this.state.backerCondition} name="type"/> Room backed by house</label>
+              </div>
+              <div className={ !this.state.backerCondition ? "backer-type-wrapper toggled" : "backer-type-wrapper"}>
+                <label><input onChange={this.toggleClick} type="radio" checked={!this.state.backerCondition} name="type"/> Room backed by individual(s)</label>
+                <Select.Async
+                  name="backers"
+                  loadOptions={this.getOptions.bind(this)}
+                  matchPos="start"
+                  value={this.state.backers}
+                  onChange={this.handleUserChange}
+                  multi={true}
+                />
+              </div>
             </div>
 
           </div>

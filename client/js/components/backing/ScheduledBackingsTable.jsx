@@ -25,9 +25,12 @@ export default class ScheduledBackingsTable extends React.Component {
 
     return (
         <div key={backing.id}>
-            Scheduled changes: {backers} on {this.formatDate(backing.start)}
+          {backers.length
+          ? <span>Scheduled changes: {backers} on {this.formatDate(backing.start)}</span>
+          : <span>Scheduled changes: Backed by house on {this.formatDate(backing.start)}</span>
+          }
         </div>
-    ) 
+    )
   }
 
   renderBackings() {
