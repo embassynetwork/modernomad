@@ -587,6 +587,8 @@ class Resource(models.Model):
                 print 'ending backing %d' % existing_backing.id
                 existing_backing.end = new_backing_date
                 existing_backing.save()
+        if backers == list(self.most_recent(new_backing_date).users.all()):
+            raise Exception('No change: There is no change from the previous backers.')
         # create a new backing
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
         print 'created new backing %d' % new_backing.id
