@@ -40,6 +40,6 @@ class BackingMutation(graphene.Mutation):
         resource = Resource.objects.get(pk=id)
         backers = [User.objects.get(pk=i) for i in data['backers']]
         start = data['start'].date()
-        new_backing = resource.set_next_backing(backers, start)
+        new_backing = resource.add_backing(backers, start)
         if new_backing:
             return BackingMutation(ok=True, backing=new_backing)

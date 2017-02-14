@@ -515,7 +515,7 @@ class Resource(models.Model):
 
     def current_backing(self):
         today = timezone.localtime(timezone.now()).date()
-        soonest_backing = self.current_and_future_backings().first()
+        soonest_backing = self.current_and_future_backings_relative_to(today).first()
         print soonest_backing
         if (not soonest_backing) or (soonest_backing and soonest_backing.start > today):
             print 'no soonest backing'
@@ -540,45 +540,53 @@ class Resource(models.Model):
         # latest backing *may* be in the past or the future...
         return self.backings_this_room().order_by('start').last()
 
-    def current_and_future_backings(self, date=None):
+    def most_recent(self, date):
+        ''' get the most recent backing that started _before_ date. may be
+        None.'''
+        if not date:
+            date = timezone.localtime(timezone.now()).date()
+        return self.backings_this_room().filter(start__lte=date).order_by('start').last()
+
+    def current_and_future_backings_relative_to(self, date=None):
+        ''' return backings current to `date` and forward. if `date` is None,
+        use today. '''
+
         if not date:
             date = timezone.localtime(timezone.now()).date()
         # most recent *could* be in the past OR future.
-        most_recent = self.backings_this_room().filter(start__lte=date).order_by('start').last()
-        print 'most recent'
-        print most_recent
+        most_recent = self.most_recent(date) 
 
-        # if there was no most_recent, or if most_recent backing ended in
-        # the past, then only look for future backings.
-        if (not most_recent) or (hasattr(most_recent, 'end') and most_recent.end and most_recent.end <= date):
-            # checking if most_recent.end is less than OR equal to 'date' means
-            # that if the backing ended today then it is NOT current (much like
-            # a departure date of a booking).
+        # if there was no most_recent, then only look for future backings.
+        if not most_recent: 
             return self.backings_this_room().filter(start__gt=date)
-        else:
-            # (will include most_recent)
-            return self.backings_this_room().filter(start__gte=most_recent.start)
+            
+        # if most_recent backing ended in the past, only look for future backings
+        if (hasattr(most_recent, 'end') and most_recent.end and most_recent.end <= date):
+            # if a backing starts today (gt OR equal to), we consider it
+            # current. 
+            return self.backings_this_room().filter(start__gte=date)
 
-    def set_next_backing(self, backers, new_backing_date):
+        # include most_recent if it is current
+        return self.backings_this_room().filter(start__gte=most_recent.start)
+
+    def has_backings(self):
+        return hasattr(self, 'backings')
+
+    def add_backing(self, backers, new_backing_date):
         # this method only supports having a single backing in the future.
         # remove all future backigns, if any, and then setup the new backing.
         today = timezone.localtime(timezone.now()).date()
-        if hasattr(self, 'backings'):
-            print 'will end/delete current and future backings'
-            print self.current_and_future_backings(new_backing_date)
-            for b in self.current_and_future_backings(new_backing_date):
-                # if the backing started in the past, then there are likely
-                # credits that will need to be reflected to this backer. so
-                # don't delete the backing, just end it. but if the backing
-                # hasn't even started yet, then just kill it and replace it
-                # with the new one.
-                if (b.start > today) or (b.start == new_backing_date):
-                    print 'deleting backing %d' % b.id
-                    b.delete()
-                else:
-                    print 'ending backing %d' % b.id
-                    b.end = new_backing_date
-                    b.save()
+        if new_backing_date < today:
+            raise Exception('Conflict: You cannot set a new backing in the past as it would require re-allocating previous earnings.')
+ 
+        for existing_backing in self.current_and_future_backings_relative_to(new_backing_date):
+            if existing_backing.start >= new_backing_date:
+                print 'deleting backing %d' % existing_backing.id
+                existing_backing.delete()
+            else:
+                print 'ending backing %d' % existing_backing.id
+                existing_backing.end = new_backing_date
+                existing_backing.save()
         # create a new backing
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
         print 'created new backing %d' % new_backing.id
@@ -1996,8 +2004,6 @@ class BackingManager(models.Manager):
         return Backing.objects.filter(users=user).filter(start__lte=today).filter(Q(end=None) | Q(end__gt=today))
 
     def setup_new(self, resource, backers, start):
-        print 'start is'
-        print start
         b = Backing(resource=resource, start=start)
         assert b.comes_after_others()
         b._setup_accounts(backers)
