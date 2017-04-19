@@ -17,4 +17,6 @@ django.log
 .vagrant
 modernomad.komodoproject
 modernomad/local_settings.py.bak
+modernomad.sublime-project
+modernomad.sublime-workspace
 ghostdriver.log
