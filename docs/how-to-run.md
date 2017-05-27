@@ -45,8 +45,7 @@ create your own local_settings.py file from local_settings.example.py. inside th
   * `CREATE DATABASE modernomad;`
   * `GRANT ALL PRIVILEGES ON DATABASE modernomad TO modernomad ;`
   * (Enter USER, NAME, and PASSWORD in config)
-* LOGGING: If some debug modes are enabled you need to set a valid log file path in the setting LOGGING.handlers.file.filename
-
+* `LOGGING` : If some debug modes are enabled you need to set a valid log file path in the setting LOGGING.handlers.file.filename
 
 ### optional stuff required for payment, email, etc. 
 
