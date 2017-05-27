@@ -29,7 +29,7 @@ Install the `wget` tool, which is not installed on OS X by default:
 
 (Dev environment instructions for Linux missing)
 
-## Pip and Virtualenv, Python-Dev
+## Pip and Virtualenv, Python Libs
 
 Pip is Python's package manager, and virtualenv is a tool that lets you create
 self-contained environments for sets of python libraries. 
@@ -60,10 +60,9 @@ add these to your ~/.bashrc (~/.bash_profile if one OS X) (create this file if i
 don't forget to source the bashrc file now:
 - `source ~/.bashrc` (or `source ~/.bash_profile` if that's the file you used)
 
-you also need the python dev package:
-
-- `sudo apt-get install python-dev`
-
+Required Python Libs:
+OSX: ???
+Debian: `sudo apt-get install python-dev libxslt-dev libxml2-dev`
 
 ### PIL
 PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. 
