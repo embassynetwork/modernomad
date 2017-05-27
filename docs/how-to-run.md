@@ -1,6 +1,6 @@
 ## How to Run the First Time
 
-Assuming you have all the prerequisites and dependencies outlined in [setup](setup.md), we can proceed with making the virtual environemnt, populating it with required libraries, getting your local configuration working and starting up the app.
+Assuming you have all the prerequisites and dependencies outlined in [environment-setup](environment-setup.md), we can proceed with making the virtual environemnt, populating it with required libraries, getting your local configuration working and starting up the app.
 
 ## virtualenv
 create a new virtual environment for this project:
