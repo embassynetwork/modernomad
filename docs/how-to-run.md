@@ -29,24 +29,40 @@ install it manually on the command line using:
 `pip install --index-url https://code.stripe.com --upgrade stripe`
 
 
-## first time
+## configuration file
 create your own local_settings.py file from local_settings.example.py. inside the modernomad/modernomad directory, do the following:
 - `cp local_settings.example.py local_settings.py`
 
-the local_settings.py file contains configuration information for stripe
-(payment handling), and email. if you want to run the software on a production
-server, there are production-specific settings for email which you must setup
-if you want email to work. by default, the software is in "development" mode,
-and emails are sent using django's built-in console backend, meaning they
-get printed to the console. 
+### settings you must configure, and dependant services:
+
+* `SECRET_KEY` : Set this to a private string
+* `ADMINS`     : Enter publically viewabls name, email address of administrator of this whole installation
+* `ALLOWED_HOSTS` : Enter comma delimited list of all hostnames which this site may be served through. Can be IP address, should include both with and without 'www.' separately.
+* `DATABASES`  : Setup Postgres:
+  * `sudo su - postgres`
+  * `psql`
+  * `CREATE USER modernomad WITH PASSWORD '$POSTGRESPASSWORD';`
+  * `CREATE DATABASE modernomad;`
+  * `GRANT ALL PRIVILEGES ON DATABASE modernomad TO modernomad ;`
+  * (Enter USER, NAME, and PASSWORD in config)
+* LOGGING: If some debug modes are enabled you need to set a valid log file path in the setting LOGGING.handlers.file.filename
+
+
+### optional stuff required for payment, email, etc. 
+
+* STRIPE
+* EMAIL: if you want to run the software on a production server, there are production-specific settings for email which you must setup if you want email to work. by default, the software is in "development" mode, and emails are sent using django's built-in console backend, meaning they get printed to the console. 
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
+
+## initialisation
 
 go back into the top level repository directory and do the following:
 
 - run `./manage.py syncdb` to create and sync the models of installed apps (and create an admin user)
 - run `./manage.py migrate` to run the existing migrations (this will run migrations for all apps)
 
+## run!
 now you should be able to run the software:
 - `./manage.py runserver [port]`
 
