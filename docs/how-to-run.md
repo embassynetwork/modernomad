@@ -32,6 +32,8 @@ initialize webpack here???
 
 @todo This is a fix to make webpack work. Configuration needs tidying up by whoever knows how webpack works.
 - `cp webpack-stats-prod.json webpack-stats.json`
+- Edit server.js and replace `YOUR_HOST_NAME_OR_IP` to the public IP address or hostname you are serving from. E.g. `public: 'myhousingnetwork.com'`
+
 
 note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
@@ -106,15 +108,22 @@ to match the host and port you are running the software on.
 
 Now you can go ahead and start creating content. 
 
-## each time
+## Running in Production
 
-- make sure rabbitmq is running, or start it: `rabbitmq-server`
-- start celery beat (the scheduler for periodic tasks): `celery beat` (or some
+(Update docs here for Debian service creation)
+
+Ensure required services running:
+
+- rabbitmq
+- celery 
+   - `celery beat` (or some
   more sophisticated version of the same command, depending on your local or
   production setup), such as `./manage.py celeryd -v 2 -B -s celery -E -l INFO -n some_unique_name`
-- start django `./manage.py runserver domain port`
+- postgres
 
+Start django and node services
 
+(Docs here for adding proper production configuration for django and node)
 
 ## model updates
 see the instructions in [updates](updates.md) for how to create and run database migrations if you add or remove fields from models. 
