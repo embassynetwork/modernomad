@@ -32,7 +32,8 @@ initialize webpack here???
 
 @todo This is a fix to make webpack work. Configuration needs tidying up by whoever knows how webpack works.
 - `cp webpack-stats-prod.json webpack-stats.json`
-- Edit server.js and replace `YOUR_HOST_NAME_OR_IP` to the public IP address or hostname you are serving from. E.g. `public: 'myhousingnetwork.com'`
+- Edit server.js and replace `localhost` if necessary with the public IP address or hostname you are serving from. E.g. `public: 'myhousingnetwork.com'`
+- Edit webpack.config.js and in the output.publicPath setting, replace `localhost` if necessary with your public IP or hostname. E.g. ` publicPath: 'http://myhousingnetwork:3000/build/'`
 
 
 note that the stripe library requires custom arguments which the
