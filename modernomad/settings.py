@@ -161,6 +161,7 @@ INSTALLED_APPS = (
     'webpack_loader',
     'compressor',
     'django_extensions',
+    'django_filters',
     # 'debug_toolbar',
 )
 
