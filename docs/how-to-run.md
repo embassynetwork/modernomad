@@ -29,6 +29,7 @@ install all node packages
 
 initialize webpack here???
 - `node_modules/.bin/webpack --config webpack.prod.config.js`
+
 @todo This is a fix to make webpack work. Configuration needs tidying up by whoever knows how webpack works.
 - `cp webpack-stats-prod.json webpack-stats.json`
 
@@ -36,7 +37,8 @@ note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
 support](https://github.com/pypa/pip/pull/515) (as of november 2012), so
 install it manually on the command line using:
-`pip install --index-url https://code.stripe.com --upgrade stripe`
+
+- `pip install --index-url https://code.stripe.com --upgrade stripe`
 
 
 ## configuration file
