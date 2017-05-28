@@ -60,6 +60,14 @@ add these to your ~/.bashrc (~/.bash_profile if one OS X) (create this file if i
 don't forget to source the bashrc file now:
 - `source ~/.bashrc` (or `source ~/.bash_profile` if that's the file you used)
 
+## Node
+
+### OSX
+???
+
+### Debian
+Install npm e.g. as per https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-debian-
+
 ## Required Libs:
 ### OSX
 ???
