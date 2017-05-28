@@ -21,6 +21,8 @@ installed in the virtual env.
 ## dependencies:
 within the virtualenv, install the requirements. this is done with the following command, which should iterate through the items in the text file and install them one by one:
 - `pip install -r requirements.txt` 
+- `pip install -r requirements.test.txt` 
+
 
 note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
@@ -58,8 +60,7 @@ create your own local_settings.py file from local_settings.example.py. inside th
 
 go back into the top level repository directory and do the following:
 
-- run `./manage.py syncdb` to create and sync the models of installed apps (and create an admin user)
-- run `./manage.py migrate` to run the existing migrations (this will run migrations for all apps)
+- `./manage.py migrate` will initialise the database on first run
 
 ## run!
 now you should be able to run the software:
