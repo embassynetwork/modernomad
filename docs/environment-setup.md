@@ -29,7 +29,7 @@ Install the `wget` tool, which is not installed on OS X by default:
 
 (Dev environment instructions for Linux missing)
 
-## Pip and Virtualenv, Python Libs
+## Pip and Virtualenv
 
 Pip is Python's package manager, and virtualenv is a tool that lets you create
 self-contained environments for sets of python libraries. 
@@ -60,14 +60,17 @@ add these to your ~/.bashrc (~/.bash_profile if one OS X) (create this file if i
 don't forget to source the bashrc file now:
 - `source ~/.bashrc` (or `source ~/.bash_profile` if that's the file you used)
 
-Required Python Libs:
-OSX: ???
-Debian: `sudo apt-get install python-dev libxslt-dev libxml2-dev`
+## Required Libs:
+### OSX
+???
+### Debian
 
-### PIL
+`sudo apt-get install python-dev libxslt-dev libxml2-dev node-less`
+
+## PIL
 PIL is a requirement, but in order for it to compile with JPG support, you must have a system-wide library called libjpeg62-dev. 
 
-#### OS X
+### OS X
 
 Install the missing libjpeg library. You will need X Code installed with the
 extra "command line tools" component as described above. 
@@ -82,7 +85,7 @@ extra "command line tools" component as described above.
 
 Then either install PIL using `brew`, or from the dmg's available on the PIL website. for example, see the process outlined [here](http://stackoverflow.com/questions/9070074/how-to-install-pil-on-mac-os-x-10-7-2-lion)
 
-#### Debian
+### Debian
 
 - `sudo apt-get install libjpeg62-turbo-dev`
 
@@ -94,17 +97,20 @@ Old docs, not required for jessie? remove this section?
 > `sudo ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/`
 > `sudo ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/`
 
+## Supporting Services
 
 ### RabbitMQ
 
 Required for Celery
 
 OSX: `brew update; brew install rabbitmq`
+
 Debian: `sudo apt-get install rabbitmq-server`
 
 ### PostgreSQL
 
 OSX: `brew update; brew install postgresql`
+
 Debian: `sudo apt-get install postgresql libpq-dev`
 
 ## Hooray!
