@@ -73,8 +73,11 @@ go back into the top level repository directory and do the following:
 - `./manage.py migrate` will initialise the database on first run
 
 ## run!
-now you should be able to run the software:
+now you should be able to run the software. Both django and node are required to be running!
+
 - `./manage.py runserver [port]`
+- `cd client`
+- `node server`
 
 the first time you run the software, you will want to configure two things in
 the admin interface. the software is designed to send various emails to users
