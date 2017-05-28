@@ -23,6 +23,14 @@ within the virtualenv, install the requirements. this is done with the following
 - `pip install -r requirements.txt` 
 - `pip install -r requirements.test.txt` 
 
+install all node packages
+- `cd modernomad/client`
+- `npm install`
+
+initialize webpack here???
+- `node_modules/.bin/webpack --config webpack.prod.config.js`
+@todo This is a fix to make webpack work. Configuration needs tidying up by whoever knows how webpack works.
+- `cp webpack-stats-prod.json webpack-stats.json`
 
 note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
