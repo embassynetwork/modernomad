@@ -72,14 +72,22 @@ go back into the top level repository directory and do the following:
 
 - `./manage.py migrate` will initialise the database on first run
 
-## run!
-now you should be able to run the software. Both django and node are required to be running!
+## Run!
 
+Now you should be able to run the software. Both django and node are required to be running!
+
+Run django:
+
+- `cd $WORKON_HOME/modernomadenv/modernomad`
 - `./manage.py runserver [port]`
-- `cd client`
+
+Run node:
+
+- `cd $WORKON_HOME/modernomadenv/modernomad/client` 
 - `node server`
 
-the first time you run the software, you will want to configure two things in
+
+The first time you run the software, you will want to configure two things in
 the admin interface. the software is designed to send various emails to users
 who are part of the group 'house_admins' so, before it will send any emails,
 you need to add at least one user to this group. login to the admin interface
