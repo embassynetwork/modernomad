@@ -1,6 +1,6 @@
 ## How to Run the First Time
 
-Assuming you have all the prerequisites and dependencies outlined in [setup](setup.md), we can proceed with making the virtual environemnt, populating it with required libraries, getting your local configuration working and starting up the app.
+Assuming you have all the prerequisites and dependencies outlined in [environment-setup](environment-setup.md), we can proceed with making the virtual environemnt, populating it with required libraries, getting your local configuration working and starting up the app.
 
 ## virtualenv
 create a new virtual environment for this project:
@@ -21,36 +21,76 @@ installed in the virtual env.
 ## dependencies:
 within the virtualenv, install the requirements. this is done with the following command, which should iterate through the items in the text file and install them one by one:
 - `pip install -r requirements.txt` 
+- `pip install -r requirements.test.txt` 
+
+install all node packages
+- `cd modernomad/client`
+- `npm install`
+
+initialize webpack here???
+- `node_modules/.bin/webpack --config webpack.prod.config.js`
+
+@todo This is a fix to make webpack work. Configuration needs tidying up by whoever knows how webpack works.
+- `cp webpack-stats-prod.json webpack-stats.json`
+- Edit server.js and replace `localhost` if necessary with the public IP address or hostname you are serving from. E.g. `public: 'myhousingnetwork.com'`
+- Edit webpack.config.js and in the output.publicPath setting, replace `localhost` if necessary with your public IP or hostname. E.g. ` publicPath: 'http://myhousingnetwork:3000/build/'`
+
 
 note that the stripe library requires custom arguments which the
 requirements.txt file parsing [apparently doesn't
 support](https://github.com/pypa/pip/pull/515) (as of november 2012), so
 install it manually on the command line using:
-`pip install --index-url https://code.stripe.com --upgrade stripe`
+
+- `pip install --index-url https://code.stripe.com --upgrade stripe`
 
 
-## first time
+## configuration file
 create your own local_settings.py file from local_settings.example.py. inside the modernomad/modernomad directory, do the following:
 - `cp local_settings.example.py local_settings.py`
 
-the local_settings.py file contains configuration information for stripe
-(payment handling), and email. if you want to run the software on a production
-server, there are production-specific settings for email which you must setup
-if you want email to work. by default, the software is in "development" mode,
-and emails are sent using django's built-in console backend, meaning they
-get printed to the console. 
+### settings you must configure, and dependant services:
+
+* `SECRET_KEY` : Set this to a private string
+* `ADMINS`     : Enter publically viewabls name, email address of administrator of this whole installation
+* `ALLOWED_HOSTS` : Enter comma delimited list of all hostnames which this site may be served through. Can be IP address, should include both with and without 'www.' separately.
+* `DATABASES`  : Setup Postgres:
+  * `sudo su - postgres`
+  * `psql`
+  * `CREATE USER modernomad WITH PASSWORD '$POSTGRESPASSWORD';`
+  * `CREATE DATABASE modernomad;`
+  * `GRANT ALL PRIVILEGES ON DATABASE modernomad TO modernomad ;`
+  * (Enter USER, NAME, and PASSWORD in config)
+* `LOGGING` : If some debug modes are enabled you need to set a valid log file path in the setting LOGGING.handlers.file.filename
+
+### optional stuff required for payment, email, etc. 
+
+* STRIPE
+* EMAIL: if you want to run the software on a production server, there are production-specific settings for email which you must setup if you want email to work. by default, the software is in "development" mode, and emails are sent using django's built-in console backend, meaning they get printed to the console. 
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
 
+## initialisation
+
 go back into the top level repository directory and do the following:
 
-- run `./manage.py syncdb` to create and sync the models of installed apps (and create an admin user)
-- run `./manage.py migrate` to run the existing migrations (this will run migrations for all apps)
+- `./manage.py migrate` will initialise the database on first run
 
-now you should be able to run the software:
+## Run!
+
+Now you should be able to run the software. Both django and node are required to be running!
+
+Run django:
+
+- `cd $WORKON_HOME/modernomadenv/modernomad`
 - `./manage.py runserver [port]`
 
-the first time you run the software, you will want to configure two things in
+Run node:
+
+- `cd $WORKON_HOME/modernomadenv/modernomad/client` 
+- `node server`
+
+
+The first time you run the software, you will want to configure two things in
 the admin interface. the software is designed to send various emails to users
 who are part of the group 'house_admins' so, before it will send any emails,
 you need to add at least one user to this group. login to the admin interface
@@ -69,15 +109,22 @@ to match the host and port you are running the software on.
 
 Now you can go ahead and start creating content. 
 
-## each time
+## Running in Production
 
-- make sure rabbitmq is running, or start it: `rabbitmq-server`
-- start celery beat (the scheduler for periodic tasks): `celery beat` (or some
+(Update docs here for Debian service creation)
+
+Ensure required services running:
+
+- rabbitmq
+- celery 
+   - `celery beat` (or some
   more sophisticated version of the same command, depending on your local or
   production setup), such as `./manage.py celeryd -v 2 -B -s celery -E -l INFO -n some_unique_name`
-- start django `./manage.py runserver domain port`
+- postgres
 
+Start django and node services
 
+(Docs here for adding proper production configuration for django and node)
 
 ## model updates
 see the instructions in [updates](updates.md) for how to create and run database migrations if you add or remove fields from models. 
