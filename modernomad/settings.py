@@ -197,6 +197,8 @@ REST_FRAMEWORK = {
     ]
 }
 
+LIST_DOMAIN = "example.com"
+
 # import any local settings
 try:
     from local_settings import *

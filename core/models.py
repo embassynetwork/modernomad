@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import timedelta, date
 from dateutil.relativedelta import relativedelta
 
@@ -2054,20 +2055,20 @@ class Backing(models.Model):
         # ensure we are not overwriting existing accounts
         assert not hasattr(self, 'money_account') and not hasattr(self, 'drft_account')
         # create accounts for this backing
-        usd = Currency.objects.get(name="USD")
+        usd, _ = Currency.objects.get_or_create(name="USD", defaults={'symbol': '$'})
         ma = Account.objects.create(currency=usd,
                 name="%s Backing USD Account" % self.resource,
                 type = Account.CREDIT)
         ma.owners.add(*backers)
         self.money_account = ma
 
-        drft = Currency.objects.get(name="DRFT")
+        drft, _ = Currency.objects.get_or_create(name='DRFT', defaults={'symbol': 'Ɖ'})
         da = Account.objects.create(currency=drft,
                 name="%s Backing DRFT Account" % self.resource,
                 type = Account.CREDIT)
         da.owners.add(*backers)
         self.drft_account = da
-    
+
 
 class HouseAccount(models.Model):
     location = models.ForeignKey(Location)
