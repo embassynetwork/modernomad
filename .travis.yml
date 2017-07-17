@@ -5,6 +5,7 @@ cache: pip
 services:
   - postgresql
 install:
+  - "nvm install 8"
   - "pip install -r requirements.txt -r requirements.test.txt"
 before_script:
   - "cd client && npm install && cd .."
