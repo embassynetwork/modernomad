@@ -11,7 +11,7 @@ before_script:
   - "cd client && npm install && cd .."
   - "cd client && webpack --config webpack.prod.config.js && cd .."
   - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
-script: ./manage.py test modernomad core
+script: ./manage.py test
 notifications:
   slack:
     rooms:
