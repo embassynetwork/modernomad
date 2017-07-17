@@ -18,7 +18,7 @@ improving the software makes those improvements available to others.
 
 <img src="static/img/agplv3-88x31.png" />
 
-## Running and Contributing
+## Running
 
 Interested in contributing? We use [Trello](https://trello.com/b/FPDnTkqj/modernomad) to coordinate day to day. We also have
 [Github issues](https://github.com/jessykate/modernomad/issues?state=open)
@@ -38,3 +38,10 @@ If you can't or don't want to use Docker, see [Environment Setup](docs/environme
 see [Configuration](docs/configuration.md)
 
 Additional documentation can be found in the [`docs`](docs/) directory.
+
+## Contributing
+We love contributors! Add an issue if you have an idea or bug report, visit the [Backlog](https://github.com/embassynetwork/modernomad/projects/1) to see what we're up to, or message [jessykate](https://github.com/jessykate) on [twitter](https://github.com/jessykate). 
+
+## Admin User Guide
+
+There is an admin user guide under development on [Gitbooks](https://embassynetwork.gitbooks.io/modernomad/content/). This guide should help users to get familiar with the available features, set up, and manage existing locations on instances of modernomad.
