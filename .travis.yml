@@ -5,8 +5,7 @@ cache: pip
 services:
   - postgresql
 install:
-  - "pip install -r requirements.txt"
-  - "pip install -r requirements.test.txt"
+  - "pip install -r requirements.txt -r requirements.test.txt"
 before_script:
   - "cd client && npm install && cd .."
   - "cd client && webpack --config webpack.prod.config.js && cd .."
