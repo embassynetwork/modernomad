@@ -1,6 +1,7 @@
 # Django settings for modernomad project.
 import os
 import datetime
+import sys
 
 # Make filepaths relative to settings.
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -210,5 +211,22 @@ NOSE_ARGS = [
     '--nocapture',
     '--nologcapture'
 ]
+
+
+class DisableMigrations(object):
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return None
+
+
+TESTS_IN_PROGRESS = False
+if 'test' in sys.argv[1:]:
+    PASSWORD_HASHERS = (
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    )
+    TESTS_IN_PROGRESS = True
+    MIGRATION_MODULES = DisableMigrations()
 
 os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = "localhost:8000-8010,8080,9200-9300"
