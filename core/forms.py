@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django import forms
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 import os
@@ -105,16 +106,11 @@ class UserProfileForm(forms.ModelForm):
         return email
 
     def create_username(self, suffix=""):
-        clean_first = self.cleaned_data['first_name'].strip().lower()
-        clean_last = self.cleaned_data['last_name'].strip().lower()
-        username = "%s_%s%s" % (clean_first, clean_last, suffix)
-        clean_username = username.replace(" ", "_")
-        clean_username = clean_username.replace(".", "_")
-        clean_username = clean_username.replace("@", "")
-        clean_username = clean_username.replace("+", "")
-        clean_username = clean_username.replace("-", "")
-        clean_username = clean_username.replace("'", "")
-        return clean_username
+        return slugify("%s %s%s" % (
+            self.cleaned_data['first_name'],
+            self.cleaned_data['last_name'],
+            suffix
+        ))
 
     def clean(self):
         # Generate a (unique) username, if one is needed (ie, if the user is new)
