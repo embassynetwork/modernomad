@@ -1,6 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# NOTE: This has been deprecated in favour of Docker. It is left in place
+# in case people are using it, but it probably won't get updated.
+# See readme.md.
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
