@@ -35,6 +35,13 @@ def save_cropped_image(raw_img_data, upload_path):
     return relative_file_name
 
 
+def create_username(first_name, last_name, suffix=""):
+    username = slugify("%s %s" % (first_name, last_name))
+    if suffix:
+        username = "%s-%s" % (username, suffix)
+    return username
+
+
 class UserProfileForm(forms.ModelForm):
     # this is used in the profile edit page.
     ''' This form manually incorporates the fields corresponding to the base
@@ -105,21 +112,21 @@ class UserProfileForm(forms.ModelForm):
                 raise forms.ValidationError('There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page.')
         return email
 
-    def create_username(self, suffix=""):
-        return slugify("%s %s%s" % (
-            self.cleaned_data['first_name'],
-            self.cleaned_data['last_name'],
-            suffix
-        ))
-
     def clean(self):
         # Generate a (unique) username, if one is needed (ie, if the user is new)
         if 'username' not in self.cleaned_data:
             tries = 1
-            username = self.create_username()
+            username = create_username(
+                self.cleaned_data['first_name'],
+                self.cleaned_data['last_name']
+            )
             while User.objects.filter(username=username).count() > 0:
                 tries = tries + 1
-                username = self.create_username(suffix=tries)
+                username = create_username(
+                    self.cleaned_data['first_name'],
+                    self.cleaned_data['last_name'],
+                    suffix=tries
+                )
             self.cleaned_data['username'] = username
 
         # save any cropped images
