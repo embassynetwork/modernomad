@@ -9,6 +9,8 @@ class UserProfileFormTest(TestCase):
         self.assertEqual(create_username('Joe', '⛄️ Bloggs'), 'joe-bloggs')
         self.assertEqual(create_username('Joe', 'Bloggs Smith'), 'joe-bloggs-smith')
         self.assertEqual(create_username('Joe', 'Smith', suffix="1"), 'joe-smith-1')
+        self.assertEqual(create_username('Joe', 'Blooooooooooooooooooooooooooooooooooooooooooooooooggs'), 'joe-blooooooooooooooooooo')
+        self.assertEqual(create_username('Joe', 'Blooooooooooooooooooooooooooooooooooooooooooooooooggs', suffix="2"), 'joe-blooooooooooooooooooo-2')
 
     def test_users_are_given_unique_usernames(self):
         # If joe-bloggs doesn't exist, user is given normal username

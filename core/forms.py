@@ -37,6 +37,11 @@ def save_cropped_image(raw_img_data, upload_path):
 
 def create_username(first_name, last_name, suffix=""):
     username = slugify("%s %s" % (first_name, last_name))
+
+    # Max username length is 30, so this gives us 9999 suffixes to make unique
+    # usernames. Probably enough.
+    username = username[:25]
+
     if suffix:
         username = "%s-%s" % (username, suffix)
     return username
