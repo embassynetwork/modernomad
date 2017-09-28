@@ -6,6 +6,8 @@
     <meta property="og:url" content="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" />
     <meta property="og:description" content="{{event.description|striptags}}"/>
 {% endblock %}
+{% block pagetitle %}Embassy Network - {{location.name}} Events - {{event.title}}{% endblock %}
+
 
 {% block content %}
 

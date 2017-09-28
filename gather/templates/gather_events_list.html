@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% if location %}
+  {% block pagetitle %}Embassy Network - {{location.name}} - {{page_title|title}}{% endblock %}
+{% else %}
+  {% block pagetitle %}Embassy Network - {{page_title|title}}{% endblock %}
+{% end %}
 
 {% block content %}
 

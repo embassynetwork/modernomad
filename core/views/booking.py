@@ -35,6 +35,7 @@ def StayComponent(request, location_slug, room_id=None):
     return render(request,
         'booking.html',
         {
+            "location": location,
             "request_user_drft_balance": user_drft_balance,
             "is_house_admin": is_house_admin
         })
