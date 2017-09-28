@@ -268,7 +268,7 @@
             },
             email: {
                 strictEmail: "Please provide a valid email address.",
-                remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}'>login</a> page."
+                remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}?next={ request.path|urlencode }'>login</a> page."
             },
         },
         rules: {
