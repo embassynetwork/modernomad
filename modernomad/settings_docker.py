@@ -30,6 +30,8 @@ DATABASES = {
     'default': env.db(),
 }
 
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+
 BROKER_URL = env('BROKER_URL', default='amqp://')
 CELERY_RESULT_BACKEND = env('BROKER_URL', default='amqp://')
 
@@ -42,7 +44,18 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 DISCOURSE_BASE_URL = env('DISCOURSE_BASE_URL', default='')
 DISCOURSE_SSO_SECRET = env('DISCOURSE_SSO_SECRET', default='')
 
+ADMINS = ((
+    env('ADMIN_NAME', default='Unnamed'),
+    env('ADMIN_EMAIL', default='none@example.com')
+),)
+
 MAILGUN_API_KEY = env('MAILGUN_API_KEY', default='')
+LIST_DOMAIN = env('LIST_DOMAIN', default='somedomain.com')
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='stay@example.com')
+
+GOOGLE_ANALYTICS_PROPERTY_ID = env('GOOGLE_ANALYTICS_PROPERTY_ID', default='')
+GOOGLE_ANALYTICS_DOMAIN = env('GOOGLE_ANALYTICS_DOMAIN', default='example.com')
 
 LOGGING = {
     'version': 1,
