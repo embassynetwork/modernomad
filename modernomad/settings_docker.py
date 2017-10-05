@@ -19,6 +19,7 @@ if env_mode == 'DEVELOPMENT':
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 elif env_mode == 'PRODUCTION':
     MODE = PRODUCTION
+    DEBUG = False
 else:
     raise ImproperlyConfigured('Unknown MODE setting')
 
