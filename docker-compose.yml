@@ -28,9 +28,9 @@ services:
     volumes:
       - "./:/app"
       - "/app/client/node_modules"
-  celery:
+  worker:
     build: .
-    command: ./manage.py celeryd --verbosity=2 --beat --schedule=celery --events --loglevel=INFO
+    command: bin/celeryd
     environment:
       - "SECRET_KEY=insecure - only for development"
       - "MODE=DEVELOPMENT"
