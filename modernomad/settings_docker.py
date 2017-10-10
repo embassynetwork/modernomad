@@ -27,13 +27,13 @@ TEMPLATE_DEBUG = DEBUG
 
 SECRET_KEY = env('SECRET_KEY')
 DATABASES = {
-    'default': env.db(),
+    'default': env.db('DATABASE_URL', default='postgres://postgres@postgres/postgres'),
 }
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
-BROKER_URL = env('BROKER_URL', default='amqp://')
-CELERY_RESULT_BACKEND = env('BROKER_URL', default='amqp://')
+BROKER_URL = env('BROKER_URL', default='amqp://guest:guest@rabbitmq//')
+CELERY_RESULT_BACKEND = BROKER_URL
 
 # this should be a TEST or PRODUCTION key depending on whether this is a local
 # test/dev site or production!
