@@ -35,3 +35,5 @@ requests==2.9.1
 six==1.11.0
 stripe==2.10.1
 Werkzeug==0.14.1
+gunicorn==19.7.1
+whitenoise==3.3.1
