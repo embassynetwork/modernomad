@@ -5,8 +5,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - "BROKER_URL=amqp://guest:guest@rabbitmq//"
-      - "DATABASE_URL=postgres://postgres@postgres/postgres"
       - "SECRET_KEY=insecure - only for development"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
@@ -30,8 +28,6 @@ services:
     build: .
     command: ./manage.py celeryd --verbosity=2 --beat --schedule=celery --events --loglevel=INFO
     environment:
-      - "BROKER_URL=amqp://guest:guest@rabbitmq//"
-      - "DATABASE_URL=postgres://postgres@postgres/postgres"
       - "SECRET_KEY=insecure - only for development"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
