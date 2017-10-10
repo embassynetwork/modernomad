@@ -42,7 +42,13 @@ ENV MODE PRODUCTION
 # Number of gunicorn workers
 ENV WEB_CONCURRENCY 3
 EXPOSE 8000
-CMD ["gunicorn", "modernomad.wsgi"]
+
+# Make this configurable so we can build a worker image using just build args
+# (e.g. when using Compose or a CI system)
+ARG CUSTOM_CMD="gunicorn modernomad.wsgi"
+# ARG can't be used in CMD
+ENV CUSTOM_CMD=$CUSTOM_CMD
+CMD $CUSTOM_CMD
 
 # Copy all files last, because this is most likely to change
 COPY . /app/
