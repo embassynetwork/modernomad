@@ -17,13 +17,15 @@ services:
     volumes:
       - "./:/app"
   client:
-    build: client/
+    build: .
+    working_dir: /app/client/
+    command: node server.js
     ports:
       - "3000:3000"
     # Bind mount app directory, but leave node_modules intact
     volumes:
-      - "./client/:/app"
-      - "/app/node_modules"
+      - "./:/app"
+      - "/app/client/node_modules"
   celery:
     build: .
     command: ./manage.py celeryd --verbosity=2 --beat --schedule=celery --events --loglevel=INFO
