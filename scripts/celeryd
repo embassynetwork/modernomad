@@ -1,0 +1,2 @@
+#!/bin/sh
+exec ./manage.py celeryd --verbosity=2 --beat --schedule=celery --events --loglevel=INFO
