@@ -81,7 +81,7 @@ BASE_DIR = os.path.normpath(ROOT + '/..')
 
 WEBPACK_LOADER = {
     'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'client/dist/',
+        'BUNDLE_DIR_NAME': '',
         'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats-prod.json'),
     }
 }
