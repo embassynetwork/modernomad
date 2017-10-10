@@ -63,7 +63,7 @@ MEDIA_URL = "/media/"
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = path("../../static/")
-STATICFILES_DIRS = ('static', '')
+STATICFILES_DIRS = ('static', 'client/dist')
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
