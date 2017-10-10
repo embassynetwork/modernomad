@@ -34,6 +34,8 @@ django-ical
 django-extensions
 Werkzeug
 django-environ==0.4.3
+gunicorn==19.7.1
+whitenoise==3.3.1
 
 # the stripe library requires custom arguments which the requirements.txt file
 # parsing apparently doesn't support, so install it manually on the command

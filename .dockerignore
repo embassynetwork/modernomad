@@ -1,0 +1,6 @@
+.git
+media
+.env
+client/node_modules
+client/build
+client/webpack-stats.json

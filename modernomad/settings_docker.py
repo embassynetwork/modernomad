@@ -1,8 +1,9 @@
-# A sensible set of defaults for a development environment, that can be
+# A sensible set of defaults for a production environment which can be
 # overridden with environment variables
 
 import environ
 from django.core.exceptions import ImproperlyConfigured
+import os
 from .settings import *
 
 env = environ.Env()
@@ -12,7 +13,7 @@ DEVELOPMENT = 0
 PRODUCTION = 1
 
 # default mode is production. change to dev as appropriate.
-env_mode = env('MODE', default='DEVELOPMENT')
+env_mode = env('MODE', default='PRODUCTION')
 if env_mode == 'DEVELOPMENT':
     MODE = DEVELOPMENT
     DEBUG = True
@@ -20,6 +21,19 @@ if env_mode == 'DEVELOPMENT':
 elif env_mode == 'PRODUCTION':
     MODE = PRODUCTION
     DEBUG = False
+
+    STATIC_ROOT = path("static_root/")
+
+    # Collect static gathers client/dist/ into root of static/,
+    # which is why bundle dir is blank
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': '',
+            'CACHE': True,
+            'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats-prod.json'),
+        }
+    }
+    COMPRESS_OFFLINE = True
 else:
     raise ImproperlyConfigured('Unknown MODE setting')
 
@@ -32,7 +46,7 @@ DATABASES = {
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
-BROKER_URL = env('BROKER_URL', default='amqp://guest:guest@rabbitmq//')
+BROKER_URL = env('BROKER_URL', default=env('CLOUDAMQP_URL', default='amqp://guest:guest@rabbitmq//'))
 CELERY_RESULT_BACKEND = BROKER_URL
 
 # this should be a TEST or PRODUCTION key depending on whether this is a local
