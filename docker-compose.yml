@@ -2,10 +2,12 @@ version: "3.0"
 services:
   web:
     build: .
+    command: ./manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     environment:
       - "SECRET_KEY=insecure - only for development"
+      - "MODE=DEVELOPMENT"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "DISCOURSE_BASE_URL"
@@ -31,6 +33,7 @@ services:
     command: ./manage.py celeryd --verbosity=2 --beat --schedule=celery --events --loglevel=INFO
     environment:
       - "SECRET_KEY=insecure - only for development"
+      - "MODE=DEVELOPMENT"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "DISCOURSE_BASE_URL"
