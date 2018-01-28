@@ -530,6 +530,7 @@ def occupancy(request, location_slug):
             # JKS this section tracks whether payment for this booking
             # were made in a prior month or in this month.
             if u.booking.is_paid():
+                unpaid = False
                 for p in u.booking.payments():
                     if p.payment_date.date() < start:
                         income_from_past_months += nights_this_month*(p.to_house()/(u.depart - u.arrive).days)
@@ -538,7 +539,6 @@ def occupancy(request, location_slug):
                     # for previous months" in that month. we skip it here.
                     elif p.payment_date.date() < end:
                         income_for_this_month += nights_this_month*(p.to_house()/(u.depart - u.arrive).days)
-                    unpaid = False
             else:
                 unpaid_total += (to_house_per_night*nights_this_month)
                 unpaid = True
