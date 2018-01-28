@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django import forms
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from PIL import Image
 import os
@@ -32,6 +33,21 @@ def save_cropped_image(raw_img_data, upload_path):
         f.close()
     relative_file_name = os.path.join(upload_path, filename)
     return relative_file_name
+
+
+def create_username(first_name, last_name, suffix=""):
+    username = slugify("%s %s" % (first_name, last_name))
+
+    if username == "":
+        username = "unnamed"
+
+    # Max username length is 30, so this gives us 9999 suffixes to make unique
+    # usernames. Probably enough.
+    username = username[:25]
+
+    if suffix:
+        username = "%s-%s" % (username, suffix)
+    return username
 
 
 class UserProfileForm(forms.ModelForm):
@@ -104,26 +120,21 @@ class UserProfileForm(forms.ModelForm):
                 raise forms.ValidationError('There is already a user with this email. If this is your account and you need to recover your password, you can do so from the login page.')
         return email
 
-    def create_username(self, suffix=""):
-        clean_first = self.cleaned_data['first_name'].strip().lower()
-        clean_last = self.cleaned_data['last_name'].strip().lower()
-        username = "%s_%s%s" % (clean_first, clean_last, suffix)
-        clean_username = username.replace(" ", "_")
-        clean_username = clean_username.replace(".", "_")
-        clean_username = clean_username.replace("@", "")
-        clean_username = clean_username.replace("+", "")
-        clean_username = clean_username.replace("-", "")
-        clean_username = clean_username.replace("'", "")
-        return clean_username
-
     def clean(self):
         # Generate a (unique) username, if one is needed (ie, if the user is new)
         if 'username' not in self.cleaned_data:
             tries = 1
-            username = self.create_username()
+            username = create_username(
+                self.cleaned_data['first_name'],
+                self.cleaned_data['last_name']
+            )
             while User.objects.filter(username=username).count() > 0:
                 tries = tries + 1
-                username = self.create_username(suffix=tries)
+                username = create_username(
+                    self.cleaned_data['first_name'],
+                    self.cleaned_data['last_name'],
+                    suffix=tries
+                )
             self.cleaned_data['username'] = username
 
         # save any cropped images
