@@ -1,8 +1,9 @@
-# A sensible set of defaults for a development environment, that can be
+# A sensible set of defaults for a production environment which can be
 # overridden with environment variables
 
 import environ
 from django.core.exceptions import ImproperlyConfigured
+import os
 from .settings import *
 
 env = environ.Env()
@@ -12,13 +13,27 @@ DEVELOPMENT = 0
 PRODUCTION = 1
 
 # default mode is production. change to dev as appropriate.
-env_mode = env('MODE', default='DEVELOPMENT')
+env_mode = env('MODE', default='PRODUCTION')
 if env_mode == 'DEVELOPMENT':
     MODE = DEVELOPMENT
     DEBUG = True
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 elif env_mode == 'PRODUCTION':
     MODE = PRODUCTION
+    DEBUG = False
+
+    STATIC_ROOT = path("static_root/")
+
+    # Collect static gathers client/dist/ into root of static/,
+    # which is why bundle dir is blank
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': '',
+            'CACHE': True,
+            'STATS_FILE': os.path.join(BASE_DIR, 'client/webpack-stats-prod.json'),
+        }
+    }
+    COMPRESS_OFFLINE = True
 else:
     raise ImproperlyConfigured('Unknown MODE setting')
 
@@ -26,11 +41,13 @@ TEMPLATE_DEBUG = DEBUG
 
 SECRET_KEY = env('SECRET_KEY')
 DATABASES = {
-    'default': env.db(),
+    'default': env.db('DATABASE_URL', default='postgres://postgres@postgres/postgres'),
 }
 
-BROKER_URL = env('BROKER_URL', default='amqp://')
-CELERY_RESULT_BACKEND = env('BROKER_URL', default='amqp://')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+
+BROKER_URL = env('BROKER_URL', default=env('CLOUDAMQP_URL', default='amqp://guest:guest@rabbitmq//'))
+CELERY_RESULT_BACKEND = BROKER_URL
 
 # this should be a TEST or PRODUCTION key depending on whether this is a local
 # test/dev site or production!
@@ -41,7 +58,18 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 DISCOURSE_BASE_URL = env('DISCOURSE_BASE_URL', default='')
 DISCOURSE_SSO_SECRET = env('DISCOURSE_SSO_SECRET', default='')
 
+ADMINS = ((
+    env('ADMIN_NAME', default='Unnamed'),
+    env('ADMIN_EMAIL', default='none@example.com')
+),)
+
 MAILGUN_API_KEY = env('MAILGUN_API_KEY', default='')
+LIST_DOMAIN = env('LIST_DOMAIN', default='somedomain.com')
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='stay@example.com')
+
+GOOGLE_ANALYTICS_PROPERTY_ID = env('GOOGLE_ANALYTICS_PROPERTY_ID', default='')
+GOOGLE_ANALYTICS_DOMAIN = env('GOOGLE_ANALYTICS_DOMAIN', default='example.com')
 
 LOGGING = {
     'version': 1,
