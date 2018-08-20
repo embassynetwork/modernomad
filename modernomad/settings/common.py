@@ -145,10 +145,6 @@ ROOT_URLCONF = 'modernomad.urls.main'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'modernomad.wsgi.application'
 
-<<<<<<< HEAD:modernomad/settings/common.py
-=======
-
->>>>>>> first pass: django 1.10 migration prep. migrate url files, template settings, and a few small dependencies.:modernomad/settings.py
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'client/build/',
