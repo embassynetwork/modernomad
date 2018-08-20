@@ -1,6 +1,13 @@
 # copy this file to local_settings.py. it should be exluded from the repo
 # (ensure local_settings.py is in .gitignore)
 
+# Make filepaths relative to settings.
+import os
+ROOT = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.normpath(ROOT + '/..')
+path = lambda *a: os.path.join(ROOT, *a)
+
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'secret'
 
@@ -67,7 +74,37 @@ else:
     EMAIL_HOST_PASSWORD = 'password'
     DEBUG = False
 
-TEMPLATE_DEBUG = DEBUG
+TEMPLATES = [
+{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS' : [
+        # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        path("../templates/"),
+        path("core/templates/"),
+    ],
+    # default template context processors
+    'APP_DIRS': True,
+    'debug': DEBUG,
+    'OPTIONS': {
+        'context_processors': [
+            "django.contrib.auth.context_processors.auth",
+            "django.core.context_processors.debug",
+            "django.core.context_processors.i18n",
+            "django.core.context_processors.media",
+            "django.core.context_processors.static",
+            "django.core.context_processors.tz",
+            "django.core.context_processors.request",
+            "django.contrib.messages.context_processors.messages",
+            "core.context_processors.location.location_variables",
+            "core.context_processors.location.network_locations",
+            "core.context_processors.analytics.google_analytics",
+        ],
+    },
+},
+]
+
 
 # fill in any local template directories. any templates with the same name WILL
 # OVERRIDE included templates. don't forget the trailing slash in the path, and
