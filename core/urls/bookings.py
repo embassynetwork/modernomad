@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 from core.views.booking import * 
 from core.views.unsorted import submit_payment
