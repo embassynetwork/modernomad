@@ -15,7 +15,7 @@ django-ical==1.5
 django-jwt-auth==0.0.2
 django-uuidfield==0.5.0
 django-webpack-loader==0.3.3
-Django>=1.9.12,<1.10
+Django==1.11.16
 djangorestframework==3.6.4
 eventbrite==3.3.3
 graphene-django==1.1.0
