@@ -1,4 +1,4 @@
-Django>=1.9.12,<1.10
+Django==1.11
 amqp==1.4.9
 anyjson==0.3.3
 billiard==3.3.0.23
@@ -21,14 +21,14 @@ stripe
 django-jwt-auth
 django-webpack-loader==0.3.3
 django-rest-swagger===0.3.5
-djangorestframework==3.3
+djangorestframework==3.8.2
 markdown
-django-filter==0.15.3
-graphene==1.0
-graphene-django==1.1.0
-graphql-core==1.1
+django-filter==1.0.2
+graphene==2.0
+graphene-django==2.0
+graphql-core==2.0
 graphql-relay==0.4.5
-django-graphiql
+#django-graphiql
 django-compressor
 icalendar
 django-ical

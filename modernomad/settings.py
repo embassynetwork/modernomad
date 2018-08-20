@@ -114,7 +114,6 @@ INSTALLED_APPS = (
     'gather',
     'modernomad',
     'api',
-    'django_graphiql',
     'graphene_django',
     'graphapi',
     'django_behave',
