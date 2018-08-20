@@ -1,8 +1,7 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
-from api.views.capacities import *
 from rest_framework import routers
-from api.views import capacities
+from api.views.capacities import capacities, capacity_detail
 import rest_framework.urls
 
 # Routers provide an easy way of automatically determining the URL conf.

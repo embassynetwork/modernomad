@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
 from core.views.unsorted import ListUsers, user_login, email_available, username_available, register, PeopleDaterangeQuery, UserDetail, UserAvatar, UserEdit, UserAddCard, UserDeleteCard, user_email_settings, user_subscriptions, user_events, user_edit_room
 from core.views.booking import UserBookings
