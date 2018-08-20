@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from core.views.unsorted import guest_rooms, view_room, room_cal_request
 from core.views import resource_availability
 
