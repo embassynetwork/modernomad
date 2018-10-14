@@ -44,8 +44,8 @@ class ResourceNode(DjangoObjectType):
         start_date = args['arrive'].date()
         end_date = args['depart'].date() - timedelta(days=1)
 
-        print '%s drftable between? ' % self.name
-        print self.drftable_between(start_date, end_date)
+        logger.debug('%s drftable between? ' % self.name)
+        logger.debug(self.drftable_between(start_date, end_date))
         return self.drftable_between(start_date, end_date)
 
     def resolve_availabilities(self, args, *stuff):

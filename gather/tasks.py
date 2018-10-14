@@ -3,7 +3,6 @@ import json, requests, pytz, datetime
 from celery.task.schedules import crontab
 from celery.task import periodic_task
 from celery import shared_task
-from django.core import urlresolvers
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.conf import settings
@@ -18,6 +17,10 @@ from itertools import chain
 from gather import emails
 from gather.models import Event, EventNotifications
 from core.models import Location
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 weekday_number_to_name = {
     0: "Monday",
@@ -114,7 +117,7 @@ def events_pending(location):
 def published_events_this_week_local(location):
     # we have to do a bunch of tomfoolery here because we want to gets events
     # that are "this week" in this week's timezone, but dates are stored in UTC which
-    # is offset from the current timezone's hours by a certain amount. 
+    # is offset from the current timezone's hours by a certain amount.
     current_tz = timezone.get_current_timezone()
     today_local = timezone.now().astimezone(current_tz).date()
     tomorrow_local = today_local + datetime.timedelta(days=1)
@@ -141,7 +144,7 @@ def published_events_this_week_local(location):
 def published_events_today_local(location):
     # we have to do a bunch of tomfoolery here because we want to gets events
     # that are "today" in today's timezone, but dates are stored in UTC which
-    # is offset from the current timezone's hours by a certain amount. 
+    # is offset from the current timezone's hours by a certain amount.
     current_tz = timezone.get_current_timezone()
     today_local = timezone.now().astimezone(current_tz).date()
     utc_tz = pytz.timezone('UTC')
@@ -161,7 +164,7 @@ def published_events_today_local(location):
         today_local_start_utc).filter(end__gte=today_local_end_utc).filter(status='live')
 
     events_today_local = list(set(chain(starts_today_local, ends_today_local, across_today_local)))
-    # returns all types of events - private, community and public. 
+    # returns all types of events - private, community and public.
     return events_today_local
 
 @shared_task
@@ -172,9 +175,9 @@ def events_today_reminder():
         events_today_local = published_events_today_local(location)
         if len(events_today_local) == 0:
             continue
-        # for each event, 
+        # for each event,
         #    for each attendee or organizer
-        #        if they want reminders, append this event to a list of reminders for today, for that person. 
+        #        if they want reminders, append this event to a list of reminders for today, for that person.
         reminders_per_person = {}
         for event in events_today_local:
             distinct_event_people = list(set(list(event.attendees.all()) + list(event.organizers.all())))
@@ -183,26 +186,26 @@ def events_today_reminder():
                     reminders_this_person = reminders_per_person.get(user, [])
                     reminders_this_person.append(event)
                     reminders_per_person[user] = reminders_this_person
-        
+
         for user, events_today in reminders_per_person.iteritems():
             send_events_list(user, events_today, location)
-    
+
 @shared_task
 @periodic_task(run_every=crontab(day_of_week='sun', hour=4, minute=30))
 def weekly_upcoming_events():
-    # gets a list of events to send reminders about *for all locations* one by one. 
+    # gets a list of events to send reminders about *for all locations* one by one.
     locations = Location.objects.all()
     for location in locations:
         events_this_week_at_location = published_events_this_week_local(location)
         if len(events_this_week_at_location) == 0:
-            print 'no events this week at %s; skipping email notification' % location.name
+            logger.debug('no events this week at %s; skipping email notification' % location.name)
             continue
-        # for each event, 
+        # for each event,
         #    for each attendee or organizer
-        #        if they want reminders, append this event to a list of reminders for today, for that person. 
+        #        if they want reminders, append this event to a list of reminders for today, for that person.
         weekly_notifications_on = EventNotifications.objects.filter(location_weekly = location)
         remindees_for_location = [notify.user for notify in weekly_notifications_on]
-        
+
         for user in remindees_for_location:
             weekly_reminder_email(user, events_this_week_at_location, location)
 

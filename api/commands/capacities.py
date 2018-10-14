@@ -19,12 +19,12 @@ def user_can_administer_a_resource(user, resource):
 def in_the_past(capacity):
     tz = capacity.resource.tz()
     now = datetime.now(tz).date()
-    print type(now)
-    print type(capacity.start_date)
+    print(type(now))
+    print(type(capacity.start_date))
     return capacity.start_date < now
 
 def get_or_create_unsaved_capacity(data):
-    # if there is an existing capacity change for this date, then we're updating. otherwise we're adding. 
+    # if there is an existing capacity change for this date, then we're updating. otherwise we're adding.
     capacity = CapacityChange.objects.filter(start_date=data['start_date'], resource=data['resource']).first()
     if capacity:
         capacity.quantity = data['quantity']
@@ -32,10 +32,10 @@ def get_or_create_unsaved_capacity(data):
     else:
         start_date = datetime.strptime(data['start_date'], "%Y-%m-%d").date()
         capacity = CapacityChange(
-                start_date=start_date, 
+                start_date=start_date,
                 resource=Resource.objects.get(id=data['resource']),
                 accept_drft=data['accept_drft'],
-                quantity=data['quantity'] 
+                quantity=data['quantity']
             )
     return capacity
 

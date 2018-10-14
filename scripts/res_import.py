@@ -1,8 +1,12 @@
+from datetime import datetime
+import json
+import logging
+
 from django.utils import timezone
 from django.contrib.auth.models import User, Group
 from core.models import Location, Booking, Payment, Room
-from datetime import datetime
-import json
+
+logger = logging.getLogger(__name__)
 
 '''
 Usage
@@ -10,18 +14,19 @@ Usage
 import res_import
 res_import.import_bookings("farmhouse_bookings.json", "farmhouse_payments.json", 3, 28)
 '''
+
 def import_bookings(booking_file, payment_file, location_id, room_offset):
     json_file = open(booking_file)
     booking_data = json.load(json_file)
     json_file.close()
-    
+
     json_file = open(payment_file)
     payment_data = json.load(json_file)
     json_file.close()
-    
+
     location = Location.objects.get(pk=location_id)
-    print "location=%s" % location.name
-    
+    logger.debug("location=%s" % location.name)
+
     '''
     {
         "pk": 3,
@@ -45,9 +50,8 @@ def import_bookings(booking_file, payment_file, location_id, room_offset):
             booking_id = payment['booking']
             payments_by_booking[booking_id] = payment
         else:
-            print "payment %s has no booking!" % payment_id
-    #print payments_by_booking
-    
+            logger.debug("payment %s has no booking!" % payment_id)
+
     '''
     {
         "pk": 1,
@@ -75,12 +79,12 @@ def import_bookings(booking_file, payment_file, location_id, room_offset):
     for r in booking_data:
         old_booking = r['fields']
         old_booking_id = r['pk']
-        
+
         old_room_id = old_booking['room']
         new_room_id = int(old_room_id) + room_offset
-        print "old_booking_id = %s, old_room_id = %s, new_room_id = %s" % (old_booking_id, old_room_id, new_room_id)
+        logger.debug("old_booking_id = %s, old_room_id = %s, new_room_id = %s" % (old_booking_id, old_room_id, new_room_id))
         new_room = Room.objects.get(id=new_room_id)
-        #print "room = %s" % new_room.name
+
         username = r['fields']['user'][0]
         user = User.objects.filter(username=username).first()
 
@@ -99,12 +103,11 @@ def import_bookings(booking_file, payment_file, location_id, room_offset):
             room=new_room,
         )
         new_booking.save()
-        #print new_booking
 
         # Now create the payment for this new booking
         if old_booking_id in payments_by_booking:
             old_payment = payments_by_booking[old_booking_id]
-            print "booking %s has payment of $%s" % (old_booking_id, old_payment['paid_amount'])
+            logger.debug("booking %s has payment of $%s" % (old_booking_id, old_payment['paid_amount']))
             new_payment = Payment(payment_method=old_payment['payment_method'],
                 payment_service=old_payment['payment_service'],
                 transaction_id=old_payment['transaction_id'],

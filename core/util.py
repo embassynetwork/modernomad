@@ -2,23 +2,27 @@ from core.views.unsorted import monthly_occupant_report
 from core.models import *
 from django.contrib.auth.models import User
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def monthly_occupant_report_console(location_slug, year, month):
     (occupants, messages) = monthly_occupant_report(location_slug, year, month)
-    print "occupancy report for %s %s" % (month, year)
-    print "name, email, total_nights, total_value, total_comped, owing, reference_ids"
-    print "Residents"
+    logger.debug("occupancy report for %s %s" % (month, year))
+    logger.debug("name, email, total_nights, total_value, total_comped, owing, reference_ids")
+    logger.debug("Residents")
     for v in occupants['residents'].values():
-        print "%s, %s, %d" % (v['name'], v['email'], v['total_nights'])
-    print "Guests"
+        logger.debug("%s, %s, %d" % (v['name'], v['email'], v['total_nights']))
+    logger.debug("Guests")
     for v in occupants['guests'].values():
-        print "%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids'])))
-    print "Subscriptions"
+        logger.debug("%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids']))))
+    logger.debug("Subscriptions")
     for v in occupants['members'].values():
-        print "%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids'])))
+        logger.debug("%s, %s, %d, %d, %d, %s, %s" % (v['name'], v['email'], v['total_nights'], v['total_value'], v['total_comped'], ' '.join(map(str, v['owing'])), ' '.join(map(str, v['ids']))))
 
     for message in messages:
-        print message
+        logger.debug(message)
 
 
 def people_with_bookings_longer_than(min_length):

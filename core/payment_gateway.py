@@ -58,8 +58,8 @@ def charge_description(booking):
 
 def stripe_charge_card_third_party(booking, amount, token, charge_descr):
     logger.debug("stripe_charge_card_third_party(booking=%s)" % booking.id)
-    print 'in charge card 3rd party'
-    
+    logger.debug('in charge card 3rd party')
+
     # stripe will raise a stripe.CardError if the charge fails. this
     # function purposefully does not handle that error so the calling
     # function can decide what to do.
@@ -70,7 +70,7 @@ def stripe_charge_card_third_party(booking, amount, token, charge_descr):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     charge = stripe.Charge.create(
-            amount=amt_owed_cents, 
+            amount=amt_owed_cents,
             currency="usd",
             card=token,
             description= descr
@@ -79,7 +79,7 @@ def stripe_charge_card_third_party(booking, amount, token, charge_descr):
 
 def stripe_charge_user(user, bill, amount_dollars, reference):
     logger.debug("stripe_charge_user(%s, %s, %d, %s)" % (user, bill, amount_dollars, reference))
-    
+
     # stripe will raise a stripe.CardError if the charge fails. this
     # function purposefully does not handle that error so the calling
     # function can decide what to do.
@@ -110,7 +110,7 @@ def stripe_charge_user(user, bill, amount_dollars, reference):
 
 def stripe_charge_booking(booking):
     logger.debug("stripe_charge_booking(booking=%s)" % booking.id)
-    
+
     # stripe will raise a stripe.CardError if the charge fails. this
     # function purposefully does not handle that error so the calling
     # function can decide what to do.
@@ -126,10 +126,10 @@ def stripe_charge_booking(booking):
             description=descr
         )
 
-    print 'charge obj'
-    print charge
-    print '--- charge.card.last4'
-    print charge.card.last4
+    logger.debug('charge obj')
+    logger.debug(charge)
+    logger.debug('--- charge.card.last4')
+    logger.debug(charge.card.last4)
 
     # Store the charge details in a Payment object
     return Payment.objects.create(bill=booking.bill,
@@ -143,15 +143,15 @@ def stripe_charge_booking(booking):
 
 def stripe_issue_refund(payment, refund_amount=None):
     logger.debug("stripe_issue_refund(payment=%s)" % payment.id)
-    
+
     stripe.api_key = settings.STRIPE_SECRET_KEY
     charge = stripe.Charge.retrieve(payment.transaction_id)
-    print "refunding amount"
-    print refund_amount
+    logger.debug("refunding amount")
+    logger.debug(refund_amount)
     if refund_amount:
         # amount refunded has to be given in cents
         refund_amount_cents = int(float(refund_amount)*100)
-        print refund_amount_cents
+        logger.debug(refund_amount_cents)
         refund = charge.refund(amount=refund_amount_cents)
     else:
         refund = charge.refund()
@@ -164,7 +164,7 @@ def stripe_issue_refund(payment, refund_amount=None):
         paid_amount = -1 * Decimal(refund_amount),
         transaction_id = refund.id
     )
-    
+
 ###################################################################
 # USAePay Methods
 ###################################################################

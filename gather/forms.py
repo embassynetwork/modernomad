@@ -9,6 +9,10 @@ import re
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext as _
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class EventForm(forms.ModelForm):
     co_organizers = forms.CharField(required=False,  widget = forms.TextInput(attrs={'class':'form-control'}), help_text = "Optionally, select other members to co-host this event (members must have an account on this site to be listed as co-organizers).")
 
@@ -28,8 +32,8 @@ class EventForm(forms.ModelForm):
 
     def clean_co_organizers(self):
         co_organizers_usernames = self.cleaned_data.get('co_organizers').strip(", ").split(",")
-        print 'here'
-        print co_organizers_usernames
+        logger.debug('here')
+        logger.debug(co_organizers_usernames)
         co_organizers = []
         for username in co_organizers_usernames:
             username = username.strip()
@@ -45,13 +49,13 @@ class EventForm(forms.ModelForm):
 
     def clean_description(self):
         description = self.cleaned_data.get('description')
-        # sanitize the html, make sure evil things are removed. 
+        # sanitize the html, make sure evil things are removed.
         cleaned = clean_html(description)
         # clean_html creates a rooted html tree and wraps the content in divs
         # if they're not already present. this can create weirdness when people
         # aren't expecting it and editing the html directly in the textarea,
         # and since the template will provide markup around the text anyway, we
-        # remove the wrapping div tags. 
+        # remove the wrapping div tags.
         cleaned = re.sub('^<div>', '', cleaned)
         cleaned = re.sub('</div>', '', cleaned)
         return cleaned
@@ -60,7 +64,7 @@ class EventForm(forms.ModelForm):
 class EmailTemplateForm(forms.Form):
     ''' We don't actually make this a model form because it's a derivative
     function of a model but not directly constructed from the model fields
-    itself.''' 
+    itself.'''
     sender = forms.EmailField(widget=forms.TextInput(attrs={'readonly':'readonly', 'class':"form-control", 'type': 'hidden'}))
     recipient = forms.EmailField(widget=forms.TextInput(attrs={'class':"form-control", 'type': 'hidden'}))
     footer = forms.CharField( widget=forms.Textarea(attrs={'readonly':'readonly', 'class':"form-control"}))
@@ -74,7 +78,7 @@ class EventEmailTemplateForm(EmailTemplateForm):
         ''' pass in an event and a location to use in constructing the email. '''
 
         domain = Site.objects.get_current().domain
-        # calling super will initialize the form fields 
+        # calling super will initialize the form fields
         super(EventEmailTemplateForm, self).__init__()
 
         # add in the extra fields

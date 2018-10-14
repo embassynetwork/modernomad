@@ -13,9 +13,6 @@ from django.core import urlresolvers
 import logging
 logger = logging.getLogger(__name__)
 
-#@periodic_task(run_every=crontab(hour=22, minute=53, day_of_week="*"))  
-#def test():      
-#    print "HELLO WORLD"                    
 
 @periodic_task(run_every=crontab(hour=5, minute=30))
 def send_guests_residents_daily_update():
@@ -32,7 +29,7 @@ def send_admin_daily_update():
 #@periodic_task(run_every=crontab(minute="*")) # <-- for testing
 @periodic_task(run_every=crontab(hour=5, minute=0))
 def send_guest_welcome():
-    # get all bookings WELCOME_EMAIL_DAYS_AHEAD from now. 
+    # get all bookings WELCOME_EMAIL_DAYS_AHEAD from now.
     locations = Location.objects.all()
     for location in locations:
         soon = datetime.datetime.today() + datetime.timedelta(days=location.welcome_email_days_ahead)
@@ -89,8 +86,8 @@ def _format_attachment(use, color):
             'color': color,
             'fallback' : use.user.get_full_name(),
             'title': use.user.get_full_name(),
-            'title_link': profile_url[0], 
-            'text': booking_url, 
+            'title_link': profile_url[0],
+            'text': booking_url,
             'thumb_url': profile_img_url,
     }
     return item
@@ -123,7 +120,7 @@ def slack_embassysf_daily():
             })
 
     js = json.dumps(payload)
-    print js
+    logger.debug(js)
     resp = requests.post(webhook, data=js)
     logger.debug("Slack response: %s" % resp.text)
 
@@ -156,7 +153,7 @@ def slack_ams_daily():
             })
 
     js = json.dumps(payload)
-    print js
+    logger.debug(js)
     resp = requests.post(webhook, data=js)
     logger.debug("Slack response: %s" % resp.text)
 
@@ -189,7 +186,7 @@ def slack_redvic_daily():
             })
 
     js = json.dumps(payload)
-    print js
+    logger.debug(js)
     resp = requests.post(webhook, data=js)
     logger.debug("Slack response: %s" % resp.text)
 
