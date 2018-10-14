@@ -969,7 +969,7 @@ class Subscription(models.Model):
             # we can stop right here and go with the existing line items.
             if not delete_old_items:
                 return list(bill.line_items)
-        except Exception, e:
+        except Exception as e:
             logger.debug("Generating new bill item")
             bill = SubscriptionBill.objects.create(period_start=period_start, period_end=period_end)
 

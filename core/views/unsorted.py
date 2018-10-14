@@ -1033,7 +1033,7 @@ def UserAddCard(request, username):
         if booking_id and booking.use.status == Use.APPROVED:
             updated_booking_notify(booking)
         messages.add_message(request, messages.INFO, 'Thanks! Your card has been saved.')
-    except Exception, e:
+    except Exception as e:
         messages.add_message(request, messages.INFO, '<span class="text-danger">Drat, there was a problem with your card: <em>%s</em></span>' % e)
     if booking_id:
         return HttpResponseRedirect(reverse('booking_detail', args=(booking.use.location.slug, booking.id)))
@@ -1560,7 +1560,7 @@ def BookingManageAction(request, location_slug, booking_id):
             days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
                 guest_welcome(booking.use)
-        except stripe.CardError, e:
+        except stripe.CardError as e:
             # raise Booking.ResActionError(e)
             # messages.add_message(request, messages.INFO, "There was an error: %s" % e)
             # status_area_html = render(request, "snippets/res_status_area.html", {"r": booking, 'location': location, 'error': True})
@@ -1866,7 +1866,7 @@ def BillCharge(request, location_slug, bill_id):
 
     try:
         payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
-    except stripe.CardError, e:
+    except stripe.CardError as e:
         messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
         if bill.is_booking_bill():
             return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, bill.bookingbill.booking.id)))
@@ -2081,7 +2081,7 @@ def submit_payment(request, booking_uuid, location_slug):
                     )
                     form = PaymentForm(default_amount=booking.bill.total_owed)
 
-            except Exception, e:
+            except Exception as e:
                 messages.add_message(
                     request, messages.INFO,
                     'Drat, there was a problem with your card. Sometimes this reflects a card transaction limit, or bank ' +

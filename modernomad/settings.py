@@ -17,6 +17,7 @@ ADMINS = (
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'mysecret')
 DEBUG = os.getenv('DEBUG', False)
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', default='')
 
 MANAGERS = ADMINS
 

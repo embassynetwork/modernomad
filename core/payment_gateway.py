@@ -1,7 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core import urlresolvers
-from models import Booking, Payment
+from core.models import Booking, Payment
 from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal

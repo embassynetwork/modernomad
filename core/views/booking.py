@@ -9,7 +9,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.template import get_template
+try:
+    from django.template import get_template
+except ImportError:
+    from django.template.loader import get_template
+
 from django.template import Context
 from django.utils import timezone
 
@@ -318,7 +322,7 @@ def BookingConfirm(request, booking_id, location_slug):
                 request,
                 messages.INFO,
                 'Thank you! Your payment has been received and a receipt emailed to you at %s' % booking.use.user.email)
-        except stripe.CardError, e:
+        except stripe.CardError as e:
             messages.add_message(
                 request,
                 messages.WARNING,
