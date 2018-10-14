@@ -30,7 +30,7 @@ def mailgun_send(mailgun_data, files_dict=None):
         )
         logger.debug("Mailgun response: %s" % resp.text)
         return HttpResponse(status=200)
-    except requests.ConnectionError, e:
+    except requests.ConnectionError as e:
         logger.error('No network connection. Email "%s" aborted.' % mailgun_data['subject'])
         return HttpResponse(status=500)
 
