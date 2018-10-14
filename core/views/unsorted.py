@@ -62,9 +62,9 @@ logger = logging.getLogger(__name__)
 def location(request, location_slug):
     try:
         location = Location.objects.get(slug=location_slug)
-        print location.get_members()
-        print '--'
-        print request.user
+        logger.debug(location.get_members())
+        logger.debug('--')
+        logger.debug(request.user)
 
         if location.visibility == 'public' or location.visibility == 'link':
             has_permission = True
@@ -177,7 +177,7 @@ def today(request, location_slug):
 
 
 def room_occupancy_month(room, month, year):
-    print room, month, year
+    logger.debug(room, month, year)
     start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
 
     # note the day parameter is meaningless
@@ -363,11 +363,11 @@ def monthly_occupant_report(location_slug, year, month):
         # associated with the days of the bill(s) that occurred this month.
         bills_between = s.bills_between(start, end)
         value_this_month = 0
-        print "subscription %d" % s.id
+        logger.debug("subscription %d" % s.id)
         for b in bills_between:
-            print b.subtotal_amount()
-            print b.period_end
-            print b.period_start
+            logger.debug(b.subtotal_amount())
+            logger.debug(b.period_end)
+            logger.debug(b.period_start)
             if (b.period_end - b.period_start).days > 0:
                 effective_rate = b.subtotal_amount() / (b.period_end - b.period_start).days
                 value_this_bill_this_month = effective_rate*b.days_between(start, end)
@@ -578,8 +578,8 @@ def occupancy(request, location_slug):
             room_occupancy_rate = 0.0
         # tuple with income, num nights occupied, and % occupancy rate
         room_income_occupancy[room] = (room_income.get(room, 0), room_occupancy_rate, room_occupancy.get(room, 0), reservable_days_per_room.get(room, 0))
-        print room.name
-        print room_income_occupancy[room]
+        logger.debug(room.name)
+        logger.debug(room_income_occupancy[room])
         total_reservable_days += reservable_days_per_room[room]
     overall_occupancy = 0
     if total_reservable_days > 0:
@@ -995,7 +995,7 @@ def UserAddCard(request, username):
     ''' Adds a card from either the booking page or the user profile page.
     Displays success or error message and returns user to originating page.'''
 
-    print "in user add card"
+    logger.debug("in user add card")
     # get the user object associated with the booking
     user = get_object_or_404(User, username=username)
     if not request.method == 'POST':
@@ -1023,11 +1023,10 @@ def UserAddCard(request, username):
 
     try:
         customer = stripe.Customer.create(card=token, description=user.email)
-        print 'customer'
-        print customer
+        logger.debug('customer %s', customer)
         profile = user.profile
         profile.customer_id = customer.id
-        print customer.sources.data
+        logger.debug(customer.sources.data)
         # assumes the user has only one card stored with their profile.
         profile.last4 = customer.sources.data[0].last4
         profile.save()
@@ -1135,8 +1134,8 @@ def LocationEditPages(request, location_slug):
 
     if request.method == 'POST':
         action = request.POST['action']
-        print "action=%s" % action
-        print request.POST
+        logger.debug("action=%s" % action)
+        logger.debug(request.POST)
         if "Add Menu" == action:
             try:
                 menu = request.POST['menu'].strip().title()
@@ -1166,7 +1165,7 @@ def LocationEditPages(request, location_slug):
             except Exception as e:
                 messages.add_message(request, messages.ERROR, "Could not edit page: %s" % e)
         elif "Delete Page" == action and 'page_id' in request.POST:
-            print "in Delete Page"
+            logger.debug("in Delete Page")
             try:
                 page = LocationFlatPage.objects.get(pk=request.POST['page_id'])
                 page.delete()
@@ -1222,10 +1221,10 @@ def LocationEditRoom(request, location_slug, room_id):
     room = Resource.objects.get(pk=room_id)
     resource_capacity = SerializedResourceCapacity(room, timezone.localtime(timezone.now()))
     resource_capacity_as_dict = json.dumps(resource_capacity.as_dict())
-    print 'resource capacity'
-    print resource_capacity_as_dict
+    logger.debug('resource capacity')
+    logger.debug(resource_capacity_as_dict)
 
-    print request.method
+    logger.debug(request.method)
     if request.method == 'POST':
         page = request.POST.get('page')
         form = LocationRoomForm(request.POST, request.FILES, instance=Resource.objects.get(id=room_id))
@@ -1239,7 +1238,7 @@ def LocationEditRoom(request, location_slug, room_id):
                 if not new_backing_date:
                     messages.add_message(request, messages.ERROR, "You must supply both a backer and a date if you want to update the backing")
                 else:
-                    print "found both backer id and new date. updating backing"
+                    logger.debug("found both backer id and new date. updating backing")
                     resource.set_next_backing(backers, new_backing_date)
                     messages.add_message(request, messages.INFO, "Backing was scheduled.")
             elif backers:
@@ -1363,8 +1362,8 @@ def BookingManageCreate(request, location_slug):
         location = get_object_or_404(Location, slug=location_slug)
 
         notify = request.POST.get('email_announce')
-        print 'notify was set to:'
-        print notify
+        logger.debug('notify was set to:')
+        logger.debug(notify)
 
         try:
             username = request.POST.get('username')
@@ -1396,8 +1395,8 @@ def BookingManageCreate(request, location_slug):
             )
             return HttpResponseRedirect(reverse('booking_manage', args=(location.slug, booking.id)))
         else:
-            print 'the form had errors'
-            print form.errors
+            logger.debug('the form had errors')
+            logger.debug(form.errors)
     else:
         form = AdminBookingForm()
         username = request.GET.get("username", "")
@@ -1541,8 +1540,8 @@ def BookingManageAction(request, location_slug, booking_id):
     location = get_object_or_404(Location, slug=location_slug)
     booking = Booking.objects.get(id=booking_id)
     booking_action = request.POST.get('booking-action')
-    print 'booking action'
-    print booking_action
+    logger.debug('booking action')
+    logger.debug(booking_action)
 
     if booking_action == 'set-tentative':
         booking.approve()
@@ -1648,8 +1647,8 @@ def ManagePayment(request, location_slug, bill_id):
         payment_id = request.POST.get("payment_id")
         payment = get_object_or_404(Payment, id=payment_id)
         refund_amount = request.POST.get("refund-amount")
-        print refund_amount
-        print payment.net_paid()
+        logger.debug(refund_amount)
+        logger.debug(payment.net_paid())
         if Decimal(refund_amount) > Decimal(payment.net_paid()):
             messages.add_message(request, messages.INFO, "Cannot refund more than payment balance")
         else:
@@ -1802,8 +1801,8 @@ def DeleteBillLineItem(request, location_slug, bill_id):
 
     if bill.is_booking_bill():
         booking = bill.bookingbill.booking
-        print "in delete bill line item"
-        print request.POST
+        logger.debug("in delete bill line item")
+        logger.debug(request.POST)
         item_id = int(request.POST.get("payment_id"))
         line_item = BillLineItem.objects.get(id=item_id)
         line_item.delete()
@@ -1814,8 +1813,8 @@ def DeleteBillLineItem(request, location_slug, bill_id):
         return HttpResponseRedirect(reverse('booking_manage', args=(location.slug, booking.id)))
     elif bill.is_subscription_bill():
         subscription = bill.subscriptionbill.subscription
-        print "in delete bill line item"
-        print request.POST
+        logger.debug("in delete bill line item")
+        logger.debug(request.POST)
         item_id = int(request.POST.get("payment_id"))
         line_item = BillLineItem.objects.get(id=item_id)
         line_item.delete()
@@ -1843,10 +1842,10 @@ def BillCharge(request, location_slug, bill_id):
     location = get_object_or_404(Location, slug=location_slug)
     bill = get_object_or_404(Bill, pk=bill_id)
 
-    print request.POST
+    logger.debug(request.POST)
     # how much to charge?
     charge_amount_dollars = Decimal(request.POST.get('charge-amount'))
-    print 'request to charge user $%d' % charge_amount_dollars
+    logger.debug('request to charge user $%d' % charge_amount_dollars)
     if charge_amount_dollars > bill.total_owed():
         messages.add_message(
             request,
@@ -2090,8 +2089,8 @@ def submit_payment(request, booking_uuid, location_slug):
                     'error returned was: <em>%s</em>' % e
                 )
         else:
-            print 'payment form not valid'
-            print form.errors
+            logger.debug('payment form not valid')
+            logger.debug(form.errors)
 
     else:
         form = PaymentForm(default_amount=booking.bill.total_owed)
@@ -2360,8 +2359,8 @@ def register(request):
             request.POST['username'] = user.username
             return user_login(request)
         else:
-            print 'profile form contained errors:'
-            print profile_form.errors
+            logger.debug('profile form contained errors:')
+            logger.debug(profile_form.errors)
     else:
         if request.user.is_authenticated():
             messages.add_message(
@@ -2393,8 +2392,8 @@ def UserEdit(request, username):
             messages.add_message(request, messages.INFO, "Your profile has been updated.")
             return HttpResponseRedirect("/people/%s" % user.username)
         else:
-            print 'profile form contained errors:'
-            print profile_form.errors
+            logger.debug('profile form contained errors:')
+            logger.debug(profile_form.errors)
     else:
         profile_form = UserProfileForm(instance=profile)
     if profile.image:

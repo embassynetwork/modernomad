@@ -1,12 +1,19 @@
-from django.db import models
-from django.contrib.auth.models import User, Group
-from PIL import Image
 import uuid, os, datetime
+import logging
+
 from django.conf import settings
+from django.contrib.auth.models import User, Group
+from django.db import models
 from django.db.models.signals import post_save
-import requests
 from django.utils import timezone
+from PIL import Image
+import requests
+
 from core.models import Location
+
+
+logger = logging.getLogger(__name__)
+
 
 class EventAdminGroup(models.Model):
     ''' Define admininstrative groups per location.'''
@@ -47,7 +54,7 @@ class EventManager(models.Manager):
         # return the events happening today or in the future, returning up to
         # the number of events specified in the 'upto' argument.
         today = timezone.now()
-        print today
+        logger.debug(today)
 
         upcoming = super(EventManager, self).get_queryset().filter(end__gte = today).exclude(status=Event.CANCELED).order_by('start')
         if location:
@@ -58,7 +65,7 @@ class EventManager(models.Manager):
                 viewable_upcoming.append(event)
                 if upto and len(viewable_upcoming) == upto:
                     break
-        print viewable_upcoming
+        logger.debug(viewable_upcoming)
         return viewable_upcoming
 
     class Meta:
@@ -85,8 +92,8 @@ class Event(models.Model):
     COMMUNITY = 'community'
 
     event_visibility = (
-            (PUBLIC, 'Public'), 
-            (PRIVATE, 'Private'), 
+            (PUBLIC, 'Public'),
+            (PRIVATE, 'Private'),
             (COMMUNITY, 'Community')
     )
 
@@ -135,7 +142,7 @@ class Event(models.Model):
             is_event_admin = True
         else:
             is_event_admin = False
-        
+
         if current_user and current_user in self.location.residents():
             is_community_member = True
         else:
@@ -143,15 +150,15 @@ class Event(models.Model):
 
         # ok now let's see...
         if (
-                (self.status == 'live' and self.visibility == Event.PUBLIC) 
-                or 
+                (self.status == 'live' and self.visibility == Event.PUBLIC)
+                or
                 (
-                    is_event_admin 
-                    or 
-                    current_user == self.creator 
-                    or 
-                    current_user in self.organizers.all() 
-                    or 
+                    is_event_admin
+                    or
+                    current_user == self.creator
+                    or
+                    current_user in self.organizers.all()
+                    or
                     current_user in self.attendees.all()
                 )
                 or
@@ -163,9 +170,9 @@ class Event(models.Model):
         return viewable
 
 def default_event_status(sender, instance, created, using, **kwargs):
-    print instance
-    print created
-    print instance.status
+    logger.debug(instance)
+    logger.debug(created)
+    logger.debug(instance.status)
     if created == True:
         if instance.creator in instance.admin.users.all():
             instance.status = Event.FEEDBACK

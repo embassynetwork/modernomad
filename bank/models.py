@@ -73,7 +73,7 @@ class Account(models.Model):
 
 class SystemAccounts(models.Model):
     # money coming into or out of the system (either due to real transfers or
-    # minting) is recorded in these accounts. 
+    # minting) is recorded in these accounts.
     currency = models.OneToOneField(Currency)
     credit = models.OneToOneField(Account, related_name="+")
     debit = models.OneToOneField(Account, related_name="+")
@@ -105,8 +105,8 @@ class Transaction(models.Model):
 
             # check that all entries balance out
             balance = sum([e.amount for e in entries])
-            print "BALANCE"
-            print balance
+            print("BALANCE")
+            print(balance)
             if balance != 0:
                 # Note that this effectively prevents us from editing a
                 # transaction as well, since one entry will get updated before
@@ -163,12 +163,12 @@ class Entry(models.Model):
     def with_account(self):
         if self.valid:
             # what account was this transaction _from_?
-            print self.transaction.entries.all()
+            print(self.transaction.entries.all())
             other_entry = self.transaction.entries.exclude(id=self.id).first()
             return other_entry.account
         else:
-            print 'Warning! found invalid transaction id=%d' % self.transaction.id
-            print self.transaction.entries.all()
+            print('Warning! found invalid transaction id=%d' % self.transaction.id)
+            print(self.transaction.entries.all())
             return None
 
     def balance_at(self):

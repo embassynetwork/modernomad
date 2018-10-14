@@ -25,7 +25,7 @@ def mailgun_send(mailgun_data, files_dict=None):
     try:
         resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
             auth=("api", settings.MAILGUN_API_KEY),
-            data=mailgun_data, 
+            data=mailgun_data,
             files=files_dict
         )
         logger.debug("Mailgun response: %s" % resp.text)
@@ -130,8 +130,8 @@ def event_published_notification(event, location):
     for subscriber in subscribed_users:
         # if it's a public event, or subscriber is in the community and it's a
         # community event, then let the subscriber know. private events are not
-        # announced to subscribers. 
-        print event.visibility
+        # announced to subscribers.
+        logger.debug(event.visibility)
         try:
             u = User.objects.get(email=subscriber)
         except:
@@ -157,12 +157,12 @@ def create_route(route_name, route_pattern, path):
     # strip the initial slash
     forward_url = os.path.join(list_domain, path)
     forward_url = "https://" + forward_url
-    print forward_url
-    print list_domain
+    logger.debug(forward_url)
+    logger.debug(list_domain)
     expression = "match_recipient('%s')" % route_pattern
-    print expression
+    logger.debug(expression)
     forward_url = "forward('%s')" % forward_url
-    print forward_url
+    logger.debug(forward_url)
     return requests.post( "https://api.mailgun.net/v2/routes",
             auth=("api", mailgun_api_key),
             data={"priority": 1,
@@ -182,7 +182,6 @@ def create_route(route_name, route_pattern, path):
 #        route_name = 'Event %d' % instance.id
 #        path = "events/message/"
 #        resp = create_route(route_name, route_pattern, path)
-#        print resp.text
 #post_save.connect(create_event_email, sender=Event)
 
 ############################################
@@ -200,7 +199,7 @@ def event_message(request, location_slug=None):
     subject = request.POST.get('subject')
     body_plain = request.POST.get('body-plain')
     body_html = request.POST.get('body-html')
-    
+
     # get the event info and make sure the event exists
     # we know that the route is always in the form eventXX, where XX is the
     # event id.
@@ -223,12 +222,12 @@ def event_message(request, location_slug=None):
     message_header_keys = [item[0] for item in message_headers]
     # make sure this isn't an email we have already forwarded (cf. emailbombgate 2014)
     # A List-Id header will only be present if it has been added manually in
-    # this function, ie, if we have already processed this message. 
+    # this function, ie, if we have already processed this message.
     if request.POST.get('List-Id') or 'List-Id' in message_header_keys:
         logger.debug('List-Id header was found! Dropping message silently')
         return HttpResponse(status=200)
     # If 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
-    if 'Auto-Submitted' in message_header_keys: 
+    if 'Auto-Submitted' in message_header_keys:
         logger.info('message appears to be auto-submitted. reject silently')
         return HttpResponse(status=200)
 
@@ -237,7 +236,7 @@ def event_message(request, location_slug=None):
     location_event_admin = EventAdminGroup.objects.get(location=event.location)
     admins = location_event_admin.users.all()
 
-    # Build our bcc list 
+    # Build our bcc list
     bcc_list = []
     for organizer in organizers:
         if organizer.email not in bcc_list:
@@ -267,7 +266,7 @@ def event_message(request, location_slug=None):
     if body_html:
         body_html = body_html + "<br><br>-------------------------------------------<br>" + footer_msg
 
-    # send the message 
+    # send the message
     mailgun_data={"from": from_address,
         "to": [recipient, ],
         "bcc": bcc_list,

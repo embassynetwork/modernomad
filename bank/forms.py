@@ -24,7 +24,7 @@ def recipient_accounts():
     accounts = Account.objects.all()
     for a in accounts:
         if a.primary_for.all():
-            print a.primary_for.all()
+            print(a.primary_for.all())
             account_list.append(a)
     choices = [("", "---------")]
     for a in account_list:
@@ -39,9 +39,9 @@ class TransactionForm(forms.Form):
 
     def __init__(self, user, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
-        accounts = Account.objects.filter(currency=Currency.objects.get(name="DRFT")).filter(Q(owners=user.pk) | Q(admins=user.pk)) 
+        accounts = Account.objects.filter(currency=Currency.objects.get(name="DRFT")).filter(Q(owners=user.pk) | Q(admins=user.pk))
         self.fields['from_account'].queryset = accounts
-        self.fields['to_account'].queryset = accounts 
+        self.fields['to_account'].queryset = accounts
         for field_name, field in self.fields.items():
             if field_name == 'from_account' or field_name == 'to_account':
                 field.widget.attrs['class'] = 'form-control chosen-select'

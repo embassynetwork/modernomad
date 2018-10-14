@@ -1,21 +1,22 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .view_helpers import _get_user_and_perms
 import datetime
-from django.conf import settings
-from django.shortcuts import get_object_or_404
 import logging
+
+from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from core.emails import send_booking_receipt, new_booking_notify
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.template import get_template
+from django.template import Context
+from django.utils import timezone
 
-from core.models import Booking, Use, Location, Site
+from .view_helpers import _get_user_and_perms
+from core.emails import send_booking_receipt, new_booking_notify
 from core.forms import BookingUseForm
-from bank.models import Currency, Account
-from django.contrib.auth.models import AnonymousUser
-
+from core.models import Booking, Use, Location, Site
 logger = logging.getLogger(__name__)
 
 
@@ -77,7 +78,7 @@ def BookingSubmit(request, location_slug):
             messages.add_message(request, messages.INFO, 'Thank you! Please make a profile to complete your booking request.')
             return HttpResponseRedirect(reverse('registration_register'))
     else:
-        print 'form was not valid'
+        logger.debug('form was not valid')
         logger.debug(request.POST)
         logger.debug(form.errors)
         raise Exception(str(form.errors.as_data()))
@@ -241,8 +242,8 @@ def BookingEdit(request, booking_id, location_slug):
             if form.is_valid():
                 logger.debug("BookingEdit: Valid Form")
                 comments = request.POST.get('comments')
-                print 'comments?'
-                print comments
+                logger.debug('comments?')
+                logger.debug(comments)
                 booking.comments = comments
                 booking.generate_bill()
                 booking.save()

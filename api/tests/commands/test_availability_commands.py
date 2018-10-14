@@ -16,7 +16,7 @@ class AddCapacityChangeTestCase(TestCase):
         command = UpdateOrAddCapacityChange(self.user, start_date="4016-01-13", resource=self.resource.pk, quantity=2)
 
         if not command.execute():
-            print command.result()
+            print(command.result())
             self.assertTrue(False)
 
         capacity = CapacityChange.objects.filter(resource=self.resource).last()

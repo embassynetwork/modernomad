@@ -331,7 +331,7 @@ class LocationRoomForm(forms.ModelForm):
                     # Image data on creation is ensured by the javascript validator.
                     # If we don't have image data here it's because we don't need to
                     # update the image.  Doing nothing -- JLS
-                    print 'there was no image data'
+                    print('there was no image data')
             except:
                 raise forms.ValidationError('No valid image was provided.')
             upload_path = "rooms/"

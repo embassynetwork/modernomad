@@ -18,12 +18,12 @@ class BackupError(Exception):
 class BackupManager(object):
     def __init__(self):
         pass
-    
+
     def call_system(self, command):
         if os.system(command) == 0: return True
-        print 'FAILED:', command
+        logger.debug('FAILED:', command)
         return False
-    
+
     def get_db_info(self):
         if not hasattr(settings, 'DATABASES'): raise BackupError('settings.DATABASES is not defined')
         if not settings.DATABASES.has_key('default'): raise BackupError('settings.DATABASES has no default db')
@@ -33,7 +33,7 @@ class BackupManager(object):
         else:
             password = None
         return (settings.DATABASES['default']['USER'], settings.DATABASES['default']['NAME'], password)
-    
+
     def restore_backup(self, file_path):
         backup_path = os.path.realpath(file_path)
         if not os.path.exists(backup_path): raise BackupError('The backup file "%s" does not exist.' % backup_path)
@@ -84,7 +84,7 @@ class BackupManager(object):
         if not os.path.exists(settings.BACKUP_ROOT): os.makedirs(settings.BACKUP_ROOT)
         if not os.path.exists(settings.BACKUP_ROOT): raise BackupError('Backup root "%s" does not exist' % settings.BACKUP_ROOT)
         if not os.path.isdir(settings.BACKUP_ROOT): raise BackupError('Backup root "%s" is not a directory' % settings.BACKUP_ROOT)
-    
+
     def remove_old_files(self, backup_count):
         logger.debug("remove_old_files, backup_count=%s" % backup_count)
         file_count = 0
@@ -102,7 +102,7 @@ class BackupManager(object):
                 else:
                     logger.warn("Removing old log file: %s" % f)
                     os.remove(settings.BACKUP_ROOT + f)
-                
+
 
     def make_backup(self):
         self.check_dirs()
@@ -117,7 +117,7 @@ class BackupManager(object):
         if db_password: os.environ['PGPASSWORD'] = db_password
         command = 'pg_dump -U %s %s | gzip > "%s"' % (db_user, db_name, sql_path)
         if not self.call_system(command):
-            print 'aborting'
+            logger.info('aborting')
             return
 
         media_file = '%s-media.tgz' % file_token
@@ -125,22 +125,23 @@ class BackupManager(object):
         dirs = settings.MEDIA_ROOT.split('/')
         command = 'cd "%s" && cd .. && tar -czf "%s" "%s"' % (settings.MEDIA_ROOT, media_path, dirs[len(dirs)-1])
         if not self.call_system(command):
-            print 'aborting'
+            logger.info('aborting')
             return
 
         backup_file = '%s-backup.tar' % file_token
         backup_path = '%s%s' % (settings.BACKUP_ROOT, backup_file)
-        print "backup_file: %s" % backup_file
+        logger.info("backup_file: %s" % backup_file)
         command = 'cd "%s" && tar -czf "%s" "%s" "%s"' % (settings.BACKUP_ROOT, backup_path, media_file, sql_file)
         if not self.call_system(command):
-            print 'aborting'
+            logger.info('aborting')
             return
 
         if not self.call_system('cd "%s" && ln -fs "%s" latest-backup.tar' % (settings.BACKUP_ROOT, backup_file)):
-            print 'Could not link %s to latest-backup.tar' % backup_file
-            
+            logger.info('Could not link %s to latest-backup.tar' % backup_file)
+
         command = 'rm -f "%s" "%s"' % (media_path, sql_path)
-        if not self.call_system(command): print 'Could not erase temp backup files'
+        if not self.call_system(command):
+            logger.info('Could not erase temp backup files')
 
         if settings.BACKUP_COUNT and settings.BACKUP_COUNT > 0:
             self.remove_old_files(settings.BACKUP_COUNT)

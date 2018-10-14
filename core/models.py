@@ -288,7 +288,7 @@ class Location(models.Model):
         for resource in self.resources.all():
             for resident in resource.backers():
                 all_residents.append(resident)
-        print all_residents
+        print(all_residents)
         return all_residents
 
 
@@ -358,7 +358,7 @@ class RoomCalendar(calendar.HTMLCalendar):
 class ResourceManager(models.Manager):
     def backed_by(self, user):
         resources = self.get_queryset().filter(backing__money_account__owners = user)
-        print resources
+        print(resources)
         return resources
 
 class Resource(models.Model):
@@ -524,14 +524,14 @@ class Resource(models.Model):
     def current_backing(self):
         today = timezone.localtime(timezone.now()).date()
         soonest_backing = self.current_and_future_backings().first()
-        print soonest_backing
+        print(soonest_backing)
         if (not soonest_backing) or (soonest_backing and soonest_backing.start > today):
             return None
         else:
             return soonest_backing
 
     def current_backers(self):
-        print 'current backers'
+        print('current backers')
         if self.current_backing():
             return self.current_backing().users.all()
         else:
@@ -556,11 +556,11 @@ class Resource(models.Model):
         most_recent = self.backings_this_room().filter(start__lte=date).order_by('start').last()
 
         # if there was no most_recent, or if most_recent backing ended in
-        # the past, then only look for future backings. 
+        # the past, then only look for future backings.
         if (not most_recent) or (hasattr(most_recent, 'end') and most_recent.end and most_recent.end <= date):
             # checking if most_recent.end is less than OR equal to 'date' means
             # that if the backing ended today then it is NOT current (much like
-            # a departure date of a booking). 
+            # a departure date of a booking).
             return self.backings_this_room().filter(start__gt=date)
         else:
             # (will include most_recent)
@@ -570,10 +570,10 @@ class Resource(models.Model):
         # this method only supports having a single backing in the future.
         # remove all future backigns, if any, and then setup the new backing.
         today = timezone.localtime(timezone.now()).date()
-        print 'in set_next_backing'
+        logger.debug('in set_next_backing')
         if hasattr(self, 'backings'):
-            print 'will end/delete current and future backings'
-            print self.current_and_future_backings(new_backing_date)
+            logger.debug('will end/delete current and future backings')
+            print(self.current_and_future_backings(new_backing_date))
             for b in self.current_and_future_backings(new_backing_date):
                 # if the backing started in the past, then there are likely
                 # credits that will need to be reflected to this backer. so
@@ -581,15 +581,15 @@ class Resource(models.Model):
                 # hasn't even started yet, then just kill it and replace it
                 # with the new one.
                 if (b.start > today) or (b.start == new_backing_date):
-                    print 'deleting backing %d' % b.id
+                    logger.debug('deleting backing %d' % b.id)
                     b.delete()
                 else:
-                    print 'ending backing %d' % b.id
+                    logger.debug('ending backing %d' % b.id)
                     b.end = new_backing_date
                     b.save()
         # create a new backing
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
-        print 'created new backing %d' % new_backing.id
+        logger.debug('created new backing %d' % new_backing.id)
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -1054,8 +1054,8 @@ class Subscription(models.Model):
             try:
                 (paid_until_start, paid_until_end) = self.get_period(target_date=b.period_end)
             except:
-                print "didn't like date"
-                print b.period_end
+                logger.debug("didn't like date")
+                logger.debug(b.period_end)
             if b.is_paid() or (include_partial and b.total_paid() > 0):
                 return paid_until_end
         return b.period_start
@@ -1370,8 +1370,8 @@ class Booking(models.Model):
         return "booking (unsaved)"
 
     def suppress_fee(self, line_item):
-        print 'suppressing fee'
-        print line_item.fee
+        logger.debug('suppressing fee')
+        logger.debug(line_item.fee)
         self.suppressed_fees.add(line_item.fee)
         self.save()
 
@@ -1531,7 +1531,7 @@ class Payment(models.Model):
         for p in payments:
             if p.is_refund():
                 refunds.append(p)
-        print refunds
+        logger.debug(refunds)
         return refunds
 
     def net_paid(self):
@@ -1652,16 +1652,16 @@ class UserProfile(models.Model):
         # the prumary account should be unique for each currency (enforced by
         # the m2m_changed receiver), but it migh tbe None, and get() throws an
         # error if that's the case. Hence filter().first().
-        print 'checking for primary account...'
+        logger.debug('checking for primary account...')
         primary = self.primary_accounts.filter(currency=currency).first()
         if primary:
-            print "found: %s (id %d)" % (primary, primary.id)
+            logger.debug("found: %s (id %d)" % (primary, primary.id))
         if not primary:
             primary = Account(currency=currency, name="%s %s Account (primary)" % (self.user.first_name, currency.name))
             primary.save()
             primary.owners.add(self.user)
-            print 'saving new primary account'
-            print primary.id
+            logger.debug('saving new primary account')
+            logger.debug(primary.id)
             self.primary_accounts.add(primary)
         return primary
 
@@ -1692,10 +1692,10 @@ User._meta.ordering = ['username']
 # Note: primary.accounts.'through' is django's name for the M2M class
 @receiver(m2m_changed, sender=UserProfile.primary_accounts.through)
 def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs):
-    print 'p2p_changed signal'
-    print action
+    logger.debug('p2p_changed signal')
+    logger.debug(action)
     if action == "pre_add":
-        print instance # should be a UserProfile unless reversed
+        logger.debug(instance) # should be a UserProfile unless reversed
 
         # since the sender is defined as UserProfile in the @receiver line,
         # UserProfile is the forward relation and Account is the reverse relation
@@ -1748,8 +1748,8 @@ def size_images(sender, instance, **kwargs):
         main_img.save(main_img_full_path)
         # the image field is a link to the path where the image is stored
         instance.image = img_upload_path_rel
-        print 'updating instance.image to be a relative path...'
-        print instance.image
+        logger.debug('updating instance.image to be a relative path...')
+        logger.debug(instance.image)
         # now resize this to generate the smaller thumbnail
         thumb_img = im.resize(UserProfile.IMG_THUMB_SIZE, Image.ANTIALIAS)
         thumb_full_path = os.path.splitext(main_img_full_path)[0] + ".thumb" + os.path.splitext(main_img_full_path)[1]
@@ -1969,14 +1969,14 @@ class CapacityChangeManager(models.Manager):
         )
 
     def same_as_next_quantity(self, capacity):
-        print 'same_as_next_quantity'
+        logger.debug('same_as_next_quantity')
         next_capacity = self._next_capacity(capacity)
-        print next_capacity
+        logger.debug(next_capacity)
         if next_capacity:
-            print next_capacity.quantity
-            print next_capacity.accept_drft
-        print capacity.quantity
-        print capacity.accept_drft
+            logger.debug(next_capacity.quantity)
+            logger.debug(next_capacity.accept_drft)
+        logger.debug(capacity.quantity)
+        logger.debug(capacity.accept_drft)
 
         return (next_capacity and
             ( next_capacity.quantity == capacity.quantity)
@@ -2002,7 +2002,7 @@ class BackingManager(models.Manager):
 
     def setup_new(self, resource, backers, start):
         b = Backing(resource=resource, start=start)
-        assert b.comes_after_others() 
+        assert b.comes_after_others()
         b._setup_accounts(backers)
         b.save()
         b.users.add(*backers)
@@ -2037,17 +2037,17 @@ class Backing(models.Model):
 
         # any other backing for this resource without an end date, period
         if Backing.objects.filter(resource=self.resource, end=None).exclude(pk=self.pk):
-            print 'backing without end date'
+            logger.debug('backing without end date')
             return False
         # start date in past, end date after self.start
         if Backing.objects.filter(resource=self.resource, start__lte=self.start, end__gt=self.start).exclude(pk=self.pk):
-            print 'start date in past, end date after start:'
-            print self.start
-            print Backing.objects.filter(resource=self.resource, start__lte=self.start, end__gt=self.start).exclude(pk=self.pk)
+            logger.debug('start date in past, end date after start:')
+            logger.debug(self.start)
+            logger.debug(Backing.objects.filter(resource=self.resource, start__lte=self.start, end__gt=self.start).exclude(pk=self.pk))
             return False
         # any backing for this resource with a start date in the future
         if Backing.objects.filter(resource=self.resource, start__gt=self.start):
-            print 'another backing has a start date in the future'
+            logger.debug('another backing has a start date in the future')
             return False
         return True
 

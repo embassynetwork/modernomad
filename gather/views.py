@@ -35,7 +35,7 @@ def create_event(request, location_slug=None):
     logger.debug("create_event: location:%s, user:%s" % (location, current_user))
 
     # if the user doesn't have a proper profile, then make sure they extend it first
-    print current_user.id
+    logger.debug(current_user.id)
     if current_user.id == None :
         messages.add_message(request, messages.INFO, 'We want to know who you are! Please create a profile before submitting an event.')
         next_url = '/locations/%s/events/create/' % location.slug
@@ -77,9 +77,9 @@ def create_event(request, location_slug=None):
             messages.add_message(request, messages.INFO, 'The event has been created.')
             return HttpResponseRedirect(reverse('gather_view_event', args=(event.location.slug, event.id, event.slug)))
         else:
-            print "form error"
-            print form
-            print form.errors
+            logger.debug("form error")
+            logger.debug(form)
+            logger.debug(form.errors)
 
     else:
         form = EventForm()
@@ -100,21 +100,21 @@ def edit_event(request, event_id, event_slug, location_slug=None):
         if form.is_valid():
             event = form.save(commit=False)
             co_organizers = form.cleaned_data.get('co_organizers')
-            print co_organizers
+            logger.debug(co_organizers)
             event.organizers.add(*co_organizers)
             event.save()
             messages.add_message(request, messages.INFO, 'The event has been saved.')
             return HttpResponseRedirect(reverse('gather_view_event', args=(event.location.slug, event.id, event.slug)))
         else:
-            print "form error"
-            print form.errors
+            logger.debug("form error")
+            logger.debug(form.errors)
 
     else:
         # format the organizers as a string for use with the autocomplete field
         other_organizers = event.organizers.exclude(id=current_user.id)
         other_organizer_usernames = [u.username for u in other_organizers]
         other_organizer_usernames_string = ",".join(other_organizer_usernames)
-        print event.organizers.all()
+        logger.debug(event.organizers.all())
         form = EventForm(instance=event, initial={'co_organizers': other_organizer_usernames_string})
     return render(request, 'gather_event_edit.html', {'form': form, 'current_user': current_user, 'event_id': event_id, 'event_slug': event_slug, 'user_list': json.dumps(user_list), 'location': location})
 
@@ -125,14 +125,14 @@ def view_event(request, event_id, event_slug, location_slug=None):
     try:
         event = Event.objects.get(id=event_id)
     except:
-        print 'event not found'
+        logger.debug('event not found')
         return HttpResponseRedirect('/404')
 
     location = get_object_or_404(Location, slug=location_slug)
     # if the slug has changed, redirect the viewer to the correct url (one
     # where the url matches the current slug)
     if event.slug != event_slug:
-        print 'event slug has changed'
+        logger.debug('event slug has changed')
         # there's some tomfoolery here since we don't know for sure if the app
         # is being used in a project that specifies the location as part of the
         # url. probably a better way to do this...
@@ -140,7 +140,7 @@ def view_event(request, event_id, event_slug, location_slug=None):
 
     # is the event in the past?
     today = timezone.now()
-    print event.end
+    logger.debug(event.end)
     if event.end < today:
         past = True
     else:
@@ -347,7 +347,7 @@ def email_preferences(request, username, location_slug=None):
             notifications.location_publish.remove(location)
 
     notifications.save()
-    print notifications.location_weekly.all()
+    logger.debug(notifications.location_weekly.all())
     messages.add_message(request, messages.INFO, 'Your preferences have been updated.')
     return HttpResponseRedirect('/people/%s/' % u.username)
 
@@ -389,10 +389,10 @@ def event_publish(request, event_id, event_slug, location_slug=None):
     if (request.user not in location_event_admin.users.all() and
         request.user not in event.location.house_admins.all() and
         request.user not in event.organizers.all()):
-        print 'user does not have correct permissions to publish event'
+        logger.debug('user does not have correct permissions to publish event')
         return HttpResponseRedirect('/404')
 
-    print request.POST
+    logger.debug(request.POST)
     event.status = Event.LIVE
     event.save()
     if request.user in location_event_admin.users.all():
@@ -489,7 +489,7 @@ def rsvp_event(request, event_id, event_slug, location_slug=None):
         return render(request, "snippets/rsvp_info.html", {"num_attendees": num_attendees, "spots_remaining": spots_remaining, "event": event, 'current_user': user, 'user_is_organizer': user_is_organizer, 'location': location });
 
     else:
-        print 'user was aready attending'
+        logger.debug('user was aready attending')
     return HttpResponse(status=500);
 
 @login_required
@@ -500,8 +500,7 @@ def rsvp_cancel(request, event_id, event_slug, location_slug=None):
 
     user_id_str = request.POST.get('user_id')
 
-    print 'event slug'
-    print event_slug
+    logger.debug('event slug: %s', event_slug)
     event = Event.objects.get(id=event_id)
     user = User.objects.get(pk=int(user_id_str))
     if user in event.organizers.all():
@@ -515,8 +514,8 @@ def rsvp_cancel(request, event_id, event_slug, location_slug=None):
         num_attendees = event.attendees.count()
         spots_remaining = event.limit - num_attendees
         return render(request, "snippets/rsvp_info.html", {"num_attendees": num_attendees, "spots_remaining": spots_remaining, "event": event, 'current_user': user, 'user_is_organizer': user_is_organizer, 'location': location });
-    else:
-        print 'user was not attending'
+
+    logger.debug('user was not attending')
     return HttpResponse(status=500);
 
 def rsvp_new_user(request, event_id, event_slug, location_slug=None):
@@ -524,8 +523,8 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
     if not request.method == 'POST':
         return HttpResponseRedirect('/404')
 
-    print 'in rsvp_new_user'
-    print request.POST
+    logger.debug('in rsvp_new_user')
+    logger.debug(request.POST)
     # get email signup info and remove from form, since we tacked this field on
     # but it's not part of the user model.
     weekly_updates = request.POST.get('weekly-email-notifications')
@@ -534,8 +533,8 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
         weekly_updates = True
     else:
         weekly_updates = False
-    print 'weekly updates?'
-    print weekly_updates
+    logger.debug('weekly updates?')
+    logger.debug(weekly_updates)
     if notify_new == 'on':
         notify_new = True
     else:
@@ -550,7 +549,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
     form.fields['discussion'].required = False
     form.fields['sharing'].required = False
     form.fields['projects'].required = False
-    print form
+    logger.debug(form)
     if form.is_valid():
         new_user = form.save()
         new_user.save()
@@ -571,7 +570,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
         # RSVP new user to the event
         event = Event.objects.get(id=event_id)
         event.attendees.add(new_user)
-        print (event.attendees.all())
+        logger.debug(event.attendees.all())
         event.save()
         messages.add_message(request, messages.INFO, 'Thanks! Your account has been created. Check your email for login info and how to update your preferences.')
         return HttpResponse(status=200)
@@ -579,7 +578,7 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
         errors = json.dumps({"errors": form.errors})
         return HttpResponse(json.dumps(errors))
 
-    return HttpResponse(status=500);
+    return HttpResponse(status=500)
 
 def endorse(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
@@ -588,7 +587,7 @@ def endorse(request, event_id, event_slug, location_slug=None):
 
     event = Event.objects.get(id=event_id)
 
-    print request.POST
+    logger.debug(request.POST)
     endorser = request.user
     event.endorsements.add(endorser)
     event.save()

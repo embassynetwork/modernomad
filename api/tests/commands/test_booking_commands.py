@@ -12,7 +12,7 @@ class CommandErrorMatchers:
     def executeCommandSucceeds(self):
         self.executeCommand()
         if not self.succeeded:
-            print "failed with errors " + str(self.result.errors)
+            print("failed with errors " + str(self.result.errors))
             self.assertEqual(self.succeeded, True)
 
     def executeCommand(self):
