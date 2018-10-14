@@ -15,6 +15,9 @@ ADMINS = (
     ('Jessy Kate Schingler', 'jessy@embassynetwork.com'),
 )
 
+SECRET_KEY = os.getenv('SECRET_KEY', 'mysecret')
+DEBUG = os.getenv('DEBUG', False)
+
 MANAGERS = ADMINS
 
 DATABASES = {
