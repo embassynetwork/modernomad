@@ -568,7 +568,7 @@ def occupancy(request, location_slug):
 
     total_income_for_this_month = income_for_this_month + income_from_past_months
     total_income_during_this_month = income_for_this_month + income_for_future_months + income_for_past_months
-    total_by_rooms = sum(room_income.itervalues())
+    total_by_rooms = sum(room_income.values())
     for room in location_rooms:
         # JKS: it is possible for this to be > 100% if admins overbook a room
         # or book it when it was not listed as available.
