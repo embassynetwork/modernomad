@@ -6,6 +6,10 @@ from graphene_django.filter import DjangoFilterConnectionField
 from datetime import timedelta
 from core.models import Resource, Backing
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AvailabilityNode(graphene.ObjectType):
     date = DateTime()
