@@ -18,21 +18,21 @@ pytz==2015.7
 requests==2.9.1
 six==1.10.0
 stripe
-django-jwt-auth
+django-jwt-auth==0.0.2
 django-webpack-loader==0.3.3
 djangorestframework==3.6.4
-markdown
+markdown==3.0.1
 django-filter==0.15.3
 graphene==1.0
 graphene-django==1.1.0
 graphql-core==1.1
 graphql-relay==0.4.5
-django-graphiql
-django-compressor
-icalendar
-django-ical
-django-extensions
-Werkzeug
+django-graphiql==0.4.4
+django-compressor==2.2
+icalendar==4.0.3
+django-ical==1.5
+django-extensions==2.1.3
+Werkzeug==0.14.1
 django-environ==0.4.3
 
 # the stripe library requires custom arguments which the requirements.txt file
