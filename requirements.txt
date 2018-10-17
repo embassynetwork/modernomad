@@ -20,7 +20,7 @@ six==1.10.0
 stripe
 django-jwt-auth
 django-webpack-loader==0.3.3
-djangorestframework
+djangorestframework==3.6.4
 markdown
 django-filter==0.15.3
 graphene==1.0
