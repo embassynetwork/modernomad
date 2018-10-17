@@ -11,7 +11,7 @@ eventbrite==3.3.3
 kombu==3.0.34
 lxml==3.5.0
 Pillow==3.1.1
-psycopg2==2.6.1
+psycopg2-binary==2.7.5
 python-dateutil==2.5.0
 python-mimeparse==0.1.4
 pytz==2015.7
