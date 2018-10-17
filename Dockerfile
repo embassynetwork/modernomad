@@ -12,6 +12,7 @@ RUN apk add --no-cache \
   libxml2 \
   libxml2-dev \
   nodejs \
+  npm \
   postgresql-dev \
   postgresql-libs \
   zlib \
