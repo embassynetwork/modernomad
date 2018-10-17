@@ -86,3 +86,13 @@ LOGGING = {
         },
     },
 }
+
+# Media storage
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='')
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default='')
+AWS_DEFAULT_ACL = 'public-read'
+if AWS_STORAGE_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = env('MEDIA_URL', default='https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME)
+
