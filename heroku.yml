@@ -1,0 +1,21 @@
+setup:
+  addons:
+    - plan: heroku-postgresql
+    - plan: cloudamqp
+  config:
+    SECRET_KEY: "change-me!"
+    ALLOWED_HOSTS: ".herokuapp.com"
+    MODE: "production"
+build:
+  docker:
+    web: Dockerfile
+release:
+  command:
+    - ./manage.py migrate
+  image: web
+run:
+  web: gunicorn modernomad.wsgi
+  worker:
+    command:
+      - bin/celeryd
+    image: web
