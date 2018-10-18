@@ -35,6 +35,7 @@ import time
 import json
 import datetime
 import stripe
+from stripe.error import CardError
 from django.http import JsonResponse
 from core.booking_calendar import GuestCalendar
 from core.emails import send_booking_receipt, send_subscription_receipt, new_booking_notify
@@ -1561,7 +1562,7 @@ def BookingManageAction(request, location_slug, booking_id):
             days_until_arrival = (booking.use.arrive - datetime.date.today()).days
             if days_until_arrival <= location.welcome_email_days_ahead:
                 guest_welcome(booking.use)
-        except stripe.CardError, e:
+        except CardError, e:
             # raise Booking.ResActionError(e)
             # messages.add_message(request, messages.INFO, "There was an error: %s" % e)
             # status_area_html = render(request, "snippets/res_status_area.html", {"r": booking, 'location': location, 'error': True})
@@ -1867,7 +1868,7 @@ def BillCharge(request, location_slug, bill_id):
 
     try:
         payment = payment_gateway.charge_user(user, bill, charge_amount_dollars, reference)
-    except stripe.CardError, e:
+    except CardError, e:
         messages.add_message(request, messages.INFO, "Charge failed with the following error: %s" % e)
         if bill.is_booking_bill():
             return HttpResponseRedirect(reverse('booking_manage', args=(location_slug, bill.bookingbill.booking.id)))
@@ -2058,10 +2059,10 @@ def submit_payment(request, booking_uuid, location_slug):
                     bill=booking.bill,
                     user=pay_user,
                     payment_service="Stripe",
-                    payment_method=charge.card.brand,
+                    payment_method=charge.source.brand,
                     paid_amount=(charge.amount / 100.00),
                     transaction_id=charge.id,
-                    last4=charge.card.last4
+                    last4=charge.source.last4
                 )
 
                 if booking.bill.total_owed() <= 0.0:

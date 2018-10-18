@@ -36,14 +36,6 @@ initialize webpack here???
 - Edit webpack.config.js and in the output.publicPath setting, replace `localhost` if necessary with your public IP or hostname. E.g. ` publicPath: 'http://myhousingnetwork:3000/build/'`
 
 
-note that the stripe library requires custom arguments which the
-requirements.txt file parsing [apparently doesn't
-support](https://github.com/pypa/pip/pull/515) (as of november 2012), so
-install it manually on the command line using:
-
-- `pip install --index-url https://code.stripe.com --upgrade stripe`
-
-
 ## configuration file
 create your own local_settings.py file from local_settings.example.py. inside the modernomad/modernomad directory, do the following:
 - `cp local_settings.example.py local_settings.py`
