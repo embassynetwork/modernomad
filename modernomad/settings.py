@@ -170,7 +170,8 @@ COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
 
-TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
+# FIXME: disabled. see https://github.com/embassynetwork/modernomad/issues/302
+# TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
