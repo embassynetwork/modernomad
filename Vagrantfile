@@ -80,7 +80,6 @@ $userScript = <<SCRIPT
 
   mkvirtualenv modernomad
   yes | pip install -r requirements.txt
-  yes | pip install --index-url https://code.stripe.com --upgrade stripe
 
   if [ ! -f modernomad/local_settings.py ]; then
   	SECURE_RANDOM=$(dd if=/dev/urandom count=1 bs=28 2>/dev/null | od -t x1 -A n)

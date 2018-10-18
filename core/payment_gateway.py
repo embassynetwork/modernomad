@@ -93,19 +93,14 @@ def stripe_charge_user(user, bill, amount_dollars, reference):
             description= reference
         )
 
-    logger.debug('charge obj')
-    logger.debug(charge)
-    logger.debug('--- charge.card.last4')
-    logger.debug(charge.card.last4)
-
     # Store the charge details in a Payment object
     return Payment.objects.create(bill=bill,
         user = user,
         payment_service = "Stripe",
-        payment_method = charge.card.brand,
+        payment_method = charge.source.brand,
         paid_amount = amount_dollars,
         transaction_id = charge.id,
-        last4 = charge.card.last4
+        last4 = charge.source.last4
     )
 
 def stripe_charge_booking(booking):
@@ -126,19 +121,14 @@ def stripe_charge_booking(booking):
             description=descr
         )
 
-    logger.debug('charge obj')
-    logger.debug(charge)
-    logger.debug('--- charge.card.last4')
-    logger.debug(charge.card.last4)
-
     # Store the charge details in a Payment object
     return Payment.objects.create(bill=booking.bill,
         user = booking.use.user,
         payment_service = "Stripe",
-        payment_method = charge.card.brand,
+        payment_method = charge.source.brand,
         paid_amount = amt_owed,
         transaction_id = charge.id,
-        last4 = charge.card.last4
+        last4 = charge.source.last4
     )
 
 def stripe_issue_refund(payment, refund_amount=None):

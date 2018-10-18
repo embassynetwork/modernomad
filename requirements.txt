@@ -35,8 +35,3 @@ requests==2.9.1
 six==1.11.0
 stripe==2.10.1
 Werkzeug==0.14.1
-
-# the stripe library requires custom arguments which the requirements.txt file
-# parsing apparently doesn't support, so install it manually on the command
-# line using:
-# pip install --index-url https://code.stripe.com --upgrade stripe
