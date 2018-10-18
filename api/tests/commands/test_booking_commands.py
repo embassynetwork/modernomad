@@ -26,7 +26,7 @@ class CommandErrorMatchers:
     def assertModelSaved(self, model, values={}):
         self.assertTrue(model)
         self.assertTrue(model.pk)
-        for key, value in values.iteritems():
+        for key, value in values.items():
             self.assertEqual(getattr(model, key), value)
 
 

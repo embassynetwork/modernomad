@@ -131,6 +131,6 @@ class FormCommand(Command):
 
     def _append_form_errors(self):
         if self.form.errors:
-            for field_name, messages in self.form.errors.iteritems():
+            for field_name, messages in self.form.errors.items():
                 for message in messages:
                     self.add_error(field_name, message)
