@@ -8,7 +8,7 @@ django-compressor==2.2
 django-debug-toolbar==1.5
 django-environ==0.4.3
 django-extensions==2.1.3
-django-filter==0.15.3
+django-filter==2.0.0
 django-flatpages-tinymce==0.1.1
 django-graphiql==0.4.4
 django-ical==1.5
@@ -18,9 +18,9 @@ django-webpack-loader==0.3.3
 Django==1.11.16
 djangorestframework==3.6.4
 eventbrite==3.3.3
-graphene-django==1.1.0
-graphene==1.0
-graphql-core==1.1
+graphene-django==2.2.0
+graphene<3,>=2.1.3
+graphql-core<3,>=2.1.0
 graphql-relay==0.4.5
 icalendar==4.0.3
 kombu==3.0.34

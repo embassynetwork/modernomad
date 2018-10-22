@@ -11,7 +11,6 @@ class EventNode(DjangoObjectType):
     class Meta:
         model = Event
         filter_fields = ['slug', 'title']
-        filter_order_by = ['slug']
 
     def resolve_url(self, args, *_):
         return "/locations/" + self.location.slug + "/events/" + str(self.id) + "/" + self.slug + "/"

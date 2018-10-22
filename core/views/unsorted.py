@@ -7,7 +7,6 @@ from django.shortcuts import render
 from django.db import transaction
 from PIL import Image
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import RequestContext
 from core.forms import BookingUseForm, AdminBookingForm, UserProfileForm, SubscriptionEmailTemplateForm
 from core.forms import BookingEmailTemplateForm, PaymentForm, AdminSubscriptionForm, LocationSettingsForm
 from core.forms import LocationUsersForm, LocationContentForm, LocationPageForm, LocationMenuForm, LocationRoomForm
@@ -45,7 +44,6 @@ from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
-from django.template import Context
 from django.core.serializers.json import DjangoJSONEncoder
 import logging
 from django.views.decorators.csrf import csrf_exempt
@@ -1993,7 +1991,7 @@ def payments_today(request, location_slug):
     today = timezone.localtime(timezone.now())
     return HttpResponseRedirect(
         reverse(
-            'core.views.unsorted.payments',
+            'location_payments',
             args=[],
             kwargs={'location_slug': location_slug, 'year': today.year, 'month': today.month}
         )
@@ -2345,7 +2343,7 @@ def user_login(request):
             return HttpResponseRedirect(next_page)
 
     # redirect to the login page if there was a problem
-    return render(request, 'registration/login.html', context_instance=RequestContext(request))
+    return render(request, 'registration/login.html')
 
 
 def register(request):

@@ -13,8 +13,8 @@ from django.utils.html import strip_tags
 def index(request):
     recent_events = Event.objects.order_by('-start')[:10]
     locations = Location.objects.filter(visibility='public')
-
-    return render(request, "index.html", {'locations': locations, 'recent_events': recent_events})
+    context = {'locations': locations, 'recent_events': recent_events}
+    return render(request, "index.html", context)
 
 def about(request):
     return render(request, "about.html")

@@ -21,7 +21,6 @@ class OccupantNode(DjangoObjectType):
         model = Use
         interfaces = (Node, )
         filter_fields = ['arrive', 'location']
-        filter_order_by = True
 
     def resolve_occupants_during(self, args, *_):
         query = (

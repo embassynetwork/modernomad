@@ -15,7 +15,6 @@ try:
 except ImportError:
     from django.template.loader import get_template
 
-from django.template import Context
 from django.utils import timezone
 
 from .view_helpers import _get_user_and_perms
@@ -202,13 +201,13 @@ def BookingReceipt(request, location_slug, booking_id):
 
     # I want to render the receipt exactly like we do in the email
     htmltext = get_template('emails/receipt.html')
-    c = Context({
+    c = {
         'today': timezone.localtime(timezone.now()),
         'user': booking.use.user,
         'location': booking.use.location,
         'booking': booking,
         'booking_url': "https://" + Site.objects.get_current().domain + booking.get_absolute_url()
-        })
+    }
     receipt_html = htmltext.render(c)
 
     return render(

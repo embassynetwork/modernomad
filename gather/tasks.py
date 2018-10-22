@@ -8,7 +8,6 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.loader import get_template
-from django.template import Context
 from django.core import urlresolvers
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
@@ -42,17 +41,17 @@ def send_events_list(user, event_list, location):
     day_of_week = weekday_number_to_name[today_local.weekday()]
     plaintext = get_template('emails/events_today.txt')
     domain = Site.objects.get_current().domain
-    c = Context({
-            'user': user,
-            'events': event_list,
-            'location_name': location.name,
-            'location': location,
-            'domain': domain,
-            "footer": footer,
-            "day_of_week": day_of_week
-            })
+    c = {
+        'user': user,
+        'events': event_list,
+        'location_name': location.name,
+        'location': location,
+        'domain': domain,
+        "footer": footer,
+        "day_of_week": day_of_week
+    }
     text_content = plaintext.render(c)
-    mailgun_data={
+    mailgun_data = {
             "from": sender,
             "to": user.email,
             "subject": subject,
@@ -76,29 +75,29 @@ def weekly_reminder_email(user, event_list, location):
     htmltext = get_template('emails/events_this_week.html')
     domain = Site.objects.get_current().domain
 
-    c_text = Context({
-            'user': user,
-            'events': event_list,
-            'location_name': location_name,
-            'location': location,
-            'domain': domain,
-            "footer": footer,
-            "week_name": week_name
-            })
+    c_text = {
+        'user': user,
+        'events': event_list,
+        'location_name': location_name,
+        'location': location,
+        'domain': domain,
+        "footer": footer,
+        "week_name": week_name
+    }
     text_content = plaintext.render(c_text)
 
-    c_html = Context({
-            'user': user,
-            'events': event_list,
-            'location_name': location_name,
-            'location': location,
-            'domain': domain,
-            "footer": footer,
-            "week_name": week_name
-            })
+    c_html = {
+        'user': user,
+        'events': event_list,
+        'location_name': location_name,
+        'location': location,
+        'domain': domain,
+        "footer": footer,
+        "week_name": week_name
+    }
     html_content = htmltext.render(c_html)
 
-    mailgun_data={
+    mailgun_data = {
             "from": sender,
             "to": user.email,
             "subject": subject,
