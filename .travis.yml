@@ -8,6 +8,8 @@ cache:
     - node_modules
 services:
   - postgresql
+env:
+  - DJANGO_SETTINGS_MODULE=modernomad.settings.local
 install:
   - "pip install -U pip wheel"
   - "nvm install 8"
@@ -15,7 +17,6 @@ install:
 before_script:
   - "cd client && npm install && cd .."
   - "cd client && ./node_modules/.bin/webpack --config webpack.prod.config.js && cd .."
-  - "cp modernomad/local_settings.travis.py modernomad/local_settings.py"
 script: ./manage.py test
 notifications:
   slack:

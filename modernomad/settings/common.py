@@ -22,7 +22,7 @@ DEBUG = False
 TEMPLATE_DEBUG = False
 
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', '')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 
 DATABASES = {
     'default': env.db('DATABASE_URL', default='postgres://postgres@postgres/postgres'),
@@ -71,7 +71,7 @@ if AWS_STORAGE_BUCKET_NAME:
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = BASE_DIR / 'static'
-STATICFILES_DIRS = ('static', 'client/dist')
+STATICFILES_DIRS = ('client/dist',)
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -152,6 +152,8 @@ WEBPACK_LOADER = {
     }
 }
 
+
+
 INSTALLED_APPS = [
     # django stuff
     'django.contrib.auth',
@@ -169,7 +171,7 @@ INSTALLED_APPS = [
     'compressor',
     'django_behave',
     'django_extensions',
-    'django_filters'
+    'django_filters',
     'django_graphiql',
     'djcelery',
     'graphene_django',
