@@ -20,7 +20,7 @@ def create_transaction(reason, amount, from_account, to_account):
         assert t.valid
         return True
     except:
-        print 'transaction was invalid. please check transaction ids %d and %d' % (e1.id, e2.id)
+        print('transaction was invalid. please check transaction ids %d and %d' % (e1.id, e2.id))
         return False
 
 # Create your views here.
@@ -52,8 +52,8 @@ class AccountList(View):
 
     @method_decorator(login_required)
     def post(self, request):
-        print 'IN POST'
-        print request.POST
+        print('IN POST')
+        print(request.POST)
         transaction_form = self.form_class(request.user, request.POST)
         if transaction_form.is_valid():
             to_account_id = request.POST.get('to_account')
@@ -73,8 +73,8 @@ class AccountList(View):
 
             # check if balances are valid
             try:
-                print from_account.get_balance()
-                print amount
+                print(from_account.get_balance())
+                print(amount)
                 assert from_account.get_balance() >= amount
             except AssertionError:
                 messages.add_message(request, messages.INFO, "Insufficient balance on source account %s (%d)" % (from_account.name, from_account.id))
@@ -88,13 +88,13 @@ class AccountList(View):
                 prerequisites_met = False
 
             if prerequisites_met:
-                success = create_transaction(reason, amount, from_account, to_account) 
+                success = create_transaction(reason, amount, from_account, to_account)
                 if success:
                     messages.add_message(request, messages.INFO, "Submitted")
                 else:
                     messages.add_message(request, messages.INFO, "Oops, something went wrong. Please try again.")
         else:
-            print transaction_form.errors
+            print(transaction_form.errors)
             messages.add_message(request, messages.INFO, "The form contained errors, your transfer was not completed. %s" % transaction_form.errors)
 
         return redirect("account_list")

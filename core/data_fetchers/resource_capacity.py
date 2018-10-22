@@ -34,11 +34,11 @@ class SerializedResourceCapacity:
 
     def current_capacity(self):
         record = self.resource_capacity.current_capacity()
-        return self.__serializeRecord(record)
+        return self._serializeRecord(record)
 
     def upcoming_capacities(self):
         capacities = self.resource_capacity.upcoming_capacities()
-        return map(self.__serializeRecord, capacities)
+        return self._serializeRecord(capacities)
 
     def as_dict(self):
         return {
@@ -47,5 +47,5 @@ class SerializedResourceCapacity:
             'upcomingCapacities': self.upcoming_capacities()
         }
 
-    def __serializeRecord(self, record):
+    def _serializeRecord(self, record):
         return CapacityChangeSerializer(record).data if record else None

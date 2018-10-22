@@ -36,7 +36,6 @@ source bin/activate
 git clone https://github.com/jessykate/modernomad.git
 cd modernomad
 pip install -r requirements.txt
-pip install --index-url https://code.stripe.com --upgrade stripe
 pip install gunicorn
 pip install psycopg2
 

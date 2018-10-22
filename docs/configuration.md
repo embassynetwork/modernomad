@@ -25,6 +25,16 @@ The majority of the configuration is around
   connected with the house and its activities. They are sent to guests in the
   welcome email so make sure to populate these. 
 
+## Stripe in development
+
+If you want to test Stripe payments, you need to set up an account and get some test keys.
+
+First, [create an account](https://dashboard.stripe.com/register). On the left-hand menu, click "Developers", then "API Keys".
+
+**Important:** Make sure the keys start with `pk_test_` and `sk_test_` otherwise you will be charging real credit cards!
+
+Copy and paste these keys into your `local_settings.py` file. If you're using Docker, they go in the `.env` file.
+
 ## Local Settings
 
 - While getting set up, leave the MODE set to DEVELOPMENT

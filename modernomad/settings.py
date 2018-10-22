@@ -15,6 +15,9 @@ ADMINS = (
     ('Jessy Kate Schingler', 'jessy@embassynetwork.com'),
 )
 
+DEBUG = os.getenv('DEBUG', False)
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', default='')
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -203,7 +206,7 @@ LIST_DOMAIN = "example.com"
 
 # import any local settings
 try:
-    from local_settings import *
+    from .local_settings import *
 except ImportError:
     pass
 

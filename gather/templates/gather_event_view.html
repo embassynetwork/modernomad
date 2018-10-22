@@ -6,6 +6,8 @@
     <meta property="og:url" content="https://{{domain}}{% url 'gather_view_event' event.location.slug event.id event.slug %}" />
     <meta property="og:description" content="{{event.description|striptags}}"/>
 {% endblock %}
+{% block pagetitle %}Embassy Network - {{location.name}} Events - {{event.title}}{% endblock %}
+
 
 {% block content %}
 
@@ -30,7 +32,7 @@
             </div>
             <div class="modal-body">
                 <h4>We need a bit more info to keep you posted on this event. </h4>
-                <p><em>Already a member? <a href="{% url 'user_login' %}">Login instead</a></em></p>
+                <p><em>Already a member? <a href="{% url 'user_login' %}?next={ request.path|urlencode }">Login instead</a></em></p>
                 <div id="new-user-form-errors"></div>
                 <form id="new-user-form" class="form-horizontal">
                     <div class="form-group">
@@ -258,7 +260,7 @@
             password2: "The passwords do not match.",
             email: {
                 strictEmail: "Please provide a valid email address.",
-                remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}'>login</a> page."
+                remote: "This email address is already in use. If you need to log in, please visit the <a href='{% url 'user_login' %}?next={ request.path|urlencode }'>login</a> page."
             },
             username: {
                 remote: "This username is already taken. Please choose another."

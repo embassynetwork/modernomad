@@ -7,6 +7,9 @@ from django import template
 from django.utils.html import linebreaks
 from django.conf import settings
 
+import logging
+
+logger = logging.getLogger(__name__)
 register = template.Library()
 
 SCALE_WIDTH = 'w'
@@ -35,9 +38,10 @@ def crop(file, size_param="300x255"):
                 image.save(miniature_filename, image.format)
                 fit_crop(miniature_filename, width, height)
         return miniature_url
-    except:
-        print 'Could not crop file: %s' % file
+    except Exception as e:
+        logger.exception('Could not crop file: %s' % file)
         return ''
+
 register.filter('crop', crop)
 
 def squarecrop(file, size_param='100'):
@@ -56,9 +60,11 @@ def squarecrop(file, size_param='100'):
             image.save(miniature_filename, image.format)
             fit_crop(miniature_filename, size, size)
         return miniature_url
-    except:
-        print 'Could not squarecrop file: %s' % file
+    except Exception as e:
+        logger.exception('Could not squarecrop file: %s' % file)
         return ''
+
+
 register.filter('squarecrop', squarecrop)
 
 def fit_image(file, size_param="300x300"):
@@ -72,7 +78,7 @@ def fit_image(file, size_param="300x300"):
         filename, miniature_filename, miniature_dir, miniature_url = determine_resized_image_paths(file, 'fit_' + size_param)
         if os.path.isdir(miniature_filename): return ''
         if not os.path.exists(miniature_dir): os.makedirs(miniature_dir)
-        if os.path.exists(miniature_filename) and os.path.getmtime(filename) > os.path.getmtime(miniature_filename): 
+        if os.path.exists(miniature_filename) and os.path.getmtime(filename) > os.path.getmtime(miniature_filename):
             os.unlink(miniature_filename)
 
         if not os.path.exists(miniature_filename):
@@ -80,10 +86,11 @@ def fit_image(file, size_param="300x300"):
             image.save(miniature_filename, image.format)
             fit(miniature_filename, width, height)
         return miniature_url
-    except:
-        traceback.print_exc()
-        print "Could not fit_image %s" % file
+    except Exception as e:
+        logger.exception("Could not fit_image %s" % file)
         return ''
+
+
 register.filter('fit_image', fit_image)
 
 # Thumbnail filter based on code from http://batiste.dosimple.ch/blog/2007-05-13-1/
@@ -103,17 +110,19 @@ def thumbnail(file, size='300w'):
 
         if not os.path.exists(miniature_filename):
             image = Image.open(filename)
-            image_x, image_y = image.size  
+            image_x, image_y = image.size
             if mode == SCALE_HEIGHT:
                 image_y, image_x = calc_scale(max_size, (image_y, image_x))
             else:
                 image_x, image_y = calc_scale(max_size, (image_x, image_y))
             image = image.resize((image_x, image_y), Image.ANTIALIAS) # .convert("L") is the Black and White hack
-            image.save(miniature_filename, image.format)        
+            image.save(miniature_filename, image.format)
         return miniature_url
-    except:
-        print "Could not load image %s" % filename
+    except Exception as e:
+        logger.exception("Could not load image %s" % filename)
         return ''
+
+
 register.filter('thumbnail', thumbnail)
 
 def determine_resized_image_paths(file, size_mark):
@@ -142,7 +151,7 @@ def fit(file_path, max_width=None, max_height=None, save_as=None):
     h = int(max_height or h)
     img.thumbnail((w, h), Image.ANTIALIAS)
     img.save(save_as or file_path)
-    
+
     return True
 
 def fit_crop(file_path, max_width=None, max_height=None, save_as=None):
