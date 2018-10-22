@@ -2,7 +2,6 @@ from django.contrib.sites.models import Site
 from django.core import urlresolvers
 from django.conf import settings
 from django.template.loader import get_template
-from django.template import Context
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
@@ -44,17 +43,18 @@ def new_event_notification(event, location):
     subject = '[' + location.email_subject_prefix + ']' + " A new event has been created: %s" % event_short_title
     from_address = location.from_email()
     plaintext = get_template('emails/new_event_notify.txt')
-    c = Context({
+    c = {
         'event': event,
         'location': location,
-        'domain' : Site.objects.get_current().domain,
-    })
+        'domain': Site.objects.get_current().domain,
+    }
     body_plain = plaintext.render(c)
-    mailgun_data={"from": from_address,
-            "to": recipients,
-            "subject": subject,
-            "text": body_plain,
-        }
+    mailgun_data = {
+        "from": from_address,
+        "to": recipients,
+        "subject": subject,
+        "text": body_plain,
+    }
     return mailgun_send(mailgun_data)
 
 def event_approved_notification(event, location):
@@ -64,13 +64,14 @@ def event_approved_notification(event, location):
     subject = '[' + location.email_subject_prefix + ']' + " Your event is ready to be published"
     from_address = location.from_email()
     plaintext = get_template('emails/event_approved_notify.txt')
-    c = Context({
+    c = {
         'event': event,
-        'domain' : Site.objects.get_current().domain,
+        'domain': Site.objects.get_current().domain,
         'location': location,
-    })
+    }
     body_plain = plaintext.render(c)
-    mailgun_data={"from": from_address,
+    mailgun_data = {
+        "from": from_address,
         "to": recipients,
         "subject": subject,
         "text": body_plain,
@@ -90,13 +91,14 @@ def event_published_notification(event, location):
     subject = '[' + location.email_subject_prefix + ']' + " Your event is now live: %s" % event_short_title
     from_address = location.from_email()
     plaintext = get_template('emails/event_published_notify.txt')
-    c = Context({
+    c = {
         'event': event,
         'domain' : Site.objects.get_current().domain,
         'location': location,
-    })
+    }
     body_plain = plaintext.render(c)
-    mailgun_data={"from": from_address,
+    mailgun_data = {
+        "from": from_address,
         "to": recipients,
         "subject": subject,
         "text": body_plain,
@@ -113,18 +115,17 @@ def event_published_notification(event, location):
     htmltext = get_template('emails/new_event_announce.html')
     domain = Site.objects.get_current().domain
 
-
-    c_text = Context({
+    c_text = {
         'event': event,
         'domain' : Site.objects.get_current().domain,
         'location': location,
-    })
+    }
     text_content = plaintext.render(c_text)
-    c_html = Context({
+    c_html = {
         'event': event,
         'domain' : Site.objects.get_current().domain,
         'location': location,
-    })
+    }
     html_content = htmltext.render(c_html)
 
     for subscriber in subscribed_users:

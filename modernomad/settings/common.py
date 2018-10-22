@@ -96,6 +96,36 @@ LIST_DOMAIN = env('LIST_DOMAIN', default='somedomain.com')
 GOOGLE_ANALYTICS_PROPERTY_ID = env('GOOGLE_ANALYTICS_PROPERTY_ID', default='')
 GOOGLE_ANALYTICS_DOMAIN = env('GOOGLE_ANALYTICS_DOMAIN', default='example.com')
 
+TEMPLATES = [
+{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS' : [
+        # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        path("../templates/"),
+        path("core/templates/"),
+    ],
+    # default template context processors
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            "django.contrib.auth.context_processors.auth",
+            "django.template.context_processors.debug",
+            "django.template.context_processors.i18n",
+            "django.template.context_processors.media",
+            "django.template.context_processors.static",
+            "django.template.context_processors.tz",
+            "django.template.context_processors.request",
+            "django.contrib.messages.context_processors.messages",
+            "core.context_processors.location.location_variables",
+            "core.context_processors.location.network_locations",
+            "core.context_processors.analytics.google_analytics",
+        ],
+    },
+},
+]
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

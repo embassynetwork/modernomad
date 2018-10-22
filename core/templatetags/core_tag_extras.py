@@ -1,7 +1,7 @@
 from django import template
 from django.template.defaultfilters import stringfilter
 import itertools
-from django.template import resolve_variable, NodeList
+from django.template import NodeList
 from django.contrib.auth.models import Group
 
 register = template.Library()
@@ -10,7 +10,7 @@ register = template.Library()
 @stringfilter
 def split(value, arg):
     ''' split the string 'value' on all occurences of 'arg' '''
-    return value.split(arg) 
+    return value.split(arg)
 
 
 @register.filter
@@ -19,7 +19,7 @@ def subsets_size(value, set_size):
     containing the remainder if less than set_size. use like so:
         {% for subset in coming_month|subsets_size: 6 %}
         ...
-        {% endfor %} 
+        {% endfor %}
     '''
 
     set_len = int(set_size)
@@ -46,16 +46,16 @@ def ifusergroup(parser, token):
         tag, group = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("Tag 'ifusergroup' requires 1 argument.")
-    
+
     nodelist_true = parser.parse(('else', 'endifusergroup'))
     token = parser.next_token()
-    
+
     if token.contents == 'else':
         nodelist_false = parser.parse(('endifusergroup',))
         parser.delete_first_token()
     else:
         nodelist_false = NodeList()
-    
+
     return GroupCheckNode(group, nodelist_true, nodelist_false)
 
 
@@ -64,21 +64,19 @@ class GroupCheckNode(template.Node):
         self.group = group
         self.nodelist_true = nodelist_true
         self.nodelist_false = nodelist_false
+
     def render(self, context):
-        user = resolve_variable('user', context)
-        
+        user = template.Variable('user').resolve(context)
+
         if user is None or not user.is_authenticated():
             return self.nodelist_false.render(context)
-            
+
         try:
             for group in self.group.split("|"):
-                
+
                 if Group.objects.get(name=group) in user.groups.all():
                     return self.nodelist_true.render(context)
-
         except Group.DoesNotExist:
             return self.nodelist_false.render(context)
-            
-        
         return self.nodelist_false.render(context)
 
