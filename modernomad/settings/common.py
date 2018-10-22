@@ -3,29 +3,29 @@ import os
 import datetime
 import sys
 from pathlib import Path
+import environ
+
+env = environ.Env()
 
 BASE_DIR = Path.cwd()
 BACKUP_ROOT = BASE_DIR / 'backups'
 
-ADMINS = (
-    ('Jessy Kate Schingler', 'jessy@embassynetwork.com'),
-)
+ADMINS = ((
+    env('ADMIN_NAME', default='Unnamed'),
+    env('ADMIN_EMAIL', default='none@example.com')
+),)
+
 MANAGERS = ADMINS
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 DEBUG = False
 TEMPLATE_DEBUG = False
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'mysecret')
-STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', default='')
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', '')
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'USER': 'postgres',
-        'NAME': os.environ['POSTGRES_NAME'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-    }
+    'default': env.db('DATABASE_URL', default='postgres://postgres@postgres/postgres'),
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -58,6 +58,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = "/media/"
 
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default='')
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default='')
+AWS_DEFAULT_ACL = 'public-read'
+if AWS_STORAGE_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = env('MEDIA_URL', default='https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME)
+
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
@@ -78,14 +86,15 @@ AUTHENTICATION_BACKENDS = (
 )
 
 EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
-MAILGUN_API_KEY = os.getenv('MAILGUN_APIKEY', '')
-# this will be used as the subject line prefix for all emails sent from this app.
-EMAIL_SUBJECT_PREFIX = os.getenv('EMAIL_SUBJECT', '[Embassy Network] ')
-DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM', 'stay@embassynetwork.com')
-LIST_DOMAIN = "mail.embassynetwork.com"
+MAILGUN_API_KEY = env('MAILGUN_API_KEY', default='')
 
-GOOGLE_ANALYTICS_PROPERTY_ID = os.getenv('GA_PROPERTY_ID', '')
-GOOGLE_ANALYTICS_DOMAIN = 'embassynetwork.com'
+# this will be used as the subject line prefix for all emails sent from this app.
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='stay@example.com')
+LIST_DOMAIN = env('LIST_DOMAIN', default='somedomain.com')
+
+GOOGLE_ANALYTICS_PROPERTY_ID = env('GOOGLE_ANALYTICS_PROPERTY_ID', default='')
+GOOGLE_ANALYTICS_DOMAIN = env('GOOGLE_ANALYTICS_DOMAIN', default='example.com')
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -187,10 +196,6 @@ COMPRESS_PRECOMPILERS = (
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 
-# Discourse discussion group
-DISCOURSE_BASE_URL = 'http://your-discourse-site.com'
-DISCOURSE_SSO_SECRET = 'paste_your_secret_here'
-
 # If we add a page for the currently-logged-in user to view and edit
 # their profile, we might want to use that here instead.
 LOGIN_REDIRECT_URL = '/'
@@ -198,11 +203,15 @@ LOGIN_URL = '/people/login/'
 LOGOUT_URL = '/people/logout/'
 
 # Celery configuration options
-BROKER_URL = "amqp://guest:guest@localhost:5672//"
+BROKER_URL = env(
+    'BROKER_URL',
+    default=env('CLOUDAMQP_URL', default='amqp://guest:guest@localhost:5672//')
+)
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 CELERY_ACCEPT_CONTENT = ['json', 'yaml']
+CELERY_RESULT_BACKEND = BROKER_URL
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -214,6 +223,58 @@ NOSE_ARGS = [
     '--nocapture',
     '--nologcapture'
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': './django.log',
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+            'formatter': 'verbose',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'core': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'modernomad': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+        'gather': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+    },
+}
 
 
 class DisableMigrations(object):
