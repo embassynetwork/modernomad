@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from modernomad.urls import user
-from modernomad import settings
+from django.conf import settings
 from django.views.generic import RedirectView
 from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework import routers, serializers, viewsets
