@@ -1,4 +1,4 @@
-FROM python:2-alpine
+FROM 3.6.6-alpine3.8
 
 # So Pillow can find zlib
 ENV LIBRARY_PATH /lib:/usr/lib
@@ -38,8 +38,7 @@ RUN cd client && node_modules/.bin/webpack --config webpack.prod.config.js
 
 # Set configuration last so we can change this without rebuilding the whole
 # image
-ENV DJANGO_SETTINGS_MODULE modernomad.settings_docker
-ENV MODE PRODUCTION
+ENV DJANGO_SETTINGS_MODULE modernomad.settings.production
 # Number of gunicorn workers
 ENV WEB_CONCURRENCY 3
 EXPOSE 8000
