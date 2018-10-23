@@ -25,7 +25,7 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='sqlite://modernomad.db'),
+    'default': env.db('DATABASE_URL', default='sqlite:///modernomad.db'),
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -152,8 +152,6 @@ WEBPACK_LOADER = {
     }
 }
 
-
-
 INSTALLED_APPS = [
     # django stuff
     'django.contrib.auth',
@@ -243,13 +241,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': './django.log',
-            'formatter': 'verbose',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-            'formatter': 'verbose',
+            'formatter': 'simple',
         }
     },
     'loggers': {
@@ -259,7 +251,7 @@ LOGGING = {
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['file', 'mail_admins'],
+            'handlers': ['file'],
             'level': 'INFO',
             'propagate': True,
         },
