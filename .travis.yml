@@ -10,11 +10,13 @@ services:
   - postgresql
 env:
   - DJANGO_SETTINGS_MODULE=modernomad.settings.local
+    DATABASE_URL=postgres://postgres@localhost/test_db
 install:
   - "pip install -U pip wheel"
   - "nvm install 8"
   - "pip install -r requirements.txt -r requirements.test.txt"
 before_script:
+  - psql -c 'create database test_db;' -U postgres
   - "cd client && npm install && cd .."
   - "cd client && ./node_modules/.bin/webpack --config webpack.prod.config.js && cd .."
 script: ./manage.py test
