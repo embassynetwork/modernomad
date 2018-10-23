@@ -25,7 +25,7 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres://postgres@postgres/postgres'),
+    'default': env.db('DATABASE_URL', default='sqlite://modernomad.db'),
 }
 
 # Local time zone for this installation. Choices can be found here:
