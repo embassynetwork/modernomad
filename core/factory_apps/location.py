@@ -1,28 +1,8 @@
-from faker import Faker
-from fakers.providers import lorem
-from fakers.providers import profile
-from fakers.providers import address
-from faker.providers import BaseProvider
-import factory
+from . import factory
 from core.models import Location
 from core.models import Resource
 from core.models import LocationFee
-from core.models import Fee
-
-factory.Faker.add_provider(lorem)
-factory.Faker.add_provider(profile)
-factory.Faker.add_provider(address)
-
-
-class Provider(BaseProvider):
-    # Note that the class name _must_ be ``Provider``.
-    def slug(self, provider):
-        fake = Faker()
-        value = getattr(fake, provider)()
-        return value.replace(' ', '-')
-
-
-factory.Faker.add_provider(Provider)
+from .booking import FeeFactory
 
 
 class LocationFactory(factory.DjangoModelFactory):
@@ -62,7 +42,6 @@ class LocationFactory(factory.DjangoModelFactory):
     check_in = factory.faker('word')
     visibility = factory.Iterator(['public', 'members', 'link'])
 
-
     @factory.post_generation
     def house_admins(self, create, extracted, **kwargs):
         if not create:
@@ -97,3 +76,12 @@ class ResourceFactory(factory.DjangoModelFactory):
     summary = factory.faker('sentence')
     cancellation_policy = factory.faker('text')
     image = factory.django.ImageField(color='green')
+
+
+class LocationFeeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = LocationFee
+
+    location = factory.SubFactory(LocationFactory)
+    fee = factory.SubFactory(FeeFactory)
+
