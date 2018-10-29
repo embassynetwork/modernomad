@@ -1,13 +1,12 @@
-import uuid, os, datetime
+import uuid
+import os
 import logging
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.utils import timezone
-from PIL import Image
-import requests
 
 from core.models import Location
 
@@ -26,6 +25,7 @@ class EventAdminGroup(models.Model):
     class Meta:
         app_label = 'gather'
 
+
 class EventSeries(models.Model):
     ''' Events may be associated with a series. A series has a name and
     desciption, and its own landing page which lists the associated events. '''
@@ -38,6 +38,7 @@ class EventSeries(models.Model):
     class Meta:
         app_label = 'gather'
 
+
 def event_img_upload_to(instance, filename):
     ext = filename.split('.')[-1]
     # rename file to random string
@@ -49,16 +50,21 @@ def event_img_upload_to(instance, filename):
         os.makedirs(upload_abs_path)
     return os.path.join(upload_path, filename)
 
+
 class EventManager(models.Manager):
     def upcoming(self, upto=None, current_user=None, location=None):
         # return the events happening today or in the future, returning up to
         # the number of events specified in the 'upto' argument.
         today = timezone.now()
         logger.debug(today)
+        qs = super().get_queryset()
+        upcoming = qs.filter(end__gte=today).exclude(
+            status=Event.CANCELED
+        ).order_by('start')
 
-        upcoming = super(EventManager, self).get_queryset().filter(end__gte = today).exclude(status=Event.CANCELED).order_by('start')
         if location:
             upcoming = upcoming.filter(location=location)
+
         viewable_upcoming = []
         for event in upcoming:
             if event.is_viewable(current_user):
@@ -71,7 +77,7 @@ class EventManager(models.Manager):
     class Meta:
         app_label = 'gather'
 
-# Create your models here.
+
 class Event(models.Model):
     PENDING = 'waiting for approval'
     FEEDBACK = 'seeking feedback'
@@ -106,15 +112,15 @@ class Event(models.Model):
     description = models.TextField(help_text="Basic HTML markup is supported for your event description.")
     image = models.ImageField(upload_to=event_img_upload_to)
     attendees = models.ManyToManyField(User, related_name="events_attending", blank=True)
-    notifications = models.BooleanField(default = True)
+    notifications = models.BooleanField(default=True)
     # where, site, place, venue
-    where = models.CharField(verbose_name = 'Where will the event be held?', max_length=500, help_text="Either a specific room at this location or an address if elsewhere")
+    where = models.CharField(verbose_name='Where will the event be held?', max_length=500, help_text="Either a specific room at this location or an address if elsewhere")
     creator = models.ForeignKey(User, related_name="events_created")
     organizers = models.ManyToManyField(User, related_name="events_organized", blank=True)
     organizer_notes = models.TextField(blank=True, null=True, help_text="These will only be visible to other organizers")
     limit = models.IntegerField(default=0, help_text="Specify a cap on the number of RSVPs, or 0 for no limit.", blank=True)
-    visibility = models.CharField(choices = event_visibility, max_length=200, default=PUBLIC, help_text="Community events are visible only to community members. Private events are visible to those who have the link.")
-    status = models.CharField(choices = event_statuses, default=PENDING, max_length=200, verbose_name='Review Status', blank=True)
+    visibility = models.CharField(choices=event_visibility, max_length=200, default=PUBLIC, help_text="Community events are visible only to community members. Private events are visible to those who have the link.")  # noqa
+    status = models.CharField(choices=event_statuses, default=PENDING, max_length=200, verbose_name='Review Status', blank=True)
     endorsements = models.ManyToManyField(User, related_name="events_endorsed", blank=True)
     # the location field is optional but lets you associate an event with a
     # specific location object that is also managed by this software. a single
@@ -149,36 +155,37 @@ class Event(models.Model):
             is_community_member = False
 
         # ok now let's see...
-        if (
-                (self.status == 'live' and self.visibility == Event.PUBLIC)
-                or
-                (
-                    is_event_admin
-                    or
-                    current_user == self.creator
-                    or
-                    current_user in self.organizers.all()
-                    or
-                    current_user in self.attendees.all()
-                )
-                or
-                (is_community_member and self.visibility != Event.PRIVATE)
-            ):
+        can_view = any([
+            self.status == 'live' and self.visibility == Event.PUBLIC,
+            is_event_admin,
+            current_user == self.creator,
+            current_user in self.organizers.all(),
+            current_user in self.attendees.all(),
+            is_community_member and self.visibility != Event.PRIVATE
+
+        ])
+
+        if can_view:
             viewable = True
         else:
             viewable = False
         return viewable
 
+
 def default_event_status(sender, instance, created, using, **kwargs):
     logger.debug(instance)
     logger.debug(created)
     logger.debug(instance.status)
-    if created == True:
+
+    if created:
         if instance.creator in instance.admin.users.all():
             instance.status = Event.FEEDBACK
         else:
             instance.status = Event.PENDING
+
+
 post_save.connect(default_event_status, sender=Event)
+
 
 class EventNotifications(models.Model):
     user = models.OneToOneField(User, related_name='event_notifications')
@@ -191,7 +198,9 @@ class EventNotifications(models.Model):
     class Meta:
         app_label = 'gather'
 
+
 User.event_notifications = property(lambda u: EventNotifications.objects.get_or_create(user=u)[0])
+
 
 # override the save method of the User model to create the EventNotifications
 # object automatically for new users
