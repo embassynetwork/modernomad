@@ -3,20 +3,15 @@ from datetime import timedelta, date
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.models import User
-from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.contrib.sites.models import Site
-from django.core import urlresolvers
 from PIL import Image
 import os
 import datetime
 from django.conf import settings
 from django.core.files.storage import default_storage
 import uuid
-import stripe
-from django.db.models import Q, Sum
+from django.db.models import Q
 from decimal import Decimal
-from django.utils.safestring import mark_safe
 import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
@@ -27,12 +22,7 @@ import pytz
 # imports for signals
 import django.dispatch
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save, m2m_changed
-
-# mail imports
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import get_template
-from django.template import Context
+from django.db.models.signals import pre_save, m2m_changed
 
 # bank app imports
 from bank.models import Account, Transaction, Currency
@@ -209,7 +199,6 @@ class Location(models.Model):
         return False
 
     def events(self, user=None):
-        today = timezone.localtime(timezone.now())
         if 'gather' in settings.INSTALLED_APPS:
             from gather.models import Event
             return Event.objects.upcoming(upto=5, current_user=user, location=self)
@@ -357,9 +346,10 @@ class RoomCalendar(calendar.HTMLCalendar):
 
 class ResourceManager(models.Manager):
     def backed_by(self, user):
-        resources = self.get_queryset().filter(backing__money_account__owners = user)
+        resources = self.get_queryset().filter(backing__money_account__owners=user)
         print(resources)
         return resources
+
 
 class Resource(models.Model):
     name = models.CharField(max_length=200)
@@ -590,6 +580,7 @@ class Resource(models.Model):
         # create a new backing
         new_backing = Backing.objects.setup_new(resource=self, backers=backers, start=new_backing_date)
         logger.debug('created new backing %d' % new_backing.id)
+
 
 class Fee(models.Model):
     description = models.CharField(max_length=100, verbose_name="Fee Name")
@@ -1684,10 +1675,10 @@ class UserProfile(models.Model):
         return list(self.user.accounts_owned.filter(currency=currency)) + list(self.user.accounts_administered.filter(currency=currency))
 
 
-
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 User.rooms_backed = (lambda u: Resource.objects.backed_by(user=u))
 User._meta.ordering = ['username']
+
 
 # Note: primary.accounts.'through' is django's name for the M2M class
 @receiver(m2m_changed, sender=UserProfile.primary_accounts.through)
@@ -1695,13 +1686,13 @@ def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs
     logger.debug('p2p_changed signal')
     logger.debug(action)
     if action == "pre_add":
-        logger.debug(instance) # should be a UserProfile unless reversed
+        logger.debug(instance)  # should be a UserProfile unless reversed
 
         # since the sender is defined as UserProfile in the @receiver line,
         # UserProfile is the forward relation and Account is the reverse relation
-        if reverse: # Account.primary_for.add(...)
+        if reverse:  # Account.primary_for.add(...)
             account = instance
-        else: # UserProfile.primary_accounts.add(...)
+        else:  # UserProfile.primary_accounts.add(...)
             user_profile = instance
 
         for pk in pk_set:
@@ -1717,6 +1708,7 @@ def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs
             assert not user_profile.primary_accounts.filter(currency=account.currency)
             # ensure user is an owner of primary account
             assert user_profile.user in account.owners.all()
+
 
 @receiver(pre_save, sender=UserProfile)
 def size_images(sender, instance, **kwargs):
@@ -1962,11 +1954,11 @@ class CapacityChangeManager(models.Manager):
 
     def would_not_change_previous_quantity(self, capacity):
         previous_capacity = self._previous_capacity(capacity)
-        return (previous_capacity and
-            ( previous_capacity.quantity == capacity.quantity )
-            and
-            (previous_capacity.accept_drft == capacity.accept_drft)
-        )
+        return all([
+            previous_capacity,
+            previous_capacity.quantity == capacity.quantity,
+            previous_capacity.accept_drft == capacity.accept_drft
+        ])
 
     def same_as_next_quantity(self, capacity):
         logger.debug('same_as_next_quantity')
@@ -1978,11 +1970,11 @@ class CapacityChangeManager(models.Manager):
         logger.debug(capacity.quantity)
         logger.debug(capacity.accept_drft)
 
-        return (next_capacity and
-            ( next_capacity.quantity == capacity.quantity)
-            and
-            ( next_capacity.accept_drft == capacity.accept_drft)
-        )
+        return all([
+            next_capacity,
+            next_capacity.quantity == capacity.quantity,
+            next_capacity.accept_drft == capacity.accept_drft
+        ])
 
 
 class CapacityChange(models.Model):
@@ -1996,9 +1988,10 @@ class CapacityChange(models.Model):
     class Meta:
         unique_together = ('start_date', 'resource',)
 
+
 class BackingManager(models.Manager):
     def by_user(self, user):
-        return self.get_queryset().filter(money_account__owners = user)
+        return self.get_queryset().filter(money_account__owners=user)
 
     def setup_new(self, resource, backers, start):
         b = Backing(resource=resource, start=start)
@@ -2011,6 +2004,7 @@ class BackingManager(models.Manager):
         b.drft_account.name = "%s DRFT Account: Backing %d " % (b.resource, b.pk)
         b.drft_account.save()
         return b
+
 
 class Backing(models.Model):
     resource = models.ForeignKey(Resource, related_name='backings')
@@ -2056,16 +2050,19 @@ class Backing(models.Model):
         assert not hasattr(self, 'money_account') and not hasattr(self, 'drft_account')
         # create accounts for this backing
         usd, _ = Currency.objects.get_or_create(name="USD", defaults={'symbol': '$'})
-        ma = Account.objects.create(currency=usd,
-                name="%s Backing USD Account" % self.resource,
-                type = Account.CREDIT)
+        ma = Account.objects.create(
+            currency=usd,
+            name="%s Backing USD Account" % self.resource,
+            type=Account.CREDIT
+        )
         ma.owners.add(*backers)
         self.money_account = ma
 
         drft, _ = Currency.objects.get_or_create(name='DRFT', defaults={'symbol': 'Ɖ'})
-        da = Account.objects.create(currency=drft,
-                name="%s Backing DRFT Account" % self.resource,
-                type = Account.CREDIT)
+        da = Account.objects.create(
+            currency=drft,
+            name="%s Backing DRFT Account" % self.resource,
+            type=Account.CREDIT)
         da.owners.add(*backers)
         self.drft_account = da
 
@@ -2073,6 +2070,7 @@ class Backing(models.Model):
 class HouseAccount(models.Model):
     location = models.ForeignKey(Location)
     account = models.ForeignKey(Account)
+
 
 class UseTransaction(models.Model):
     use = models.ForeignKey(Use)
