@@ -1,8 +1,14 @@
-from . import factory
+from django.contrib.flatpages.models import FlatPage
+
 from core.models import Location
 from core.models import Resource
 from core.models import LocationFee
+from core.models import LocationMenu
+from core.models import LocationFlatPage
+from core.models import LocationEmailTemplate
+from core.models import CapacityChange
 from .booking import FeeFactory
+from . import factory
 
 
 class LocationFactory(factory.DjangoModelFactory):
@@ -71,7 +77,7 @@ class ResourceFactory(factory.DjangoModelFactory):
 
     name = factory.faker('name')
     location = factory.SubFactory(LocationFactory)
-    default_rate = factory.faker('random_int')
+    default_rate = factory.faker('pydecimal', left_digits=0, positive=True)
     description = factory.faker('text')
     summary = factory.faker('sentence')
     cancellation_policy = factory.faker('text')
@@ -85,3 +91,56 @@ class LocationFeeFactory(factory.DjangoModelFactory):
     location = factory.SubFactory(LocationFactory)
     fee = factory.SubFactory(FeeFactory)
 
+
+class LocationMenuFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = LocationMenu
+
+    location = factory.SubFactory(LocationFactory)
+    name = factory.faker('text')
+
+
+class FlatpageFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = FlatPage
+
+
+class LocationFlatPageFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = LocationFlatPage
+
+    menu = factory.SubFactory(LocationMenuFactory)
+    flatpage = factory.SubFactory(FlatpageFactory)
+
+
+class LocationEmailTemplateFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = LocationEmailTemplate
+
+    location = factory.SubFactory(LocationFactory)
+    key = 'admin_daily_update'
+    text_body = factory.faker('text')
+    html_body = factory.faker('text')
+
+
+class CapacityChangeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CapacityChange
+
+    created = factory.faker('past_datetime')
+    resource = factory.SubFactory(ResourceFactory)
+    start_date = factory.faker('future_date')
+    quantity = factory.faker('pyint')
+    accept_drft = factory.faker('pybool')
+
+
+class LocationImageFactory(factory.DjangoModelFactory):
+    pass
+
+
+class RoomImageFactory(factory.DjangoModelFactory):
+    pass
+
+
+class BackingFactory(factory.DjangoModelFactory):
+    pass

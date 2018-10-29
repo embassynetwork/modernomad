@@ -1,11 +1,13 @@
 from faker import Faker
-from fakers.providers import lorem
-from fakers.providers import profile
-from fakers.providers import address
-from fakers.providers import python
+from faker.providers import lorem
+from faker.providers import profile
+from faker.providers import address
+from faker.providers import python
+from faker.providers import date_time
 from faker.providers import BaseProvider
 import factory
 
+factory.Faker.add_provider(date_time)
 factory.Faker.add_provider(python)
 factory.Faker.add_provider(lorem)
 factory.Faker.add_provider(profile)
