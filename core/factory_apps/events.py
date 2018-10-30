@@ -6,7 +6,7 @@ from gather.models import EventSeries
 from gather.models import Event
 from gather.models import EventNotifications
 
-from core.factory_apps.user import UserFactory
+from .user import UserFactory
 
 
 class EventAdminGroupFactory(factory.DjangoModelFactory):
