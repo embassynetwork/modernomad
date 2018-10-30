@@ -1769,9 +1769,11 @@ class EmailTemplate(models.Model):
     SUBJECT_PREFIX = settings.EMAIL_SUBJECT_PREFIX
     FROM_ADDRESS = settings.DEFAULT_FROM_EMAIL
 
+    BOOKING = 'booking'
+    SUBSCRIPTION = 'subscription'
     context_options = (
-        ('booking', 'Booking'),
-        ('subscription', 'Subscription')
+        (BOOKING, 'Booking'),
+        (SUBSCRIPTION, 'Subscription')
     )
 
     body = models.TextField(verbose_name="The body of the email")
