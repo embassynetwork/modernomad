@@ -7,16 +7,26 @@ from core.models import LocationMenu
 from core.models import LocationFlatPage
 from core.models import LocationEmailTemplate
 from core.models import CapacityChange
-from .booking import FeeFactory
+from core.models import Fee
 from . import factory
+
+
+class FeeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Fee
+
+    description = factory.Faker('text')
+    percentage = factory.Faker('pyfloat', left_digits=0, positive=True)
+    paid_by_house = factory.Faker('pybool')
 
 
 class LocationFactory(factory.DjangoModelFactory):
     class Meta:
         model = Location
+        django_get_or_create = ('slug',)
 
     name = factory.Faker('street_name')
-    slug = factory.Faker('slug', provider='street_name')
+    slug = factory.Faker('slug', name='street_name')
     short_description = factory.Faker('text')
     address = factory.Faker('street_address')
     image = factory.django.ImageField(color='blue')
@@ -29,7 +39,7 @@ class LocationFactory(factory.DjangoModelFactory):
 
     stay_page = factory.Faker('text')
     front_page_stay = factory.Faker('text')
-    front_page_participants = factory.Faker('text')
+    front_page_participate = factory.Faker('text')
     announcement = factory.Faker('text')
 
     house_access_code = factory.Faker('word')

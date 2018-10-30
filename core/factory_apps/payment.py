@@ -1,10 +1,10 @@
 from . import factory
-from core.models import Fee
 from core import models
 
 from .user import UserFactory
 from .location import LocationFactory
 from .location import ResourceFactory
+from .location import FeeFactory
 
 
 class SubscriptionFactory(factory.DjangoModelFactory):
@@ -18,20 +18,11 @@ class SubscriptionFactory(factory.DjangoModelFactory):
     location = factory.SubFactory(LocationFactory)
     user = factory.SubFactory(UserFactory)
 
-    price = factory.Faker('pydecimal')
+    price = factory.Faker('pydecimal', left_digits=3, positive=True)
     description = factory.Faker('words')
 
     start_date = factory.Faker('future_date')
     end_date = factory.Faker('future_date')
-
-
-class FeeFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Fee
-
-    description = factory.Faker('text')
-    percentage = factory.Faker('pyfloat', left_digits=0, positive=True)
-    paid_by_house = factory.Faker('pybool')
 
 
 class BillFactory(factory.DjangoModelFactory):
@@ -71,9 +62,9 @@ class BillLineItem(factory.DjangoModelFactory):
     fee = factory.SubFactory(FeeFactory)
 
     description = factory.Faker('words')
-    amount = factory.Faker('pydecimal')
-    paid_by_house = factory.Faker('pyboolean')
-    custom = factory.Faker('pyboolean')
+    amount = factory.Faker('pydecimal', left_digits=3, positive=True)
+    paid_by_house = factory.Faker('pybool')
+    custom = factory.Faker('pybool')
 
 
 class UseFactory(factory.DjangoModelFactory):
@@ -105,7 +96,7 @@ class BookingFactory(factory.DjangoModelFactory):
     updated = factory.Faker('past_datetime')
 
     comments = factory.Faker('paragraph')
-    rate = factory.Faker('pydecimal')
+    rate = factory.Faker('pydecimal', left_digits=3, positive=True)
     uuid = factory.Faker('uuid4')
 
     bill = factory.SubFactory(BookingBillFactory)
@@ -132,7 +123,7 @@ class PaymentFactory(factory.DjangoModelFactory):
     payment_date = factory.Faker('past_datetime')
 
     # payment_service and payment_method may be empty so ignoring those
-    paid_amount = factory.Faker('pydecimal')
+    paid_amount = factory.Faker('pydecimal', left_digits=3, positive=True)
     transaction_id = factory.Faker('uuid4')
     last4 = factory.Faker('pyint')
 
