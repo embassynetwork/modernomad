@@ -11,5 +11,5 @@ class EmailtemplateFactory(factory.DjangoModelFactory):
     subject = factory.Faker('words')
     name = factory.Faker('words')
     creator = factory.SubFactory(UserFactory)
-    shared = factory.Faker('pyboolean')
+    shared = factory.Faker('pybool')
     context = models.EmailTemplate.BOOKING

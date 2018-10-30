@@ -10,10 +10,10 @@ class UserFactory(factory.DjangoModelFactory):
         model = User
 
     username = factory.Faker('name')
-    first_name = factory.Faker('name')
-    last_name = factory.Faker('lastname')
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
     email = factory.Faker('email')
-    is_staff = factory.Faker('pyboolean')
+    is_staff = factory.Faker('pybool')
     is_active = True
     is_superuser = False
 

@@ -50,7 +50,7 @@ class EventFactory(factory.DjangoModelFactory):
     description = factory.Faker('paragraph')
     image = factory.django.ImageField(color='gray')
 
-    notifications = factory.Faker('pyboolean')
+    notifications = factory.Faker('pybool')
 
     where = factory.Faker('city')
     creator = factory.SubFactory(UserFactory)
@@ -98,7 +98,7 @@ class EventNotificationFactory(factory.DjangoModelFactory):
         model = EventNotifications
 
     user = factory.SubFactory(UserFactory)
-    reminders = factory.Faker('pyboolean')
+    reminders = factory.Faker('pybool')
 
     @factory.post_generation
     def location_weekly(self, create, extracted, **kwargs):

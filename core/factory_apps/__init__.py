@@ -18,9 +18,9 @@ factory.Faker.add_provider(address)
 
 class Provider(BaseProvider):
     # Note that the class name _must_ be ``Provider``.
-    def slug(self, provider):
+    def slug(self, name):
         fake = Faker()
-        value = getattr(fake, provider)()
+        value = getattr(fake, name)()
         return value.replace(' ', '-')
 
 
