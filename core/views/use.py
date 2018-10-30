@@ -5,10 +5,11 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 import logging
 from django.contrib import messages
+from django.contrib.sites.models import Site
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from core.models import Use, Location, Site
+from core.models import Use, Location
 
 @login_required
 def UseDetail(request, use_id, location_slug):

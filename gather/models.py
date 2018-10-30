@@ -209,4 +209,3 @@ def add_user_event_notifications(sender, instance, created, using, **kwargs):
     # defined with get_or_create, above.
     instance.event_notifications
     return
-

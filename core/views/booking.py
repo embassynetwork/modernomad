@@ -3,6 +3,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.sites.models import Site
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
@@ -20,7 +21,7 @@ from django.utils import timezone
 from .view_helpers import _get_user_and_perms
 from core.emails import send_booking_receipt, new_booking_notify
 from core.forms import BookingUseForm
-from core.models import Booking, Use, Location, Site
+from core.models import Booking, Use, Location
 logger = logging.getLogger(__name__)
 
 
