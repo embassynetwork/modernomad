@@ -19,7 +19,7 @@ class OptionalJWTMixin(JSONWebTokenAuthMixin):
 class AuthGraphQLView(OptionalJWTMixin, GraphQLView):
     pass
 
+
 urlpatterns = [
-    url(r'^graphql', csrf_exempt(AuthGraphQLView.as_view(schema=schema))),
-    url(r'^graphiql', include('django_graphiql.urls')),
+    url(r'^graphql', csrf_exempt(AuthGraphQLView.as_view(schema=schema)))
 ]
