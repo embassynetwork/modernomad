@@ -46,5 +46,5 @@ per_location_patterns = [
 
 urlpatterns = patterns('core.views.unsorted',
     url(r'^$', 'location_list', name='location_list'),
-    url(r'^(?P<location_slug>\w+)/', include(per_location_patterns)),
+    url(r'^(?P<location_slug>[\w-]+)/', include(per_location_patterns)),
 )
