@@ -2,54 +2,139 @@ from . import factory
 from core.models import Fee
 from core import models
 
-
-class FeeFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Fee
-
-    description = factory.faker('text')
-    percentage = factory.faker('pyfloat', left_digits=0, positive=True)
-    paid_by_house = factory.faker('pybool')
-
-
-class BillFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = models.Bill
-
-
-class BillLineItem(factory.DjangoModelFactory):
-    class Meta:
-        model = models.BillLineItem
+from .user import UserFactory
+from .location import LocationFactory
+from .location import ResourceFactory
 
 
 class SubscriptionFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Subscription
 
+    created = factory.Faker('past_datetime')
+    updated = factory.Faker('past_datetime')
+
+    created_by = factory.SubFactory(UserFactory)
+    location = factory.SubFactory(LocationFactory)
+    user = factory.SubFactory(UserFactory)
+
+    price = factory.Faker('pydecimal')
+    description = factory.Faker('words')
+
+    start_date = factory.Faker('future_date')
+    end_date = factory.Faker('future_date')
+
+
+class FeeFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Fee
+
+    description = factory.Faker('text')
+    percentage = factory.Faker('pyfloat', left_digits=0, positive=True)
+    paid_by_house = factory.Faker('pybool')
+
+
+class BillFactory(factory.DjangoModelFactory):
+    '''Bookings, BillLineItem or Subscription'''
+    class Meta:
+        model = models.Bill
+
+    generated_on = factory.Faker('past_datetime')
+    comment = factory.Faker('paragraph')
+
 
 class SubscriptionBillFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.SubscriptionBill
+
+    generated_on = factory.Faker('past_datetime')
+    comment = factory.Faker('paragraph')
+
+    period_start = factory.Faker('future_date')
+    period_end = factory.Faker('future_date')
+    subscription = factory.SubFactory(SubscriptionFactory)
 
 
 class BookingBillFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.BookingBill
 
+    generated_on = factory.Faker('past_datetime')
+    comment = factory.Faker('paragraph')
+
+
+class BillLineItem(factory.DjangoModelFactory):
+    class Meta:
+        model = models.BillLineItem
+
+    bill = factory.SubFactory(BillFactory)
+    fee = factory.SubFactory(FeeFactory)
+
+    description = factory.Faker('words')
+    amount = factory.Faker('pydecimal')
+    paid_by_house = factory.Faker('pyboolean')
+    custom = factory.Faker('pyboolean')
+
 
 class UseFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Use
 
+    created = factory.Faker('past_datetime')
+    updated = factory.Faker('past_datetime')
+
+    location = factory.SubFactory(LocationFactory)
+    user = factory.SubFactory(UserFactory)
+    resource = factory.SubFactory(ResourceFactory)
+
+    status = models.Use.PENDING
+    arrive = factory.Faker('future_date')
+    depart = factory.Faker('future_date')
+    arrival_time = factory.Faker('words')
+    purpose = factory.Faker('paragraph')
+    last_msg = factory.Faker('past_datetime')
+    accounted_by = models.Use.FIAT
+
 
 class BookingFactory(factory.DjangoModelFactory):
+    # deprecated fields not modeled in factory
     class Meta:
         model = models.Booking
+
+    created = factory.Faker('past_datetime')
+    updated = factory.Faker('past_datetime')
+
+    comments = factory.Faker('paragraph')
+    rate = factory.Faker('pydecimal')
+    uuid = factory.Faker('uuid4')
+
+    bill = factory.SubFactory(BookingBillFactory)
+    use = factory.SubFactory(UseFactory)
+
+    @factory.post_generation
+    def suppressed_fees(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if extracted:
+            # A list of groups were passed in, use them
+            for fee in extracted:
+                self.suppressed_fees.add(fee)
 
 
 class PaymentFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.Payment
+
+    bill = factory.SubFactory(BillFactory)
+    user = factory.SubFactory(UserFactory)
+    payment_date = factory.Faker('past_datetime')
+
+    # payment_service and payment_method may be empty so ignoring those
+    paid_amount = factory.Faker('pydecimal')
+    transaction_id = factory.Faker('uuid4')
+    last4 = factory.Faker('pyint')
 
 
 class UseNoteFactory(factory.DjangoModelFactory):
@@ -60,4 +145,3 @@ class UseNoteFactory(factory.DjangoModelFactory):
 class SubscriptionNoteFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.SubscriptionNote
-

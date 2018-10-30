@@ -4,9 +4,11 @@ from faker.providers import profile
 from faker.providers import address
 from faker.providers import python
 from faker.providers import date_time
+from faker.providers import misc
 from faker.providers import BaseProvider
 import factory
 
+factory.Faker.add_provider(misc)
 factory.Faker.add_provider(date_time)
 factory.Faker.add_provider(python)
 factory.Faker.add_provider(lorem)
