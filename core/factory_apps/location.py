@@ -144,13 +144,5 @@ class CapacityChangeFactory(factory.DjangoModelFactory):
     accept_drft = factory.Faker('pybool')
 
 
-class LocationImageFactory(factory.DjangoModelFactory):
-    pass
-
-
-class RoomImageFactory(factory.DjangoModelFactory):
-    pass
-
-
 class BackingFactory(factory.DjangoModelFactory):
     pass
