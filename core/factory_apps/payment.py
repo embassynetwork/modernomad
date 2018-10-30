@@ -1,5 +1,6 @@
 from . import factory
 from core.models import Fee
+from core import models
 
 
 class FeeFactory(factory.DjangoModelFactory):
@@ -12,41 +13,51 @@ class FeeFactory(factory.DjangoModelFactory):
 
 
 class BillFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.Bill
 
 
 class BillLineItem(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.BillLineItem
 
 
 class SubscriptionFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.Subscription
 
 
 class SubscriptionBillFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.SubscriptionBill
 
 
 class BookingBillFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.BookingBill
 
 
 class UseFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.Use
 
 
 class BookingFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.Booking
 
 
 class PaymentFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.Payment
 
 
 class UseNoteFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.UseNote
 
 
 class SubscriptionNoteFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = models.SubscriptionNote
 
