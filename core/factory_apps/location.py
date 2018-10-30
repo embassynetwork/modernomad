@@ -15,37 +15,37 @@ class LocationFactory(factory.DjangoModelFactory):
     class Meta:
         model = Location
 
-    name = factory.faker('street_name')
-    slug = factory.faker('slug', provider='street_name')
-    short_description = factory.faker('text')
-    address = factory.faker('street_address')
+    name = factory.Faker('street_name')
+    slug = factory.Faker('slug', provider='street_name')
+    short_description = factory.Faker('text')
+    address = factory.Faker('street_address')
     image = factory.django.ImageField(color='blue')
     profile_image = factory.django.ImageField(color='red')
-    latitude = factory.faker('latitude')
-    longitude = factory.faker('longitude')
+    latitude = factory.Faker('latitude')
+    longitude = factory.Faker('longitude')
 
-    welcome_email_days_ahead = factory.faker('random_int')
-    max_booking_days = factory.faker('random_int')
+    welcome_email_days_ahead = factory.Faker('random_int')
+    max_booking_days = factory.Faker('random_int')
 
-    stay_page = factory.faker('text')
-    front_page_stay = factory.faker('text')
-    front_page_participants = factory.faker('text')
-    announcement = factory.faker('text')
+    stay_page = factory.Faker('text')
+    front_page_stay = factory.Faker('text')
+    front_page_participants = factory.Faker('text')
+    announcement = factory.Faker('text')
 
-    house_access_code = factory.faker('word')
-    ssid = factory.faker('word')
-    ssid_password = factory.faker('word')
+    house_access_code = factory.Faker('word')
+    ssid = factory.Faker('word')
+    ssid_password = factory.Faker('word')
 
-    timezone = factory.faker('word')
-    bank_account_number = factory.faker('random_int')
-    routing_number = factory.faker('random_int')
+    timezone = factory.Faker('word')
+    bank_account_number = factory.Faker('random_int')
+    routing_number = factory.Faker('random_int')
 
-    bank_name = factory.faker('word')
-    name_on_account = factory.faker('word')
-    email_subject_prefix = factory.faker('word')
+    bank_name = factory.Faker('word')
+    name_on_account = factory.Faker('word')
+    email_subject_prefix = factory.Faker('word')
 
-    check_out = factory.faker('word')
-    check_in = factory.faker('word')
+    check_out = factory.Faker('word')
+    check_in = factory.Faker('word')
     visibility = factory.Iterator(['public', 'members', 'link'])
 
     @factory.post_generation
@@ -75,12 +75,12 @@ class ResourceFactory(factory.DjangoModelFactory):
     class Meta:
         model = Resource
 
-    name = factory.faker('name')
+    name = factory.Faker('name')
     location = factory.SubFactory(LocationFactory)
-    default_rate = factory.faker('pydecimal', left_digits=0, positive=True)
-    description = factory.faker('text')
-    summary = factory.faker('sentence')
-    cancellation_policy = factory.faker('text')
+    default_rate = factory.Faker('pydecimal', left_digits=0, positive=True)
+    description = factory.Faker('text')
+    summary = factory.Faker('sentence')
+    cancellation_policy = factory.Faker('text')
     image = factory.django.ImageField(color='green')
 
 
@@ -97,7 +97,7 @@ class LocationMenuFactory(factory.DjangoModelFactory):
         model = LocationMenu
 
     location = factory.SubFactory(LocationFactory)
-    name = factory.faker('text')
+    name = factory.Faker('text')
 
 
 class FlatpageFactory(factory.DjangoModelFactory):
@@ -119,19 +119,19 @@ class LocationEmailTemplateFactory(factory.DjangoModelFactory):
 
     location = factory.SubFactory(LocationFactory)
     key = 'admin_daily_update'
-    text_body = factory.faker('text')
-    html_body = factory.faker('text')
+    text_body = factory.Faker('text')
+    html_body = factory.Faker('text')
 
 
 class CapacityChangeFactory(factory.DjangoModelFactory):
     class Meta:
         model = CapacityChange
 
-    created = factory.faker('past_datetime')
+    created = factory.Faker('past_datetime')
     resource = factory.SubFactory(ResourceFactory)
-    start_date = factory.faker('future_date')
-    quantity = factory.faker('pyint')
-    accept_drft = factory.faker('pybool')
+    start_date = factory.Faker('future_date')
+    quantity = factory.Faker('pyint')
+    accept_drft = factory.Faker('pybool')
 
 
 class LocationImageFactory(factory.DjangoModelFactory):

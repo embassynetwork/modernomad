@@ -31,33 +31,33 @@ class EventSeriesFactory(factory.DjangoModelFactory):
     class Meta:
         model = EventSeries
 
-    name = factory.faker('word')
-    description = factory.faker('paragraph')
+    name = factory.Faker('word')
+    description = factory.Faker('paragraph')
 
 
 class EventFactory(factory.DjangoModelFactory):
     class Meta:
         model = Event
 
-    created = factory.faker('past_datetime')
-    updated = factory.faker('past_datetime')
-    start = factory.faker('future_datetime')
-    end = factory.faker('future_datetime')
+    created = factory.Faker('past_datetime')
+    updated = factory.Faker('past_datetime')
+    start = factory.Faker('future_datetime')
+    end = factory.Faker('future_datetime')
 
-    title = factory.faker('words')
-    slug = factory.faker('words')
+    title = factory.Faker('words')
+    slug = factory.Faker('words')
 
-    description = factory.faker('paragraph')
+    description = factory.Faker('paragraph')
     image = factory.django.ImageField(color='gray')
 
-    notifications = factory.faker('pyboolean')
+    notifications = factory.Faker('pyboolean')
 
-    where = factory.faker('city')
+    where = factory.Faker('city')
     creator = factory.SubFactory(UserFactory)
 
-    organizer_notes = factory.faker('paragraph')
+    organizer_notes = factory.Faker('paragraph')
 
-    limit = factory.faker('random_digit_or_empty')
+    limit = factory.Faker('random_digit_or_empty')
     visibility = Event.PUBLIC
     status = Event.PENDING
 
@@ -98,7 +98,7 @@ class EventNotificationFactory(factory.DjangoModelFactory):
         model = EventNotifications
 
     user = factory.SubFactory(UserFactory)
-    reminders = factory.faker('pyboolean')
+    reminders = factory.Faker('pyboolean')
 
     @factory.post_generation
     def location_weekly(self, create, extracted, **kwargs):

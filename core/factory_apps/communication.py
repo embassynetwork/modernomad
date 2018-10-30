@@ -7,9 +7,9 @@ class EmailtemplateFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.EmailTemplate
 
-    body = factory.faker('paragraph')
-    subject = factory.faker('words')
-    name = factory.faker('words')
+    body = factory.Faker('paragraph')
+    subject = factory.Faker('words')
+    name = factory.Faker('words')
     creator = factory.SubFactory(UserFactory)
-    shared = factory.faker('pyboolean')
+    shared = factory.Faker('pyboolean')
     context = models.EmailTemplate.BOOKING
