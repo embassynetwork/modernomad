@@ -107,7 +107,7 @@ class LocationMenuFactory(factory.DjangoModelFactory):
         model = LocationMenu
 
     location = factory.SubFactory(LocationFactory)
-    name = factory.Faker('text')
+    name = factory.Faker('text', max_nb_chars=15)
 
 
 class FlatpageFactory(factory.DjangoModelFactory):
