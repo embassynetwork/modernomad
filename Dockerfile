@@ -1,4 +1,4 @@
-FROM 3.6.6-alpine3.8
+FROM python:3.6.6-alpine3.8
 
 # So Pillow can find zlib
 ENV LIBRARY_PATH /lib:/usr/lib
