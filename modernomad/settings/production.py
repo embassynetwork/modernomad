@@ -1,4 +1,4 @@
-from .common import *　# noqa
+from .common import * # noqa
 from .common import env
 from .common import BASE_DIR
 
