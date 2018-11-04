@@ -27,3 +27,4 @@ WEBPACK_LOADER = {
         'STATS_FILE': BASE_DIR / 'client/webpack-stats-prod.json',
     }
 }
+COMPRESS_OFFLINE = True
