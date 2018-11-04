@@ -57,7 +57,7 @@ class EventFactory(factory.DjangoModelFactory):
 
     organizer_notes = factory.Faker('paragraph')
 
-    limit = factory.Faker('random_digit_or_empty')
+    limit = factory.Faker('random_digit')
     visibility = Event.PUBLIC
     status = Event.PENDING
 

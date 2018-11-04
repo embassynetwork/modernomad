@@ -70,11 +70,12 @@ create your own local_settings.py file from local_settings.example.py. inside th
 
 - browse through settings.py. make note of the location of the media directory and media_url, and any other settings of interest.
 
-## initialisation
+## Initialisation
 
 go back into the top level repository directory and do the following:
 
-- `./manage.py migrate` will initialise the database on first run
+- `./manage.py migrate` will initialise the database on first run. In the next step you want to get some initial data into the database.
+- `./manage.py generate_test_data`. This will populate the database with some randomized initial data.
 
 ## Run!
 

@@ -25,6 +25,8 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             statements = flush_db.split('\n')
             for statement in statements:
+                if not statement:
+                    continue
                 cursor.execute(statement)
 
         call_command('migrate')
