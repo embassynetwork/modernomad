@@ -1,4 +1,5 @@
-version: "3.0"
+version: "3.4"
+
 services:
   web:
     build: .
@@ -6,8 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - "SECRET_KEY=insecure - only for development"
-      - "MODE=DEVELOPMENT"
+      - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "MAILGUN_API_KEY"
@@ -30,8 +30,7 @@ services:
     build: .
     command: bin/celeryd
     environment:
-      - "SECRET_KEY=insecure - only for development"
-      - "MODE=DEVELOPMENT"
+      - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "MAILGUN_API_KEY"
