@@ -1,0 +1,31 @@
+{
+  "name": "modernomad",
+  "scripts": {
+    "postdeploy": "./manage.py generate_test_data"
+  },
+  "env": {
+    "ALLOWED_HOSTS": ".herokuapp.com",
+    "AWS_ACCESS_KEY_ID": {
+      "required": true
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "required": true
+    },
+    "AWS_STORAGE_BUCKET_NAME": {
+      "required": true
+    },
+    "SECRET_KEY": {
+      "generator": "secret"
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1
+    },
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": ["cloudamqp", "papertrail", "heroku-postgresql"],
+  "buildpacks": []
+}
