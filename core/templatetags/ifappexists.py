@@ -1,6 +1,6 @@
 from django.template import Library
 from django import template
-from modernomad import settings
+from django.conf import settings
 
 register = Library()
 
