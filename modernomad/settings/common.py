@@ -211,7 +211,18 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 CELERY_ACCEPT_CONTENT = ['json', 'yaml']
-CELERY_RESULT_BACKEND = BROKER_URL
+
+# Disabled when moving to Heroku for simplicity's sake, because no tasks 
+# have results. If results are needed, a suitable one can be picked for
+# Heroku + CloudAMPQ. (Probably the "rpc" one, perhaps Django ORM?)
+CELERY_RESULT_BACKEND = None
+
+# as per https://www.cloudamqp.com/docs/celery.html
+BROKER_POOL_LIMIT = 1
+BROKER_HEARTBEAT = None
+BROKER_CONNECTION_TIMEOUT = 30
+CELERY_EVENT_QUEUE_EXPIRES = 60
+CELERYD_PREFETCH_MULTIPLIER = 1
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
