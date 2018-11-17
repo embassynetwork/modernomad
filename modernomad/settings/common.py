@@ -19,7 +19,6 @@ MANAGERS = ADMINS
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 DEBUG = False
-TEMPLATE_DEBUG = False
 
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
@@ -103,8 +102,8 @@ TEMPLATES = [
         # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
         # Always use forward slashes, even on Windows.
         # Don't forget to use absolute paths, not relative paths.
-        path("../templates/"),
-        path("core/templates/"),
+        BASE_DIR / 'templates',
+        BASE_DIR / 'core' / 'templates'
     ],
     # default template context processors
     'APP_DIRS': True,
@@ -136,35 +135,6 @@ MIDDLEWARE_CLASSES = (
     'modernomad.middleware.crossdomainxhr.CORSMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
-)
-# default template context processors
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.core.context_processors.request",
-    "django.contrib.messages.context_processors.messages",
-    "core.context_processors.location.location_variables",
-    "core.context_processors.location.network_locations",
-    "core.context_processors.analytics.google_analytics",
-)
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    BASE_DIR / 'templates',
-    BASE_DIR / 'core' / 'templates'
 )
 
 # other JWT options available at https://github.com/jpadilla/django-jwt-auth
@@ -200,7 +170,6 @@ INSTALLED_APPS = [
     'django_behave',
     'django_extensions',
     'django_filters',
-    'django_graphiql',
     'djcelery',
     'graphene_django',
     'rest_framework',

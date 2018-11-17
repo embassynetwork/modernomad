@@ -54,5 +54,5 @@ per_location_patterns = [
 
 urlpatterns = [
     url(r'^$', core.views.unsorted.location_list, name='location_list'),
-    url(r'^(?P<location_slug>\w+)/', include(per_location_patterns)),
+    url(r'^(?P<location_slug>[\w-]+)/', include(per_location_patterns)),
 ]
