@@ -10,8 +10,6 @@ services:
       - "MODE=DEVELOPMENT"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
-      - "DISCOURSE_BASE_URL"
-      - "DISCOURSE_SSO_SECRET"
       - "MAILGUN_API_KEY"
     links:
       - postgres
@@ -36,8 +34,6 @@ services:
       - "MODE=DEVELOPMENT"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
-      - "DISCOURSE_BASE_URL"
-      - "DISCOURSE_SSO_SECRET"
       - "MAILGUN_API_KEY"
     links:
       - postgres
