@@ -18,6 +18,10 @@ RUN apk add --no-cache \
   zlib \
   zlib-dev
 
+# https://bitbucket.org/site/master/issues/16334/pipelines-failing-with-could-not-get-uid
+# https://github.com/npm/npm/issues/20861
+RUN npm config set unsafe-perm true
+
 RUN npm install -g less
 
 # Only copy requirements so cache isn't busted by changes in the app
