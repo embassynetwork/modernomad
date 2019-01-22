@@ -26,9 +26,9 @@ RUN npm install -g less
 
 # Only copy requirements so cache isn't busted by changes in the app
 RUN mkdir -p /app
-COPY requirements.txt requirements.test.txt /app/
+COPY requirements.txt /app/
 WORKDIR /app
-RUN pip install --no-cache-dir -r requirements.txt -r requirements.test.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Same, but for client
 RUN mkdir -p /app/client
