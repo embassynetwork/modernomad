@@ -4,6 +4,8 @@ import datetime
 import sys
 from pathlib import Path
 import environ
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 env = environ.Env()
 
@@ -64,6 +66,15 @@ AWS_DEFAULT_ACL = 'public-read'
 if AWS_STORAGE_BUCKET_NAME:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_URL = env('MEDIA_URL', default='https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME)
+
+SENTRY_DSN = env('SENTRY_DSN', default='')
+if SENTRY_DSN:
+    print("Found Sentry DSN")
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), sentry_logging]
+    )
+
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -244,38 +255,6 @@ LOGGING = {
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': './django.log',
-            'formatter': 'simple',
-        }
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'core': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-        },
-        'modernomad': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-        },
-        'gather': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
         },
     },
 }
