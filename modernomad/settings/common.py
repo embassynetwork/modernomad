@@ -69,12 +69,10 @@ if AWS_STORAGE_BUCKET_NAME:
 
 SENTRY_DSN = env('SENTRY_DSN', default='')
 if SENTRY_DSN:
-    print("Found Sentry DSN")
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(), sentry_logging]
     )
-
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
