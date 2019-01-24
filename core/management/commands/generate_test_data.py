@@ -34,36 +34,38 @@ class Command(BaseCommand):
         # setting the seed so output is consistent
         fake = Faker()
         fake.seed(1)
-        # Building location specific things
-        locationobj = location.LocationFactory()
-        resource = location.ResourceFactory(location=locationobj)
-        location.LocationFee(location=locationobj)
-
-        menu = location.LocationMenuFactory(location=locationobj)
-        location.LocationFlatPageFactory(menu=menu)
-
-        location.CapacityChangeFactory(resource=resource)
-
-        # event things
-        event_admin = events.EventAdminGroupFactory(location=locationobj)
-        event_series = events.EventSeriesFactory()
-        events.EventFactory(
-            location=locationobj, admin=event_admin, series=event_series
-        )
-        events.EventNotificationFactory()
 
         # communication
         communication.EmailtemplateFactory()
 
-        # payment
-        subscription = payment.SubscriptionFactory(location=locationobj)
-        payment.SubscriptionBillFactory(subscription=subscription)
+        # Building location specific things
+        for _ in range(10):
+            locationobj = location.LocationFactory()
+            resource = location.ResourceFactory(location=locationobj)
+            location.LocationFee(location=locationobj)
 
-        bill = payment.BookingBillFactory()
-        payment.BillLineItem(bill=bill)
-        use = payment.UseFactory(location=locationobj, resource=resource)
-        payment.BookingFactory(bill=bill, use=use)
+            menu = location.LocationMenuFactory(location=locationobj)
+            location.LocationFlatPageFactory(menu=menu)
 
-        payment.PaymentFactory(bill=bill)
+            location.CapacityChangeFactory(resource=resource)
+
+            # event things
+            event_admin = events.EventAdminGroupFactory(location=locationobj)
+            event_series = events.EventSeriesFactory()
+            events.EventFactory(
+                location=locationobj, admin=event_admin, series=event_series
+            )
+            events.EventNotificationFactory()
+
+            # payment
+            subscription = payment.SubscriptionFactory(location=locationobj)
+            payment.SubscriptionBillFactory(subscription=subscription)
+
+            bill = payment.BookingBillFactory()
+            payment.BillLineItem(bill=bill)
+            use = payment.UseFactory(location=locationobj, resource=resource)
+            payment.BookingFactory(bill=bill, use=use)
+
+            payment.PaymentFactory(bill=bill)
 
         self.stdout.write(self.style.SUCCESS('Successfully generated testdata'))
