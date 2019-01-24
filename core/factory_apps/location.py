@@ -29,8 +29,8 @@ class LocationFactory(factory.DjangoModelFactory):
     slug = factory.Faker('slug', name='street_name')
     short_description = factory.Faker('text')
     address = factory.Faker('street_address')
-    image = factory.django.ImageField(color='blue')
-    profile_image = factory.django.ImageField(color='red')
+    image = factory.django.ImageField(color='blue', width=800, height=225)
+    profile_image = factory.django.ImageField(color='red', width=336, height=344)
     latitude = factory.Faker('latitude')
     longitude = factory.Faker('longitude')
 
