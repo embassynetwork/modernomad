@@ -15,7 +15,7 @@ class FeeFactory(factory.DjangoModelFactory):
     class Meta:
         model = Fee
 
-    description = factory.Faker('text')
+    description = factory.Faker('text', max_nb_chars=100)
     percentage = factory.Faker('pyfloat', left_digits=0, positive=True)
     paid_by_house = factory.Faker('pybool')
 
