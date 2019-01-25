@@ -139,8 +139,8 @@ class CapacityChangeFactory(factory.DjangoModelFactory):
 
     created = factory.Faker('past_datetime')
     resource = factory.SubFactory(ResourceFactory)
-    start_date = factory.Faker('future_date')
-    quantity = factory.Faker('pyint')
+    start_date = factory.Faker('past_datetime')
+    quantity = factory.Iterator([1, 2])
     accept_drft = factory.Faker('pybool')
 
 
