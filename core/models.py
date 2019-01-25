@@ -116,7 +116,7 @@ class Location(models.Model):
             )
     visibility = models.CharField(max_length=32, choices=visibility_options, blank=False, null=False, default='link')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -361,7 +361,7 @@ class Resource(models.Model):
     image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
     objects = ResourceManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def quantity_between(self, start, end):
@@ -587,7 +587,7 @@ class Fee(models.Model):
     percentage = models.FloatField(default=0, help_text="For example 5.2% = 0.052")
     paid_by_house = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.description
 
 
@@ -639,7 +639,7 @@ class Bill(models.Model):
     generated_on = models.DateTimeField(auto_now=True)
     comment = models.TextField(blank=True, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Bill %d" % self.id
 
     def non_refund_payments(self):
@@ -1355,7 +1355,7 @@ class Booking(models.Model):
 
         return res_info
 
-    def __unicode__(self):
+    def __str__(self):
         if self.id:
             return "booking (id = %d)" % self.id
         return "booking (unsaved)"
@@ -1507,7 +1507,7 @@ class Payment(models.Model):
 
     objects = PaymentManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s: %s - $%s" % (str(self.payment_date)[:16], self.user, self.paid_amount)
 
     def to_house(self):
@@ -1636,8 +1636,8 @@ class UserProfile(models.Model):
     last4 = models.IntegerField(null=True, blank=True, help_text="Last 4 digits of the user's card on file, if any")
     primary_accounts = models.ManyToManyField(Account, help_text="one for each currency", related_name="primary_for", blank=True)
 
-    def __unicode__(self):
-        return (self.user.__unicode__())
+    def __str__(self):
+        return str(self.user)
 
     def get_or_create_primary_account(self, currency):
         # the prumary account should be unique for each currency (enforced by
@@ -1783,7 +1783,7 @@ class EmailTemplate(models.Model):
     shared = models.BooleanField(default=False)
     context = models.CharField(max_length=32, choices=context_options, blank=False, null=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1820,7 +1820,7 @@ class LocationFee(models.Model):
     location = models.ForeignKey(Location)
     fee = models.ForeignKey(Fee)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s: %s' % (self.location, self.fee)
 
 
@@ -1837,7 +1837,7 @@ class BillLineItem(models.Model):
     paid_by_house = models.BooleanField(default=True)
     custom = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.description
 
 
@@ -1852,7 +1852,7 @@ class LocationMenu(models.Model):
     def page_count(self):
         return len(self.pages.all())
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -1876,7 +1876,7 @@ class LocationFlatPage(models.Model):
     def content(self):
         return self.flatpage.content
 
-    def __unicode__(self):
+    def __str__(self):
         return self.flatpage.title
 
 
@@ -2018,7 +2018,7 @@ class Backing(models.Model):
     end = models.DateField(blank=True, null=True)
     objects = BackingManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return "Backing %d for %s" % (self.pk, self.resource)
 
     def next_backing(self):
@@ -2078,5 +2078,5 @@ class UseTransaction(models.Model):
     use = models.ForeignKey(Use)
     transaction = models.ForeignKey(Transaction)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Transaction %d <> Use %d" % (self.transaction.id, self.use.id)
