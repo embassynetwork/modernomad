@@ -1956,27 +1956,21 @@ class CapacityChangeManager(models.Manager):
 
     def would_not_change_previous_quantity(self, capacity):
         previous_capacity = self._previous_capacity(capacity)
-        return all([
-            previous_capacity,
-            previous_capacity.quantity == capacity.quantity,
-            previous_capacity.accept_drft == capacity.accept_drft
-        ])
+        if not previous_capacity:
+            return False
+        return (
+            previous_capacity.quantity == capacity.quantity
+            and previous_capacity.accept_drft == capacity.accept_drft
+        )
 
     def same_as_next_quantity(self, capacity):
-        logger.debug('same_as_next_quantity')
         next_capacity = self._next_capacity(capacity)
-        logger.debug(next_capacity)
-        if next_capacity:
-            logger.debug(next_capacity.quantity)
-            logger.debug(next_capacity.accept_drft)
-        logger.debug(capacity.quantity)
-        logger.debug(capacity.accept_drft)
-
-        return all([
-            next_capacity,
-            next_capacity.quantity == capacity.quantity,
-            next_capacity.accept_drft == capacity.accept_drft
-        ])
+        if not next_capacity:
+            return False
+        return (
+            next_capacity.quantity == capacity.quantity
+            and next_capacity.accept_drft == capacity.accept_drft
+        )
 
 
 class CapacityChange(models.Model):
