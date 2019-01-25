@@ -11,6 +11,7 @@ from core.factory_apps import location
 from core.factory_apps import communication
 from core.factory_apps import events
 from core.factory_apps import payment
+from core.models import Currency
 
 
 class Command(BaseCommand):
@@ -34,6 +35,10 @@ class Command(BaseCommand):
         # setting the seed so output is consistent
         fake = Faker()
         fake.seed(1)
+
+        # this is created as part of a migration but is destroyed by the sqlflush.
+        # hmm. a better solution needed here, but this shall do for now.
+        Currency.objects.get_or_create(name='DRFT', defaults={'symbol': 'Ɖ'})
 
         # communication
         communication.EmailtemplateFactory()
