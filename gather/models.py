@@ -19,7 +19,7 @@ class EventAdminGroup(models.Model):
     location = models.OneToOneField(Location, related_name="event_admin_group")
     users = models.ManyToManyField(User)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.location.name + " Admin Group"
 
     class Meta:
@@ -32,7 +32,7 @@ class EventSeries(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -131,7 +131,7 @@ class Event(models.Model):
 
     objects = EventManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     class Meta:

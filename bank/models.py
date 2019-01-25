@@ -13,7 +13,7 @@ class Currency(models.Model):
     class Meta:
         verbose_name_plural = "Currencies"
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
@@ -45,7 +45,7 @@ class Account(models.Model):
             help_text="A credit (expense, asset) account always has a balance > 0. A debit (revenue, liability) account always has a balance < 0. #helpfulnothelpful."
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name + " (%s)" % (self.currency)
 
     def is_credit(self):
@@ -87,7 +87,7 @@ class Transaction(models.Model):
     approver = models.ForeignKey(User, related_name="approved_transactions", blank=True, null=True)
     valid = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Transaction %s" % self.pk
 
     def save(self, *args, **kwargs):
@@ -144,7 +144,7 @@ class Entry(models.Model):
         verbose_name_plural = "Entries"
         ordering=['-transaction__date']
 
-    def __unicode__(self):
+    def __str__(self):
         return "Entry: account %s for %d" % (self.account, self.amount)
 
     def save(self, *args, **kwargs):

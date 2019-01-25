@@ -22,7 +22,7 @@ class AccountAdmin(admin.ModelAdmin):
     model = Account
     raw_id_fields = ("owners", "admins")
     list_filter = ('type', 'owners')
-    list_display = ('__unicode__', 'balance', 'account_owners', 'account_admins', 'type')
+    list_display = ('__str__', 'balance', 'account_owners', 'account_admins', 'type')
     inlines = [EntryReadOnlyInline,]
 
     def balance(self, obj):
