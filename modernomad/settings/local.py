@@ -8,3 +8,13 @@ INSTALLED_APPS = INSTALLED_APPS + [
 SECRET_KEY = 'local_development'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'USER': 'modernomad',
+        'NAME': 'modernomad',
+        'PASSWORD': '',
+    }
+}
+
