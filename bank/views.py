@@ -10,6 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.shortcuts import redirect
+import logging
+logger = logging.getLogger(__name__)
 
 def create_transaction(reason, amount, from_account, to_account):
     t = Transaction.objects.create(reason=reason)
@@ -20,7 +22,7 @@ def create_transaction(reason, amount, from_account, to_account):
         assert t.valid
         return True
     except:
-        print('transaction was invalid. please check transaction ids %d and %d' % (e1.id, e2.id))
+        logger.error('transaction was invalid. please check transaction ids %d and %d' % (e1.id, e2.id))
         return False
 
 # Create your views here.
@@ -52,8 +54,6 @@ class AccountList(View):
 
     @method_decorator(login_required)
     def post(self, request):
-        print('IN POST')
-        print(request.POST)
         transaction_form = self.form_class(request.user, request.POST)
         if transaction_form.is_valid():
             to_account_id = request.POST.get('to_account')
@@ -73,8 +73,6 @@ class AccountList(View):
 
             # check if balances are valid
             try:
-                print(from_account.get_balance())
-                print(amount)
                 assert from_account.get_balance() >= amount
             except AssertionError:
                 messages.add_message(request, messages.INFO, "Insufficient balance on source account %s (%d)" % (from_account.name, from_account.id))
@@ -94,7 +92,7 @@ class AccountList(View):
                 else:
                     messages.add_message(request, messages.INFO, "Oops, something went wrong. Please try again.")
         else:
-            print(transaction_form.errors)
+            logger.debug(transaction_form.errors)
             messages.add_message(request, messages.INFO, "The form contained errors, your transfer was not completed. %s" % transaction_form.errors)
 
         return redirect("account_list")

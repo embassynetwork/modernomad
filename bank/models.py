@@ -5,6 +5,8 @@ from django.db.models.signals import pre_save
 from django.db.models import Q, Sum
 from django.utils import timezone
 from django.db.models.functions import Coalesce
+import logging
+logger = logging.getLogger(__name__)
 
 class Currency(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -105,8 +107,6 @@ class Transaction(models.Model):
 
             # check that all entries balance out
             balance = sum([e.amount for e in entries])
-            print("BALANCE")
-            print(balance)
             if balance != 0:
                 # Note that this effectively prevents us from editing a
                 # transaction as well, since one entry will get updated before
@@ -163,12 +163,10 @@ class Entry(models.Model):
     def with_account(self):
         if self.valid:
             # what account was this transaction _from_?
-            print(self.transaction.entries.all())
             other_entry = self.transaction.entries.exclude(id=self.id).first()
             return other_entry.account
         else:
-            print('Warning! found invalid transaction id=%d' % self.transaction.id)
-            print(self.transaction.entries.all())
+            logger.debug('Warning! found invalid transaction id=%d' % self.transaction.id)
             return None
 
     def balance_at(self):

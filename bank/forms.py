@@ -24,7 +24,6 @@ def recipient_accounts():
     accounts = Account.objects.all()
     for a in accounts:
         if a.primary_for.all():
-            print(a.primary_for.all())
             account_list.append(a)
     choices = [("", "---------")]
     for a in account_list:
