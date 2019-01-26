@@ -12,6 +12,8 @@ from django.contrib.sites.models import Site
 import re
 import base64
 import uuid
+import logging
+logger = logging.getLogger(__name__)
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
@@ -331,7 +333,7 @@ class LocationRoomForm(forms.ModelForm):
                     # Image data on creation is ensured by the javascript validator.
                     # If we don't have image data here it's because we don't need to
                     # update the image.  Doing nothing -- JLS
-                    print('there was no image data')
+                    pass
             except:
                 raise forms.ValidationError('No valid image was provided.')
             upload_path = "rooms/"

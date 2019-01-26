@@ -28,7 +28,6 @@ from django.db.models.signals import pre_save, m2m_changed
 from bank.models import Account, Transaction, Currency
 
 import logging
-
 logger = logging.getLogger(__name__)
 
 # there is a weird db issue it seems with setting a field to null=False after it has been defined as null=True.
@@ -277,7 +276,6 @@ class Location(models.Model):
         for resource in self.resources.all():
             for resident in resource.backers():
                 all_residents.append(resident)
-        print(all_residents)
         return all_residents
 
 
@@ -347,7 +345,6 @@ class RoomCalendar(calendar.HTMLCalendar):
 class ResourceManager(models.Manager):
     def backed_by(self, user):
         resources = self.get_queryset().filter(backing__money_account__owners=user)
-        print(resources)
         return resources
 
 
@@ -514,14 +511,12 @@ class Resource(models.Model):
     def current_backing(self):
         today = timezone.localtime(timezone.now()).date()
         soonest_backing = self.current_and_future_backings().first()
-        print(soonest_backing)
         if (not soonest_backing) or (soonest_backing and soonest_backing.start > today):
             return None
         else:
             return soonest_backing
 
     def current_backers(self):
-        print('current backers')
         if self.current_backing():
             return self.current_backing().users.all()
         else:
@@ -558,12 +553,12 @@ class Resource(models.Model):
 
     def set_next_backing(self, backers, new_backing_date):
         # this method only supports having a single backing in the future.
-        # remove all future backigns, if any, and then setup the new backing.
+        # remove all future backings, if any, and then setup the new backing.
         today = timezone.localtime(timezone.now()).date()
         logger.debug('in set_next_backing')
         if hasattr(self, 'backings'):
             logger.debug('will end/delete current and future backings')
-            print(self.current_and_future_backings(new_backing_date))
+            logger.debug(self.current_and_future_backings(new_backing_date))
             for b in self.current_and_future_backings(new_backing_date):
                 # if the backing started in the past, then there are likely
                 # credits that will need to be reflected to this backer. so

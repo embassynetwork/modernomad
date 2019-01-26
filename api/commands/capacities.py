@@ -19,8 +19,6 @@ def user_can_administer_a_resource(user, resource):
 def in_the_past(capacity):
     tz = capacity.resource.tz()
     now = datetime.now(tz).date()
-    print(type(now))
-    print(type(capacity.start_date))
     return capacity.start_date < now
 
 def get_or_create_unsaved_capacity(data):
