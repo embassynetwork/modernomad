@@ -18,7 +18,7 @@ except ImportError:
 from django.utils import timezone
 
 from .view_helpers import _get_user_and_perms
-from core.emails import send_booking_receipt, new_booking_notify
+from core.emails.messages import send_booking_receipt, new_booking_notify
 from core.forms import BookingUseForm
 from core.models import Booking, Use, Location
 logger = logging.getLogger(__name__)

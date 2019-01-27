@@ -37,9 +37,9 @@ import stripe
 from stripe.error import CardError
 from django.http import JsonResponse
 from core.booking_calendar import GuestCalendar
-from core.emails import send_booking_receipt, send_subscription_receipt, new_booking_notify
-from core.emails import updated_booking_notify, send_from_location_address, admin_new_subscription_notify
-from core.emails import subscription_note_notify
+from core.emails.messages import send_booking_receipt, send_subscription_receipt, new_booking_notify
+from core.emails.messages import updated_booking_notify, send_from_location_address, admin_new_subscription_notify
+from core.emails.messages import subscription_note_notify
 from django.core.urlresolvers import reverse
 from core.models import get_location
 from django.shortcuts import get_object_or_404
