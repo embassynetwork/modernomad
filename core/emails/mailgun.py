@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.conf import settings
+from sentry_sdk import capture_exception, capture_message
 import logging
 logger = logging.getLogger(__name__)
 
