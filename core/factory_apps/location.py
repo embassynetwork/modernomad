@@ -34,8 +34,8 @@ class LocationFactory(factory.DjangoModelFactory):
     latitude = factory.Faker('latitude')
     longitude = factory.Faker('longitude')
 
-    welcome_email_days_ahead = factory.Faker('random_int')
-    max_booking_days = factory.Faker('random_int')
+    welcome_email_days_ahead = factory.Iterator([1,2,3,4,5])
+    max_booking_days = factory.Iterator([1,5,14,30])
 
     stay_page = factory.Faker('text')
     front_page_stay = factory.Faker('text')

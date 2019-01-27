@@ -25,6 +25,8 @@ class EventAdminGroupFactory(factory.DjangoModelFactory):
             # A list of groups were passed in, use them
             for user in extracted:
                 self.users.add(user)
+        else:
+            self.users.add(1)
 
 
 class EventSeriesFactory(factory.DjangoModelFactory):
