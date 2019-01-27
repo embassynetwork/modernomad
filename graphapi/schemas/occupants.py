@@ -22,7 +22,7 @@ class OccupantNode(DjangoObjectType):
         interfaces = (Node, )
         filter_fields = ['arrive', 'location']
 
-    def resolve_occupants_during(self, args, *_):
+    def resolve_occupants_during(self, info):
         query = (
             Use.objects
             .filter(location=self.location, status="confirmed")
@@ -34,7 +34,7 @@ class OccupantNode(DjangoObjectType):
         )
         return query.all()
 
-    def resolve_upcoming_events_during(self, args, *_):
+    def resolve_upcoming_events_during(self, info):
         today = timezone.now()
 
         query = (
@@ -47,7 +47,7 @@ class OccupantNode(DjangoObjectType):
         )
         return query.all()[:3]
 
-    def resolve_type(self, args, *_):
+    def resolve_type(self, info):
         return "guest"
 
 
@@ -55,15 +55,15 @@ class Query(AbstractType):
     my_occupancies = DjangoFilterConnectionField(OccupantNode)
     my_current_occupancies = DjangoFilterConnectionField(OccupantNode)
 
-    def resolve_my_occupancies(self, args, context, info):
-        if not context.user.is_authenticated():
+    def resolve_my_occupancies(self, info):
+        if not info.context.user.is_authenticated():
             return Use.objects.none()
         else:
-            return Use.objects.filter(user=context.user)
+            return Use.objects.filter(user=info.context.user)
 
-    def resolve_my_current_occupancies(self, args, context, info):
-        if not context.user.is_authenticated():
+    def resolve_my_current_occupancies(self, info):
+        if not info.context.user.is_authenticated():
             return Use.objects.none()
         else:
             today = timezone.now()
-            return Use.objects.filter(user=context.user, depart__gte=today)
+            return Use.objects.filter(user=info.context.user, depart__gte=today)

@@ -12,7 +12,7 @@ class EventNode(DjangoObjectType):
         model = Event
         filter_fields = ['slug', 'title']
 
-    def resolve_url(self, args, *_):
+    def resolve_url(self, info, **kwargs):
         return "/locations/" + self.location.slug + "/events/" + str(self.id) + "/" + self.slug + "/"
 
 

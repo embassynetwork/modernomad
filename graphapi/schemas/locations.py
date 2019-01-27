@@ -21,16 +21,16 @@ class LocationNode(DjangoObjectType):
         interfaces = (Node, )
         filter_fields = ['slug']
 
-    def resolve_fees(self, args, *_):
+    def resolve_fees(self, info, **kwargs):
         query = Fee.objects.filter(locationfee__location=self)
-        query = query.filter(**args)
+        query = query.filter(**kwargs)
 
         return query
 
-    def resolve_resources(self, args, *_):
-        if args.get('has_future_capacity', False):
+    def resolve_resources(self, info, **kwargs):
+        if kwargs.get('has_future_capacity', False):
             resources = self.rooms_with_future_capacity()
-        elif args.get('has_future_drft_capacity', False):
+        elif kwargs.get('has_future_drft_capacity', False):
             resources = self.rooms_with_future_drft_capacity()
         else:
             resources = self.resources.all()
