@@ -13,13 +13,20 @@ This will boot up everything that Modernomad needs to run, and stay running in t
 In another console, run these commands to set up the database and set up a user:
 
     $ [sudo] docker-compose run web ./manage.py migrate
-    $ [sudo] docker-compose run web ./manage.py createsuperuser
 
-You only need to run these commands once. To spin up the development environment when you need to work on it again, just run `docker-compose up --build`. (Note: `--build` is optional, but means that the Python and Node dependencies will always remain up-to-date.)
-
-To run the test suite:
+Your docker image is now running with your local development code. Browse to `http://localhost:8000/` to access your running image. You can run any of the other `manage.py` commands in the same way. E.g., to run the test suite:
 
     $ docker-compose run web ./manage.py test
+
+The first time you get this going, you will want to generate some test data:
+
+    $ docker-compose run web ./manage.py generate_test_data
+
+This will wipe out your superuser, so after generating test data, create a new superuser that you know the credentials to:
+
+    $ [sudo] docker-compose run web ./manage.py createsuperuser
+
+You only need to run these commands once. Wen you want to work on the development environment in the future, just run `docker-compose up --build`. (Note: `--build` is optional, but means that the Python and Node dependencies will always remain up-to-date.)
 
 ## Configuration
 
