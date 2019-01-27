@@ -12,26 +12,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-
-def mailgun_send(mailgun_data, files_dict=None):
-    logger.debug("Mailgun send: %s" % mailgun_data)
-    logger.debug("Mailgun files: %s" % files_dict)
-    if settings.DEBUG:
-        if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
-            # We will see this message in the mailgun logs but nothing will actually be delivered
-            logger.debug("mailgun_send: setting testmode=yes")
-            mailgun_data["o:testmode"] = "yes"
-    try:
-        resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
-            auth=("api", settings.MAILGUN_API_KEY),
-            data=mailgun_data,
-            files=files_dict
-        )
-        logger.debug("Mailgun response: %s" % resp.text)
-        return HttpResponse(status=200)
-    except requests.ConnectionError as e:
-        logger.error('No network connection. Email "%s" aborted.' % mailgun_data['subject'])
-        return HttpResponse(status=500)
+from core.emails.mailgun import mailgun_send
 
 def new_event_notification(event, location):
     # notify the event admins that a new event has been proposed

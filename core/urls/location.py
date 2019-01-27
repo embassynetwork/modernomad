@@ -1,6 +1,6 @@
 from django.conf.urls import include, url
 import core.views.unsorted
-import core.emails
+import core.emails.messages
 import gather.urls
 import core.urls.bookings
 import core.urls.uses
@@ -30,12 +30,12 @@ per_location_patterns = [
     url(r'^edit/rooms/new$', core.views.unsorted.LocationNewRoom, name='location_new_room'),
     url(r'^edit/rooms/$', core.views.unsorted.LocationManageRooms, name='location_manage_rooms'),
 
-    url(r'^email/current$', core.emails.current, name='location_email_current'),
-    url(r'^email/stay$', core.emails.stay, name='location_email_stay'),
-    url(r'^email/residents$', core.emails.residents, name='location_email_residents'),
-    url(r'^email/test80085$', core.emails.test80085, name='location_email_test'),
-    url(r'^email/unsubscribe$', core.emails.unsubscribe, name='location_email_unsubscribe'),
-    url(r'^email/announce$', core.emails.announce, name='location_email_announce'),
+    url(r'^email/current$', core.emails.messages.current, name='location_email_current'),
+    url(r'^email/stay$', core.emails.messages.stay, name='location_email_stay'),
+    url(r'^email/residents$', core.emails.messages.residents, name='location_email_residents'),
+    url(r'^email/test80085$', core.emails.messages.test80085, name='location_email_test'),
+    url(r'^email/unsubscribe$', core.emails.messages.unsubscribe, name='location_email_unsubscribe'),
+    url(r'^email/announce$', core.emails.messages.announce, name='location_email_announce'),
 
     # internal views
     url(r'^rooms_availabile_on_dates/$', core.views.unsorted.RoomsAvailableOnDates, name='rooms_available_on_dates'),

@@ -9,9 +9,9 @@ from itertools import chain
 import logging
 
 from modernomad.log import catch_exceptions
-from gather import emails
 from gather.models import Event, EventNotifications
 from core.models import Location
+from core.emails.mailgun import mailgun_send
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ def send_events_list(user, event_list, location):
             "subject": subject,
             "text": text_content,
         }
-    return emails.mailgun_send(mailgun_data)
+    return mailgun_send(mailgun_data)
 
 
 def weekly_reminder_email(user, event_list, location):
@@ -100,7 +100,7 @@ def weekly_reminder_email(user, event_list, location):
             "text": text_content,
             "html": html_content,
         }
-    return emails.mailgun_send(mailgun_data)
+    return mailgun_send(mailgun_data)
 
 
 def events_pending(location):

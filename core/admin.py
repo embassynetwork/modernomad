@@ -5,7 +5,7 @@ from django.contrib import messages
 
 from core.models import *
 from gather.models import EventAdminGroup
-from core.emails import *
+from core.emails.messages import *
 
 class EmailTemplateAdmin(admin.ModelAdmin):
     model = EmailTemplate

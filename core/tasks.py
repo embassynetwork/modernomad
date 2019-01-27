@@ -1,5 +1,5 @@
 from core.models import Location, Subscription, Use
-from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
+from core.emails.messages import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from django.conf import settings
 from modernomad.backup import BackupManager
 from modernomad.log import catch_exceptions
