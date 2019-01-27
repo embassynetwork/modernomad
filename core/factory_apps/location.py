@@ -46,7 +46,7 @@ class LocationFactory(factory.DjangoModelFactory):
     ssid = factory.Faker('word')
     ssid_password = factory.Faker('word')
 
-    timezone = factory.Faker('word')
+    timezone = factory.Iterator(['America/Los_Angeles', 'Europe/Berlin'])
     bank_account_number = factory.Faker('random_int')
     routing_number = factory.Faker('random_int')
 
@@ -54,10 +54,14 @@ class LocationFactory(factory.DjangoModelFactory):
     name_on_account = factory.Faker('word')
     email_subject_prefix = factory.Faker('word')
 
-    check_out = factory.Faker('word')
-    check_in = factory.Faker('word')
-    visibility = factory.Iterator(['public', 'members', 'link'])
+    check_out = factory.Iterator(['11am', '10am', '12pm', '1pm'])
+    check_in = factory.Iterator(['2pm', '3pm', '4pm'])
 
+    # only use public for now. 'members' doesn't work and 'link' just makes it
+    # harder to browse.
+    visibility = factory.Iterator(['public'])
+
+    # JKS how to call this?
     @factory.post_generation
     def house_admins(self, create, extracted, **kwargs):
         if not create:
@@ -68,6 +72,8 @@ class LocationFactory(factory.DjangoModelFactory):
             # A list of groups were passed in, use them
             for user in extracted:
                 self.house_admins.add(user)
+        else:
+            self.house_admins.add(1)
 
     @factory.post_generation
     def readonly_admins(self, create, extracted, **kwargs):
@@ -79,6 +85,12 @@ class LocationFactory(factory.DjangoModelFactory):
             # A list of groups were passed in, use them
             for user in extracted:
                 self.readonly_admins.add(user)
+
+    @factory.post_generation
+    def add_backing(self, create, extracted, **kwargs):
+        # JKS backings are how residents are determined. backings will generate
+        # users.
+        pass
 
 
 class ResourceFactory(factory.DjangoModelFactory):
@@ -92,6 +104,7 @@ class ResourceFactory(factory.DjangoModelFactory):
     summary = factory.Faker('sentence')
     cancellation_policy = factory.Faker('text')
     image = factory.django.ImageField(color='green')
+    # JKS add backing
 
 
 class LocationFeeFactory(factory.DjangoModelFactory):

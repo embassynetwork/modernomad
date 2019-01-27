@@ -11,11 +11,12 @@ from core.factory_apps import location
 from core.factory_apps import communication
 from core.factory_apps import events
 from core.factory_apps import payment
+from core.factory_apps import user
 from core.models import Currency
 
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
+    help = 'Generate test data for a development environment.'
 
     def handle(self, *args, **options):
         f = io.StringIO()
@@ -40,7 +41,18 @@ class Command(BaseCommand):
         # hmm. a better solution needed here, but this shall do for now.
         Currency.objects.get_or_create(name='DRFT', defaults={'symbol': 'Ɖ'})
 
-        # communication
+        # create a known super user. as the first created user, this user will
+        # have user id = 1. this user will also be set as a location admin for
+        # all locations.
+        superuser = user.UserFactory(
+            first_name='Root',
+            last_name='Admin',
+            username='admin',
+            is_superuser=True,
+            is_staff=True
+        )
+
+        # communication. these emails will also generate users.
         communication.EmailtemplateFactory()
 
         # Building location specific things
