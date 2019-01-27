@@ -13,7 +13,10 @@ from . import factory
 from .user import UserFactory
 from .accounts import USDAccountFactory
 from .accounts import DRFTAccountFactory
+import datetime
 
+one_year_ago = datetime.datetime.today() - datetime.timedelta(days=365)
+yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
 
 class FeeFactory(factory.DjangoModelFactory):
     class Meta:
@@ -157,9 +160,9 @@ class CapacityChangeFactory(factory.DjangoModelFactory):
     class Meta:
         model = CapacityChange
 
-    created = factory.Faker('past_datetime')
     resource = factory.SubFactory(ResourceFactory)
-    start_date = factory.Faker('past_datetime')
+    start_date = factory.fuzzy.FuzzyDate(one_year_ago, yesterday)
+    created = factory.fuzzy.FuzzyDate(one_year_ago, yesterday)
     quantity = factory.Iterator([1, 2])
     accept_drft = factory.Faker('pybool')
 
@@ -175,7 +178,7 @@ class BackingFactory(factory.DjangoModelFactory):
     drft_account = factory.SubFactory(DRFTAccountFactory)
     # these will be the residents of the location associated with the linked
     # resource.
-    start = factory.Faker('past_datetime')
+    start = factory.fuzzy.FuzzyDate(one_year_ago, yesterday)
 
     @factory.post_generation
     def users(self, create, extracted, **kwargs):
