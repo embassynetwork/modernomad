@@ -107,6 +107,9 @@ class ResourceFactory(factory.DjangoModelFactory):
     # JKS add backing
 
 
+# Note: this doesn't get used because it's really just an indexing mechanism to
+# reference what fees should be applied to the bill. Maybe worth wiring up at
+# some point but it's a known orphan at the moment.
 class LocationFeeFactory(factory.DjangoModelFactory):
     class Meta:
         model = LocationFee
