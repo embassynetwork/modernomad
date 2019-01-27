@@ -35,29 +35,23 @@ class ResourceNode(DjangoObjectType):
             'location__slug': ['exact'],
         }
 
-    def resolve_has_future_drft_capacity(self, args, *kwargs):
+    def resolve_has_future_drft_capacity(self, info):
         return self.has_future_drft_capacity()
 
-    def resolve_rid(self, args, *_):
+    def resolve_rid(self, info):
         return self.id
 
-    def resolve_accept_drft_these_dates(self, args, *stuff):
-        assert args['arrive'], "you must specify arrival date"
-        assert args['depart'], "you must specify departure date"
-
-        start_date = args['arrive'].date()
-        end_date = args['depart'].date() - timedelta(days=1)
+    def resolve_accept_drft_these_dates(self, info, arrive, depart):
+        start_date = arrive.date()
+        end_date = depart.date() - timedelta(days=1)
 
         logger.debug('%s drftable between? ' % self.name)
         logger.debug(self.drftable_between(start_date, end_date))
         return self.drftable_between(start_date, end_date)
 
-    def resolve_availabilities(self, args, *stuff):
-        assert args['arrive'], "you must specify arrival date"
-        assert args['depart'], "you must specify departure date"
-
-        start_date = args['arrive'].date()
-        end_date = args['depart'].date() - timedelta(days=1)
+    def resolve_availabilities(self, info, arrive, depart):
+        start_date = arrive.date()
+        end_date = depart.date() - timedelta(days=1)
 
         availabilities = self.daily_availabilities_within(start_date, end_date)
 
@@ -67,5 +61,5 @@ class Query(AbstractType):
     all_resources = DjangoFilterConnectionField(ResourceNode)
     all_drft_resources = DjangoFilterConnectionField(ResourceNode)
 
-    def resolve_all_drft_resources(self, args, context, info):
+    def resolve_all_drft_resources(self, info):
         return Resource.objects.filter(hasFutureDrftCapacity=True)

@@ -22,10 +22,10 @@ class UserNode(DjangoObjectType):
         interfaces = (Node, )
         filter_fields = ['id']
 
-    def resolve_name(self, args, *_):
+    def resolve_name(self, info):
         return " ".join([self.first_name, self.last_name])
 
-    def resolve_url(self, args, *_):
+    def resolve_url(self, info):
         return "/people/" + self.username
 
 
