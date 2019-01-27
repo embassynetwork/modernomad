@@ -291,8 +291,10 @@ class LocationDoesNotExistException(Exception):
 def get_location(location_slug):
     if location_slug:
         try:
+            # TODO This looks like a bug. Since it's using first this will
+            # raise an exception, it'll just return None.
             location = Location.objects.filter(slug=location_slug).first()
-        except:
+        except Exception:
             raise LocationDoesNotExistException("The requested location does not exist: %s" % location_slug)
     else:
         if Location.objects.count() == 1:
