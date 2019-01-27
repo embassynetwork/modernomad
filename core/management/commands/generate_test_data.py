@@ -12,6 +12,7 @@ from core.factory_apps import communication
 from core.factory_apps import events
 from core.factory_apps import payment
 from core.factory_apps import user
+from core.factory_apps import accounts
 from core.models import Currency
 
 
@@ -37,10 +38,6 @@ class Command(BaseCommand):
         fake = Faker()
         fake.seed(1)
 
-        # this is created as part of a migration but is destroyed by the sqlflush.
-        # hmm. a better solution needed here, but this shall do for now.
-        Currency.objects.get_or_create(name='DRFT', defaults={'symbol': 'Ɖ'})
-
         # create a known super user. as the first created user, this user will
         # have user id = 1. this user will also be set as a location admin for
         # all locations.
@@ -51,6 +48,11 @@ class Command(BaseCommand):
             is_superuser=True,
             is_staff=True
         )
+
+        # the site as a whole makes use of at least a fiat (USD) and DRFT
+        # currency.
+        accounts.USDCurrencyFactory.create()
+        accounts.DRFTCurrencyFactory.create()
 
         # communication. these emails will also generate users.
         communication.EmailtemplateFactory()
@@ -64,7 +66,10 @@ class Command(BaseCommand):
             menu = location.LocationMenuFactory(location=locationobj)
             location.LocationFlatPageFactory(menu=menu)
 
+
             location.CapacityChangeFactory(resource=resource)
+            # generates new users who will also be the location residents
+            backing = location.BackingFactory(resource=resource)
 
             # event things
             event_admin = events.EventAdminGroupFactory(location=locationobj)
