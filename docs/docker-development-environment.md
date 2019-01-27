@@ -8,12 +8,12 @@ Next, run:
 
     $ [sudo] docker-compose up --build
 
-This will boot up everything that Modernomad needs to run.
+This will boot up everything that Modernomad needs to run, and stay running in the terminal.
 
 In another console, run these commands to set up the database and set up a user:
 
-    $ docker-compose run web ./manage.py migrate
-    $ docker-compose run web ./manage.py createsuperuser
+    $ [sudo] docker-compose run web ./manage.py migrate
+    $ [sudo] docker-compose run web ./manage.py createsuperuser
 
 You only need to run these commands once. To spin up the development environment when you need to work on it again, just run `docker-compose up --build`. (Note: `--build` is optional, but means that the Python and Node dependencies will always remain up-to-date.)
 
