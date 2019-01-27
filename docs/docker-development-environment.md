@@ -1,10 +1,12 @@
 # Docker Development Environment
 
-First, install Docker CE. On macOS, the best way to this is to use [Docker for Mac](https://docs.docker.com/docker-for-mac/install/). For Linux and Windows, [take a look at Docker's documentation](https://docs.docker.com/engine/installation/).
+First, install Docker CE. On macOS, the best way to this is to use [Docker for Mac](https://docs.docker.com/docker-for-mac/install/). For Linux and Windows, [take a look at Docker's documentation](https://docs.docker.com/engine/installation/). 
+
+Make sure you have `docker-compose` installed. See eg: Digital Ocean's most likely up to date [instructions](https://www.digitalocean.com/community/tutorials/how-to-install-docker-compose-on-ubuntu-18-04) for installing from source or packages. 
 
 Next, run:
 
-    $ docker-compose up --build
+    $ [sudo] docker-compose up --build
 
 This will boot up everything that Modernomad needs to run.
 
