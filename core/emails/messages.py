@@ -14,15 +14,15 @@ from core.models import Booking, Subscription, Use
 from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from sentry_sdk import capture_exception, capture_message
 
 import json
 import requests
 import datetime
-import logging
-
 from django.utils import translation
+from core.emails.mailgun import mailgun_send
 
-
+import logging
 logger = logging.getLogger(__name__)
 
 weekday_number_to_name = {
@@ -34,22 +34,6 @@ weekday_number_to_name = {
     5: "Saturday",
     6: "Sunday"
 }
-
-def mailgun_send(mailgun_data, files_dict=None):
-    logger.debug("Mailgun send: %s" % mailgun_data)
-    logger.debug("Mailgun files: %s" % files_dict)
-    if settings.DEBUG:
-        if not hasattr(settings, 'MAILGUN_DEBUG') or settings.MAILGUN_DEBUG:
-            # We will see this message in the mailgun logs but nothing will actually be delivered
-            logger.debug("mailgun_send: setting testmode=yes")
-            mailgun_data["o:testmode"] = "yes"
-    resp = requests.post("https://api.mailgun.net/v2/%s/messages" % settings.LIST_DOMAIN,
-        auth=("api", settings.MAILGUN_API_KEY),
-        data=mailgun_data,
-        files=files_dict
-    )
-    logger.debug("Mailgun response: %s" % resp.text)
-    return HttpResponse(status=200)
 
 def send_from_location_address(subject, text_content, html_content, recipient, location):
     ''' a somewhat generic send function using mailgun that sends plaintext
