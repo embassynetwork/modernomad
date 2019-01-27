@@ -9,7 +9,7 @@ class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
 
-    username = factory.Faker('name')
+    username = factory.Faker('user_name')
     # all users have a password hardcoded to 'password'
     password = factory.PostGenerationMethodCall('set_password', 'password')
     first_name = factory.Faker('first_name')

@@ -8,7 +8,11 @@ from core.models import LocationFlatPage
 from core.models import LocationEmailTemplate
 from core.models import CapacityChange
 from core.models import Fee
+from core.models import Backing
 from . import factory
+from .user import UserFactory
+from .accounts import USDAccountFactory
+from .accounts import DRFTAccountFactory
 
 
 class FeeFactory(factory.DjangoModelFactory):
@@ -161,4 +165,23 @@ class CapacityChangeFactory(factory.DjangoModelFactory):
 
 
 class BackingFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = Backing
+
+    resource = factory.SubFactory(ResourceFactory)
+    # JKS TODO these money and drft accounts should really be owned and admin-ed by
+    # the backing user.
+    money_account = factory.SubFactory(USDAccountFactory)
+    drft_account = factory.SubFactory(DRFTAccountFactory)
+    # these will be the residents of the location associated with the linked
+    # resource.
+    start = factory.Faker('past_datetime')
+
+    @factory.post_generation
+    def users(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+        self.users.add(UserFactory())
+
+
