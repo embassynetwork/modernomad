@@ -122,7 +122,7 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
 
 const RoomIndexOrDetail = graphql(resourcesQuery, {
   options: (props) => {
-    const formatString = 'Y-MM-DTHH:mm:ss.ms'
+    const formatString = 'YYYY-MM-DDTHH:mm:ss.ms'
     const parseFormat = 'MM/DD/YYYY'
     const query = props.location.query
     const arrive = query.arrive ? moment(query.arrive, parseFormat) : moment().startOf('day')
