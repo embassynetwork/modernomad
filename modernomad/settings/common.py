@@ -110,6 +110,10 @@ EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 ANYMAIL = {
     "MAILGUN_API_KEY": env('MAILGUN_API_KEY', default=''),
 }
+ANYMAIL_SEND_DEFAULTS = {
+    'esp_extra': {'o:testmode': env('MAILGUN_TESTMODE', default='yes')}
+}
+
 
 # this will be used as the subject line prefix for all emails sent from this app.
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
