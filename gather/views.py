@@ -1,30 +1,30 @@
-import json, requests, logging, datetime
-from PIL import Image
+import json
+import logging
+import datetime
 
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.contrib import messages
 from django.conf import settings
-from django.db.models import Q
-from gather.models import Event, EventAdminGroup, EventSeries
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.views.decorators.csrf import csrf_exempt
-from django.template.loader import get_template
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
+from gather.models import Event, EventAdminGroup
 from gather.forms import EventForm, EventEmailTemplateForm
 from core.forms import UserProfileForm
-from gather.emails import new_event_notification, event_approved_notification, event_published_notification, mailgun_send
+from gather.emails import new_event_notification, event_approved_notification, event_published_notification
 from core.models import Location
 
 logger = logging.getLogger(__name__)
+
 
 def create_event(request, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
@@ -33,7 +33,7 @@ def create_event(request, location_slug=None):
 
     # if the user doesn't have a proper profile, then make sure they extend it first
     logger.debug(current_user.id)
-    if current_user.id == None :
+    if current_user.id is None:
         messages.add_message(request, messages.INFO, 'We want to know who you are! Please create a profile before submitting an event.')
         next_url = '/locations/%s/events/create/' % location.slug
         return HttpResponseRedirect('/people/register/?next=%s' % next_url)
@@ -82,6 +82,7 @@ def create_event(request, location_slug=None):
         form = EventForm()
     return render(request, 'gather_event_create.html', {'form': form, 'current_user': current_user, 'user_list': json.dumps(user_list), 'is_event_admin': is_event_admin, 'location': location})
 
+
 @login_required
 def edit_event(request, event_id, event_slug, location_slug=None):
     location = get_object_or_404(Location, slug=location_slug)
@@ -115,13 +116,14 @@ def edit_event(request, event_id, event_slug, location_slug=None):
         form = EventForm(instance=event, initial={'co_organizers': other_organizer_usernames_string})
     return render(request, 'gather_event_edit.html', {'form': form, 'current_user': current_user, 'event_id': event_id, 'event_slug': event_slug, 'user_list': json.dumps(user_list), 'location': location})
 
+
 def view_event(request, event_id, event_slug, location_slug=None):
     # XXX should we double check the associated location here? currently the
     # assumption is that if an event is being viewed under a specific location
     # that that will be reflected in the URL path.
     try:
         event = Event.objects.get(id=event_id)
-    except:
+    except Exception:
         logger.debug('event not found')
         return HttpResponseRedirect('/404')
 
@@ -174,10 +176,10 @@ def view_event(request, event_id, event_slug, location_slug=None):
         spots_remaining = event.limit - num_attendees
         event_email = 'event%d@%s.%s' % (event.id, event.location.slug, settings.LIST_DOMAIN)
         domain = Site.objects.get_current().domain
-        formatted_title = event.title.replace(" ","+")
-        formatted_dates =  event.start.strftime("%Y%m%dT%H%M00Z") + "/" + event.end.strftime("%Y%m%dT%H%M00Z") # "20140127T224000Z/20140320T221500Z"
-        detail_url = "https://" +domain +  reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
-        formatted_location = event.where.replace(" ","+")
+        formatted_title = event.title.replace(" ", "+")
+        formatted_dates = event.start.strftime("%Y%m%dT%H%M00Z") + "/" + event.end.strftime("%Y%m%dT%H%M00Z")  # "20140127T224000Z/20140320T221500Z"
+        detail_url = "https://" + domain + reverse('gather_view_event', args=(event.location.slug, event.id, event.slug))
+        formatted_location = event.where.replace(" ", "+")
         event_google_cal_link = '''https://www.google.com/calendar/render?action=TEMPLATE&text=%s&dates=%s&details=For+details%%3a+%s&location=%s&sf=true&output=xml''' % (formatted_title, formatted_dates, detail_url, formatted_location)
         if user_is_event_admin or user_is_organizer:
             email_form = EventEmailTemplateForm(event, location)
@@ -439,25 +441,22 @@ def event_send_mail(request, event_id, event_slug, location_slug=None):
 
     location = get_object_or_404(Location, slug=location_slug)
     subject = request.POST.get("subject")
-    recipients = [request.POST.get("recipient"),]
+    recipients = [request.POST.get("recipient")]
     body = request.POST.get("body") + "\n\n" + request.POST.get("footer")
 
     # the from address is set to the organizer's email so people can respond
     # directly with questions if needed.
-    mailgun_data={"from": request.user.email,
-        "to": request.user.email,
-        "bcc": recipients,
+
+    mailgun_data = {
+        "from_email": request.user.email,
         "subject": subject,
-        "text": body,
+        "message": body,
     }
+    for recipient in recipients:
+        mailgun_data['recipient_list'] = [recipient]
+        send_mail(**mailgun_data)
 
-    resp = mailgun_send(mailgun_data)
-
-    logger.debug(resp)
-    if resp.status_code == 200:
-        messages.add_message(request, messages.INFO, "Your message was sent.")
-    else:
-        messages.add_message(request, messages.INFO, "There was a connection problem and your message was not sent.")
+    messages.add_message(request, messages.INFO, "Your message was sent.")
     return HttpResponseRedirect(reverse('gather_view_event', args=(location_slug, event_id, event_slug)))
 
 

@@ -117,7 +117,7 @@ def event_published_notification(event, location):
         logger.debug(event.visibility)
         try:
             u = User.objects.get(email=subscriber_email)
-        except:
+        except Exception:
             logger.error('There was an error retrieving the user associated with email address %s, likely because the email is not unique. Skipping this notification.' % subscriber_email)
             return
         if (event.visibility == Event.PUBLIC) or (event.visibility == Event.COMMUNITY and u in location.residents()):
