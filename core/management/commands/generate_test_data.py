@@ -12,7 +12,6 @@ from core.factory_apps import communication
 from core.factory_apps import events
 from core.factory_apps import payment
 from core.factory_apps import user
-from core.factory_apps import accounts
 from core.models import Currency
 
 
@@ -48,11 +47,6 @@ class Command(BaseCommand):
             is_superuser=True,
             is_staff=True
         )
-
-        # the site as a whole makes use of at least a fiat (USD) and DRFT
-        # currency.
-        accounts.USDCurrencyFactory.create()
-        accounts.DRFTCurrencyFactory.create()
 
         # communication. these emails will also generate users.
         communication.EmailtemplateFactory()
