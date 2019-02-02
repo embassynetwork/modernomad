@@ -7,19 +7,23 @@ from .user import UserFactory
 class DRFTCurrencyFactory(factory.DjangoModelFactory):
     class Meta:
         model = Currency
+        # Currencies are created in migrations, so use that if it exists
+        django_get_or_create = ('name',)
     name = "DRFT"
     symbol = "Ɖ"
 
 class USDCurrencyFactory(factory.DjangoModelFactory):
     class Meta:
         model = Currency
+        # Currencies are created in migrations, so use that if it exists
+        django_get_or_create = ('name',)
     name = "USD"
     symbol = "$"
 
 class USDAccountFactory(factory.DjangoModelFactory):
     class Meta:
         model = Account
-    currency = Currency.objects.get_or_create(name='USD')[0]
+    currency = factory.SubFactory(USDCurrencyFactory)
     # JKS this is a hack. Just makes the primary superuser the account
     # owner/admin.
     name = factory.fuzzy.FuzzyText(length=10)
@@ -49,7 +53,7 @@ class USDAccountFactory(factory.DjangoModelFactory):
 class DRFTAccountFactory(factory.DjangoModelFactory):
     class Meta:
         model = Account
-    currency = Currency.objects.get_or_create(name='DRFT')[0]
+    currency = factory.SubFactory(DRFTCurrencyFactory)
     # JKS this is a hack. Just makes the primary superuser the account
     # owner/admin.
     name = factory.fuzzy.FuzzyText(length=10)
