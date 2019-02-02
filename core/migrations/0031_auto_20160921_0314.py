@@ -10,6 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("UPDATE core_emailtemplate SET context = 'booking' WHERE context = 'reservation';"),
-        migrations.RunSQL("UPDATE core_locationemailtemplate SET key = 'newbooking' WHERE key = 'newreservation';")
+        migrations.RunSQL("UPDATE core_emailtemplate SET context = 'booking' WHERE context = 'reservation';", elidable=True),
+        migrations.RunSQL("UPDATE core_locationemailtemplate SET key = 'newbooking' WHERE key = 'newreservation';", elidable=True)
     ]
