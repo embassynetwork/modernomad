@@ -6,7 +6,7 @@ from gather.models import EventSeries
 from gather.models import Event
 from gather.models import EventNotifications
 
-from .user import UserFactory
+from .user import UserFactory, SuperUserFactory
 
 
 class EventAdminGroupFactory(factory.DjangoModelFactory):
@@ -26,7 +26,7 @@ class EventAdminGroupFactory(factory.DjangoModelFactory):
             for user in extracted:
                 self.users.add(user)
         else:
-            self.users.add(1)
+            self.users.add(SuperUserFactory())
 
 
 class EventSeriesFactory(factory.DjangoModelFactory):

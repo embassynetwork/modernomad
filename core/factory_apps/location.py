@@ -10,7 +10,7 @@ from core.models import CapacityChange
 from core.models import Fee
 from core.models import Backing
 from . import factory
-from .user import UserFactory
+from .user import UserFactory, SuperUserFactory
 from .accounts import USDAccountFactory
 from .accounts import DRFTAccountFactory
 import datetime
@@ -80,7 +80,7 @@ class LocationFactory(factory.DjangoModelFactory):
             for user in extracted:
                 self.house_admins.add(user)
         else:
-            self.house_admins.add(1)
+            self.house_admins.add(SuperUserFactory())
 
     @factory.post_generation
     def readonly_admins(self, create, extracted, **kwargs):

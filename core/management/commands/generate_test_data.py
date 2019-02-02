@@ -37,16 +37,9 @@ class Command(BaseCommand):
         fake = Faker()
         fake.seed(1)
 
-        # create a known super user. as the first created user, this user will
-        # have user id = 1. this user will also be set as a location admin for
+        # create a known super user. this user will also be set as a location admin for
         # all locations.
-        superuser = user.UserFactory(
-            first_name='Root',
-            last_name='Admin',
-            username='admin',
-            is_superuser=True,
-            is_staff=True
-        )
+        user.SuperUserFactory()
 
         # communication. these emails will also generate users.
         communication.EmailtemplateFactory()
