@@ -19,20 +19,6 @@ class Command(BaseCommand):
     help = 'Generate test data for a development environment.'
 
     def handle(self, *args, **options):
-        f = io.StringIO()
-        with contextlib.redirect_stdout(f):
-            call_command('sqlflush')
-        flush_db = f.getvalue()
-
-        with connection.cursor() as cursor:
-            statements = flush_db.split('\n')
-            for statement in statements:
-                if not statement:
-                    continue
-                cursor.execute(statement)
-
-        call_command('migrate')
-
         # setting the seed so output is consistent
         fake = Faker()
         fake.seed(1)
