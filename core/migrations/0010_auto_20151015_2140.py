@@ -22,5 +22,5 @@ class Migration(migrations.Migration):
             name='summary',
             field=models.CharField(max_length=140, help_text=b'Max length 140 chars', default=''),
         ),
-        migrations.RunPython(forward),
+        migrations.RunPython(forward, elidable=True),
     ]

@@ -32,5 +32,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(migrate_reservables, reverse_migrate_reservables)
+        migrations.RunPython(migrate_reservables, reverse_migrate_reservables, elidable=True)
     ]

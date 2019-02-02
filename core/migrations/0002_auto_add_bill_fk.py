@@ -78,7 +78,7 @@ class Migration(migrations.Migration):
             field=models.OneToOneField(related_name='reservation', to='core.Bill', null=True),
             preserve_default=True,
         ),
-        migrations.RunPython(forward),
+        migrations.RunPython(forward, elidable=True),
         migrations.RemoveField(
             model_name='payment',
             name='reservation',
