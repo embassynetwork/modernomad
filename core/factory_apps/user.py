@@ -20,6 +20,21 @@ class UserFactory(factory.DjangoModelFactory):
     is_superuser = False
 
 
+class SuperUserFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = User
+        django_get_or_create = ('username',)
+
+    username = 'admin'
+    password = factory.PostGenerationMethodCall('set_password', 'password')
+    first_name = 'Root'
+    last_name = 'Admin'
+    email = factory.Faker('email')
+    is_superuser = True
+    is_active = True
+    is_staff = True
+
+
 class UserProfileFactory(factory.DjangoModelFactory):
     pass
 
