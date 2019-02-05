@@ -20,13 +20,14 @@ def send_guests_residents_daily_update():
     for location in locations:
         guests_residents_daily_update(location)
 
+
 @periodic_task(run_every=crontab(hour=4, minute=30))
 def send_admin_daily_update():
     locations = Location.objects.all()
     for location in locations:
         admin_daily_update(location)
 
-#@periodic_task(run_every=crontab(minute="*")) # <-- for testing
+
 @periodic_task(run_every=crontab(hour=5, minute=0))
 def send_guest_welcome():
     # get all bookings WELCOME_EMAIL_DAYS_AHEAD from now.
@@ -37,6 +38,7 @@ def send_guest_welcome():
         for booking in upcoming:
             guest_welcome(booking)
 
+
 @periodic_task(run_every=crontab(hour=4, minute=30))
 def send_departure_email():
     # get all bookings departing today
@@ -46,6 +48,7 @@ def send_departure_email():
         departing = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
         for use in departing:
             goodbye_email(use)
+
 
 @periodic_task(run_every=crontab(hour=2, minute=0))
 def make_backup():
@@ -84,13 +87,14 @@ def _format_attachment(use, color):
     profile_url = domain + urlresolvers.reverse('user_detail', args=(use.user.username,)),
     item = {
             'color': color,
-            'fallback' : use.user.get_full_name(),
+            'fallback': use.user.get_full_name(),
             'title': use.user.get_full_name(),
             'title_link': profile_url[0],
             'text': booking_url,
             'thumb_url': profile_img_url,
     }
     return item
+
 
 @periodic_task(run_every=crontab(hour=5, minute=10))
 def slack_embassysf_daily():
@@ -189,7 +193,3 @@ def slack_redvic_daily():
     logger.debug(js)
     resp = requests.post(webhook, data=js)
     logger.debug("Slack response: %s" % resp.text)
-
-
-
-
