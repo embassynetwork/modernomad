@@ -9,13 +9,11 @@ services:
     environment:
       - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
       - "DATABASE_URL=postgres://postgres@postgres/postgres"
-      - "BROKER_URL=amqp://guest:guest@rabbitmq//"
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "MAILGUN_API_KEY"
     links:
       - postgres
-      - rabbitmq
     volumes:
       - "./:/app"
   client:
@@ -28,22 +26,5 @@ services:
     volumes:
       - "./:/app"
       - "/app/client/node_modules"
-  worker:
-    build: .
-    command: bin/celeryd
-    environment:
-      - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
-      - "DATABASE_URL=postgres://postgres@postgres/postgres"
-      - "BROKER_URL=amqp://guest:guest@rabbitmq//"
-      - "STRIPE_SECRET_KEY"
-      - "STRIPE_PUBLISHABLE_KEY"
-      - "MAILGUN_API_KEY"
-    links:
-      - postgres
-      - rabbitmq
-    volumes:
-      - "./:/app"
-  rabbitmq:
-    image: rabbitmq
   postgres:
     image: postgres
