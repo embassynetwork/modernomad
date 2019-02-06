@@ -6,7 +6,7 @@
  the specific site or installation-wide: `client_max_body_size 20M;`
 
 2. redirect all requests to HTTPS. here is an example nginx config file. if you
- have an example config for apache, i am happy to include it. 
+ have an example config for apache, i am happy to include it.
 
 
 ###### Example Nginx Config ######

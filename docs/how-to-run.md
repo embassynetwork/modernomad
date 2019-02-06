@@ -6,11 +6,7 @@ Assuming you have all the prerequisites and dependencies outlined in [environmen
 create a new virtual environment for this project:
 - `mkvirtualenv modernomad`
 
-this will usually cause you to "enter" the virtualenv automatically, as will be
-reflected by the prompt now prefixed with (modernomad). use the following
-commands to work with virtualenvwrapper: `workon` to work on a specific virtual
-env, `pip install blah` to install packages, `lssitepackages` to see packaged
-installed in the virtual env.
+this will usually cause you to "enter" the virtualenv automatically, as will be reflected by the prompt now prefixed with (modernomad). use the following commands to work with virtualenvwrapper: `workon` to work on a specific virtual env, `pip install blah` to install packages, `lssitepackages` to see packaged installed in the virtual env.
 
 ## clone the repository
 
@@ -45,15 +41,11 @@ configured for.
 - Edit webpack.config.js and in the output.publicPath setting, replace `localhost` if necessary with your public IP or hostname. E.g. ` publicPath: 'http://myhousingnetwork:3000/build/'`
 
 
-## configuration file
-create your own local_settings.py file from local_settings.example.py. inside the modernomad/modernomad directory, do the following:
-- `cp local_settings.example.py local_settings.py`
+## Configuration settings
+If there is any local settings that you'd like to overwrite while developing you can always overwrite those in `settings/local.py`. Otherwise the project is set up to the biggest possible extent to use environment variables.
 
 ### settings you must configure, and dependant services:
 
-* `SECRET_KEY` : Set this to a private string
-* `ADMINS`     : Enter publically viewabls name, email address of administrator of this whole installation
-* `ALLOWED_HOSTS` : Enter comma delimited list of all hostnames which this site may be served through. Can be IP address, should include both with and without 'www.' separately.
 * `DATABASES`  : Setup Postgres:
   * `sudo su - postgres`
   * `psql`
@@ -92,22 +84,11 @@ Run node:
 - `node server`
 
 
-The first time you run the software, you will want to configure two things in
-the admin interface. the software is designed to send various emails to users
-who are part of the group 'house_admins' so, before it will send any emails,
-you need to add at least one user to this group. login to the admin interface
-at `localhost:port/admin` (with the admin user credentials you supplied when
-you ran migrate). click on 'users' and then any user (you probably only have one
-user right now). on the user page under 'groups' highlight the option
-'house_admin', and then hit 'save.'
+The first time you run the software, you will want to configure two things in the admin interface. the software is designed to send various emails to users who are part of the group 'house_admins' so, before it will send any emails, you need to add at least one user to this group. login to the admin interface at `localhost:port/admin` (with the admin user credentials you supplied when you ran migrate). click on 'users' and then any user (you probably only have one user right now). on the user page under 'groups' highlight the option 'house_admin', and then hit 'save.'
 
-in the admin interface you should also define some rooms, since the booking
-form presents a choice to users based on the rooms and rates defined here.
+in the admin interface you should also define some rooms, since the booking form presents a choice to users based on the rooms and rates defined here.
 
-finally, set the value of the site variable so that full urls will have the
-correct domain. Go back to the home page of the admin interface, then click
-on 'sites' and then the first/only site that exists. edit the domain name
-to match the host and port you are running the software on.
+finally, set the value of the site variable so that full urls will have the correct domain. Go back to the home page of the admin interface, then click on 'sites' and then the first/only site that exists. edit the domain name to match the host and port you are running the software on.
 
 Now you can go ahead and start creating content.
 
