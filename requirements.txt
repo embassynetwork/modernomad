@@ -2,7 +2,6 @@ amqp==1.4.9
 anyjson==0.3.3
 billiard==3.3.0.23
 celery==3.1.20
-django-behave
 django-celery==3.1.17
 django-compressor==2.2
 django-debug-toolbar==1.5

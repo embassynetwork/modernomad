@@ -177,7 +177,6 @@ INSTALLED_APPS = [
 
     # 3rd party
     'compressor',
-    'django_behave',
     'django_extensions',
     'django_filters',
     'djcelery',
@@ -191,16 +190,12 @@ INSTALLED_APPS = [
     'gather',
     'modernomad',
     'api',
-    'bdd',
     'graphapi',
 ]
 
 COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
-
-# FIXME: disabled. see https://github.com/embassynetwork/modernomad/issues/302
-# TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
 
 AUTH_PROFILE_MODULE = 'core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
