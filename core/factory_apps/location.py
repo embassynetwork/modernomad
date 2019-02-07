@@ -42,7 +42,7 @@ class LocationFactory(factory.DjangoModelFactory):
     longitude = factory.Faker('longitude')
 
     welcome_email_days_ahead = factory.Iterator([1,2,3,4,5])
-    max_booking_days = factory.Iterator([1,5,14,30])
+    max_booking_days = factory.Iterator([5,14,30])
 
     stay_page = factory.Faker('text')
     front_page_stay = factory.Faker('text')
@@ -106,7 +106,7 @@ class ResourceFactory(factory.DjangoModelFactory):
 
     name = factory.Faker('name')
     location = factory.SubFactory(LocationFactory)
-    default_rate = factory.Faker('pydecimal', left_digits=0, positive=True)
+    default_rate = factory.Iterator([14.12, 30.53, 99, 31.41])
     description = factory.Faker('text')
     summary = factory.Faker('sentence')
     cancellation_policy = factory.Faker('text')
