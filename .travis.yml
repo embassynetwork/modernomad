@@ -1,5 +1,21 @@
+language: node_js
+node_js:
+ - 10
+cache:
+  npm: true
+  directories:
+    # cache folder with Cypress binary
+    - ~/.cache
 dist: xenial
-script: script/test
+install:
+  - sudo apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2
+  - npm ci
+script:
+ - script/test
+ - docker-compose up -d
+ - docker-compose run web ./manage.py migrate
+ - docker-compose run web ./manage.py generate_test_data
+ - $(npm bin)/cypress run --record --key 88257c2f-8d2e-464c-878b-650cace8563e
 notifications:
   slack:
     rooms:
