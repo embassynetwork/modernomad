@@ -17,9 +17,3 @@ that we leverage that you can specify yourself.
 # SSL Certificate
 
 - you need an SSL certificate to take payments. 
-
-# Eventbrite 
-
-- this is optional but if you have an eventbrite account events will display on
-  the landing page. 
-
