@@ -25,13 +25,13 @@ Interested in contributing? We use [Trello](https://trello.com/b/FPDnTkqj/modern
 associated with this repository if you are not on trello and want to report problems, bugs or make suggestions.
 [Read more about contributing](docs/contributing.md).
 
-### Docker development environment
+### Development environment
 
 The easiest way to get up and running in development is by using Docker. See [Docker development environment](docs/docker-development-environment.md).
 
-### Manual setup
-
 If you can't or don't want to use Docker, see [Environment Setup](docs/environment-setup.md) and [How to Run](docs/how-to-run.md).
+
+We use browser tests to ensure Modernomad keeps on doing what we want it to do. [See browser test documentation if you want to run or write tests.](docs/browser-tests.md)
 
 ### Configuration
 
