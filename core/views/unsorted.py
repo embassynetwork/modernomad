@@ -2301,15 +2301,17 @@ def process_unsaved_booking(request):
     return
 
 
-def user_login(request):
+def user_login(request, username=None):
     logger.debug('in user_login')
     next_page = None
     if 'next' in request.GET:
         next_page = request.GET['next']
 
-    username = password = ''
+    password = ''
     if request.POST:
-        username = request.POST['username']
+        # Username is pre-set if this is part of registration flow
+        if not username:
+            username = request.POST['username']
         # JKS this is a bit janky. this is because we use this view both after
         # the user registration or after the login view, which themselves use
         # slightly different forms.
@@ -2355,8 +2357,7 @@ def register(request):
         profile_form = UserProfileForm(request.POST, request.FILES)
         if profile_form.is_valid():
             user = profile_form.save()
-            request.POST['username'] = user.username
-            return user_login(request)
+            return user_login(request, username=user.username)
         else:
             logger.debug('profile form contained errors:')
             logger.debug(profile_form.errors)
