@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(hour=5, minute=30))
 def send_guests_residents_daily_update():
+    logger.info("Running task: send_guests_residents_daily_update")
     locations = Location.objects.all()
     for location in locations:
         guests_residents_daily_update(location)
@@ -23,6 +24,7 @@ def send_guests_residents_daily_update():
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
 def send_admin_daily_update():
+    logger.info("Running task: send_admin_daily_update")
     locations = Location.objects.all()
     for location in locations:
         admin_daily_update(location)
@@ -30,6 +32,7 @@ def send_admin_daily_update():
 
 @periodic_task(run_every=crontab(hour=5, minute=0))
 def send_guest_welcome():
+    logger.info("Running task: send_guest_welcome")
     # get all bookings WELCOME_EMAIL_DAYS_AHEAD from now.
     locations = Location.objects.all()
     for location in locations:
@@ -41,6 +44,7 @@ def send_guest_welcome():
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
 def send_departure_email():
+    logger.info("Running task: send_departure_email")
     # get all bookings departing today
     locations = Location.objects.all()
     for location in locations:
@@ -52,12 +56,14 @@ def send_departure_email():
 
 @periodic_task(run_every=crontab(hour=2, minute=0))
 def make_backup():
+    logger.info("Running task: make_backup")
     manager = BackupManager()
     manager.make_backup()
 
 
 @periodic_task(run_every=crontab(hour=1, minute=0))
 def generate_subscription_bills():
+    logger.info("Running task: generate_subscription_bills")
     today = timezone.localtime(timezone.now()).date()
     # using the exclude is an easier way to filter for subscriptions with an
     # end date of None *or* in the future.
@@ -101,6 +107,7 @@ def slack_embassysf_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
     url and put it in the webhook variable below.'''
+    logger.info("Running task: slack_embassysf_daily")
     webhook = "https://hooks.slack.com/services/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"
     today = timezone.localtime(timezone.now())
     location = Location.objects.get(slug="embassysf")
@@ -134,6 +141,7 @@ def slack_ams_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
     url and put it in the webhook variable below.'''
+    logger.info("Running task: slack_ams_daily")
     webhook = "https://hooks.slack.com/services/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"
     today = timezone.localtime(timezone.now())
     location = Location.objects.get(slug="amsterdam")
@@ -167,6 +175,7 @@ def slack_redvic_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
     url and put it in the webhook variable below.'''
+    logger.info("Running task: slack_redvic_daily")
     webhook = "https://hooks.slack.com/services/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"
     today = timezone.localtime(timezone.now())
     location = Location.objects.get(slug="redvic")
