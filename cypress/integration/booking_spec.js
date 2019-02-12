@@ -4,9 +4,9 @@ const randomstring = require("randomstring");
 describe("Booking a room", function() {
   it("New user flow", function() {
     cy.visit("/");
-    cy.contains("Cummings Green").click();
+    cy.contains("Mary Pass").click();
     cy.contains("View all rooms").click();
-    cy.contains("Evan Johnson").click({ force: true });
+    cy.contains("Rhonda Hicks").click({ force: true });
 
     cy.get("input[name=arrive]").focus();
     // Pick next month so all the dates are available
