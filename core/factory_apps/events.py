@@ -46,8 +46,8 @@ class EventFactory(factory.DjangoModelFactory):
     start = factory.Faker('future_datetime')
     end = factory.Faker('future_datetime')
 
-    title = factory.Faker('words')
-    slug = factory.Faker('words')
+    title = factory.Faker('word')
+    slug = factory.Faker('word')
 
     description = factory.Faker('paragraph')
     image = factory.django.ImageField(color='gray')
