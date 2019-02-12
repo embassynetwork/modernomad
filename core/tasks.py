@@ -3,6 +3,7 @@ from celery.task import periodic_task
 from core.models import Location, Subscription, Use
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from modernomad.backup import BackupManager
+from modernomad.log import catch_exceptions
 from django.contrib.sites.models import Site
 import datetime
 from django.utils import timezone
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @periodic_task(run_every=crontab(hour=5, minute=30))
+@catch_exceptions
 def send_guests_residents_daily_update():
     logger.info("Running task: send_guests_residents_daily_update")
     locations = Location.objects.all()
@@ -23,6 +25,7 @@ def send_guests_residents_daily_update():
 
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
+@catch_exceptions
 def send_admin_daily_update():
     logger.info("Running task: send_admin_daily_update")
     locations = Location.objects.all()
@@ -31,6 +34,7 @@ def send_admin_daily_update():
 
 
 @periodic_task(run_every=crontab(hour=5, minute=0))
+@catch_exceptions
 def send_guest_welcome():
     logger.info("Running task: send_guest_welcome")
     # get all bookings WELCOME_EMAIL_DAYS_AHEAD from now.
@@ -43,6 +47,7 @@ def send_guest_welcome():
 
 
 @periodic_task(run_every=crontab(hour=4, minute=30))
+@catch_exceptions
 def send_departure_email():
     logger.info("Running task: send_departure_email")
     # get all bookings departing today
@@ -55,6 +60,7 @@ def send_departure_email():
 
 
 @periodic_task(run_every=crontab(hour=2, minute=0))
+@catch_exceptions
 def make_backup():
     logger.info("Running task: make_backup")
     manager = BackupManager()
@@ -62,6 +68,7 @@ def make_backup():
 
 
 @periodic_task(run_every=crontab(hour=1, minute=0))
+@catch_exceptions
 def generate_subscription_bills():
     logger.info("Running task: generate_subscription_bills")
     today = timezone.localtime(timezone.now()).date()
@@ -103,6 +110,7 @@ def _format_attachment(use, color):
 
 
 @periodic_task(run_every=crontab(hour=5, minute=10))
+@catch_exceptions
 def slack_embassysf_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
@@ -137,6 +145,7 @@ def slack_embassysf_daily():
 
 
 @periodic_task(run_every=crontab(hour=0, minute=11))
+@catch_exceptions
 def slack_ams_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
@@ -171,6 +180,7 @@ def slack_ams_daily():
 
 
 @periodic_task(run_every=crontab(hour=5, minute=12))
+@catch_exceptions
 def slack_redvic_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
