@@ -8,6 +8,8 @@ First, install Cypress:
 
     $ npm install
 
+To run the Cypress tests, make sure your docker instance is running and the migrations are up to date. The tests also assume that the `generate_test_data` command has been run (so there is test data in the database).
+
 Then, start it up: 
 
     npm run cypress:open
