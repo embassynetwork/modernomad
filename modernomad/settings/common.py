@@ -1,6 +1,7 @@
 # Django settings for modernomad project.
 import os
 import datetime
+import logging
 import sys
 from pathlib import Path
 import environ
@@ -263,6 +264,9 @@ LOGGING = {
         },
     },
 }
+
+# Suppress "Starting new HTTPS connection" messages
+logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
 
 class DisableMigrations(object):
