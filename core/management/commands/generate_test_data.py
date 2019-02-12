@@ -30,6 +30,11 @@ class Command(BaseCommand):
         # communication. these emails will also generate users.
         communication.EmailtemplateFactory()
 
+        # The email sending tasks expect there to be locations with these slugs
+        location.LocationFactory(slug="embassysf", name="Embassy SF")
+        location.LocationFactory(slug="amsterdam", name="Embassy Amsterdam")
+        location.LocationFactory(slug="redvic", name="The Red Victorian")
+
         # Building location specific things
         for _ in range(10):
             locationobj = location.LocationFactory()
