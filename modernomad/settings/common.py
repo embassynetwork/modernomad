@@ -242,6 +242,17 @@ NOSE_ARGS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG'
+    },
+    'handlers': {
+        'console': {
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
     'formatters': {
         'verbose': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
