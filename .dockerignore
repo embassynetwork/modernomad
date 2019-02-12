@@ -4,3 +4,4 @@ media
 client/node_modules
 client/build
 client/webpack-stats.json
+node_modules
