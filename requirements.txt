@@ -22,7 +22,7 @@ icalendar==4.0.3
 kombu==3.0.34
 lxml==3.5.0
 markdown==3.0.1
-Pillow==3.1.1
+Pillow==5.4.1
 psycopg2-binary==2.7.7
 python-dateutil==2.5.0
 pytz==2015.7
