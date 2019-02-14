@@ -1,5 +1,3 @@
-from celery.task.schedules import crontab
-from celery.task import periodic_task
 from core.models import Location, Subscription, Use
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from django.conf import settings
@@ -16,7 +14,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@periodic_task(run_every=crontab(hour=5, minute=30))
 @catch_exceptions
 def send_guests_residents_daily_update():
     logger.info("Running task: send_guests_residents_daily_update")
@@ -25,7 +22,6 @@ def send_guests_residents_daily_update():
         guests_residents_daily_update(location)
 
 
-@periodic_task(run_every=crontab(hour=4, minute=30))
 @catch_exceptions
 def send_admin_daily_update():
     logger.info("Running task: send_admin_daily_update")
@@ -34,7 +30,6 @@ def send_admin_daily_update():
         admin_daily_update(location)
 
 
-@periodic_task(run_every=crontab(hour=5, minute=0))
 @catch_exceptions
 def send_guest_welcome():
     logger.info("Running task: send_guest_welcome")
@@ -47,7 +42,6 @@ def send_guest_welcome():
             guest_welcome(booking)
 
 
-@periodic_task(run_every=crontab(hour=4, minute=30))
 @catch_exceptions
 def send_departure_email():
     logger.info("Running task: send_departure_email")
@@ -60,7 +54,6 @@ def send_departure_email():
             goodbye_email(use)
 
 
-@periodic_task(run_every=crontab(hour=2, minute=0))
 @catch_exceptions
 def make_backup():
     logger.info("Running task: make_backup")
@@ -68,7 +61,6 @@ def make_backup():
     manager.make_backup()
 
 
-@periodic_task(run_every=crontab(hour=1, minute=0))
 @catch_exceptions
 def generate_subscription_bills():
     logger.info("Running task: generate_subscription_bills")
@@ -110,7 +102,6 @@ def _format_attachment(use, color):
     return item
 
 
-@periodic_task(run_every=crontab(hour=5, minute=10))
 @catch_exceptions
 def slack_embassysf_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
@@ -149,7 +140,6 @@ def slack_embassysf_daily():
     logger.debug("Slack response: %s" % resp.text)
 
 
-@periodic_task(run_every=crontab(hour=0, minute=11))
 @catch_exceptions
 def slack_ams_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
@@ -188,7 +178,6 @@ def slack_ams_daily():
     logger.debug("Slack response: %s" % resp.text)
 
 
-@periodic_task(run_every=crontab(hour=5, minute=12))
 @catch_exceptions
 def slack_redvic_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming

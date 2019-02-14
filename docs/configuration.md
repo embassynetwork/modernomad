@@ -41,9 +41,6 @@ Copy and paste these keys into your `local_settings.py` file. If you're using Do
   PRODUCTION mode, you will need an email account that you can configure to
   send and receive real emails. Configure the email settings for production
   mode with the correct SMTP settings.
-- the celery configuration options are the vanilla celery and broker
-  settings. You only need to change these if you have customized the settings
-  of your celery install.
 
 ## Email Templates
 There are two places email templates are stored. The first is in

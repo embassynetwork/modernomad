@@ -183,7 +183,6 @@ INSTALLED_APPS = [
     'compressor',
     'django_extensions',
     'django_filters',
-    'djcelery',
     'graphene_django',
     'rest_framework',
     'webpack_loader',
@@ -209,28 +208,6 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/people/login/'
 LOGOUT_URL = '/people/logout/'
-
-# Celery configuration options
-BROKER_URL = env(
-    'BROKER_URL',
-    default=env('CLOUDAMQP_URL', default='amqp://guest:guest@localhost:5672//')
-)
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ENABLE_UTC = True
-CELERY_ACCEPT_CONTENT = ['json', 'yaml']
-
-# Disabled when moving to Heroku for simplicity's sake, because no tasks
-# have results. If results are needed, a suitable one can be picked for
-# Heroku + CloudAMPQ. (Probably the "rpc" one, perhaps Django ORM?)
-CELERY_RESULT_BACKEND = None
-
-# as per https://www.cloudamqp.com/docs/celery.html
-BROKER_POOL_LIMIT = 1
-BROKER_HEARTBEAT = None
-BROKER_CONNECTION_TIMEOUT = 30
-CELERY_EVENT_QUEUE_EXPIRES = 60
-CELERYD_PREFETCH_MULTIPLIER = 1
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
