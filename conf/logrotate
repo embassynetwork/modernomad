@@ -1,7 +1,0 @@
-/home/embassynetwork/logs/*.log {
-        size 50M
-        missingok
-        compress
-        delaycompress
-        notifempty
-}
