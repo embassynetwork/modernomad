@@ -107,14 +107,6 @@ Old docs, not required for jessie? remove this section?
 
 ## Supporting Services
 
-### RabbitMQ
-
-Required for Celery
-
-OSX: `brew update; brew install rabbitmq`
-
-Debian: `sudo apt-get install rabbitmq-server`
-
 ### PostgreSQL
 
 OSX: `brew update; brew install postgresql`

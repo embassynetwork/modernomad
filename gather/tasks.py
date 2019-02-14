@@ -1,9 +1,6 @@
 from __future__ import absolute_import
 import pytz
 import datetime
-from celery.task.schedules import crontab
-from celery.task import periodic_task
-from celery import shared_task
 from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.template.loader import get_template
@@ -169,8 +166,6 @@ def published_events_today_local(location):
     return events_today_local
 
 
-@shared_task
-@periodic_task(run_every=crontab(hour=4, minute=35))
 def events_today_reminder():
     locations = Location.objects.all()
     for location in locations:
@@ -193,8 +188,6 @@ def events_today_reminder():
             send_events_list(user, events_today, location)
 
 
-@shared_task
-@periodic_task(run_every=crontab(day_of_week='sun', hour=4, minute=30))
 def weekly_upcoming_events():
     # gets a list of events to send reminders about *for all locations* one by one.
     locations = Location.objects.all()

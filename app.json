@@ -17,13 +17,10 @@
     }
   },
   "formation": {
-    "worker": {
-      "quantity": 1
-    },
     "web": {
       "quantity": 1
     }
   },
-  "addons": ["cloudamqp", "papertrail", "heroku-postgresql"],
+  "addons": ["papertrail", "heroku-postgresql"],
   "buildpacks": []
 }
