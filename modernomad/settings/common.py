@@ -137,6 +137,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'basicauth.middleware.BasicAuthMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -293,3 +294,11 @@ SILENCED_SYSTEM_CHECKS = ["fields.W342"]
 # Enable Slack daily arrival/departure messages
 # TODO: this would be better if the hook URLs were configured in the database as part of each location
 ENABLE_SLACK = env.bool('ENABLE_SLACK', default=False)
+
+# Put entire site behind basic auth by setting BASICAUTH_USER and BASICAUTH_PASS
+if env('BASICAUTH_USER', default=''):
+    BASICAUTH_USERS = {}
+    BASICAUTH_USERS[env('BASICAUTH_USER')] = env('BASICAUTH_PASS')
+else:
+    BASICAUTH_DISABLE = True
+
