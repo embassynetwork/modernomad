@@ -2,6 +2,7 @@ from celery.task.schedules import crontab
 from celery.task import periodic_task
 from core.models import Location, Subscription, Use
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
+from django.conf import settings
 from modernomad.backup import BackupManager
 from modernomad.log import catch_exceptions
 from django.contrib.sites.models import Site
@@ -115,6 +116,10 @@ def slack_embassysf_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
     url and put it in the webhook variable below.'''
+    if not settings.ENABLE_SLACK:
+        logger.info("Skipping task: slack_embassysf_daily")
+        return
+
     logger.info("Running task: slack_embassysf_daily")
     webhook = "https://hooks.slack.com/services/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"
     today = timezone.localtime(timezone.now())
@@ -150,6 +155,10 @@ def slack_ams_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
     url and put it in the webhook variable below.'''
+    if not settings.ENABLE_SLACK:
+        logger.info("Skipping task: slack_ams_daily")
+        return
+
     logger.info("Running task: slack_ams_daily")
     webhook = "https://hooks.slack.com/services/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"
     today = timezone.localtime(timezone.now())
@@ -185,6 +194,10 @@ def slack_redvic_daily():
     ''' post daily arrivals and departures to slack. to enable, add an incoming
     web hook to the specific channel you want this to post to. grab the webhook
     url and put it in the webhook variable below.'''
+    if not settings.ENABLE_SLACK:
+        logger.info("Skipping task: slack_redvic_daily")
+        return
+
     logger.info("Running task: slack_redvic_daily")
     webhook = "https://hooks.slack.com/services/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"
     today = timezone.localtime(timezone.now())

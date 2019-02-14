@@ -289,3 +289,7 @@ os.environ['DJANGO_LIVE_TEST_SERVER_ADDRESS'] = "localhost:8000-8010,8080,9200-9
 
 # Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
 SILENCED_SYSTEM_CHECKS = ["fields.W342"]
+
+# Enable Slack daily arrival/departure messages
+# TODO: this would be better if the hook URLs were configured in the database as part of each location
+ENABLE_SLACK = env.bool('ENABLE_SLACK', default=False)
