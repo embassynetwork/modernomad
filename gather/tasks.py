@@ -6,12 +6,12 @@ from django.contrib.sites.models import Site
 from django.template.loader import get_template
 from django.core import urlresolvers
 from itertools import chain
+import logging
 
+from modernomad.log import catch_exceptions
 from gather import emails
 from gather.models import Event, EventNotifications
 from core.models import Location
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +166,9 @@ def published_events_today_local(location):
     return events_today_local
 
 
+@catch_exceptions
 def events_today_reminder():
+    logger.info("Running task: events_today_reminder")
     locations = Location.objects.all()
     for location in locations:
         events_today_local = published_events_today_local(location)
@@ -188,7 +190,9 @@ def events_today_reminder():
             send_events_list(user, events_today, location)
 
 
+@catch_exceptions
 def weekly_upcoming_events():
+    logger.info("Running task: weekly_upcoming_events")
     # gets a list of events to send reminders about *for all locations* one by one.
     locations = Location.objects.all()
     for location in locations:
