@@ -1,7 +1,7 @@
 amqp==1.4.9
 billiard==3.3.0.23
 celery==3.1.20
-django-celery==3.1.17
+django-celery==3.2.2
 django-compressor==2.2
 django-debug-toolbar==1.5
 django-environ==0.4.3
