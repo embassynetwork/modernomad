@@ -1,4 +1,4 @@
-amqp==1.4.9
+amqp==2.4.1
 billiard==3.3.0.23
 celery==3.1.20
 django-celery==3.1.17
