@@ -20,7 +20,7 @@ graphql-core<3,>=2.1.0
 graphql-relay==0.4.5
 icalendar==4.0.3
 kombu==3.0.34
-lxml==3.5.0
+lxml==4.3.1
 markdown==3.0.1
 Pillow==5.4.1
 psycopg2-binary==2.7.7
