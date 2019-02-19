@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 {% if event.limit > 0 %}
     <h3>This event has limited RSVPs</h3>
     <span id="event-limits-info"><span id="spots-remaining">{{spots_remaining}}</span> of <span id="event-cap">{{ event.limit }}</span> spots remaining</span>
