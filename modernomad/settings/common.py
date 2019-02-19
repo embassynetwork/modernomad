@@ -96,6 +96,10 @@ COMPRESS_CSS_FILTERS = [
     'compressor.filters.cssmin.rCSSMinFilter'
 ]
 
+# Cache static files forever in browser and on Cloudflare
+WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
+
+
 AUTHENTICATION_BACKENDS = (
     'modernomad.backends.EmailOrUsernameModelBackend',
     'django.contrib.auth.backends.ModelBackend'
@@ -143,6 +147,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'whitenoise.middleware.WhiteNoiseMiddleware', # first, after SecurityMiddleware
     'basicauth.middleware.BasicAuthMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
