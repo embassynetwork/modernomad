@@ -11,6 +11,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="A Global Housing Layer for the New World">
 
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700|Raleway:800" rel="stylesheet">
+
         {% compress css %}
         <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
         <link rel="stylesheet" type="text/less" href="{% static 'css/custom.less' %}" />
@@ -23,17 +25,6 @@
         {% endcompress %}
 
         <link rel="shortcut icon" href="/favicon.ico">
-        <link href='https://fonts.googleapis.com/css?family=Raleway:800' rel='stylesheet' type='text/css'>
-
-        <!-- Asyncronous Font Loading -->
-        <script src="{% static 'js/webfont.js' %}"></script>
-        <script>
-            WebFont.load({
-                google: {
-                    families: ['Open Sans:400italic,400,600,300,700']
-                }
-            });
-        </script>
 
         <!-- start Mixpanel -->
         <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
