@@ -45,6 +45,7 @@ RUN cd client && node_modules/.bin/webpack --config webpack.prod.config.js
 ENV DJANGO_SETTINGS_MODULE modernomad.settings.production
 # Number of gunicorn workers
 ENV WEB_CONCURRENCY 3
+ENV PORT 8000
 EXPOSE 8000
 CMD ["gunicorn", "modernomad.wsgi"]
 
