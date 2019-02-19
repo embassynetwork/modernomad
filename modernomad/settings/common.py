@@ -91,6 +91,10 @@ STATICFILES_FINDERS = (
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
     'compressor.finders.CompressorFinder',
 )
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.rCSSMinFilter'
+]
 
 AUTHENTICATION_BACKENDS = (
     'modernomad.backends.EmailOrUsernameModelBackend',
