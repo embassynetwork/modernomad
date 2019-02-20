@@ -1,0 +1,32 @@
+# This Compose file can be used to simulate a production environment locally
+# for testing things like static file compilation and gunicorn configuration.
+# It is not actually used in production - that is configured by
+# Dockerfile and heroku.yml.
+#
+# Run it with:
+#
+#     $ docker-compose -f docker-compose.production.yml up --build
+#
+# See docs/running-in-production.md for more details.
+
+version: "3.4"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - "DJANGO_SETTINGS_MODULE=modernomad.settings.production"
+      - "DATABASE_URL=postgres://postgres@postgres/postgres"
+      - "SECRET_KEY=fdshjkfds"
+      - "ALLOWED_HOSTS=localhost"
+      - "STRIPE_SECRET_KEY"
+      - "STRIPE_PUBLISHABLE_KEY"
+      - "MAILGUN_API_KEY"
+    links:
+      - postgres
+    volumes:
+      - "./media:/app/media"
+  postgres:
+    image: postgres
