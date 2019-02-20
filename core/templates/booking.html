@@ -4,8 +4,10 @@
 
 {% block content %}
 <div id="room-container"></div>
-<script type="text/javascript">
-    window.renderReactComponent('room-container', 'RoomBooking', {request_user_drft_balance: {{request_user_drft_balance}}, is_house_admin: {{is_house_admin}}})
-</script>
+{% endblock %}
 
+{% block extrajs %}
+<script type="text/javascript">
+  window.renderReactComponent('room-container', 'RoomBooking', {request_user_drft_balance: {{request_user_drft_balance}}, is_house_admin: {{is_house_admin}}})
+</script>
 {% endblock %}
