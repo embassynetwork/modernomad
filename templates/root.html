@@ -122,8 +122,6 @@
     mixpanel.init("4b2494ff72befabff33e599d5222d8d3");</script>
     <!-- end Mixpanel -->
 
-    {% render_bundle 'main' %}
-
     <!-- Begin Inspectlet Embed Code -->
     <script type="text/javascript" id="inspectletjs">
     window.__insp = window.__insp || [];
@@ -134,6 +132,9 @@
     })();
     </script>
     <!-- End Inspectlet Embed Code -->
+
+    {% render_bundle 'main' %}
+    {% compress js %}
 
     <!-- JQuery -->
     <script src="{% static 'js/jquery-1.8.2.js' %}"></script>
@@ -155,6 +156,7 @@
     });
 
     </script>
+    {% endcompress %}
 
     {% if GOOGLE_ANALYTICS_PROPERTY_ID %}
       {% include "snippets/google_analytics.html" %}
