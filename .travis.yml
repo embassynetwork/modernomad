@@ -12,9 +12,9 @@ install:
   - npm ci
 script:
  - script/test
- - docker-compose up -d
- - docker-compose run web ./manage.py migrate
- - docker-compose run web ./manage.py generate_test_data
+ - docker-compose -f docker-compose.production.yml up -d
+ - docker-compose -f docker-compose.production.yml run web ./manage.py migrate
+ - docker-compose -f docker-compose.production.yml run web ./manage.py generate_test_data
  - $(npm bin)/cypress run --record --key 88257c2f-8d2e-464c-878b-650cace8563e
 notifications:
   slack:
