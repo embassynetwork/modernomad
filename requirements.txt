@@ -33,6 +33,6 @@ Werkzeug==0.14.1
 gunicorn==19.9.0
 whitenoise==3.3.1
 django-storages==1.7.1
-boto3==1.9.98
+boto3==1.9.99
 sentry-sdk==0.7.3
 factory_boy==2.11.1
