@@ -8,9 +8,11 @@ import environ
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+BASE_DIR = Path.cwd()
+
+environ.Env.read_env(str(BASE_DIR / '.env'))
 env = environ.Env()
 
-BASE_DIR = Path.cwd()
 BACKUP_ROOT = BASE_DIR / 'backups'
 
 ADMINS = ((
@@ -27,7 +29,7 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='sqlite:///modernomad.db'),
+    'default': env.db('DATABASE_URL', default='postgres:///modernomad'),
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -218,7 +220,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ENABLE_UTC = True
 CELERY_ACCEPT_CONTENT = ['json', 'yaml']
 
-# Disabled when moving to Heroku for simplicity's sake, because no tasks 
+# Disabled when moving to Heroku for simplicity's sake, because no tasks
 # have results. If results are needed, a suitable one can be picked for
 # Heroku + CloudAMPQ. (Probably the "rpc" one, perhaps Django ORM?)
 CELERY_RESULT_BACKEND = None
