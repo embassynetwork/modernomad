@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
 {% block extrajs %}
-    <link  href="https://cdn.rawgit.com/fengyuanchen/cropper/v1.0.0/dist/cropper.min.css" rel="stylesheet">
-    <script src="https://cdn.rawgit.com/fengyuanchen/cropper/v1.0.0/dist/cropper.min.js"></script>
+    <script src="{% static 'js/cropper.min.js' %}"></script>
 {% endblock %}
 
 {% block content %}
