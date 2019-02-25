@@ -1,3 +1,4 @@
+django-anymail[mailgun]==6.0
 django-compressor==2.2
 django-debug-toolbar==1.11
 django-environ==0.4.5
