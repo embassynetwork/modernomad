@@ -1,4 +1,4 @@
-## Modernomad
+# Modernomad
 
 Modernomad is an operating platform for collaborative spaces. It aims to
 facilitate democratic management, empower people with information, and enable
