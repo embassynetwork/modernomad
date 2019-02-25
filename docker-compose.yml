@@ -27,4 +27,4 @@ services:
       - "./:/app"
       - "/app/client/node_modules"
   postgres:
-    image: postgres
+    image: postgres:10
