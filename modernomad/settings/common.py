@@ -106,14 +106,18 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend'
 )
 
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+EMAIL_BACKEND = env('MAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+MAIL_DOMAIN = env('MAIL_DOMAIN', default='sandbox.embassynetwork.com')
 ANYMAIL = {
     "MAILGUN_API_KEY": env('MAILGUN_API_KEY', default=''),
+    "MAILGUN_SENDER_DOMAIN": MAIL_DOMAIN
 }
+if env('MAILGUN_API_KEY', default=''):
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+
 ANYMAIL_SEND_DEFAULTS = {
     'esp_extra': {'o:testmode': env('MAILGUN_TESTMODE', default='yes')}
 }
-MAIL_DOMAIN = env('MAIL_DOMAIN', default='sandbox.embassynetwork.com')
 
 # this will be used as the subject line prefix for all emails sent from this app.
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')

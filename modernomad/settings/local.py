@@ -1,4 +1,5 @@
 from .common import *  # noqa
+from .common import MIDDLEWARE_CLASSES
 from .common import INSTALLED_APPS
 
 DEBUG = True
