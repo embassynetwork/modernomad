@@ -9,6 +9,7 @@ services:
     environment:
       - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
       - "DATABASE_URL=postgres://postgres@postgres/postgres"
+      # Read these envvars from .env or environment Compose is run in
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "MAILGUN_API_KEY"
