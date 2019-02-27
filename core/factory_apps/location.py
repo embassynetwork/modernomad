@@ -79,8 +79,9 @@ class LocationFactory(factory.DjangoModelFactory):
             # A list of groups were passed in, use them
             for user in extracted:
                 self.house_admins.add(user)
-        else:
-            self.house_admins.add(SuperUserFactory())
+        
+        # Always add superuser
+        self.house_admins.add(SuperUserFactory())
 
     @factory.post_generation
     def readonly_admins(self, create, extracted, **kwargs):
