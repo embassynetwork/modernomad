@@ -9,7 +9,7 @@ from faker import Faker
 
 from core.factory_apps.communication import EmailtemplateFactory
 from core.factory_apps.location import LocationFactory, ResourceFactory
-from core.factory_apps.user import SuperUserFactory
+from core.factory_apps.user import SuperUserFactory, UserFactory
 
 
 class Command(BaseCommand):
@@ -23,6 +23,9 @@ class Command(BaseCommand):
         # create a known super user. this user will also be set as a location admin for
         # all locations.
         SuperUserFactory()
+
+        # known normal users
+        UserFactory(username="pixel", first_name="Pixel", last_name="McPixelston")
 
         # communication. these emails will also generate users.
         EmailtemplateFactory()
