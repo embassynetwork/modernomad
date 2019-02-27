@@ -21,6 +21,7 @@ services:
       - "DATABASE_URL=postgres://postgres@postgres/postgres"
       - "SECRET_KEY=fdshjkfds"
       - "ALLOWED_HOSTS=localhost"
+      # Read these envvars from .env or environment Compose is run in
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
       - "MAILGUN_API_KEY"
