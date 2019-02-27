@@ -68,3 +68,12 @@ Cypress.Commands.add("login", (username, password) => {
         });
     });
 });
+
+// https://gist.github.com/mbrochh/460f6d4fce959791c8f947cb30bed6a7
+Cypress.Commands.add("stripeCheckout", () => {
+  // For some reason we need to wait a bit before getting iframe
+  cy.wait(1000);
+  return cy.get("iframe.stripe_checkout_app").then(function($iframe) {
+    return $iframe.contents().find("body");
+  });
+});
