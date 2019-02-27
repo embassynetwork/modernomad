@@ -7,6 +7,14 @@ cache:
     # cache folder with Cypress binary
     - ~/.cache
 dist: xenial
+env:
+  global:
+    # Used by cypress tests to test payments.
+    # These are the test keys, so they are not secret. By adding them here,
+    # instead of encrypting them or adding them to Travis settings, it means
+    # we can run the tests against PRs from forks of the project.
+    - STRIPE_PUBLISHABLE_KEY=pk_test_8z7r9ZpQQcaduYfZlREiNfhP
+    - STRIPE_SECRET_KEY=sk_test_Jtj2Ibwg2DQzT3ZlxF196Dpp
 install:
   - sudo apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2
   - npm ci
