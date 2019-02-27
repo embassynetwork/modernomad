@@ -1891,10 +1891,10 @@ def AddBillLineItem(request, location_slug, bill_id):
 def _assemble_and_send_email(location_slug, post):
     location = get_object_or_404(Location, slug=location_slug)
     subject = post.get("subject")
-    recipient = [post.get("recipient")]
+    recipient = post.get("recipient")
     body = post.get("body") + "\n\n" + post.get("footer")
     # TODO - This isn't fully implemented yet -JLS
-    send_from_location_address(subject, body, None, recipient, location)
+    send_from_location_address(subject, body, None, [recipient], location)
 
 
 @house_admin_required

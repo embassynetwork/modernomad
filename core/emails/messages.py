@@ -57,14 +57,14 @@ def send_custom_mail(
     msg.send()
 
 
-def send_from_location_address(subject, text_content, html_content, recipient, location):
+def send_from_location_address(subject, text_content, html_content, recipients, location):
     ''' a somewhat generic send function using mailgun that sends plaintext
     from the location's generic stay@ address.'''
     mailgun_data = {
         "subject": subject,
         "message": text_content,
         "from_email": location.from_email(),
-        "recipient_list": [recipient],
+        "recipient_list": recipients,
     }
     if html_content:
         mailgun_data["html_message"] = html_content
@@ -118,9 +118,9 @@ def send_booking_receipt(booking, send_to=None):
     location = booking.use.location
     subject = "[%s] Receipt for Booking %s - %s" % (location.email_subject_prefix, str(booking.use.arrive), str(booking.use.depart))
     if send_to:
-        recipient = [send_to]
+        recipient = send_to
     else:
-        recipient = [booking.use.user.email]
+        recipient = booking.use.user.email
     c = {
         'today': timezone.localtime(timezone.now()),
         'user': booking.use.user,
@@ -130,7 +130,7 @@ def send_booking_receipt(booking, send_to=None):
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
     if text_content or html_content:
-        return send_from_location_address(subject, text_content, html_content, recipient, location)
+        return send_from_location_address(subject, text_content, html_content, [recipient], location)
     else:
         return False
 
@@ -138,7 +138,7 @@ def send_booking_receipt(booking, send_to=None):
 def send_subscription_receipt(subscription, bill):
     location = subscription.location
     subject = "[%s] Membership #%d Receipt for %s" % (location.email_subject_prefix, subscription.id, bill.subscriptionbill.period_start.strftime("%B %d, %Y"))
-    recipient = [subscription.user.email]
+    recipient = subscription.user.email
     c = {
         'today': timezone.localtime(timezone.now()),
         'user': subscription.user,
@@ -149,7 +149,7 @@ def send_subscription_receipt(subscription, bill):
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.SUBSCRIPTION_RECEIPT)
     if text_content or html_content:
-        return send_from_location_address(subject, text_content, html_content, recipient, location)
+        return send_from_location_address(subject, text_content, html_content, [recipient], location)
     else:
         return False
 
@@ -167,7 +167,7 @@ def send_invoice(booking):
 
     location = booking.use.location
     subject = "[%s] Thanks for Staying with us!" % location.email_subject_prefix
-    recipient = [booking.use.user.email]
+    recipient = booking.use.user.email
     c = {
         'today': timezone.localtime(timezone.now()),
         'user': booking.use.user,
@@ -176,7 +176,7 @@ def send_invoice(booking):
         'domain': Site.objects.get_current().domain,
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.INVOICE)
-    return send_from_location_address(subject, text_content, html_content, recipient, location)
+    return send_from_location_address(subject, text_content, html_content, [recipient], location)
 
 
 def new_booking_notify(booking):
