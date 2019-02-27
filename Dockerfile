@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Same, but for client
 RUN mkdir -p /app/client
-COPY client/package.json /app/client/
+COPY client/package.json client/package-lock.json /app/client/
 RUN cd client && npm install && npm cache clean --force
 
 # Build client before copying everything so changes in Django don't trigger a
