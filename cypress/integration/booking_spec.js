@@ -2,7 +2,7 @@
 const randomstring = require("randomstring");
 
 describe("Booking a room", function() {
-  it("New user flow", function() {
+  it("works for a new user", function() {
     cy.visit("/");
     cy.contains("Embassy SF").click();
     cy.contains("View all rooms").click();
@@ -35,6 +35,54 @@ describe("Booking a room", function() {
     cy.uploadFile("profile.png", "input[name=image");
 
     cy.contains("Submit").click();
+
+    cy.contains("Your booking has been submitted.");
+  });
+
+  it("works for an existing logged in user", function() {
+    cy.login("pixel", "password")
+    cy.visit("/");
+    cy.contains("Embassy SF").click();
+    cy.contains("View all rooms").click();
+    cy.contains("Ada Lovelace").click({ force: true });
+
+    cy.get("input[name=arrive]").focus();
+    // Pick next month so all the dates are available
+    cy.get(".react-datepicker__navigation--next").click({ force: true });
+    cy.get("[aria-label=day-13]").click({ force: true });
+    // Force de-select first date picker. For some reason immediately selecting second date
+    // picker causes first not to close.
+    cy.get("#network-footer").click("topLeft");
+    cy.get("input[name=depart]").focus();
+    cy.get("[aria-label=day-16]").click({ force: true });
+    cy.get("[name=purpose]").type("Work.");
+    cy.contains("Request to Book").click();
+
+    cy.contains("Your booking was submitted.");
+  });
+
+  it("works for an existing logged out user", function() {
+    cy.visit("/");
+    cy.contains("Embassy SF").click();
+    cy.contains("View all rooms").click();
+    cy.contains("Ada Lovelace").click({ force: true });
+
+    cy.get("input[name=arrive]").focus();
+    // Pick next month so all the dates are available
+    cy.get(".react-datepicker__navigation--next").click({ force: true });
+    cy.get("[aria-label=day-13]").click({ force: true });
+    // Force de-select first date picker. For some reason immediately selecting second date
+    // picker causes first not to close.
+    cy.get("#network-footer").click("topLeft");
+    cy.get("input[name=depart]").focus();
+    cy.get("[aria-label=day-16]").click({ force: true });
+    cy.get("[name=purpose]").type("Work.");
+    cy.contains("Request to Book").click();
+
+    cy.contains("log in").click();
+    cy.get("[name=username]").type("pixel");
+    cy.get("[name=password]").type("password");
+    cy.get("button[type=submit]").click();
 
     cy.contains("Your booking has been submitted.");
   });

@@ -39,3 +39,32 @@ Cypress.Commands.add("uploadFile", (fileName, selector) => {
     });
   });
 });
+
+// https://docs.cypress.io/guides/getting-started/testing-your-app.html#Logging-in
+// https://github.com/cypress-io/cypress-example-recipes/blob/master/examples/logging-in__csrf-tokens/cypress/integration/logging-in-csrf-tokens-spec.js
+Cypress.Commands.add("login", (username, password) => {
+  return cy
+    .request("/people/login/")
+    .its("body")
+    .then(body => {
+      const $html = Cypress.$(body);
+      const csrf = $html.find("input[name=csrfmiddlewaretoken]").val();
+
+      return cy
+        .request({
+          method: "POST",
+          url: "/people/login/",
+          form: true,
+          followRedirect: false,
+          body: {
+            username: username,
+            password: password,
+            csrfmiddlewaretoken: csrf
+          }
+        })
+        .then(resp => {
+          // Redirect to home page = success
+          expect(resp.status).to.eq(302);
+        });
+    });
+});
