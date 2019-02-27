@@ -118,11 +118,11 @@
         {% include 'snippets/event_status_area.html' %}
     </div>
 
-    {% if event.visibility = 'private' %}
+    {% if event.visibility == 'private' %}
         <div class="event-status bg-warning">
             <i class="fa fa-lock"></i> This event is private and is only viewable to those with the link.
         </div>
-    {% elif event.visibility = 'community' %}
+    {% elif event.visibility == 'community' %}
         <div class="event-status bg-info">
             <i class="fa fa-eye"></i> This is event is viewable only to members of the {{ event.location.name }} community.
         </div>
