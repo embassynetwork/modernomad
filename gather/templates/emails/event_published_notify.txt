@@ -4,7 +4,7 @@ Your event '{{ event.title }},' beginning {{event.start|date:"F j"}} at {{ event
 
 You can view or edit your event at https://{{domain}}{% url 'gather_view_event' location.slug event.id event.slug %}. 
 
-This is a {% if event.visibility = 'private' %}private{% elif event.visibility = 'community' %}community{% else %}public{% endif %} event. Public events are open and visible to all; community events are visible only to community members, and private events are visible to those who have the link.
+This is a {% if event.visibility == 'private' %}private{% elif event.visibility == 'community' %}community{% else %}public{% endif %} event. Public events are open and visible to all; community events are visible only to community members, and private events are visible to those who have the link.
 
 Let us know any questions!
 {{ location.name }}
