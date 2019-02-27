@@ -7,12 +7,9 @@ from django.db import connection
 
 from faker import Faker
 
-from core.factory_apps import location
-from core.factory_apps import communication
-from core.factory_apps import events
-from core.factory_apps import payment
-from core.factory_apps import user
-from core.models import Currency
+from core.factory_apps.communication import EmailtemplateFactory
+from core.factory_apps.location import LocationFactory, ResourceFactory
+from core.factory_apps.user import SuperUserFactory
 
 
 class Command(BaseCommand):
@@ -25,47 +22,22 @@ class Command(BaseCommand):
 
         # create a known super user. this user will also be set as a location admin for
         # all locations.
-        user.SuperUserFactory()
+        SuperUserFactory()
 
         # communication. these emails will also generate users.
-        communication.EmailtemplateFactory()
+        EmailtemplateFactory()
 
         # The email sending tasks expect there to be locations with these slugs
-        location.LocationFactory(slug="embassysf", name="Embassy SF")
-        location.LocationFactory(slug="amsterdam", name="Embassy Amsterdam")
-        location.LocationFactory(slug="redvic", name="The Red Victorian")
+        location = LocationFactory(slug="embassysf", name="Embassy SF")
+        ResourceFactory(location=location, name="Batcave")
+        ResourceFactory(location=location, name="Ada Lovelace")
 
-        # Building location specific things
-        for _ in range(10):
-            locationobj = location.LocationFactory()
-            resource = location.ResourceFactory(location=locationobj)
-            location.LocationFee(location=locationobj)
+        location = LocationFactory(slug="amsterdam", name="Embassy Amsterdam")
+        ResourceFactory(location=location, name="Some room")
 
-            menu = location.LocationMenuFactory(location=locationobj)
-            location.LocationFlatPageFactory(menu=menu)
+        location = LocationFactory(slug="redvic", name="The Red Victorian")
+        ResourceFactory(location=location, name="Another room")
 
 
-            location.CapacityChangeFactory(resource=resource)
-            # generates new users who will also be the location residents
-            backing = location.BackingFactory(resource=resource)
-
-            # event things
-            event_admin = events.EventAdminGroupFactory(location=locationobj)
-            event_series = events.EventSeriesFactory()
-            events.EventFactory(
-                location=locationobj, admin=event_admin, series=event_series
-            )
-            events.EventNotificationFactory()
-
-            # payment
-            subscription = payment.SubscriptionFactory(location=locationobj)
-            payment.SubscriptionBillFactory(subscription=subscription)
-
-            bill = payment.BookingBillFactory()
-            payment.BillLineItem(bill=bill)
-            use = payment.UseFactory(location=locationobj, resource=resource)
-            payment.BookingFactory(bill=bill, use=use)
-
-            payment.PaymentFactory(bill=bill)
 
         self.stdout.write(self.style.SUCCESS('Successfully generated testdata'))

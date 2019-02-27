@@ -99,6 +99,31 @@ class LocationFactory(factory.DjangoModelFactory):
         # users.
         pass
 
+    @factory.post_generation
+    def add_stuff(self, create, extracted, **kwargs):
+        # avoid recursive import
+        from . import events
+        from . import payment
+
+        LocationFee(location=self)
+
+        # event things
+        event_admin = events.EventAdminGroupFactory(location=self)
+        event_series = events.EventSeriesFactory()
+        events.EventFactory(
+            location=self, admin=event_admin, series=event_series
+        )
+        events.EventNotificationFactory()
+
+        # flat pages
+        menu = LocationMenuFactory(location=self)
+        LocationFlatPageFactory(menu=menu)
+
+        # payments
+        subscription = payment.SubscriptionFactory(location=self)
+        payment.SubscriptionBillFactory(subscription=subscription)
+
+
 
 class ResourceFactory(factory.DjangoModelFactory):
     class Meta:
@@ -111,7 +136,22 @@ class ResourceFactory(factory.DjangoModelFactory):
     summary = factory.Faker('sentence')
     cancellation_policy = factory.Faker('text')
     image = factory.django.ImageField(color='green')
-    # JKS add backing
+
+    @factory.post_generation
+    def add_stuff(self, create, extracted, **kwargs):
+        # avoid recursive import
+        from . import payment
+
+        CapacityChangeFactory(resource=self)
+        # generates new users who will also be the location residents
+        BackingFactory(resource=self)
+
+        # payment
+        bill = payment.BookingBillFactory()
+        payment.BillLineItem(bill=bill)
+        use = payment.UseFactory(location=self.location, resource=self)
+        payment.BookingFactory(bill=bill, use=use)
+        payment.PaymentFactory(bill=bill)
 
 
 # Note: this doesn't get used because it's really just an indexing mechanism to
