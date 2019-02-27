@@ -30,8 +30,9 @@ class Command(BaseCommand):
         # communication. these emails will also generate users.
         EmailtemplateFactory()
 
-        # The email sending tasks expect there to be locations with these slugs
-        location = LocationFactory(slug="embassysf", name="Embassy SF")
+        # Locations
+        user = UserFactory(username="embassysfadmin", first_name="SF", last_name="Admin")
+        location = LocationFactory(slug="embassysf", name="Embassy SF", house_admins=[user])
         ResourceFactory(location=location, name="Batcave")
         ResourceFactory(location=location, name="Ada Lovelace")
 
