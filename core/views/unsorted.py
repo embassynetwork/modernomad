@@ -81,22 +81,6 @@ def location_detail(request, location_slug):
     return render(request, "location_detail.html", {'location': location, 'max_days': location.max_booking_days})
 
 
-def guest_rooms(request, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
-    rooms = location.guest_rooms()
-    return render(request, "location_rooms.html", {'rooms': rooms, 'location': location})
-
-
-def view_room(request, location_slug, room_id):
-    location = get_object_or_404(Location, slug=location_slug)
-    room = get_object_or_404(Resource, id=room_id)
-    today = timezone.localtime(timezone.now())
-    month = request.GET.get("month")
-    year = request.GET.get("year")
-    start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-    return render(request, "room.html", {'room': room, 'location': location, "next_month": next_month, "prev_month": prev_month})
-
-
 def community(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     residents = location.residents()
@@ -722,66 +706,6 @@ def calendar(request, location_slug):
             'calendar': mark_safe(guest_calendar)
         }
     )
-
-
-def room_cal_request(request, location_slug, room_id, month=None, year=None, browse_past=True):
-    if not request.method == 'POST':
-        return HttpResponseRedirect('/404')
-    month = int(request.POST.get("month"))
-    year = int(request.POST.get("year"))
-    browse_past_str = request.POST.get("browse_past")
-    if browse_past_str == 'false':
-        browse_past = False
-    else:
-        brose_past = True
-
-    try:
-        location = get_object_or_404(Location, slug=location_slug)
-        room = Resource.objects.get(id=room_id)
-    except:
-        return HttpResponseRedirect('/')
-
-    cal_html = room.capacity_calendar_html(month=month, year=year)
-    start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-
-    link_html = '''
-            <form id="room-cal-prev" action="%s" class="form-inline">
-                <input type="hidden" name="month" value=%s>
-                <input type="hidden" name="year" value=%s>
-                <input class="room-cal-req form-control" type="submit" value="Previous">
-            </form>
-            <form id="room-cal-next" action="%s" class="form-inline">
-                <input type="hidden" name="month" value=%s>
-                <input type="hidden" name="year" value=%s>
-                <input class="room-cal-req form-control" type="submit" value="Next">
-            </form>
-    ''' % (reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year,
-           reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
-    return HttpResponse(cal_html+link_html)
-
-
-def stay(request, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
-
-    today = timezone.localtime(timezone.now())
-    if browse_past is False and prev_month < datetime.date(today.year, today.month, 1):
-        link_html = '''
-                <div class="clear"></div>
-                <div class="center">
-                <span class="greyed-out">Previous</span> |
-                <a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
-                </div>
-        ''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
-    else:
-        link_html = '''
-                <div class="clear"></div>
-                <div class="center">
-                <a id="room-cal-%s-prev" href="%s?month=%s&year=%s">Previous</a> |
-                <a id="room-cal-%s-next" href="%s?month=%s&year=%s">Next</a>
-                </div>
-        ''' % (room_id, reverse(room_cal_request, args=(location.slug, room.id)), prev_month.month, prev_month.year,
-               room_id, reverse(room_cal_request, args=(location.slug, room.id)), next_month.month, next_month.year)
-    return HttpResponse(cal_html+link_html)
 
 
 def thanks(request, location_slug):

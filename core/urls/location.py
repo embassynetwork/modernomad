@@ -5,7 +5,6 @@ import gather.urls
 import core.urls.bookings
 import core.urls.uses
 import core.urls.manage
-import core.urls.room
 import core.views.redirects
 
 per_location_patterns = [
@@ -43,7 +42,6 @@ per_location_patterns = [
     url(r'^booking/', include(core.urls.bookings)),
     url(r'^use/', include(core.urls.uses)),
     url(r'^manage/', include(core.urls.manage)),
-    url(r'^room/', include(core.urls.room)),
 
     url(r'^events/', include(gather.urls)),
 

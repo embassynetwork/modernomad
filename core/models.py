@@ -12,7 +12,6 @@ from django.core.files.storage import default_storage
 import uuid
 from django.db.models import Q
 from decimal import Decimal
-import calendar
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.flatpages.models import FlatPage
@@ -317,33 +316,6 @@ def resource_img_upload_to(instance, filename):
     return os.path.join(upload_path, filename)
 
 
-class RoomCalendar(calendar.HTMLCalendar):
-    def __init__(self, room, location, year, month):
-        super(RoomCalendar, self).__init__()
-        self.year = year
-        self.month = month
-        self.room = room
-        self.location = location
-        self.today = timezone.now()
-        self.setfirstweekday(calendar.SUNDAY)
-
-    def formatday(self, day, weekday):
-        # XXX warning: if there are ANY errors this method seems to just punt
-        # and return None. makes it very hard to debug.
-        if day == 0:
-            return '<td class="noday">&nbsp;</td>'  # day outside month
-        else:
-            if self.today.date() == datetime.date(self.year, self.month, day):
-                cssclasses = self.cssclasses[weekday] + ' today'
-            else:
-                cssclasses = self.cssclasses[weekday]
-            the_day = datetime.date(self.year, self.month, day)
-            if self.room.available_on(the_day):
-                return '<td class="a_day available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
-            else:
-                return '<td class="a_day not-available-today %s %d_%d_%d">%d</td>' % (cssclasses, the_day.year, the_day.month, the_day.day, day)
-
-
 class ResourceManager(models.Manager):
     def backed_by(self, user):
         resources = self.get_queryset().filter(backing__money_account__owners=user)
@@ -490,16 +462,6 @@ class Resource(models.Model):
             if a.start_date <= start:
                 break
         return max_quantity
-
-    def capacity_calendar_html(self, month=None, year=None):
-        if not (month and year):
-            today = timezone.localtime(timezone.now())
-            month = today.month
-            year = today.year
-        location = self.location
-        room_cal = RoomCalendar(self, location, year, month)
-        month_html = room_cal.formatmonth(year, month)
-        return month_html
 
     def tz(self):
         assert self.location, "You can't fetch a timezone on a resource without a location"
