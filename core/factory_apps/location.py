@@ -38,8 +38,8 @@ class LocationFactory(factory.DjangoModelFactory):
     address = factory.Faker('street_address')
     image = factory.django.ImageField(color='blue', width=800, height=225)
     profile_image = factory.django.ImageField(color='red', width=336, height=344)
-    latitude = factory.Faker('latitude')
-    longitude = factory.Faker('longitude')
+    latitude = 37.7777567
+    longitude = -122.3988704
 
     welcome_email_days_ahead = factory.Iterator([1,2,3,4,5])
     max_booking_days = factory.Iterator([5,14,30])
