@@ -1,6 +1,8 @@
 # Browser tests
 
-We use [Cypress](https://www.cypress.io/) to test the high-level features of Modernomad in a browser. This checks that the frontend code and backend code all work together from the level of a user clicking around on the site. All of the cypress are public and you can see them [here](https://dashboard.cypress.io/#/projects/3gfovh/runs)
+We use [Cypress](https://www.cypress.io/) to test the high-level features of Modernomad in a browser. This checks that the frontend code and backend code all work together from the level of a user clicking around on the site.
+
+The results of the tests that are run on Travis are public and [you can see them here](https://dashboard.cypress.io/#/projects/3gfovh/runs).
 
 Cypress needs to run on your local machine, not inside Chrome or a VM, because it has to start and control your browser.
 
