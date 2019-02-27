@@ -342,7 +342,7 @@ def guest_welcome(use):
         'day_of_week': day_of_week,
         'location': use.location,
         'use': use,
-        'current_email': 'current@%s.mail.embassynetwork.com' % location.slug,
+        'current_email': 'current@{}.{}'.format(location.slug, settings.MAIL_DOMAIN),
         'site_url': reverse('location_home', args=(location.slug,)),
         'events_url': "https://" + domain + reverse('gather_upcoming_events', args=(location.slug,)),
         'profile_url': "https://" + domain + reverse('user_detail', args=(use.user.username,)),
@@ -704,7 +704,7 @@ def test80085(request, location_slug):
         body_html = body_html + html_footer
 
     # send the message
-    list_address = "test80085@"+location.slug+".mail.embassynetwork.com"
+    list_address = "test80085@{}.{}".format(location.slug, settings.MAIL_DOMAIN)
     mailgun_data = {
         "subject": subject,
         "from_email": from_address,

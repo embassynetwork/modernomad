@@ -113,7 +113,7 @@ ANYMAIL = {
 ANYMAIL_SEND_DEFAULTS = {
     'esp_extra': {'o:testmode': env('MAILGUN_TESTMODE', default='yes')}
 }
-
+MAIL_DOMAIN = env('MAIL_DOMAIN', default='sandbox.embassynetwork.com')
 
 # this will be used as the subject line prefix for all emails sent from this app.
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
