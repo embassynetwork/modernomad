@@ -21,7 +21,7 @@
     {{ endorsements|length }} 
 {% endif %}
 
-<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+{# HACK: Just for this page, jQuery is loaded ahead of this code in gather_event_view.html #}
 <script>
     $("#heart-endorse").click(function(e) {
         request = $.ajax({ 

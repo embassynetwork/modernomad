@@ -21,6 +21,24 @@
   fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));</script>
 
+{% comment %}
+    FIXME: HACK.
+
+    The endorsements and RSVP buttons rely on firing off an ajax request, then 
+    replacing themselves with a the response of the ajax request. The code needs
+    to be inline with the HTML because it needs to be run against the response
+    of the ajax request to rebind all the event handlers.
+
+    But, this doesn't work because it depends on jQuery, and jQuery is now loaded
+    the end of the body. So, to make this all work, let's load jQuery here just for
+    this page.
+
+    SIGH. Anyway. I'm not rewriting this mess but I thought I'd explain it in case
+    anyone comes across it.
+    
+    See snippets/endorsements.html and snippets/rsvp_info.html
+{% endcomment %}
+<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
 
 <div id="event-view-wrapper" class="container">
     <div class="modal fade" id="new-user-modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
