@@ -4,7 +4,7 @@ We use [Cypress](https://www.cypress.io/) to test the high-level features of Mod
 
 The results of the tests that are run on Travis are public and [you can see them here](https://dashboard.cypress.io/#/projects/3gfovh/runs).
 
-Cypress needs to run on your local machine, not inside Chrome or a VM, because it has to start and control your browser.
+Cypress needs to run on your local machine, not inside Docker or a VM, because it has to start and control your browser. It also assumes your development is running inside Docker when it clears the database before each test run. (TODO: There should be an option to run the database commands outside Docker.)
 
 First, install Cypress:
 
@@ -17,4 +17,3 @@ Then, start it up:
     npm run cypress:open
 
 [The Cypress documentation has information on how to run and write tests.](https://docs.cypress.io/) The test cases are in `cypress/fixtures/`.
-
