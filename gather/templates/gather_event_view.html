@@ -225,19 +225,16 @@
             if (msg.length > 0) {
                 data = JSON.parse(JSON.parse(msg));
                 if (data.errors) {
-                    console.log("errors");
                     errors = data.errors;
                     error_html = "<div class='text-danger'>There were errors in the form:</div>";
                     for (var k in errors) {
                         error_html += '<div class="text-danger">' + k + ': ' + errors[k] + '</div>';
                     }
-                    console.log(error_html);
                     $("#new-user-form-errors").html(error_html);
                 } else {
-                    console.log("shouldn't be here...");
+                    console.error("Error case, but no error message");
                 }
             } else {
-                console.log("success");
                 location.reload();
             }
         });

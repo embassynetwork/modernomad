@@ -217,8 +217,6 @@ $("#which-email-select").change(function() {
 
 var action_el;
 function ajax_call(el) {
-    console.log('el is');
-    console.log(action_el);
     res_action = $(el).attr('id')
     request = $.ajax({
         data: {
@@ -229,7 +227,6 @@ function ajax_call(el) {
         url: $("#res-action-form").attr('action') // the url to hit
     });
     request.done(function(msg) { // on success..
-        console.log("Success!");
         $("#res-status-area").html(msg);
         if(res_action == "set-tentative" || res_action == 'res-charge-card') {
             $("#emailModal").modal("show");
@@ -240,8 +237,7 @@ function ajax_call(el) {
         register_actions();
     });
     request.fail(function(msg) {
-        console.log("Error in booking update:");
-        console.log(msg);
+        console.error("Error in booking update:", msg);
     });
 }
 
@@ -257,9 +253,6 @@ function register_actions() {
     $('.res-manage-action').click(function() {
         // action_el gets reset every time res-manage-action is clicked
         action_el = this;
-        console.log(action_el);
-        console.log('{{r.status}}');
-        console.log('{{room_has_capacity}}')
         if ('{{r.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
             $("#dialog-warn-full").dialog("open");
         } else {
@@ -292,7 +285,6 @@ $(document).ready(function() {
             '</div>' +
             '</div>'
     {% endfor %}
-    console.log($email_templates);
 
     // wire up the ajax-y spinning animated GIF when an ajax call is made.
     $('#spinner').ajaxStart(function () {

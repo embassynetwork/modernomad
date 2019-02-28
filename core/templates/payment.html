@@ -152,8 +152,6 @@
             var month_val = $('#id_expiration_month').val();
             var year_val = $('#id_expiration_year').val();
 
-            //console.log(year_val);
-
             // validate card number, expiry, CVC etc. via Stripe's servers
             Stripe.validateCVC(cvc_val);
             Stripe.validateExpiry(month_val, year_val);
@@ -173,9 +171,7 @@
 
         function stripeResponseHandler(status, response) {
             if (response.error) {
-                // send the response object to the console (REMOVE)
-                console.log(response);
-                console.log(response.error);
+                console.error(response.error);
 
                 // show the errors on the form
                 $("#payment-errors").html('<div class="bg-danger para-padding">'+response.error.message+'</div>');

@@ -56,15 +56,12 @@ $(document).ready(function() {
 
     // Update room availability based on dates
     update_room_list = function(event) {
-        console.log('updating room list');
         // Get arrive and depart dates, update value.
         var arrive = $("#id_arrive").val();
         var depart = $("#id_depart").val();
 
         // once the dates are selected, poll for a list of available rooms
         if (arrive && depart) {
-            console.log('checking...');
-
             $.post("{% url 'rooms_available_on_dates' location.slug %}", {arrive: arrive, depart: depart}, function(data){
                 room_select = $("#id_room");
                 selected_room_id = room_select.val();
@@ -93,11 +90,8 @@ $(document).ready(function() {
         onSelect: function( selectedDate ) {
             if(this.id == 'id_arrive') {
                 startDate = $('#id_arrive').datepicker("getDate");
-                console.log('found start date to update end date');
                 var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
                 var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
-                console.log(rMin);
-                console.log(rMax);
                 $('#id_depart').datepicker("option","minDate",rMin);
                 $('#id_depart').datepicker("option","maxDate",rMax);
             }

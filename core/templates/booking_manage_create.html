@@ -113,9 +113,7 @@
 <script>
 
     get_avatar = function(event) {
-        console.log('username changed');
         username = $("#id_username").val();
-        console.log(username);
         if (username) {
             request = $.ajax({
                 data: {
@@ -126,7 +124,6 @@
             });
 
             request.done(function(url) { // on success..
-                console.log(url);
                 $("#avatar-placeholder").fadeOut(function() {
                     $(this).attr('src', url).fadeIn();
                 });
@@ -155,7 +152,6 @@
 
     // if a user is pre-populated, get the avatar right away
     if ('{{username}}' != "") {
-        console.log("getting avatar...")
         get_avatar()
     }
 
@@ -182,15 +178,12 @@
         if (arrive && depart) {
 
             $.post("{% url 'rooms_available_on_dates' location.slug %}", {arrive: arrive, depart: depart}, function(data){
-                console.log(data);
                 room_select = $("#resource_select");
                 room_select.children().remove();
                 room_select.append('<option value="">Select Room</option>');
                 $.each(data.rooms_capacity, function(k, v) {
-                    console.log(v);
                     avail = "";
                     if (v.available == false) {
-                        console.log('room not available');
                         avail = ' (***Not Available)';
                     }
                     room_select.append('<option value="'+ v.id +'">' + k + avail + '</option>');
