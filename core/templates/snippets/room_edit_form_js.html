@@ -21,7 +21,6 @@
 
     jQuery.validator.addMethod("imageExists", function(value, element) {
         // will be None if there is no instance
-        console.log ('{{form.instance.image}}')
         return this.optional(element) || ('{{form.instance.image}}' != 'None')
         }, "Image is required.");
 
@@ -67,7 +66,6 @@
         $("#id_image_preview").cropper('destroy');
         // display the new image in the preview box
         if (this.files && this.files[0]) {
-            console.log('input files found');
             var reader = new FileReader();
             reader.onload = function (e) {
                 $("#id_image_preview").attr('src', e.target.result);

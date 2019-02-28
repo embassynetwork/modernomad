@@ -107,7 +107,6 @@
                         startDate = $('#arrive_date').datepicker("getDate");
                           var rMin = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + 1); // Min Date = Selected + 1d
                           var rMax = new Date(startDate.getFullYear(), startDate.getMonth(),startDate.getDate() + {{max_days}} ); // Max Date = Selected + max_days
-                          console.log(rMax);
                           $('#depart_date').datepicker("option","minDate",rMin);
                           $('#depart_date').datepicker("option","maxDate",rMax);
                     }

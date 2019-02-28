@@ -28,8 +28,6 @@ export default class CapacityTable extends React.Component {
 
   render() {
     const capacities = this.props.capacities;
-    console.log('capacities');
-    console.log(capacities)
 
     const rows = capacities.map((capacity) => {
       const desc = `${capacity.quantity}`
@@ -38,7 +36,6 @@ export default class CapacityTable extends React.Component {
         event.preventDefault();
         this.props.onDelete(capacity.id);
       }
-      console.log(capacity.accept_drft);
       return (
         <tr key={capacity.id}>
           <td>{this.formatDate(capacity.start_date)}</td>

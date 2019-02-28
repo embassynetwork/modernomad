@@ -227,10 +227,7 @@ $("#which-email-select").change(function() {
 
 var action_el;
 function ajax_call(el) {
-    console.log('el is');
-    console.log(action_el);
     res_action = $(el).attr('id');
-    console.log(res_action);
     request = $.ajax({
         data: {
             'booking-action': res_action,
@@ -240,7 +237,6 @@ function ajax_call(el) {
         url: $("#res-action-form").attr('action') // the url to hit
     });
     request.done(function(msg) { // on success..
-        console.log("Success!");
         $("#res-status-area").html(msg);
         if(res_action == "set-tentative" || res_action == 'res-charge-card') {
             $("#emailModal").modal("show");
@@ -251,8 +247,7 @@ function ajax_call(el) {
         register_actions();
     });
     request.fail(function(msg) {
-        console.log("Error in booking update:");
-        console.log(msg);
+        console.error("Error in booking update:", msg);
         error_alert = '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">×</button><div {% if message.tags %} class="{{ message.tags }}"{% endif %}>The card was declined</div></div>'
         $("#res-status-area").before(error_alert);
     });
@@ -270,7 +265,6 @@ function register_actions() {
     $('.res-manage-action').click(function() {
         // action_el gets reset every time res-manage-action is clicked
         action_el = this;
-        console.log(action_el);
         if ('{{r.use.status}}' == 'pending' && '{{ room_has_capacity }}' == 'False') {
             $("#dialog-warn-full").dialog("open");
         } else {
@@ -303,27 +297,23 @@ $(document).ready(function() {
             '</div>' +
             '</div>'
     {% endfor %}
-    console.log($email_templates);
 
     $('#res-action-charge').submit(function() {
         submitdata = {
             'csrfmiddlewaretoken': '{{ csrf_token }}'
         };
-        console.log(submitdata);
         request = $.ajax({
             data: submitdata,
             type: $("#res-action-charge").attr('method'), // GET or POST
             url: $("#res-action-charge").attr('action'), // the file to call
         });
         request.done(function(msg) { // on success..
-            console.log("Success!");
             $("#res-action-charge-submit").val("PAID");
             $("#res-action-charge-submit").addClass("disabled");
             $("#res-status-area").addClass("paid-bg-img");
         });
         request.fail(function(msg) {
-            console.log("Error in booking update:");
-            console.log(msg);
+            console.error("Error in booking update:", msg);
         });
 
         return false;

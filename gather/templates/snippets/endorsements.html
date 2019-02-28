@@ -36,8 +36,8 @@
             $("#endorsement-area").html(msg);
         });
 
-        request.fail(function() {
-            console.log("oops, there was a problem");
+        request.fail(function(err) {
+            console.error("Error endorsing:", err);
         });
 
         event.preventDefault();

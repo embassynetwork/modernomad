@@ -32,8 +32,6 @@ export default class CapacityContainer extends React.Component {
         resource: this.props.resourceId
       })
       .then((response) => {
-        console.log('response from capacities was');
-        console.log(response.data);
         this.setState({formLoading: false, errors: null, warnings: response.data.warnings})
         if (response.data.data.upcomingCapacities) {
           this.updateCapacities(response.data.data.upcomingCapacities)
@@ -41,12 +39,12 @@ export default class CapacityContainer extends React.Component {
         this.setState({currentCapacity: response.data.data.currentCapacity})
       })
       .catch((error) => {
-        console.log("error occured in post", error);
+        console.error("error occured in post", error);
         this.setState({formLoading: false})
         if (error.response.status == '400' && error.response.data.errors) {
           this.displayErrors(error.response.data.errors);
         } else {
-          console.log("error occured in post", error);
+          console.error("error occured in post", error);
         }
       });
   }
@@ -65,7 +63,7 @@ export default class CapacityContainer extends React.Component {
         this.deleteCapacity(response.data.data.deleted.capacities)
       })
       .catch((error) => {
-        console.log("error occured in delete", error);
+        console.error("error occured in delete", error);
       });
   }
 

@@ -103,7 +103,6 @@
             // payment processing page. (note: this shouldn't happen for new
             // bookings but might for legacy bookings)
             $customer_id = "{{ booking.user.profile.customer_id }}";
-            console.log($customer_id);
 
             if ($customer_id == "None" || $customer_id == "") {
                 var token = function(res){

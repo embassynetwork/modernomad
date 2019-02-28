@@ -52,8 +52,6 @@
 
   function register() {
     $("a[id*='room-cal'").click(function(e) {
-      console.log('room-cal clicked');
-      console.log($(this).attr('id'));
       e.preventDefault();
 
       // "this" will pick up the parameters from whichever link was clicked
@@ -62,7 +60,6 @@
       month = path.split('&')[0].split('=')[1];
       year = path.split('&')[1].split('=')[1];
       form_data = {'year': year, 'month': month, 'browse_past': 'false'};
-      console.log(form_data);
 
       if ($(this).val() == 'Next') {
         form_data = $("#room-cal-next").serialize();
@@ -89,7 +86,6 @@
 
       request.fail(function(msg) {
         div_id = "#availability-cal-" + room_id
-        console.log(div_id)
         $(div_id).html("<p>Hmm, there was a problem. Please try selecting your dates again.</p>")
       });
     })

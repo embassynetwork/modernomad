@@ -29,8 +29,6 @@
           {% if paid_until %}
                 paid_until = new Date({{s.paid_until.year}}, {{s.paid_until.month}}-1, {{s.paid_until.day}});
                 $("#id_end_date").datepicker({minDate: paid_until});
-                console.log("paid until:");
-                console.log("{{s.paid_until}}")
             {% else %}
                 $("#id_end_date").datepicker();
             {% endif %}
