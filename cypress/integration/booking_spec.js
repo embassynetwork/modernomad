@@ -2,7 +2,7 @@
 const randomstring = require("randomstring");
 
 describe("Booking a room", function() {
-  it("works for existing logged in user, adding card, then approved by admin", function() {
+  it("works for the full happy path: existing logged in user, adding card, approved by admin, refunded", function() {
     cy.login("pixel", "password");
     cy.visit("/");
     cy.contains("Embassy SF").click();
@@ -51,6 +51,12 @@ describe("Booking a room", function() {
       .click();
 
     cy.contains("This booking is confirmed and paid.");
+
+    // Refund
+    cy.get("[href='#booking-manage-edit']").click();
+    cy.contains("Cancel This Booking").click();
+    cy.contains("Yes, Cancel").click();
+    cy.contains("The booking has been cancelled.").click();
   });
 
   it("shows an error when credit card is declined when added", function() {
