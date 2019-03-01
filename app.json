@@ -1,6 +1,8 @@
 {
   "name": "modernomad",
-  "scripts": {},
+  "scripts": {
+    "postdeploy": "./manage.py generate_test_data"
+  },
   "env": {
     "ALLOWED_HOSTS": ".herokuapp.com",
     "SECRET_KEY": {
