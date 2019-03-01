@@ -36,9 +36,10 @@ describe("Booking a room", function() {
     // Approve booking
     cy.login("embassysfadmin", "password");
     cy.visit("/locations/embassysf/manage/bookings/");
-    // Latest booking
-    cy.get("#booking-list-tab-content")
-      .find("tbody")
+    // The booking we want is the only one by pixel
+    cy.contains("Pixel")
+      .parent()
+      .parent()
       .find("a")
       .first()
       .click();
@@ -125,9 +126,10 @@ describe("Booking a room", function() {
     // Approve booking
     cy.login("embassysfadmin", "password");
     cy.visit("/locations/embassysf/manage/bookings/");
-    // Latest booking
-    cy.get("#booking-list-tab-content")
-      .find("tbody")
+    // The booking we want is the only one by pixel
+    cy.contains("Pixel")
+      .parent()
+      .parent()
       .find("a")
       .first()
       .click();
