@@ -1,4 +1,4 @@
-# Running in production
+## Running in production
 
 Modernomad is designed to be deployed on Heroku inside Docker containers.
 
@@ -7,9 +7,13 @@ In the root of the repository is a manifest that lets you deploy it on Heroku. I
     $ heroku create --manifest
     $ heroku run ./manage.py migrate
 
+## Cloudflare
+
+We are set up to use Cloudflare for DNS which also includes a CDN. 
+
 ## Static files
 
-The Heroku app serves up static files directly, using [Whitenoise](http://whitenoise.evans.io/en/stable/).
+The Heroku app serves up static files (JS, CSS, etc.) directly, using [Whitenoise](http://whitenoise.evans.io/en/stable/).
 
 Cloudflare sits in front of the Heroku app and caches the static files so each request doesn't hit the Heroku app.
 
@@ -30,3 +34,24 @@ The Docker Compose file `docker-compose.production.yml` approximates a productio
 It won't auto-reload, so you'll need to Ctrl-C and start it again if you change any code.
 
 This Compose file is also used on CI for the browser tests so they are as close as possible to a production set up. This will catch problems like the static files not compiling properly.
+
+## Media
+
+We use the Heroku add-on "Bucketeer" to host media files on S3. Creates bucket
+and puts creds inside Heroku environment variables, and does billing through
+Heroku too. Inside the Django app we use django-storages which saves the files
+to s3. Configuration is in the `settings.py`.
+
+## Payments
+
+Stripe is used for payment processing. 
+
+## Email sending
+
+Emails are sent using Mailgun. Using mailgun we configure routes to associate
+with specific modernomad HTTP endpoints, which trigger function calls in the
+code. 
+
+Mailgun credentials are stored in Heroku environment variables. 
+
+

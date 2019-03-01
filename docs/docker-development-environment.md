@@ -22,9 +22,7 @@ The first time you get this going, you will want to generate some test data:
 
     $ docker-compose run web ./manage.py generate_test_data
 
-This will wipe out your superuser, so after generating test data, create a new superuser that you know the credentials to:
-
-    $ docker-compose run web ./manage.py createsuperuser
+This will create a superuser with the credentials `admin` and `password`. 
 
 You only need to run these commands once. Wen you want to work on the development environment in the future, just run `docker-compose up --build`. (Note: `--build` is optional, but means that the Python and Node dependencies will always remain up-to-date.)
 
