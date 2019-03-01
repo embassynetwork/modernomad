@@ -2,8 +2,8 @@ from django.http import HttpResponse
 from django.conf import settings
 from sentry_sdk import capture_exception, capture_message
 import logging
+import requests
 logger = logging.getLogger(__name__)
-
 
 def mailgun_send(mailgun_data, files_dict=None):
     logger.debug("Mailgun send: %s" % mailgun_data)
