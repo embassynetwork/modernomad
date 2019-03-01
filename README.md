@@ -20,7 +20,7 @@ If you can't or don't want to use Docker, see [Environment Setup](docs/environme
 - [Admin user guide](https://embassynetwork.gitbooks.io/modernomad/content/) - to help users set up and manage locations on Modernomad
 - [Browser tests](docs/browser-tests.md) - want to write a browser test or fix a broken one?
 - [Configuration](docs/browser-tests.md)
-- [Running in production](docs/running-in-production.md) - how embassynetwork.com works, and how to run your own copy of Modernomad
+- [Deployment](docs/deployment.md) - how embassynetwork.com works, and how to run your own copy of Modernomad
 
 ## Contributing
 
