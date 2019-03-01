@@ -1,11 +1,32 @@
-## Running in production
+# Deployment
+
+This a description of how https://embassynetwork.com is set up, but you can also use it to set up your own instance of Modernomad.
+
+## Creating app
 
 Modernomad is designed to be deployed on Heroku inside Docker containers.
 
-In the root of the repository is a manifest that lets you deploy it on Heroku. In short, you can these commands and it should get most things up and running:
+These commands, roughly, will get you set up with an app. Replace `embassynetwork-production` with a name for your app:
 
-    $ heroku create --manifest
-    $ heroku run ./manage.py migrate
+    $ heroku update beta
+    $ heroku plugins:install @heroku-cli/plugin-manifest
+    $ heroku apps:create --manifest --no-remote --stack=container embassynetwork-production
+    $ heroku config:set -a embassynetwork-production SECRET_KEY=$(openssl rand -hex 64)
+
+In the Heroku web UI, go to the app, then the "Deploy" tab, then connect it to a GitHub repo. Then, click "Deploy branch" at the bottom.
+
+If you want to set up a Bucketeer bucket with a custom name:
+
+    $ heroku addons:destroy -a embassynetwork-production BUCKETEER
+    $ heroku addons:create -a embassynetwork-production bucketeer:micro --bucket-name media.embassynetwork.com
+
+## Deployments
+
+Trigger deployments through the Heroku web UI. It will automatically run `./manage.py migrate`.
+
+## Scheduled tasks
+
+In Heroku scheduler, add a daily task at 11:00 UTC: `./manage.py run_daily_tasks`
 
 ## Cloudflare
 
