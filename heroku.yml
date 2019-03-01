@@ -1,10 +1,12 @@
 setup:
   addons:
     - plan: heroku-postgresql
+    - plan: bucketeer
+    - plan: papertrail
+    - plan: scheduler
   config:
     SECRET_KEY: "change-me!"
     ALLOWED_HOSTS: ".herokuapp.com"
-    MODE: "production"
 build:
   docker:
     web: Dockerfile
