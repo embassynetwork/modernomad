@@ -40,6 +40,7 @@ RUN cd client && npm install && npm cache clean --force
 COPY client /app/client
 RUN cd client && node_modules/.bin/webpack --config webpack.prod.config.js
 
+ENV PYTHONUNBUFFERED 1
 # Set configuration last so we can change this without rebuilding the whole
 # image
 ENV DJANGO_SETTINGS_MODULE modernomad.settings.production
