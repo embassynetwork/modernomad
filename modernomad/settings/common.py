@@ -208,6 +208,7 @@ INSTALLED_APPS = [
 
     # modernomad
     'core',
+    'modernomad.core.locations',
     'bank',
     'gather',
     'modernomad',
