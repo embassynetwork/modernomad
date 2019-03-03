@@ -9,7 +9,6 @@ import core.urls.room
 import core.views.redirects
 
 per_location_patterns = [
-    url(r'^$', core.views.unsorted.location_detail, name='location_detail'),
     url(r'^stay/$', core.views.booking.StayComponent, name='location_stay'),
     url(r'^stay/room/(?P<room_id>\w+)$', core.views.booking.StayComponent, name='room'),
     url(r'^community/$', core.views.unsorted.community, name='location_community'),

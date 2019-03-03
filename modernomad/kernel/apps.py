@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
-app_name = 'modernomad.core.locations'
+app_name = 'kernel'
 
 
 class LocationsConfig(AppConfig):

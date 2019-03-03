@@ -277,7 +277,7 @@ def guest_welcome(use):
         'location': use.location,
         'use': use,
         'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
-        'site_url': "https://" + domain + urlresolvers.reverse('location_detail', args=(location.slug,)),
+        'site_url': "https://" + domain + urlresolvers.reverse('kernel:location_detail', args=(location.slug,)),
         'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
         'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(use.user.username,)),
         'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, use.booking.id,)),

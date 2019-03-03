@@ -5,7 +5,7 @@ from django.conf import settings
 from django.views.generic import RedirectView
 from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework import routers, serializers, viewsets
-import modernomad.views 
+import modernomad.views
 import core.urls.location
 import bank.urls
 import gather.views
@@ -13,7 +13,7 @@ import jwt_auth.views
 import api.urls
 import graphapi.urls
 import django.views
-
+from modernomad.kernel import urls as location_urls
 
 admin.autodiscover()
 
@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^people/', include(modernomad.urls.user)),
     url(r'^locations/', include(core.urls.location)),
+    url(r'^locations/', include(location_urls)),
     url(r'^events/$', gather.views.upcoming_events_all_locations),
     url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', gather.views.email_preferences, name='gather_email_preferences'),
     url(r'^accounts/', include(bank.urls)),

@@ -10,7 +10,7 @@
 
     {% for location in locations %}
 
-        <a href="{% url 'location_detail' location.slug %}" class="col-lg-4 col-md-6">
+        <a href="{% url 'kernel:location_detail' location.slug %}" class="col-lg-4 col-md-6">
             <div class="location-box">
                 <img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo panel panel-default">
                 <div class="location-name">
