@@ -58,7 +58,7 @@ from bank.models import Account, Currency, Transaction, Entry
 logger = logging.getLogger(__name__)
 
 
-def location(request, location_slug):
+def location_detail(request, location_slug):
     try:
         location = Location.objects.get(slug=location_slug)
         logger.debug(location.get_members())
@@ -78,7 +78,7 @@ def location(request, location_slug):
     except Location.DoesNotExist:
         raise Http404("The location does not exist or you do not have permission to view it")
 
-    return render(request, "landing.html", {'location': location, 'max_days': location.max_booking_days})
+    return render(request, "location_detail.html", {'location': location, 'max_days': location.max_booking_days})
 
 
 def guest_rooms(request, location_slug):

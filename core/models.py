@@ -119,7 +119,7 @@ class Location(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('location_home', kwargs={'location_slug': self.slug})
+        return reverse('location_detail', kwargs={'location_slug': self.slug})
 
     def from_email(self):
         ''' return a location-specific email in the standard format we use.'''
