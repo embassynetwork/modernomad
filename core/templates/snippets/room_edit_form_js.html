@@ -7,7 +7,6 @@
 </script>
 
 <script src="{% static 'js/jquery.validate.min.js' %}"></script>
-<script src="{% static 'js/cropper.min.js' %}"></script>
 <script src="{% static 'js/chosen.jquery.min.js' %}"></script>
 <script>
     if ('{{room_id}}' != "None") {
@@ -47,41 +46,6 @@
             }
         }
     })
-    //image cropping
-    function showCropper(preview_id) {
-        // register a cropper on *all* the preview elements
-        $(preview_id).cropper({
-            aspectRatio: 4/3,
-            zoomable: false,
-            rotatable: false,
-            scalable: false,
-            guides: false,
-            dragCrop: false,
-        });
-    }
-    image_was_changed = false;
-    $("input[id$='image']").change(function() {
-        image_was_changed = true;
-        // destroy the previous cropper if it existed
-        $("#id_image_preview").cropper('destroy');
-        // display the new image in the preview box
-        if (this.files && this.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $("#id_image_preview").attr('src', e.target.result);
-                showCropper("#id_image_preview");
-            }
-            reader.readAsDataURL(this.files[0]);
-        }
-    });
-    $(".room-form").submit(function(){
-        if (image_was_changed) {
-            // add the cropped image data to the hidden form element, then submit.
-            $("#id_cropped_image_data").val($("#id_image_preview").cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
-        }
-        return true;
-    })
-
     // multiple select using search and tags.
     $(".chosen-select").chosen({
         no_results_text: "No user with that name.",

@@ -35,24 +35,14 @@
             {% csrf_token %}
             {{ form.username }}
 
-            {{ form.cropped_image_data }}
             <div class="form-group">
                 {{ form.image.errors|safe }}
                 <div class="row">
                     <label class="light col-sm-2 control-label">
                         {% if has_image %} Update image {% else %} Image {% endif %}
                     </label>
-                    <div class="form-field-body col-sm-10" id="img-cropper-wrapper">
+                    <div class="form-field-body col-sm-10">
                         {{ form.image }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div id="image-preview-wrapper" class="col-md-offset-2 col-md-6 row-spacer-top-bottom">
-                        {% if has_image %}
-                            <img id="image-preview" src="{{ form.instance.image.url }}">
-                        {% else %}
-                            <img id="image-preview" src="{{ STATIC_URL }}img/default.jpg">
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -196,8 +186,6 @@
     <script src="{% static 'js/jquery.validate.min.js' %}"></script>
     <script src="{% static 'js/waypoints-sticky.js' %}"></script>
     <script src="{% static 'js/jquery.sticky-kit.min.js' %}"></script>
-    <!-- image cropping -->
-    <script src="{% static 'js/cropper.min.js' %}"></script>
 
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
     <script>
@@ -323,45 +311,6 @@
             }
         }
     });
-
-    function showCropper() {
-        $("#image-preview").cropper({
-            aspectRatio: 1/1,
-            zoomable: false,
-            rotatable: false,
-            scalable: false,
-            guides: false,
-            dragCrop: false,
-        });
-        // set the dimensions of the wrapper to be the same as the image
-    }
-
-    function showImage(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                $('#image-preview').fadeOut(300, function() {
-                    $(this).attr('src',e.target.result);
-                }).fadeIn(800, showCropper);
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    $("#id_image").change(function() {
-        $("#image-preview").cropper('destroy');
-        if ($("#id_image").val()) {
-            console.log('found image. previewing.');
-            showImage(this);
-        }
-    });
-
-    $("#newprofileform").submit(function(){
-        // add the cropped image data to the form, then submit.
-        $("#id_cropped_image_data").val($("#image-preview").cropper('getCroppedCanvas').toDataURL().match(/data:image\/(png|jpeg);base64,(.*)$/)[2])
-        return true;
-    })
 
     </script>
 {% endblock %}

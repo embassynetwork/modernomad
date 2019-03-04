@@ -2,39 +2,11 @@ from django.contrib.auth.models import User
 from django import forms
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
-from PIL import Image
-import os
-import datetime
-from django.conf import settings
 from django.template import Template, Context
 from core.models import UserProfile, Use, Booking, EmailTemplate, Resource, Location, LocationMenu, Subscription, Subscription
 from django.contrib.sites.models import Site
-import re
-import base64
-import uuid
-import logging
-logger = logging.getLogger(__name__)
 
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
-
-def save_cropped_image(raw_img_data, upload_path):
-    # Decode the image data
-    img_data = base64.b64decode(raw_img_data)
-    filename = "%s.png" % uuid.uuid4()
-
-    # XXX make the upload path a fixed setting in models, since it's
-    # reference in three places
-    upload_abs_path = os.path.join(settings.MEDIA_ROOT, upload_path)
-    if not os.path.exists(upload_abs_path):
-        os.makedirs(upload_abs_path)
-    full_file_name = os.path.join(upload_abs_path, filename)
-
-    with open(full_file_name, 'wb') as f:
-        f.write(img_data)
-        f.close()
-    relative_file_name = os.path.join(upload_path, filename)
-    return relative_file_name
 
 
 def create_username(first_name, last_name, suffix=""):
@@ -68,7 +40,6 @@ class UserProfileForm(forms.ModelForm):
     email = forms.EmailField(label=_("E-mail"), max_length=75, widget=forms.TextInput(attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'email'}))
     password1 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'password'}), label=_("New Password"))
     password2 = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'required': 'true', 'placeholder': 'password (again)'}), label=_("New Password (again)"))
-    cropped_image_data = forms.CharField(widget=forms.HiddenInput())
 
     class Meta:
         model = UserProfile
@@ -99,7 +70,6 @@ class UserProfileForm(forms.ModelForm):
             # Since validation isn't working, make this readonly for now -JLS
             # self.fields['email'] = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control', 'readonly':True}))
             self.fields['email'].initial = self.instance.user.email
-            self.fields['cropped_image_data'].required = False
 
             self.fields['password1'] = forms.CharField(widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'placeholder': 'password'}), label=_("New Password"))
             self.fields['password1'].required = False
@@ -138,21 +108,6 @@ class UserProfileForm(forms.ModelForm):
                     suffix=tries
                 )
             self.cleaned_data['username'] = username
-
-        # save any cropped images
-        try:
-            img_data = self.cleaned_data['cropped_image_data']
-            # If none or len 0, means illegal image data
-            if (not img_data) or img_data is None or len(img_data) == 0:
-                # Image data on creation is ensured by the javascript validator.
-                # If we don't have image data here it's because we don't need to
-                # update the image.  Doing nothing -- JLS
-                return
-        except:
-            raise forms.ValidationError('No valid image was provided.')
-        upload_path = "avatars/%s/" % self.cleaned_data['username']
-        relative_file_name = save_cropped_image(img_data, upload_path)
-        self.cleaned_data['image'] = relative_file_name
 
     def clean_links(self):
         # validates and formats the urls, returning a string of comma-separated urls
@@ -299,7 +254,6 @@ def all_users():
     return [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in User.objects.all()]
 
 class LocationRoomForm(forms.ModelForm):
-    cropped_image_data = forms.CharField(widget=forms.HiddenInput())
     change_backers = forms.MultipleChoiceField(choices=all_users, required=False)
     new_backing_date = forms.DateField(required=False)
 
@@ -312,33 +266,12 @@ class LocationRoomForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(LocationRoomForm, self).__init__(*args, **kwargs)
-        if self.instance.id is not None:
-            self.fields['cropped_image_data'].required = False
-            #self.fields['backed_by'].initial = [(u.id, "%s %s" % (u.first_name, u.last_name)) for u in self.instance.backers()]
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
             if field_name == 'change_backers':
                 field.widget.attrs['class'] += ' chosen-select'
             elif field_name == 'new_backing_date':
                 field.widget.attrs['class'] += ' datepicker'
-
-
-    def clean(self):
-        # save any cropped images
-        if self.cleaned_data.get('cropped_image_data'):
-            try:
-                img_data = self.cleaned_data['cropped_image_data']
-                # If none or len 0, means illegal image data
-                if (img_data is False or img_data is None or len(img_data) == 0):
-                    # Image data on creation is ensured by the javascript validator.
-                    # If we don't have image data here it's because we don't need to
-                    # update the image.  Doing nothing -- JLS
-                    pass
-            except:
-                raise forms.ValidationError('No valid image was provided.')
-            upload_path = "rooms/"
-            relative_file_name = save_cropped_image(img_data, upload_path)
-            self.cleaned_data['image'] = relative_file_name
 
 
 class BookingUseForm(forms.ModelForm):
