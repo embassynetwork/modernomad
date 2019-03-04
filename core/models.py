@@ -17,6 +17,8 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.flatpages.models import FlatPage
 from core.libs.dates import dates_within, count_range_objects_on_day
+from imagekit.models import ImageSpecField, ProcessedImageField
+from imagekit.processors import ResizeToFill
 import pytz
 
 # imports for signals
@@ -1599,15 +1601,20 @@ def profile_img_upload_to(instance, filename):
 
 
 class UserProfile(models.Model):
-    IMG_SIZE = (300, 300)
-    IMG_THUMB_SIZE = (150, 150)
-
     # User model fields: username, first_name, last_name, email,
     # password, is_staff, is_active, is_superuser, last_login, date_joined,
     user = models.OneToOneField(User)
     updated = models.DateTimeField(auto_now=True)
-    image = models.ImageField(upload_to=profile_img_upload_to, help_text="Image should have square dimensions.")
-    image_thumb = models.ImageField(upload_to="avatars/%Y/%m/%d/", blank=True, null=True)
+    image = ProcessedImageField(
+        upload_to=profile_img_upload_to,
+        processors=[ResizeToFill(300, 300)],
+        format='JPEG',
+        options={'quality': 90})
+    image_thumb = ImageSpecField(
+        source='image',
+        processors=[ResizeToFill(150, 150)],
+        format='JPEG',
+        options={'quality': 90})
     bio = models.TextField("About you", blank=True, null=True)
     links = models.TextField(help_text="Comma-separated", blank=True, null=True)
     phone = models.CharField(
@@ -1703,57 +1710,6 @@ def primary_accounts_changed(sender, action, instance, reverse, pk_set, **kwargs
             assert not user_profile.primary_accounts.filter(currency=account.currency)
             # ensure user is an owner of primary account
             assert user_profile.user in account.owners.all()
-
-
-@receiver(pre_save, sender=UserProfile)
-def size_images(sender, instance, **kwargs):
-    try:
-        obj = UserProfile.objects.get(pk=instance.pk)
-    except UserProfile.DoesNotExist:
-        obj = None
-
-    # if this is the default avatar, reuse it for the thumbnail (lazy, but only
-    # for backwards compatibility for those who created accounts before images
-    # were required)
-    if instance.image.name == "avatars/default.jpg":
-        instance.image_thumb = "avatars/default.thumb.jpg"
-
-    elif instance.image and (obj is None or obj.image != instance.image or obj.image_thumb is None):
-        im = Image.open(instance.image)
-
-        img_upload_path_rel = profile_img_upload_to(instance, instance.image.name)
-        main_img_full_path = os.path.join(settings.MEDIA_ROOT, img_upload_path_rel)
-
-        # JKS even though we scaled the image on upload, we re *size* it here,
-        # as well as save the thumbnail. probably it would be better if we
-        # saved the original AND the resized versions...?
-
-        # resize returns a copy. resize() forces the dimensions of the image
-        # to match SIZE specified, squeezing the image if necessary along one
-        # dimension.
-        main_img = im.resize(UserProfile.IMG_SIZE, Image.ANTIALIAS)
-        main_img.save(main_img_full_path)
-        # the image field is a link to the path where the image is stored
-        instance.image = img_upload_path_rel
-        logger.debug('updating instance.image to be a relative path...')
-        logger.debug(instance.image)
-        # now resize this to generate the smaller thumbnail
-        thumb_img = im.resize(UserProfile.IMG_THUMB_SIZE, Image.ANTIALIAS)
-        thumb_full_path = os.path.splitext(main_img_full_path)[0] + ".thumb" + os.path.splitext(main_img_full_path)[1]
-        thumb_img.save(thumb_full_path)
-        # the ImageFileField needs the path info relative to the media
-        # directory
-        # XXX Q: does this save the file twice? once by PIL and another time
-        # reading it in and saving it to the same place when the model saves?
-        thumb_rel_path = os.path.join(os.path.split(img_upload_path_rel)[0], os.path.basename(thumb_full_path))
-        instance.image_thumb = thumb_rel_path
-
-        # now delete any old images
-        if obj and obj.image and obj.image.name != "avatars/default.jpg":
-            default_storage.delete(obj.image.path)
-
-        if obj and obj.image_thumb and obj.image_thumb.name != "avatars/default.thumb.jpg":
-            default_storage.delete(obj.image_thumb.path)
 
 
 class EmailTemplate(models.Model):
