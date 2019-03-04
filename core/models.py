@@ -1906,22 +1906,6 @@ class SubscriptionNote(models.Model):
         return '%s - %d: %s' % (self.created.date(), self.subscription.id, self.note)
 
 
-class BaseImage(models.Model):
-    original = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
-    large = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
-    med = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
-    thumb = models.ImageField(upload_to=resource_img_upload_to, blank=True, null=True)
-    caption = models.CharField(max_length=200, blank=True, null=True)
-
-
-class RoomImage(BaseImage):
-    resource = models.ForeignKey(Resource)
-
-
-class LocationImage(BaseImage):
-    location = models.ForeignKey(Location)
-
-
 class CapacityChangeManager(models.Manager):
     def _latest_change(self, date, resource):
         return self.get_queryset().filter(resource=resource).filter(start_date__lte=date).order_by('-start_date').first()
