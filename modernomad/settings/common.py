@@ -62,6 +62,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = "/media/"
 
+# Generate thumbnails on save
+IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = 'imagekit.cachefiles.strategies.Optimistic'
+
 AWS_STORAGE_BUCKET_NAME = env('BUCKETEER_BUCKET_NAME', default='')
 AWS_ACCESS_KEY_ID = env('BUCKETEER_AWS_ACCESS_KEY_ID', default='')
 AWS_SECRET_ACCESS_KEY = env('BUCKETEER_AWS_SECRET_ACCESS_KEY', default='')
