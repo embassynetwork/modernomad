@@ -357,7 +357,12 @@ class Resource(models.Model):
     description = models.TextField(blank=True, null=True, help_text="Displayed on room detail page only")
     summary = models.CharField(max_length=140, help_text="Displayed on the search page. Max length 140 chars", default='')
     cancellation_policy = models.CharField(max_length=400, default="24 hours")
-    image = models.ImageField(upload_to=resource_img_upload_to, help_text="Images should be 500px x 325px or a 1 to 0.65 ratio ")
+    image = ProcessedImageField(
+        help_text="Should be 500x325px or a 1 to 0.65 ratio. If it is not this size, it will automatically be resized.",
+        upload_to=resource_img_upload_to,
+        processors=[ResizeToFill(500, 325)],
+        format='JPEG',
+        options={'quality': 90})
     objects = ResourceManager()
 
     def __str__(self):
