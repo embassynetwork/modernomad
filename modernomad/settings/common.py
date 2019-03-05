@@ -196,6 +196,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_filters',
     'graphene_django',
+    'imagekit',
     'rest_framework',
     'webpack_loader',
 
