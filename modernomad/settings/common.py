@@ -13,8 +13,6 @@ BASE_DIR = Path.cwd()
 environ.Env.read_env(str(BASE_DIR / '.env'))
 env = environ.Env()
 
-BACKUP_ROOT = BASE_DIR / 'backups'
-
 ADMINS = ((
     env('ADMIN_NAME', default='Unnamed'),
     env('ADMIN_EMAIL', default='none@example.com')
