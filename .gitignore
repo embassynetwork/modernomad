@@ -9,8 +9,6 @@ local_settings.py
 .DS_Store
 local_templates/
 local_templates_hidden/
-backups
-backup/
 django.log
 .vagrant
 modernomad.komodoproject

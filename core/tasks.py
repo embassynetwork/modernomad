@@ -1,7 +1,6 @@
 from core.models import Location, Subscription, Use
 from core.emails import guests_residents_daily_update, admin_daily_update, guest_welcome, goodbye_email
 from django.conf import settings
-from modernomad.backup import BackupManager
 from modernomad.log import catch_exceptions
 from django.contrib.sites.models import Site
 import datetime
@@ -52,13 +51,6 @@ def send_departure_email():
         departing = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
         for use in departing:
             goodbye_email(use)
-
-
-@catch_exceptions
-def make_backup():
-    logger.info("Running task: make_backup")
-    manager = BackupManager()
-    manager.make_backup()
 
 
 @catch_exceptions
