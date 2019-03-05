@@ -46,6 +46,10 @@ This is done automatically by django_compressor for most CSS and JS in the app. 
 
 In Django, there are various ways of adding the hash of the content of a static file to the filename, but this hasn't been implemented yet.
 
+### Thumbnails
+
+Thumbnails are generated with django-imagekit when a model is saved. If you change the thumbnail specification in the model, or need to regenerate the thumbnails for whatever reason, run `./manage.py generateimages`.
+
 ### Testing production static files locally
 
 The Docker Compose file `docker-compose.production.yml` approximates a production setup so you can check the compilation of static files. Run it with:
