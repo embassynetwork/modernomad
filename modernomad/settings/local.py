@@ -7,8 +7,6 @@ INSTALLED_APPS = INSTALLED_APPS + [
 ]
 SECRET_KEY = 'local_development'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )

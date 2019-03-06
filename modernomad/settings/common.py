@@ -108,8 +108,14 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend'
 )
 
-EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
 MAILGUN_API_KEY = env('MAILGUN_API_KEY', default='')
+if MAILGUN_API_KEY:
+    EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
+    # This should only ever be true in the production environment. Defaults to False.
+    MAILGUN_CAUTION_SEND_REAL_MAIL = env('MAILGUN_CAUTION_SEND_REAL_MAIL', default='')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # this will be used as the subject line prefix for all emails sent from this app.
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
