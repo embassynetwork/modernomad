@@ -146,14 +146,14 @@ class Location(models.Model):
 
     def rooms_with_future_capacity(self):
         future_capacity = []
-        for room in Resource.objects.filter(location=self):
+        for room in Resource.objects.filter(location=self).prefetch_related('capacity_changes'):
             if room.has_future_capacity():
                 future_capacity.append(room)
         return future_capacity
 
     def rooms_with_future_drft_capacity(self):
         future_capacity = []
-        for room in Resource.objects.filter(location=self):
+        for room in Resource.objects.filter(location=self).prefetch_related('capacity_changes'):
             if (room.has_future_capacity() and room.has_future_drft_capacity()):
                 future_capacity.append(room)
         return future_capacity
@@ -405,9 +405,11 @@ class Resource(models.Model):
         # iterate backwards over time through capacities. if there's any
         # non-zero capacities current or future, then this resource has
         # SOME 'future' capacity.
-        avails = self.capacity_changes.all().order_by('-start_date')
+        avails = self.capacity_changes.all()
         if accept_drft:
             avails = avails.filter(accept_drft=True)
+        # do sort outside database so prefetch_related works
+        avails = sorted(list(avails), key=lambda obj: obj.start_date, reverse=True)
         for a in avails:
             if a.start_date >= today and a.quantity > 0:
                 return True
