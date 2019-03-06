@@ -60,7 +60,11 @@ logger = logging.getLogger(__name__)
 
 def location_detail(request, location_slug):
     try:
-        location = Location.objects.get(slug=location_slug)
+        location = (
+            Location.objects
+            .prefetch_related('house_admins', 'resources')
+            .get(slug=location_slug)
+        )
         logger.debug(location.get_members())
         logger.debug('--')
         logger.debug(request.user)

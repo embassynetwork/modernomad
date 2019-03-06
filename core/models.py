@@ -214,9 +214,13 @@ class Location(models.Model):
 
     def coming_month_uses(self, days=30):
         today = timezone.localtime(timezone.now())
-        return Use.objects.filter(
-                Q(status="confirmed") | Q(status="approved")
-                ).filter(location=self).exclude(depart__lt=today).exclude(arrive__gt=today+datetime.timedelta(days=days))
+        return (Use.objects
+            .filter(Q(status="confirmed") | Q(status="approved"))
+            .filter(location=self)
+            .exclude(depart__lt=today)
+            .exclude(arrive__gt=today+datetime.timedelta(days=days))
+            .select_related('user__profile')
+        )
 
     def people_today(self):
         guests = self.guests_today()
@@ -240,7 +244,7 @@ class Location(models.Model):
                 people.append(r)
 
         # add house admins
-        for a in self.house_admins.all():
+        for a in self.house_admins.all().select_related('profile'):
             if a not in people:
                 people.append(a)
 
@@ -472,7 +476,7 @@ class Resource(models.Model):
     def backers(self):
         b = self.current_backing()
         if b:
-            return b.users.all()
+            return b.users.all().select_related('profile')
         else:
             return []
 
