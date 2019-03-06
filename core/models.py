@@ -619,7 +619,15 @@ class UseManager(models.Manager):
         return list(confirmed_bookings)
 
     def confirmed_but_unpaid(self, location):
-        confirmed_this_location = super(UseManager, self).get_queryset().filter(location=location, status='confirmed').order_by('-arrive')
+        confirmed_this_location = (
+            super(UseManager, self).get_queryset()
+            .filter(location=location, status='confirmed')
+            .order_by('-arrive')
+            .select_related('booking', 'booking__bill', 'resource', 'user')
+            # this makes is is_paid() efficient
+            .prefetch_related('booking__bill__line_items', 'booking__bill__line_items__fee',
+                              'booking__bill__payments')
+        )
         unpaid_this_location = []
         for use in confirmed_this_location:
             try:
