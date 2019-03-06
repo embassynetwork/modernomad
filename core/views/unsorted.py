@@ -1329,11 +1329,20 @@ def BookingManageList(request, location_slug):
     show_all = False
     if 'show_all' in request.GET and request.GET.get('show_all') == "True":
         show_all = True
+    
+    bookings = (
+        Booking.objects
+        .filter(use__location=location)
+        .order_by('-id')
+        .select_related('use', 'use__resource', 'use__user', 'bill')
+        # this makes is is_paid() efficient
+        .prefetch_related('bill__line_items', 'bill__line_items__fee', 'bill__payments')
+    )
 
-    pending = Booking.objects.filter(use__location=location).filter(use__status="pending").order_by('-id')
-    approved = Booking.objects.filter(use__location=location).filter(use__status="approved").order_by('-id')
-    confirmed = Booking.objects.filter(use__location=location).filter(use__status="confirmed").order_by('-id')
-    canceled = Booking.objects.filter(use__location=location).exclude(use__status="confirmed").exclude(use__status="approved").exclude(use__status="pending").order_by('-id')
+    pending = bookings.filter(use__status="pending")
+    approved = bookings.filter(use__status="approved")
+    confirmed = bookings.filter(use__status="confirmed")
+    canceled = bookings.exclude(use__status="confirmed").exclude(use__status="approved").exclude(use__status="pending")
 
     if not show_all:
         today = timezone.localtime(timezone.now())
