@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from core.models import UserProfile
 
 from . import factory
 
@@ -8,6 +9,7 @@ User = get_user_model()
 class UserFactory(factory.DjangoModelFactory):
     class Meta:
         model = User
+        django_get_or_create = ('username',)
 
     username = factory.Faker('user_name')
     # all users have a password hardcoded to 'password'
@@ -19,24 +21,23 @@ class UserFactory(factory.DjangoModelFactory):
     is_active = True
     is_superuser = False
 
+    @factory.post_generation
+    def create_profile(self, create, extracted, **kwargs):
+        if not UserProfile.objects.filter(user=self).exists():
+            UserProfileFactory(user=self)
 
-class SuperUserFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = User
-        django_get_or_create = ('username',)
 
+class SuperUserFactory(UserFactory):
     username = 'admin'
-    password = factory.PostGenerationMethodCall('set_password', 'password')
     first_name = 'Root'
     last_name = 'Admin'
-    email = factory.Faker('email')
     is_superuser = True
-    is_active = True
     is_staff = True
 
 
 class UserProfileFactory(factory.DjangoModelFactory):
-    pass
+    class Meta:
+        model = UserProfile
 
 
 class UserNote(factory.DjangoModelFactory):

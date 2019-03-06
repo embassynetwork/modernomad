@@ -1580,7 +1580,7 @@ def profile_img_upload_to(instance, filename):
 class UserProfile(models.Model):
     # User model fields: username, first_name, last_name, email,
     # password, is_staff, is_active, is_superuser, last_login, date_joined,
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, related_name='profile')
     updated = models.DateTimeField(auto_now=True)
     image = ProcessedImageField(
         upload_to=profile_img_upload_to,
@@ -1654,8 +1654,9 @@ class UserProfile(models.Model):
         return list(self.user.accounts_owned.filter(currency=currency)) + list(self.user.accounts_administered.filter(currency=currency))
 
 
-User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+# FIXME: this should use related_name
 User.rooms_backed = (lambda u: Resource.objects.backed_by(user=u))
+# FIXME: nope. explicit ordering everywhere.
 User._meta.ordering = ['username']
 
 
