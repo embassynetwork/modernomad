@@ -47,3 +47,14 @@ media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
 urlpatterns += [
     url(r'^%s/(?P<path>.*)$' % media_url, django.views.static.serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        # For Django >= 2.0
+        # path('__debug__/', include(debug_toolbar.urls)),
+
+        # For django versions before 2.0:
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+
+    ] + urlpatterns
