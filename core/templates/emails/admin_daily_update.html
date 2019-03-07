@@ -37,7 +37,7 @@
             {{ use.user.first_name }} {{ use.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}">{{ use.arrive }} - {{ use.depart }}</a> in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
             </td></tr>
             <tr>
-            <td width="600px"><img src="https://{{domain}}/media/{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
+            <td width="600px"><img src="{{ MEDIA_URL }}{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
             </tr>
             
         {% endfor %}
@@ -55,7 +55,7 @@
             {{ use.user.first_name }} {{ use.user.last_name }}, <a href="https://{{ domain }}{% url 'booking_manage' use.location.slug use.booking.id %}">{{ use.arrive }} - {{ use.depart }}</a> in {{ use.resource|safe }} {% if not use.booking.is_paid %} (unpaid) {% endif %}
             </td></tr>
             <tr>
-            <td width="600px"><img src="https://{{domain}}/media/{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
+            <td width="600px"><img src="{{ MEDIA_URL }}{{ use.user.profile.image_thumb }}" style="border: solid 1px #AAAAAA; margin-right: 15px; margin-bottom:15px; float: left;" width="150" height="150"><p style="margin-top:0px;">{{ use.user.profile.bio}}</p></td>
             </tr>
             
         {% endfor %}

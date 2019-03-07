@@ -15,7 +15,7 @@
                             <div class="panel-body">
                                 <div class="billing-message center">Scroll down to submit</div>
                                 <p class="room-avail-descr">{{ room.summary|truncatechars:140 }}</p>
-                                <img src="/media/{{room.image}}" class="room-info-image" />
+                                <img src="{{ MEDIA_URL }}{{ room.image }}" class="room-info-image" />
                             </div>
                         </div>
                     </label>

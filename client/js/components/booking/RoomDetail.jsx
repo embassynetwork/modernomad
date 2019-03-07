@@ -45,7 +45,7 @@ export default class RoomDetail extends React.Component {
         <div className="row">
           <div className="col-md-8">
             <div className="room-image-panel">
-              <img className="room-image img-responsive" src={"/media/"+room.image} />
+              <img className="room-image img-responsive" src={window.modernomadSettings.MEDIA_URL+room.image} />
             {/*room.img && <ImageCarousel img={room.img} />*/}
             </div>
             <p className="room-summary">{nl2br(room.description)}</p>
