@@ -29,7 +29,7 @@ export default class RoomCard extends React.Component {
             <div className="panel-body">
 
               {/*this.props.image && <ImageCarousel img={this.props.image} />*/}
-              <img className="room-image img-responsive" src={"/media/"+this.props.image} />
+              <img className="room-image img-responsive" src={window.modernomadSettings.MEDIA_URL+this.props.image} />
               <div className="col-xs-12">
                 <h3>{this.props.name}</h3>
                 {this.props.hasFutureDrftCapacity ?
