@@ -112,7 +112,7 @@ MAILGUN_API_KEY = env('MAILGUN_API_KEY', default='')
 if MAILGUN_API_KEY:
     EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
     # This should only ever be true in the production environment. Defaults to False.
-    MAILGUN_CAUTION_SEND_REAL_MAIL = env('MAILGUN_CAUTION_SEND_REAL_MAIL', default='')
+    MAILGUN_CAUTION_SEND_REAL_MAIL = env.bool('MAILGUN_CAUTION_SEND_REAL_MAIL', default=False)
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
