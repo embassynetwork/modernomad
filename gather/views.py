@@ -542,7 +542,6 @@ def rsvp_new_user(request, event_id, event_slug, location_slug=None):
     form.fields['city'].required = False
     form.fields['referral'].required = False
     form.fields['image'].required = False
-    form.fields['cropped_image_data'].required = False
     form.fields['discussion'].required = False
     form.fields['sharing'].required = False
     form.fields['projects'].required = False
