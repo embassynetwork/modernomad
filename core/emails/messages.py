@@ -157,7 +157,7 @@ def new_booking_notify(booking):
     c = {
         'location': location.name,
         'status': booking.use.status,
-        'user_image' : "https://" + domain+"/media/"+ str(booking.use.user.profile.image_thumb),
+        'user_image' : settings.MEDIA_URL + str(booking.use.user.profile.image_thumb),
         'first_name': booking.use.user.first_name,
         'last_name' : booking.use.user.last_name,
         'room_name' : booking.use.resource.name,

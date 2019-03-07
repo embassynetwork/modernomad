@@ -32,7 +32,7 @@
                 {{ event.description|striptags|truncatechars:300 }}
                 </p>
             </td> 
-            <td width="300px" align="right"><p margin="0 0 1.6em 0"><img src="https://{{domain}}/media/{{ event.image }}" style="border: solid 1px #AAAAAA; padding: 7px; width: 150px;"></p></td>
+            <td width="300px" align="right"><p margin="0 0 1.6em 0"><img src="{{ MEDIA_URL }}{{ event.image }}" style="border: solid 1px #AAAAAA; padding: 7px; width: 150px;"></p></td>
         </tr>
         {% endfor %}
     </table>

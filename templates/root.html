@@ -114,6 +114,12 @@
         </div>
         {% endblock %}
 
+    <script type="text/javascript">
+      window.modernomadSettings = {
+        MEDIA_URL: "{{ MEDIA_URL|escapejs }}"
+      };
+    </script>
+
     {% render_bundle 'main' %}
     {% compress js %}
 
