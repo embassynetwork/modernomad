@@ -14,8 +14,6 @@ class Command(BaseCommand):
         tasks.send_guest_welcome()
         tasks.send_departure_email()
         tasks.slack_embassysf_daily()
-        tasks.slack_ams_daily()
-        tasks.slack_redvic_daily()
         gather_tasks.events_today_reminder()
         if datetime.date.today().weekday() == 6: # sunday
             gather_tasks.weekly_upcoming_events()
