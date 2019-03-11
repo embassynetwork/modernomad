@@ -1632,7 +1632,7 @@ def BookingManageEdit(request, location_slug, booking_id):
             messages.add_message(request, messages.INFO, "Invalid room given!")
     elif 'rate' in request.POST:
         rate = request.POST.get("rate")
-        if rate >= 0 and rate != booking.get_rate():
+        if Decimal(rate) >= Decimal(0.0) and rate != booking.get_rate():
             booking.set_rate(rate)
             messages.add_message(request, messages.INFO, "Rate changed.")
         else:
