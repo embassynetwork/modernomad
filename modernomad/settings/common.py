@@ -155,7 +155,7 @@ TEMPLATES = [
 
 MIDDLEWARE_CLASSES = (
     'whitenoise.middleware.WhiteNoiseMiddleware', # first, after SecurityMiddleware
-    'modernomad.middleware.basic_auth.BasicAuthMiddleware',
+    'basicauth.middleware.BasicAuthMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -295,9 +295,6 @@ ENABLE_SLACK = env.bool('ENABLE_SLACK', default=False)
 if env('BASICAUTH_USER', default=''):
     BASICAUTH_USERS = {}
     BASICAUTH_USERS[env('BASICAUTH_USER')] = env('BASICAUTH_PASS')
-    BASICAUTH_ALWAYS_ALLOW_URLS = [
-        r'^/graphql'
-    ]
 else:
     BASICAUTH_DISABLE = True
 
