@@ -10,8 +10,8 @@ import logging
 
 from modernomad.log import catch_exceptions
 from gather.models import Event, EventNotifications
-from core.models import Location
-from core.emails.mailgun import mailgun_send
+from modernomad.core.models import Location
+from modernomad.core.emails.mailgun import mailgun_send
 
 logger = logging.getLogger(__name__)
 

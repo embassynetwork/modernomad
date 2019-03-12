@@ -4,7 +4,7 @@ from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from django.contrib.auth.models import User
-from core.models import UserProfile
+from modernomad.core.models import UserProfile
 
 
 class UserProfileNode(DjangoObjectType):

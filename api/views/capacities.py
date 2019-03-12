@@ -5,9 +5,9 @@ from rest_framework.parsers import JSONParser
 from api.utils.http import JSONResponse
 from api.commands.capacities import *
 
-from core.models import CapacityChange, Resource
-from core.serializers import CapacityChangeSerializer
-from core.data_fetchers import SerializedResourceCapacity
+from modernomad.core.models import CapacityChange, Resource
+from modernomad.core.serializers import CapacityChangeSerializer
+from modernomad.core.data_fetchers import SerializedResourceCapacity
 from django.utils import timezone
 import json
 

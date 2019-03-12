@@ -1,5 +1,5 @@
 from api.command import *
-from core.models import Resource, Booking, Use
+from modernomad.core.models import Resource, Booking, Use
 from django.db import transaction
 
 

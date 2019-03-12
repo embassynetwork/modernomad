@@ -1,13 +1,13 @@
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
-from core.views.unsorted import ListUsers, user_login, email_available, username_available, register, PeopleDaterangeQuery, UserDetail, UserAvatar, UserEdit, UserAddCard, UserDeleteCard, user_email_settings, user_subscriptions, user_events, user_edit_room
-from core.views.booking import UserBookings
-from core.views.redirects import old_user_bookings_redirect
+from modernomad.core.views.unsorted import ListUsers, user_login, email_available, username_available, register, PeopleDaterangeQuery, UserDetail, UserAvatar, UserEdit, UserAddCard, UserDeleteCard, user_email_settings, user_subscriptions, user_events, user_edit_room
+from modernomad.core.views.booking import UserBookings
+from modernomad.core.views.redirects import old_user_bookings_redirect
 from django.contrib.auth.views import *
 import gather.views
 
-import core.forms
+import modernomad.core.forms
 
 # Add the user registration and account management patters from the
 # django-registration package, overriding the initial registration

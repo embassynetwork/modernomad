@@ -1,8 +1,8 @@
 from api.command import *
 from datetime import datetime
-from core.models import Resource
 from django.core.exceptions import ValidationError
-from core.models import CapacityChange
+from modernomad.core.models import Resource
+from modernomad.core.models import CapacityChange
 
 def user_can_administer_a_resource(user, resource):
     return (
