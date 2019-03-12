@@ -12,7 +12,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
-from core.emails.mailgun import mailgun_send
+from modernomad.core.emails.mailgun import mailgun_send
 
 def new_event_notification(event, location):
     # notify the event admins that a new event has been proposed

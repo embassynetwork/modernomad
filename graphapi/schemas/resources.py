@@ -4,7 +4,7 @@ from graphene.types.datetime import *
 from graphene_django.types import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from datetime import timedelta
-from core.models import Resource, Backing
+from modernomad.core.models import Resource, Backing
 
 import logging
 

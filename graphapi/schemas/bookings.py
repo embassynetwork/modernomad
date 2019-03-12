@@ -7,7 +7,7 @@ from graphene.types.datetime import *
 
 from api.commands.bookings import RequestBooking
 from graphapi.schemas.resources import ResourceNode
-from core.models import Resource, Booking
+from modernomad.core.models import Resource, Booking
 
 
 def commandErrorsToGraphQL(errors):

@@ -1,4 +1,4 @@
-from core.serializers import *
+from modernomad.core.serializers import *
 from django import forms
 
 

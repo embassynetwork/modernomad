@@ -8,7 +8,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from core.models import Location
+from modernomad.core.models import Location
 
 
 logger = logging.getLogger(__name__)

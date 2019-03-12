@@ -5,8 +5,8 @@ from django.conf import settings
 from django.views.generic import RedirectView
 from django.http import HttpResponse, HttpResponseRedirect
 from rest_framework import routers, serializers, viewsets
-import modernomad.views 
-import core.urls.location
+import modernomad.views
+import modernomad.core.urls.location
 import bank.urls
 import gather.views
 import jwt_auth.views
@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^404/$', modernomad.views.ErrorView),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^people/', include(modernomad.urls.user)),
-    url(r'^locations/', include(core.urls.location)),
+    url(r'^locations/', include(modernomad.core.urls.location)),
     url(r'^events/$', gather.views.upcoming_events_all_locations),
     url(r'^events/emailpreferences/(?P<username>[\w\d\-\.@+_]+)/$', gather.views.email_preferences, name='gather_email_preferences'),
     url(r'^accounts/', include(bank.urls)),

@@ -1,9 +1,9 @@
 from django.test import TestCase
 import unittest
 
-from core.factories import *
+from modernomad.core.factories import *
 from api.commands.capacities import *
-from core.models import *
+from modernomad.core.models import *
 
 @unittest.skip("needs fixing after refactoring in ac1c446e4758b2552e5d1bc08c9f832faa31a3a0")
 class AddCapacityChangeTestCase(TestCase):

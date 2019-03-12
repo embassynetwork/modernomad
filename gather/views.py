@@ -20,9 +20,9 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
 from gather.forms import EventForm, EventEmailTemplateForm
-from core.forms import UserProfileForm
 from gather.emails import new_event_notification, event_approved_notification, event_published_notification, mailgun_send
-from core.models import Location
+from modernomad.core.forms import UserProfileForm
+from modernomad.core.models import Location
 
 logger = logging.getLogger(__name__)
 

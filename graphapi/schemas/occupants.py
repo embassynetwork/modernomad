@@ -3,7 +3,7 @@ from graphene import AbstractType, Field, Node
 from graphene_django.types import DjangoObjectType
 from graphene.types import String
 from graphene_django.filter import DjangoFilterConnectionField
-from core.models import Use, Location
+from modernomad.core.models import Use, Location
 from django.contrib.auth.models import User
 from django.utils import timezone
 

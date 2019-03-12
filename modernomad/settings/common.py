@@ -131,7 +131,7 @@ TEMPLATES = [
         # Always use forward slashes, even on Windows.
         # Don't forget to use absolute paths, not relative paths.
         BASE_DIR / 'templates',
-        BASE_DIR / 'core' / 'templates'
+        BASE_DIR / 'modernomad' / 'core' / 'templates'
     ],
     # default template context processors
     'APP_DIRS': True,
@@ -145,9 +145,9 @@ TEMPLATES = [
             "django.template.context_processors.tz",
             "django.template.context_processors.request",
             "django.contrib.messages.context_processors.messages",
-            "core.context_processors.location.location_variables",
-            "core.context_processors.location.network_locations",
-            "core.context_processors.analytics.google_analytics",
+            "modernomad.core.context_processors.location.location_variables",
+            "modernomad.core.context_processors.location.network_locations",
+            "modernomad.core.context_processors.analytics.google_analytics",
         ],
     },
 },
@@ -205,7 +205,7 @@ INSTALLED_APPS = [
     'webpack_loader',
 
     # modernomad
-    'core',
+    'modernomad.core',
     'bank',
     'gather',
     'modernomad',
@@ -217,7 +217,7 @@ COMPRESS_PRECOMPILERS = (
     ('text/less', 'lessc {infile} {outfile}'),
 )
 
-AUTH_PROFILE_MODULE = 'core.UserProfile'
+AUTH_PROFILE_MODULE = 'modernomad.core.UserProfile'
 ACCOUNT_ACTIVATION_DAYS = 7  # One week account activation window.
 
 # If we add a page for the currently-logged-in user to view and edit
