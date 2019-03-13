@@ -15,6 +15,7 @@
             {{ location.short_description|safe }}
         </div>
 
+        {% if location.rooms_with_future_capacity %}
         <div class="col-sm-5 text-center book-room">
             <h3>BOOK A ROOM</h3>
             <div class="booking-dates top-spacer">
@@ -33,6 +34,7 @@
             <h4>-OR-</h4>
             <h3><a href="stay" class="btn btn-lg btn-primary btn-brand">View all rooms</a></h3>
         </div>
+        {% endif %}
     </div>
 
     <div class="row">
