@@ -32,6 +32,10 @@ def StayComponent(request, location_slug, room_id=None):
         user_drft_balance = 0
 
     location = get_object_or_404(Location, slug=location_slug)
+    if not location.rooms_with_future_capacity():
+        messages.add_message(request, messages.INFO, 'Sorry! This location does not currently have any listings.')
+        return HttpResponseRedirect(reverse("location_detail", args=(location.slug, )))
+
     if request.user in location.house_admins.all():
         is_house_admin = "true"
     else:
