@@ -106,14 +106,18 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend'
 )
 
-MAILGUN_API_KEY = env('MAILGUN_API_KEY', default='')
-if MAILGUN_API_KEY:
-    EMAIL_BACKEND = 'modernomad.backends.MailgunBackend'
-    # This should only ever be true in the production environment. Defaults to False.
-    MAILGUN_CAUTION_SEND_REAL_MAIL = env.bool('MAILGUN_CAUTION_SEND_REAL_MAIL', default=False)
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = env('MAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+MAIL_DOMAIN = env('MAIL_DOMAIN', default='sandbox.embassynetwork.com')
+ANYMAIL = {
+    "MAILGUN_API_KEY": env('MAILGUN_API_KEY', default=''),
+    "MAILGUN_SENDER_DOMAIN": MAIL_DOMAIN
+}
+if env('MAILGUN_API_KEY', default=''):
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 
+ANYMAIL_SEND_DEFAULTS = {
+    'esp_extra': {'o:testmode': env('MAILGUN_TESTMODE', default='yes')}
+}
 
 # this will be used as the subject line prefix for all emails sent from this app.
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default='[Modernomad] ')
@@ -123,10 +127,9 @@ LIST_DOMAIN = env('LIST_DOMAIN', default='somedomain.com')
 GOOGLE_ANALYTICS_PROPERTY_ID = env('GOOGLE_ANALYTICS_PROPERTY_ID', default='')
 GOOGLE_ANALYTICS_DOMAIN = env('GOOGLE_ANALYTICS_DOMAIN', default='example.com')
 
-TEMPLATES = [
-{
+TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS' : [
+    'DIRS': [
         # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
         # Always use forward slashes, even on Windows.
         # Don't forget to use absolute paths, not relative paths.
@@ -196,6 +199,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     # 3rd party
+    'anymail',
     'compressor',
     'django_extensions',
     'django_filters',

@@ -59,7 +59,7 @@ class Location(models.Model):
     slug = models.CharField(
             max_length=60, unique=True,
             help_text="Try to make this short and sweet. It will also be used to form several location-specific " +
-            "email addresses in the form of xxx@<your_slug>.mail.embassynetwork.com"
+            "email addresses in the form of xxx@<your_slug>.{}".format(settings.MAIL_DOMAIN)
             )
     short_description = models.TextField()
     address = models.CharField(max_length=300)
@@ -124,7 +124,7 @@ class Location(models.Model):
 
     def from_email(self):
         ''' return a location-specific email in the standard format we use.'''
-        return "stay@%s.mail.embassynetwork.com" % self.slug
+        return "stay@{}.{}".format(self.slug, settings.MAIL_DOMAIN)
 
     def get_rooms(self):
         return list(Resource.objects.filter(location=self))
@@ -291,8 +291,10 @@ class LocationDoesNotExistException(Exception):
 def get_location(location_slug):
     if location_slug:
         try:
+            # TODO This looks like a bug. Since it's using first this will
+            # raise an exception, it'll just return None.
             location = Location.objects.filter(slug=location_slug).first()
-        except:
+        except Exception:
             raise LocationDoesNotExistException("The requested location does not exist: %s" % location_slug)
     else:
         if Location.objects.count() == 1:

@@ -1,28 +1,25 @@
 from django.contrib.auth.models import User
-from django.core import urlresolvers
-from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.core.mail import send_mail
 from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 from django.template.loader import get_template
 from django.template import Template, TemplateDoesNotExist
 from django.contrib.sites.models import Site
-from core.models import get_location, Booking, LocationEmailTemplate, Use
-from django.http import HttpResponse, HttpResponseRedirect
-from gather.tasks import published_events_today_local, events_pending
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from core.models import Booking, Subscription, Use
-from gather.models import Event, EventAdminGroup, EventSeries, EventNotifications
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from sentry_sdk import capture_exception, capture_message
+from django.utils import translation
+
+from gather.tasks import published_events_today_local, events_pending
+from gather.models import Event, EventAdminGroup, EventNotifications
+from core.models import get_location, LocationEmailTemplate, Use
+from core.models import Subscription
 
 import json
-import requests
-import datetime
-from django.utils import translation
-from core.emails.mailgun import mailgun_send
-
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 weekday_number_to_name = {
@@ -35,23 +32,52 @@ weekday_number_to_name = {
     6: "Sunday"
 }
 
-def send_from_location_address(subject, text_content, html_content, recipient, location):
+
+def send_custom_mail(
+    subject,
+    message,
+    from_email,
+    recipient_list,
+    html_message=None,
+    headers=None,
+    attachments=None,
+    cc=None,
+    bcc=None,
+    reply_to=None
+):
+    msg = EmailMultiAlternatives(
+        subject=subject, body=message, from_email=from_email,
+        to=recipient_list, attachments=attachments, cc=cc, bcc=bcc,
+        headers=headers, reply_to=reply_to
+    )
+
+    if html_message:
+        msg.attach_alternative(html_message, "text/html")
+
+    msg.send()
+
+
+def send_from_location_address(subject, text_content, html_content, recipients, location):
     ''' a somewhat generic send function using mailgun that sends plaintext
     from the location's generic stay@ address.'''
-    mailgun_data={"from": location.from_email(),
-        "to": [recipient, ],
+    mailgun_data = {
         "subject": subject,
-        "text": text_content,
+        "message": text_content,
+        "from_email": location.from_email(),
+        "recipient_list": recipients,
     }
     if html_content:
-        mailgun_data["html"] = html_content
-    return mailgun_send(mailgun_data)
+        mailgun_data["html_message"] = html_content
+    return send_mail(**mailgun_data)
+
 
 def get_templates(location, email_key):
     text_template = None
     html_template = None
 
-    template_override = LocationEmailTemplate.objects.filter(location=location, key=email_key)
+    template_override = LocationEmailTemplate.objects.filter(
+        location=location, key=email_key
+    )
     if template_override and template_override.count() > 0:
         t = template_override[0]
         if t.text_body:
@@ -67,6 +93,7 @@ def get_templates(location, email_key):
             logger.debug('Exiting quietly')
 
     return (text_template, html_template)
+
 
 def render_templates(context, location, email_key, language='en-us'):
     prev_language = translation.get_language()
@@ -86,13 +113,14 @@ def render_templates(context, location, email_key, language='en-us'):
 #            BOOKING EMAILS            #
 ############################################
 
+
 def send_booking_receipt(booking, send_to=None):
     location = booking.use.location
     subject = "[%s] Receipt for Booking %s - %s" % (location.email_subject_prefix, str(booking.use.arrive), str(booking.use.depart))
     if send_to:
-        recipient = [send_to,]
+        recipient = send_to
     else:
-        recipient = [booking.use.user.email,]
+        recipient = booking.use.user.email
     c = {
         'today': timezone.localtime(timezone.now()),
         'user': booking.use.user,
@@ -102,14 +130,15 @@ def send_booking_receipt(booking, send_to=None):
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.RECEIPT)
     if text_content or html_content:
-        return send_from_location_address(subject, text_content, html_content, recipient, location)
+        return send_from_location_address(subject, text_content, html_content, [recipient], location)
     else:
         return False
+
 
 def send_subscription_receipt(subscription, bill):
     location = subscription.location
     subject = "[%s] Membership #%d Receipt for %s" % (location.email_subject_prefix, subscription.id, bill.subscriptionbill.period_start.strftime("%B %d, %Y"))
-    recipient = [subscription.user.email,]
+    recipient = subscription.user.email
     c = {
         'today': timezone.localtime(timezone.now()),
         'user': subscription.user,
@@ -120,9 +149,16 @@ def send_subscription_receipt(subscription, bill):
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.SUBSCRIPTION_RECEIPT)
     if text_content or html_content:
-        return send_from_location_address(subject, text_content, html_content, recipient, location)
+        return send_from_location_address(subject, text_content, html_content, [recipient], location)
     else:
         return False
+
+
+def send_comp_invoice(booking):
+    # TODO eventually send an email for COMPs too, but a
+    # different once, with thanks/asking for feedback.
+    return
+
 
 def send_invoice(booking):
     ''' trigger a reminder email to the guest about payment.'''
@@ -131,7 +167,7 @@ def send_invoice(booking):
 
     location = booking.use.location
     subject = "[%s] Thanks for Staying with us!" % location.email_subject_prefix
-    recipient = [booking.use.user.email,]
+    recipient = booking.use.user.email
     c = {
         'today': timezone.localtime(timezone.now()),
         'user': booking.use.user,
@@ -140,16 +176,21 @@ def send_invoice(booking):
         'domain': Site.objects.get_current().domain,
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.INVOICE)
-    return send_from_location_address(subject, text_content, html_content, recipient, location)
+    return send_from_location_address(subject, text_content, html_content, [recipient], location)
+
 
 def new_booking_notify(booking):
     house_admins = booking.use.location.house_admins.all()
     domain = Site.objects.get_current().domain
     location = booking.use.location
 
-    subject = "[%s] Booking Request, %s %s, %s - %s" % (location.email_subject_prefix, booking.use.user.first_name,
-        booking.use.user.last_name, str(booking.use.arrive), str(booking.use.depart))
-    sender = location.from_email()
+    subject = "[%s] Booking Request, %s %s, %s - %s" % (
+        location.email_subject_prefix,
+        booking.use.user.first_name,
+        booking.use.user.last_name,
+        str(booking.use.arrive),
+        str(booking.use.depart)
+    )
     recipients = []
     for admin in house_admins:
         recipients.append(admin.email)
@@ -159,80 +200,105 @@ def new_booking_notify(booking):
         'status': booking.use.status,
         'user_image' : settings.MEDIA_URL + str(booking.use.user.profile.image_thumb),
         'first_name': booking.use.user.first_name,
-        'last_name' : booking.use.user.last_name,
-        'room_name' : booking.use.resource.name,
-        'arrive' : str(booking.use.arrive),
-        'depart' : str(booking.use.depart),
+        'last_name': booking.use.user.last_name,
+        'room_name': booking.use.resource.name,
+        'arrive': str(booking.use.arrive),
+        'depart': str(booking.use.depart),
         'purpose': booking.use.purpose,
-        'comments' : booking.comments,
-        'bio' : booking.use.user.profile.bio,
-        'referral' : booking.use.user.profile.referral,
-        'projects' : booking.use.user.profile.projects,
+        'comments': booking.comments,
+        'bio': booking.use.user.profile.bio,
+        'referral': booking.use.user.profile.referral,
+        'projects': booking.use.user.profile.projects,
         'sharing': booking.use.user.profile.sharing,
-        'discussion' : booking.use.user.profile.discussion,
-        "admin_url" : "https://" + domain + urlresolvers.reverse('booking_manage', args=(location.slug, booking.id,))
+        'discussion': booking.use.user.profile.discussion,
+        "admin_url": "https://" + domain + reverse('booking_manage', args=(location.slug, booking.id,))
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.NEW_BOOKING)
 
-    return send_from_location_address(subject, text_content, html_content, recipients, booking.use.location)
+    return send_from_location_address(
+        subject,
+        text_content,
+        html_content,
+        recipients,
+        booking.use.location
+    )
+
 
 def subscription_note_notify(subscription):
     domain = Site.objects.get_current().domain
-    admin_path = urlresolvers.reverse('subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
+    admin_path = reverse('subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
     text_content = '''Howdy,\n\nA new note has been added to a subscription for %s %s. \n\nManage this subscription at %s%s.''' % (
-            subscription.user.first_name , subscription.user.last_name, domain, admin_path
+            subscription.user.first_name, subscription.user.last_name, domain, admin_path
         )
     recipients = []
     for admin in subscription.location.house_admins.all():
-        if not admin.email in recipients:
+        if admin.email not in recipients:
             recipients.append(admin.email)
-    subject = "[%s] New subscription note for %s %s" % (subscription.location.email_subject_prefix, subscription.user.first_name,
-        subscription.user.last_name)
-    mailgun_data={"from": subscription.location.from_email(),
-        "to": recipients,
+
+    subject = "[%s] New subscription note for %s %s" % (
+        subscription.location.email_subject_prefix,
+        subscription.user.first_name,
+        subscription.user.last_name
+    )
+
+    mailgun_data = {
         "subject": subject,
-        "text": text_content,
+        "message": text_content,
+        "from_email": subscription.location.from_email(),
+        "recipient_list": recipients,
     }
-    return mailgun_send(mailgun_data)
+    return send_mail(**mailgun_data)
 
 
 def admin_new_subscription_notify(subscription):
     domain = Site.objects.get_current().domain
-    admin_path = urlresolvers.reverse('subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
+    admin_path = reverse('subscription_manage_detail', args=(subscription.location.slug, subscription.id,))
     text_content = '''Howdy,\n\nA new subscription for %s %s has been added for %d/mo starting %s.\n\nManage this subscription at %s%s.''' % (
-            subscription.user.first_name , subscription.user.last_name, subscription.price, str(subscription.start_date), domain, admin_path
+            subscription.user.first_name, subscription.user.last_name, subscription.price, str(subscription.start_date), domain, admin_path
         )
     recipients = []
     for admin in subscription.location.house_admins.all():
-        if not admin.email in recipients:
+        if admin.email not in recipients:
             recipients.append(admin.email)
-    subject = "[%s] Subscription Added for %s %s" % (subscription.location.email_subject_prefix, subscription.user.first_name,
-        subscription.user.last_name)
-    mailgun_data={"from": subscription.location.from_email(),
-        "to": recipients,
-        "subject": subject,
-        "text": text_content,
-    }
-    return mailgun_send(mailgun_data)
+    subject = "[{}] Subscription Added for {} {}".format(
+        subscription.location.email_subject_prefix,
+        subscription.user.first_name,
+        subscription.user.last_name
+    )
 
+    mailgun_data = {
+        "subject": subject,
+        "message": text_content,
+        "from_email": subscription.location.from_email(),
+        "recipient_list": recipients,
+    }
+    return send_mail(**mailgun_data)
 
 
 def updated_booking_notify(booking):
     domain = Site.objects.get_current().domain
-    admin_path = urlresolvers.reverse('booking_manage', args=(booking.use.location.slug, booking.id,))
+    admin_path = reverse('booking_manage', args=(booking.use.location.slug, booking.id,))
     text_content = '''Howdy,\n\nA booking has been updated and requires your review.\n\nManage this booking at %s%s.''' % (domain, admin_path)
     recipients = []
     for admin in booking.use.location.house_admins.all():
-        if not admin.email in recipients:
+        if admin.email not in recipients:
             recipients.append(admin.email)
-    subject = "[%s] Booking Updated, %s %s, %s - %s" % (booking.use.location.email_subject_prefix, booking.use.user.first_name,
-        booking.use.user.last_name, str(booking.use.arrive), str(booking.use.depart))
-    mailgun_data={"from": booking.use.location.from_email(),
-        "to": recipients,
+    subject = "[%s] Booking Updated, %s %s, %s - %s" % (
+        booking.use.location.email_subject_prefix,
+        booking.use.user.first_name,
+        booking.use.user.last_name,
+        str(booking.use.arrive),
+        str(booking.use.depart)
+    )
+
+    mailgun_data = {
         "subject": subject,
-        "text": text_content,
+        "message": text_content,
+        "from_email": booking.use.location.from_email(),
+        "recipient_list": recipients,
     }
-    return mailgun_send(mailgun_data)
+    return send_mail(**mailgun_data)
+
 
 def goodbye_email(use):
     ''' Send guest a departure email'''
@@ -243,22 +309,23 @@ def goodbye_email(use):
     c = {
         'first_name': use.user.first_name,
         'location': use.location,
-        'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, use.booking.id,)),
-        'new_booking_url' : "https://" + domain + urlresolvers.reverse('location_stay', args=(location.slug,)),
+        'booking_url': "https://" + domain + reverse('booking_detail', args=(location.slug, use.booking.id,)),
+        'new_booking_url': "https://" + domain + reverse('location_stay', args=(location.slug,)),
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.DEPARTURE)
 
     subject = "[%s] Thank you for staying with us" % location.email_subject_prefix
     mailgun_data = {
-        "from": use.location.from_email(),
-        "to": [use.user.email],
         "subject": subject,
-        "text": text_content,
+        "message": text_content,
+        "from_email": use.location.from_email(),
+        "recipient_list": [use.user.email],
     }
     if html_content:
-        mailgun_data["html"] = html_content
+        mailgun_data["html_message"] = html_content
 
-    return mailgun_send(mailgun_data)
+    return send_mail(**mailgun_data)
+
 
 def guest_welcome(use):
     ''' Send guest a welcome email'''
@@ -268,19 +335,18 @@ def guest_welcome(use):
     intersecting_uses = Use.objects.filter(arrive__gte=use.arrive).filter(depart__lte=use.depart)
     residents = location.residents()
     intersecting_events = Event.objects.filter(location=location).filter(start__gte=use.arrive).filter(end__lte=use.depart)
-    profiles = None
     day_of_week = weekday_number_to_name[use.arrive.weekday()]
 
     c = {
         'first_name': use.user.first_name,
-        'day_of_week' : day_of_week,
+        'day_of_week': day_of_week,
         'location': use.location,
         'use': use,
-        'current_email' : 'current@%s.mail.embassynetwork.com' % location.slug,
-        'site_url': "https://" + domain + urlresolvers.reverse('location_detail', args=(location.slug,)),
-        'events_url' : "https://" + domain + urlresolvers.reverse('gather_upcoming_events', args=(location.slug,)),
-        'profile_url' : "https://" + domain + urlresolvers.reverse('user_detail', args=(use.user.username,)),
-        'booking_url' : "https://" + domain + urlresolvers.reverse('booking_detail', args=(location.slug, use.booking.id,)),
+        'current_email': 'current@{}.{}'.format(location.slug, settings.MAIL_DOMAIN),
+        'site_url': reverse('location_home', args=(location.slug,)),
+        'events_url': "https://" + domain + reverse('gather_upcoming_events', args=(location.slug,)),
+        'profile_url': "https://" + domain + reverse('user_detail', args=(use.user.username,)),
+        'booking_url': "https://" + domain + reverse('booking_detail', args=(location.slug, use.booking.id,)),
         'intersecting_bookings': intersecting_uses,
         'intersecting_events': intersecting_events,
         'residents': residents,
@@ -288,19 +354,23 @@ def guest_welcome(use):
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.WELCOME)
 
     mailgun_data = {
-            "from": use.location.from_email(),
-            "to": [use.user.email],
-            "subject": "[%s] See you on %s" % (use.location.email_subject_prefix, day_of_week),
-            "text": text_content,
-        }
+        "subject": "[%s] See you on %s" % (
+            use.location.email_subject_prefix,
+            day_of_week
+        ),
+        "message": text_content,
+        "from_email": use.location.from_email(),
+        "recipient_list": [use.user.email],
+    }
     if html_content:
-        mailgun_data["html"] = html_content
+        mailgun_data["html_message"] = html_content
 
-    return mailgun_send(mailgun_data)
+    return send_mail(**mailgun_data)
 
 ############################################
 #             LOCATION EMAILS              #
 ############################################
+
 
 def guests_residents_daily_update(location):
     # this is split out by location because each location has a timezone that affects the value of 'today'
@@ -317,18 +387,18 @@ def guests_residents_daily_update(location):
 
     admin_emails = []
     for admin in location.house_admins.all():
-        if not admin.email in admin_emails:
+        if admin.email not in admin_emails:
             admin_emails.append(admin.email)
 
     to_emails = []
     for r in Use.objects.confirmed_on_date(today, location):
-        if (not r.user.email in admin_emails) and (not r.user.email in to_emails):
+        if (r.user.email not in admin_emails) and (r.user.email not in to_emails):
             to_emails.append(r.user.email)
 
     # Add all the non-admin residents at this location (admins get a different
     # email)
     for r in location.residents():
-        if (not r.email in admin_emails) and (not r.email in to_emails):
+        if (r.email not in admin_emails) and (r.email not in to_emails):
             to_emails.append(r.email)
 
     if len(to_emails) == 0:
@@ -339,22 +409,23 @@ def guests_residents_daily_update(location):
         'today': today,
         'domain': Site.objects.get_current().domain,
         'location': location,
-        'arriving' : arriving_today,
-        'departing' : departing_today,
+        'arriving': arriving_today,
+        'departing': departing_today,
         'events_today': events_today,
     }
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.GUEST_DAILY)
 
     mailgun_data = {
-        "from": location.from_email(),
-        "to": to_emails,
         "subject": subject,
-        "text": text_content,
+        "message": text_content,
+        "from_email": location.from_email(),
+        "recipient_list": to_emails,
     }
     if html_content:
-        mailgun_data["html"] = html_content
+        mailgun_data["html_message"] = html_content
 
-    return mailgun_send(mailgun_data)
+    return send_mail(**mailgun_data)
+
 
 def admin_daily_update(location):
     # this is split out by location because each location has a timezone that affects the value of 'today'
@@ -379,7 +450,7 @@ def admin_daily_update(location):
 
     admins_emails = []
     for admin in location.house_admins.all():
-        if not admin.email in admins_emails:
+        if admin.email not in admins_emails:
             admins_emails.append(admin.email)
     if len(admins_emails) == 0:
         logger.debug('%s: No admins to send to' % location.slug)
@@ -402,19 +473,20 @@ def admin_daily_update(location):
     text_content, html_content = render_templates(c, location, LocationEmailTemplate.ADMIN_DAILY)
 
     mailgun_data = {
-        "from": location.from_email(),
-        "to": admins_emails,
         "subject": subject,
-        "text": text_content,
+        "message": text_content,
+        "from_email": location.from_email(),
+        "recipient_list": admins_emails,
     }
     if html_content:
-        mailgun_data["html"] = html_content
+        mailgun_data["html_message"] = html_content
 
-    return mailgun_send(mailgun_data)
+    return send_mail(**mailgun_data)
 
 ############################################
 #              EMAIL ENDPOINTS             #
 ############################################
+
 
 @csrf_exempt
 def current(request, location_slug):
@@ -422,7 +494,7 @@ def current(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error('location not found')
         return HttpResponse(status=200)
@@ -442,7 +514,6 @@ def current(request, location_slug):
         logger.debug('List-Id header was found! Dropping message silently')
         return HttpResponse(status=200)
 
-    #if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
     if 'Auto-Submitted' in message_header_keys:
         logger.info('message appears to be auto-submitted. reject silently')
         return HttpResponse(status=200)
@@ -478,7 +549,7 @@ def current(request, location_slug):
     logger.debug("bcc list: %s" % bcc_list)
 
     # Make sure this person can post to our list
-    #if not sender in bcc_list:
+    # if not sender in bcc_list:
     #    # TODO - This shoud possibly send a response so they know they were blocked
     #    logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
     #    return HttpResponse(status=200)
@@ -493,35 +564,40 @@ def current(request, location_slug):
     # prefix subject, but only if the prefix string isn't already in the
     # subject line (such as a reply)
     if subject.find(location.email_subject_prefix) < 0:
-        prefix = "["+location.email_subject_prefix + "] [Current Guests and Residents] "
+        prefix = f"[{location.email_subject_prefix}] [Current Guests and Residents] "
         subject = prefix + subject
     logger.debug("subject: %s" % subject)
 
     # add in footer
-    text_footer = '''\n\n-------------------------------------------\nYou are receiving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
+    text_footer = '''\n\n-------------------------------------------\nYou are receiving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.''' % location.name
     body_plain = body_plain + text_footer
     if body_html:
-        html_footer = '''<br><br>-------------------------------------------<br>You are receiving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.'''% location.name
+        html_footer = '''<br><br>-------------------------------------------<br>You are receiving this email because you are a current guest or resident at %s. This list is used to share questions, ideas and activities with others currently at this location. Feel free to respond.''' % location.name
         body_html = body_html + html_footer
 
     # send the message
     list_address = "current@%s.%s" % (location.slug, settings.LIST_DOMAIN)
-    mailgun_data =  {"from": from_address,
-        "to": [recipient, ],
-        "bcc": bcc_list,
+    mailgun_data = {
         "subject": subject,
-        "text": body_plain,
-        "html": body_html,
+        "message": body_plain,
+        "from_email": from_address,
+        "recipient_list": [recipient],
+        "bcc": bcc_list,
+        "html_message": body_html,
         # attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
         # Precedence: list - helps some out of office auto responders know not to send their auto-replies.
-        "h:List-Id": list_address,
-        "h:Precedence": "list",
+        "headers": {
+            "List-Id": list_address,
+            "Precedence": "list",
+            "Reply-To": list_address,
+        },
+        "attachments": attachments
         # Reply-To: list email apparently has some religious debates
         # (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
         # to be common these days
-        "h:Reply-To": list_address,
     }
-    return mailgun_send(mailgun_data, attachments)
+    return send_custom_mail(**mailgun_data)
+
 
 @csrf_exempt
 def unsubscribe(request, location_slug):
@@ -529,7 +605,7 @@ def unsubscribe(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug('unsubscribe@ for location: %s' % location)
@@ -537,13 +613,14 @@ def unsubscribe(request, location_slug):
     logger.debug(request.FILES)
     return HttpResponse(status=200)
 
+
 @csrf_exempt
 def test80085(request, location_slug):
     ''' test route '''
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug('test80085@ for location: %s' % location)
@@ -563,13 +640,12 @@ def test80085(request, location_slug):
         logger.debug('List-Id header was found! Dropping message silently')
         return HttpResponse(status=200)
 
-    #if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
+    # if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
     if 'Auto-Submitted' in message_header_keys:
         logger.info('message appears to be auto-submitted. reject silently')
         return HttpResponse(status=200)
 
     recipient = request.POST.get('recipient')
-    to = request.POST.get('To')
     from_address = request.POST.get('from')
     logger.debug('from: %s' % from_address)
     sender = request.POST.get('sender')
@@ -583,14 +659,14 @@ def test80085(request, location_slug):
     logger.debug("bcc list: %s" % bcc_list)
 
     # Make sure this person can post to our list
-    #if not sender in bcc_list:
+    # if not sender in bcc_list:
     #    # TODO - This shoud possibly send a response so they know they were blocked
     #    logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
     #    return HttpResponse(status=200)
 
     # usually we would remove the sender from receiving the email but because
     # we're testing, let 'em have it.
-    #if sender in bcc_list:
+    # if sender in bcc_list:
     #    bcc_list.remove(sender)
 
     # pass through attachments
@@ -628,23 +704,28 @@ def test80085(request, location_slug):
         body_html = body_html + html_footer
 
     # send the message
-    list_address = "test80085@"+location.slug+".mail.embassynetwork.com"
-    mailgun_data = {"from": from_address,
-            "to": [recipient, ],
-            "bcc": bcc_list,
-            "subject": subject,
-            "text": body_plain,
-            "html": body_html,
-            # attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
-            # Precedence: list - helps some out of office auto responders know not to send their auto-replies.
-            "h:List-Id": list_address,
-            "h:Precedence": "list",
-            # Reply-To: list email apparently has some religious debates
-            # (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
-            # to be common these days
-            "h:Reply-To": from_address
-        }
-    return mailgun_send(mailgun_data, attachments)
+    list_address = "test80085@{}.{}".format(location.slug, settings.MAIL_DOMAIN)
+    mailgun_data = {
+        "subject": subject,
+        "from_email": from_address,
+        "recipient_list": [recipient],
+        "bcc": bcc_list,
+        "message": body_plain,
+        "html_message": body_html,
+        # attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
+        # Precedence: list - helps some out of office auto responders know not to send their auto-replies.
+        "headers": {
+            "List-Id": list_address,
+            "Precedence": "list",
+            "Reply-To": from_address
+        },
+        "attachments": attachments
+        # Reply-To: list email apparently has some religious debates
+        # (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
+        # to be common these days
+    }
+    return send_custom_mail(**mailgun_data)
+
 
 @csrf_exempt
 def stay(request, location_slug):
@@ -652,7 +733,7 @@ def stay(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         return HttpResponse(status=200)
     logger.debug('stay@ for location: %s' % location)
@@ -671,13 +752,12 @@ def stay(request, location_slug):
         logger.debug('List-Id header was found! Dropping message silently')
         return HttpResponse(status=200)
 
-    #if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
+    # if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
     if 'Auto-Submitted' in message_header_keys:
         logger.info('message appears to be auto-submitted. reject silently')
         return HttpResponse(status=200)
 
     recipient = request.POST.get('recipient')
-    to = request.POST.get('To')
     from_address = request.POST.get('from')
     logger.debug('from: %s' % from_address)
     sender = request.POST.get('sender')
@@ -695,7 +775,7 @@ def stay(request, location_slug):
     logger.debug("bcc list: %s" % bcc_list)
 
     # Make sure this person can post to our list
-    #if not sender in bcc_list:
+    # if not sender in bcc_list:
     #    # TODO - This shoud possibly send a response so they know they were blocked
     #    logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
     #    return HttpResponse(status=200)
@@ -710,7 +790,7 @@ def stay(request, location_slug):
     # prefix subject, but only if the prefix string isn't already in the
     # subject line (such as a reply)
     if subject.find(location.email_subject_prefix) < 0:
-        prefix = "["+location.email_subject_prefix + "] [Admin] "
+        prefix = f"[{location.email_subject_prefix}] [Admin] "
         subject = prefix + subject
     logger.debug("subject: %s" % subject)
 
@@ -723,25 +803,31 @@ def stay(request, location_slug):
 
     # send the message
     list_address = location.from_email()
-    mailgun_data = {"from": from_address,
-            "to": [recipient, ],
-            "bcc": bcc_list,
-            "subject": subject,
-            "text": body_plain,
-            "html": body_html,
-            # attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
-            # Precedence: list - helps some out of office auto responders know not to send their auto-replies.
-            "h:List-Id": list_address,
-            "h:Precedence": "list",
-            # Reply-To: list email apparently has some religious debates
-            # (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
-            # to be common these days
-            "h:Reply-To": from_address
-        }
-    return mailgun_send(mailgun_data, attachments)
+    mailgun_data = {
+        "subject": subject,
+        "from_email": from_address,
+        "recipient_list": [recipient],
+        "bcc": bcc_list,
+        "message": body_plain,
+        "html_message": body_html,
+        # attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
+        # Precedence: list - helps some out of office auto responders know not to send their auto-replies.
+        "headers": {
+            "List-Id": list_address,
+            "Precedence": "list",
+            "Reply-To": from_address
+        },
+        "attachments": attachments
+        # Reply-To: list email apparently has some religious debates
+        # (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
+        # to be common these days
+    }
+    return send_custom_mail(**mailgun_data)
 
 # XXX TODO there is a lot of duplication in these email endpoints. should be
 # able to pull out this code into some common reuseable functions.
+
+
 @csrf_exempt
 def residents(request, location_slug):
     ''' email all residents at this location.'''
@@ -749,7 +835,7 @@ def residents(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error('location not found')
         return HttpResponse(status=200)
@@ -768,7 +854,7 @@ def residents(request, location_slug):
         logger.debug('List-Id header was found! Dropping message silently')
         return HttpResponse(status=200)
 
-    #if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
+    # if 'Auto-Submitted' in message_headers or message_headers['Auto-Submitted'] != 'no':
     if 'Auto-Submitted' in message_header_keys:
         logger.info('message appears to be auto-submitted. reject silently')
         return HttpResponse(status=200)
@@ -796,7 +882,7 @@ def residents(request, location_slug):
     logger.debug("bcc list: %s" % bcc_list)
 
     # Make sure this person can post to our list
-    #if not sender in bcc_list:
+    # if not sender in bcc_list:
     #    # TODO - This shoud possibly send a response so they know they were blocked
     #    logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
     #    return HttpResponse(status=200)
@@ -816,31 +902,35 @@ def residents(request, location_slug):
     logger.debug("subject: %s" % subject)
 
     # add in footer
-    text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s residents email list *~*~*~* '''% location.name
+    text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s residents email list *~*~*~* ''' % location.name
     body_plain = body_plain + text_footer
 
     if body_html:
-        html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s residents email list *~*~*~* '''% location.name
+        html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s residents email list *~*~*~* ''' % location.name
         body_html = body_html + html_footer
 
     # send the message
     list_address = "residents@%s.%s" % (location.slug, settings.LIST_DOMAIN)
-    mailgun_data =  {"from": from_address,
-        "to": [recipient, ],
+    mailgun_data = {
+        "from_email": from_address,
+        "recipient_list": [recipient],
         "bcc": bcc_list,
         "subject": subject,
-        "text": body_plain,
-        "html": body_html,
+        "message": body_plain,
+        "html_message": body_html,
         # attach some headers: LIST-ID, REPLY-TO, MSG-ID, precedence...
         # Precedence: list - helps some out of office auto responders know not to send their auto-replies.
-        "h:List-Id": list_address,
-        "h:Precedence": "list",
+        "headers": {
+            "List-Id": list_address,
+            "Precedence": "list",
+            "Reply-To": list_address,
+        },
+        "attachments": attachments
         # Reply-To: list email apparently has some religious debates
         # (http://www.gnu.org/software/mailman/mailman-admin/node11.html) but seems
         # to be common these days
-        "h:Reply-To": list_address,
     }
-    return mailgun_send(mailgun_data, attachments)
+    return send_custom_mail(**mailgun_data)
 
 
 @csrf_exempt
@@ -850,7 +940,7 @@ def announce(request, location_slug):
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
-    except:
+    except Exception:
         # XXX TODO reject and bounce back to sender?
         logger.error('location not found')
         return HttpResponse(status=200)
@@ -873,13 +963,15 @@ def announce(request, location_slug):
         logger.warn("Sender (%s) not allowed.  Exiting quietly." % sender)
         return HttpResponse(status=200)
 
-    weekly_notifications_on = EventNotifications.objects.filter(location_weekly = location)
+    # NOTE The following two variables are unused.
+    weekly_notifications_on = EventNotifications.objects.filter(
+        location_weekly=location
+    )
     remindees_for_location = [notify.user for notify in weekly_notifications_on]
 
     # TESTING
     jessy = User.objects.get(id=1)
-    for user in [jessy,]:
-    #for user in remindees_for_location:
+    for user in [jessy]:
         send_announce(request, user, location)
 
     return HttpResponse(status=200)
@@ -897,26 +989,25 @@ def send_announce(request, user, location):
     for attachment in request.FILES.values():
         attachments.append(("attachment", attachment))
 
-    prefix = "["+location.email_subject_prefix + "] "
+    prefix = f"[{location.email_subject_prefix}] "
     subject = prefix + subject
     logger.debug("subject: %s" % subject)
 
     # add in footer
-    text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s Announce *~*~*~* '''% location.name
+    text_footer = '''\n\n-------------------------------------------\n*~*~*~* %s Announce *~*~*~* ''' % location.name
     body_plain = body_plain + text_footer
 
     if body_html:
-        html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s Announce *~*~*~* '''% location.name
+        html_footer = '''<br><br>-------------------------------------------<br>*~*~*~* %s Announce *~*~*~* ''' % location.name
         body_html = body_html + html_footer
 
     # send the message
-    mailgun_data =  {
-        "from": from_address,
-        "to": [user.email, ],
+    mailgun_data = {
         "subject": subject,
-        "text": body_plain,
-        "html": body_html,
+        "message": body_plain,
+        "from_email": from_address,
+        "recipient_list": [user.email],
+        "html_message": body_html,
+        "attachments": attachments
     }
-    return mailgun_send(mailgun_data, attachments)
-
-
+    return send_custom_mail(**mailgun_data)

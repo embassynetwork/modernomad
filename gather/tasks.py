@@ -5,6 +5,9 @@ from django.utils import timezone
 from django.contrib.sites.models import Site
 from django.template.loader import get_template
 from django.core import urlresolvers
+from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
 from itertools import chain
 import logging
 
@@ -47,12 +50,13 @@ def send_events_list(user, event_list, location):
     }
     text_content = plaintext.render(c)
     mailgun_data = {
-            "from": sender,
-            "to": user.email,
-            "subject": subject,
-            "text": text_content,
-        }
-    return mailgun_send(mailgun_data)
+        "from_email": sender,
+        "recipient_list": [user.email],
+        "subject": subject,
+        "message": text_content,
+    }
+    return send_mail(**mailgun_data)
+
 
 
 def weekly_reminder_email(user, event_list, location):
@@ -71,7 +75,7 @@ def weekly_reminder_email(user, event_list, location):
     htmltext = get_template('emails/events_this_week.html')
     domain = Site.objects.get_current().domain
 
-    c_text = {
+    context = {
         'user': user,
         'events': event_list,
         'location_name': location_name,
@@ -80,27 +84,17 @@ def weekly_reminder_email(user, event_list, location):
         "footer": footer,
         "week_name": week_name
     }
-    text_content = plaintext.render(c_text)
-
-    c_html = {
-        'user': user,
-        'events': event_list,
-        'location_name': location_name,
-        'location': location,
-        'domain': domain,
-        "footer": footer,
-        "week_name": week_name
-    }
-    html_content = htmltext.render(c_html)
+    text_content = plaintext.render(context)
+    html_content = htmltext.render(context)
 
     mailgun_data = {
-            "from": sender,
-            "to": user.email,
-            "subject": subject,
-            "text": text_content,
-            "html": html_content,
-        }
-    return mailgun_send(mailgun_data)
+        "from_email": sender,
+        "recipient_list": [user.email],
+        "subject": subject,
+        "message": text_content,
+        "html_message": html_content,
+    }
+    return send_mail(**mailgun_data)
 
 
 def events_pending(location):
