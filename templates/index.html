@@ -5,7 +5,7 @@
 
 <div class="jumbotron home-page" id="center">
     <div class="container text-center dept-of-housing">
-        <img src="{% static 'img/en-logo-transparent.png' %}" class="logo" alt="" />
+        <img src="{% static 'img/en-logo-transparent.png' %}" class="logo" alt="" width="87" height="70">
         <h2>
             <span class="bold">Embassy Network</span> 
         </h2>
@@ -24,7 +24,7 @@
 
         <a href="{% url 'location_detail' location.slug %}" class="col-lg-4 col-md-6">
             <div class="location-box">
-                <img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo panel panel-default">
+                <img src="{{MEDIA_URL}}{{location.profile_image}}" class="location-photo panel panel-default" width="336" height="344">
                 <div class="location-name">
               <h2 class="bold">{{ location.name }}<br> <em class="small">{{ location.address}}</em></h2>
             </div>
