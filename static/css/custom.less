@@ -190,6 +190,12 @@ a:hover {
 
 .house-box {
   position: relative;
+  // HACK: Size this correctly before .house-image has loaded so there
+  // isn't a reflow once it has loaded.
+  // https://www.voorhoede.nl/en/blog/say-no-to-image-reflow/
+  height: 0;
+  padding-bottom: 100% / (800 / 225); // house-image is 800x225px
+  overflow: hidden;
 }
 
 .house-image {
