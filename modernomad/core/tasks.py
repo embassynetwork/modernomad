@@ -34,16 +34,27 @@ def send_guest_welcome():
     logger.info("Running task: send_guest_welcome")
     # get all bookings WELCOME_EMAIL_DAYS_AHEAD from now.
     locations = Location.objects.all()
+
+    # to ensure tests actually do something
+    did_send_email = False
+
     for location in locations:
         soon = datetime.datetime.today() + datetime.timedelta(days=location.welcome_email_days_ahead)
         upcoming = Use.objects.filter(location=location).filter(arrive=soon).filter(status='confirmed')
         for booking in upcoming:
             guest_welcome(booking)
+            did_send_email = True
+
+    return did_send_email
 
 
 @catch_exceptions
 def send_departure_email():
     logger.info("Running task: send_departure_email")
+
+    # to ensure tests actually do something
+    did_send_email = False
+
     # get all bookings departing today
     locations = Location.objects.all()
     for location in locations:
@@ -51,6 +62,9 @@ def send_departure_email():
         departing = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
         for use in departing:
             goodbye_email(use)
+            did_send_email = True
+    
+    return did_send_email
 
 
 @catch_exceptions
