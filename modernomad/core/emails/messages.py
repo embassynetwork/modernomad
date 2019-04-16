@@ -3,7 +3,7 @@ from django.core import urlresolvers
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from django.template import Template, TemplateDoesNotExist
+from django.template import Template, Context, TemplateDoesNotExist
 from django.contrib.sites.models import Site
 from django.http import HttpResponse, HttpResponseRedirect
 from gather.tasks import published_events_today_local, events_pending
@@ -47,37 +47,26 @@ def send_from_location_address(subject, text_content, html_content, recipient, l
         mailgun_data["html"] = html_content
     return mailgun_send(mailgun_data)
 
-def get_templates(location, email_key):
-    text_template = None
-    html_template = None
-
-    template_override = LocationEmailTemplate.objects.filter(location=location, key=email_key)
-    if template_override and template_override.count() > 0:
-        t = template_override[0]
-        if t.text_body:
-            text_template = Template(t.text_body)
-        if t.html_body:
-            html_template = Template(t.html_body)
-    else:
-        try:
-            text_template = get_template("emails/%s.txt" % email_key)
-            html_template = get_template("emails/%s.html" % email_key)
-        except TemplateDoesNotExist:
-            logger.debug('There is no template for email key "%s"' % email_key)
-            logger.debug('Exiting quietly')
-
-    return (text_template, html_template)
-
 def render_templates(context, location, email_key, language='en-us'):
     prev_language = translation.get_language()
     translation.activate(language)
+    template_override = LocationEmailTemplate.objects.filter(location=location, key=email_key)
     text_content = None
     html_content = None
-    text_template, html_template = get_templates(location, email_key)
-    if text_template:
-        text_content = text_template.render(context)
-    if html_template:
-        html_content = html_template.render(context)
+
+    if template_override and template_override.count() > 0:
+        t = template_override[0]
+        if t.text_body:
+            text_content = Template(t.text_body).render(Context(context))
+        if t.html_body:
+            html_content = Template(t.html_body).render(Context(context))
+    else:
+        try:
+            text_content = get_template("emails/%s.txt" % email_key).render(context)
+            html_content = get_template("emails/%s.html" % email_key).render(context)
+        except TemplateDoesNotExist:
+            logger.debug('There is no template for email key "%s"' % email_key)
+            logger.debug('Exiting quietly')
 
     translation.activate(prev_language)
     return (text_content, html_content)

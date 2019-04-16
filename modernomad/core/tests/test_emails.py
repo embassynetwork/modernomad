@@ -2,7 +2,7 @@ from django.test import TestCase
 import unittest
 from modernomad.core.factories import ResourceFactory
 from django.contrib.auth.models import User
-from modernomad.core.models import Payment, Use, Booking, UserProfile
+from modernomad.core.models import Payment, Use, Booking, UserProfile, LocationEmailTemplate
 from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt, updated_booking_notify, admin_daily_update
 from modernomad.core.tasks import send_departure_email, send_guest_welcome, guests_residents_daily_update
 from django.utils import timezone
@@ -88,6 +88,15 @@ class EmailsTestCase(TestCase):
     def test_guest_welcome(self):
         # test the task, which calls guest_welcome() in emails.py
         self.assertTrue(send_guest_welcome())
+
+    def test_guest_welcome_with_location_email_override(self):
+        LocationEmailTemplate.objects.create(
+            location=self.resource.location,
+            key=LocationEmailTemplate.WELCOME,
+            text_body="hi {{first_name}}",
+            html_body="hi {{first_name}}")
+        self.assertTrue(send_guest_welcome())
+
 
     def test_guests_residents_daily_update(self):
         # called here directly instead as the task, because we can get the
