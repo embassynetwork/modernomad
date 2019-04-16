@@ -1,13 +1,14 @@
 from django.test import TestCase
 import unittest
-from modernomad.core.factories import *
-from modernomad.core.models import *
-from modernomad.core.tasks import *
-from modernomad.core.emails import *
+from modernomad.core.factories import ResourceFactory
+from django.contrib.auth.models import User
+from modernomad.core.models import Payment, Use, Booking, UserProfile
+from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt, updated_booking_notify, admin_daily_update
+from modernomad.core.tasks import send_departure_email, send_guest_welcome, guests_residents_daily_update
 from django.utils import timezone
 from datetime import datetime, timedelta, date
 
-@unittest.skip("depends on Mailgun API key")
+
 class EmailsTestCase(TestCase):
 
     def create_booking(self, user, rate=100, status=Use.PENDING, arrive=date(4016, 1, 13), depart=date(4016, 1, 23)):
@@ -20,6 +21,8 @@ class EmailsTestCase(TestCase):
 
     def create_user(self, username, email, admin=False, resident=False):
         user = User.objects.create(username=username, first_name='user', last_name='user', email=email)
+        user.profile = UserProfile.objects.create(user=user)
+        user.save()
         if admin:
             self.resource.location.house_admins.add(user)
         if resident:
@@ -27,6 +30,12 @@ class EmailsTestCase(TestCase):
         return user
 
     def setUp(self):
+        # Patch mailgun
+        class MockResponse():
+            status_code = 200
+        self.mock_mailgun_send = unittest.mock.patch('modernomad.core.emails.messages.mailgun_send', return_value=MockResponse())
+        self.mock_mailgun_send.start()
+
         self.resource = ResourceFactory()
         self.guest1 = self.create_user('guest1', email='guest1@bob.com')
         self.guest2 = self.create_user('guest2', email='guest2@bob.com')
@@ -43,6 +52,9 @@ class EmailsTestCase(TestCase):
         self.departing_today = self.create_booking(arrive=yesterday, depart=today, user=self.guest1, status="confirmed")
         self.arriving_in_two_days = self.create_booking(arrive=in_two_days, depart=after_that, user=self.guest2, status="confirmed")
         self.arriving_today = self.create_booking(arrive=today, depart=after_that, user=self.guest3, status="confirmed")
+
+    def tearDown(self):
+        self.mock_mailgun_send.stop()
 
     # emails triggered by actions
     def test_new_booking_notify(self):
