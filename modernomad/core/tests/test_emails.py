@@ -82,12 +82,12 @@ class EmailsTestCase(TestCase):
     # automated emails (called from tasks.py)
     def test_departure_email(self):
         # test the task, which calls goodbye_email() in emails.py
-        send_departure_email()
+        self.assertTrue(send_departure_email())
 
 
     def test_guest_welcome(self):
-        # test the task, which calls goodbye_email() in emails.py
-        send_guest_welcome()
+        # test the task, which calls guest_welcome() in emails.py
+        self.assertTrue(send_guest_welcome())
 
     def test_guests_residents_daily_update(self):
         # called here directly instead as the task, because we can get the
