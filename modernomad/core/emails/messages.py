@@ -127,6 +127,7 @@ def send_subscription_receipt(subscription, bill):
 def send_invoice(booking):
     ''' trigger a reminder email to the guest about payment.'''
     if booking.is_comped():
+        # FIXME: undefined!
         return send_comp_invoice(booking)
 
     location = booking.use.location
