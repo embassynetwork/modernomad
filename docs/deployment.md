@@ -82,4 +82,6 @@ code.
 
 Mailgun credentials are stored in Heroku environment variables. 
 
+## Backups
 
+Backups are done with [heroku-tarsnap-backups](https://github.com/bfirsh/heroku-tarsnap-backups). It runs as a sidecar container alongside the main app and backs up both Heroku's Postgres database and the Bucketeer S3 bucket onto Tarsnap.
