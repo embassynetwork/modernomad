@@ -20,6 +20,16 @@ If you want to set up a Bucketeer bucket with a custom name:
     $ heroku addons:destroy -a embassynetwork-production BUCKETEER
     $ heroku addons:create -a embassynetwork-production bucketeer:micro --bucket-name media.embassynetwork.com
 
+## Staging environment and Heroku Pipelines
+
+On embassynetwork.com, we have a separate staging environment, https://staging.embassynetwork.com/, that is deployed on every commit to master. It has a complete copy of production data so we can check things work on real data.
+
+Both the staging environment and production environment are part of a "[Pipeline](https://devcenter.heroku.com/articles/pipelines)" on Heroku. This allows us to see a high-level view of what state the app is in. It also allows you to create "[Review Apps](https://devcenter.heroku.com/articles/github-integration-review-apps)" of pull requests, which are like mini throwaway staging environments.
+
+Deploys can be done either through the Heroku web interface (under the "Deploy" tab in the app) or on Slack, in the #modernomad_heroku channel. The advantage of doing it on Slack is that it will refuse to deploy if the build is broken, stopping you from deploying a broken version to production.
+
+Heroku Pipelines has a "promotion" feature which is designed to deploy a build from staging directly to production. This means the exact same deployment from staging gets deployed to production, instead of it getting rebuilt from source code, which minimises the chances of breakage. Unfortunately this doesn't support Docker containers yet. Once it does, this could be used to deploy the app.
+
 ## Deployments
 
 Trigger deployments through the Heroku web UI. It will automatically run `./manage.py migrate`.
