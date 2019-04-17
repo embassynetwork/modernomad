@@ -30,7 +30,7 @@ In Heroku scheduler, add a daily task at 11:00 UTC: `./manage.py run_daily_tasks
 
 ## Cloudflare
 
-We are set up to use Cloudflare for DNS which also includes a CDN. 
+We are set up to use Cloudflare for DNS which also includes a CDN. All requests to the app go through Cloudflare, and it caches what it can. This is just static files and media currently -- both documented in more detail below.
 
 ## Static files
 
@@ -62,10 +62,13 @@ This Compose file is also used on CI for the browser tests so they are as close 
 
 ## Media
 
-We use the Heroku add-on "Bucketeer" to host media files on S3. Creates bucket
-and puts creds inside Heroku environment variables, and does billing through
-Heroku too. Inside the Django app we use django-storages which saves the files
-to s3. Configuration is in the `settings.py`.
+Media files are hosted on S3. Setting up S3 buckets and IAM credentials is a PITA so we use the Heroku add-on "Bucketeer" to do that for us. It creates a bucket on S3 and adds the credentials to the Heroku config.
+
+Inside the Django app, we use django-storages to save the files to S3. Configuration is in `settings/common.py`.
+
+Cloudflare sits in front of the S3 bucket to handle caching and distribution. The trick to make this work is to give the bucket a custom name that is a full domain name, as shown in the "Creating app" section above. You can then use Cloudflare to proxy requests to it.
+
+For example, for embassynetwork.com our S3 bucket is called `media.embassynetwork.com`, then we have a CNAME in Cloudflare called `media` which points at `media.embassynetwork.com.s3.amazonaws.com`.
 
 ## Payments
 
