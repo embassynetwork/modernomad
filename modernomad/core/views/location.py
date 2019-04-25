@@ -1,34 +1,23 @@
 
 import logging
 from django.http import Http404
-from django.shortcuts import render
+from django.views.generic import DetailView
+from rules.contrib.views import PermissionRequiredMixin
 from modernomad.core.models import Location
 
 logger = logging.getLogger(__name__)
 
 
-def location_detail(request, location_slug):
-    try:
-        location = (
-            Location.objects
-            .prefetch_related('house_admins', 'resources')
-            .get(slug=location_slug)
-        )
-        logger.debug(location.get_members())
-        logger.debug('--')
-        logger.debug(request.user)
+class LocationDetail(PermissionRequiredMixin, DetailView):
+    model = Location
+    context_object_name = 'location'
+    template_name = 'location/location_detail.html'
+    permission_required = 'location.can_view'
 
-        if location.visibility == 'public' or location.visibility == 'link':
-            has_permission = True
-        elif request.user in location.get_members():
-            has_permission = True
-        else:
-            has_permission = False
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.prefetch_related('house_admins', 'resources')
+        return qs
 
-        if not has_permission:
-            raise Location.DoesNotExist
-
-    except Location.DoesNotExist:
+    def handle_no_permission(self):
         raise Http404("The location does not exist or you do not have permission to view it")
-
-    return render(request, "location_detail.html", {'location': location, 'max_days': location.max_booking_days})

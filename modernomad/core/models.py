@@ -54,6 +54,10 @@ def default_location():
     return Location.objects.get(pk=1)
 
 
+LOCATION_PUBLIC = 'public'
+LOCATION_MEMBER = 'members'
+LOCATION_LINK = 'link'
+
 class Location(models.Model):
     name = models.CharField(max_length=200)
     slug = models.CharField(
@@ -110,10 +114,10 @@ class Location(models.Model):
     check_in = models.CharField(max_length=200, help_text="When your guests can expect their bed to be ready.")
 
     visibility_options = (
-            ('public', 'Public'),
-            ('members', 'Members Only'),
-            ('link', 'Those with the Link')
-            )
+        (LOCATION_PUBLIC, 'Public'),
+        (LOCATION_MEMBER, 'Members Only'),
+        (LOCATION_LINK, 'Those with the Link')
+    )
     visibility = models.CharField(max_length=32, choices=visibility_options, blank=False, null=False, default='link')
 
     def __str__(self):

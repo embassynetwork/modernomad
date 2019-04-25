@@ -103,6 +103,7 @@ WHITENOISE_MAX_AGE = 31536000 if not DEBUG else 0
 
 AUTHENTICATION_BACKENDS = (
     'modernomad.backends.EmailOrUsernameModelBackend',
+    'rules.permissions.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend'
 )
 
@@ -202,6 +203,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'imagekit',
     'rest_framework',
+    'rules.apps.AutodiscoverRulesConfig',
     'webpack_loader',
 
     # modernomad
