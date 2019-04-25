@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 import modernomad.core.views.unsorted
+from modernomad.core.views import location
 import modernomad.core.emails.messages
 import modernomad.core.urls.bookings
 import modernomad.core.urls.uses
@@ -8,7 +9,7 @@ import modernomad.core.views.redirects
 import gather.urls
 
 per_location_patterns = [
-    url(r'^$', modernomad.core.views.unsorted.location_detail, name='location_detail'),
+    url(r'^$', location.location_detail, name='location_detail'),
     url(r'^stay/$', modernomad.core.views.booking.StayComponent, name='location_stay'),
     url(r'^stay/room/(?P<room_id>\w+)$', modernomad.core.views.booking.StayComponent, name='room'),
     url(r'^community/$', modernomad.core.views.unsorted.community, name='location_community'),
