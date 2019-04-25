@@ -409,6 +409,12 @@ def admin_daily_update(location):
 @csrf_exempt
 def current(request, location_slug):
     ''' email all residents, guests and admins who are current or currently at this location. '''
+    from_address = request.POST.get('from')
+    if not User.objects.filter(email=from_address).exists():
+        # You should only be able to send email if you are an already registered
+        # user.
+        return
+
     # fail gracefully if location does not exist
     try:
         location = get_location(location_slug)
@@ -438,7 +444,6 @@ def current(request, location_slug):
         return HttpResponse(status=200)
 
     recipient = request.POST.get('recipient')
-    from_address = request.POST.get('from')
     logger.debug('from: %s' % from_address)
     sender = request.POST.get('sender')
     logger.debug('sender: %s' % sender)
