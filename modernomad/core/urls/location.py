@@ -53,5 +53,5 @@ per_location_patterns = [
 
 urlpatterns = [
     url(r'^$', modernomad.core.views.unsorted.location_list, name='location_list'),
-    url(r'^(?P<slug>[\w-]+)/', include(per_location_patterns)),
+    url(r'^(?P<location_slug>[\w-]+)/', include(per_location_patterns)),
 ]
