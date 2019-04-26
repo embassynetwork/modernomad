@@ -1,3 +1,5 @@
+import pytz
+
 from . import factory
 from .location import LocationFactory
 
@@ -41,10 +43,10 @@ class EventFactory(factory.DjangoModelFactory):
     class Meta:
         model = Event
 
-    created = factory.Faker('past_datetime')
-    updated = factory.Faker('past_datetime')
-    start = factory.Faker('future_datetime')
-    end = factory.Faker('future_datetime')
+    created = factory.Faker('past_datetime', tzinfo=pytz.UTC)
+    updated = factory.Faker('past_datetime', tzinfo=pytz.UTC)
+    start = factory.Faker('future_datetime', tzinfo=pytz.UTC)
+    end = factory.Faker('future_datetime', tzinfo=pytz.UTC)
 
     title = factory.Faker('word')
     slug = factory.Faker('word')
