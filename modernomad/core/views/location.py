@@ -1,8 +1,10 @@
 
 import logging
+
 from django.http import Http404
 from django.views.generic import DetailView
 from rules.contrib.views import PermissionRequiredMixin
+
 from modernomad.core.models import Location
 
 logger = logging.getLogger(__name__)

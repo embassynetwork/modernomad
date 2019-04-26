@@ -4,6 +4,7 @@ from bank.models import Currency
 from bank.models import Account
 from .user import UserFactory
 
+
 class DRFTCurrencyFactory(factory.DjangoModelFactory):
     class Meta:
         model = Currency
@@ -12,6 +13,7 @@ class DRFTCurrencyFactory(factory.DjangoModelFactory):
     name = "DRFT"
     symbol = "Ɖ"
 
+
 class USDCurrencyFactory(factory.DjangoModelFactory):
     class Meta:
         model = Currency
@@ -19,6 +21,7 @@ class USDCurrencyFactory(factory.DjangoModelFactory):
         django_get_or_create = ('name',)
     name = "USD"
     symbol = "$"
+
 
 class USDAccountFactory(factory.DjangoModelFactory):
     class Meta:
@@ -49,6 +52,7 @@ class USDAccountFactory(factory.DjangoModelFactory):
                 self.owners.add(user)
         else:
             self.owners.add(UserFactory())
+
 
 class DRFTAccountFactory(factory.DjangoModelFactory):
     class Meta:
@@ -81,12 +85,13 @@ class DRFTAccountFactory(factory.DjangoModelFactory):
             self.owners.add(UserFactory())
 
 
-
 class UserPrimaryAccountFactory(factory.DjangoModelFactory):
     pass
 
+
 class HouseAccountFactory(factory.DjangoModelFactory):
     pass
+
 
 class UseTransactionFactory(factory.DjangoModelFactory):
     pass

@@ -1,4 +1,6 @@
+import datetime
 from django.contrib.flatpages.models import FlatPage
+from django.utils import timezone
 
 from modernomad.core.models import Location
 from modernomad.core.models import Resource
@@ -13,10 +15,10 @@ from . import factory
 from .user import UserFactory, SuperUserFactory
 from .accounts import USDAccountFactory
 from .accounts import DRFTAccountFactory
-import datetime
 
-one_year_ago = datetime.datetime.today() - datetime.timedelta(days=365)
-yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
+one_year_ago = timezone.now() - datetime.timedelta(days=365)
+yesterday = timezone.now() - datetime.timedelta(days=1)
+
 
 class FeeFactory(factory.DjangoModelFactory):
     class Meta:
@@ -41,8 +43,8 @@ class LocationFactory(factory.DjangoModelFactory):
     latitude = 37.7777567
     longitude = -122.3988704
 
-    welcome_email_days_ahead = factory.Iterator([1,2,3,4,5])
-    max_booking_days = factory.Iterator([5,14,30])
+    welcome_email_days_ahead = factory.Iterator([1, 2, 3, 4, 5])
+    max_booking_days = factory.Iterator([5, 14, 30])
 
     stay_page = factory.Faker('text')
     front_page_stay = factory.Faker('text')
@@ -123,7 +125,6 @@ class LocationFactory(factory.DjangoModelFactory):
         # payments
         subscription = payment.SubscriptionFactory(location=self)
         payment.SubscriptionBillFactory(subscription=subscription)
-
 
 
 class ResourceFactory(factory.DjangoModelFactory):
@@ -227,5 +228,3 @@ class BackingFactory(factory.DjangoModelFactory):
             # Simple build, do nothing.
             return
         self.users.add(UserFactory())
-
-
