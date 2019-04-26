@@ -15,6 +15,7 @@ class LocationDetail(PermissionRequiredMixin, DetailView):
     context_object_name = 'location'
     template_name = 'location/location_detail.html'
     permission_required = 'location.can_view'
+    slug_url_kwarg = 'location_slug'
 
     def get_queryset(self):
         qs = super().get_queryset()
