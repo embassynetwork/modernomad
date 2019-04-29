@@ -44,7 +44,7 @@ class EmailsTestCase(TestCase):
         self.admin = self.create_user('admin1', admin=True, email='admin1@bob.com')
         self.booking = self.create_booking(user=self.guest1)
 
-        today = datetime.now().date()
+        today = timezone.localtime(timezone.now())
         yesterday = today + timedelta(days=-1)
         in_two_days = today + timedelta(days=2)
         after_that = in_two_days + timedelta(days=1)
