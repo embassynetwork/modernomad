@@ -6,6 +6,8 @@ The results of the tests that are run on Travis are public and [you can see them
 
 Cypress needs to run on your local machine, not inside Docker or a VM, because it has to start and control your browser. It also assumes your development is running inside Docker when it clears the database before each test run. (TODO: There should be an option to run the database commands outside Docker.)
 
+Read through the [docker development][1] for how to run the docker container. You also need to set the stripe environment variables for the tests to run successfully. Take a look at `.travis.yml` to see which keys are being set. 
+
 First, install Cypress:
 
     $ npm install
@@ -17,3 +19,6 @@ Then, start it up:
     npm run cypress:open
 
 [The Cypress documentation has information on how to run and write tests.](https://docs.cypress.io/) The test cases are in `cypress/fixtures/`.
+
+
+[1]: docker-development-environment.md
