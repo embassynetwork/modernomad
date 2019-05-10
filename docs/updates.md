@@ -36,15 +36,15 @@ for changes in where or what data is stored, use datamigrations:
 
 new models and permissions: to get the id for the permissions associated with a model (there are 3 by default - add, change, delete), do the following:
 
-`>>> from django.contrib.contenttypes.models import ContentType`
+```
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
 
-`>>> from django.contrib.auth.models import Permission`
+[p.id for p in Permission.objects.filter(content_type=ContentType.objects.get(model="modelname"))]
 
-`>>> [p.id for p in Permission.objects.filter(content_type=ContentType.objects.get(model="modelname"))]`
-
-which will return a list, eg:
-
-`[40, 41, 42]`
+# which will return a list, eg:
+[40, 41, 42]
+```
 
 `modelname` is a string, the lowercase version of the model class name in your app's models.py. then add these to the list in appname/fixtures/initial_data.json, eg.:
 
