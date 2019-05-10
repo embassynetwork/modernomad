@@ -3,10 +3,9 @@ from .common import *  # noqa
 from .common import INSTALLED_APPS, MIDDLEWARE_CLASSES
 
 DEBUG = True
-TESTING_MODE = 'test' in sys.argv
-DEV_MODE = DEBUG and not TESTING_MODE
+RUNNING_TESTS = 'test' in sys.argv
 
-if DEV_MODE:
+if not RUNNING_TESTS:
     INSTALLED_APPS += [
         'debug_toolbar'
     ]
