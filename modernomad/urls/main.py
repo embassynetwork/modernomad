@@ -48,7 +48,7 @@ urlpatterns += [
     url(r'^%s/(?P<path>.*)$' % media_url, django.views.static.serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
 ]
 
-if settings.DEV_MODE:
+if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
         # For Django >= 2.0
