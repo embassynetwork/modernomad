@@ -43,7 +43,6 @@
 * Detailed occupancy and earnings analysis
 * Guests can edit and cancel booking after creation (before being confirmed)
 * Custom rates and comps
-* Calendar view of bookings by month
 * Detailed payments information
 * Online credit card payments
 * 3rd party payment option

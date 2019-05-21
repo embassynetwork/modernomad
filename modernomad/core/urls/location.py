@@ -17,7 +17,6 @@ per_location_patterns = [
     url(r'^guests/$', modernomad.core.views.unsorted.guests, name='location_guests'),
     url(r'^occupancy/$', modernomad.core.views.unsorted.occupancy, name='location_occupancy'),
     url(r'^occupancy/room/(?P<room_id>\d+)/(?P<year>\d+)/$', modernomad.core.views.unsorted.room_occupancy, name='room_occupancy'),
-    url(r'^calendar/$', modernomad.core.views.unsorted.calendar, name='location_calendar'),
     url(r'^thanks/$', modernomad.core.views.unsorted.thanks, name='location_thanks'),
     url(r'^today/$', modernomad.core.views.unsorted.today, name='location_today'),
 

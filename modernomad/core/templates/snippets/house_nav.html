@@ -70,7 +70,6 @@
                     {% if user in location.house_admins.all or user in location.residents.all or user in location.readonly_admins.all %}
                         <li><a tabindex="-1" href="{% url 'location_occupancy' location.slug %}">Occupancy</a></li>
                         <li><a tabindex="-1" href="{% url 'location_payments_today' location.slug %}">Payments</a></li>
-                        <li><a href="{% url 'location_calendar' location.slug %}">Guest Calendar</a></li>
                         <li><a href="{% url 'manage_today' location.slug %}">Arrive & Depart Today</a></li>
                     {% endif %}
                     {% if user in location.house_admins.all %}

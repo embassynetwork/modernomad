@@ -36,7 +36,6 @@ import datetime
 import stripe
 from stripe.error import CardError
 from django.http import JsonResponse
-from modernomad.core.booking_calendar import GuestCalendar
 from modernomad.core.emails.messages import send_booking_receipt, send_subscription_receipt, new_booking_notify
 from modernomad.core.emails.messages import updated_booking_notify, send_from_location_address, admin_new_subscription_notify
 from modernomad.core.emails.messages import subscription_note_notify
@@ -600,87 +599,6 @@ def manage_today(request, location_slug):
             'arriving_today': arriving_today,
             'departing_today': departing_today,
             'events_today': events_today
-        }
-    )
-
-
-@login_required
-def calendar(request, location_slug):
-    location = get_object_or_404(Location, slug=location_slug)
-    today = timezone.localtime(timezone.now())
-    month = request.GET.get("month")
-    year = request.GET.get("year")
-
-    start, end, next_month, prev_month, month, year = get_calendar_dates(month, year)
-    report_date = datetime.date(year, month, 1)
-
-    uses = (
-        Use.objects.filter(Q(status="confirmed") | Q(status="approved"))
-        .filter(location=location)
-        .exclude(depart__lt=start)
-        .exclude(arrive__gt=end).order_by('arrive')
-    )
-
-    rooms = Resource.objects.filter(location=location)
-    uses_by_room = []
-    empty_rooms = 0
-
-    # this is tracked here to help us determine what height the timeline div
-    # should be. it's kind of a hack.
-    num_rows_in_chart = 0
-    for room in rooms:
-        num_rows_in_chart += room.max_daily_capacities_between(start, end)
-
-    if len(uses) == 0:
-        any_uses = False
-    else:
-        any_uses = True
-
-    for room in rooms:
-        uses_this_room = []
-
-        uses_list_this_room = list(uses.filter(resource=room))
-
-        if len(uses_list_this_room) == 0:
-            empty_rooms += 1
-            num_rows_in_chart -= room.max_daily_capacities_between(start, end)
-
-        else:
-            for u in uses_list_this_room:
-                if u.arrive < start:
-                    display_start = start
-                else:
-                    display_start = u.arrive
-                if u.depart > end:
-                    display_end = end
-                else:
-                    display_end = u.depart
-                uses_this_room.append({'use': u, 'display_start': display_start, 'display_end': display_end})
-
-            uses_by_room.append((room, uses_this_room))
-
-    logger.debug("Uses by Room for calendar view:")
-    logger.debug(uses_by_room)
-
-    # create the calendar object
-    guest_calendar = GuestCalendar(uses, year, month, location).formatmonth(year, month)
-
-    return render(
-        request,
-        "calendar.html",
-        {
-            'uses': uses,
-            'uses_by_room': uses_by_room,
-            'month_start': start,
-            'month_end': end,
-            "next_month": next_month,
-            "prev_month": prev_month,
-            'rows_in_chart': num_rows_in_chart,
-            "report_date": report_date,
-            'location': location,
-            'empty_rooms': empty_rooms,
-            'any_uses': any_uses,
-            'calendar': mark_safe(guest_calendar)
         }
     )
 

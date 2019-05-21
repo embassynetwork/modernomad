@@ -463,16 +463,6 @@ class Resource(models.Model):
 
         return result
 
-    def max_daily_capacities_between(self, start, end):
-        max_quantity = 0
-        avails = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
-        for a in avails:
-            if a.quantity > max_quantity:
-                max_quantity = a.quantity
-            if a.start_date <= start:
-                break
-        return max_quantity
-
     def tz(self):
         assert self.location, "You can't fetch a timezone on a resource without a location"
         return self.location.tz()
