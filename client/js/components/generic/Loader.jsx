@@ -7,7 +7,9 @@ function Loader(props) {
     <ReactLoaderAdvanced
       show={!!props.loading}
       backgroundStyle={{backgroundColor: '#FFFFFF', opacity: 0.7}}
-      message={<CircularProgress />}>
+      message={<CircularProgress />}
+      hideContentOnLoad={true}
+    >
       {props.children}
     </ReactLoaderAdvanced>
   )
