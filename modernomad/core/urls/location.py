@@ -10,8 +10,8 @@ import gather.urls
 
 per_location_patterns = [
     url(r'^$', location.LocationDetail.as_view(), name='location_detail'),
-    url(r'^stay/$', modernomad.core.views.booking.StayComponent, name='location_stay'),
-    url(r'^stay/room/(?P<room_id>\w+)$', modernomad.core.views.booking.StayComponent, name='room'),
+    url(r'^stay/$', modernomad.core.views.booking.StayView.as_view(), name='location_stay'),
+    url(r'^stay/room/(?P<room_id>\w+)$', modernomad.core.views.booking.StayView.as_view(), name='room'),
     url(r'^community/$', modernomad.core.views.unsorted.community, name='location_community'),
     url(r'^team/$', modernomad.core.views.unsorted.team, name='location_team'),
     url(r'^guests/$', modernomad.core.views.unsorted.guests, name='location_guests'),
@@ -20,6 +20,9 @@ per_location_patterns = [
     url(r'^calendar/$', modernomad.core.views.unsorted.calendar, name='location_calendar'),
     url(r'^thanks/$', modernomad.core.views.unsorted.thanks, name='location_thanks'),
     url(r'^today/$', modernomad.core.views.unsorted.today, name='location_today'),
+
+    url(r'^json/room/$', modernomad.core.views.booking.RoomApiList.as_view(), name='json_room_list'),
+    url(r'^json/room/(?P<room_id>\w+)/$', modernomad.core.views.booking.RoomApiDetail.as_view(), name='json_room_detail'),
 
     url(r'^edit/settings/$', modernomad.core.views.unsorted.LocationEditSettings, name='location_edit_settings'),
     url(r'^edit/users/$', modernomad.core.views.unsorted.LocationEditUsers, name='location_edit_users'),
