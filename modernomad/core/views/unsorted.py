@@ -829,8 +829,8 @@ def RoomsAvailableOnDates(request, location_slug):
     location = get_object_or_404(Location, slug=location_slug)
     # Check if the room is available for all dates in the booking
     try:
-        arrive = datetime.datetime.strptime(request.POST['arrive'], '%m/%d/%Y').date()
-        depart = datetime.datetime.strptime(request.POST['depart'], '%m/%d/%Y').date()
+        arrive = datetime.datetime.strptime(request.POST['arrive'], settings.DATE_FORMAT).date()
+        depart = datetime.datetime.strptime(request.POST['depart'], settings.DATE_FORMAT).date()
     except:
         arrive = datetime.datetime.strptime(request.POST['arrive'], '%Y-%m-%d').date()
         depart = datetime.datetime.strptime(request.POST['depart'], '%Y-%m-%d').date()
@@ -2417,7 +2417,7 @@ def SubscriptionManageUpdateEndDate(request, location_slug, subscription_id):
     new_end_date = None  # an empty end date is an ongoing subscription.
     old_end_date = subscription.end_date
     if request.POST.get("end_date"):
-        new_end_date = datetime.datetime.strptime(request.POST['end_date'], '%m/%d/%Y').date()
+        new_end_date = datetime.datetime.strptime(request.POST['end_date'], settings.DATE_FORMAT).date()
         # disable setting the end date earlier than any recorded payments for associated bills (even partial payments)
         most_recent_paid = subscription.last_paid(include_partial=True)
 
