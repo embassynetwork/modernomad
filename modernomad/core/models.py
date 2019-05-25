@@ -356,24 +356,6 @@ class Resource(models.Model):
             the_day += datetime.timedelta(1)
         return total
 
-    # Returns all the capacity change objects that affect the time period
-    # described, in chronological order. This includes the immediately before or on
-    # the start date, and any others through to and including the end date.
-    def capacities_between(self, start, end):
-        capacities = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
-        capacities_between = []
-        for a in capacities:
-            # since we already filtered out capacities ahead of our date
-            # range, we just need to go backwards until the first avail that
-            # starts on or before our start date, and then break.
-            if a.start_date > start:
-                capacities_between.append(a)
-            else:
-                capacities_between.append(a)
-                break
-        capacities_between.reverse()
-        return capacities_between
-
     def confirmed_uses_between(self, start, end):
         return self.use_set.confirmed_between_dates(start, end)
 
@@ -437,10 +419,33 @@ class Resource(models.Model):
         return True
 
     def daily_capacities_within(self, start, end):
-        # creates a list of (day, quantity) tuples. No capacity objects are
-        # returned.
-        capacities = self.capacities_between(start, end)
+        '''
+        Param:
+            start datetime
+            end datetime
+        Returns a list [(day, quantity), ...]
+        '''
+        def capacities_between(start, end):
+            '''
+            Returns all the capacity change objects that affect the time period
+            described, in chronological order. This includes the immediately before or on
+            the start date, and any others through to and including the end date.
+            '''
+            capacities = self.capacity_changes.exclude(start_date__gt=end).order_by('-start_date')
+            capacities_between = []
+            for a in capacities:
+                # since we already filtered out capacities ahead of our date
+                # range, we just need to go backwards until the first avail that
+                # starts on or before our start date, and then break.
+                if a.start_date > start:
+                    capacities_between.append(a)
+                else:
+                    capacities_between.append(a)
+                    break
+            capacities_between.reverse()
+            return capacities_between
 
+        capacities = capacities_between(start, end)
         quantity = 0
         result = []
         for day in dates_within(start, end):
@@ -451,6 +456,14 @@ class Resource(models.Model):
         return result
 
     def daily_availabilities_within(self, start, end):
+        '''
+        Param:
+            start: datetime
+            end: datetime
+
+        Returns a list [(day, quantity), ...]
+        Quantity = capacity - confirmed usage
+        '''
         daily_capacities = self.daily_capacities_within(start, end)
         uses = self.confirmed_uses_between(start, end)
 
