@@ -18,6 +18,7 @@ except ImportError:
     from django.template.loader import get_template
 
 from django.utils import timezone
+import maya
 from rest_framework import mixins
 from rest_framework import generics
 
@@ -58,8 +59,9 @@ class RoomApiList(mixins.ListModelMixin, generics.GenericAPIView):
         qs = queryset.filter(location__slug=self.kwargs['location_slug'])
         params = self.request.query_params.dict()
         if params:
-            arrive = params['arrive']
-            depart = params['depart']
+            arrive = maya.parse(params['arrive']).date
+            depart = maya.parse(params['depart']).date
+
             room_ids = [
                 room.pk for room in qs
                 if room_available_during_period(room, arrive, depart)

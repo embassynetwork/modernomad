@@ -1,6 +1,5 @@
 import React, {PropTypes} from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
-import qs from 'qs'
 import RoomIndexOrDetail from './RoomIndexOrDetail'
 import RoomDrft from './RoomDrft'
 import RoomDetail from './RoomDetail'
@@ -31,7 +30,6 @@ class RoomBookingRoutes extends React.Component {
               return <RoomIndexOrDetail
                 {...props}
                 rooms={this.props.rooms}
-                location_name={props.match.params.location}
                 isAdmin={this.props.isAdmin}
               />
             }}
@@ -41,11 +39,8 @@ class RoomBookingRoutes extends React.Component {
             render={(props) => <RoomDetail
               {...props}
               room={this.props.room}
-              location={this.props.location}
               fees={this.props.fees}
               drftBalance={this.props.drftBalance}
-              location_name={props.match.params.location}
-              query={qs.parse(props.location.search)}
             />}
           />
         </div>

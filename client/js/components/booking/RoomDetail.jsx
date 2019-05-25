@@ -1,6 +1,8 @@
 import axios from 'axios'
 import React, {PropTypes} from 'react'
 import moment from 'moment'
+import qs from 'qs'
+
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import BookingForm from './BookingForm'
@@ -19,7 +21,11 @@ export default class RoomDetail extends React.Component {
       room: this.props.room,
       loading: false
     };
+
     this.pk = props.match.params.id
+    this.location_name = props.match.params.location
+    let search = props.location.search.slice(1)
+    this.query = qs.parse(search)
   }
 
   componentWillMount() {
@@ -34,11 +40,11 @@ export default class RoomDetail extends React.Component {
     if (!_.isEmpty(filters)) {
       formattedDates['arrive'] = filters.dates.arrive.format('MM/DD/YYYY')
       formattedDates['depart'] = filters.dates.depart.format('MM/DD/YYYY')
+      this.query = formattedDates
     }
 
-    var path = `/locations/${this.props.location_name}/stay/room/${this.pk}`
-    // need arrive and depart too.
-    axios.get(`/locations/${this.props.location_name}/json/room/${this.pk}`)
+    var path = `/locations/${this.location_name}/stay/room/${this.pk}`
+    axios.get(`/locations/${this.location_name}/json/room/${this.pk}`)
       .then(res => {
         const room = res.data
         this.setState({ room: room })
@@ -54,7 +60,7 @@ export default class RoomDetail extends React.Component {
   }
 
   roomIsAvailable() {
-    if (this.props.query) {
+    if (!_.isEmpty(this.query)) {
       return isFullyAvailable(this.state.room.availabilities)
     }
     return false
@@ -62,8 +68,8 @@ export default class RoomDetail extends React.Component {
 
   indexLinkDetails() {
     return {
-      pathname: `/locations/${this.props.location_name}/stay/`,
-      query: this.props.query
+      pathname: `/locations/${this.location_name}/stay/`,
+      query: this.query
     }
   }
 
@@ -93,6 +99,8 @@ export default class RoomDetail extends React.Component {
                   datesAvailable={this.roomIsAvailable()}
                   onFilterChange={this.fetchRoom.bind(this)}
                   drftBalance={this.props.drftBalance}
+                  location_name={this.location_name}
+                  query={this.query}
                 />
               </div>
             </div>
