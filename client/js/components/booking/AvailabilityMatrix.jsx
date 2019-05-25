@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import { Table } from 'react-bootstrap'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import moment from 'moment'
 
 
@@ -15,7 +15,7 @@ export default class AvailabilityMatrix extends React.Component {
   }
 
   detailUrl(id) {
-    return `/locations/${this.props.routeParams.location}/stay/room/${id}`
+    return `/locations/${this.props.location_name}/stay/room/${id}`
   }
 
   detailLinkDetails(id) {
