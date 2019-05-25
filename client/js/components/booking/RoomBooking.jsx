@@ -1,10 +1,8 @@
 import React, {PropTypes} from 'react'
-import { Router, Route, browserHistory, IndexRoute } from 'react-router'
+import { BrowserRouter, Route } from 'react-router-dom'
 import RoomIndexOrDetail from './RoomIndexOrDetail'
 import RoomDrft from './RoomDrft'
 import RoomDetail from './RoomDetail'
-import ApolloClient from 'apollo-client'
-import { ApolloProvider } from 'react-apollo'
 
 const client = new ApolloClient();
 
@@ -14,16 +12,45 @@ class DummyRoomDetail extends React.Component {
   }
 }
 
+// Kind reminder of what lifecycle methods exists
+// https://gist.github.com/bvaughn/923dffb2cd9504ee440791fade8db5f9
+
 class RoomBookingRoutes extends React.Component {
   render() {
     return (
-      <Router history={browserHistory}>
-        <Route path="/drft/" component={RoomDrft} drftBalance={this.props.drftBalance} isAdmin={this.props.isAdmin}>
-        </Route>
-        <Route path="/locations/:location/stay/" component={RoomIndexOrDetail} drftBalance={this.props.drftBalance} isAdmin={this.props.isAdmin}>
-          <Route path="room/:id" component={DummyRoomDetail} />
-        </Route>
-      </Router>
+      <BrowserRouter>
+        <div>
+          <Route
+            path="/drft/"
+            component={RoomDrft}
+            drftBalance={this.props.drftBalance}
+            isAdmin={this.props.isAdmin}
+          />
+          <Route
+            exact path="/locations/:location/stay/"
+            render={(props) => {
+              return <RoomIndexOrDetail
+                {...props}
+                rooms={this.props.rooms}
+                location_name={props.match.params.location}
+                isAdmin={this.props.isAdmin}
+              />
+            }}
+          />
+          <Route
+            path="/locations/:location/stay/room/:id"
+            render={(props) => <RoomDetail
+              {...props}
+              room={this.props.room}
+              location={this.props.location}
+              fees={this.props.fees}
+              drftBalance={this.props.drftBalance}
+              location_name={props.match.params.location}
+              query={props.location.search}
+            />}
+          />
+        </div>
+      </BrowserRouter>
     )
   }
 }
@@ -31,9 +58,13 @@ class RoomBookingRoutes extends React.Component {
 export default class RoomBooking extends React.Component {
   render() {
     return (
-      <ApolloProvider client={client}>
-        <RoomBookingRoutes drftBalance={this.props.request_user_drft_balance} isAdmin={this.props.is_house_admin}/>
-      </ApolloProvider>
+        <RoomBookingRoutes
+          drftBalance={this.props.user_drft_balance}
+          isAdmin={this.props.is_house_admin}
+          room={this.props.room}
+          rooms={this.props.rooms}
+          fees={this.props.fees}
+        />
     )
   }
 }
