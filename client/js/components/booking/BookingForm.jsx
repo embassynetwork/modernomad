@@ -2,16 +2,18 @@ import React, {PropTypes} from 'react'
 import moment from 'moment'
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { Panel, FormGroup, ControlLabel, FormControl, OverlayTrigger, Tooltip } from 'react-bootstrap';
+
 import DjangoCSRFInput from '../generic/DjangoCSRFInput'
 import BookingDisplay from './BookingDisplay'
 import { Booking } from '../../models/Booking'
+import makeParam from '../generic/Utils'
+
 
 export default class BookingForm extends React.Component {
   static propTypes = {
     query: PropTypes.object.isRequired,
-    room: PropTypes.object.isRequired,
     datesAvailable: PropTypes.bool.isRequired,
     onFilterChange: PropTypes.func.isRequired
   }
@@ -19,6 +21,7 @@ export default class BookingForm extends React.Component {
   constructor(props) {
     super(props)
     this.state = {open: false, showValidation: false}
+    this.submitUrl = `/locations/${props.location_name}/booking/submit`
   }
 
   onDateRangeChange(dates) {
@@ -27,17 +30,18 @@ export default class BookingForm extends React.Component {
 
   renderCost() {
     const parseFormat = 'MM/DD/YYYY'
+
     const depart = moment(this.props.query.depart, parseFormat)
     const arrive = moment(this.props.query.arrive, parseFormat)
     const acceptDrftTheseDates = this.props.room.acceptDrftTheseDates
-    const drftBalance = this.props.route.drftBalance
+    const drftBalance = this.props.drftBalance
 
-    if (depart && arrive) {
+    if (depart.isValid() && arrive.isValid()) {
       const booking = new Booking({
-        nightRate: this.props.room.defaultRate,
+        nightRate: this.props.room.default_rate,
         arrive: arrive,
         depart: depart,
-        fees: this.props.networkLocation.fees,
+        fees: this.props.fees,
         drftBalance: drftBalance,
         acceptDrftTheseDates: acceptDrftTheseDates,
         hasFutureDrftCapacity: this.props.room.hasFutureDrftCapacity
@@ -49,14 +53,14 @@ export default class BookingForm extends React.Component {
   }
 
   indexLinkDetails() {
-    if (this.props.query.arrive) {
+    if (this.query.arrive) {
       return {
-        pathname: `/locations/${this.props.routeParams.location}/stay/`,
-        query: this.props.query
+        pathname: `/locations/${this.props.location_name}/stay/`,
+        query: this.query
       }
     } else {
       return {
-        pathname: `/locations/${this.props.routeParams.location}/stay/`
+        pathname: `/locations/${this.props.location_name}/stay/`
       }
     }
   }
@@ -88,20 +92,20 @@ export default class BookingForm extends React.Component {
 
 
   render() {
-    const room = this.props.room
-    const submitUrl = `/locations/${this.props.routeParams.location}/booking/submit`
     const drftTooltip = (
       <Tooltip id="tooltip">DRFT (Ɖ) is an internal, housing-backed currency currently in beta. Contact us for more info.</Tooltip>
     );
 
-    if (!this.props.networkLocation) return null;
+    if (!this.props.room) {
+      return null
+    }
 
     return (
-      <form className="booking-request-form" method="POST" action={submitUrl} onSubmit={this.checkValid.bind(this)}>
+      <form className="booking-request-form" method="POST" action={this.submitUrl} onSubmit={this.checkValid.bind(this)}>
         <DjangoCSRFInput />
-        <input type="hidden" name="resource" value={room.rid} />
+        <input type="hidden" name="resource" value={this.props.room.id} />
         <div className="row nightly-price">
-          <h3 className="col-xs-8">${this.props.room.defaultRate}
+          <h3 className="col-xs-8">${this.props.room.default_rate}
             {this.props.room.hasFutureDrftCapacity?
               <span><span className="h5"> or </span>Ɖ1
                 <OverlayTrigger placement="top" overlay={drftTooltip}>
@@ -117,8 +121,10 @@ export default class BookingForm extends React.Component {
         <div className="date-row">
           <DateRangeSelector
             onChange={this.onDateRangeChange.bind(this)}
-            maxLength={this.props.networkLocation.maxBookingDays}
-            detail={true} {...this.props.query} />
+            maxLength={this.props.room.maxBookingDays}
+            detail={true}
+            {...this.query}
+          />
         </div>
         {this.props.datesAvailable || !this.props.query.arrive ?
           <div>
