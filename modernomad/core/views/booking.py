@@ -7,6 +7,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.models import Site
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -29,6 +31,7 @@ from modernomad.core.models import Booking, Use, Location, Resource, Fee
 from modernomad.core.shortcuts import get_qs_or_404
 from modernomad.core.serializers import ResourceSerializer
 
+ensure_csrf = method_decorator(ensure_csrf_cookie)
 logger = logging.getLogger(__name__)
 
 
@@ -89,6 +92,7 @@ class StayView(TemplateView):
     # This view should be moved to views/location.py which is up for a PR.
     template_name = 'booking/booking.html'
 
+    @ensure_csrf
     def get(self, request, *args, **kwargs):
         room_id = kwargs.get('room_id')
         if room_id:
