@@ -54,7 +54,6 @@ export default class DateRangeSelector extends React.Component {
       const combinedState = {...this.state, ...newState}
 
       this.setState(newState)
-
       if (combinedState.arrive && combinedState.depart) {
         this.props.onChange(combinedState)
       }

@@ -5,14 +5,21 @@ import AvailabilityMatrix from './AvailabilityMatrix'
 import { FormGroup, Checkbox, Button, Nav, NavItem } from 'react-bootstrap';
 import { isFullyAvailable } from '../../models/Availabilities'
 
-export default class RoomCards extends React.Component {
+class RoomCards extends React.Component {
   static propTypes = {
     rooms: PropTypes.array.isRequired
   }
 
   renderRoomCards() {
     return this.props.rooms.map((room) => {
-      return <RoomCard key={room.id} drft={this.props.drft} routeParams={this.props.routeParams} query={this.props.query} route={this.props.route} {...room} />
+      return <RoomCard
+        key={room.id}
+        drft={this.props.drft}
+        location={this.props.location}
+        match={this.props.match}
+        isAdmin={this.props.isAdmin}
+        {...room}
+      />
     })
   }
 
@@ -36,3 +43,4 @@ export default class RoomCards extends React.Component {
     }
   }
 }
+export default RoomCards
