@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import { browserHistory } from 'react-router'
+// import { browserHistory } from 'react-router'
 import RoomDrftIndex from './RoomDrftIndex'
 import RoomDetail from './RoomDetail'
 import gql from 'graphql-tag'
