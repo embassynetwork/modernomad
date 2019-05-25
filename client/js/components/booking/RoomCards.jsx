@@ -19,6 +19,7 @@ class RoomCards extends React.Component {
         match={this.props.match}
         isAdmin={this.props.isAdmin}
         {...room}
+        {...this.props}
       />
     })
   }
