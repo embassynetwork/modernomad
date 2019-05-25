@@ -1,5 +1,7 @@
 import datetime
 import logging
+import json
+from json import JSONEncoder
 
 from django.conf import settings
 from django.contrib import messages
@@ -9,45 +11,127 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.generic import TemplateView
 try:
     from django.template import get_template
 except ImportError:
     from django.template.loader import get_template
 
 from django.utils import timezone
+from rest_framework import mixins
+from rest_framework import generics
 
 from .view_helpers import _get_user_and_perms
 from modernomad.core.emails.messages import send_booking_receipt, new_booking_notify
 from modernomad.core.forms import BookingUseForm
-from modernomad.core.models import Booking, Use, Location
+from modernomad.core.models import Booking, Use, Location, Resource, Fee
+from modernomad.core.shortcuts import get_qs_or_404
+from modernomad.core.serializers import ResourceSerializer
+
 logger = logging.getLogger(__name__)
 
 
-@ensure_csrf_cookie
-def StayComponent(request, location_slug, room_id=None):
-    if request.user.is_authenticated():
-        user_drft_balance = request.user.profile.drft_spending_balance()
-    else:
-        user_drft_balance = 0
+class DateEncoder(JSONEncoder):
+    def default(self, o):
+        try:
+            return o.strftime(settings.DATE_FORMAT)
+        except Exception:
+            return super().default(o)
 
-    location = get_object_or_404(Location, slug=location_slug)
-    if not location.rooms_with_future_capacity():
-        messages.add_message(request, messages.INFO, 'Sorry! This location does not currently have any listings.')
-        return HttpResponseRedirect(reverse("location_detail", args=(location.slug, )))
 
-    if request.user in location.house_admins.all():
-        is_house_admin = "true"
-    else:
-        is_house_admin = "false"
+class RoomApiList(mixins.ListModelMixin, generics.GenericAPIView):
+    queryset = Resource.objects.all()
+    serializer_class = ResourceSerializer
+    lookup_field = 'location_slug'
 
-    return render(request,
-        'booking.html',
-        {
-            "location": location,
-            "request_user_drft_balance": user_drft_balance,
-            "is_house_admin": is_house_admin
-        })
+    def filter_queryset(self, queryset):
+        # TODO make sure that capacity_change and uses are prefetched somehow
+        # ideally a method on Resource manager
+
+        def room_available_during_period(room, arrive, depart):
+            availabilities = room.daily_availabilities_within(arrive, depart)
+            zero_quantity_dates = [avail for avail in availabilities if avail[1] == 0]
+            if zero_quantity_dates:
+                return False
+            return True
+
+        qs = queryset.filter(location__slug=self.kwargs['location_slug'])
+        params = self.request.query_params.dict()
+        if params:
+            arrive = params['arrive']
+            depart = params['depart']
+            room_ids = [
+                room.pk for room in qs
+                if room_available_during_period(room, arrive, depart)
+            ]
+            qs = qs.filter(id__in=room_ids)
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+class RoomApiDetail(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    queryset = Resource.objects.all()
+    serializer_class = ResourceSerializer
+    lookup_url_kwarg = 'room_id'
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+class StayView(TemplateView):
+    # This view should be moved to views/location.py which is up for a PR.
+    template_name = 'booking/booking.html'
+
+    def get(self, request, *args, **kwargs):
+        room_id = kwargs.get('room_id')
+        if room_id:
+            self.room = get_qs_or_404(Resource, pk=room_id).select_related('location').first()
+            self.location = self.room.location
+        else:
+            self.room = None
+            self.location = get_object_or_404(Location, slug=kwargs.get('location_slug'))
+
+        if not self.location.rooms_with_future_capacity():
+            msg = 'Sorry! This location does not currently have any listings.'
+            messages.add_message(self.request, messages.INFO, msg)
+            return HttpResponseRedirect(reverse("location_detail", args=(self.location.slug, )))
+
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['location'] = self.location
+
+        is_admin = self.location.house_admins.all().filter(pk=self.request.user.pk).exists()
+        if self.request.user.is_authenticated():
+            user_drft_balance = self.request.user.profile.drft_spending_balance()
+        else:
+            user_drft_balance = 0
+
+        react_data = {
+            'is_house_admin': is_admin,
+            'user_drft_balance': user_drft_balance,
+            'room': ResourceSerializer(
+                self.room,
+                context={'request': self.request}
+            ).data if self.room else None,
+            'rooms': None,
+            'fees': list(Fee.objects.filter(locationfee__location=self.location))
+        }
+        if not self.room:
+            # is drft ever used in bookings right now?
+            rooms = self.location.rooms_with_future_capacity()
+            react_data['rooms'] = ResourceSerializer(
+                rooms, many=True, context={'request': self.request}
+            ).data
+
+        context['react_data'] = json.dumps(react_data, cls=DateEncoder)
+        return context
 
 
 def BookingSubmit(request, location_slug):
