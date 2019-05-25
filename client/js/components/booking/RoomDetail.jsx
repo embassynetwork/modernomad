@@ -1,8 +1,6 @@
 import axios from 'axios'
 import React, {PropTypes} from 'react'
 import moment from 'moment'
-import queryString from 'query-string'
-
 import DateRangeSelector from './DateRangeSelector'
 import ImageCarousel from './ImageCarousel'
 import BookingForm from './BookingForm'
