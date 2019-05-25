@@ -33,6 +33,7 @@ DATABASES = {
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 TIME_ZONE = 'America/Los_Angeles'
+DATE_FORMAT = '%m/%d/%Y'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -229,9 +230,7 @@ LOGIN_URL = '/people/login/'
 LOGOUT_URL = '/people/logout/'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+    'DEFAULT_PERMISSION_CLASSES': []
 }
 
 NOSE_ARGS = [
