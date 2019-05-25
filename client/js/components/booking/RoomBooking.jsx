@@ -1,10 +1,9 @@
 import React, {PropTypes} from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
+import qs from 'qs'
 import RoomIndexOrDetail from './RoomIndexOrDetail'
 import RoomDrft from './RoomDrft'
 import RoomDetail from './RoomDetail'
-
-const client = new ApolloClient();
 
 class DummyRoomDetail extends React.Component {
   render() {
@@ -46,7 +45,7 @@ class RoomBookingRoutes extends React.Component {
               fees={this.props.fees}
               drftBalance={this.props.drftBalance}
               location_name={props.match.params.location}
-              query={props.location.search}
+              query={qs.parse(props.location.search)}
             />}
           />
         </div>
