@@ -6,12 +6,16 @@ import RoomDetail from './RoomDetail'
 import _ from 'lodash'
 import moment from 'moment'
 import makeParam from '../generic/Utils'
+import DATEFORMAT from './constants'
 
 
 class RoomIndexOrDetailWithoutQuery extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { rooms:this.props.rooms || [] };
+    this.state = {
+      rooms:this.props.rooms || [],
+      errorMsg: null
+    }
     this.location_name = props.match.params.location
     let search = props.location.search.slice(1)
     this.query = qs.parse(search)
@@ -21,12 +25,21 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
     // Rooms need to be fetched if the page didn't start out with any rooms
     // which happens when going from individual room to list view.
     if (this.props.rooms == undefined) {
-      axios.get(`/locations/${this.location_name}/json/room/`)
-        .then(res => {
-          const rooms = res.data;
-          this.setState({ rooms: rooms });
-      });
+      this.fetchRooms(null)
     }
+  }
+
+  fetchRooms(dates) {
+    let paramObj = dates ? {params: dates} : {}
+    let jsonUrl = `/locations/${this.location_name}/json/room`
+    this.setState({ errorMsg: null })
+    axios.get(jsonUrl, paramObj)
+      .then(res => {
+        const rooms = res.data;
+        this.setState({ rooms: rooms });
+      }).catch((error) => {
+        this.setState({ errorMsg: 'An error occurred, we\'ll take a look at it' })
+      })
   }
 
   renderSubComponent() {
@@ -34,23 +47,19 @@ class RoomIndexOrDetailWithoutQuery extends React.Component {
       ...this.props,
       onFilterChange: this.reFilter.bind(this),
       location_name: this.location_name,
-      query: this.query
+      query: this.query,
+      errorMsg: this.state.errorMsg
     }
     return <RoomIndex {...sharedProps} rooms={this.state.rooms} />
   }
 
   reFilter(filters) {
     const formattedDates = {
-      arrive: filters.dates.arrive.format('MM/DD/YYYY'),
-      depart: filters.dates.depart.format('MM/DD/YYYY')
+      arrive: filters.dates.arrive.format(DATEFORMAT),
+      depart: filters.dates.depart.format(DATEFORMAT)
     }
     var path = `/locations/${this.location_name}/stay/`
-    let jsonUrl = `/locations/${this.location_name}/json/room`
-    axios.get(jsonUrl, {params: formattedDates})
-      .then(res => {
-        const rooms = res.data;
-        this.setState({ rooms: rooms });
-    })
+    this.fetchRooms(formattedDates)
 
     let location = {
       pathname: path,

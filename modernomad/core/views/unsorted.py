@@ -1,3 +1,5 @@
+import maya
+
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.auth import login, authenticate, logout
@@ -828,12 +830,9 @@ def RoomsAvailableOnDates(request, location_slug):
     # Check the room on the admin booking page to see if its available
     location = get_object_or_404(Location, slug=location_slug)
     # Check if the room is available for all dates in the booking
-    try:
-        arrive = datetime.datetime.strptime(request.POST['arrive'], settings.DATE_FORMAT).date()
-        depart = datetime.datetime.strptime(request.POST['depart'], settings.DATE_FORMAT).date()
-    except:
-        arrive = datetime.datetime.strptime(request.POST['arrive'], '%Y-%m-%d').date()
-        depart = datetime.datetime.strptime(request.POST['depart'], '%Y-%m-%d').date()
+    arrive = maya.parse(request.POST['arrive']).date
+    depart = maya.parse(request.POST['depart']).date
+
     free_rooms = location.rooms_free(arrive, depart)
     rooms_capacity = {}
     for room in location.rooms_with_future_capacity():

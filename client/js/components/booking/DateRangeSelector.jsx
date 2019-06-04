@@ -2,9 +2,16 @@ import React, {PropTypes} from 'react'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
 import _ from 'lodash'
+import DATEFORMAT from './constants'
 
 function momentUnlessNull(dateString, parseFormat = null) {
-  return dateString ? moment(dateString, parseFormat) : null
+
+  let date = dateString ? moment(dateString, parseFormat) : null
+  if (date != null && !date.isValid()) {
+    // if a string is supplied, make sure it's always valid
+    return moment()
+  }
+  return date
 }
 
 export default class DateRangeSelector extends React.Component {
@@ -16,10 +23,9 @@ export default class DateRangeSelector extends React.Component {
 
   constructor(props) {
     super(props)
-    const parseFormat = 'MM/DD/YYYY'
 
-    const arrive = momentUnlessNull(props.arrive, parseFormat)
-    const depart = momentUnlessNull(props.depart, parseFormat)
+    const arrive = momentUnlessNull(props.arrive, DATEFORMAT)
+    const depart = momentUnlessNull(props.depart, DATEFORMAT)
     const dates = {arrive: arrive, depart: depart}
     this.state = this.constrainDateRangeByStart(dates, props.maxLength)
     if (dates.depart != depart && props.onChange) {
@@ -49,7 +55,11 @@ export default class DateRangeSelector extends React.Component {
       let newState = {}
       newState[key] = value
 
-      newState.depart = this.constrainedDepartDate(newState.arrive, newState.depart || this.state.depart, this.props.maxLength)
+      newState.depart = this.constrainedDepartDate(
+        newState.arrive,
+        newState.depart || this.state.depart,
+        this.props.maxLength
+      )
 
       const combinedState = {...this.state, ...newState}
 
