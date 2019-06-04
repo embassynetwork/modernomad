@@ -12,6 +12,7 @@ import _ from 'lodash'
 import nl2br from 'react-nl2br'
 import { isFullyAvailable } from '../../models/Availabilities'
 import makeParam from '../generic/Utils'
+import DATEFORMAT from './constants'
 
 export default class RoomDetail extends React.Component {
 
@@ -38,8 +39,8 @@ export default class RoomDetail extends React.Component {
   fetchRoom(filters) {
     let formattedDates = {}
     if (!_.isEmpty(filters)) {
-      formattedDates['arrive'] = filters.dates.arrive.format('MM/DD/YYYY')
-      formattedDates['depart'] = filters.dates.depart.format('MM/DD/YYYY')
+      formattedDates['arrive'] = filters.dates.arrive.format(DATEFORMAT)
+      formattedDates['depart'] = filters.dates.depart.format(DATEFORMAT)
       this.query = formattedDates
     }
 

@@ -109,6 +109,17 @@ class StayView(TemplateView):
 
         return super().get(request, *args, **kwargs)
 
+    def populate_room(self, context, resource_data, many):
+        resource = ResourceSerializer(
+            resource_data, many=many, context={'request': self.request}
+        )
+
+        if many:
+            context['rooms'] = resource.data
+        else:
+            context['room'] = resource.data
+        return context
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['location'] = self.location
@@ -122,19 +133,12 @@ class StayView(TemplateView):
         react_data = {
             'is_house_admin': is_admin,
             'user_drft_balance': user_drft_balance,
-            'room': ResourceSerializer(
-                self.room,
-                context={'request': self.request}
-            ).data if self.room else None,
-            'rooms': None,
             'fees': list(Fee.objects.filter(locationfee__location=self.location))
         }
-        if not self.room:
-            # is drft ever used in bookings right now?
-            rooms = self.location.rooms_with_future_capacity()
-            react_data['rooms'] = ResourceSerializer(
-                rooms, many=True, context={'request': self.request}
-            ).data
+
+        resource_data = self.room if self.room else self.location.rooms_with_future_capacity()
+        use_many = False if self.room else True
+        react_data = self.populate_room(react_data, resource_data, use_many)
 
         context['react_data'] = json.dumps(react_data, cls=DateEncoder)
         return context

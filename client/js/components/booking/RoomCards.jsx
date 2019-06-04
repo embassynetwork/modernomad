@@ -25,19 +25,24 @@ class RoomCards extends React.Component {
   }
 
   render() {
-    if (this.props.rooms.length > 0) {
+    if (this.props.errorMsg) {
+      return <div className="no-data">{this.props.errorMsg}</div>
+    }
+    else if (this.props.rooms.length > 0) {
       return (
         <div className="row" id="room-cards">
           {this.renderRoomCards()}
         </div>
       )
-    } else {
+    }
+    else {
       if (this.props.loading) {
         return null
       } else {
         if (this.props.drft){
           return <div className="no-data">Sorry, this location has rooms that accept Ɖ but none of those rooms match your search</div>
-        } else {
+        }
+        else {
           return <div className="no-data">Sorry, no rooms match your search</div>
         }
       }

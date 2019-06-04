@@ -4,6 +4,7 @@ import datetime as dt
 from django.utils import timezone
 from rest_framework import serializers
 import maya
+from pendulum.parsing.exceptions import ParserError
 
 from modernomad.core.models import CapacityChange
 from modernomad.core.models import Location
@@ -36,8 +37,14 @@ class ResourceSerializer(serializers.ModelSerializer):
             # this is a django request and not a REST request
             params = request.GET.dict()
 
-        arrive = maya.parse(params.get('arrive', dt.datetime.today())).date
-        depart = maya.parse(params.get('depart', arrive + timedelta(days=13))).date
+        try:
+            arrive = params.get('arrive', dt.datetime.today())
+            arrive = maya.parse(arrive).date
+            depart = params.get('depart', arrive + timedelta(days=13))
+            depart = maya.parse(depart).date
+        except ParserError:
+            arrive = dt.date.today()
+            depart = arrive + timedelta(days=13)
 
         availabilities = [
             {'date': date, 'quantity': quantity} for (date, quantity)

@@ -9,6 +9,7 @@ import DjangoCSRFInput from '../generic/DjangoCSRFInput'
 import BookingDisplay from './BookingDisplay'
 import { Booking } from '../../models/Booking'
 import makeParam from '../generic/Utils'
+import DATEFORMAT from './constants'
 
 
 export default class BookingForm extends React.Component {
@@ -29,10 +30,8 @@ export default class BookingForm extends React.Component {
   }
 
   renderCost() {
-    const parseFormat = 'MM/DD/YYYY'
-
-    const depart = moment(this.props.query.depart, parseFormat)
-    const arrive = moment(this.props.query.arrive, parseFormat)
+    const depart = moment(this.props.query.depart, DATEFORMAT)
+    const arrive = moment(this.props.query.arrive, DATEFORMAT)
     const acceptDrftTheseDates = this.props.room.acceptDrftTheseDates
     const drftBalance = this.props.drftBalance
 
