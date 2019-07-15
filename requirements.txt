@@ -13,7 +13,7 @@ Django==1.11.20
 djangorestframework==3.6.4
 graphene-django==2.2.0
 graphene==2.1.6
-graphql-core==2.1.0
+graphql-core==2.2
 graphql-relay==0.4.5
 icalendar==4.0.3
 lxml==4.3.3
