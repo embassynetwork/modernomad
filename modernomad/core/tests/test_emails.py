@@ -5,10 +5,12 @@ from django.contrib.auth.models import User
 from modernomad.core.models import Payment, Use, Booking, UserProfile, LocationEmailTemplate
 from modernomad.core.emails.messages import new_booking_notify, send_booking_receipt, updated_booking_notify, admin_daily_update
 from modernomad.core.tasks import send_departure_email, send_guest_welcome, guests_residents_daily_update
-from django.utils import timezone
 from datetime import datetime, timedelta, date
+from freezegun import freeze_time
 
+TODAY = date(2019, 3, 14)
 
+@freeze_time(TODAY)
 class EmailsTestCase(TestCase):
 
     def create_booking(self, user, rate=100, status=Use.PENDING, arrive=date(4016, 1, 13), depart=date(4016, 1, 23)):
@@ -44,14 +46,13 @@ class EmailsTestCase(TestCase):
         self.admin = self.create_user('admin1', admin=True, email='admin1@bob.com')
         self.booking = self.create_booking(user=self.guest1)
 
-        today = timezone.localtime(timezone.now())
-        yesterday = today + timedelta(days=-1)
-        in_two_days = today + timedelta(days=2)
+        yesterday = TODAY + timedelta(days=-1)
+        in_two_days = TODAY + timedelta(days=2)
         after_that = in_two_days + timedelta(days=1)
 
-        self.departing_today = self.create_booking(arrive=yesterday, depart=today, user=self.guest1, status="confirmed")
+        self.departing_today = self.create_booking(arrive=yesterday, depart=TODAY, user=self.guest1, status="confirmed")
         self.arriving_in_two_days = self.create_booking(arrive=in_two_days, depart=after_that, user=self.guest2, status="confirmed")
-        self.arriving_today = self.create_booking(arrive=today, depart=after_that, user=self.guest3, status="confirmed")
+        self.arriving_today = self.create_booking(arrive=TODAY, depart=after_that, user=self.guest3, status="confirmed")
 
     def tearDown(self):
         self.mock_mailgun_send.stop()
