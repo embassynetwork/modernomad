@@ -4,7 +4,6 @@ from django.conf import settings
 from modernomad.log import catch_exceptions
 from django.contrib.sites.models import Site
 import datetime
-from django.utils import timezone
 import requests
 import json
 from django.core import urlresolvers
@@ -39,7 +38,7 @@ def send_guest_welcome():
     did_send_email = False
 
     for location in locations:
-        soon = datetime.datetime.today() + datetime.timedelta(days=location.welcome_email_days_ahead)
+        soon = datetime.date.today() + datetime.timedelta(days=location.welcome_email_days_ahead)
         upcoming = Use.objects.filter(location=location).filter(arrive=soon).filter(status='confirmed')
         for booking in upcoming:
             guest_welcome(booking)
@@ -58,7 +57,7 @@ def send_departure_email():
     # get all bookings departing today
     locations = Location.objects.all()
     for location in locations:
-        today = timezone.localtime(timezone.now())
+        today = datetime.date.today()
         departing = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
         for use in departing:
             goodbye_email(use)
@@ -70,7 +69,7 @@ def send_departure_email():
 @catch_exceptions
 def generate_subscription_bills():
     logger.info("Running task: generate_subscription_bills")
-    today = timezone.localtime(timezone.now()).date()
+    today = datetime.date.today()
     # using the exclude is an easier way to filter for subscriptions with an
     # end date of None *or* in the future.
     locations = Location.objects.all()
@@ -119,7 +118,7 @@ def slack_embassysf_daily():
 
     logger.info("Running task: slack_embassysf_daily")
     webhook = "https://hooks.slack.com/services/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"
-    today = timezone.localtime(timezone.now())
+    today = datetime.date.today()
     location = Location.objects.get(slug="embassysf")
     arriving_today = Use.objects.filter(location=location).filter(arrive=today).filter(status='confirmed')
     departing_today = Use.objects.filter(location=location).filter(depart=today).filter(status='confirmed')
