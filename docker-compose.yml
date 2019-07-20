@@ -20,7 +20,7 @@ services:
   client:
     build: .
     working_dir: /app/client/
-    command: node server.js
+    command: sh -c "npm install && node server.js"
     ports:
       - "3000:3000"
     # Bind mount app directory, but leave node_modules intact
