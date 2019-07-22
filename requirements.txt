@@ -13,7 +13,7 @@ Django==1.11.22
 djangorestframework==3.10.1
 freezegun==0.3.12
 graphene-django==2.2.0
-graphene==2.1.6
+graphene==2.1.7
 graphql-core==2.1.0
 graphql-relay==0.4.5
 icalendar==4.0.3
