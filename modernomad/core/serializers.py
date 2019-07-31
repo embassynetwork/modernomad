@@ -6,9 +6,7 @@ from rest_framework import serializers
 import maya
 from pendulum.parsing.exceptions import ParserError
 
-from modernomad.core.models import CapacityChange
-from modernomad.core.models import Location
-from modernomad.core.models import Resource
+from modernomad.core.models import CapacityChange, Location, Resource, Fee
 
 
 class CapacityChangeSerializer(serializers.ModelSerializer):
@@ -21,6 +19,12 @@ class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = '__all__'
+
+
+class FeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fee
+        fields = ('id', 'description', 'percentage', 'paid_by_house')
 
 
 class ResourceSerializer(serializers.ModelSerializer):

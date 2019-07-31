@@ -29,7 +29,7 @@ from modernomad.core.emails.messages import send_booking_receipt, new_booking_no
 from modernomad.core.forms import BookingUseForm
 from modernomad.core.models import Booking, Use, Location, Resource, Fee
 from modernomad.core.shortcuts import get_qs_or_404
-from modernomad.core.serializers import ResourceSerializer
+from modernomad.core.serializers import ResourceSerializer, FeeSerializer
 
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 logger = logging.getLogger(__name__)
@@ -129,11 +129,13 @@ class StayView(TemplateView):
             user_drft_balance = self.request.user.profile.drft_spending_balance()
         else:
             user_drft_balance = 0
+        
+        fees = Fee.objects.filter(locationfee__location=self.location)
 
         react_data = {
             'is_house_admin': is_admin,
             'user_drft_balance': user_drft_balance,
-            'fees': list(Fee.objects.filter(locationfee__location=self.location))
+            'fees': FeeSerializer(fees, many=True).data
         }
 
         resource_data = self.room if self.room else self.location.rooms_with_future_capacity()
