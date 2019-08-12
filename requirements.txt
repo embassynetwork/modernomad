@@ -12,7 +12,7 @@ django-webpack-loader==0.6.0
 Django==1.11.22
 djangorestframework==3.10.2
 freezegun==0.3.12
-graphene-django==2.2.0
+graphene-django==2.5.0
 graphene==2.1.6
 graphql-core==2.1.0
 graphql-relay==0.4.5
