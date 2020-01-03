@@ -9,7 +9,7 @@ django-imagekit==4.0.2
 django-jwt-auth==0.0.2
 django-uuidfield==0.5.0
 django-webpack-loader==0.6.0
-Django==1.11.23
+Django==3.0.2
 djangorestframework==3.10.3
 freezegun==0.3.12
 graphene-django==2.2.0
