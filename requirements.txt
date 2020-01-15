@@ -27,7 +27,7 @@ pytz==2019.2
 requests==2.22.0
 rules==2.1
 six==1.12.0
-stripe==2.27.0
+stripe==2.42.0
 gunicorn==19.9.0
 whitenoise==4.1.4
 django-storages==1.7.1
