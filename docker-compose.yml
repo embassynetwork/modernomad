@@ -8,7 +8,7 @@ services:
       - "8000:8000"
     environment:
       - "DJANGO_SETTINGS_MODULE=modernomad.settings.local"
-      - "DATABASE_URL=postgres://postgres@postgres/postgres"
+      - "DATABASE_URL=psql://postgres:postgres@postgres:5432/postgres"
       # Read these envvars from .env or environment Compose is run in
       - "STRIPE_SECRET_KEY"
       - "STRIPE_PUBLISHABLE_KEY"
@@ -29,3 +29,5 @@ services:
       - "/app/client/node_modules"
   postgres:
     image: postgres:10
+    environment:
+      POSTGRES_PASSWORD: postgres
