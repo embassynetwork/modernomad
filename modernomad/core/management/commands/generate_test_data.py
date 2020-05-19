@@ -17,8 +17,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # setting the seed so output is consistent
-        fake = Faker()
-        fake.seed(1)
+        Faker.seed(1)
 
         # create a known super user. this user will also be set as a location admin for
         # all locations.
