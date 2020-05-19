@@ -1,24 +1,12 @@
-FROM python:3.6.8-alpine3.8
+FROM python:3.6.8-slim
 
-# So Pillow can find zlib
-ENV LIBRARY_PATH /lib:/usr/lib
+RUN apt-get update -qq && apt-get install -yq \
+    build-essential \
+    curl \
+    netcat
 
-RUN apk add --no-cache \
-  bash \
-  build-base \
-  curl \
-  jpeg \
-  jpeg-dev \
-  libxslt \
-  libxslt-dev \
-  libxml2 \
-  libxml2-dev \
-  nodejs \
-  npm \
-  postgresql-dev \
-  postgresql-libs \
-  zlib \
-  zlib-dev
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash
+RUN apt-get update -qq && apt-get install -yq nodejs npm
 
 # https://bitbucket.org/site/master/issues/16334/pipelines-failing-with-could-not-get-uid
 # https://github.com/npm/npm/issues/20861
