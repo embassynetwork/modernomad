@@ -13,7 +13,7 @@ Django==1.11.28
 djangorestframework==3.10.3
 Faker==4.1.0
 freezegun==0.3.12
-graphene-django==2.2.0
+graphene-django==2.11.1
 graphene==2.1.6
 graphql-core==2.1.0
 graphql-relay==0.4.5
