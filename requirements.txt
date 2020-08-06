@@ -1,7 +1,7 @@
 django-compressor==2.3
 django-debug-toolbar==1.11
 django-environ==0.4.5
-django-extensions==2.2.1
+django-extensions==3.0.4
 django-filter==2.2.0
 django-flatpages-tinymce==0.1.1
 django-ical==1.5
