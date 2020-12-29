@@ -1,0 +1,39 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: boto3
+    versions:
+    - ">= 1.9.100.a"
+    - "< 1.9.101"
+  - dependency-name: boto3
+    versions:
+    - "> 1.9.98"
+    - "< 1.10"
+  - dependency-name: django
+    versions:
+    - ">= 2.0.a"
+    - "< 2.1"
+  - dependency-name: django
+    versions:
+    - ">= 2.1.a"
+    - "< 2.2"
+- package-ecosystem: docker
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: python
+    versions:
+    - ">= 3.7.a"
+    - "< 3.8"
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
