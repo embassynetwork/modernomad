@@ -33,6 +33,6 @@ gunicorn==19.9.0
 whitenoise==4.1.4
 django-storages==1.7.1
 boto3==1.9.98
-sentry-sdk==0.12.3
+sentry-sdk==1.5.11
 factory_boy==2.12.0
 django-basicauth==0.5.2
